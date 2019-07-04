@@ -1,2 +1,2 @@
 # midgetv
-RISC-V controller with wishbone interface specifically for Lattice iCE40 FPGAs
+RISC-V controller with Wishbone interface specifically for Lattice iCE40 FPGAs
