@@ -33,8 +33,8 @@ TARGETSSRAM := t101 t102 t103 t104 t105 t106 t107 t108 t109 \
 	t180 t181 t182 t183 t184 t185 t186 \
 	t201 t202 t203 
 
-OBJDIREBR = ../../obj_dir/first
-OBJDIRSRAM = ../../obj_dir/sfirst
+OBJDIREBR := ../../obj_dir/first
+OBJDIRSRAM := ../../obj_dir/sfirst
 
 #.SECONDARY:
 
@@ -112,9 +112,19 @@ $(OBJDIREBR)/%.result.txt: $(OBJDIREBR)/%.bin
 $(OBJDIRSRAM)/%.result.txt: $(OBJDIRSRAM)/%.bin
 	$(MIDGETVICE40SRAM) -c 0x2000 -s -l $@ -i $<
 
+
+$(BINTARGETSEBR): | $(OBJDIREBR)
+
+$(BINTARGETSSRAM): | $(OBJDIRSRAM)
+
+$(OBJDIREBR):
+	mkdir -p $(OBJDIREBR)
+
+$(OBJDIRSRAM):
+	mkdir -p $(OBJDIRSRAM)
+
 clean: 
 	rm results.txt $(LSTTARGETSEBR) $(LSTTARGETSSRAM) \
 	$(RESULTSEBR) $(RESULTSSRAM) $(OBJDIREBR)/*bin $(OBJDIRSRAM)/*bin
 
 
-# hexdump -ve '"%4.4_ax  " 4/4 "%8.8x " 1/0 "\n"'  t101.bin
