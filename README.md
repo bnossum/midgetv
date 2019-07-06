@@ -32,13 +32,14 @@ RISC-V controller with Wishbone interface specifically for Lattice iCE40 FPGAs. 
 ## Results
 Using iCECube2 for compilation give the following for the example "hello world" program:
 
-| Board           | Size (in SB_LUT4s) | Clock (MHz)       |
-| --------------- | --------- | ----------  |
-| iceblink40-hx1k | 258       |  75         |
-| upduino2        | 353       |  33         |
-
+| Board           | Size (in SB_LUT4s) | EBRs | SRAM | Clock (MHz)       |
+| --------------- | --------- | -------- | -------- | ----------  |
+| iceblink40-hx1k | 258       |  5 | 0 | 75         |
+| upduino2        | 353       |  5 | 2 | 33         |
 
 Real-world usage of midgetv will certainly be larger, and slower.
+
+## Abbreviated, incomplete build instructions
 
 ## Future work
 - Cleanup on where produced files appears
