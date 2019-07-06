@@ -74,10 +74,10 @@ Note. This will be modified.
    - midgetv_bin2ebr to transform morse.bin to ice40loaderprog.hv in
      directories tsthw/iceblink40-hx1k and tsthw/upduino2
 4. Go to directory tsthw/upduino2.
-   a. In the top of thw wrapper toplevel
-      verilog file upduino2.v are some hints on how to compile a FPGA image.
-   b. Alternatively, an iceCube2 should be available in directory
-      tsthw/upduino2/iCEcube2_flow.
+   - In the top of the wrapper toplevel
+     verilog file upduino2.v are some hints on how to compile a FPGA image.
+   - Alternatively, an iceCube2 should be available in directory
+     tsthw/upduino2/iCEcube2_flow.
 5. Upload to the upduino2 board. A similar procedure is to be followed for
    the iceblink40-hx1k board
    
