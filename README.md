@@ -1,7 +1,7 @@
 # midgetv
 RISC-V controller with Wishbone interface specifically for Lattice iCE40 FPGAs. midgetv is a non-pipelined, multi-cycle design. A small implementations size is the primary goal of midgetv.
 
-# Goals
+## Goals
 - To provide a small RV32I compliant RISC-V ISA controller on the Lattice iCE40 family FPGAs
   - optionally omit the 64-bit counter for cycle counting
   - optionally omit the 64-bit retired instructions counter
@@ -11,7 +11,7 @@ RISC-V controller with Wishbone interface specifically for Lattice iCE40 FPGAs. 
 - Enable a future extension with a cache, for this reason the SRAM interface of midgetv is close to Wishbone. 
 - A thorough simulation of the instructions
 
-### Requirements
+## Requirements
 - GNU Make
 - gcc
   - On the host environment to compile simulation binaries
@@ -20,6 +20,12 @@ RISC-V controller with Wishbone interface specifically for Lattice iCE40 FPGAs. 
 - emacs (for Verilog-Mode)
 - A toolchain for FPGA compilation and upload, for example:
   - iCEcube2 from Lattice
-  - yosys/arachne-pnr/icepack 
-  - I believe more options exists
+  - A toolchain based on the emminent icestorm project, such as: yosys/arachne-pnr/icepack 
   
+## Status
+- Passes internal instruction testing program in simulation
+- Passes the RISC-V rv32i compliance tests in simulation
+- A compiled C-program ("hello world" in morse) is compiled to iCE40HX1K and programmed to the iceblink40-hx1k board
+- The same program is compiled to iCE40UP5K FPGAs and programmed to the upduino2 development board
+
+
