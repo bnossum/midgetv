@@ -1,0 +1,29 @@
+# ##############################################################################
+
+# iCEcube PCF
+
+# Version:            2017.08.27940
+
+# File Generated:     Jun 22 2019 12:28:07
+
+# Family & Device:    iCE40HX1K
+
+# Package:            VQ100
+
+# ##############################################################################
+
+###MergeFF List 5
+set_io_ff led1 -out ON
+set_io_ff led2 -out ON
+set_io_ff led3 -out ON
+set_io_ff led4 -out ON
+set_io_ff usartRX -in ON
+
+###IOSet List 6
+set_io CLK_I 13 -io_std SB_LVCMOS -pullup no
+set_io led1 59 -io_std SB_LVCMOS -pullup no
+set_io led2 56 -io_std SB_LVCMOS -pullup no
+set_io led3 53 -io_std SB_LVCMOS -pullup no
+set_io led4 51 -io_std SB_LVCMOS -pullup no
+set_io usartRX 60 -io_std SB_LVCMOS -pullup no
+
