@@ -27,7 +27,7 @@ RISC-V controller with Wishbone interface specifically for Lattice iCE40 FPGAs. 
 - Passes the RISC-V rv32i compliance tests in simulation
 - A compiled C-program ("hello world" in morse) is compiled to iCE40HX1K and programmed to the iceblink40-hx1k board
 - The same program is compiled to iCE40UP5K FPGAs and programmed to the upduino2 development board
-- Much work remains, but I believe this project to be mature enough to be usefull to others, hence I make arelease.
+- Much work remains, but I believe this project to be mature enough to be useful to others, hence I make a release.
 
 ## Results
 Using iCECube2 for compilation give the following for the example "hello world" program:
