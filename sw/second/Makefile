@@ -77,6 +77,19 @@ $(OBJDIREBR)/%.result.txt: $(OBJDIREBR)/%.bin
 $(OBJDIRSRAM)/%.result.txt: $(OBJDIRSRAM)/%.bin
 	$(MIDGETVICE40SRAM) -c 0x1000 -s -l $@ -i $<
 
+# Directories for result may need to be made
+$(OBJDIREBR):
+	mkdir -p $(OBJDIREBR)
+
+$(OBJDIRSRAM):
+	mkdir -p $(OBJDIRSRAM)
+
+# Directories must exist before results are compiled
+$(BINTARGETSEBR): | $(OBJDIREBR)
+
+$(BINTARGETSSRAM): | $(OBJDIRSRAM)
+
+
 clean:
 	rm $(OBJDIREBR)/*bin $(OBJDIRSRAM)/*bin
 
