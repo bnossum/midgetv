@@ -6,4 +6,6 @@ Requires:
 GNU Make
 gcc
 Verilator
+apio
+
 
