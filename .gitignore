@@ -1,1 +1,10 @@
 obj_dir/*
+bin/*
+tsthw/iceblink40-hx1k/.sconsign.dblite
+tsthw/iceblink40-hx1k/hardware.asc
+tsthw/iceblink40-hx1k/hardware.bin
+tsthw/iceblink40-hx1k/hardware.blif
+tsthw/upduino2/.sconsign.dblite
+tsthw/upduino2/hardware.asc
+tsthw/upduino2/hardware.bin
+tsthw/upduino2/hardware.blif
