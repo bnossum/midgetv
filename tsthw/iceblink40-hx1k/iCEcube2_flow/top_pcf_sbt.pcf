@@ -27,3 +27,37 @@ set_io led3 53 -io_std SB_LVCMOS -pullup no
 set_io led4 51 -io_std SB_LVCMOS -pullup no
 set_io usartRX 60 -io_std SB_LVCMOS -pullup no
 
+###Cascading List 32
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_0..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_10..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_11..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_12..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_13..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_14..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_15..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_16..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_17..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_18..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_19..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_1..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_20..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_21..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_22..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_23..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_24..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_25..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_26..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_27..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_28..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_29..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_2..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_30..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_31..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_3..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_4..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_5..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_6..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_7..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_8..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_9..cmb
+
