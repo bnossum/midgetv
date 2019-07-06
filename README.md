@@ -41,6 +41,47 @@ Real-world usage of midgetv will certainly be larger, and slower.
 
 ## Abbreviated, incomplete build instructions
 
+# Basic verification of instructions
+1. "make" in directory code to compile ucode.h to ucodeinitval.hv
+2. "make" in directory tst to compile simulators
+   - m_ice40sim.bin and
+   - m_ice40sim_EBRonly.bin
+3. "make" in directory sw/first to compile a bunch of small test
+   assembler programs (riscv instructions) to binary images, then
+   simulate using simulators made in step 2.
+4. "cat results.txt" to see how simulation went.
+
+# Basic verification of instructions as per riscv conformance testing.
+1. As above
+2. As above
+3. "make" in directory sw/second to compile a bunch of small test
+   assembler programs (stubs around included compliance program code).
+   Note that the compliance tests is a dependent project, but I do
+   not make that dependency explicit in this project, at least not
+   for now.
+4. "runall" to simulate the programs compiled in step 3 (takes some time).
+5. "compareall" to compare simulated output with reference output.
+
+# Compilation of a the "morse" C-program to a development board
+Note. This will be modified.
+1. As above
+2. "make" in directory util to compile midgetv_bin2ebr, an utility that
+   mappes a binary image program to EBR initial values.
+3. "make" in directory sw/hwexamples/morse to:
+   - compile morse.c to morse.o
+   - compile crt0.S to crt0.s
+   - link to get morse.bin
+   - midgetv_bin2ebr to transform morse.bin to ice40loaderprog.hv in
+     directories tsthw/iceblink40-hx1k and tsthw/upduino2
+4. Go to directory tsthw/upduino2.
+   a. In the top of thw wrapper toplevel
+      verilog file upduino2.v are some hints on how to compile a FPGA image.
+   b. Alternatively, an iceCube2 should be available in directory
+      tsthw/upduino2/iCEcube2_flow.
+5. Upload to the upduino2 board. A similar procedure is to be followed for
+   the iceblink40-hx1k board
+   
+
 ## Future work
 - Cleanup on where produced files appears
 - Cleanup on code, with some optimized code to reinsert
