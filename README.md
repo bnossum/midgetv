@@ -41,7 +41,7 @@ Real-world usage of midgetv will certainly be larger, and slower.
 
 ## Abbreviated, incomplete build instructions
 
-# Basic verification of instructions
+### Basic verification of instructions
 1. "make" in directory code to compile ucode.h to ucodeinitval.hv
 2. "make" in directory tst to compile simulators
    - m_ice40sim.bin and
@@ -51,7 +51,7 @@ Real-world usage of midgetv will certainly be larger, and slower.
    simulate using simulators made in step 2.
 4. "cat results.txt" to see how simulation went.
 
-# Basic verification of instructions as per riscv conformance testing.
+### Basic verification of instructions as per riscv conformance testing.
 1. As above
 2. As above
 3. "make" in directory sw/second to compile a bunch of small test
@@ -62,7 +62,7 @@ Real-world usage of midgetv will certainly be larger, and slower.
 4. "runall" to simulate the programs compiled in step 3 (takes some time).
 5. "compareall" to compare simulated output with reference output.
 
-# Compilation of a the "morse" C-program to a development board
+### Compilation of a the "morse" C-program to a development board
 Note. This will be modified.
 1. As above
 2. "make" in directory util to compile midgetv_bin2ebr, an utility that
