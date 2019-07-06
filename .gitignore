@@ -8,3 +8,13 @@ tsthw/upduino2/.sconsign.dblite
 tsthw/upduino2/hardware.asc
 tsthw/upduino2/hardware.bin
 tsthw/upduino2/hardware.blif
+tsthw/upduino2/iCEcube2_flow/.vdbs/
+tsthw/upduino2/iCEcube2_flow/iCEcube2_flow_Implmnt/*
+tsthw/upduino2/iCEcube2_flow/iCEcube2_flow_lse.prj
+tsthw/upduino2/iCEcube2_flow/iCEcube2_flow_lse.twr
+tsthw/upduino2/iCEcube2_flow/mytop.arearep
+tsthw/upduino2/iCEcube2_flow/mytop_drc.log
+tsthw/upduino2/iCEcube2_flow/mytop_prim.v
+tsthw/upduino2/iCEcube2_flow/xxx_lse_cp_file_list
+tsthw/upduino2/iCEcube2_flow/xxx_lse_sign_file
+
