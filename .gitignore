@@ -17,4 +17,12 @@ tsthw/upduino2/iCEcube2_flow/mytop_drc.log
 tsthw/upduino2/iCEcube2_flow/mytop_prim.v
 tsthw/upduino2/iCEcube2_flow/xxx_lse_cp_file_list
 tsthw/upduino2/iCEcube2_flow/xxx_lse_sign_file
-
+tsthw/iceblink40-hx1k/iCEcube2_flow/.vdbs/
+tsthw/iceblink40-hx1k/iCEcube2_flow/iCEcube2_flow_Implmnt/
+tsthw/iceblink40-hx1k/iCEcube2_flow/iCEcube2_flow_lse.prj
+tsthw/iceblink40-hx1k/iCEcube2_flow/iCEcube2_flow_lse.twr
+tsthw/iceblink40-hx1k/iCEcube2_flow/top.arearep
+tsthw/iceblink40-hx1k/iCEcube2_flow/top_drc.log
+tsthw/iceblink40-hx1k/iCEcube2_flow/top_prim.v
+tsthw/iceblink40-hx1k/iCEcube2_flow/xxx_lse_cp_file_list
+tsthw/iceblink40-hx1k/iCEcube2_flow/xxx_lse_sign_file
