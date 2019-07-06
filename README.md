@@ -22,10 +22,27 @@ RISC-V controller with Wishbone interface specifically for Lattice iCE40 FPGAs. 
   - iCEcube2 from Lattice
   - A toolchain based on the emminent icestorm project, such as: yosys/arachne-pnr/icepack 
   
-## Status
+## Status 
 - Passes internal instruction testing program in simulation
 - Passes the RISC-V rv32i compliance tests in simulation
 - A compiled C-program ("hello world" in morse) is compiled to iCE40HX1K and programmed to the iceblink40-hx1k board
 - The same program is compiled to iCE40UP5K FPGAs and programmed to the upduino2 development board
 
+## Results
+Using iCECube2 for compilation give the following for the example "hello world" program:
+| Board           | (SB_LUT4s)   | (MHz) |
+| --------------- | ---- | ----  |
+| iceblink40-hx1k | 
+| upduino2        |
+
+
+## Future work
+- Cleanup on where produced files appears
+- Cleanup on code, with some optimized code to reinsert
+- Verification on startup conditions should be tighter
+- Bootloader program
+- Test on external interrupts
+- Test on nested interrupts
+- Better linker scripts
+- much more.
 
