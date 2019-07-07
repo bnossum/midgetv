@@ -12,11 +12,13 @@ RISC-V controller with Wishbone interface specifically for Lattice iCE40 FPGAs. 
 - A thorough simulation of the instructions
 
 ## Requirements
+I try not to tie-in this code to any particular tools, but there are certain dependencies:
+
 - GNU Make
 - gcc
   - On the host environment to compile some utility programs and simulation binaries
   - As a cross compiler to compile C and assembler programs for RISC-V.
-- Verilator
+- Verilator for simulation
 - emacs (for Verilog-Mode)
 - A toolchain for FPGA compilation and upload, for example:
   - iCEcube2 from Lattice
@@ -36,6 +38,8 @@ Using iCECube2 for compilation give the following for the example "hello world" 
 | --------------- | -------- | ---- | ---- | ----------- |
 | iceblink40-hx1k | 258      |  5   |  0   | 75          |
 | upduino2        | 353      |  5   |  2   | 33          |
+
+Note that "Auto lut cascade" must be off in the placer option of iCEcube2.
 
 Real-world usage of midgetv will certainly be larger, and slower.
 
