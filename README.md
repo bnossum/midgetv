@@ -73,7 +73,7 @@ Note. This will be modified.
    mappes a binary image program to EBR initial values.
 3. "make" in directory sw/hwexamples/morse to:
    - compile morse.c to morse.o
-   - compile crt0.S to crt0.s
+   - compile crt0.S to crt0.s (Note that this crt0 is a joke, very incomplete).
    - link to get morse.bin
    - midgetv_bin2ebr to transform morse.bin to ice40loaderprog.hv in
      directories tsthw/iceblink40-hx1k and tsthw/upduino2
@@ -87,12 +87,13 @@ Note. This will be modified.
    
 
 ## Future work
-- Cleanup on where produced files appears
+- Cleanup on where produced files appears, then add produced files to a release
 - Cleanup on code, with some optimized code to reinsert
-- Verification on startup conditions should be tighter
+- Verification on startup conditions must be tighter
+- A number of test programs on modules will be added
 - Bootloader program
 - Test on external interrupts
 - Test on nested interrupts
 - Better linker scripts
-- much more.
+- much more
 
