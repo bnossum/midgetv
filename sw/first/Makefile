@@ -5,7 +5,7 @@
 # programs are supposed to be self-checking.
 #
 # Many programs can be compiled to an image residing only
-# in EBR, and to an image risiding in SRAM. This is needed
+# in EBR, and to an image residing in SRAM. This is needed
 # because timing is different for instructions in SRAM and
 # EBR.
 #
