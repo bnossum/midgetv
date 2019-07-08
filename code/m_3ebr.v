@@ -3,7 +3,7 @@
  * 2019. Copyright B. Nossum.
  * For licence, see LICENCE
  * -----------------------------------------------------------------------------
- * Simply 3 EBRs used as ROM. 
+ * Simply 3 EBRs used as a ROM for control equations
  */
 module m_3ebr
   (
@@ -13,7 +13,7 @@ module m_3ebr
    output [47:0] d
    );
    
-`include "ucodeinitval.hv"
+`include "../bin/ucodeinitval.hv"
 
 `ifdef verilator
    /* verilator lint_off UNUSED */
