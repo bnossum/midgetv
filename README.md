@@ -1,28 +1,26 @@
 # midgetv
-RISC-V controller with Wishbone interface specifically for Lattice iCE40 FPGAs. midgetv is a non-pipelined, multi-cycle design. A small implementations size is the primary goal of midgetv.
+RISC-V controller with Wishbone interface specifically for Lattice iCE40 FPGAs. midgetv is a non-pipelined, multi-cycle design. 
 
 ## Goals
-- To provide a small RV32I compliant RISC-V ISA controller on the Lattice iCE40 family FPGAs
-  - optionally omit the 64-bit counter for cycle counting
-  - optionally omit the 64-bit retired instructions counter
-  - optionally omit the 64-bit mtime counter.
-  - optionally omit CSR instructions
-  - optionally omit interrupt handling
-- Enable a future extension with a cache, for this reason the SRAM interface of midgetv is close to Wishbone. 
-- A thorough simulation of the instructions
+- Small implementations size
+- Easy interconnect to external modules with Wishbone
+- Full compliance with RV32I as per riscv-spec-v2.2.pdf
+- Full compliance with riscv-privileged-v1.10.pdf
 
 ## Requirements
 I try not to tie-in this code to any particular tools, but there are certain dependencies:
 
 - GNU Make
 - gcc
-  - On the host environment to compile some utility programs and simulation binaries
+  - On the host environment to compile some utility programs and simulation binaries.
   - As a cross compiler to compile C and assembler programs for RISC-V.
 - Verilator for simulation
 - emacs (for Verilog-Mode)
 - A toolchain for FPGA compilation and upload, for example:
   - iCEcube2 from Lattice
-  - A toolchain based on the emminent icestorm project, such as: yosys/arachne-pnr/icepack 
+  - A toolchain based on the emminent icestorm project, such as: yosys/arachne-pnr/icepack
+
+All my work is done under Linux.
   
 ## Status 
 - Passes internal instruction testing program in simulation
@@ -39,7 +37,9 @@ Using iCECube2 for compilation give the following for the example "hello world" 
 | iceblink40-hx1k | 258      |  5   |  0   | 75          |
 | upduino2        | 353      |  5   |  2   | 33          |
 
-Note that "Auto lut cascade" must be off in the placer option of iCEcube2.
+Note that "Auto lut cascade" must be off in the placer option of
+iCEcube2. This is due to the lattice preference files where
+"set_cascading" is used to reduce the size of the core by 31 LUTs.
 
 Real-world usage of midgetv will certainly be larger, and slower.
 
