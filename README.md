@@ -19,10 +19,12 @@ module, the interconnect of midgetv may be shown as this:
 
 | Goal          | Result | Comment |
 | ------------- | ------ | ------- |
-| Small implementations size | < 400 SB_LUT4 | Size varies with inclueded features |
+| Small implementations size | < 400 SB_LUT4 | Size varies with included features and toolchain |
 | Easy interconnect to external modules with Wishbone | Done | |
 | Full compliance with RV32I as per riscv-spec-v2.2.pdf | Done | |
-| Full compliance with riscv-privileged-v1.10.pdf | Parially done | |
+| Full compliance with riscv-privileged-v1.10.pdf | Partially done | It is unlikely anyone will need
+full compliance here, but as a reference I will endeavor to construct this. A current implementation
+includes just those registers needed to pass the RISC-V rv32i compliance tests |
 
 ## Requirements
 
