@@ -58,7 +58,7 @@ LSTTARGETSSRAM := $(foreach i,$(TARGETSSRAM),$(OBJDIRSRAM)/$(i).lst)
 RESULTSSRAM    := $(foreach i,$(TARGETSSRAM),$(OBJDIRSRAM)/$(i).result.txt)
 
 
-all: results.txt $(BINTARGETSEBR) $(BINTARGETSSRAM) \
+all: ../../obj_dir/results.txt $(BINTARGETSEBR) $(BINTARGETSSRAM) \
 	$(LSTTARGETSEBR) $(LSTTARGETSSRAM) \
 	../../tsthw/upduino2/ice40loaderprog.hv	\
 	../../tsthw/iceblink40-hx1k/ice40loaderprog.hv \
@@ -70,8 +70,8 @@ all: results.txt $(BINTARGETSEBR) $(BINTARGETSSRAM) \
 ../../tsthw/iceblink40-hx1k/ice40loaderprog.hv:$(OBJDIREBR)/iceblink40-hx1kblink.bin
 	../../bin/midgetv_bin2ebr -i $< -o $@
 
-results.txt: $(RESULTSEBR) $(RESULTSSRAM)
-	cat $(RESULTSEBR) $(RESULTSSRAM) > results.txt
+../../obj_dir/results.txt: $(RESULTSEBR) $(RESULTSSRAM)
+	cat $(RESULTSEBR) $(RESULTSSRAM) > $@
 
 # When compiling
 # Specify only rv32i instructions to be used.
@@ -124,7 +124,7 @@ $(OBJDIRSRAM):
 	mkdir -p $(OBJDIRSRAM)
 
 clean: 
-	rm results.txt $(LSTTARGETSEBR) $(LSTTARGETSSRAM) \
+	rm ../../obj_dir/results.txt $(LSTTARGETSEBR) $(LSTTARGETSSRAM) \
 	$(RESULTSEBR) $(RESULTSSRAM) $(OBJDIREBR)/*bin $(OBJDIRSRAM)/*bin
 
 

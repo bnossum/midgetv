@@ -20,7 +20,7 @@ clock cycles (for ADDI) and around 40 clock cycles (for shifts of a
 register by 31). Average number of clocks per instruction (CPI) seems to be
 around 10. Unaligned word/hword load/store instructions are performed in
 software and really slow. CSR instructions are implemented partly
-in microcode, but mostly in sofware, and are also very slow.
+in microcode, but mostly in sofware, and are also very slow. Interrupt response is also slow. 
 
 
 ## Overall goals and results
@@ -90,7 +90,7 @@ Real-world usage of midgetv will certainly be larger, and slower.
 ### Basic verification of instructions
 1. "make" in directory sw/first to compile a bunch of small test
    assembler programs (riscv instructions) to binary images, then
-   simulate using simulators made in step 2.
+   simulate using simulators made in step 3.
 2. "cat results.txt" to see how simulation went.
 
 ### Basic verification of instructions as per riscv conformance testing.
@@ -99,7 +99,7 @@ Real-world usage of midgetv will certainly be larger, and slower.
    Note that the compliance tests is a dependent project, but I do
    not make that dependency explicit in this project, at least not
    for now.
-2. "./runall" to simulate the programs compiled in step 3 (takes some time).
+2. "./runall" to simulate the programs compiled in step 1 (takes some time).
 3. "./compareall" to compare simulated output with reference output.
 
 ### Compilation of a the "morse" C-program to a development board
