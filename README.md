@@ -91,7 +91,7 @@ Real-world usage of midgetv will certainly be larger, and slower.
 1. "make" in directory sw/first to compile a bunch of small test
    assembler programs (riscv instructions) to binary images, then
    simulate using simulators made in step 3.
-2. "cat results.txt" to see how simulation went.
+2. "cat ../../obj_dir/results.txt" to see how simulation went.
 
 ### Basic verification of instructions as per riscv conformance testing.
 1. "make" in directory sw/second to compile a bunch of small test

@@ -1,5 +1,4 @@
 obj_dir/*
-bin/*
 tsthw/iceblink40-hx1k/.sconsign.dblite
 tsthw/iceblink40-hx1k/hardware.asc
 tsthw/iceblink40-hx1k/hardware.bin

@@ -1,35 +1,39 @@
+BIN = ../../../bin
+OBJ = ../../../obj_dir
 
 CFLAGS = -mabi=ilp32 -march=rv32i -nodefaultlibs -nostartfiles -Os -Wall -Wa,-adhln=$*.slst \
 	-DNOCSR=1 -DonlyEBR=1 -DSP_INITVAL=0x400 
 
-all : crt0.o morse.lst simmorse \
-	../../../tsthw/upduino2/ice40loaderprog.hv \
-	../../../tsthw/iceblink40-hx1k/ice40loaderprog.hv morse.s
+#all :  morse.lst $(BIN)/simmorse \
+#	../../../tsthw/upduino2/ice40loaderprog.hv \
+#	../../../tsthw/iceblink40-hx1k/ice40loaderprog.hv morse.s
+all: ../../../tsthw/upduino2/ice40loaderprog.hv \
+	../../../tsthw/iceblink40-hx1k/ice40loaderprog.hv
 
 ../../../tsthw/iceblink40-hx1k/ice40loaderprog.hv: ../../../tsthw/upduino2/ice40loaderprog.hv
 	cp $< $@
 
-../../../tsthw/upduino2/ice40loaderprog.hv: morse.bin 
+../../../tsthw/upduino2/ice40loaderprog.hv: $(OBJ)/morse.bin 
 	../../../bin/midgetv_bin2ebr -i $< -o $@
 
-simmorse:morse.c
+$(BIN)/simmorse:morse.c
 	gcc -Wall -Wextra -Dsim=1 -o $@ $< 
 
+$(OBJ)/morse.o: | $(OBJ)/crt0.o
 
+# .SECONDARY:
 
-.SECONDARY:
-
-%.s:%.c
+$(OBJ)/%.s:%.c
 	riscv32-unknown-elf-gcc -S $(CFLAGS) -TEBRlink.ld  -I ./ -o $@ $<
 
-%.o:%.c 
+$(OBJ)/%.o:%.c 
 	riscv32-unknown-elf-gcc -c $(CFLAGS) -TEBRlink.ld  -I ./ -o $@ $<
 
-%.o:%.S
-	riscv32-unknown-elf-gcc -c $(CFLAGS) -TEBRlink.ld  -I ./ -I ../../inc/ -Wa,-a=$*.slst -o $@ $<
+$(OBJ)/%.o:%.S
+	riscv32-unknown-elf-gcc -c $(CFLAGS) -TEBRlink.ld  -I ./ -I ../../inc/ -Wa,-a=$(OBJ)/$*.slst -o $@ $<
 
 %.out:%.o
-	riscv32-unknown-elf-ld -TEBRlink.ld -nodefaultlibs -nostartfiles -o $@ crt0.o $< -M > $(*F).map
+	riscv32-unknown-elf-ld -TEBRlink.ld -nodefaultlibs -nostartfiles -o $@ $(OBJ)/crt0.o $< -M > $(OBJ)/$(*F).map
 
 %.bin:%.out
 	riscv32-unknown-elf-objcopy -Obinary $< $@ 
@@ -38,4 +42,8 @@ simmorse:morse.c
 	riscv32-unknown-elf-objdump -M numeric,no-aliases -D $< > $@
 
 clean:
-	rm *.o *.out *.bin *~  *.lst *.slst $(BINTARGETS) $(LSTTARGETS) simmorse
+	rm -f $(BIN)/simmorse \
+	$(OBJ)/crt0.o \
+	$(OBJ)/morse.bin \
+	../../../tsthw/upduino2/ice40loaderprog.hv \
+	../../../tsthw/iceblink40-hx1k/ice40loaderprog.hv
