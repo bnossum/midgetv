@@ -1,4 +1,9 @@
-/* 
+/* -----------------------------------------------------------------------------
+ * Part of midgetv
+ * 2019. Copyright B. Nossum.
+ * For licence, see LICENCE
+ * -----------------------------------------------------------------------------
+ * 
  * If we have MTIMETAP > 13, interrupts and mtime is implemented in midgetv
  * From user code, the following holds:
  * Write adr                            Write to

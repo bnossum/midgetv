@@ -1,7 +1,7 @@
 # midgetv
 
 RISC-V controller with Wishbone interface specifically for Lattice
-iCE40 FPGAs. midgetv is a non-pipelined, multi-cycle design. As a
+iCE40 FPGAs. midgetv is a non-pipelined, multi-cycle, microcoded design. As a
 module, the interconnect of midgetv may be shown as this:
 
    
@@ -23,6 +23,8 @@ module, the interconnect of midgetv may be shown as this:
 | Easy interconnect to external modules with Wishbone | Done | |
 | Full compliance with RV32I as per riscv-spec-v2.2.pdf | Done | |
 | Full compliance with riscv-privileged-v1.10.pdf | Partially done | It is unlikely anyone will need full compliance here, but as a reference I will endeavor to construct this. A current implementation includes just those registers needed to pass the RISC-V rv32i compliance tests |
+
+Midgetv trades speed for size. Each RISCV instruction uses between 4 and 40 clock cycles. Average number of clocks per instruction seems to be around 10.
 
 ## Requirements
 

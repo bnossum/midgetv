@@ -4,7 +4,11 @@
  * For licence, see LICENCE
  * -----------------------------------------------------------------------------
  *
- * Nearly Whishbone B.4 data sheet for m_ram
+ * Nearly Whishbone B.4 data sheet for m_ram. The only reason I can not
+ * call this a Whishbone interface is that midgetv require a read latency
+ * of 1 cycle (or higher). In other words, midgetv can not support a 
+ * Whishbone classical read cycle with no latency.
+ * 
  * --------------------------------------------------------------------
  * Inteface type:                   SLAVE
  * General description:             0/16384/32768 * 32-bit memory
