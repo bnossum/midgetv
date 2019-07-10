@@ -15,6 +15,14 @@ module, the interconnect of midgetv may be shown as this:
     DAT_I[IWIDTH-1:0] -|                |
                        +----------------+
 
+Midgetv trades speed for size. Each RISCV instruction uses between 4
+clock cycles (for ADDI) and around 40 clock cycles (for shifts of a
+register by 31). Average number of clocks per instruction seems to be
+around 10. Unaligned word/hword load and store is performed in
+software and is really slow. CSR instructions are implemented partly
+in microcode, but mostly in sofware, and is also very slow.
+
+
 ## Overall goals and results
 
 | Goal          | Result | Comment |
@@ -24,7 +32,6 @@ module, the interconnect of midgetv may be shown as this:
 | Full compliance with RV32I as per riscv-spec-v2.2.pdf | Done | |
 | Full compliance with riscv-privileged-v1.10.pdf | Partially done | It is unlikely anyone will need full compliance here, but as a reference I will endeavor to construct this. A current implementation includes just those registers needed to pass the RISC-V rv32i compliance tests |
 
-Midgetv trades speed for size. Each RISCV instruction uses between 4 and 40 clock cycles. Average number of clocks per instruction seems to be around 10.
 
 ## Requirements
 
