@@ -22,14 +22,16 @@ module, the interconnect of midgetv may be shown as this:
 - Full compliance with riscv-privileged-v1.10.pdf
 
 ## Requirements
-I try not to tie-in this code to any particular tools, but there are certain dependencies:
+
+I try not to tie-in this code to any particular tools, but there are
+certain dependencies. To compile the code with least effort you need:
 
 - GNU Make
 - gcc
   - On the host environment to compile some utility programs and simulation binaries.
   - As a cross compiler to compile C and assembler programs for RISC-V.
-- Verilator for simulation
-- emacs (for Verilog-Mode)
+- Verilator to build the simulator(s)
+- emacs if you want to modify the code easily (for Verilog-Mode)
 - A toolchain for FPGA compilation and upload, for example:
   - iCEcube2 from Lattice
   - A toolchain based on the emminent icestorm project, such as: yosys/arachne-pnr/icepack
@@ -39,9 +41,10 @@ All my work is done under Linux.
 ## Status 
 - Passes internal instruction testing program in simulation
 - Passes the RISC-V rv32i compliance tests in simulation
-- A compiled C-program ("hello world" in morse) is compiled to iCE40HX1K and programmed to the iceblink40-hx1k board
-- The same program is compiled to iCE40UP5K FPGAs and programmed to the upduino2 development board
-- Much work remains, but I believe this project to be mature enough to be useful to others, hence I make a release.
+- A compiled C-program ("hello world" in morse) is compiled to
+  iCE40HX1K and programmed to the iceblink40-hx1k board
+- The same program is compiled to iCE40UP5K FPGAs and programmed to
+  the upduino2 development board
 
 ## Results
 Using iCECube2 for compilation give the following for the example "hello world" program:
@@ -107,6 +110,7 @@ Note. This will be modified.
 - Cleanup on where produced files appears, then add produced files to a release
 - Cleanup on code, with some optimized code to reinsert
 - Verification on startup conditions must be tighter
+- Better documentation
 - A number of test programs on modules will be added
 - Bootloader program
 - Test on external interrupts
