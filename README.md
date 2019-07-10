@@ -1,5 +1,19 @@
 # midgetv
-RISC-V controller with Wishbone interface specifically for Lattice iCE40 FPGAs. midgetv is a non-pipelined, multi-cycle design. 
+
+RISC-V controller with Wishbone interface specifically for Lattice
+iCE40 FPGAs. midgetv is a non-pipelined, multi-cycle design. As a
+module, the interconnect of midgetv may be shown as this:
+
+   
+                      +----------------+
+               CLK_I ->                |- WE_O
+               RST_I -|                |- STB_O
+               start -|                |- CYC_O
+                      |                |- SEL_O[3:0] 
+                meip -|                |- ADR_O[31:0]
+               ACK_I -|                |- DAT_O[31:0]
+   DAT_I[IWIDTH-1:0] -|                |
+                      +----------------+
 
 ## Goals
 - Small implementations size
