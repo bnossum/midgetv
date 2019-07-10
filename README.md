@@ -15,11 +15,14 @@ module, the interconnect of midgetv may be shown as this:
     DAT_I[IWIDTH-1:0] -|                |
                        +----------------+
 
-## Goals
-- Small implementations size
-- Easy interconnect to external modules with Wishbone
-- Full compliance with RV32I as per riscv-spec-v2.2.pdf
-- Full compliance with riscv-privileged-v1.10.pdf
+## Overall goals and results
+
+| Goal          | Result | Comment |
+| ------------- | ------ | ------- |
+| Small implementations size | < 400 SB_LUT4 | Size varies with inclueded features |
+| Easy interconnect to external modules with Wishbone | Done | |
+| Full compliance with RV32I as per riscv-spec-v2.2.pdf | Done | |
+| Full compliance with riscv-privileged-v1.10.pdf | Parially done | |
 
 ## Requirements
 
