@@ -8,7 +8,7 @@ module, the interconnect of midgetv may be shown as this:
                        +----------------+
                 CLK_I ->                |- WE_O
                 RST_I -|                |- STB_O
-                start -|                |- CYC_O
+                start -|   midgetv      |- CYC_O
                        |                |- SEL_O[3:0] 
                  meip -|                |- ADR_O[31:0]
                 ACK_I -|                |- DAT_O[31:0]
@@ -17,10 +17,10 @@ module, the interconnect of midgetv may be shown as this:
 
 Midgetv trades speed for size. Each RISCV instruction uses between 4
 clock cycles (for ADDI) and around 40 clock cycles (for shifts of a
-register by 31). Average number of clocks per instruction seems to be
-around 10. Unaligned word/hword load and store is performed in
-software and is really slow. CSR instructions are implemented partly
-in microcode, but mostly in sofware, and is also very slow.
+register by 31). Average number of clocks per instruction (CPI) seems to be
+around 10. Unaligned word/hword load/store instructions are performed in
+software and really slow. CSR instructions are implemented partly
+in microcode, but mostly in sofware, and are also very slow.
 
 
 ## Overall goals and results
@@ -31,7 +31,8 @@ in microcode, but mostly in sofware, and is also very slow.
 | Easy interconnect to external modules with Wishbone | Done | |
 | Full compliance with RV32I as per riscv-spec-v2.2.pdf | Done | |
 | Full compliance with riscv-privileged-v1.10.pdf | Partially done | It is unlikely anyone will need full compliance here, but as a reference I will endeavor to construct this. A current implementation includes just those registers needed to pass the RISC-V rv32i compliance tests |
-
+| Support of "C" standard extension | | Not started |
+| Support of "M" standard extension for iCE UltraPlus | | Not started |
 
 ## Requirements
 
@@ -46,7 +47,7 @@ certain dependencies. To compile the code with least effort you need:
 - emacs if you want to modify the code easily (for Verilog-Mode)
 - A toolchain for FPGA compilation and upload, for example:
   - iCEcube2 from Lattice
-  - A toolchain based on the emminent icestorm project, such as: yosys/arachne-pnr/icepack
+  - A toolchain based on the eminent icestorm project, such as: yosys/arachne-pnr/icepack
 
 All my work is done under Linux.
   
@@ -67,7 +68,7 @@ Using iCECube2 for compilation give the following for the example "hello world" 
 | upduino2        | 353      |  5   |  2   | 33          |
 
 Note that "Auto lut cascade" must be off in the placer option of
-iCEcube2. This is due to the lattice preference files where
+iCEcube2. This is due to the Lattice preference files where
 "set_cascading" is used to reduce the size of the core by 31 LUTs.
 
 Real-world usage of midgetv will certainly be larger, and slower.
