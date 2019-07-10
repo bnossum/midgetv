@@ -2,10 +2,11 @@
 OBJDIR = ../obj_dir
 BINDIR = ../bin
 VERILOGDIR = ../code
+SB_SIMMOD = ../code/sb_sim_rtl
 
 GCCFLAGS = -I $(OBJDIR) -I/usr/share/verilator/include -I/usr/share/verilator/include/vltstd -Wall
 
-VERILATORFLAGS = -Wall -I$(VERILOGDIR) -Mdir $(OBJDIR) -cc --x-assign 1
+VERILATORFLAGS = -Wall -I$(VERILOGDIR) -I$(SB_SIMMOD) -Mdir $(OBJDIR) -cc --x-assign 1
 
 #
 #MY = m_inputmux m_cyclecnt m_alu_carryin m_alu m_immexp_zfind_q m_rai m_wai \
