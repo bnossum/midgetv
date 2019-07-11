@@ -7,7 +7,7 @@
 BIN = ../../../bin
 OBJ = ../../../obj_dir
 
-CFLAGS = -mabi=ilp32 -march=rv32i -nodefaultlibs -nostartfiles -Os -Wall -Wa,-adhln=$*.slst \
+CFLAGS = -mabi=ilp32 -march=rv32i -nodefaultlibs -nostartfiles -Os -Wall \
 	-DNOCSR=1 -DonlyEBR=1 -DSP_INITVAL=0x400 
 
 #all :  morse.lst $(BIN)/simmorse \
