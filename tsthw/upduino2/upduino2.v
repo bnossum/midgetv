@@ -132,16 +132,16 @@ module mytop
    /* Asynchronous data input is first registered in the IO FF,
     * it then follows one path, with a fanout of 1, to the
     * rDee register in m_inputmux. These two consequtive
-    * registers constitutes my guard for metastabiliti on the
+    * registers constitutes my guard for metastability on the
     * inputs.
     *
     */
    always @(posedge CLK_I) 
      if ( CYC_O & STB_O & WE_O ) begin
-        usartTX <= DAT_O[0];
-        redled <= DAT_O[1];
+        usartTX  <= DAT_O[0];
+        redled   <= DAT_O[1];
         greenled <= DAT_O[2];
-        blueled <= DAT_O[3];
+        blueled  <= DAT_O[3];
      end
    
    reg rACK_I;

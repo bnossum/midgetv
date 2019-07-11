@@ -22,7 +22,7 @@ clock cycles (for ADDI) and around 40 clock cycles (for shifts of a
 register by 31). Average number of clocks per instruction (CPI) seems to be
 around 10. Unaligned word/hword load/store instructions must be performed in
 software and is really slow. CSR instructions are implemented partly
-in microcode, but mostly in sofware; slow! Interrupt response is also slow. 
+in microcode, but mostly in software; slow! Interrupt response is also slow. 
 
 
 ## Overall goals and results
@@ -46,7 +46,7 @@ certain dependencies. To compile the code with least effort you need:
   - On the host environment to compile some utility programs and simulation binaries.
   - As a cross compiler to compile C and assembler programs for RISC-V.
 - Verilator to build the simulator(s)
-- emacs if you want to modify the code easily (for Verilog-Mode)
+- Emacs if you want to modify the code easily (for Verilog-Mode)
 - A toolchain for FPGA compilation and upload, for example:
   - iCEcube2 from Lattice
   - A toolchain based on the eminent icestorm project, such as: yosys/arachne-pnr/icepack
@@ -78,7 +78,7 @@ iCEcube2. This is due to the Lattice preference files where
 
 ### yosys/arachne-pnr, icetime
 Unfortunately this give the following
-(I would have expected numbers comparable with those for iCECube2, only 32 SB_LUTs larger):
+(I would have expected numbers comparable with those for iCECube2, only 31 SB_LUTs larger):
 
 Board           | FPGA            | SB_LUT4  | EBRs | SRAM | Clock (MHz)
 --------------- | --------------- | -------- | ---- | ---- | -----------
@@ -99,7 +99,7 @@ But I know my tools are dated:
 "make" in directory code to generate some verilog include files.
 
 ### 3: Simulators
-"make" in direcory tst to compile simulators
+"make" in directory tst to compile simulators
  - m_ice40sim_SRAM.bin and
  - m_ice40sim_EBRonly.bin
 
@@ -136,7 +136,7 @@ Note. This will be modified.
    the iceblink40-hx1k board
    
 
-## Semantic Versioning. API specification
+## Semantic Versioning API specification
 1. Input and Output signals to m_midgetv_core.v are parts of the API.
    See module m_midgetv_core in m_midgetv_core.v
 2. The memory map of midgetv is part of the API. See midgetv.inc in `sw/inc`
