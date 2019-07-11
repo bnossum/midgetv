@@ -68,7 +68,7 @@ module top
    wire                 STB_O;                  // From inst_midgetv_core of m_midgetv_core.v
    wire                 WE_O;                   // From inst_midgetv_core of m_midgetv_core.v
    wire                 corerunning;            // From inst_midgetv_core of m_midgetv_core.v
-   wire [31:0]          dbgpc;                  // From inst_midgetv_core of m_midgetv_core.v
+   wire [31:0]          dbga;                   // From inst_midgetv_core of m_midgetv_core.v
    wire                 midgetv_core_killwarnings;// From inst_midgetv_core of m_midgetv_core.v
    // End of automatics
    
@@ -113,7 +113,7 @@ module top
        .NO_CYCLECNT  (   NO_CYCLECNT    ),
        .MTIMETAP     (   MTIMETAP       ),
        .HIGHLEVEL    (   HIGHLEVEL      ),
-       .DBGPC        (   1'b1 ),
+       .DBGA         (   1'b0 ),
        .program0(program0),
        .program1(program1),
        .program2(program2),
@@ -146,7 +146,7 @@ module top
       .DAT_O                            (DAT_O[31:0]),
       .SEL_O                            (SEL_O[3:0]),
       .corerunning                      (corerunning),
-      .dbgpc                            (dbgpc[31:0]),
+      .dbga                             (dbga[31:0]),
       .midgetv_core_killwarnings        (midgetv_core_killwarnings),
       // Inputs
       .CLK_I                            (CLK_I),

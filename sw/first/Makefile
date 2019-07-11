@@ -1,3 +1,8 @@
+#-----------------------------------------------------------------------------
+# Part of midgetv
+# 2019. Copyright B. Nossum.
+# For licence, see LICENCE
+# -----------------------------------------------------------------------------
 #
 # Makefile to compile small test programs for midgetv.
 # Each program usually consentrate on behavior of

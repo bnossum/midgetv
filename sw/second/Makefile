@@ -1,3 +1,8 @@
+#-----------------------------------------------------------------------------
+# Part of midgetv
+# 2019. Copyright B. Nossum.
+# For licence, see LICENCE
+# -----------------------------------------------------------------------------
 
 TARGETSEBR := wI-ADD-01 wI-ADDI-01 wI-AND-01 wI-ANDI-01 wI-AUIPC-01 \
 	wI-BEQ-01 wI-BGE-01 wI-BGEU-01 wI-BLT-01 wI-BLTU-01 wI-BNE-01 \

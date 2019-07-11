@@ -25,7 +25,7 @@ module m_ice40sim_EBRonly
    wire [31:0]          ADR_O;                  // From inst_midgetv_core of m_midgetv_core.v
    wire   midgetv_core_killwarnings;// From inst_midgetv_core of m_midgetv_core.v
    wire                 CYC_O;                  // From inst_midgetv_core of m_midgetv_core.v
-   wire [31:0]          dbgpc;                  // From inst_midgetv_core of m_midgetv_core.v
+   wire [31:0]          dbga;                   // From inst_midgetv_core of m_midgetv_core.v
    wire                 corerunning;            // From inst_midgetv_core of m_midgetv_core.v
    /* verilator lint_on UNUSED */
    
@@ -71,7 +71,7 @@ module m_ice40sim_EBRonly
       .DAT_O                            (DAT_O[31:0]),
       .SEL_O                            (SEL_O[3:0]),
       .corerunning                      (corerunning),
-      .dbgpc                            (dbgpc[31:0]),
+      .dbga                             (dbga[31:0]),
       .midgetv_core_killwarnings        (midgetv_core_killwarnings),
       // Inputs
       .CLK_I                            (CLK_I),

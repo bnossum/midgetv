@@ -119,7 +119,8 @@ module mytop
    wire [3:0]           SEL_O;                  // From inst_midgetv_core of m_midgetv_core.v
    wire                 STB_O;                  // From inst_midgetv_core of m_midgetv_core.v
    wire                 WE_O;                   // From inst_midgetv_core of m_midgetv_core.v
-   wire [31:0]          dbgpc;                  // From inst_midgetv_core of m_midgetv_core.v
+   wire                 corerunning;            // From inst_midgetv_core of m_midgetv_core.v
+   wire [31:0]          dbga;                   // From inst_midgetv_core of m_midgetv_core.v
    wire                 midgetv_core_killwarnings;// From inst_midgetv_core of m_midgetv_core.v
    // End of automatics
    
@@ -197,7 +198,8 @@ module mytop
       .ADR_O                            (ADR_O[31:0]),
       .DAT_O                            (DAT_O[31:0]),
       .SEL_O                            (SEL_O[3:0]),
-      .dbgpc                            (dbgpc[31:0]),
+      .corerunning                      (corerunning),
+      .dbga                             (dbga[31:0]),
       .midgetv_core_killwarnings        (midgetv_core_killwarnings),
       // Inputs
       .CLK_I                            (CLK_I),

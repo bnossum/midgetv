@@ -130,6 +130,13 @@
  * This is the machine external interrupt pending signal. It should be
  * valid in the CLK_I clock domain.
  * 
+ * output:dbga[31:0]
+ * -----------------
+ * A catchall hardware debugging aid. When not debugging dbga == 32'h0.
+ * My intention is that by leaving this vector as is, different 
+ * information may be emitted from the core without breaking programs 
+ * that use the core allready.
+ * 
  * output:midgetv_core_killwarnings
  * --------------------------------
  * This is a dummy output to remove warnings from different tools.
@@ -220,7 +227,7 @@ module m_midgetv_core
       SRAMADRWIDTH = 0,  EBRADRWIDTH =  8, IWIDTH =  8, NO_CYCLECNT = 1, MTIMETAP =  0, HIGHLEVEL = 0, // Minimal
 //    SRAMADRWIDTH = 16, EBRADRWIDTH =  8, IWIDTH = 32, NO_CYCLECNT = 0, MTIMETAP = 14, HIGHLEVEL = 0, // Conventional
 //    SRAMADRWIDTH = 17, EBRADRWIDTH = 11, IWIDTH = 32, NO_CYCLECNT = 0, MTIMETAP = 14, HIGHLEVEL = 0, // Maximal
-      DBGPC = 0,
+      DBGA = 0,
       parameter [4095:0] program0 = 4096'h0,
       parameter [4095:0] program1 = 4096'h0,
       parameter [4095:0] program2 = 4096'h0,
@@ -240,18 +247,16 @@ module m_midgetv_core
       )
    (
     // Whishbone signals:
-    input              CLK_I, // System clock, used on rising flank only
-   /* verilator lint_off UNUSED */
-    input              RST_I, // Whishbone reset equals NMI.
-   /* verilator lint_on UNUSED */
-    input              ACK_I, // Acknowledge from I/O device
-    input [IWIDTH-1:0] DAT_I, // Input devices data for midgetv
-    output             CYC_O, // We do not generate wait states. Observation 3.55 in wbspec_b4: CYC_O = STB_O
-    output             STB_O, // Qualifies ADR_O, DAT_O, SEL_O and WE_O.
-    output             WE_O, //  Midgetv writes output to address ADR_O
-    output [31:0]      ADR_O, // Address for I/O devices
-    output [31:0]      DAT_O, // Data from midgetv to output devices
-    output [3:0]       SEL_O, // Byte mask for read/write. 
+    input              CLK_I, //       System clock, used on rising flank only
+    input              RST_I, //       Whishbone reset equals NMI.
+    input              ACK_I, //       Acknowledge from I/O device
+    input [IWIDTH-1:0] DAT_I, //       Input devices data for midgetv
+    output             CYC_O, //       We do not generate wait states. Observation 3.55 in wbspec_b4: CYC_O = STB_O
+    output             STB_O, //       Qualifies ADR_O, DAT_O, SEL_O and WE_O.
+    output             WE_O, //        Midgetv writes output to address ADR_O
+    output [31:0]      ADR_O, //       Address for I/O devices
+    output [31:0]      DAT_O, //       Data from midgetv to output devices
+    output [3:0]       SEL_O, //       Byte mask for read/write. 
 
     // The following whishbone signals are not supported:
     //input            ERR_I,RTY_I,STALL_I
@@ -260,10 +265,10 @@ module m_midgetv_core
     //output [x:0]     TGA_O,TGC_O,TGD_O, 
 
     // Non-whishbone signals:
-    input              meip, //  External interrupt(s) pending
-    input              start, // Control startup of midgetv
-    output             corerunning, //
-    output [31:0]      dbgpc, // For hardware debugging
+    input              meip, //        External interrupt(s) pending
+    input              start, //       Control startup of midgetv
+    output             corerunning, // midgetv should now be active. For synchronization of startup
+    output [31:0]      dbga, //     For hardware debugging
     output             midgetv_core_killwarnings // To tie-off unused signals. Do not connect.
     );
    wire                clk; //   My signal name for the clock. It is only used on rising edge
@@ -922,35 +927,37 @@ module m_midgetv_core
    endgenerate
 
    generate
-      if ( DBGPC ) begin
-         reg [31:0] rdbgpc;
+      if ( DBGA == 0 ) begin
+         assign dbga = 32'b0;
+      end else begin
+         reg [31:0] rdbga;
          always @(posedge clk) begin
-//            rdbgpc[3] <= STB_O;
-//            rdbgpc[2] <= iwe;
-//            rdbgpc[1] <= sram_stb;
-//            rdbgpc[0] <= progress_ucode;
+//            rdbga[3] <= STB_O;
+//            rdbga[2] <= iwe;
+//            rdbga[1] <= sram_stb;
+//            rdbga[0] <= progress_ucode;
             //
             // This established that we do progress_ucode, and iwe from times to times
             // Never any STB_O, nor sram_stb
             // So where do we write?
 //            if ( iwe ) 
-//              rdbgpc[3:0] <= {sa27,sa26,sa25,sa24};
+//              rdbga[3:0] <= {sa27,sa26,sa25,sa24};
 //            else
-//              rdbgpc[3:0] <= 4'h0;
+//              rdbga[3:0] <= 4'h0;
             //            
             // Sequence 4,a,0,b,9,0,d,f -> We are entering a trap
             // Reconfirm that we write to PC
 //            if ( iwe & {sa27,sa26,sa25,sa24} == 4'b1010 ) begin
-//               rdbgpc[3:0] <= 4'hf;
+//               rdbga[3:0] <= 4'hf;
 //            end else begin
-//               rdbgpc[3:0] <= 4'h0;
+//               rdbga[3:0] <= 4'h0;
 //            end
             //
             // We do. Confirm that the upper 20 bits and the lower
             // two bits of PC are always written to 0
 //            if ( iwe & {sa27,sa26,sa25,sa24} == 4'b1010 ) begin
 //               if ( B[31:12] != 20'h0 || B[1:0] != 2'b00 ) begin
-//                  rdbgpc[3:0] <= 4'h1;
+//                  rdbga[3:0] <= 4'h1;
 //               end
 //            end
             //
@@ -958,22 +965,20 @@ module m_midgetv_core
             // This relies on the fact that we use more than 3 cycles
             // between each PC write.
 //            if ( iwe & {sa27,sa26,sa25,sa24} == 4'b1010 ) begin
-//               rdbgpc <= B | 32'b1;
+//               rdbga <= B | 32'b1;
 //            end else begin
-//               rdbgpc[27:0] <= rdbgpc[31:4];
+//               rdbga[27:0] <= rdbga[31:4];
 //            end
             //
             // Seems we write 0x4 to PC, then 0 to PC ??
             // Examine minx[3:0]
-//            rdbgpc[3:0] <= minx[3:0];
+//            rdbga[3:0] <= minx[3:0];
             //
             // seems stuck at 0x8. 
             // Examine minx[7:0]
-            rdbgpc[3:0] <= minx[7:4];
+            rdbga[3:0] <= minx[7:4];
          end
-         assign dbgpc = rdbgpc;
-      end else begin
-         assign dbgpc = 32'b0;
+         assign dbga = rdbga;
       end
    endgenerate
 endmodule
