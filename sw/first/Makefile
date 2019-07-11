@@ -46,7 +46,7 @@ MIDGETVICE40EBR = ../../bin/m_ice40sim_EBRonly.bin
 #
 # Midget with 64k sram, 1k EBR, etc
 #
-MIDGETVICE40SRAM = ../../bin/m_ice40sim.bin
+MIDGETVICE40SRAM = ../../bin/m_ice40sim_SRAM.bin
 
 
 BINTARGETSEBR := $(foreach i,$(TARGETSEBR),$(OBJDIREBR)/$(i).bin)
@@ -125,6 +125,8 @@ $(OBJDIRSRAM):
 
 clean: 
 	rm ../../obj_dir/results.txt $(LSTTARGETSEBR) $(LSTTARGETSSRAM) \
-	$(RESULTSEBR) $(RESULTSSRAM) $(OBJDIREBR)/*bin $(OBJDIRSRAM)/*bin
+	$(RESULTSEBR) $(RESULTSSRAM) \
+	$(OBJDIREBR)/*bin $(OBJDIRSRAM)/*bin \
+	$(OBJDIREBR)/*out.map $(OBJDIRSRAM)/*out.map
 
 
