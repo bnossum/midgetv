@@ -1,3 +1,12 @@
+/* -----------------------------------------------------------------------------
+ * Part of midgetv
+ * 2019. Copyright B. Nossum.
+ * For licence, see LICENCE
+ * -----------------------------------------------------------------------------
+ * Cycle-true simulation of midgetv where program/data is stored in EBR-ram and
+ * SRAM. 
+ * This file needs a cleanup.
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -15,25 +24,16 @@ INFOCHUNK g_info = {
 // To only output trace in specific regions
 int g_suspendtrace;
 
-/*
- * A preliminary speed test indicates the simulator corresponds to a
- * target with a 144 kHz clock
- */
 /////////////////////////////////////////////////////////////////////////////
 #define    EBRADRWIDTH  8 // Is a parameter to m_midgetv
-#include "Vm_ice40sim__Syms.h"
-
-
-
-//
-/////////////////////////////////////////////////////////////////////////////
+#include "Vm_ice40sim_SRAM__Syms.h"
 
 
 /////////////////////////////////////////////////////////////////////////////
 #define regPC    0x88
 #define regttime 0x8c
 
-uint32_t getebr( Vm_ice40sim *tb, uint32_t byteadr ) {
+uint32_t getebr( Vm_ice40sim_SRAM *tb, uint32_t byteadr ) {
         uint32_t d;
         uint32_t wa = byteadr/4;
         if ( byteadr & 3 )
@@ -78,7 +78,7 @@ uint32_t getsram( void *vtb, uint32_t byteadr ) {
          */
         byteadr &= 0xFFFF; 
         uint32_t wa = byteadr/4;
-        Vm_ice40sim *tb =(Vm_ice40sim *)vtb;
+        Vm_ice40sim_SRAM *tb =(Vm_ice40sim_SRAM *)vtb;
 //old   d =  (tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_sram->genblk2__DOT__blk0__BRA__0__KET____DOT__blk1__BRA__0__KET____DOT__sram->get_as_16(wa) << 0 );
 //old   d |= (tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_sram->genblk2__DOT__blk0__BRA__0__KET____DOT__blk1__BRA__1__KET____DOT__sram->get_as_16(wa) <<16 );
         d =  (tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ram->genblk2__DOT__blk0__BRA__0__KET____DOT__blk1__BRA__0__KET____DOT__sram->get_as_16(wa) << 0 );
@@ -91,7 +91,7 @@ uint32_t getsram( void *vtb, uint32_t byteadr ) {
 /* Not finished.
  * Assumes a 64kBib SRAM
  */
-void readout_ebr_sram(const char *hdrEBR, const char *hdrSRAM, int hexdumpit, Vm_ice40sim *tb ) {
+void readout_ebr_sram(const char *hdrEBR, const char *hdrSRAM, int hexdumpit, Vm_ice40sim_SRAM *tb ) {
         int i;
         uint32_t d;
 
@@ -126,7 +126,7 @@ void readout_ebr_sram(const char *hdrEBR, const char *hdrSRAM, int hexdumpit, Vm
 }
 
 /////////////////////////////////////////////////////////////////////////////
-void initialize_ebr_sram( Vm_ice40sim *tb, FILE *fi, char *finame ) {
+void initialize_ebr_sram( Vm_ice40sim_SRAM *tb, FILE *fi, char *finame ) {
         int i,j,c;
         const int MAXEBR =  (16 * (4*1024)); //  16 EBR blocks give this number of bits
         const int MAXSRAM = (4 * (256*1024)); // 4 SRAM blocks give this number of bits
@@ -251,7 +251,7 @@ void initialize_ebr_sram( Vm_ice40sim *tb, FILE *fi, char *finame ) {
 
 
 /////////////////////////////////////////////////////////////////////////////
-//void readout_ucode(Vm_ice40simsim_EBRonly *tb ) {
+//void readout_ucode(Vm_ice40sim_SRAMsim_EBRonly *tb ) {
 //        int i;
 //        uint64_t d;
 //        
@@ -275,7 +275,7 @@ enum {
         ST_HINT_SIMERROR
 };
 
-int check_for_simulationhint( FILE *lfo, char *imagetosimnamep, Vm_ice40sim *tb, int silent) {
+int check_for_simulationhint( FILE *lfo, char *imagetosimnamep, Vm_ice40sim_SRAM *tb, int silent) {
         static uint32_t prevI = 0;
         static int st;
         uint32_t I = tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->get_I();
@@ -353,7 +353,7 @@ int check_for_simulationhint( FILE *lfo, char *imagetosimnamep, Vm_ice40sim *tb,
                         
                 
 /////////////////////////////////////////////////////////////////////////////
-void simprintf( uint32_t cy, Vm_ice40sim *tb ) {
+void simprintf( uint32_t cy, Vm_ice40sim_SRAM *tb ) {
         if ( g_suspendtrace )
                 return;
 #define STARTOFHIER tb->v->inst_ice40sim_EBRonly->inst_midgetv_core
@@ -392,7 +392,7 @@ int main(int argc, char **argv) {
         FILE *lfo = stdout;
         FILE *imagetosim = NULL;
         char *imagetosimname = NULL;
-	Vm_ice40sim *tb = new Vm_ice40sim;
+	Vm_ice40sim_SRAM *tb = new Vm_ice40sim_SRAM;
 
         int cyclelimit = 300;
         int simhintstate;

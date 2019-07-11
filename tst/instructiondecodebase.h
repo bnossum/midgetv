@@ -1,6 +1,13 @@
-// Encodings
+/* -----------------------------------------------------------------------------
+ * Part of midgetv
+ * 2019. Copyright B. Nossum.
+ * For licence, see LICENCE
+ * -----------------------------------------------------------------------------
+ * This file is used to disassemble instructions in simulators, and
+ * give the RV32I encodings. X-macros are used extensively.
+ */
 
-// 104 Volume I: RISC-V User-Level ISA V2.2
+// Page 104 Volume I: RISC-V User-Level ISA V2.2
 // 
 // 31 25         24 20 19 15 14 12  11 7        6 0
 // funct7        rs2   rs1   funct3 rd          opcode   R-type

@@ -1,3 +1,11 @@
+/* -----------------------------------------------------------------------------
+ * Part of midgetv
+ * 2019. Copyright B. Nossum.
+ * For licence, see LICENCE
+ * -----------------------------------------------------------------------------
+ * This file needs a cleanup.
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>

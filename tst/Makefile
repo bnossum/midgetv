@@ -1,3 +1,8 @@
+#-----------------------------------------------------------------------------
+# Part of midgetv
+# 2019. Copyright B. Nossum.
+# For licence, see LICENCE
+# -----------------------------------------------------------------------------
 
 OBJDIR = ../obj_dir
 BINDIR = ../bin
@@ -11,20 +16,22 @@ VERILATORFLAGS = -Wall -I$(VERILOGDIR) -I$(SB_SIMMOD) -Mdir $(OBJDIR) -cc --x-as
 #
 #MY = m_inputmux m_cyclecnt m_alu_carryin m_alu m_immexp_zfind_q m_rai m_wai \
 #	m_bmask_emask m_condcode m_shiftcounter \
-#	m_ice40sim  m_ice40sim_EBRonly 
 
-MY =  m_ice40sim_EBRonly m_ice40sim
+
+MY =  m_ice40sim_SRAM  m_ice40sim_EBRonly 
 
 TARGETS:=$(foreach i,$(MY),$(BINDIR)/$(i).bin)
 
-all:$(TARGETS)
+#
+# I do not really master the build process of Verilator.
+# The following is a quick and dirty solution to help 'make clean'
+#
+FORCLEANING:=$(foreach i,$(MY),$(OBJDIR)/V$(i)*)
 
-.SECONDARY:
+all:$(TARGETS)
 
 $(OBJDIR)/V%.cpp:$(VERILOGDIR)/%.v
 	verilator $(VERILATORFLAGS) $<
-
-# verilator -Wall -I.. -cc $<
 
 $(OBJDIR)/V%__ALL.a:$(OBJDIR)/V%.cpp
 	cd $(OBJDIR); make -f V$(*F).mk; cd -; 
@@ -32,4 +39,9 @@ $(OBJDIR)/V%__ALL.a:$(OBJDIR)/V%.cpp
 $(BINDIR)/%.bin:%.cpp $(OBJDIR)/V%__ALL.a
 	g++ $(GCCFLAGS) $< $(OBJDIR)/V$(*F)__ALL.a /usr/share/verilator/include/verilated.cpp common.cpp -o $@
 
+clean:
+	rm $(TARGETS) $(FORCLEANING)
 
+
+# .SECONDARY:
+# verilator -Wall -I.. -cc $<

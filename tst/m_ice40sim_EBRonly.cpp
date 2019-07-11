@@ -1,3 +1,12 @@
+/* -----------------------------------------------------------------------------
+ * Part of midgetv
+ * 2019. Copyright B. Nossum.
+ * For licence, see LICENCE
+ * -----------------------------------------------------------------------------
+ * Cycle-true simulation of midgetv where all program/data is stored in EBR-ram
+ * This file needs a cleanup.
+ */
+
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
@@ -201,18 +210,6 @@ void initialize_ebr( void *vtb, FILE *fi, char *finame ) {
 
 
 
-/////////////////////////////////////////////////////////////////////////////
-//void readout_ucode(Vm_ice40sim_EBRonly *tb ) {
-//        int i;
-//        uint64_t d;
-//        
-//        for ( i = 0; i < 256; i++ ) {
-//                d =  ((uint64_t)tb->v->inst_midgetv_core->inst_ucode->genblk1__DOT__inst_3ebr->ucode0->get_as_16(i) <<  0);
-//                d |= ((uint64_t)tb->v->inst_midgetv_core->inst_ucode->genblk1__DOT__inst_3ebr->ucode1->get_as_16(i) << 16);
-//                d |= ((uint64_t)tb->v->inst_midgetv_core->inst_ucode->genblk1__DOT__inst_3ebr->ucode2->get_as_16(i) << 32);
-//                printf("%2.2x %16.16" PRIx64 "\n", i, d);
-//        }
-//}
 
 /////////////////////////////////////////////////////////////////////////////
 /* SLTU x0,rs1,rs2 is used to give simulation hints
@@ -429,8 +426,6 @@ void simprintf( uint32_t cy, Vm_ice40sim_EBRonly *tb ) {
                 printf( "  cy |||||||| || [31:0]   I[31:0]  || rs2 rs1 | Rd  || PC[31:0] ||| | || || |||| || ||| DAT_O[..] rDee[..] Di[31:0] || IOA[31:0]B[31:0]  || || || |||| |||||\n" );
         }
 
-
-        
         minx = STARTOFHIER->get_minx();
         I = STARTOFHIER->get_I();
         
