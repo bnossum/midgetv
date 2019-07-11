@@ -145,6 +145,11 @@ Note. This will be modified.
 
 
 ## Todo
+
+- Test program for corner cases, instructions that 'nearly' are
+  supported.  Among these are `wfi` encoded with fields `rs1` and or
+  `rs2` != 0, and other similar cases.
+
 - Cleanup on code, with some optimized code to reinsert
 - Verification on startup conditions must be tighter
 - Write and test exhaustive CSR code, just now only a minimum exists

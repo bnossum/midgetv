@@ -4,12 +4,12 @@
         .globl _start
         # =============================================================================
 StartTrap:
-        # Should get here with mcause == 3, mepc == adr of ECALL, mtval == 0
+        # Should get here with mcause == 3, mepc == adr of EBREAK, mtval == 0
         li      x2,3
         lw      x1,%lo(__mcause)(x0)
         bne     x1,x2,1f
         lw      x1,%lo(__mepc)(x0)
-        la      x2,atECALL
+        la      x2,atEBREAK
         bne     x1,x2,2f
         lw      x1,%lo(__mtval)(x0)
         bnez    x1,3f
@@ -34,7 +34,7 @@ _start:
         la      x1,StartTrap
         sw      x1,%lo(__mtvec)(x0)
 offending:     
-atECALL:
+atEBREAK:
         ebreak
         simdump
 6:      simerr  6
