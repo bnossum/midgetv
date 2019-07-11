@@ -3,10 +3,15 @@
 # 2019. Copyright B. Nossum.
 # For licence, see LICENCE
 # -----------------------------------------------------------------------------
+# TODO: Reinsert generation of optimized control equation storage in two EBRs
+#       rather than 3.
+#
 
 GEN_CODE_DIR := ../bin
 
-all: $(GEN_CODE_DIR)/ucodeinitval.hv
+TRG := $(GEN_CODE_DIR)/ucodeinitval.hv
+
+all: $(TRG)
 
 # # m_2ebr.v
 # 
@@ -33,3 +38,6 @@ $(GEN_CODE_DIR)/ucodeinitval.hv: | $(GEN_CODE_DIR)
 
 $(GEN_CODE_DIR):
 	mkdir -p $(GEN_CODE_DIR)
+
+clean:
+	rm $(TRG)
