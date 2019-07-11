@@ -99,6 +99,5 @@ endmodule
       
 // Local Variables:
 // verilog-library-directories:("."  )
-// verilog-library-files:("/home/bnossum/PROJ/iCE_simlib/iCE_simlib.v" )
 // verilog-library-extensions:(".v" )
 // End:

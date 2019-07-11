@@ -102,7 +102,7 @@ Real-world usage of midgetv will certainly be larger, and slower.
 2. "./runall" to simulate the programs compiled in step 1 (takes some time).
 3. "./compareall" to compare simulated output with reference output.
 
-### Compilation of a the "morse" C-program to a development board
+### Compilation of the "morse" C-program to a development board
 Note. This will be modified.
 1. "make" in directory sw/hwexamples/morse to:
    - compile morse.c to morse.o
