@@ -77,16 +77,17 @@ iCEcube2. This is due to the Lattice preference files where
 "set_cascading" is used to reduce the size of the core by 31 LUTs.
 
 ### yosys/arachne-pnr, icetime
-Unfortunately this give the following:
+Unfortunately this give the following
+(I would have expected numbers comparable with those for iCECube2, only 32 SB_LUTs larger):
 
 Board           | FPGA            | SB_LUT4  | EBRs | SRAM | Clock (MHz)
 --------------- | --------------- | -------- | ---- | ---- | -----------
 iceblink40-hx1k | ICE40HX1K-VQ100 | 330      |  5   |  0   | 40         
 upduino2        | ICE40UP5K-SG48I | 428      |  5   |  2   | 24         
 
-But I know my tools are old:
-Yosys 0.7+515 (git sha1 3545c0f, clang 3.8.0-2ubuntu4 -fPIC -Os)
-arachne-pnr 0.1+287+0 (git sha1 6701132, g++ 5.4.0-6ubuntu1~16.04.9 -O2)
+But I know my tools are dated:
+- Yosys 0.7+515 (git sha1 3545c0f, clang 3.8.0-2ubuntu4 -fPIC -Os)
+- arachne-pnr 0.1+287+0 (git sha1 6701132, g++ 5.4.0-6ubuntu1~16.04.9 -O2)
 
 
 ## Incomplete build instructions
