@@ -8,11 +8,13 @@ module, the interconnect of midgetv may be shown as this:
                        +----------------+
                 CLK_I ->                |- WE_O
                 RST_I -|                |- STB_O
-                start -|   midgetv      |- CYC_O
+                start -|    midgetv     |- CYC_O
                        |                |- SEL_O[3:0] 
                  meip -|                |- ADR_O[31:0]
                 ACK_I -|                |- DAT_O[31:0]
     DAT_I[IWIDTH-1:0] -|                |
+                       |                |- corerunning
+                       |                |- dbga[31:0]
                        +----------------+
 
 Midgetv trades speed for size. Each RISCV instruction uses between 4
@@ -118,6 +120,14 @@ Note. This will be modified.
 1. Upload to the upduino2 board. A similar procedure is to be followed for
    the iceblink40-hx1k board
    
+
+## Semantic Versioning. API specification
+1. Input and Output signals to m_midgetv_core.v are parts of the API.
+   See module m_midgetv_core in m_midgetv_core.v
+2. The memory map of midgetv is part of the API. See midgetv.inc in `sw/inc`
+3. The way a binary file is mapped to `localparam` specifications by the
+   utility `midgetv_bin2ebr` is part of the API.
+
 
 ## Todo
 - Cleanup on code, with some optimized code to reinsert
