@@ -73,7 +73,7 @@ iCEcube2. This is due to the Lattice preference files where
 
 Real-world usage of midgetv will certainly be larger, and slower.
 
-## Abbreviated, incomplete build instructions
+## Incomplete build instructions
 
 ### 1: Utilities
 "make" in directory util to build a few utilities
@@ -83,7 +83,7 @@ Real-world usage of midgetv will certainly be larger, and slower.
 
 ### 3: Simulators
 "make" in direcory tst to compile simulators
- - m_ice40sim.bin and
+ - m_ice40sim_SRAM.bin and
  - m_ice40sim_EBRonly.bin
 
 
