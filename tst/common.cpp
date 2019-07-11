@@ -68,7 +68,7 @@ void userguide( void ) {
 #define STR(x) STRX(x)
 #define CATX(a,b) a ## b
 #define CAT(a,b) CATX(a,b)
-#define NRINSTR 50
+#define NRINSTR 51
 const char *instrtxt[NRINSTR+1] = {
 #define R(ty,funct7,rs2,rs1,funct3,rd,opcode,txt) STR(txt),
 #define r(ty,a,b,c,rs1,funct3,rd,opcode,txt)      STR(txt),
@@ -96,8 +96,7 @@ const uint8_t instrty[NRINSTR+1] = {
 void pocketdissass( uint32_t pc, uint32_t I ) {
         int bit30 = (I >> 30) & 1;
         int bit2928 = (I >> 28) & 3;
-//        int bit20 = (I >> 20) & 1;
-        int bit2120 = (I >> 20) & 3;
+        int bit2220 = (I >> 20) & 7;
         int f3    = (I >> 12) & 7;
         int opcode   = I  & 127;
         int inx = -1;
@@ -166,24 +165,25 @@ void pocketdissass( uint32_t pc, uint32_t I ) {
         case 0b1110011 : 
                 switch( f3 ) {
                 case 0b000 :
-                        switch ( bit2120 ) {
-                        case 0b00 : inx = 39; break;
-                        case 0b01 : inx = 40; break;
-                        case 0b10 : 
+                        switch ( bit2220 ) {
+                        case 0b000 : inx = 39; break;
+                        case 0b001 : inx = 40; break;
+                        case 0b010 : 
                                 switch ( bit2928 ) {
                                 case 0b00 : inx = 41; break;
                                 case 0b01 : inx = 42; break;
                                 case 0b11 : inx = 43; break;
                                 }
                                 break;
+                        case 0b101 : inx = 44; break;                                
                         }
                         break;
-                case 0b001 : inx = 44; break;
-                case 0b010 : inx = 45; break;
-                case 0b011 : inx = 46; break;
-                case 0b101 : inx = 47; break;
-                case 0b110 : inx = 48; break;
-                case 0b111 : inx = 49; break;
+                case 0b001 : inx = 45; break;
+                case 0b010 : inx = 46; break;
+                case 0b011 : inx = 47; break;
+                case 0b101 : inx = 48; break;
+                case 0b110 : inx = 49; break;
+                case 0b111 : inx = 50; break;
                 }                        
                 break;
         }
