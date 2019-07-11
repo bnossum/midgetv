@@ -22,13 +22,10 @@
  * 
  */
 module m_inputmux
-  # ( parameter HIGHLEVEL = 0,
-      IWIDTH = 8,  //               Can in principle be from 1 to 32. Usually 8, 16 or 32.
-      SRAMADRWIDTH = 0, //          ice40hx1k and similar has no SRAM
-      MTIMETAP = 0 //               Governs inclusion of registers 
-      // mstatus Machine Status Register
-      // mie     Machine Interrupt Enable Register
-      // mip     Machine Interrupt Pending Register
+  # ( parameter HIGHLEVEL = 0, // 
+      IWIDTH = 8,  //             Can in principle be from 1 to 32. Usually 8, 16 or 32.
+      SRAMADRWIDTH = 0, //        ice40hx1k and similar has no SRAM
+      MTIMETAP = 0 //             Governs inclusion of registers 
       )
    (
     input              clk,

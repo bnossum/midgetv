@@ -106,7 +106,7 @@ Real-world usage of midgetv will certainly be larger, and slower.
 Note. This will be modified.
 1. "make" in directory sw/hwexamples/morse to:
    - compile morse.c to morse.o
-   - compile crt0.S to crt0.s (Note that this crt0 is a joke, very incomplete).
+   - compile crt0.S to crt0.o (Note that this crt0 is a joke, very incomplete).
    - link to get morse.bin
    - midgetv_bin2ebr to transform morse.bin to ice40loaderprog.hv in
      directories tsthw/iceblink40-hx1k and tsthw/upduino2

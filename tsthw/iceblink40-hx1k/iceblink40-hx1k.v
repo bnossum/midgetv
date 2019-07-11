@@ -113,7 +113,7 @@ module top
        .NO_CYCLECNT  (   NO_CYCLECNT    ),
        .MTIMETAP     (   MTIMETAP       ),
        .HIGHLEVEL    (   HIGHLEVEL      ),
-       .DBGA         (   1'b0 ),
+       .DBGA         (   1'b0           ),
        .program0(program0),
        .program1(program1),
        .program2(program2),
