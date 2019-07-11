@@ -6,7 +6,19 @@
  * Utility to map a binary file over to localparam as needed when compiling
  * m_ice40.v. The original binary file is to have a load address = relocation
  * address starting at 0.
- */
+ *
+ * Possible enhancement:
+ * While this utility allows maximum utilization of EBR resources for iCE40
+ * LP640, LP1K, LP4K, HX1K, HX4K and iCE40UP3K, it is conceivable to initiate
+ * even more memory for LP8K, HX8K and iCE40UP5K. This is not done now.
+ * An example of what could be done:
+ * iCE40 LP8K and HX8K has 32 EBR blocks. A maximum size midgetv utilization
+ * could for instance use these as follows:
+ *  4 EBRs for microcode
+ * 16 EBRs for what in the rest of midgetv is called "EBR ram"
+ *  8 EBRs connected to what midgetv calls "SRAM" -- this can be initiated.
+ */ 
+
 #include <stdint.h>
 #include <unistd.h>
 #include <stdlib.h>
