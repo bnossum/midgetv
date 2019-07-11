@@ -62,10 +62,10 @@ All my work is done under Linux.
 ## Results
 Using iCECube2 for compilation give the following for the example "hello world" program:
 
-| Board           | SB_LUT4  | EBRs | SRAM | Clock (MHz) |
-| --------------- | -------- | ---- | ---- | ----------- |
-| iceblink40-hx1k | 258      |  5   |  0   | 75          |
-| upduino2        | 353      |  5   |  2   | 33          |
+Board           | SB_LUT4  | EBRs | SRAM | Clock (MHz)
+--------------- | -------- | ---- | ---- | -----------
+iceblink40-hx1k | 258      |  5   |  0   | 75         
+upduino2        | 353      |  5   |  2   | 33         
 
 Note that "Auto lut cascade" must be off in the placer option of
 iCEcube2. This is due to the Lattice preference files where
@@ -119,8 +119,7 @@ Note. This will be modified.
    the iceblink40-hx1k board
    
 
-## Future work
-- Cleanup on where produced files appears, then add produced files to a release
+## Todo
 - Cleanup on code, with some optimized code to reinsert
 - Verification on startup conditions must be tighter
 - Write and test exhaustive CSR code, just now only a minimum exists
