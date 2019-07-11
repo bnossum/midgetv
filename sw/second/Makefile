@@ -91,5 +91,5 @@ $(BINTARGETSSRAM): | $(OBJDIRSRAM)
 
 
 clean:
-	rm $(OBJDIREBR)/*bin $(OBJDIRSRAM)/*bin
-
+	rm $(OBJDIREBR)/*bin $(OBJDIRSRAM)/*bin \
+	$(OBJDIREBR)/*map $(OBJDIRSRAM)/*map
