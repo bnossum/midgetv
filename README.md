@@ -93,7 +93,7 @@ Real-world usage of midgetv will certainly be larger, and slower.
    simulate using simulators made in step 3.
 2. "cat ../../obj_dir/results.txt" to see how simulation went.
 
-### Basic verification of instructions as per riscv conformance testing.
+### Basic verification of instructions as per riscv conformance testing
 1. "make" in directory sw/second to compile a bunch of small test
    assembler programs (stubs around included compliance program code).
    Note that the compliance tests is a dependent project, but I do
