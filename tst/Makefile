@@ -36,7 +36,7 @@ $(OBJDIR)/V%.cpp:$(VERILOGDIR)/%.v
 $(OBJDIR)/V%__ALL.a:$(OBJDIR)/V%.cpp
 	cd $(OBJDIR); make -f V$(*F).mk; cd -; 
 
-$(BINDIR)/%.bin:%.cpp $(OBJDIR)/V%__ALL.a
+$(BINDIR)/%.bin:%.cpp $(OBJDIR)/V%__ALL.a common.cpp
 	g++ $(GCCFLAGS) $< $(OBJDIR)/V$(*F)__ALL.a /usr/share/verilator/include/verilated.cpp common.cpp -o $@
 
 clean:

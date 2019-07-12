@@ -91,99 +91,109 @@ const uint8_t instrty[NRINSTR+1] = {
 #include "instructiondecodebase.h"
         0xff
 };
+typedef enum {
+#define R(ty,funct7,rs2,rs1,funct3,rd,opcode,txt) e_ ## txt,
+#define r(ty,a,b,c,rs1,funct3,rd,opcode,txt)      e_ ## txt,
+#define I(ty,imm,rs1,func3,rd,opcode,txt)         e_ ## txt,
+#define S(ty,immh,rs2,rs1,funct3,imml,opcode,txt) e_ ## txt,
+#define B(ty,immh,rs2,rs1,funct3,imml,opcode,txt) e_ ## txt,
+#define U(ty,imm,rd,opcode,txt)                   e_ ## txt,
+#define J(ty,imm,rd,opcode,txt)                   e_ ## txt,
+#include "instructiondecodebase.h"
+} eINSTR;
 
 /////////////////////////////////////////////////////////////////////////////
 void pocketdissass( uint32_t pc, uint32_t I ) {
-        int bit30 = (I >> 30) & 1;
+        int bit30   = (I >> 30) & 1;
         int bit2928 = (I >> 28) & 3;
         int bit2220 = (I >> 20) & 7;
-        int f3    = (I >> 12) & 7;
-        int opcode   = I  & 127;
+        int f3      = (I >> 12) & 7;
+        int opcode  = I  & 127;
         int inx = -1;
 
         switch ( opcode ) {
-        case 0b0110111 : inx = 0; break;
-        case 0b0010111 : inx = 1; break;
-        case 0b1101111 : inx = 2; break;
-        case 0b1100111 : inx = 3; break;
+        case 0b0110111 : inx = e_lui;   break;
+        case 0b0010111 : inx = e_auipc; break;
+        case 0b1101111 : inx = e_jal;   break;
+        case 0b1100111 : inx = e_jalr;  break;
         case 0b1100011 : 
                 switch( f3 ) {
-                case 0b000 : inx = 4; break;
-                case 0b001 : inx = 5; break;
-                case 0b100 : inx = 6; break;
-                case 0b101 : inx = 7; break;
-                case 0b110 : inx = 8; break;
-                case 0b111 : inx = 9; break;
+                case 0b000 : inx = e_beq;  break;
+                case 0b001 : inx = e_bne;  break;
+                case 0b100 : inx = e_blt;  break;
+                case 0b101 : inx = e_bge;  break;
+                case 0b110 : inx = e_bltu; break;
+                case 0b111 : inx = e_bgeu; break;
                 }
                 break;
         case 0b0000011 : 
                 switch( f3 ) {
-                case 0b000 : inx = 10; break;
-                case 0b001 : inx = 11; break;
-                case 0b010 : inx = 12; break;
-                case 0b100 : inx = 13; break;       
-                case 0b101 : inx = 14; break;
+                case 0b000 : inx = e_lb;  break;
+                case 0b001 : inx = e_lh;  break;
+                case 0b010 : inx = e_lw;  break;
+                case 0b100 : inx = e_lbu; break;       
+                case 0b101 : inx = e_lhu; break;
                 }
                 break;
         case 0b0100011 : 
                 switch( f3 ) {
-                case 0b000 : inx = 15; break;
-                case 0b001 : inx = 16; break;
-                case 0b010 : inx = 17; break;
+                case 0b000 : inx = e_sb; break;
+                case 0b001 : inx = e_sh; break;
+                case 0b010 : inx = e_sw; break;
                 }
                 break;
         case 0b0010011 : 
                 switch( f3 ) {
-                case 0b000 : inx = 18; break;
-                case 0b001 : inx = 19; break;
-                case 0b010 : inx = 20; break;
-                case 0b011 : inx = 21; break;
-                case 0b100 : inx = 22; break;
-                case 0b101 : inx = 23 + bit30; break;
-                case 0b110 : inx = 25; break;
-                case 0b111 : inx = 26; break;
+                case 0b000 : inx = e_addi;  break;
+                case 0b001 : inx = e_slli;  break; // sloppy
+                case 0b010 : inx = e_slti;  break;
+                case 0b011 : inx = e_sltiu; break;
+                case 0b100 : inx = e_xori;  break;
+                case 0b101 : inx = bit30 ? e_srai : e_srli; break; // sloppy
+                case 0b110 : inx = e_ori;   break;
+                case 0b111 : inx = e_andi;  break;
                 }
                 break;
         case 0b0110011 : 
                 switch( f3 ) { 
-                case 0b000 : inx = 27 + bit30; break;
-                case 0b001 : inx = 29; break;
-                case 0b010 : inx = 30; break;
-                case 0b011 : inx = 31; break;
-                case 0b100 : inx = 32; break;
-                case 0b101 : inx = 33 + bit30; break;
-                case 0b110 : inx = 35; break;
-                case 0b111 : inx = 36; break;
+                case 0b000 : inx = bit30 ? e_sub : e_add; break; // sloppy
+                case 0b001 : inx = e_sll;  break; // sloppy
+                case 0b010 : inx = e_slt;  break; // sloppy
+                case 0b011 : inx = e_sltu; break; // sloppy
+                case 0b100 : inx = e_xor;  break; // sloppy
+                case 0b101 : inx = bit30 ? e_sra : e_srl; break; // sloppy
+                case 0b110 : inx = e_or;   break; // sloppy
+                case 0b111 : inx = e_and;  break; // sloppy
                 }     
                 break;        
         case 0b0001111 : 
                 switch( f3 ) {
-                case 0b000 : inx = 37; break;
-                case 0b001 : inx = 38; break;
+                case 0b000 : inx = e_fence;   break; 
+                case 0b001 : inx = e_fence_i; break; 
                 }
                 break;
         case 0b1110011 : 
                 switch( f3 ) {
                 case 0b000 :
                         switch ( bit2220 ) {
-                        case 0b000 : inx = 39; break;
-                        case 0b001 : inx = 40; break;
+                        case 0b000 : inx = e_ecall;  break; // sloppy
+                        case 0b001 : inx = e_ebreak; break; // sloppy
                         case 0b010 : 
                                 switch ( bit2928 ) {
-                                case 0b00 : inx = 41; break;
-                                case 0b01 : inx = 42; break;
-                                case 0b11 : inx = 43; break;
+                                case 0b00 : inx = e_uret; break; // sloppy
+                                case 0b01 : inx = e_sret; break; // sloppy
+                                case 0b11 : inx = e_mret; break; // sloppy
                                 }
                                 break;
-                        case 0b101 : inx = 44; break;                                
+                        case 0b101 : inx = e_wfi; break; // sloppy
                         }
                         break;
-                case 0b001 : inx = 45; break;
-                case 0b010 : inx = 46; break;
-                case 0b011 : inx = 47; break;
-                case 0b101 : inx = 48; break;
-                case 0b110 : inx = 49; break;
-                case 0b111 : inx = 50; break;
+                case 0b001 : inx = e_csrrw;  break;
+                case 0b010 : inx = e_csrrs;  break;
+                case 0b011 : inx = e_csrrc;  break;
+                case 0b101 : inx = e_csrrwi; break;
+                case 0b110 : inx = e_csrrsi; break;
+                case 0b111 : inx = e_csrrci; break;
                 }                        
                 break;
         }

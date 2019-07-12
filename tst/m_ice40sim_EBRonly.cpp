@@ -16,7 +16,7 @@
 #define _main
 #include "common.h"
 INFOCHUNK g_info = {
-        ~0u ^ (INFO_skip_first64 | INFO_get_inexplcable | INFO_Dsram | INFO_I_fields),
+        ~0u ^ (INFO_skip_first64 | INFO_get_inexplcable | INFO_Dsram ), // | INFO_I_fields
         DEFAULT_UCODETEXTLEN,
 };
 
