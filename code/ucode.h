@@ -656,8 +656,11 @@
 //                                                                                                                                                               
 #define _FENCE(x) x,       "f      Prepare read PC (FENCE)",                        isr_none     | A_xx      | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  
 //      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 isr_none     | A_add4    | Wpc   | Ralu      | Qu   | sr_h  | u_cont         | n(OpFetch )  etc
-//                                                                                                                                                               
-#define _ECAL_BRK ECAL_BRK,"ECALL/EBREAK  Select ECALL/(U/S/M)RET or EBREAK",       isr_none     | A_passq   | Wjj   | Rpc       | Qhld | sr_h  | hwordaligned   | n(ECAL_RET)
+//
+//!! Should have a tighter decode. ECALL =0x00000073, so Imm==0x000, rs1=0, rd=0
+//!! Should have a tighter decode. EBREAK=0x00100073, so Imm==0x001, rs1=0, rd=0
+//!! Should have a tighter decode. WFI   =0x10500073, so Imm==0x105, rs1=0, rd=0
+#define _ECAL_BRK ECAL_BRK,"ECALL/EBREAK  Select ECALL/(U/S/M)RET or EBREAK/WFI",   isr_none     | A_passq   | Wjj   | rFFFFFFFF | Qhld | sr_h  | hwordaligned   | n(ECAL_RET)
 #define _ECAL_RET ECAL_RET,"ECALL/(U/S/M)RET Select ECALL or (U/S/M)RET",           isr_none     | A_passq   | Wjj   | Rpc       | Qhld | sr_h  | wordaligned    | n(ECALL_1) /* Must be at even ucode adr */
 #define _ECALL_1  ECALL_1, "ECALL  mepc = pc, prep store 0 to mtval",               isr_none     | A_passd   | Wmepc | r_xx      | Qz   | sr_h  | u_cont         | n(ECALL_2) /* Must be at even ucode adr */
 #define _ECALL_2  ECALL_2, "       mtval = 0, now start the chore of 11 to mcause", isr_none     | A_passq   | Wmtval| r00000000 | Qz   | sr_h  | u_cont         | n(ECALL_3)   
@@ -666,12 +669,21 @@
 #define _ECALL_5  ECALL_5, "       mcause = 11",                                    isr_intoTrap | A_add3    | Wmcaus| rmtvec    | Qx   | sr_h  | u_cont         | n(JAL_3)
 //efine _JAL_3    JAL_3,   "       PC = trap entry point. OpFetch",                 
 //                                                                                                                                                               
-#define _EBREAK_1 EBREAK_1,"EBREAK mepc = pc, prep store 0 to mtval",               isr_none     | A_passd   | Wmepc | r_xx      | Qz   | sr_h  | u_cont         | n(EBREAK_2) /* Must follow _ECAL_RET */
+
+#define _EBRKWFI1 EBRKWFI1,"EBREAK/WFI1 Prepare select EBREAK or WFI",              isr_none     | A_addDQ   | Wnn   | r_xx      | Qu   | sr_h  | u_cont         | n(EBRKWFI2) /* Must follow _ECAL_RET */
+#define _EBRKWFI2 EBRKWFI2,"EBREAK/WFI2 Select EBREAK or WFI",                      isr_none     | A_xx      | Wnn   | Rpc       | Qz   | sr_h  | usebcond       | n(EBREAK_1)
+#define _EBREAK_1 EBREAK_1,"EBREAK mepc = pc, prep store 0 to mtval",               isr_none     | A_passd   | Wmepc | r_xx      | Qz   | sr_h  | u_cont         | n(EBREAK_2) /* Must be at odd ucode adr */
 #define _EBREAK_2 EBREAK_2,"       mtval = 0, ",                                    isr_none     | A_passq   | Wmtval| r00000000 | Qz   | sr_h  | u_cont         | n(EBREAK_3)  
 #define _EBREAK_3 EBREAK_3,"       mcause = 3",                                     isr_intoTrap | A_add3    | Wmcaus| rmtvec    | Qx   | sr_h  | u_cont         | n(JAL_3)
 //efine _JAL_3    JAL_3,   "       PC = trap entry point. OpFetch",                 
-//                                                                                                                                                               
-#define _xRET_1   xRET_1,  "(U/S/M)RET Prepare emulation entry point 0x104",        isr_none     | A_xx      | Wnn   | r000000FF | Qz   | sr_h  | u_cont         | n(xRET_2)  /* Must folliw _ECALL_1 */
+
+#define _WFI      WFI,     "       WFI, Prepare read PC",                           isr_none     | A_xx      | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc) /* This preceeds EBREAK_1  */
+
+
+
+
+//!! Should have a tighter decode. MRET=0x30200073, so Imm=0x302, rs1=0 rd=0
+#define _xRET_1   xRET_1,  "(U/S/M)RET Prepare emulation entry point 0x104",        isr_none     | A_xx      | Wnn   | r000000FF | Qz   | sr_h  | u_cont         | n(xRET_2)  /* Must follow _ECALL_1 */
 #define _xRET_2   xRET_2,  "       Prep +4",                                        isr_none     | A_add1    | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(StdIncPc)
 //      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 isr_none     | A_add4    | Wpc   | Ralu      | Qu   | sr_h  | u_cont         | n(OpFetch )  etc
 //                                                                                                                                                               
@@ -889,7 +901,7 @@
 /* 0e */Y( 1,     0 , _SUB_0             )
 /* 0f */Y( 1,     0 , _LUI_0(_L0f)       )
 /* 10 */Y( 0,     0 , _SUB_1             )
-/* 11 */Y( 0,     0 , _L11,"q:11", unx   )
+/* 11 */Y( 0,     0 , _AND_1             )
 /* 12 */Y( 0,     0 , _eFetch3           )
 /* 13 */Y( 0,     0 , _condb_2           )
 /* 14 */Y( 0,     0 , _condb_3           )
@@ -906,8 +918,8 @@
 /* 1f */Y( 0,     0 , _IJ_2              )
 /* 20 */Y( 1,     0 , _LH_0              )
 /* 21 */Y( 0,     0 , _XORI_1            )
-/* 22 */Y( 0,     0 , _AND_1             )
-/* 23 */Y( 1,     0 , _FENCE(FENCEI)     )
+/* 22 */Y( 0,     0 , _L22,"q:22", unx   )
+/* 23 */Y( 1,     0 , _FENCE(FENCEI)     ) 
 /* 24 */Y( 1,     0 , _SLLI_0            )
 /* 25 */Y( 1,     0 , _AUIPC_0(_L25)     )
 /* 26 */Y( 0,     0 , _OR_1              )
@@ -1039,7 +1051,7 @@
 /* a4 */Y( 1,     0 , _SRxI_0            )
 /* a5 */Y( 1,     0 , _AUIPC_0(_La5)     )
 /* a6 */Y( 0,  0x0c , _ECAL_RET          )
-/* a7 */Y( 0,  0x0c , _EBREAK_1          )
+/* a7 */Y( 0,  0x0c , _EBRKWFI1          )
 /* a8 */Y( 1,     0 , _ILL_0(_La8)       )
 /* a9 */Y( 0,     0 , _ECALL_5           )
 /* aa */Y( 1,     0 , _ILL_0(_Laa)       )
@@ -1107,7 +1119,7 @@
 /* e8 */Y( 1,     0 , _ILL_0(_Le8)       )
 /* e9 */Y( 0,     0 , _aF_SW_3           )
 /* ea */Y( 1,     0 , _ILL_0(_Lea)       )
-/* eb */Y( 0,     0 , _Leb,"q:eb", unx   )
+/* eb */Y( 0,     0 , _EBRKWFI2          )
 /* ec */Y( 1,     0 , _AND_0             )
 /* ed */Y( 1,     0 , _LUI_0(_Led)       )
 /* ee */Y( 1,     0 , _ILL_0(_Lee)       )
@@ -1115,11 +1127,11 @@
 /* f0 */Y( 0,  0x12 , _LBU_2             )
 /* f1 */Y( 0,  0x12 , _aFaulte           )
 /* f2 */Y( 0,  0x13 , _SW_2              )
-/* f3 */Y( 0,     0 , _aF_SW             ) 
+/* f3 */Y( 0,  0x13 , _aF_SW             ) 
 /* f4 */Y( 0,     0 , _Fetch2            )
 /* f5 */Y( 0,     0 , _jFault            )
-/* f6 */Y( 0,     0 , _Lf6,"q:f6", unx   )
-/* f7 */Y( 0,     0 , _Lf7,"q:f7", unx   )
+/* f6 */Y( 0,  0x14 , _WFI               )
+/* f7 */Y( 0,  0x14 , _EBREAK_1          ) 
 /* f8 */Y( 1,     0 , _BGEU              )
 /* f9 */Y( 1,     0 , _ILL_0(_Lf9)       )
 /* fa */Y( 0,     0 , _Lfa,"q:fa", unx   )
