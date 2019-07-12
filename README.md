@@ -56,7 +56,7 @@ All my work is done under Linux.
 ## Status 
 - Passes internal instruction testing program in simulation
 - Passes the RISC-V rv32i compliance tests in simulation
-- A compiled C-program ("hello world" in morse) is compiled to
+- A C-program ("hello world" in morse) is compiled to
   iCE40HX1K and programmed to the iceblink40-hx1k board
 - The same program is compiled to iCE40UP5K FPGAs and programmed to
   the upduino2 development board
@@ -64,9 +64,9 @@ All my work is done under Linux.
 ## Results
 NB. Real-world usage of midgetv will certainly be larger, and slower.
 
+### iCEcube2
 Using iCECube2 for compilation give the following for the example "hello world" program:
 
-### iCEcube2
 Board           | FPGA            | SB_LUT4  | EBRs | SRAM | Clock (MHz)
 --------------- | --------------- | -------- | ---- | ---- | -----------
 iceblink40-hx1k | ICE40HX1K-VQ100 | 258      |  5   |  0   | 75         
@@ -149,7 +149,6 @@ Note. This will be modified.
 - Test program for corner cases, instructions that 'nearly' are
   supported.  Among these are `wfi` encoded with fields `rs1` and or
   `rs2` != 0, and other similar cases.
-
 - Cleanup on code, with some optimized code to reinsert
 - Verification on startup conditions must be tighter
 - Write and test exhaustive CSR code, just now only a minimum exists

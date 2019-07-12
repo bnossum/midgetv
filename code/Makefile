@@ -31,6 +31,13 @@ all: $(TRG)
 # 	gcc -Wall -Wextra -Dnakedfname=../code/ucode_permutated.h -o $@ ../util/midgetv_genucode_permutated.c  
 #
 
+#
+# Not the most elegant - before making verilog localparams the utility must be
+# compiled. This rule is duplicated in the Makefile of the utilities.
+#
+../bin/midgetv_genucode:../util/midgetv_genucode.c ../code/ucode.h
+	gcc -Wall -Wextra -Dnakedfname=../code/ucode.h -o $@ $< 
+
 $(GEN_CODE_DIR)/ucodeinitval.hv: ../bin/midgetv_genucode 
 	../bin/midgetv_genucode > $@
 
