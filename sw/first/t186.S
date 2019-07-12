@@ -1,4 +1,4 @@
-        # Check bus error when accessing undefined register
+        # Check bus error when accessing undefined IO address
         # =============================================================================
 
 #include "midgetv.inc"
