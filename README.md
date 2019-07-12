@@ -62,7 +62,10 @@ All my work is done under Linux.
   the upduino2 development board
 
 ## Results
-NB. Real-world usage of midgetv will certainly be larger, and slower.
+
+NB. Real-world usage of midgetv will certainly be larger, and
+slower. While I still make modifications to the Verilog code, these
+numbers will slightly change, so treat them as indicative only.
 
 ### iCEcube2
 Using iCECube2 for compilation give the following for the example "hello world" program:

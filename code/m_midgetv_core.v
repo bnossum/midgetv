@@ -680,7 +680,7 @@ module m_midgetv_core
     */
    
    // Internal read and write addresses
-   m_rai #(.HIGHLEVEL(1'b1), 
+   m_rai #(.HIGHLEVEL(HIGHLEVEL), 
            .EBRADRWIDTH(EBRADRWIDTH))
    inst_rai
      (/*AUTOINST*/
