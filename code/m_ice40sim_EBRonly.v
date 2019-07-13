@@ -12,7 +12,8 @@ module m_ice40sim_EBRonly
       IWIDTH          = 32, 
       NO_CYCLECNT     = 0, 
       MTIMETAP        = 14, 
-      HIGHLEVEL       = 0
+      HIGHLEVEL       = 0,
+      LAZY_DECODE     = 0
       )
    (
     input CLK_I, // Toggled from verilator
@@ -56,6 +57,7 @@ module m_ice40sim_EBRonly
        .NO_CYCLECNT  (   NO_CYCLECNT    ),
        .MTIMETAP     (   MTIMETAP       ),
        .HIGHLEVEL    (   HIGHLEVEL      ),
+       .LAZY_DECODE  (   LAZY_DECODE    ),
        .program0(program0),       .program1(program1),       .program2(program2),       .program3(program3),
        .program4(program4),       .program5(program5),       .program6(program6),       .program7(program7),
        .program8(program8),       .program9(program9),       .programA(programA),       .programB(programB),

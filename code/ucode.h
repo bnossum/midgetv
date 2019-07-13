@@ -662,14 +662,14 @@
 
 
 //!! Should have a tighter decode. MRET=0x30200073, so rs1=0 rd=0. Imm=0x302. 
-#define _MRET_1   MRET_1,  "MRET   First save Imm, start build constant for check", isr_none     | A_passq   | Wjj   | r000000FF | Qz   | sr_h  | u_cont         | n(MRET_2)  /* Must follow _ECALL_1 */
+#define _MRET_1   MRET_1,  "MRET   First save Imm, start build constant for check", isr_none     | A_passq   | Wjj   | r000000FF | Qz   | sr_h  | u_cont         | n(MRET_2)   /* Must follow _ECALL_1 */
 #define _MRET_2   MRET_2,  "       0xff+3 = 0x102",                                 isr_none     | A_add3    | Wnn   | r000000FF | Qu   | sr_h  | u_cont         | n(MRET_3)
 #define _MRET_3   MRET_3,  "       0x102 + 0xff + 1 = 0x202",                       isr_none     | A_add1    | Wnn   | r000000FF | Qu   | sr_h  | u_cont         | n(MRET_4)
 #define _MRET_4   MRET_4,  "       0x202 + 0xff + 1 = 0x302",                       isr_none     | A_add1    | Wnn   | r_xx      | Qu   | sr_h  | u_cont         | n(MRET_5)
 #define _MRET_5   MRET_5,  "       ~302",                                           isr_none     | A_invq    | Wnn   | Rjj       | Qu   | sr_h  | u_cont         | n(MRET_6)
 #define _MRET_6   MRET_6,  "       ~302 + origImm + 1 for branch decision",         isr_none     | A_add1    | Wnn   | r_xx      | Qu   | sr_h  | u_cont         | n(MRET_7)
-#define _MRET_7   MRET_7,  "       Prepare emulation entry point 0x104",            isr_none     | A_xx      | Wnn   | r000000FF | Qz   | sr_h  | u_cont         | n(MRET_8)  /* Must be at odd ucode adr following a _ILL_0()*/
-#define _MRET_8   MRET_8,  "       Prep +4",                                        isr_none     | A_add1    | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(StdIncPc)
+#define _MRET_7   MRET_7,  "       Prepare emulation entry point 0x104",            isr_none     | A_xx      | Wnn   | r000000FF | Qz   | sr_h  | usebcond       | n(MRET_8)  
+#define _MRET_8   MRET_8,  "       Prep +4",                                        isr_none     | A_add1    | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(StdIncPc) /* Must be at odd ucode adr following a _ILL_0()*/
 //      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 isr_none     | A_add4    | Wpc   | Ralu      | Qu   | sr_h  | u_cont         | n(OpFetch )  etc
 
 //efine _xRET_1   xRET_1,  "(U/S/M)RET Prepare emulation entry point 0x104",        isr_none     | A_xx      | Wnn   | r000000FF | Qz   | sr_h  | u_cont         | n(xRET_2)  /* Must follow _ECALL_1 */

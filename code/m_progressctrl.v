@@ -43,7 +43,9 @@ module m_progressctrl
                                                                       
     output       enaQ, //           Sample output from ALU
     output       progress_ucode, // Continue execution of microcode
-   
+
+    output       next_STB_O, //     Output for debugging
+    output       next_sram_stb, //  Output for debugging
     output       m_progressctrl_killwarnings // Dummy
    );
    
@@ -131,8 +133,8 @@ module m_progressctrl
           * Non-maskable interrupt clears registers.
           */
          reg rSTB_O,rsram_stb;
-         wire next_STB_O    = (sa42 & ~B[31] & B[30] & ~badalignment) | (rSTB_O    & ~(ACK_I | sysregack) );
-         wire next_sram_stb = (sa42 &  B[31]         & ~badalignment) | (rsram_stb & ~sram_ack);
+         assign next_STB_O    = (sa42 & ~B[31] & B[30] & ~badalignment) | (rSTB_O    & ~(ACK_I | sysregack) );
+         assign next_sram_stb = (sa42 &  B[31]         & ~badalignment) | (rsram_stb & ~sram_ack);
          always @(posedge clk) 
            if ( RST_I | buserror ) begin
               rSTB_O <= 1'b0;
@@ -171,8 +173,8 @@ module m_progressctrl
          /* Uses 1 more LUT
           */
          wire clrregs;
-         wire h1,next_STB_O;
-         wire h2,next_sram_stb;
+         wire h1;
+         wire h2;
 //         assign h1 = sa42 & ~B[31] & B[30] & ~badalignment;
 //         assign clrregs = RST_I | buserror;
 //         assign next_STB_O = h1 | (STB_O & ~(ACK_I | sysregack));

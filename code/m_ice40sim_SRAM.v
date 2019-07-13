@@ -14,23 +14,25 @@ module m_ice40sim_SRAM
       IWIDTH          = 32, 
       NO_CYCLECNT     = 0, 
       MTIMETAP        = 14, 
-      HIGHLEVEL       = 0
+      HIGHLEVEL       = 0,
+      LAZY_DECODE     = 0
       )
    (
     input CLK_I, // Toggled from verilator
     input RST_I,
     input meip
     );
-
-
+   
+   
    m_ice40sim_EBRonly
      #(
-      .SRAMADRWIDTH   ( SRAMADRWIDTH   ),
-      .SIMEBRADRWIDTH ( SIMEBRADRWIDTH ),
-      .IWIDTH         ( IWIDTH         ),
-      .NO_CYCLECNT    ( NO_CYCLECNT    ),
-      .MTIMETAP       ( MTIMETAP       ),
-      .HIGHLEVEL      ( HIGHLEVEL      )
+       .SRAMADRWIDTH   ( SRAMADRWIDTH   ),
+       .SIMEBRADRWIDTH ( SIMEBRADRWIDTH ),
+       .IWIDTH         ( IWIDTH         ),
+       .NO_CYCLECNT    ( NO_CYCLECNT    ),
+       .MTIMETAP       ( MTIMETAP       ),
+       .HIGHLEVEL      ( HIGHLEVEL      ),
+       .LAZY_DECODE    ( LAZY_DECODE    )
        )
    inst_ice40sim_EBRonly
      (/*AUTOINST*/

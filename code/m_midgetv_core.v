@@ -224,9 +224,9 @@
 
 module m_midgetv_core
   # ( parameter 
-      SRAMADRWIDTH = 0,  EBRADRWIDTH =  8, IWIDTH =  8, NO_CYCLECNT = 1, MTIMETAP =  0, HIGHLEVEL = 0, // Minimal
-//    SRAMADRWIDTH = 16, EBRADRWIDTH =  8, IWIDTH = 32, NO_CYCLECNT = 0, MTIMETAP = 14, HIGHLEVEL = 0, // Conventional
-//    SRAMADRWIDTH = 17, EBRADRWIDTH = 11, IWIDTH = 32, NO_CYCLECNT = 0, MTIMETAP = 14, HIGHLEVEL = 0, // Maximal
+      SRAMADRWIDTH = 0,  EBRADRWIDTH =  8, IWIDTH =  8, NO_CYCLECNT = 1, MTIMETAP =  0, HIGHLEVEL = 0, LAZY_DECODE = 1, // Minimal
+//    SRAMADRWIDTH = 16, EBRADRWIDTH =  8, IWIDTH = 32, NO_CYCLECNT = 0, MTIMETAP = 14, HIGHLEVEL = 0, LAZY_DECODE = 0, // Conventional
+//    SRAMADRWIDTH = 17, EBRADRWIDTH = 11, IWIDTH = 32, NO_CYCLECNT = 0, MTIMETAP = 14, HIGHLEVEL = 0, LAZY_DECODE = 0, // Maximal
       DBGA = 0,
       parameter [4095:0] program0 = 4096'h0,
       parameter [4095:0] program1 = 4096'h0,
@@ -328,7 +328,9 @@ module m_midgetv_core
    wire                 mtimeincie;             // From inst_status_and_interrupts of m_status_and_interrupts.v
    wire                 mtimeincip;             // From inst_status_and_interrupts of m_status_and_interrupts.v
    wire                 mtip;                   // From inst_status_and_interrupts of m_status_and_interrupts.v
+   wire                 next_STB_O;             // From inst_progressctrl of m_progressctrl.v
    wire                 next_readvalue_unknown; // From inst_ebr of m_ebr.v
+   wire                 next_sram_stb;          // From inst_progressctrl of m_progressctrl.v
    wire                 progress_ucode;         // From inst_progressctrl of m_progressctrl.v
    wire                 qualint;                // From inst_status_and_interrupts of m_status_and_interrupts.v
    wire [31:0]          rDee;                   // From inst_inputmux of m_inputmux.v
@@ -414,7 +416,7 @@ module m_midgetv_core
    wire                 sram_operand_fetch = sa32 & ~sa15;
    function [0:0] get_accesserror;
       // verilator public      
-      get_accesserror = next_readvalue_unknown & ~sram_operand_fetch;
+      get_accesserror = next_readvalue_unknown & ~sram_operand_fetch & ~next_STB_O & ~next_sram_stb;
    endfunction
    function [31:0] get_ADR_O;
       // verilator public
@@ -779,6 +781,8 @@ module m_midgetv_core
       .sram_stb                         (sram_stb),
       .enaQ                             (enaQ),
       .progress_ucode                   (progress_ucode),
+      .next_STB_O                       (next_STB_O),
+      .next_sram_stb                    (next_sram_stb),
       .m_progressctrl_killwarnings      (m_progressctrl_killwarnings),
       // Inputs
       .clk                              (clk),
@@ -850,7 +854,7 @@ module m_midgetv_core
         .minx                           (minx[7:0]),
         .progress_ucode                 (progress_ucode));
    
-   m_ucodepc #(.HIGHLEVEL(1), .LAZY_DECODE(1))
+   m_ucodepc #(.HIGHLEVEL(1), .LAZY_DECODE(LAZY_DECODE))
      inst_ucodepc
        (/*AUTOINST*/
         // Outputs

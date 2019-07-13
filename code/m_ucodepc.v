@@ -100,9 +100,9 @@ module m_ucodepc
          assign dinx[7]   = INSTR[14] & (INSTR[4:2] != 3'b101);
 /* This frees 8 instances of lui and 4 instances of auipc for the cost of 1 LUT */
 
-         wire       illegal_funct7;
+         wire       illegal_funct7_or_illegal_rs1_rd;
          if ( LAZY_DECODE ) begin
-            assign illegal_funct7 = 1'b0;
+            assign illegal_funct7_or_illegal_rs1_rd = 1'b0;
          end else begin
             /* 
  
@@ -137,8 +137,6 @@ module m_ucodepc
                        (opcode[6:2] == 5'b00100 && funct3 == 3'b101) ||
                        (opcode[6:2] == 5'b01100 && (funct3 == 3'b101 || funct3 == 3'b000));
             wire       mostof_funct7_ne0 = {funct7[6],funct7[4:0]} != 6'h0;
-            assign illegal_funct7 = (checkfunct7 & mostof_funct7_ne0) |
-                                    (checkfunct7 & ~funct7_5_dontcare & funct7[5]);
 
 /* 
  Issue 3:
@@ -155,17 +153,26 @@ module m_ucodepc
  in ucode.h.
  
  Also, decode of instruction mret is to relaxed. Here also fields rs1
- and rd are not checked. The whole of imm12 is (optionally) checked in
- software
+ and rd are not checked. The whole of imm12 is checked.
+
   |__imm12______|
   funct7   rs2    rs1    funct3 rd      opcode
   0000000, 00000, 00000, 000,   00000,  1110011, ecall
   0000000, 00001, 00000, 000,   00000,  1110011, ebreak
   0001000, 00101, 00000, 000,   00000,  1110011, wfi 
   0011000, 00010, 00000, 000,   00000,  1110011, mret
+                          00            11100xx
          
  */
+            wire       check_rs1_rd = (opcode[6:2] == 5'b11100) && (funct3[1:0] == 2'b00);
+            wire       rs1_ne_zero = INSTR[19:15] != 5'h0;
+            wire       rd_ne_zero  = INSTR[11:7] != 5'h0;
+            wire       illegal_rs1_rd = check_rs1_rd & (rs1_ne_zero | rd_ne_zero);
 
+            assign illegal_funct7_or_illegal_rs1_rd
+              = (checkfunct7 & mostof_funct7_ne0) |
+                (checkfunct7 & ~funct7_5_dontcare & funct7[5]) |
+                illegal_rs1_rd;
 
          end 
          /* The Main illegal signal
@@ -200,7 +207,7 @@ module m_ucodepc
                           (INSTR[6] & illegal_b ) | 
                           ~INSTR[1] |
                           ~INSTR[0] |
-                          illegal_funct7;
+                          illegal_funct7_or_illegal_rs1_rd;
          
          
          /* takebranch. Microcode must diverge when we have an alignment error,
