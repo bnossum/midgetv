@@ -208,16 +208,34 @@ void pocketdissass( uint32_t pc, uint32_t I ) {
                 switch( f3 ) {
                 case 0b000 :
                         switch ( bit2220 ) {
-                        case 0b000 : inx = e_ecall;  break; // sloppy
-                        case 0b001 : inx = e_ebreak; break; // sloppy
+                        case 0b000 :
+                                inx = e_ecall;
+                                sloppy = I != 0x00000073;
+                                break; 
+                        case 0b001 :
+                                inx = e_ebreak;
+                                sloppy = I != 0x00100073;
+                                break; 
                         case 0b010 : 
                                 switch ( bit2928 ) {
-                                case 0b00 : inx = e_uret; break; // sloppy
-                                case 0b01 : inx = e_sret; break; // sloppy
-                                case 0b11 : inx = e_mret; break; // sloppy
+                                case 0b00 :
+                                        inx = e_uret;
+                                        sloppy = I != 0x00200073;
+                                        break; 
+                                case 0b01 :
+                                        inx = e_sret;
+                                        sloppy = I != 0x10200073;
+                                        break; 
+                                case 0b11 :
+                                        inx = e_mret;
+                                        sloppy = I != 0x30200073;
+                                        break; 
                                 }
                                 break;
-                        case 0b101 : inx = e_wfi; break; // sloppy
+                        case 0b101 :
+                                inx = e_wfi;
+                                sloppy = I != 0x10500073;
+                                break; 
                         }
                         break;
                 case 0b001 : inx = e_csrrw;  break;
