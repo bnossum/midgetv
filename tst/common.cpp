@@ -106,11 +106,13 @@ typedef enum {
 void pocketdissass( uint32_t pc, uint32_t I ) {
         int bit30   = (I >> 30) & 1;
         int bit2928 = (I >> 28) & 3;
+        int f7      = (I >> 25) & 127;
         int bit2220 = (I >> 20) & 7;
         int f3      = (I >> 12) & 7;
-        int opcode  = I  & 127;
+        int opcode  = (I >>  0) & 127;
         int inx = -1;
-
+        int sloppy = 0;
+        
         switch ( opcode ) {
         case 0b0110111 : inx = e_lui;   break;
         case 0b0010111 : inx = e_auipc; break;
@@ -145,25 +147,55 @@ void pocketdissass( uint32_t pc, uint32_t I ) {
         case 0b0010011 : 
                 switch( f3 ) {
                 case 0b000 : inx = e_addi;  break;
-                case 0b001 : inx = e_slli;  break; // sloppy
+                case 0b001 :
+                        inx = e_slli;
+                        sloppy = ( f7 != 0 );
+                        break; 
                 case 0b010 : inx = e_slti;  break;
                 case 0b011 : inx = e_sltiu; break;
                 case 0b100 : inx = e_xori;  break;
-                case 0b101 : inx = bit30 ? e_srai : e_srli; break; // sloppy
+                case 0b101 :
+                        inx = bit30 ? e_srai : e_srli;
+                        sloppy = ( f7 != 0 && f7 != 64 );
+                        break; 
                 case 0b110 : inx = e_ori;   break;
                 case 0b111 : inx = e_andi;  break;
                 }
                 break;
         case 0b0110011 : 
                 switch( f3 ) { 
-                case 0b000 : inx = bit30 ? e_sub : e_add; break; // sloppy
-                case 0b001 : inx = e_sll;  break; // sloppy
-                case 0b010 : inx = e_slt;  break; // sloppy
-                case 0b011 : inx = e_sltu; break; // sloppy
-                case 0b100 : inx = e_xor;  break; // sloppy
-                case 0b101 : inx = bit30 ? e_sra : e_srl; break; // sloppy
-                case 0b110 : inx = e_or;   break; // sloppy
-                case 0b111 : inx = e_and;  break; // sloppy
+                case 0b000 :
+                        inx = bit30 ? e_sub : e_add;
+                        sloppy = ( f7 != 0 && f7 != 64 );
+                        break; 
+                case 0b001 :
+                        inx = e_sll;
+                        sloppy = ( f7 != 0 );
+                        break; 
+                case 0b010 :
+                        inx = e_slt;
+                        sloppy = ( f7 != 0 );
+                        break; 
+                case 0b011 :
+                        inx = e_sltu;
+                        sloppy = ( f7 != 0 );
+                        break; 
+                case 0b100 :
+                        inx = e_xor;
+                        sloppy = ( f7 != 0 );
+                        break; 
+                case 0b101 :
+                        inx = bit30 ? e_sra : e_srl;
+                        sloppy = ( f7 != 0 && f7 != 64 );
+                        break; 
+                case 0b110 :
+                        inx = e_or;
+                        sloppy = ( f7 != 0 );
+                        break; 
+                case 0b111 :
+                        inx = e_and;
+                        sloppy = ( f7 != 0 );
+                        break; 
                 }     
                 break;        
         case 0b0001111 : 
@@ -206,7 +238,6 @@ void pocketdissass( uint32_t pc, uint32_t I ) {
 #define rs1(x) ((x >> 15) & 31)
 #define rs2(x) ((x >> 20) & 31)
 #define signext(n,x) (((x & ((1<<n)-1)) ^ (1<<(n-1))) - (1<<(n-1)))
-//#define immL31_12J(x) signext(20,(x>>12))        
 #define immL31_12J(x) ((x>>12)&0xfffff)
 #define immL11_0J(x)  signext(12,(x>>20))
 #define immL11_5_4_0J(x) signext(12,( ((x>>25)<<5) | ((x>>7) & 31) ))
@@ -214,7 +245,16 @@ void pocketdissass( uint32_t pc, uint32_t I ) {
 #define _immJ(x) (((x>>31)<<20) | (((x>>12)&255)<<12) | (((x>>21)&1023)<<1))
 #define immB(x) signext(13,_immB(x))
 #define immJ(x) signext(21,_immJ(x))        
-        printf( "%-8s ", instrtxt[inx] );
+        if ( sloppy ) {
+                int n = printf( "\"%s", instrtxt[inx] );
+                n += printf( "\"");
+                while ( n < 9 ) {
+                        printf( " " );
+                        n++;
+                }
+        } else {
+                printf( "%-8s ", instrtxt[inx] );
+        }
         //printf( "[%c]", instrty[inx] );
         switch( instrty[inx] ) {
         case 'U' : printf( "x%d,0x%x", rd(I), immL31_12J(I)); break;

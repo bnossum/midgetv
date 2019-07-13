@@ -35,20 +35,20 @@
  * When power-on, dinx is used, so a "lb x0,0(x0)" is executed.
  */
 module m_ucodepc
-  # ( parameter HIGHLEVEL = 1 )
+  # ( parameter HIGHLEVEL = 1, LAZY_DECODE = 0 )
   (
    input        corerunning, //         Control startup
    input [7:0]  rinx, //                From ucode
    input        sa28,sa29,sa30,sa37, // From ucode
-   input        sa32,sa15, // == 2'b10 triggers ucode jmp to alternate operand fetch from SRAM
-   input        qualint,
-   input        is_brcond,
-   input [31:0] ADR_O, //                 
-   input [31:0] INSTR,
-   input [31:0] B,
-   input        RST_I, // NMI
-   input        buserror,
-   output [7:0] minx,
+   input        sa32,sa15, //           == 2'b10 triggers ucode jmp to alternate operand fetch from SRAM
+   input        qualint, //             Qualified interrupt
+   input        is_brcond, //           Branch condition
+   input [31:0] ADR_O, //               ADR_O[31] used at OpCode fetch to distinguish between EBR and SRAM
+   input [31:0] INSTR, //               Instruction to decode at OpCode fetch
+   input [31:0] B, //                   B[1:0] to find alignment errors. B[31] to distinguish EBR/SRAM
+   input        RST_I, //               NMI
+   input        buserror, //            Accessing empty region
+   output [7:0] minx, //                Microcode PC
    output       ucodepc_killwarnings
    );
    wire [7:0]   dinx;
@@ -83,19 +83,119 @@ module m_ucodepc
          assign maybranch = Adr0Mustbe0 | Adr1Mustbe0 | use_brcond | (sa32 & ~sa15);
          
          
-         // Slight mangling of INSTRUCTION to an index. Should require 1 LUT
+         // Slight mangling of INSTRUCTION to an index. 
          assign dinx[0]   = INSTR[2];
          assign dinx[1]   = ((~INSTR[6]&INSTR[5])&INSTR[30]) | ((~(~INSTR[6]&INSTR[5]))&INSTR[3]);
          assign dinx[4:2] = INSTR[6:4];
          assign dinx[7:5] = INSTR[14:12];
+
+/* 
+ Issue 3:
+ Instructions slli, srli, add, sll, slt, sltu, xor, srl, or, and and
+ should only be valid when funct7 == 7'b00000000. Presently funct7 is
+ mostly ignored in decode of these instructions.
+
+ Likewise, srai, sub, and sra should only be valid when funct7 ==
+ 7'b0100000. funct7 is mostly ignored also here.
+
+ ecall should only be decoded when field rs1 and rd are 5'b00000, and
+ imm12 == 12'h0. This is presently not the case. Only imm12[1:0] is
+ used in the decode.
+
+ Likewise, ebreak should only be decoded when field rs1 and rd are
+ 5'b00000, and imm12 == 12'h1. While the whole of imm12 is used in
+ this decode, fields rs1 and rd are presently ignored.
+ 
+ Also, decode of instruction wfi is to relaxed. Here also fields rs1
+ and rd are not checked. The requirement on imm12 should be that imm12
+ == 12'h105. We accept imm12 != 12'h001 && imm12[0].  Also, decode of
+ instruction mret is to relaxed, same reasons as above.  
+ 
+ 
+  0000000,       00000, 00000, 000,   00000,       1110011, ecall
+  0001000,       00101, 00000, 000,   00000,       1110011, wfi 
+  0011000,       00010, 00000, 000,   00000,       1110011, mret
          
-         
-         /* The illegal signal should be realizable in 3 luts?
+ */
+ 
+/* 
+ 
+ Instructions and, or, slli, srli, add, sll, slt, sltu, xor and srl
+ should only be valid when funct7 == 7'b00000000. 
+ Likewise, srai, sub, and sra should only be valid when funct7 ==
+ 7'b0100000. 
+ 
+  funct7         rs2    rs1    funct3 rd           opcode   Instruction
+  0000000,       shamt, rs1,   001,   rd,          0010011  slli     
+  0x00000,       shamt, rs1,   101,   rd,          0010011  srli/srai 
+                                                           
+  0x00000,       rs2,   rs1,   000,   rd,          0110011  add/sub  
+  0000000,       rs2,   rs1,   001,   rd,          0110011  sll      
+  0000000,       rs2,   rs1,   010,   rd,          0110011  slt      
+  0000000,       rs2,   rs1,   011,   rd,          0110011  sltu     
+  0000000,       rs2,   rs1,   100,   rd,          0110011  xor      
+  0x00000,       rs2,   rs1,   101,   rd,          0110011  srl/sra  
+  0000000,       rs2,   rs1,   110,   rd,          0110011  or       
+  0000000,       rs2,   rs1,   111,   rd,          0110011  and      
+
+ In the decode, if opcode[1:0] is != 00, we trigger an illegal instruction anyway.
+ The rs2, rs1 and rd fields are don't care.
+
+  funct7   funct3  opcode   Instruction
+  0000000  001,    00100xx  slli     
+  0x00000  101,    00100xx  srli/srai 
+                           
+  0x00000  000,    01100xx  add/sub  
+  0000000  001,    01100xx  sll      
+  0000000  01x,    01100xx  slt/sltu      
+  0000000  100,    01100xx  xor      
+  0x00000  101,    01100xx  srl/sra  
+  0000000  11x,    01100xx  or/and       
+
+
+  Check funct7 for the following:
+  funct3  opcode
+  x01,    00100xx  slli/srli/srai 
+  xxx,    01100xx  add/sub/sll/slt/sltu/xor/srl/sra /or/and 
+ 
+  For 3 cases funct7[5] is don't care:
+  funct7         rs2    rs1    funct3 rd           opcode   Instruction
+  0x00000,       shamt, rs1,   101,   rd,          0010011  srli/srai 
+  0x00000,       rs2,   rs1,   000,   rd,          0110011  add/sub  
+  0x00000,       rs2,   rs1,   101,   rd,          0110011  srl/sra  
+
+ In the decode, if opcode[1:0] is != 00, we trigger an illegal instruction anyway.
+ The rs2, rs1 and rd fields are don't care.
+  funct3 opcode   Instruction
+  101,   00100xx  srli/srai 
+  000,   01100xx  add/sub  
+  101,   01100xx  srl/sra  
+ */
+         wire       illegal_funct7;
+         if ( LAZY_DECODE ) begin
+            assign illegal_funct7 = 1'b0;
+         end else begin
+            wire [6:0] funct7 = INSTR[31:25];
+            wire [2:0] funct3 = INSTR[14:12];
+            /* verilator lint_off UNUSED */
+            wire [6:0] opcode = INSTR[6:0];
+            /* verilator lint_on UNUSED */
+            wire       checkfunct7 = 
+                       (opcode[6:2] == 5'b01100) ||
+                       (opcode[6:2] == 5'b00100 && funct3[1:0] == 2'b01 );
+            wire       funct7_5_dontcare =
+                       (opcode[6:2] == 5'b00100 && funct3 == 3'b101) ||
+                       (opcode[6:2] == 5'b01100 && (funct3 == 3'b101 || funct3 == 3'b000));
+            wire       mostof_funct7_ne0 = {funct7[6],funct7[4:0]} != 6'h0;
+            assign illegal_funct7 = (checkfunct7 & mostof_funct7_ne0) |
+                                    (checkfunct7 & ~funct7_5_dontcare & funct7[5]);
+         end 
+         /* The Main illegal signal
           *
-          * illegal_a = (16'b1100111011000110 >> INSTR[5:2]); previous
           * illegal_a = (16'b1100111011000010 >> INSTR[5:2]); opens up for prefix 0001011, custom-0
           * illegal_b = (16'b1110010011111111 >> INSTR[5:2]);
-          * illegal = (~INSTR[6] & illegal_a) | (INSTR[6] & illegal_b ) | ~INSTR[1] | ~INSTR[0];
+          * illegal = (~INSTR[6] & illegal_a) | (INSTR[6] & illegal_b ) | ~INSTR[1] | ~INSTR[0] |
+          *           illegal_funct7;
           */
          
          reg          illegal_a, illegal_b;
@@ -118,7 +218,11 @@ module m_ucodepc
              4'b1110 : {illegal_b,illegal_a} = 2'b11;
              4'b1111 : {illegal_b,illegal_a} = 2'b11;
            endcase
-         assign illegal = (~INSTR[6] & illegal_a) | (INSTR[6] & illegal_b ) | ~INSTR[1] | ~INSTR[0];
+         assign illegal = (~INSTR[6] & illegal_a) | 
+                          (INSTR[6] & illegal_b ) | 
+                          ~INSTR[1] |
+                          ~INSTR[0] |
+                          illegal_funct7;
          
          
          /* takebranch. Microcode must diverge when we have an alignment error,
