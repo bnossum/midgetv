@@ -24,7 +24,24 @@
 #ifndef onlyEBR
         .section .text
 #endif
+        # =============================================================================
+        # x31 is used as an index
 StartTrap:
+        // Check that mcause == 2
+        lw      x1,%lo(__mcause)(x0)
+        li      x2,2
+        bne     x1,x2,2f
+        
+        // Check that mtval contains the expected illegal instruction
+        la      x1,TheIllegals
+        sll     x2,x31,2
+        add     x1,x1,x2
+        lw      x1,0(x1)
+        lw      x2,%lo(__mtval)(x0)
+        bne     x1,x2,3f
+
+        //
+        
         addi    x31,x31,1
 
         // Modify return address
@@ -33,11 +50,16 @@ StartTrap:
         sw      x1,%lo(__mepc)(x0)
         mret
 
+2:      simerr  2
+3:      simerr  3
+        
         # =============================================================================
 _start:
         la      x1,StartTrap
         sw      x1,%lo(__mtvec)(x0)
-
+TheIllegals:    
+        .word 0x00000073 | 0x40000000 // ecall
+        .word 0x10500073 | 0x20000000 // wfi
 	.word 0x00311093 | 0x80000000 // slli   x1,x2,0x3
 	.word 0x00315093 | 0x20000000 // srli   x1,x2,0x3
 	.word 0x003100b3 | 0x10000000 // add	x1,x2,x3
@@ -52,9 +74,10 @@ _start:
 	.word 0x403100b3 | 0x02000000 // sub	x1,x2,x3
 	.word 0x403150b3 | 0x80000000 // sra	x1,x2,x3
 
-        beqz    x31,Good        // Presumably compiled with LAZY_DECODE == 1
-        li      x1,13           
-        bne     x1,x31,1f
+        li      x1,2
+        beq     x1,x31,Good     // Presumably compiled with LAZY_DECODE == 1, where only ecall and wfi is checked
+        li      x1,15           // Else each of the instructions above should be
+        bne     x1,x31,1f       // an illegal instruction
 Good:   
         simend
         
