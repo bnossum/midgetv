@@ -87,16 +87,17 @@ module m_ucodepc
          assign dinx[0]   = INSTR[2];
          assign dinx[1]   = ((~INSTR[6]&INSTR[5])&INSTR[30]) | ((~(~INSTR[6]&INSTR[5]))&INSTR[3]);
          assign dinx[4:2] = INSTR[6:4];
-         assign dinx[7:5] = INSTR[14:12];
-
+//       assign dinx[7:5] = INSTR[14:12]; Need some more space.
+         assign dinx[6:5] = INSTR[13:12];
+// Candidates to compress:
+// 6543210
+//   xxx
+// 0110111 lui
+// 0010111 auipc
+// 1101111jal
+         assign dinx[7]   = INSTR[14] & (INSTR[4:2] != 3'b101);
 /* 
  Issue 3:
- Instructions slli, srli, add, sll, slt, sltu, xor, srl, or, and and
- should only be valid when funct7 == 7'b00000000. Presently funct7 is
- mostly ignored in decode of these instructions.
-
- Likewise, srai, sub, and sra should only be valid when funct7 ==
- 7'b0100000. funct7 is mostly ignored also here.
 
  ecall should only be decoded when field rs1 and rd are 5'b00000, and
  imm12 == 12'h0. This is presently not the case. Only imm12[1:0] is
@@ -117,64 +118,31 @@ module m_ucodepc
   0011000,       00010, 00000, 000,   00000,       1110011, mret
          
  */
- 
-/* 
- 
- Instructions and, or, slli, srli, add, sll, slt, sltu, xor and srl
- should only be valid when funct7 == 7'b00000000. 
- Likewise, srai, sub, and sra should only be valid when funct7 ==
- 7'b0100000. 
- 
-  funct7         rs2    rs1    funct3 rd           opcode   Instruction
-  0000000,       shamt, rs1,   001,   rd,          0010011  slli     
-  0x00000,       shamt, rs1,   101,   rd,          0010011  srli/srai 
-                                                           
-  0x00000,       rs2,   rs1,   000,   rd,          0110011  add/sub  
-  0000000,       rs2,   rs1,   001,   rd,          0110011  sll      
-  0000000,       rs2,   rs1,   010,   rd,          0110011  slt      
-  0000000,       rs2,   rs1,   011,   rd,          0110011  sltu     
-  0000000,       rs2,   rs1,   100,   rd,          0110011  xor      
-  0x00000,       rs2,   rs1,   101,   rd,          0110011  srl/sra  
-  0000000,       rs2,   rs1,   110,   rd,          0110011  or       
-  0000000,       rs2,   rs1,   111,   rd,          0110011  and      
-
- In the decode, if opcode[1:0] is != 00, we trigger an illegal instruction anyway.
- The rs2, rs1 and rd fields are don't care.
-
-  funct7   funct3  opcode   Instruction
-  0000000  001,    00100xx  slli     
-  0x00000  101,    00100xx  srli/srai 
-                           
-  0x00000  000,    01100xx  add/sub  
-  0000000  001,    01100xx  sll      
-  0000000  01x,    01100xx  slt/sltu      
-  0000000  100,    01100xx  xor      
-  0x00000  101,    01100xx  srl/sra  
-  0000000  11x,    01100xx  or/and       
-
-
-  Check funct7 for the following:
-  funct3  opcode
-  x01,    00100xx  slli/srli/srai 
-  xxx,    01100xx  add/sub/sll/slt/sltu/xor/srl/sra /or/and 
- 
-  For 3 cases funct7[5] is don't care:
-  funct7         rs2    rs1    funct3 rd           opcode   Instruction
-  0x00000,       shamt, rs1,   101,   rd,          0010011  srli/srai 
-  0x00000,       rs2,   rs1,   000,   rd,          0110011  add/sub  
-  0x00000,       rs2,   rs1,   101,   rd,          0110011  srl/sra  
-
- In the decode, if opcode[1:0] is != 00, we trigger an illegal instruction anyway.
- The rs2, rs1 and rd fields are don't care.
-  funct3 opcode   Instruction
-  101,   00100xx  srli/srai 
-  000,   01100xx  add/sub  
-  101,   01100xx  srl/sra  
- */
          wire       illegal_funct7;
          if ( LAZY_DECODE ) begin
             assign illegal_funct7 = 1'b0;
          end else begin
+            /* 
+ 
+             Instructions and, or, slli, srli, add, sll, slt, sltu, xor and srl
+             should only be valid when funct7 == 7'b00000000. 
+             Likewise, srai, sub, and sra should only be valid when funct7 ==
+             7'b0100000. 
+                                                               checkfunct7
+                                                               | funct7_5_dontcare
+             funct7  rs2   rs1 funct3 rd opcode   Instruction  | |
+             0000000 shamt rs1 001,   rd 00100xx  slli         1 0
+             0x00000 shamt rs1 101,   rd 00100xx  srli/srai    1 1                                     
+             0x00000 rs2   rs1 000,   rd 01100xx  add/sub      1 1
+             0000000 rs2   rs1 001,   rd 01100xx  sll          1 0
+             0000000 rs2   rs1 010,   rd 01100xx  slt          1 0
+             0000000 rs2   rs1 011,   rd 01100xx  sltu         1 0
+             0000000 rs2   rs1 100,   rd 01100xx  xor          1 0
+             0x00000 rs2   rs1 101,   rd 01100xx  srl/sra      1 1
+             0000000 rs2   rs1 110,   rd 01100xx  or           1 0
+             0000000 rs2   rs1 111,   rd 01100xx  and          1 0
+             */
+
             wire [6:0] funct7 = INSTR[31:25];
             wire [2:0] funct3 = INSTR[14:12];
             /* verilator lint_off UNUSED */
