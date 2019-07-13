@@ -373,31 +373,6 @@
 #endif                                                                                                                                                               
 
 
-
-
-
-// Yes, this works..   #if HAS_EBR_MINSTRET
-// Yes, this works..   //                                                                                  ISR          | ALU         Write   intern      Reg    Shreg   Ucode            Next
-// Yes, this works..   //                                                                                  action       | op          adr/en  read adr    op     op      operation        ucode
-// Yes, this works..   #define _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 nxtSTB       | A_add4    | Wpc   | Ralu      | Qu   | sr_h  | u_cont         | n(Fetch)     // [1] Must be at even ucode adr. Goes to either Fetch or eFetch. 
-// Yes, this works..   #define _Fetch    Fetch ,  "NewOp  Read and latch instruction",                     isr_none     | A_passd   | Wnn   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR
-// Yes, this works..   #define _eFetch   eFetch,  "   eF  rep Read until d=mem[(rs1+ofs) & ~3u]",          isr_none     | A_passd   | Wnn   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [4] Must be at address after [3]
-// Yes, this works..   #define _Fetch2   Fetch2,  "    F2 Update ttime",                                   isr_none     | A_cycnt   | Wttime| Rrinst    | Qz   | sr_h  | u_cont         | n(Fetch3  )  // [5] Must be at even ucode adr. 
-// Yes, this works..   #define _Fetch3   Fetch3,  "    F3 Write minstret. Update I. Q=immediate, use dinx",isr_none     | A_add1    | Wrinst| RS1       | Qudec| sr_h  | use_dinx
-// Yes, this works..   #define _eFetch2  eFetch2, "nu", unx
-// Yes, this works..   #define _eFetch3  eFetch3, "nu", unx
-// Yes, this works..   #else
-// Yes, this works..   #define _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 nxtSTB       | A_add4    | Wpc   | Ralu      | Qu   | sr_h  | u_cont         | n(Fetch)     // [1] Must be at even ucode adr. Goes to either Fetch or eFetch. 
-// Yes, this works..   #define _Fetch    Fetch ,  "NewOp  Read and latch instruction",                     isr_none     | A_passd   | Wnn   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR
-// Yes, this works..   #define _Fetch2   Fetch2,  "    F2 Update ttime. Update I. Q=immediate. Use dinx",  isr_none     | A_cycnt   | Wttime| RS1       | Qudec| sr_h  | use_dinx                      
-// Yes, this works..   #define _Fetch3   Fetch3,  "    F3 Not in use",                                     unx
-// Yes, this works..   //efine _eFetch   eFetch,  "   eF  rep Read until d=mem[(rs1+ofs) & ~3u]",          isr_none     | A_passd   | Wnn   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(eFetch2 )  // [4]] Must be at address after [3]
-// Yes, this works..   //efine _eFetch2  eFetch2, "   eF2 Update ttime, Q=immediate. Use dinx",            isr_none     | A_cycnt   | Wttime| RS1       | Qudec| sr_h  | use_dinx
-// Yes, this works..   #define _eFetch3  eFetch3, "   eF3 Not in use",                                     unx
-// Yes, this works..   #define _eFetch   eFetch,  "nu", unx
-// Yes, this works..   #define _eFetch2  eFetch2, "nu", unx
-// Yes, this works..   #endif
-
 #define _aFault   aFault,  " err   Load access fault. Faulting adr to mtval",       isr_none     | A_passq   | Wmtval| r00000000 | Qz   | sr_h  | u_cont         | n(aFault_1) // [2] Must be after [1]
 #define _aFault_1 aFault_1,"       Q = 4",                                          isr_none     | A_add4    | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(aFault_2)
 #define _aFault_2 aFault_2,"       Store 5 to mcause",                              isr_intoTrap | A_add1    | Wmcaus| Rpc       | Qx   | sr_h  | u_cont         | n(LDAF_3)
@@ -544,7 +519,8 @@
 //efine _SLTIX_1  SLTIX_1, "       RS1 - imm / RS1 - RS2",                          isr_none     | A_add1    | Wnn   | r_xx      | Qz   | sr_h  | u_cont         | n(SLTIX_2)   
 //efine _SLTIX_2  SLTIX_2, "       Registered ALU flag to rd",                      isr_none     | A_passq_F | WTRG  | Rpc       | Qzh  | sr_h  | u_cont         | n(StdIncPc)  
 //      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 isr_none     | A_add4    | Wpc   | Ralu      | Qu   | sr_h  | u_cont         | n(OpFetch )  etc
-//                                                                                                                                                               
+//
+// Have changed decode so I do not need 16 copies of _LUI_0, only 8
 #define _LUI_0(x) x,       "LUI    q = imm20",                                      isr_none     | A_passq   | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  
 //      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 isr_none     | A_add4    | Wpc   | Ralu      | Qu   | sr_h  | u_cont         | n(OpFetch )  etc
 //                                                                                                                                                               
@@ -657,29 +633,32 @@
 #define _FENCE(x) x,       "f      Prepare read PC (FENCE)",                        isr_none     | A_xx      | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  
 //      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 isr_none     | A_add4    | Wpc   | Ralu      | Qu   | sr_h  | u_cont         | n(OpFetch )  etc
 //
-//!! Should have a tighter decode. ECALL =0x00000073, so Imm==0x000, rs1=0, rd=0
-//!! Should have a tighter decode. EBREAK=0x00100073, so Imm==0x001, rs1=0, rd=0
+//!! Should have a tighter decode. ECALL =0x00000073, so rs1=0, rd=0. Imm==0x000 checked
+//!! Should have a tighter decode. EBREAK=0x00100073, so rs1=0, rd=0. Imm==0x001 checked
 //!! Should have a tighter decode. WFI   =0x10500073, so Imm==0x105, rs1=0, rd=0
-#define _ECAL_BRK ECAL_BRK,"ECALL/EBREAK  Select ECALL/(U/S/M)RET or EBREAK/WFI",   isr_none     | A_passq   | Wjj   | rFFFFFFFF | Qhld | sr_h  | hwordaligned   | n(ECAL_RET)
-#define _ECAL_RET ECAL_RET,"ECALL/(U/S/M)RET Select ECALL or (U/S/M)RET",           isr_none     | A_passq   | Wjj   | Rpc       | Qhld | sr_h  | wordaligned    | n(ECALL_1) /* Must be at even ucode adr */
-#define _ECALL_1  ECALL_1, "ECALL  mepc = pc, prep store 0 to mtval",               isr_none     | A_passd   | Wmepc | r_xx      | Qz   | sr_h  | u_cont         | n(ECALL_2) /* Must be at even ucode adr */
-#define _ECALL_2  ECALL_2, "       mtval = 0, now start the chore of 11 to mcause", isr_none     | A_passq   | Wmtval| r00000000 | Qz   | sr_h  | u_cont         | n(ECALL_3)   
-#define _ECALL_3  ECALL_3, "       Q = 4",                                          isr_none     | A_add4    | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(ECALL_4)   
-#define _ECALL_4  ECALL_4, "       Q = 8",                                          isr_none     | A_add4    | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(ECALL_5)   
-#define _ECALL_5  ECALL_5, "       mcause = 11",                                    isr_intoTrap | A_add3    | Wmcaus| rmtvec    | Qx   | sr_h  | u_cont         | n(JAL_3)
+#define _ECAL_BRK ECAL_BRK,"ECALL/EBREAK  Select ECALL/(U/S/M)RET or EBREAK/WFI",   isr_none     | A_passq   | Wnn   | rFFFFFFFF | Qhld | sr_h  | hwordaligned   | n(ECAL_RET)
+#define _ECAL_RET ECAL_RET,"ECALL/(U/S/M)RET Select ECALL or (U/S/M)RET",           isr_none     | A_passq   | Wnn   | rFFFFFFFF | Qhld | sr_h  | wordaligned    | n(ECALL_1) /* Must be at even ucode adr */
+#define _ECALL_1  ECALL_1, "ECALL  Verify Imm==0x000",                              isr_none     | A_add1    | Wnn   | Rpc       | Qu   | sr_h  | u_cont         | n(ECALL_2) /* Must be at even ucode adr */
+#define _ECALL_2  ECALL_2, "       mepc = pc, prep store 0 to mtval",               isr_none     | A_passd   | Wmepc | r_xx      | Qz   | sr_h  | usebcond       | n(ECALL_3) 
+#define _ECALL_3  ECALL_3, "       mtval = 0, now start the chore of 11 to mcause", isr_none     | A_passq   | Wmtval| r00000000 | Qz   | sr_h  | u_cont         | n(ECALL_4) /* Must be at odd ucode adr following a _ILL_0() */
+#define _ECALL_4  ECALL_4, "       Q = 4",                                          isr_none     | A_add4    | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(ECALL_5)   
+#define _ECALL_5  ECALL_5, "       Q = 8",                                          isr_none     | A_add4    | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(ECALL_6)   
+#define _ECALL_6  ECALL_6, "       mcause = 11",                                    isr_intoTrap | A_add3    | Wmcaus| rmtvec    | Qx   | sr_h  | u_cont         | n(JAL_3)
 //efine _JAL_3    JAL_3,   "       PC = trap entry point. OpFetch",                 
 //                                                                                                                                                               
 
 #define _EBRKWFI1 EBRKWFI1,"EBREAK/WFI1 Prepare select EBREAK or WFI",              isr_none     | A_addDQ   | Wnn   | r_xx      | Qu   | sr_h  | u_cont         | n(EBRKWFI2) /* Must follow _ECAL_RET */
-#define _EBRKWFI2 EBRKWFI2,"EBREAK/WFI2 Select EBREAK or WFI",                      isr_none     | A_xx      | Wnn   | Rpc       | Qz   | sr_h  | usebcond       | n(EBREAK_1)
-#define _EBREAK_1 EBREAK_1,"EBREAK mepc = pc, prep store 0 to mtval",               isr_none     | A_passd   | Wmepc | r_xx      | Qz   | sr_h  | u_cont         | n(EBREAK_2) /* Must be at odd ucode adr */
-#define _EBREAK_2 EBREAK_2,"       mtval = 0, ",                                    isr_none     | A_passq   | Wmtval| r00000000 | Qz   | sr_h  | u_cont         | n(EBREAK_3)  
+#define _EBRKWFI2 EBRKWFI2,"EBREAK/WFI2 Select EBREAK or WFI",                      isr_none     | A_invq    | Wjj   | r000000FF | Qz   | sr_h  | usebcond       | n(EBREAK_1)
+#define _EBREAK_1 EBREAK_1,"EBREAK mepc = pc, store 0 to mtval",                    isr_none     | A_passq   | Wmtval| Rpc       | Qz   | sr_h  | u_cont         | n(EBREAK_2) /* Must be at odd ucode adr */
+#define _EBREAK_2 EBREAK_2,"       pc to mepc",                                     isr_none     | A_passd   | Wmepc | r00000000 | Qz   | sr_h  | u_cont         | n(EBREAK_3)  
 #define _EBREAK_3 EBREAK_3,"       mcause = 3",                                     isr_intoTrap | A_add3    | Wmcaus| rmtvec    | Qx   | sr_h  | u_cont         | n(JAL_3)
 //efine _JAL_3    JAL_3,   "       PC = trap entry point. OpFetch",                 
 
-#define _WFI      WFI,     "       WFI, Prepare read PC",                           isr_none     | A_xx      | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc) /* This preceeds EBREAK_1  */
-
-
+#define _WFI_1    WFI_1,   "WFI    To check offset",                                isr_none     | A_add4    | Wnn   | Rjj       | Qu   | sr_h  | u_cont         | n(WFI_2   ) /* This preceeds EBREAK_1  */
+#define _WFI_2    WFI_2,   "       Check offset",                                   isr_none     | A_add1    | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(WFI_3   )
+#define _WFI_3    WFI_3,   "       More check offset",                              isr_none     | A_add1    | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(WFI_4   )
+#define _WFI_4    WFI_4,   "       Prepare read PC",                                isr_none     | A_xx      | Wnn   | Rpc       | Qz   | sr_h  | usebcond       | n(WFI_5   )
+#define _WFI_5    WFI_5,   "       IncPC, OpFetch",                                 nxtSTB       | A_add4    | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch   ) /* Must be at odd ucode adr following a _ILL_0()*/
 
 
 //!! Should have a tighter decode. MRET=0x30200073, so Imm=0x302, rs1=0 rd=0
@@ -918,7 +897,7 @@
 /* 1f */Y( 0,     0 , _IJ_2              )
 /* 20 */Y( 1,     0 , _LH_0              )
 /* 21 */Y( 0,     0 , _XORI_1            )
-/* 22 */Y( 0,     0 , _L22,"q:22", unx   )
+/* 22 */Y( 0,     0 , _EBRKWFI2          )
 /* 23 */Y( 1,     0 , _FENCE(FENCEI)     ) 
 /* 24 */Y( 1,     0 , _SLLI_0            )
 /* 25 */Y( 1,     0 , _AUIPC_0(_L25)     )
@@ -1025,17 +1004,17 @@
 /* 8a */Y( 1,     0 , _ILL_0(_L8a)       )
 /* 8b */Y( 0,     0 , _ILL_5             )
 /* 8c */Y( 1,     0 , _XOR_0             )
-/* 8d */Y( 1,     0 , _LUI_0(_L8d)       )
-/* 8e */Y( 1,     0 , _ILL_0(_L8e)       )
-/* 8f */Y( 1,     0 , _LUI_0(_L8f)       )
+/* 8d */Y( 0,     0 , _WFI_3             )
+/* 8e */Y( 1,  0x0b , _ILL_0(_L8e)       )
+/* 8f */Y( 0,  0x0b , _WFI_5             )
 /* 90 */Y( 0,     0 , _NMI_2             )
 /* 91 */Y( 0,     0 , _LDAF_2            )
 /* 92 */Y( 0,     0 , _LDAF_3            )
 /* 93 */Y( 0,     0 , _SW_E2             )
 /* 94 */Y( 0,     0 , _SW_E3             )
 /* 95 */Y( 0,     0 , _SW_E4             )
-/* 96 */Y( 0,  0x0b , _SH_1              )
-/* 97 */Y( 0,  0x0b , _SW_E1(SWH)        )
+/* 96 */Y( 0,  0x0c , _SH_1              )
+/* 97 */Y( 0,  0x0c , _SW_E1(SWH)        )
 /* 98 */Y( 1,     0 , _BLT               )
 /* 99 */Y( 1,     0 , _ILL_0(_L99)       )
 /* 9a */Y( 0,     0 , _SH_2              )
@@ -1045,21 +1024,21 @@
 /* 9e */Y( 0,     0 , _SH_4              )
 /* 9f */Y( 0,     0 , _SH_5              )
 /* a0 */Y( 1,     0 , _LHU_0             )
-/* a1 */Y( 0,     0 , _ECALL_3           )
-/* a2 */Y( 0,     0 , _ECALL_4           )
+/* a1 */Y( 0,     0 , _ECALL_4           )
+/* a2 */Y( 0,     0 , _ECALL_5           )
 /* a3 */Y( 1,     0 , _ILL_0(_La3)       )
 /* a4 */Y( 1,     0 , _SRxI_0            )
 /* a5 */Y( 1,     0 , _AUIPC_0(_La5)     )
-/* a6 */Y( 0,  0x0c , _ECAL_RET          )
-/* a7 */Y( 0,  0x0c , _EBRKWFI1          )
+/* a6 */Y( 0,  0x0d , _ECAL_RET          )
+/* a7 */Y( 0,  0x0d , _EBRKWFI1          )
 /* a8 */Y( 1,     0 , _ILL_0(_La8)       )
-/* a9 */Y( 0,     0 , _ECALL_5           )
+/* a9 */Y( 0,     0 , _ECALL_6           )
 /* aa */Y( 1,     0 , _ILL_0(_Laa)       )
 /* ab */Y( 0,     0 , _EBREAK_2          )
 /* ac */Y( 1,     0 , _SRx_0(_Lac)       )    
-/* ad */Y( 1,     0 , _LUI_0(_Lad)       )
+/* ad */Y( 0,     0 , _WFI_4             )
 /* ae */Y( 1,     0 , _SRx_0(_Lae)       )    
-/* af */Y( 1,     0 , _LUI_0(_Laf)       )
+/* af */Y( 0,     0 , _Laf,"q:af", unx   )
 /* b0 */Y( 0,     0 , _CSRRW_3           )
 /* b1 */Y( 0,     0 , _CSRRS_1           )
 /* b2 */Y( 0,     0 , _CSRRC_1           )
@@ -1074,8 +1053,8 @@
 /* bb */Y( 1,     0 , _JAL_0(_Lbb)       )
 /* bc */Y( 1,     0 , _CSRRWI_0          )
 /* bd */Y( 0,     0 , _IJ_4              )
-/* be */Y( 0,  0x0d , _IJ_1              )
-/* bf */Y( 0,  0x0d , _IJT_1             )
+/* be */Y( 0,  0x0e , _IJ_1              )
+/* bf */Y( 0,  0x0e , _IJT_1             )
 /* c0 */Y( 1,     0 , _ILL_0(_Lc0)       )
 /* c1 */Y( 0,     0 , _IJT_2             )
 /* c2 */Y( 0,     0 , _IJT_3             )
@@ -1089,13 +1068,13 @@
 /* ca */Y( 1,     0 , _ILL_0(_Lca)       )
 /* cb */Y( 0,     0 , _QINT_2            )
 /* cc */Y( 1,     0 , _OR_0              )
-/* cd */Y( 1,     0 , _LUI_0(_Lcd)       )
+/* cd */Y( 0,     0 , _Lcd,"q:cd", unx   )
 /* ce */Y( 1,     0 , _ILL_0(_Lce)       )
-/* cf */Y( 1,     0 , _LUI_0(_Lcf)       )
-/* d0 */Y( 0,  0x0e , _ECALL_1           )
-/* d1 */Y( 0,  0x0e , _xRET_1            )
-/* d2 */Y( 0,  0x0f , _LB_2              )
-/* d3 */Y( 0,  0x0f , _aFaultd           )
+/* cf */Y( 0,     0 , _Lcf,"q:cf", unx   )
+/* d0 */Y( 0,  0x0f , _ECALL_1           )
+/* d1 */Y( 0,  0x0f , _xRET_1            )
+/* d2 */Y( 0,  0x10 , _LB_2              )
+/* d3 */Y( 0,  0x10 , _aFaultd           )
 /* d4 */Y( 0,     0 , _aFault_2          )
 /* d5 */Y( 0,     0 , _eFetch2           )
 /* d6 */Y( 0,     0 , _jFault_1          )
@@ -1106,35 +1085,35 @@
 /* db */Y( 1,     0 , _JAL_0(_Ldb)       )
 /* dc */Y( 1,     0 , _CSRRSI_0          )
 /* dd */Y( 0,     0 , _aF_SW_1           )
-/* de */Y( 0,  0x10 , _Fetch             ) 
-/* df */Y( 0,  0x10 , _eFetch            ) 
+/* de */Y( 0,  0x11 , _Fetch             ) 
+/* df */Y( 0,  0x11 , _eFetch            ) 
 /* e0 */Y( 1,     0 , _ILL_0(_Le0)       )
 /* e1 */Y( 0,     0 , _ORI_1             )
 /* e2 */Y( 0,     0 , _aF_SW_2           )
 /* e3 */Y( 1,     0 , _ILL_0(_Le3)       )
 /* e4 */Y( 1,     0 , _ANDI_0            )
 /* e5 */Y( 1,     0 , _AUIPC_0(_Le5)     )
-/* e6 */Y( 0,  0x11 , _StdIncPc          )
-/* e7 */Y( 0,  0x11 , _aFault            )
+/* e6 */Y( 0,  0x12 , _StdIncPc          )
+/* e7 */Y( 0,  0x12 , _aFault            )
 /* e8 */Y( 1,     0 , _ILL_0(_Le8)       )
 /* e9 */Y( 0,     0 , _aF_SW_3           )
-/* ea */Y( 1,     0 , _ILL_0(_Lea)       )
-/* eb */Y( 0,     0 , _EBRKWFI2          )
+/* ea */Y( 1,  0x13 , _ILL_0(_Lea)       )
+/* eb */Y( 0,  0x13 , _ECALL_3           )
 /* ec */Y( 1,     0 , _AND_0             )
-/* ed */Y( 1,     0 , _LUI_0(_Led)       )
+/* ed */Y( 0,     0 , _Led,"q:ed", unx   )
 /* ee */Y( 1,     0 , _ILL_0(_Lee)       )
-/* ef */Y( 1,     0 , _LUI_0(_Lef)       )
-/* f0 */Y( 0,  0x12 , _LBU_2             )
-/* f1 */Y( 0,  0x12 , _aFaulte           )
-/* f2 */Y( 0,  0x13 , _SW_2              )
-/* f3 */Y( 0,  0x13 , _aF_SW             ) 
+/* ef */Y( 0,     0 , _Lef,"q:ef", unx   )
+/* f0 */Y( 0,  0x14 , _LBU_2             )
+/* f1 */Y( 0,  0x14 , _aFaulte           )
+/* f2 */Y( 0,  0x15 , _SW_2              )
+/* f3 */Y( 0,  0x15 , _aF_SW             ) 
 /* f4 */Y( 0,     0 , _Fetch2            )
 /* f5 */Y( 0,     0 , _jFault            )
-/* f6 */Y( 0,  0x14 , _WFI               )
-/* f7 */Y( 0,  0x14 , _EBREAK_1          ) 
+/* f6 */Y( 0,  0x16 , _WFI_1             )
+/* f7 */Y( 0,  0x16 , _EBREAK_1          ) 
 /* f8 */Y( 1,     0 , _BGEU              )
 /* f9 */Y( 1,     0 , _ILL_0(_Lf9)       )
-/* fa */Y( 0,     0 , _Lfa,"q:fa", unx   )
+/* fa */Y( 0,     0 , _WFI_2             )
 /* fb */Y( 1,     0 , _JAL_0(_Lfb)       )
 /* fc */Y( 1,     0 , _CSRRCI_0          )
 /* fd */Y( 1,     0 , _NMI_0             )
