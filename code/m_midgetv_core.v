@@ -850,7 +850,7 @@ module m_midgetv_core
         .minx                           (minx[7:0]),
         .progress_ucode                 (progress_ucode));
    
-   m_ucodepc #(.HIGHLEVEL(1))
+   m_ucodepc #(.HIGHLEVEL(1), .LAZY_DECODE(1))
      inst_ucodepc
        (/*AUTOINST*/
         // Outputs
