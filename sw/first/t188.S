@@ -59,6 +59,7 @@ _start:
         sw      x1,%lo(__mtvec)(x0)
 TheIllegals:    
         .word 0x00000073 | 0x40000000 // ecall
+        // ebreak
         .word 0x10500073 | 0x20000000 // wfi
 	.word 0x00311093 | 0x80000000 // slli   x1,x2,0x3
 	.word 0x00315093 | 0x20000000 // srli   x1,x2,0x3

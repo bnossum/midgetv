@@ -635,7 +635,7 @@
 //
 //!! Should have a tighter decode. ECALL =0x00000073, so rs1=0, rd=0. Imm==0x000 checked
 //!! Should have a tighter decode. EBREAK=0x00100073, so rs1=0, rd=0. Imm==0x001 checked
-//!! Should have a tighter decode. WFI   =0x10500073, so Imm==0x105, rs1=0, rd=0
+//!! Should have a tighter decode. WFI   =0x10500073, so rs1=0, rd=0. Imm==0x105 checked
 #define _ECAL_BRK ECAL_BRK,"ECALL/EBREAK  Select ECALL/(U/S/M)RET or EBREAK/WFI",   isr_none     | A_passq   | Wnn   | rFFFFFFFF | Qhld | sr_h  | hwordaligned   | n(ECAL_RET)
 #define _ECAL_RET ECAL_RET,"ECALL/(U/S/M)RET Select ECALL or (U/S/M)RET",           isr_none     | A_passq   | Wnn   | rFFFFFFFF | Qhld | sr_h  | wordaligned    | n(ECALL_1) /* Must be at even ucode adr */
 #define _ECALL_1  ECALL_1, "ECALL  Verify Imm==0x000",                              isr_none     | A_add1    | Wnn   | Rpc       | Qu   | sr_h  | u_cont         | n(ECALL_2) /* Must be at even ucode adr */
@@ -996,7 +996,7 @@
 /* 82 */Y( 0,     0 , _ILL_3             )
 /* 83 */Y( 1,     0 , _ILL_0(_L83)       )
 /* 84 */Y( 1,     0 , _XORI_0            )
-/* 85 */Y( 1,     0 , _AUIPC_0(_L85)     )
+/* 85 */Y( 1,     0 , _L85,"q:85", unx   )
 /* 86 */Y( 0,  0x0a , _JAL_2             )
 /* 87 */Y( 0,  0x0a , _JALRE1            )
 /* 88 */Y( 1,     0 , _ILL_0(_L88)       )
@@ -1028,7 +1028,7 @@
 /* a2 */Y( 0,     0 , _ECALL_5           )
 /* a3 */Y( 1,     0 , _ILL_0(_La3)       )
 /* a4 */Y( 1,     0 , _SRxI_0            )
-/* a5 */Y( 1,     0 , _AUIPC_0(_La5)     )
+/* a5 */Y( 1,     0 , _La5,"q:a5", unx   )
 /* a6 */Y( 0,  0x0d , _ECAL_RET          )
 /* a7 */Y( 0,  0x0d , _EBRKWFI1          )
 /* a8 */Y( 1,     0 , _ILL_0(_La8)       )
@@ -1060,7 +1060,7 @@
 /* c2 */Y( 0,     0 , _IJT_3             )
 /* c3 */Y( 1,     0 , _ILL_0(_Lc3)       )
 /* c4 */Y( 1,     0 , _ORI_0             ) 
-/* c5 */Y( 1,     0 , _AUIPC_0(_Lc5)     )
+/* c5 */Y( 1,     0 , _Lc5,"q:c5", unx   )
 /* c6 */Y( 0,     0 , _IJT_4             )
 /* c7 */Y( 0,     0 , _QINT_1            )
 /* c8 */Y( 1,     0 , _ILL_0(_Lc8)       )
@@ -1092,7 +1092,7 @@
 /* e2 */Y( 0,     0 , _aF_SW_2           )
 /* e3 */Y( 1,     0 , _ILL_0(_Le3)       )
 /* e4 */Y( 1,     0 , _ANDI_0            )
-/* e5 */Y( 1,     0 , _AUIPC_0(_Le5)     )
+/* e5 */Y( 1,     0 , _Le5,"q:e5", unx   )
 /* e6 */Y( 0,  0x12 , _StdIncPc          )
 /* e7 */Y( 0,  0x12 , _aFault            )
 /* e8 */Y( 1,     0 , _ILL_0(_Le8)       )
