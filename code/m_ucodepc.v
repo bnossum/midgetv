@@ -87,37 +87,19 @@ module m_ucodepc
          assign dinx[0]   = INSTR[2];
          assign dinx[1]   = ((~INSTR[6]&INSTR[5])&INSTR[30]) | ((~(~INSTR[6]&INSTR[5]))&INSTR[3]);
          assign dinx[4:2] = INSTR[6:4];
-//       assign dinx[7:5] = INSTR[14:12]; Need some more space.
+/*       assign dinx[7:5] = INSTR[14:12]; Need some more space.*/
          assign dinx[6:5] = INSTR[13:12];
-// Candidates to compress:
-// 6543210
-//   xxx
-// 0110111 lui
-// 0010111 auipc
-// 1101111jal
-         assign dinx[7]   = INSTR[14] & (INSTR[4:2] != 3'b101);
-/* 
- Issue 3:
-
- ecall should only be decoded when field rs1 and rd are 5'b00000, and
- imm12 == 12'h0. This is presently not the case. Only imm12[1:0] is
- used in the decode.
-
- Likewise, ebreak should only be decoded when field rs1 and rd are
- 5'b00000, and imm12 == 12'h1. While the whole of imm12 is used in
- this decode, fields rs1 and rd are presently ignored.
- 
- Also, decode of instruction wfi is to relaxed. Here also fields rs1
- and rd are not checked. The requirement on imm12 should be that imm12
- == 12'h105. We accept imm12 != 12'h001 && imm12[0].  Also, decode of
- instruction mret is to relaxed, same reasons as above.  
- 
- 
-  0000000,       00000, 00000, 000,   00000,       1110011, ecall
-  0001000,       00101, 00000, 000,   00000,       1110011, wfi 
-  0011000,       00010, 00000, 000,   00000,       1110011, mret
-         
+/* Candidates to compress:
+ * INSTR[6:0]
+ * 6543210
+ *   xxx
+ * 0110111 lui
+ * 0010111 auipc
+ * 1101111jal
  */
+         assign dinx[7]   = INSTR[14] & (INSTR[4:2] != 3'b101);
+/* This frees 8 instances of lui and 4 instances of auipc for the cost of 1 LUT */
+
          wire       illegal_funct7;
          if ( LAZY_DECODE ) begin
             assign illegal_funct7 = 1'b0;
@@ -157,6 +139,34 @@ module m_ucodepc
             wire       mostof_funct7_ne0 = {funct7[6],funct7[4:0]} != 6'h0;
             assign illegal_funct7 = (checkfunct7 & mostof_funct7_ne0) |
                                     (checkfunct7 & ~funct7_5_dontcare & funct7[5]);
+
+/* 
+ Issue 3:
+
+ ecall should only be decoded when field rs1 and rd are 5'b00000, and
+ imm12 == 12'h0. imm12 is used in the decode in ucode.h
+
+ Likewise, ebreak should only be decoded when field rs1 and rd are
+ 5'b00000, and imm12 == 12'h1. The whole of imm12 is used in
+ this decode in ucode.h.
+ 
+ Also, decode of instruction wfi is to relaxed. Here also fields rs1
+ and rd are not checked. The whole of imm12 is checked in the decode
+ in ucode.h.
+ 
+ Also, decode of instruction mret is to relaxed. Here also fields rs1
+ and rd are not checked. The whole of imm12 is (optionally) checked in
+ software
+  |__imm12______|
+  funct7   rs2    rs1    funct3 rd      opcode
+  0000000, 00000, 00000, 000,   00000,  1110011, ecall
+  0000000, 00001, 00000, 000,   00000,  1110011, ebreak
+  0001000, 00101, 00000, 000,   00000,  1110011, wfi 
+  0011000, 00010, 00000, 000,   00000,  1110011, mret
+         
+ */
+
+
          end 
          /* The Main illegal signal
           *
