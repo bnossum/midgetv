@@ -58,8 +58,9 @@ _start:
         la      x1,StartTrap
         sw      x1,%lo(__mtvec)(x0)
 TheIllegals:    
+        .word 0x00100073 | 0x20000000 // ebreak
         .word 0x00000073 | 0x40000000 // ecall
-        // ebreak
+        .word 0x30200073 | 0x80000000 // mret
         .word 0x10500073 | 0x20000000 // wfi
 	.word 0x00311093 | 0x80000000 // slli   x1,x2,0x3
 	.word 0x00315093 | 0x20000000 // srli   x1,x2,0x3
@@ -75,12 +76,34 @@ TheIllegals:
 	.word 0x403100b3 | 0x02000000 // sub	x1,x2,x3
 	.word 0x403150b3 | 0x80000000 // sra	x1,x2,x3
 
-        li      x1,2
-        beq     x1,x31,Good     // Presumably compiled with LAZY_DECODE == 1, where only ecall and wfi is checked
-        li      x1,15           // Else each of the instructions above should be
+        li      x1,4
+        beq     x1,x31,Good     // Presumably compiled with LAZY_DECODE == 1, where only ecall, mret and wfi is checked
+        li      x1,17           // Else each of the instructions above should be
         bne     x1,x31,1f       // an illegal instruction
+
+        // These tests only make sense when LAZY_DECODE == 0.
+        // I clumsily increment the index we use to compare with:
+        addi    x31,x31,5
+        
+        // Check ecall, ebreak, wfi, mret with a bit set in rs1
+        .word 0x00100073 | 0x00010000 // ebreak
+        .word 0x00000073 | 0x00020000 // ecall
+        .word 0x30200073 | 0x00040000 // mret
+        .word 0x10500073 | 0x00080000 // wfi
+        // Check ecall, ebreak, wfi, mret with a bit set in rd
+        .word 0x00100073 | 0x00000100 // ebreak
+        .word 0x00000073 | 0x00000200 // ecall
+        .word 0x30200073 | 0x00000400 // mret
+        .word 0x10500073 | 0x00000800 // wfi
+
+        li      x1,17+5+8
+        bne     x1,x31,6f
+        
 Good:   
         simend
         
         # =============================================================================
 1:      simerr  1
+4:      simerr  4
+5:      simerr  5
+6:      simerr  6
