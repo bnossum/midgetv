@@ -398,7 +398,7 @@ module m_midgetv_core
     * During opcode read from SRAM we do:
     * StdIncPC:  writePC readALU
     * Now, if the value of the PC  ends in 0x...88, the read and write address to
-    * EBR are equal. However, the EBR value is not used for anything. 
+    * EBR are equal. However, the EBR read value is not used for anything. 
     * I weed out this case in the function below.
     * 
     * (And yes, it is a grave error to actually try to execute from address 0x80.
