@@ -23,30 +23,30 @@
 /* The specification is in ucode.h.
  */
 typedef enum {
-#define X(label,txt,def) label,
+#define X(label,txt,def,reachability,mask,instr) label,
 #include fname
         _LEND
 } LABELS;
 
 char *labeltext[256] = {
-#define X(label,txt,def) STR(label),
+#define X(label,txt,def,reachability,mask,instr) STR(label),
 #include fname
 };
 
 char *ucodestr[256] = {
-#define X(label,txt,def) txt,
+#define X(label,txt,def,reachability,mask,instr) txt,
 #include fname
 };
 
 uint64_t ucode0[256] = {
 #define x 0b0
-#define X(label,txt,def) def,
+#define X(label,txt,def,reachability,mask,instr) def,
 #include fname
 };
 
 uint64_t ucode1[256] = {
 #define x 0b1
-#define X(label,txt,def) def,
+#define X(label,txt,def,reachability,mask,instr) def,
 #include fname
 };
 

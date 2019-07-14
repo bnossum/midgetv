@@ -18,7 +18,8 @@ VERILATORFLAGS = -Wall -I$(VERILOGDIR) -I$(SB_SIMMOD) -Mdir $(OBJDIR) -cc --x-as
 #	m_bmask_emask m_condcode m_shiftcounter \
 
 
-MY =  m_ice40sim_SRAM  m_ice40sim_EBRonly 
+MY =  m_ice40sim_SRAM m_ice40sim_EBRonly \
+	 m_ucodepc
 
 TARGETS:=$(foreach i,$(MY),$(BINDIR)/$(i).bin)
 
@@ -36,8 +37,11 @@ $(OBJDIR)/V%.cpp:$(VERILOGDIR)/%.v
 $(OBJDIR)/V%__ALL.a:$(OBJDIR)/V%.cpp
 	cd $(OBJDIR); make -f V$(*F).mk; cd -; 
 
-$(BINDIR)/%.bin:%.cpp $(OBJDIR)/V%__ALL.a common.cpp
-	g++ $(GCCFLAGS) $< $(OBJDIR)/V$(*F)__ALL.a /usr/share/verilator/include/verilated.cpp common.cpp -o $@
+$(BINDIR)/%.bin:%.cpp $(OBJDIR)/V%__ALL.a 
+	g++ $(GCCFLAGS) $< $(OBJDIR)/V$(*F)__ALL.a /usr/share/verilator/include/verilated.cpp -o $@
+
+$(BINDIR)/m_ice%.bin:m_ice%.cpp $(OBJDIR)/Vm_ice%__ALL.a common.cpp
+	g++ $(GCCFLAGS) $< $(OBJDIR)/Vm_ice$(*F)__ALL.a /usr/share/verilator/include/verilated.cpp common.cpp -o $@
 
 clean:
 	rm $(TARGETS) $(FORCLEANING)

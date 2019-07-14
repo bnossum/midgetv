@@ -81,8 +81,7 @@ module m_ucodepc
          
          assign usedinx   = sa28 | !corerunning;
          assign maybranch = Adr0Mustbe0 | Adr1Mustbe0 | use_brcond | (sa32 & ~sa15);
-         
-         
+                  
          // Slight mangling of INSTRUCTION to an index. 
          assign dinx[0]   = INSTR[2];
          assign dinx[1]   = ((~INSTR[6]&INSTR[5])&INSTR[30]) | ((~(~INSTR[6]&INSTR[5]))&INSTR[3]);

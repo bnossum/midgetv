@@ -58,7 +58,7 @@ void parse_arguments(int *verbosep, int *cyclelimitp, int *silentp, FILE **lfop,
 
 /////////////////////////////////////////////////////////////////////////////
 void userguide( void ) {
-        ferr( "Will be help\n" );
+        ferr( "Will be help?\n" );
 }
 
 
@@ -701,11 +701,11 @@ int p_interruptinfo( int lnr, int interruptinfo ) {
 void common_simprintf( INFOCHUNK * const p, uint32_t cy) {
         static int lnr;        
         const char *ucodetxt[256] = {
-#define X(label,txt,val) txt,
+#define X(label,txt,val,reachability,mask,instr) txt,
 #include "../code/ucode.h"
         };
         const char *ucodelabeltxt[256] = {
-#define X(label,txt,val) STR(label),
+#define X(label,txt,val,reachability,mask,instr) STR(label),
 #include "../code/ucode.h"
         };
                 
