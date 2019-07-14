@@ -103,7 +103,7 @@ typedef enum {
 } eINSTR;
 
 /////////////////////////////////////////////////////////////////////////////
-void pocketdissass( uint32_t pc, uint32_t I ) {
+int pocketdissass( int silent, uint32_t pc, uint32_t I ) {
         int bit30   = (I >> 30) & 1;
         int bit2928 = (I >> 28) & 3;
         int f7      = (I >> 25) & 127;
@@ -248,8 +248,9 @@ void pocketdissass( uint32_t pc, uint32_t I ) {
                 break;
         }
         if ( inx == -1 ) {
-                printf( "Unsupported " );
-                return;
+                if ( !silent )
+                        printf( "Unsupported " );
+                return inx;
         }
         
 #define rd(x)  ((x >>  7) & 31)
@@ -289,6 +290,7 @@ void pocketdissass( uint32_t pc, uint32_t I ) {
         case 'a' : printf( "x%d,%d(x%d)", rd(I), immL11_0J(I), rs1(I) ); break; // LW
         default : ferr( "Que?\n" );
         }
+        return inx;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -577,7 +579,7 @@ int p_dbg_stb_ack( int lnr, int v  ) {
 
 /////////////////////////////////////////////////////////////////////////////
 int p_stb_ack( int lnr, int stb_ack ) {
-        int n;
+        int n = 0;
         static int alternateheading;
         if ( (lnr & 0x1c) == 0 ) {
                 switch ( alternateheading ) {
@@ -640,7 +642,7 @@ int p_inexplicable( int lnr, int inexplicable ) {
         
 /////////////////////////////////////////////////////////////////////////////
 int p_aluop( int lnr, int v ) {
-        int n;
+        int n = 0;
         
         if ( (lnr & 0x1c) == 0 ) {
                 switch ( lnr & 3 )  {
@@ -774,7 +776,7 @@ TOP:
                         }
                 } else {
                         if ( p->usedinx )
-                                pocketdissass( p->pc, p->I );
+                                pocketdissass( 0, p->pc, p->I );
                 }
         }
 

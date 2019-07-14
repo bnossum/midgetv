@@ -79,7 +79,7 @@ typedef struct {
 void parse_arguments(int *verbosep, int *cyclelimitp, int *silentp, FILE **lfop, FILE **imagetosimp,
                      char **imagetosimnamep, int argc, char **argv);
 void userguide( void );
-void pocketdissass( uint32_t pc, uint32_t I );
+int pocketdissass( int silent, uint32_t pc, uint32_t I );
 int printfdecodeinstr( uint32_t I );
 
 int  p_cy( int lnr, int cy );
