@@ -45,7 +45,8 @@ module top
       IWIDTH          = 32, 
       NO_CYCLECNT     = 0, 
       MTIMETAP        = 0, 
-      HIGHLEVEL       = 0
+      HIGHLEVEL       = 0,
+      LAZY_DECODE     = 0
       )
    (
     input      CLK_I,
@@ -113,6 +114,7 @@ module top
        .NO_CYCLECNT  (   NO_CYCLECNT    ),
        .MTIMETAP     (   MTIMETAP       ),
        .HIGHLEVEL    (   HIGHLEVEL      ),
+       .LAZY_DECODE  (   LAZY_DECODE    ),
        .DBGA         (   1'b0           ),
        .program0(program0),
        .program1(program1),

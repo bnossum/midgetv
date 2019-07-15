@@ -33,9 +33,16 @@
  * buserror-----------------|____|
  * 
  * When power-on, dinx is used, so a "lb x0,0(x0)" is executed.
+ * 
+ * Parameters:
+ * HIGHLEVEL      1 : Understandable code
+ *                0 : Primitives used. Smaller
+ * LAZY_DECODE    0 : Full decode of the riscv instruction. Any unknown instruction leads to a trap
+ *                1 : Decode of most riscv instructions. No decode in some minor code spaces
+ *                2 : My programs are perfect! I never present an illegal instruction to midgetv.
  */
 module m_ucodepc
-  # ( parameter HIGHLEVEL = 1, LAZY_DECODE = 0 )
+  # ( parameter HIGHLEVEL = 1, LAZY_DECODE = 16'h0 )
   (
    input        corerunning, //         Control startup
    input [7:0]  rinx, //                From ucode
@@ -79,6 +86,10 @@ module m_ucodepc
    generate
       if ( HIGHLEVEL ) begin
          
+         /* =============================================================================
+          * HIGHLEVEL implementation
+          * ============================================================================= */
+         
          assign usedinx   = sa28 | !corerunning;
          assign maybranch = Adr0Mustbe0 | Adr1Mustbe0 | use_brcond | (sa32 & ~sa15);
                   
@@ -86,18 +97,19 @@ module m_ucodepc
          assign dinx[0]   = INSTR[2];
          assign dinx[1]   = ((~INSTR[6]&INSTR[5])&INSTR[30]) | ((~(~INSTR[6]&INSTR[5]))&INSTR[3]);
          assign dinx[4:2] = INSTR[6:4];
-/*       assign dinx[7:5] = INSTR[14:12]; Need some more space.*/
+
+         /* assign dinx[7:5] = INSTR[14:12]; Need some more space, so index sligthly more elaborate */
          assign dinx[6:5] = INSTR[13:12];
-/* Candidates to compress:
- * INSTR[6:0]
- * 6543210
- *   xxx
- * 0110111 lui
- * 0010111 auipc
- * 1101111jal
- */
+         /* Candidates to compress:
+          * INSTR[6:0]
+          * 6543210
+          *   xxx
+          * 0110111 lui
+          * 0010111 auipc
+          * 1101111jal
+          */
          assign dinx[7]   = INSTR[14] & (INSTR[4:2] != 3'b101);
-/* This frees 8 instances of lui and 4 instances of auipc for the cost of 1 LUT */
+         /* This frees 8 instances of lui and 4 instances of auipc for the cost of 1 LUT */
 
          wire       illegal_funct7_or_illegal_rs1_rd;
          if ( LAZY_DECODE ) begin
@@ -137,77 +149,80 @@ module m_ucodepc
                        (opcode[6:2] == 5'b01100 && (funct3 == 3'b101 || funct3 == 3'b000));
             wire       mostof_funct7_ne0 = {funct7[6],funct7[4:0]} != 6'h0;
 
-/* 
- Issue 3:
-
- ecall should only be decoded when field rs1 and rd are 5'b00000, and
- imm12 == 12'h0. imm12 is used in the decode in ucode.h
-
- Likewise, ebreak should only be decoded when field rs1 and rd are
- 5'b00000, and imm12 == 12'h1. The whole of imm12 is used in
- this decode in ucode.h.
- 
- Also, decode of instruction wfi is to relaxed. Here also fields rs1
- and rd are not checked. The whole of imm12 is checked in the decode
- in ucode.h.
- 
- Also, decode of instruction mret is to relaxed. Here also fields rs1
- and rd are not checked. The whole of imm12 is checked.
-
-  |__imm12______|
-  funct7   rs2    rs1    funct3 rd      opcode
-  0000000, 00000, 00000, 000,   00000,  1110011, ecall
-  0000000, 00001, 00000, 000,   00000,  1110011, ebreak
-  0001000, 00101, 00000, 000,   00000,  1110011, wfi 
-  0011000, 00010, 00000, 000,   00000,  1110011, mret
-                          00            11100xx
-         
- */
+            /* 
+             Issue 3:
+             
+             ecall should only be decoded when field rs1 and rd are 5'b00000, and
+             imm12 == 12'h0. imm12 is used in the decode in ucode.h
+             
+             Likewise, ebreak should only be decoded when field rs1 and rd are
+             5'b00000, and imm12 == 12'h1. The whole of imm12 is used in
+             this decode in ucode.h.
+             
+             Also, decode of instruction wfi is to relaxed. Here also fields rs1
+             and rd are not checked. The whole of imm12 is checked in the decode
+             in ucode.h.
+             
+             Also, decode of instruction mret is to relaxed. Here also fields rs1
+             and rd are not checked. The whole of imm12 is checked.
+             
+             |__imm12______|
+             funct7   rs2    rs1    funct3 rd      opcode
+             0000000, 00000, 00000, 000,   00000,  1110011, ecall
+             0000000, 00001, 00000, 000,   00000,  1110011, ebreak
+             0001000, 00101, 00000, 000,   00000,  1110011, wfi 
+             0011000, 00010, 00000, 000,   00000,  1110011, mret
+                                     00            11100xx         
+             */
             wire       check_rs1_rd = (opcode[6:2] == 5'b11100) && (funct3[1:0] == 2'b00);
             wire       rs1_ne_zero = INSTR[19:15] != 5'h0;
             wire       rd_ne_zero  = INSTR[11:7] != 5'h0;
             wire       illegal_rs1_rd = check_rs1_rd & (rs1_ne_zero | rd_ne_zero);
-
+            
             assign illegal_funct7_or_illegal_rs1_rd
               = (checkfunct7 & mostof_funct7_ne0) |
                 (checkfunct7 & ~funct7_5_dontcare & funct7[5]) |
                 illegal_rs1_rd;
+            
+         end // if LAZY_DECODE 
 
-         end 
-         /* The Main illegal signal
-          *
-          * illegal_a = (16'b1100111011000010 >> INSTR[5:2]); opens up for prefix 0001011, custom-0
-          * illegal_b = (16'b1110010011111111 >> INSTR[5:2]);
-          * illegal = (~INSTR[6] & illegal_a) | (INSTR[6] & illegal_b ) | ~INSTR[1] | ~INSTR[0] |
-          *           illegal_funct7;
-          */
-         
-         reg          illegal_a, illegal_b;
-         always @(/*AS*/INSTR)
-           case ( INSTR[5:2] )
-             4'b0000 : {illegal_b,illegal_a} = 2'b10;
-             4'b0001 : {illegal_b,illegal_a} = 2'b11;
-             4'b0010 : {illegal_b,illegal_a} = 2'b10;
-             4'b0011 : {illegal_b,illegal_a} = 2'b10;
-             4'b0100 : {illegal_b,illegal_a} = 2'b10;
-             4'b0101 : {illegal_b,illegal_a} = 2'b10;
-             4'b0110 : {illegal_b,illegal_a} = 2'b11;
-             4'b0111 : {illegal_b,illegal_a} = 2'b11;
-             4'b1000 : {illegal_b,illegal_a} = 2'b00;
-             4'b1001 : {illegal_b,illegal_a} = 2'b01;
-             4'b1010 : {illegal_b,illegal_a} = 2'b11;
-             4'b1011 : {illegal_b,illegal_a} = 2'b01;
-             4'b1100 : {illegal_b,illegal_a} = 2'b00;
-             4'b1101 : {illegal_b,illegal_a} = 2'b10;
-             4'b1110 : {illegal_b,illegal_a} = 2'b11;
-             4'b1111 : {illegal_b,illegal_a} = 2'b11;
-           endcase
-         assign illegal = (~INSTR[6] & illegal_a) | 
-                          (INSTR[6] & illegal_b ) | 
-                          ~INSTR[1] |
-                          ~INSTR[0] |
-                          illegal_funct7_or_illegal_rs1_rd;
-         
+         if ( LAZY_DECODE > 16'b1 ) begin
+            assign illegal = 1'b0;
+         end else begin
+            /* The Main illegal signal
+             *
+             * illegal_a = (16'b1100111011000010 >> INSTR[5:2]); opens up for prefix 0001011, custom-0
+             * illegal_b = (16'b1110010011111111 >> INSTR[5:2]);
+             * illegal = (~INSTR[6] & illegal_a) | (INSTR[6] & illegal_b ) | ~INSTR[1] | ~INSTR[0] |
+             *           illegal_funct7_or_illegal_rs1_rd
+             */
+            
+            reg          illegal_a, illegal_b;
+            always @(/*AS*/INSTR)
+              case ( INSTR[5:2] )
+                4'b0000 : {illegal_b,illegal_a} = 2'b10;
+                4'b0001 : {illegal_b,illegal_a} = 2'b11;
+                4'b0010 : {illegal_b,illegal_a} = 2'b10;
+                4'b0011 : {illegal_b,illegal_a} = 2'b10;
+                4'b0100 : {illegal_b,illegal_a} = 2'b10;
+                4'b0101 : {illegal_b,illegal_a} = 2'b10;
+                4'b0110 : {illegal_b,illegal_a} = 2'b11;
+                4'b0111 : {illegal_b,illegal_a} = 2'b11;
+                4'b1000 : {illegal_b,illegal_a} = 2'b00;
+                4'b1001 : {illegal_b,illegal_a} = 2'b01;
+                4'b1010 : {illegal_b,illegal_a} = 2'b11;
+                4'b1011 : {illegal_b,illegal_a} = 2'b01;
+                4'b1100 : {illegal_b,illegal_a} = 2'b00;
+                4'b1101 : {illegal_b,illegal_a} = 2'b10;
+                4'b1110 : {illegal_b,illegal_a} = 2'b11;
+                4'b1111 : {illegal_b,illegal_a} = 2'b11;
+              endcase
+            assign illegal = (~INSTR[6] & illegal_a) | 
+                             (INSTR[6] & illegal_b ) | 
+                             ~INSTR[1] |
+                             ~INSTR[0] |
+                             illegal_funct7_or_illegal_rs1_rd;
+         end
          
          /* takebranch. Microcode must diverge when we have an alignment error,
           * a taken branch, or an opcode fetch when we read from SRAM
@@ -240,6 +255,11 @@ module m_ucodepc
          assign ucodepc_killwarnings = INSTR[31] | &INSTR[29:15] | &INSTR[11:7] | &ADR_O & &B;
          
       end else begin
+
+         /* =============================================================================
+          * LOWLEVEL implementation
+          * ============================================================================= */
+         
          wire illegal_a, illegal_b;
 
          assign usedinx   = sa28 | !corerunning;

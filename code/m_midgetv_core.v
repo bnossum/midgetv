@@ -194,6 +194,17 @@
  * RTL code, but also in a version where iCE40 native
  * building blocks (SB_LUT4, SB_DFF, etc) are instantiated.
  * 
+ * LAZY_DECODE
+ * -----------
+ * 0: All instructions are fully decoded, riscv compliance.
+ * 1: Some minor code spaces are not checked. For example,
+ *    "XOR" can be decoded by 
+ *    ( funct3 = 3'b100, opcode = 7'b0110011). However, 
+ *    one should really also check that funct7 = 7'b0000000.
+ *    With LAZY_DECODE == 1, this check is not performed.
+ * 2: Save a very few luts by elimination of all decode
+ *    checking. Not recommended.
+ * 
  * program0, program1, ... programF
  * --------------------------------
  * These holds the program to initiate in the EBRs.
@@ -224,7 +235,7 @@
 
 module m_midgetv_core
   # ( parameter 
-      SRAMADRWIDTH = 0,  EBRADRWIDTH =  8, IWIDTH =  8, NO_CYCLECNT = 1, MTIMETAP =  0, HIGHLEVEL = 0, LAZY_DECODE = 1, // Minimal
+      SRAMADRWIDTH = 0,  EBRADRWIDTH =  8, IWIDTH =  8, NO_CYCLECNT = 1, MTIMETAP =  0, HIGHLEVEL = 0, LAZY_DECODE = 16'h2, // Minimal
 //    SRAMADRWIDTH = 16, EBRADRWIDTH =  8, IWIDTH = 32, NO_CYCLECNT = 0, MTIMETAP = 14, HIGHLEVEL = 0, LAZY_DECODE = 0, // Conventional
 //    SRAMADRWIDTH = 17, EBRADRWIDTH = 11, IWIDTH = 32, NO_CYCLECNT = 0, MTIMETAP = 14, HIGHLEVEL = 0, LAZY_DECODE = 0, // Maximal
       DBGA = 0,
