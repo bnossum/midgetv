@@ -13,8 +13,6 @@
 #define _main
 #include "common.h"
 
-//#define ferr(...) exit( fprintf(stderr, "%s:%d: ", __FILE__, __LINE__) + fprintf(stderr, __VA_ARGS__))
-
 #define nakedfname ../code/ucode.h
         
 // Defeat quoting system of some shells
@@ -66,13 +64,14 @@ int main(int argc, char **argv) {
         tb->B     = 0; // B[1:0] to find alignment errors. B[31] to distinguish EBR/SRAM
         tb->ADR_O = 0; // ADR_O[31] used at OpCode fetch to distinguish between EBR and SRAM
 
-        //                   Bits    
         uint32_t INSTR;
 
         /* The crudest way to check the OpCodes would be to iterate over
-           32 bits, testing from 0x00000000 to 0xffffffff. This is what I do.
+           32 bits, testing from 0x00000000 to 0xffffffff. This is what I do, except
+           that I leave the low 3 bits of the instruction 2'b11.
         */
-
+        fprintf( stderr, "Runtime around 1 minute\n" );
+        
         int dbg = 0;
         INSTR = 3;
         do {
@@ -127,22 +126,35 @@ int main(int argc, char **argv) {
         for ( i = 0; i < 256; i++ ) {
                 switch ( reachability[i] ) {
                 case 0 :
+                        /* This entry in the table is used for microcode, and is
+                         * not an entry point.
+                         */
                         if ( hit[i] ) {
                                 printf( "0x%.2x should be unreachable from decode, but is hit %d times\n", i, hit[i] );
                         }
                         break;
                 case 1 :
+                        /* This entry in the table is the entrypoint of an instruction to run
+                         */
                         if ( hit[i] == 0 ) {
                                 printf( "0x%.2x should be hit, but is not\n", i );
                         }
                         break;
                 case 2 :
+                        /* A suitable unsupported instruction is not filtered by the
+                         * main "illegal instruction" filter, and so makes it into the
+                         * table. Here it goes the the sequence that deals with 
+                         * illegal instructions.
+                         */
                         if ( hit[i] == 0 ) {
                                 printf( "0x%.2x reserved for illegal OpCode, but is infact never hit\n", i );
                         }
                         break;
                 case 3 :
-                        // Index is reserved for NMI or qualified interrupt. Not part of this test
+                        /* There are a few locations that is accessed by other means than 
+                         * an instruction sequence or as an entry point for legal or illegal OpCodes.
+                         * This is the case for NMI or qualified interrupt. Not part of this test
+                         */
                         break;
                 default :
                         ferr( "Que?\n" );

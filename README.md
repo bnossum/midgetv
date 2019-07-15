@@ -30,7 +30,7 @@ in microcode, but mostly in software; slow! Interrupt response is also slow.
 | Goal          | Result | Comment |
 | ------------- | ------ | ------- |
 | Small implementations size | < 400 SB_LUT4 | Size varies with included features and toolchain |
-| Easy interconnect to external modules with Wishbone | Done | |
+| Easy interconnect | Done |  external modules accessed using Wishbone |
 | Full compliance with RV32I as per riscv-spec-v2.2.pdf | Done | A few options allow a smaller core, but then breaks full compliance. |
 | Full compliance with riscv-privileged-v1.10.pdf | Partially done | It is unlikely anyone will need full compliance here, but as a reference I will endeavor to construct this. A current implementation includes just those registers needed to pass the RISC-V rv32i compliance tests |
 | Support of "C" standard extension | | Not started |
@@ -149,9 +149,6 @@ Note. This will be modified.
 
 ## Todo
 
-- Test program for corner cases, instructions that 'nearly' are
-  supported.  Among these are `wfi` encoded with fields `rs1` and or
-  `rs2` != 0, and other similar cases.
 - Cleanup on code, with some optimized code to reinsert
 - Verification on startup conditions must be tighter
 - Write and test exhaustive CSR code, just now only a minimum exists
@@ -161,5 +158,5 @@ Note. This will be modified.
 - Test on external interrupts
 - Test on nested interrupts
 - Better linker scripts
-- much more
+
 
