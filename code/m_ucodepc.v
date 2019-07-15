@@ -112,7 +112,7 @@ module m_ucodepc
          /* This frees 8 instances of lui and 4 instances of auipc for the cost of 1 LUT */
 
          wire       illegal_funct7_or_illegal_rs1_rd;
-         if ( LAZY_DECODE ) begin
+         if ( LAZY_DECODE != 0) begin
             assign illegal_funct7_or_illegal_rs1_rd = 1'b0;
          end else begin
             /* 

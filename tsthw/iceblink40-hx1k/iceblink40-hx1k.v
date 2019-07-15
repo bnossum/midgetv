@@ -46,7 +46,7 @@ module top
       NO_CYCLECNT     = 0, 
       MTIMETAP        = 0, 
       HIGHLEVEL       = 0,
-      LAZY_DECODE     = 0
+      LAZY_DECODE     = 2
       )
    (
     input      CLK_I,
