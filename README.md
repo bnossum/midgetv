@@ -31,7 +31,7 @@ in microcode, but mostly in software; slow! Interrupt response is also slow.
 | ------------- | ------ | ------- |
 | Small implementations size | < 400 SB_LUT4 | Size varies with included features and toolchain |
 | Easy interconnect to external modules with Wishbone | Done | |
-| Full compliance with RV32I as per riscv-spec-v2.2.pdf | Yes? | A few options allow a smaller core, but break full compliance. The retired instruction counter can be removed. The cycle counter can be vandalised (and then mtime is also strange). Instruction decoding can be lax. At the time of writing (14 july 2019) work is underway to verify that we can strictly decode RV32I and  `ECALL/EBREAK/MRET/WFI` leaving __all__ other encodings illegal. |
+| Full compliance with RV32I as per riscv-spec-v2.2.pdf | Done | A few options allow a smaller core, but then breaks full compliance. |
 | Full compliance with riscv-privileged-v1.10.pdf | Partially done | It is unlikely anyone will need full compliance here, but as a reference I will endeavor to construct this. A current implementation includes just those registers needed to pass the RISC-V rv32i compliance tests |
 | Support of "C" standard extension | | Not started |
 | Support of "M" standard extension for iCE UltraPlus | | Not started |
