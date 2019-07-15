@@ -105,6 +105,7 @@ module top
  `define defaulticeprog "ice40loaderprog.hv"
 `endif 
 `include `defaulticeprog
+
    
    m_midgetv_core
      #(

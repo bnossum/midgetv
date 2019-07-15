@@ -189,7 +189,8 @@ int main(int argc, char *argv[]) {
         
         int k;
         for ( k = 0; k < 16; k++ ) {
-                fprintf( fo, "localparam program%X = %d'h", k, 256*n );
+//                fprintf( fo, "localparam program%X = %d'h", k, 256*n ); See issue 6.
+                fprintf( fo, "localparam program%X = %d'h", k, 4096 );
                 for ( i = 32*n-1; i >= 0; i-- ) {
                         fprintf( fo, "%2.2x", stripe[k][i] );
                         if ( i && (i & 31) == 0 )
