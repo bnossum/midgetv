@@ -70,29 +70,7 @@ int main(int argc, char **argv) {
         uint32_t INSTR;
 
         /* The crudest way to check the OpCodes would be to iterate over
-           32 bits, testing from 0x00000000 to 0xffffffff, impractical.
-           We need to speed it up a bit.
-
-           All OpCodes in RV32I is reachable by iterating over opcode,
-           funct3, bit 0 in rs2, and bit 5 in funct7.
-           To also hit instructions ECALL/EBREAK/MRET/WFI we also
-           iterate on bit 1 in rs2, and bits 3 and 4 in funct7.
-
-           This mean we basically iterate over 2^(7+3+2+3) = 2^15 
-           instructions.
-           
-           funct7  rs2   rs1   funct3 rd opcode
-           0xxx000 000xx 00000 xxx 00000 xxxxxxx
-
-           To increase the coverage, I add a "circulation bit" that
-           will occur in all bitpositions marked as '0' above. There
-           are 17 such occurences, so in total we will iterate over
-           (2^15)*(17+1) < 2^20 instructions. Feasible.
-
-           To speed up with a factor 4 I do not consider bits 1 and 0
-           in the OpCode, but assume these are always 2'b11. We are
-           down to < 2^18 iterations.
-           
+           32 bits, testing from 0x00000000 to 0xffffffff. This is what I do.
         */
 
         int dbg = 0;
@@ -175,77 +153,3 @@ int main(int argc, char **argv) {
 }
 
 
-//#if 0        
-        int nriter = 0;
-        const uint32_t circulatebit[18] =
-                { 0,
-                  7,8,9,10,11,
-                  15,16,17,18,19,
-                  22,23,24,
-                  25,26,27,31 };
-        uint32_t rotinx, rotator;
-        uint32_t opcode  ;// [6:0]   
-//      uint32_t rd      ;// [11:7]  
-        uint32_t funct3  ;// [14:12] 
-//      uint32_t rs1     ;// [19:15] 
-        uint32_t rs2     ;// [24:20] 
-        uint32_t funct7  ;// [31:25] 
-//        for ( opcode = 3; opcode < 128; opcode += 4 ) {
-//                for ( funct3 = 0; funct3 < 8; funct3++ ) {
-//                        for ( rs2 = 0; rs2 < 4; rs2++ ) {
-//                                for ( funct7 = 0; funct7 < 64; funct7 += 8 ) {
-//                                        for ( rotinx = 0; rotinx < 18; rotinx++ ) {
-//                                                
-//                                                /* Slight cheating, as opcode[0] == 1,
-//                                                   I use (1u<<0) as no rotator bit present
-//                                                */
-//                                                rotator = (1u<<circulatebit[rotinx]);
-//                                                INSTR = (funct7<<25) | (rs2<<20) | (funct3<<12) | opcode;
-//                                                INSTR |= rotator;
-//                                                nriter++;
-//
-//                                                tb->INSTR = INSTR;
-//                                                tb->eval();
-//                                                int minx = tb->v->minx;
-//
-//                                                hit[minx]++;
-//                                                
-//                                                if ( reachability[minx] == 0 ) {
-//                                                        if ( !suspend[minx] ) {
-//                                                                if ( dbg ) {
-//                                                                        printf( "Reached index that should be inaccessible\n" );
-//                                                                        printf( "Problem at base instruction 0x%8.8x\n", INSTR );
-//                                                                        printf( "Pocked dissasembly say: " );
-//                                                                        pocketdissass( 0, INSTR );
-//                                                                        printf( "\nminx = 0x%2.2x\n", minx );
-//                                                                }
-//                                                                suspend[minx] = 1;
-//                                                        }
-//                                                } else if ( reachability[minx] == 2 ) {
-//                                                        // Check that INSTR is really to be ignored
-//                                                } else if ( reachability[minx] == 1 ) {
-//                                                        /* Note.
-//                                                           Test is lax for ECALL. ECALL strict decoding must be performed elsewhere
-//                                                        */
-//                                                        /* Change to 
-//                                                           if ( (instr[minx] & mask[minx]) != (INSTR & localmask) ) {
-//                                                        */
-//                                                        if ( (instr[minx] & mask[minx]) != (INSTR & mask[minx]) ) {
-//                                                                if ( dbg ) {
-//                                                                        printf( "Problem at base instruction 0x%8.8x\n", INSTR );
-//                                                                        printf( "Pocked dissasembly say: " );
-//                                                                        pocketdissass( 0, INSTR );
-//                                                                        printf( "\nminx = 0x%2.2x\n", minx );
-//                                                                }
-//                                                                ferr( "Aborts\n" );
-//                                                        }
-//                                                        // printf( "%8.8x 0x%.2x\n", INSTR, minx );
-//                                                } else {
-//                                                        printf( "Que?\n" );
-//                                                }
-//                                        }
-//                                }
-//                        }
-//                }
-//        }
-//#else

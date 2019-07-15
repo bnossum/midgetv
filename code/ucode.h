@@ -914,7 +914,7 @@
 /* 1f */Y( 0,     0 , _IJ_2              , 0, 0xffffffff, 0x00000000)
 /* 20 */Y( 1,     0 , _LH_0              , 1, 0x0000707f, 0x00001003) // LH
 /* 21 */Y( 0,     0 , _XORI_1            , 0, 0xffffffff, 0x00000000)
-/* 22 */Y( 0,     0 , _EBRKWFI2          , 0, 0xffffffff, 0x00000000)
+/* 22 */Y( 1,     0 , _ILL_0(_L22)       , 2, 0xffffffff, 0x00000000)
 /* 23 */Y( 1,     0 , _FENCE(FENCEI)     , 1, 0x0000707f, 0x0000100f) // FENCEI
 /* 24 */Y( 1,     0 , _SLLI_0            , 1, 0xfe00707f, 0x00001013) // SLLI
 /* 25 */Y( 1,     0 , _AUIPC_0(_L25)     , 1, 0x0000007f, 0x00000017) // AUIPC 2/4
@@ -926,7 +926,7 @@
 /* 2b */Y( 0,     0 , _SLTIX_1           , 0, 0xffffffff, 0x00000000)
 /* 2c */Y( 1,     0 , _SLL_0             , 1, 0xfe00707f, 0x00001033) // SLL
 /* 2d */Y( 1,     0 , _LUI_0(_L2d)       , 1, 0x0000007f, 0x00000037) // LUI 3/8
-/* 2e */Y( 1,     0 , _ILL_0(_L2e)       , 2, 0xffffffff, 0x00000000)
+/* 2e */Y( 0,     0 , _EBRKWFI2          , 0, 0xffffffff, 0x00000000)
 /* 2f */Y( 1,     0 , _LUI_0(_L2f)       , 1, 0x0000007f, 0x00000037) // LUI 4/8
 /* 30 */Y( 0,     0 , _SLTIX_2           , 0, 0xffffffff, 0x00000000)
 /* 31 */Y( 0,     0 , _SLTX_1            , 0, 0xffffffff, 0x00000000)
@@ -946,7 +946,7 @@
 /* 3f */Y( 0,     0 , _SRx_1             , 0, 0xffffffff, 0x00000000)
 /* 40 */Y( 1,     0 , _LW_0              , 1, 0x0000707f, 0x00002003) // LW
 /* 41 */Y( 0,     0 , _JALR_1            , 0, 0xffffffff, 0x00000000)
-/* 42 */Y( 0,     0 , _JALR_2            , 0, 0xffffffff, 0x00000000)
+/* 42 */Y( 1,     0 , _ILL_0(_L42)       , 2, 0xffffffff, 0x00000000)
 /* 43 */Y( 1,     0 , _ILL_0(_L43)       , 2, 0xffffffff, 0x00000000)
 /* 44 */Y( 1,     0 , _SLTI_0            , 1, 0x0000707f, 0x00002013) // SLTI
 /* 45 */Y( 1,     0 , _AUIPC_0(_L45)     , 1, 0x0000007f, 0x00000017) // AUIPC 3/4
@@ -958,7 +958,7 @@
 /* 4b */Y( 0,     0 , _CSRRW_2           , 0, 0xffffffff, 0x00000000)
 /* 4c */Y( 1,     0 , _SLT_0             , 1, 0xfe00707f, 0x00002033) // SLT
 /* 4d */Y( 1,     0 , _LUI_0(_L4d)       , 1, 0x0000007f, 0x00000037) // LUI 5/8
-/* 4e */Y( 1,     0 , _ILL_0(_L4e)       , 2, 0xffffffff, 0x00000000)
+/* 4e */Y( 0,     0 , _JALR_2            , 0, 0xffffffff, 0x00000000)
 /* 4f */Y( 1,     0 , _LUI_0(_L4f)       , 1, 0x0000007f, 0x00000037) // LUI 6/8
 /* 50 */Y( 0,  0x03 , _LW_1              , 0, 0xffffffff, 0x00000000) 
 /* 51 */Y( 0,  0x03 , _LDAF(LDAF_LW)     , 0, 0xffffffff, 0x00000000)
@@ -978,7 +978,7 @@
 /* 5f */Y( 0,  0x06 , _LDAF(LDAF_LHU)    , 0, 0xffffffff, 0x00000000)
 /* 60 */Y( 1,  0x07 , _ILL_0(_L60)       , 2, 0xffffffff, 0x00000000)
 /* 61 */Y( 0,  0x07 , _MRET_8            , 0, 0xffffffff, 0x00000000) 
-/* 62 */Y( 0,     0 , _LHU_3             , 0, 0xffffffff, 0x00000000)
+/* 62 */Y( 1,     0 , _ILL_0(_L62)       , 2, 0xffffffff, 0x00000000)
 /* 63 */Y( 1,     0 , _ILL_0(_L63)       , 2, 0xffffffff, 0x00000000)
 /* 64 */Y( 1,     0 , _SLTIU_0           , 1, 0x0000707f, 0x00003013) // SLTIU
 /* 65 */Y( 1,     0 , _AUIPC_0(_L65)     , 1, 0x0000007f, 0x00000017) // AUIPC 4/4
@@ -990,7 +990,7 @@
 /* 6b */Y( 0,     0 , _SB_4              , 0, 0xffffffff, 0x00000000)
 /* 6c */Y( 1,     0 , _SLTU_0            , 1, 0xfe00707f, 0x00003033) // SLTU
 /* 6d */Y( 1,     0 , _LUI_0(_L6d)       , 1, 0x0000007f, 0x00000037) // LUI 7/8
-/* 6e */Y( 1,     0 , _ILL_0(_L6e)       , 2, 0xffffffff, 0x00000000)
+/* 6e */Y( 0,     0 , _LHU_3             , 0, 0xffffffff, 0x00000000)
 /* 6f */Y( 1,     0 , _LUI_0(_L6f)       , 1, 0x0000007f, 0x00000037) // LUI 8/8
 /* 70 */Y( 0,  0x09 , _LHU_2             , 0, 0xffffffff, 0x00000000)
 /* 71 */Y( 0,  0x09 , _aFaultc           , 0, 0xffffffff, 0x00000000)
@@ -1010,7 +1010,7 @@
 /* 7f */Y( 0,     0 , _JALRE2            , 0, 0xffffffff, 0x00000000)
 /* 80 */Y( 1,     0 , _LBU_0             , 1, 0x0000707f, 0x00004003) // LBU
 /* 81 */Y( 0,     0 , _JAERR_2           , 0, 0xffffffff, 0x00000000)
-/* 82 */Y( 0,     0 , _ILL_3             , 0, 0xffffffff, 0x00000000)
+/* 82 */Y( 1,     0 , _ILL_0(_L82)       , 2, 0xffffffff, 0x00000000)
 /* 83 */Y( 1,     0 , _ILL_0(_L83)       , 2, 0xffffffff, 0x00000000)
 /* 84 */Y( 1,     0 , _XORI_0            , 1, 0x0000707f, 0x00004013) // XORI
 /* 85 */Y( 0,     0 , _LBU_1             , 0, 0xffffffff, 0x00000000)
@@ -1022,16 +1022,16 @@
 /* 8b */Y( 0,     0 , _ILL_5             , 0, 0xffffffff, 0x00000000)
 /* 8c */Y( 1,     0 , _XOR_0             , 1, 0xfe00707f, 0x00004033) // XOR
 /* 8d */Y( 0,     0 , _WFI_3             , 0, 0xffffffff, 0x00000000)
-/* 8e */Y( 1,  0x0c , _ILL_0(_L8e)       , 2, 0xffffffff, 0x00000000)
-/* 8f */Y( 0,  0x0c , _WFI_5             , 0, 0xffffffff, 0x00000000)
+/* 8e */Y( 0,     0 , _ILL_3             , 0, 0xffffffff, 0x00000000)
+/* 8f */Y( 0,     0 , _aF_SW_3           , 0, 0xffffffff, 0x00000000)
 /* 90 */Y( 0,     0 , _NMI_2             , 0, 0xffffffff, 0x00000000)
 /* 91 */Y( 0,     0 , _LDAF_2            , 0, 0xffffffff, 0x00000000)
 /* 92 */Y( 0,     0 , _LDAF_3            , 0, 0xffffffff, 0x00000000)
 /* 93 */Y( 0,     0 , _SW_E2             , 0, 0xffffffff, 0x00000000)
 /* 94 */Y( 0,     0 , _SW_E3             , 0, 0xffffffff, 0x00000000)
 /* 95 */Y( 0,     0 , _SW_E4             , 0, 0xffffffff, 0x00000000)
-/* 96 */Y( 0,  0x0d , _SH_1              , 0, 0xffffffff, 0x00000000)
-/* 97 */Y( 0,  0x0d , _SW_E1(SWH)        , 0, 0xffffffff, 0x00000000)
+/* 96 */Y( 0,  0x0c , _SH_1              , 0, 0xffffffff, 0x00000000)
+/* 97 */Y( 0,  0x0c , _SW_E1(SWH)        , 0, 0xffffffff, 0x00000000)
 /* 98 */Y( 1,     0 , _BLT               , 1, 0x0000707f, 0x00004063) // BLT
 /* 99 */Y( 1,     0 , _ILL_0(_L99)       , 2, 0xffffffff, 0x00000000)
 /* 9a */Y( 0,     0 , _SH_2              , 0, 0xffffffff, 0x00000000)
@@ -1042,12 +1042,12 @@
 /* 9f */Y( 0,     0 , _SH_5              , 0, 0xffffffff, 0x00000000)
 /* a0 */Y( 1,     0 , _LHU_0             , 1, 0x0000707f, 0x00005003) // LHU
 /* a1 */Y( 0,     0 , _ECALL_4           , 0, 0xffffffff, 0x00000000)
-/* a2 */Y( 0,     0 , _ECALL_5           , 0, 0xffffffff, 0x00000000)
+/* a2 */Y( 1,     0 , _ILL_0(_La2)       , 2, 0xffffffff, 0x00000000)
 /* a3 */Y( 1,     0 , _ILL_0(_La3)       , 2, 0xffffffff, 0x00000000)
 /* a4 */Y( 1,     0 , _SRxI_0            , 1, 0xbe00707f, 0x00005013) // SRLI/SRAI
 /* a5 */Y( 0,     0 , _MRET_3            , 0, 0xffffffff, 0x00000000)
-/* a6 */Y( 0,  0x0e , _ECAL_RET          , 0, 0xffffffff, 0x00000000)
-/* a7 */Y( 0,  0x0e , _EBRKWFI1          , 0, 0xffffffff, 0x00000000)
+/* a6 */Y( 0,  0x0d , _ECAL_RET          , 0, 0xffffffff, 0x00000000)
+/* a7 */Y( 0,  0x0d , _EBRKWFI1          , 0, 0xffffffff, 0x00000000)
 /* a8 */Y( 1,     0 , _ILL_0(_La8)       , 2, 0xffffffff, 0x00000000)
 /* a9 */Y( 0,     0 , _ECALL_6           , 0, 0xffffffff, 0x00000000)
 /* aa */Y( 1,     0 , _ILL_0(_Laa)       , 2, 0xffffffff, 0x00000000)
@@ -1070,11 +1070,11 @@
 /* bb */Y( 1,     0 , _JAL_0(_Lbb)       , 1, 0x0000007f, 0x0000006f) // JAL 6/8
 /* bc */Y( 1,     0 , _CSRRWI_0          , 1, 0x0000707f, 0x00005073) // CSRRWI
 /* bd */Y( 0,     0 , _IJ_4              , 0, 0xffffffff, 0x00000000)
-/* be */Y( 0,  0x0f , _IJ_1              , 0, 0xffffffff, 0x00000000)
-/* bf */Y( 0,  0x0f , _IJT_1             , 0, 0xffffffff, 0x00000000)
+/* be */Y( 0,  0x0e , _IJ_1              , 0, 0xffffffff, 0x00000000)
+/* bf */Y( 0,  0x0e , _IJT_1             , 0, 0xffffffff, 0x00000000)
 /* c0 */Y( 1,     0 , _ILL_0(_Lc0)       , 2, 0xffffffff, 0x00000000)
 /* c1 */Y( 0,     0 , _IJT_2             , 0, 0xffffffff, 0x00000000)
-/* c2 */Y( 0,     0 , _IJT_3             , 0, 0xffffffff, 0x00000000)
+/* c2 */Y( 1,     0 , _ILL_0(_Lc2)       , 2, 0xffffffff, 0x00000000)
 /* c3 */Y( 1,     0 , _ILL_0(_Lc3)       , 2, 0xffffffff, 0x00000000)
 /* c4 */Y( 1,     0 , _ORI_0             , 1, 0x0000707f, 0x00006013) // ORI
 /* c5 */Y( 0,     0 , _MRET_5            , 0, 0xffffffff, 0x00000000)
@@ -1086,12 +1086,12 @@
 /* cb */Y( 0,     0 , _QINT_2            , 0, 0xffffffff, 0x00000000)
 /* cc */Y( 1,     0 , _OR_0              , 1, 0xfe00707f, 0x00006033) // OR
 /* cd */Y( 0,     0 , _MRET_6            , 0, 0xffffffff, 0x00000000)
-/* ce */Y( 1,     0 , _ILL_0(_Lce)       , 2, 0xffffffff, 0x00000000)
+/* ce */Y( 0,     0 , _ECALL_5           , 0, 0xffffffff, 0x00000000)
 /* cf */Y( 0,     0 , _MRET_7            , 0, 0xffffffff, 0x00000000)
-/* d0 */Y( 0,  0x10 , _ECALL_1           , 0, 0xffffffff, 0x00000000)
-/* d1 */Y( 0,  0x10 , _MRET_1            , 0, 0xffffffff, 0x00000000)
-/* d2 */Y( 0,  0x11 , _LB_2              , 0, 0xffffffff, 0x00000000)
-/* d3 */Y( 0,  0x11 , _aFaultd           , 0, 0xffffffff, 0x00000000)
+/* d0 */Y( 0,  0x0f , _ECALL_1           , 0, 0xffffffff, 0x00000000)
+/* d1 */Y( 0,  0x0f , _MRET_1            , 0, 0xffffffff, 0x00000000)
+/* d2 */Y( 0,  0x10 , _LB_2              , 0, 0xffffffff, 0x00000000)
+/* d3 */Y( 0,  0x10 , _aFaultd           , 0, 0xffffffff, 0x00000000)
 /* d4 */Y( 0,     0 , _aFault_2          , 0, 0xffffffff, 0x00000000)
 /* d5 */Y( 0,     0 , _eFetch2           , 0, 0xffffffff, 0x00000000)
 /* d6 */Y( 0,     0 , _jFault_1          , 0, 0xffffffff, 0x00000000)
@@ -1102,23 +1102,23 @@
 /* db */Y( 1,     0 , _JAL_0(_Ldb)       , 1, 0x0000007f, 0x0000006f) // JAL 7/8
 /* dc */Y( 1,     0 , _CSRRSI_0          , 1, 0x0000707f, 0x00006073) // CSRRSI
 /* dd */Y( 0,     0 , _aF_SW_1           , 0, 0xffffffff, 0x00000000)
-/* de */Y( 0,  0x12 , _Fetch             , 0, 0xffffffff, 0x00000000) 
-/* df */Y( 0,  0x12 , _eFetch            , 0, 0xffffffff, 0x00000000) 
+/* de */Y( 0,  0x11 , _Fetch             , 0, 0xffffffff, 0x00000000) 
+/* df */Y( 0,  0x11 , _eFetch            , 0, 0xffffffff, 0x00000000) 
 /* e0 */Y( 1,     0 , _ILL_0(_Le0)       , 2, 0xffffffff, 0x00000000)
 /* e1 */Y( 0,     0 , _ORI_1             , 0, 0xffffffff, 0x00000000)
-/* e2 */Y( 0,     0 , _aF_SW_2           , 0, 0xffffffff, 0x00000000)
+/* e2 */Y( 1,     0 , _ILL_0(_Le2)       , 2, 0xffffffff, 0x00000000)
 /* e3 */Y( 1,     0 , _ILL_0(_Le3)       , 2, 0xffffffff, 0x00000000)
 /* e4 */Y( 1,     0 , _ANDI_0            , 1, 0x0000707f, 0x00007013) // ANDI
-/* e5 */Y( 0,     0 , _Le5,"q:e5", unx   , 0, 0xffffffff, 0x00000000)
-/* e6 */Y( 0,  0x13 , _StdIncPc          , 0, 0xffffffff, 0x00000000)
-/* e7 */Y( 0,  0x13 , _aFault            , 0, 0xffffffff, 0x00000000)
-/* e8 */Y( 1,     0 , _ILL_0(_Le8)       , 2, 0xffffffff, 0x00000000)
-/* e9 */Y( 0,     0 , _aF_SW_3           , 0, 0xffffffff, 0x00000000)
+/* e5 */Y( 0,     0 , _aF_SW_2           , 0, 0xffffffff, 0x00000000)
+/* e6 */Y( 0,  0x12 , _StdIncPc          , 0, 0xffffffff, 0x00000000)
+/* e7 */Y( 0,  0x12 , _aFault            , 0, 0xffffffff, 0x00000000)
+/* e8 */Y( 1,  0x13 , _ILL_0(_Le8)       , 2, 0xffffffff, 0x00000000)
+/* e9 */Y( 0,  0x13 , _WFI_5             , 0, 0xffffffff, 0x00000000)
 /* ea */Y( 1,  0x14 , _ILL_0(_Lea)       , 2, 0xffffffff, 0x00000000)
 /* eb */Y( 0,  0x14 , _ECALL_3           , 0, 0xffffffff, 0x00000000)
 /* ec */Y( 1,     0 , _AND_0             , 1, 0xfe00707f, 0x00007033) // AND
 /* ed */Y( 0,     0 , _Led,"q:ed", unx   , 0, 0xffffffff, 0x00000000)
-/* ee */Y( 1,     0 , _ILL_0(_Lee)       , 2, 0xffffffff, 0x00000000)
+/* ee */Y( 0,     0 , _IJT_3             , 0, 0xffffffff, 0x00000000)
 /* ef */Y( 0,     0 , _Lef,"q:ef", unx   , 0, 0xffffffff, 0x00000000)
 /* f0 */Y( 0,  0x15 , _LBU_2             , 0, 0xffffffff, 0x00000000)
 /* f1 */Y( 0,  0x15 , _aFaulte           , 0, 0xffffffff, 0x00000000)

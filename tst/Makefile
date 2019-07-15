@@ -44,7 +44,7 @@ $(BINDIR)/%.bin:%.cpp $(OBJDIR)/V%__ALL.a
 $(BINDIR)/m_ucodepc.bin:m_ucodepc.cpp $(OBJDIR)/Vm_ucodepc__ALL.a common.cpp ../code/ucode.h
 	g++ $(GCCFLAGS) $< $(OBJDIR)/Vm_ucodepc$(*F)__ALL.a /usr/share/verilator/include/verilated.cpp common.cpp -o $@
 
-$(BINDIR)/m_ice%.bin:m_ice%.cpp $(OBJDIR)/Vm_ice%__ALL.a common.cpp
+$(BINDIR)/m_ice%.bin:m_ice%.cpp $(OBJDIR)/Vm_ice%__ALL.a common.cpp ../code/ucode.h
 	g++ $(GCCFLAGS) $< $(OBJDIR)/Vm_ice$(*F)__ALL.a /usr/share/verilator/include/verilated.cpp common.cpp -o $@
 
 
