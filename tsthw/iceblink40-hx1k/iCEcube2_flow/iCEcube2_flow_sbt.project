@@ -20,7 +20,7 @@ NetlistFile=iCEcube2_flow_Implmnt/iCEcube2_flow.edf
 AdditionalEDIFFile=
 IPEDIFFile=
 DesignLib=iCEcube2_flow_Implmnt/sbt/netlist/oadb-top
-DesignView=_pl
+DesignView=_rt
 DesignCell=top
 SynthesisSDCFile=iCEcube2_flow_Implmnt/iCEcube2_flow.scf
 UserPinConstraintFile=
@@ -69,7 +69,7 @@ VerilogIncludeSearchPath=
 [tool options]
 PlacerEffortLevel=std
 PlacerAutoLutCascade=no
-PlacerAutoRamCascade=yes
+PlacerAutoRamCascade=no
 PlacerPowerDriven=no
 PlacerAreaDriven=no
 RouteWithTimingDriven=yes

@@ -238,6 +238,7 @@ module m_midgetv_core
       SRAMADRWIDTH = 0,  EBRADRWIDTH =  8, IWIDTH =  8, NO_CYCLECNT = 1, MTIMETAP =  0, HIGHLEVEL = 0, LAZY_DECODE = 2, // Minimal
 //    SRAMADRWIDTH = 16, EBRADRWIDTH =  8, IWIDTH = 32, NO_CYCLECNT = 0, MTIMETAP = 14, HIGHLEVEL = 0, LAZY_DECODE = 0, // Conventional
 //    SRAMADRWIDTH = 17, EBRADRWIDTH = 11, IWIDTH = 32, NO_CYCLECNT = 0, MTIMETAP = 14, HIGHLEVEL = 0, LAZY_DECODE = 0, // Maximal
+
       DBGA = 0,
       parameter [4095:0] program0 = 4096'h0,
       parameter [4095:0] program1 = 4096'h0,
@@ -945,55 +946,56 @@ module m_midgetv_core
       if ( DBGA == 0 ) begin
          assign dbga = 32'b0;
       end else begin
-         reg [31:0] rdbga;
-         always @(posedge clk) begin
-//            rdbga[3] <= STB_O;
-//            rdbga[2] <= iwe;
-//            rdbga[1] <= sram_stb;
-//            rdbga[0] <= progress_ucode;
-            //
-            // This established that we do progress_ucode, and iwe from times to times
-            // Never any STB_O, nor sram_stb
-            // So where do we write?
-//            if ( iwe ) 
-//              rdbga[3:0] <= {sa27,sa26,sa25,sa24};
-//            else
-//              rdbga[3:0] <= 4'h0;
-            //            
-            // Sequence 4,a,0,b,9,0,d,f -> We are entering a trap
-            // Reconfirm that we write to PC
-//            if ( iwe & {sa27,sa26,sa25,sa24} == 4'b1010 ) begin
-//               rdbga[3:0] <= 4'hf;
-//            end else begin
-//               rdbga[3:0] <= 4'h0;
-//            end
-            //
-            // We do. Confirm that the upper 20 bits and the lower
-            // two bits of PC are always written to 0
-//            if ( iwe & {sa27,sa26,sa25,sa24} == 4'b1010 ) begin
-//               if ( B[31:12] != 20'h0 || B[1:0] != 2'b00 ) begin
-//                  rdbga[3:0] <= 4'h1;
-//               end
-//            end
-            //
-            // OK, so now get the PC out. I use PC[0] as a sentinel.
-            // This relies on the fact that we use more than 3 cycles
-            // between each PC write.
-//            if ( iwe & {sa27,sa26,sa25,sa24} == 4'b1010 ) begin
-//               rdbga <= B | 32'b1;
-//            end else begin
-//               rdbga[27:0] <= rdbga[31:4];
-//            end
-            //
-            // Seems we write 0x4 to PC, then 0 to PC ??
-            // Examine minx[3:0]
-//            rdbga[3:0] <= minx[3:0];
-            //
-            // seems stuck at 0x8. 
-            // Examine minx[7:0]
-            rdbga[3:0] <= minx[7:4];
-         end
-         assign dbga = rdbga;
+//         reg [31:0] rdbga;
+//         always @(posedge clk) begin
+////            rdbga[3] <= STB_O;
+////            rdbga[2] <= iwe;
+////            rdbga[1] <= sram_stb;
+////            rdbga[0] <= progress_ucode;
+//            //
+//            // This established that we do progress_ucode, and iwe from times to times
+//            // Never any STB_O, nor sram_stb
+//            // So where do we write?
+////            if ( iwe ) 
+////              rdbga[3:0] <= {sa27,sa26,sa25,sa24};
+////            else
+////              rdbga[3:0] <= 4'h0;
+//            //            
+//            // Sequence 4,a,0,b,9,0,d,f -> We are entering a trap
+//            // Reconfirm that we write to PC
+////            if ( iwe & {sa27,sa26,sa25,sa24} == 4'b1010 ) begin
+////               rdbga[3:0] <= 4'hf;
+////            end else begin
+////               rdbga[3:0] <= 4'h0;
+////            end
+//            //
+//            // We do. Confirm that the upper 20 bits and the lower
+//            // two bits of PC are always written to 0
+////            if ( iwe & {sa27,sa26,sa25,sa24} == 4'b1010 ) begin
+////               if ( B[31:12] != 20'h0 || B[1:0] != 2'b00 ) begin
+////                  rdbga[3:0] <= 4'h1;
+////               end
+////            end
+//            //
+//            // OK, so now get the PC out. I use PC[0] as a sentinel.
+//            // This relies on the fact that we use more than 3 cycles
+//            // between each PC write.
+////            if ( iwe & {sa27,sa26,sa25,sa24} == 4'b1010 ) begin
+////               rdbga <= B | 32'b1;
+////            end else begin
+////               rdbga[27:0] <= rdbga[31:4];
+////            end
+//            //
+//            // Seems we write 0x4 to PC, then 0 to PC ??
+//            // Examine minx[3:0]
+////            rdbga[3:0] <= minx[3:0];
+//            //
+//            // seems stuck at 0x8. 
+//            // Examine minx[7:0]
+//            rdbga[3:0] <= minx[7:4];
+//         end
+//         assign dbga = rdbga;
+         assign dbga = 32'b0;
       end
    endgenerate
 endmodule

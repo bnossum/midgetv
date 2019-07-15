@@ -39,6 +39,8 @@
 `include "../../code/m_midgetv_core.v"
 //`include "m_2ebr.v" reintroduce
 
+
+// size: 355 with LAZY_DECODE > 0, 372 with LAZY_DECODE == 0
 module mytop
   # ( parameter
       SRAMADRWIDTH    = 16,
@@ -46,7 +48,8 @@ module mytop
       IWIDTH          = 32, 
       NO_CYCLECNT     = 0, 
       MTIMETAP        = 16, 
-      HIGHLEVEL       = 0
+      HIGHLEVEL       = 0,
+      LAZY_DECODE     = 0
       )
    (input      usartRX,
     output     led_red,
@@ -162,12 +165,13 @@ module mytop
    
    m_midgetv_core
      #(
-      .SRAMADRWIDTH (   SRAMADRWIDTH),
-      .EBRADRWIDTH  (SIMEBRADRWIDTH ),
-      .IWIDTH       (   IWIDTH      ),
-      .NO_CYCLECNT  (   NO_CYCLECNT ),
-      .MTIMETAP     (   MTIMETAP    ),
-      .HIGHLEVEL    (   HIGHLEVEL   ),
+       .SRAMADRWIDTH (   SRAMADRWIDTH),
+       .EBRADRWIDTH  (SIMEBRADRWIDTH ),
+       .IWIDTH       (   IWIDTH      ),
+       .NO_CYCLECNT  (   NO_CYCLECNT ),
+       .MTIMETAP     (   MTIMETAP    ),
+       .HIGHLEVEL    (   HIGHLEVEL   ),
+       .LAZY_DECODE  (   LAZY_DECODE ),
        .program0(program0),
        .program1(program1),
        .program2(program2),
