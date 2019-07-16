@@ -3,6 +3,20 @@
  * 2019. Copyright B. Nossum.
  * For licence, see LICENCE
  * -----------------------------------------------------------------------------
+ * Instruction decode is preformed in this module. 
+ * Experiments with a lowlevel version did not give any gain in size.
+ * However:
+ *  - There is a lut or two to pinch by better analysis of startup
+ *    conditions.
+ *  - If we do not use a lazy decoding, the test of rd == 0  and
+ *    rs1 == 0 can be multiplexed with the zero-detector just before
+ *    the holding register ADR_O[31:0]. This will save a few luts.
+ * 
+ * All in all there is little to gain by manipulating this module,
+ * that also will need to be flexible if we are to implement 
+ * standard extension -M and/or -C.
+ * 
+ * 
  * Microcode program counter
  * 
  * usedinx_or_RST_I-------------------------+
@@ -82,38 +96,43 @@ module m_ucodepc
    endfunction
 `endif
 
+   wire         illegal_funct7_or_illegal_rs1_rd;
+   
+   assign usedinx   = sa28 | !corerunning;
+   assign maybranch = Adr0Mustbe0 | Adr1Mustbe0 | use_brcond | (sa32 & ~sa15);
+   
+   // Slight mangling of INSTRUCTION to an index. 
+   assign dinx[0]   = INSTR[2];
+   assign dinx[1]   = ((~INSTR[6]&INSTR[5])&INSTR[30]) | ((~(~INSTR[6]&INSTR[5]))&INSTR[3]);
+   assign dinx[4:2] = INSTR[6:4];
+   
+   /* assign dinx[7:5] = INSTR[14:12]; Need some more space, so index sligthly more elaborate */
+   assign dinx[6:5] = INSTR[13:12];
+   /* Candidates to compress:
+    * INSTR[6:0]
+    * 6543210
+    *   xxx
+    * 0110111 lui
+    * 0010111 auipc
+    * 1101111jal
+    */
+   assign dinx[7]   = INSTR[14] & (INSTR[4:2] != 3'b101);
+   /* This frees 8 instances of lui and 4 instances of auipc for the cost of 1 LUT */
+   
    generate
+      if ( LAZY_DECODE == 1 ) begin
+         // =======================================================
+         // Nearly full instruction decode. Does not
+         // check some minor code spaces.
+         // =======================================================
+         assign illegal_funct7_or_illegal_rs1_rd = 1'b0;
 
-      assign usedinx   = sa28 | !corerunning;
-      assign maybranch = Adr0Mustbe0 | Adr1Mustbe0 | use_brcond | (sa32 & ~sa15);
-      
-      // Slight mangling of INSTRUCTION to an index. 
-      assign dinx[0]   = INSTR[2];
-      assign dinx[1]   = ((~INSTR[6]&INSTR[5])&INSTR[30]) | ((~(~INSTR[6]&INSTR[5]))&INSTR[3]);
-      assign dinx[4:2] = INSTR[6:4];
-      
-      /* assign dinx[7:5] = INSTR[14:12]; Need some more space, so index sligthly more elaborate */
-      assign dinx[6:5] = INSTR[13:12];
-      /* Candidates to compress:
-       * INSTR[6:0]
-       * 6543210
-       *   xxx
-       * 0110111 lui
-       * 0010111 auipc
-       * 1101111jal
-       */
-      assign dinx[7]   = INSTR[14] & (INSTR[4:2] != 3'b101);
-      /* This frees 8 instances of lui and 4 instances of auipc for the cost of 1 LUT */
-      
-      
-      if ( LAZY_DECODE == 0 ) begin
+      end else begin
          
          // =======================================================
          // Full instruction decode. Costs around 16 luts more 
          // than LAZY_DECODE == 1.
          // =======================================================
-         wire       illegal_funct7_or_illegal_rs1_rd;
-         
          /*  
           Instructions and, or, slli, srli, add, sll, slt, sltu, xor and srl
           should only be valid when funct7 == 7'b00000000. 
@@ -182,126 +201,77 @@ module m_ucodepc
            = (checkfunct7 & mostof_funct7_ne0) |
              (checkfunct7 & ~funct7_5_dontcare & funct7[5]) |
              illegal_rs1_rd;
-         
-         /* The Main illegal signal
-          *
-          * illegal_a = (16'b1100111011000010 >> INSTR[5:2]); opens up for prefix 0001011, custom-0
-          * illegal_b = (16'b1110010011111111 >> INSTR[5:2]);
-          * illegal = (~INSTR[6] & illegal_a) | (INSTR[6] & illegal_b ) | ~INSTR[1] | ~INSTR[0] |
-          *           illegal_funct7_or_illegal_rs1_rd
-          */
-         
-         reg        illegal_a, illegal_b;
-         always @(/*AS*/INSTR)
-           case ( INSTR[5:2] )
-             4'b0000 : {illegal_b,illegal_a} = 2'b10;
-             4'b0001 : {illegal_b,illegal_a} = 2'b11;
-             4'b0010 : {illegal_b,illegal_a} = 2'b10;
-             4'b0011 : {illegal_b,illegal_a} = 2'b10;
-             4'b0100 : {illegal_b,illegal_a} = 2'b10;
-             4'b0101 : {illegal_b,illegal_a} = 2'b10;
-             4'b0110 : {illegal_b,illegal_a} = 2'b11;
-             4'b0111 : {illegal_b,illegal_a} = 2'b11;
-             4'b1000 : {illegal_b,illegal_a} = 2'b00;
-             4'b1001 : {illegal_b,illegal_a} = 2'b01;
-             4'b1010 : {illegal_b,illegal_a} = 2'b11;
-             4'b1011 : {illegal_b,illegal_a} = 2'b01;
-             4'b1100 : {illegal_b,illegal_a} = 2'b00;
-             4'b1101 : {illegal_b,illegal_a} = 2'b10;
-             4'b1110 : {illegal_b,illegal_a} = 2'b11;
-             4'b1111 : {illegal_b,illegal_a} = 2'b11;
-           endcase
-         assign illegal = (~INSTR[6] & illegal_a) | 
-                          (INSTR[6] & illegal_b ) | 
-                          ~INSTR[1] |
-                          ~INSTR[0] |
-                          illegal_funct7_or_illegal_rs1_rd;
-         
-         
-         /* takebranch. Microcode must diverge when we have an alignment error,
-          * a taken branch, or an opcode fetch when we read from SRAM
-          *                     _              ____
-          * Adr0Mustbe0 -------|&|------------|    |--- takebranch
-          * B[0] --------------|_|  +---------| or |
-          *                     _   | +-------|    |
-          * Adr1Mustbe0 -------|&|--+ | +-----|____|
-          * B[1] --------------|_|    | |
-          *                     _     | |
-          * use_brcond --------|&|----+ |
-          * is_brcond ---------|_|      |
-          *                     _       |
-          * read_instr --------|&|------+
-          * B[31] -------------|_|
-          */
-         wire       qualint_or_RST_I = qualint | RST_I;
-         wire       illegal_or_qualint = (illegal | qualint) & corerunning;
-         wire       illegal_or_qualint_or_RST_I = (illegal | qualint | RST_I) & corerunning;
-         assign takebranch = 
-                             (Adr0Mustbe0 & B[0]) |
-                             (Adr1Mustbe0 & B[1]) |                
-                             (use_brcond & is_brcond) |
-                             (sa32 & ~sa15 & B[31] );
-         wire       usedinx_or_RST_I = usedinx | RST_I;
-         assign minx[7:2] = {6{corerunning}} & (usedinx_or_RST_I ? (dinx[7:2] | {6{illegal_or_qualint_or_RST_I}}) : rinx[7:2]);
-         assign minx[1]   = corerunning & (usedinx_or_RST_I ? ( (dinx[1] | illegal_or_qualint) & ~RST_I)     : rinx[1]);
-         assign minx[0]   = corerunning & (buserror | (usedinx_or_RST_I ? (illegal_or_qualint_or_RST_I ? qualint_or_RST_I : dinx[0]) : (maybranch ? takebranch : rinx[0])));
-         
-         assign ucodepc_killwarnings = INSTR[31] | &INSTR[29:15] | &INSTR[11:7] |  &B;
-         
-         
-      end else begin
-         
-         // =======================================================
-         // Check on most codespaces, omits some minor codespaces
-         // =======================================================
-         
-         /* The Main illegal signal
-          *
-          * illegal_a = (16'b1100111011000010 >> INSTR[5:2]); opens up for prefix 0001011, custom-0
-          * illegal_b = (16'b1110010011111111 >> INSTR[5:2]);
-          * illegal = (~INSTR[6] & illegal_a) | (INSTR[6] & illegal_b ) | ~INSTR[1] | ~INSTR[0]
-          */
-         reg          illegal_a, illegal_b;
-         always @(/*AS*/INSTR)
-           case ( INSTR[5:2] )
-             4'b0000 : {illegal_b,illegal_a} = 2'b10;
-             4'b0001 : {illegal_b,illegal_a} = 2'b11;
-             4'b0010 : {illegal_b,illegal_a} = 2'b10;
-             4'b0011 : {illegal_b,illegal_a} = 2'b10;
-             4'b0100 : {illegal_b,illegal_a} = 2'b10;
-             4'b0101 : {illegal_b,illegal_a} = 2'b10;
-             4'b0110 : {illegal_b,illegal_a} = 2'b11;
-             4'b0111 : {illegal_b,illegal_a} = 2'b11;
-             4'b1000 : {illegal_b,illegal_a} = 2'b00;
-             4'b1001 : {illegal_b,illegal_a} = 2'b01;
-             4'b1010 : {illegal_b,illegal_a} = 2'b11;
-             4'b1011 : {illegal_b,illegal_a} = 2'b01;
-             4'b1100 : {illegal_b,illegal_a} = 2'b00;
-             4'b1101 : {illegal_b,illegal_a} = 2'b10;
-             4'b1110 : {illegal_b,illegal_a} = 2'b11;
-             4'b1111 : {illegal_b,illegal_a} = 2'b11;
-           endcase
-         assign illegal = (~INSTR[6] & illegal_a) | 
-                          (INSTR[6] & illegal_b ) | 
-                          ~INSTR[1] |
-                          ~INSTR[0];
-         
-         wire         qualint_or_RST_I = qualint | RST_I;
-         wire         illegal_or_qualint_AND_corerunning = (illegal | qualint) & corerunning;
-         wire         illegal_or_qualint_or_RST_I_AND_corerunning = (illegal | qualint | RST_I) & corerunning;
-         assign takebranch = 
-                             (Adr0Mustbe0 & B[0]) |
-                             (Adr1Mustbe0 & B[1]) |                
-                             (use_brcond & is_brcond) |
-                             (sa32 & ~sa15 & B[31] );
-         wire         usedinx_or_RST_I = usedinx | RST_I;
-         assign minx[7:2] = usedinx_or_RST_I ? (dinx[7:2] | {6{illegal_or_qualint_or_RST_I_AND_corerunning}}) : rinx[7:2];
-         assign minx[1]   = corerunning & (usedinx_or_RST_I ? ( (dinx[1] | illegal_or_qualint_AND_corerunning) & ~RST_I)     : rinx[1]);
-         assign minx[0]   = corerunning & (buserror | (usedinx_or_RST_I ? (illegal_or_qualint_or_RST_I_AND_corerunning ? qualint_or_RST_I : dinx[0]) : (maybranch ? takebranch : rinx[0])));
-         
-         assign ucodepc_killwarnings = INSTR[31] | &INSTR[29:15] | &INSTR[11:7] | &B;
-         
-      end         
+      end
    endgenerate
+         
+   /* The Main illegal signal
+    *
+    * illegal_a = (16'b1100111011000010 >> INSTR[5:2]); opens up for prefix 0001011, custom-0
+    * illegal_b = (16'b1110010011111111 >> INSTR[5:2]);
+    * illegal = (~INSTR[6] & illegal_a) | (INSTR[6] & illegal_b ) | ~INSTR[1] | ~INSTR[0] |
+    *           illegal_funct7_or_illegal_rs1_rd
+    */
+   
+   reg              illegal_a, illegal_b;
+   always @(/*AS*/INSTR)
+     case ( INSTR[5:2] )
+       4'b0000 : {illegal_b,illegal_a} = 2'b10;
+       4'b0001 : {illegal_b,illegal_a} = 2'b11;
+       4'b0010 : {illegal_b,illegal_a} = 2'b10;
+       4'b0011 : {illegal_b,illegal_a} = 2'b10;
+       4'b0100 : {illegal_b,illegal_a} = 2'b10;
+       4'b0101 : {illegal_b,illegal_a} = 2'b10;
+       4'b0110 : {illegal_b,illegal_a} = 2'b11;
+       4'b0111 : {illegal_b,illegal_a} = 2'b11;
+       4'b1000 : {illegal_b,illegal_a} = 2'b00;
+       4'b1001 : {illegal_b,illegal_a} = 2'b01;
+       4'b1010 : {illegal_b,illegal_a} = 2'b11;
+       4'b1011 : {illegal_b,illegal_a} = 2'b01;
+       4'b1100 : {illegal_b,illegal_a} = 2'b00;
+       4'b1101 : {illegal_b,illegal_a} = 2'b10;
+       4'b1110 : {illegal_b,illegal_a} = 2'b11;
+       4'b1111 : {illegal_b,illegal_a} = 2'b11;
+     endcase
+   assign illegal = (~INSTR[6] & illegal_a) | 
+                    (INSTR[6] & illegal_b ) | 
+                    ~INSTR[1] |
+                    ~INSTR[0] |
+                    illegal_funct7_or_illegal_rs1_rd;
+   
+   
+   /* takebranch. Microcode must diverge when we have an alignment error,
+    * a taken branch, or an opcode fetch when we read from SRAM
+    *                     _              ____
+    * Adr0Mustbe0 -------|&|------------|    |--- takebranch
+    * B[0] --------------|_|  +---------| or |
+    *                     _   | +-------|    |
+    * Adr1Mustbe0 -------|&|--+ | +-----|____|
+    * B[1] --------------|_|    | |
+    *                     _     | |
+    * use_brcond --------|&|----+ |
+    * is_brcond ---------|_|      |
+    *                     _       |
+    * read_instr --------|&|------+
+    * B[31] -------------|_|
+    */
+   wire             qualint_or_RST_I = qualint | RST_I;
+   wire             illegal_or_qualint = (illegal | qualint) & corerunning;
+   wire             illegal_or_qualint_or_RST_I = (illegal | qualint | RST_I) & corerunning;
+   assign takebranch = 
+                       (Adr0Mustbe0 & B[0]) |
+                       (Adr1Mustbe0 & B[1]) |                
+                       (use_brcond & is_brcond) |
+                       (sa32 & ~sa15 & B[31] );
+   wire             usedinx_or_RST_I = usedinx | RST_I;
+   assign minx[7:2] = {6{corerunning}} & (usedinx_or_RST_I ? (dinx[7:2] | {6{illegal_or_qualint_or_RST_I}}) : rinx[7:2]);
+   assign minx[1]   = corerunning & (usedinx_or_RST_I ? ( (dinx[1] | illegal_or_qualint) & ~RST_I)     : rinx[1]);
+   assign minx[0]   = corerunning & (buserror | (usedinx_or_RST_I ? (illegal_or_qualint_or_RST_I ? qualint_or_RST_I : dinx[0]) : (maybranch ? takebranch : rinx[0])));
+
+   // // Alternative. Revise this when analyzing startup conditions
+   // assign minx[7:2] = usedinx_or_RST_I ? (dinx[7:2] | {6{illegal_or_qualint_or_RST_I_AND_corerunning}}) : rinx[7:2];
+   // assign minx[1]   = corerunning & (usedinx_or_RST_I ? ( (dinx[1] | illegal_or_qualint_AND_corerunning) & ~RST_I)     : rinx[1]);
+   // assign minx[0]   = corerunning & (buserror | (usedinx_or_RST_I ? (illegal_or_qualint_or_RST_I_AND_corerunning ? qualint_or_RST_I : dinx[0]) : (maybranch ? takebranch : rinx[0])));
+   
+   assign ucodepc_killwarnings = INSTR[31] | &INSTR[29:15] | &INSTR[11:7] | &B;
    
 endmodule
