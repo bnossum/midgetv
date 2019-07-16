@@ -40,7 +40,6 @@
 //`include "m_2ebr.v" reintroduce
 
 
-// size: 355 with LAZY_DECODE > 0, 372 with LAZY_DECODE == 0
 module mytop
   # ( parameter
       SRAMADRWIDTH    = 16,
@@ -80,8 +79,13 @@ module mytop
      (.CLKLFPU(1'b1), // Power on
       .CLKLFEN(1'b1), // Enable always
       .CLKLF(clklf)
-      ) /* synthesis ROUTE_THROUGH_FABRIC= 1 */;
-   /* The horrible directive is needed to avoid using a clock-net
+      ) 
+     /* synthesis syn_noprune = 1 */
+     /* xsynthesis ROUTE_THROUGH_FABRIC= 1 */;
+
+ 
+   /* The second horrible directive is needed to avoid using a clock-net
+    * The first is needed to avoid deletion by Synplify Pro
     */
    reg [3:0]   hfen;
    always @(posedge clklf) 

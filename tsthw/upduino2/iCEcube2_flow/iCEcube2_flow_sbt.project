@@ -3,7 +3,7 @@ ProjectVersion=2.0
 Version=Lattice Semiconductor Corporation iCEcube - Release: 2017.08.27940 - Build Date: Sep 12 2017 08:41:24
 ProjectName=iCEcube2_flow
 Vendor=SiliconBlue
-Synthesis=synplify
+Synthesis=lse
 ProjectVFiles=../upduino2.v=work
 ProjectCFiles=
 CurImplementation=iCEcube2_flow_Implmnt
@@ -20,7 +20,7 @@ NetlistFile=iCEcube2_flow_Implmnt/iCEcube2_flow.edf
 AdditionalEDIFFile=
 IPEDIFFile=
 DesignLib=iCEcube2_flow_Implmnt/sbt/netlist/oadb-mytop
-DesignView=
+DesignView=_rt
 DesignCell=mytop
 SynthesisSDCFile=iCEcube2_flow_Implmnt/iCEcube2_flow.scf
 UserPinConstraintFile=

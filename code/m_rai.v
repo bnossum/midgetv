@@ -145,8 +145,8 @@ module m_rai
 //         assign sel[3] = sa23 & ( STB_O | sram_stb | ~sa40 );
          assign sel[1] = sa21;
          assign sel[2] = sa22;
-         SB_LUT4 #(.LUT_INIT(16'hffe0)) L_sel_0( .O(sel[0]), .I3(sel0_more), .I2(sel0_helpack), .I1(ACK_I), .I0(sram_ack));
-         SB_LUT4 #(.LUT_INIT(16'hfd00)) L_sel_3( .O(sel[3]), .I3(sa23), .I2(STB_O), .I1(sram_stb), .I0(sa40));
+         SB_LUT4 #(.LUT_INIT(16'hffe0)) L_sel_0( .O(sel[0]), .I3(sel0_more), .I2(sel0_helpack), .I1(ACK_I),    .I0(sram_ack));
+         SB_LUT4 #(.LUT_INIT(16'hfd00)) L_sel_3( .O(sel[3]), .I3(sa23),      .I2(STB_O),        .I1(sram_stb), .I0(sa40));
          
          
          SB_LUT4 #(.LUT_INIT(16'h8080)) L_ss0( .O(ss0), .I3(1'b0), .I2(sel[0]), .I1(sel[3]), .I0(sel[2]));

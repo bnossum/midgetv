@@ -46,7 +46,7 @@ int main(int argc, char **argv) {
 
 
 
-           /* Largest task to perform, and most important, check instruction decode
+        /* Largest task to perform, check instruction decode
          */
         tb->corerunning = 1;
         tb->RST_I       = 0;
@@ -62,28 +62,26 @@ int main(int argc, char **argv) {
         tb->sa32  = 0; // To trigger OpCode jmp to alternate operand fetch from SRAM
         tb->sa15  = 0; // To trigger OpCode jmp to alternate operand fetch from SRAM
         tb->B     = 0; // B[1:0] to find alignment errors. B[31] to distinguish EBR/SRAM
-        tb->ADR_O = 0; // ADR_O[31] used at OpCode fetch to distinguish between EBR and SRAM
 
         uint32_t INSTR;
 
         /* The crudest way to check the OpCodes would be to iterate over
-           32 bits, testing from 0x00000000 to 0xffffffff. This is what I do, except
-           that I leave the low 3 bits of the instruction 2'b11.
+           32 bits, testing from 0x00000000 to 0xffffffff. This is what I do.
         */
-        fprintf( stderr, "Runtime around 1 minute\n" );
+        fprintf( stderr, "Runtime around 7 minutes on a Lenovo x230.\n" );
         
-        int dbg = 0;
-        INSTR = 3;
+        int dbg = 2;
+        INSTR = 0;
         do {
                 tb->INSTR = INSTR;
                 tb->eval();
-                int minx = tb->v->minx;
+                int minx = tb->minx;
                 
                 hit[minx]++;
                 
                 if ( reachability[minx] == 0 ) {
                         if ( pocketdissass( 1, 0, INSTR ) != -1 ) {
-                                ferr( "Reaced index should be inaccessible, but is reached with an instruction that should be decoded\n" );
+                                ferr( "Reached index should be inaccessible, but is reached with an instruction that should be decoded\n" );
                         }
                         if ( !suspend[minx] ) {
                                 if ( dbg ) {
@@ -92,6 +90,8 @@ int main(int argc, char **argv) {
                                         printf( "Pocked dissasembly say: " );
                                         pocketdissass( 0, 0, INSTR );
                                         printf( "\nminx = 0x%2.2x\n", minx );
+                                        if ( dbg > 1)
+                                                ferr( "Aborts\n" );
                                 }
                                 suspend[minx] = 1;
                         }
@@ -110,15 +110,16 @@ int main(int argc, char **argv) {
                                         printf( "Pocked dissasembly say: " );
                                         pocketdissass( 0, 0, INSTR );
                                         printf( "\nminx = 0x%2.2x\n", minx );
+                                        if ( dbg > 1)
+                                                ferr( "Aborts\n" );
                                 }
-                                ferr( "Aborts\n" );
                         }
                         // printf( "%8.8x 0x%.2x\n", INSTR, minx );
                 } else {
-                        printf( "Que?\n" );
+                        ferr( "Que?\n" );
                 }
-                INSTR += 4;
-        } while ( INSTR != 3);
+                INSTR++;
+        } while ( INSTR != 0);
         
 
         

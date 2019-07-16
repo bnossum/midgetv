@@ -124,6 +124,10 @@ module m_immexp_zfind_q
            endcase
          assign BisnotZero = B != 32'h0; // Note: This is NOT 100% eqivalent to the low level version, where we get it out of a carry chain.
 
+//         assign funct7_ne_0x00000 = B[31] | |B[29:25];
+//         assign rs1_funct3_rd_ne_00000_000_00000 = |B[19:7];
+                                     
+         
          always @(posedge clk) begin
             if ( enaQ ) begin
                if ( sa14 ) begin
@@ -164,10 +168,113 @@ module m_immexp_zfind_q
          SB_LUT4 # (.LUT_INIT(16'h0a2f)) L_1606(.O(sa13b),.I3(sa09),.I2(sa08),.I1(sa07),.I0(INSTR[31]));          
          
 //         assign dbg_itype = { sa09,sa08,sa07};
+/*                                                          
+ * Immediate expansion is combined with zero-detect of the ALU result.
+ * Drawing is not 100% correct, but give the idea.
+ *
+ *                                                   ___
+ *                                               ---|O0 |
+ *                                               ---|I1 |-- is_brcond
+ *                                               ---|I2 | 
+ *                                               +--|I3_|   
+ *                                               | zcy[32]
+ *                                              /y\  ___            sa10 
+ *                               LoadImmD[31] --(((-|O0 |           |sa13
+ *                                      B[31] --((+-|I1 |-- F[31]   ||     F[31]
+ *                                       sa10 --+(--|I2 |           00     0 = LoadImmD[31]
+ *                                       sa13 ---(--|I3_|           01     1 = LoadImmD[31] 
+ *                                               |                  10     B[31]  
+ *                                               |                  11     LoadImmD[31]
+ *                                               |
+ *                                               |                  sa10
+ *                                              /y\  ___            |sa13         
+ *                               LoadImmD[30] --(((-|O0 |           ||     F[30] 
+ *                                      B[30] --((+-|I1 |-- F[30]   00     0 = LoadImmD[31]
+ *                                       sa10 --+(--|I2 |           01     1 = LoadImmD[31]
+ *                                       sa13 ---(--|I3_|           10     B[30]  
+ *                                               |                  11     LoadImmD[30]
+ *                                               |
+ *                                               :                  sa10
+ *                                              /y\  ___            |sa13
+ *                               LoadImmD[20] --(((-|O0 |           ||     F[20]
+ *                                      B[20] --((+-|I1 |-- F[20]   00     0 == LoadImmD[31]
+ *                                       sa10 --+(--|I2 |           01     B[20]  
+ *                                       sa13 ---(--|I3_|           10     1 == LoadImmD[31]
+ *                                               |                  11     LoadImmD[20]
+ *                                               |
+ *                                              /y\  ___            sa31
+ *                               LoadImmD[19] --(((-|O0 |           |sa13  F[19]
+ *                                      B[19] --((+-|I1 |-- F[19]   00     0 == LoadImmD[31]    
+ *                                       sa31 --+(--|I2 |           01     B[19]  
+ *                                       sa13 ---(--|I3_|           10     1 == LoadImmD[31]
+ *                                               |                  11     LoadImmD[19]
+ *                                               :
+ *                                              /y\  ___            sa13          
+ *                               LoadImmD[12] --(((-|O0 |           |sa31  F[12]  
+ *                                      B[12] --((+-|I1 |-- F[12]   00     0  == LoadImmD[31] 
+ *                                       sa31 --+(--|I2 |           01     B[12]  
+ *                                       sa13 ---(--|I3_|           10     1  == LoadImmD[31] 
+ *                                               |                  11     LoadImmD[12]
+ *                                               |
+ *                               ___            /y\  ___            sa09
+ *                 LoadImmD[7] -|O0 |---b-------(((-|O0 |           |sa08
+ *                LoadImmD[31] -|I1 |   B[11] --((+-|I1 |-- F[11]   ||sa07    a            b            F[11]  = a&b&B[11] | ~a&b | ~b&a
+ *                        sa08 -|I2 |      1  --+(--|I2 |           000       0            0            0     
+ *                        sa09 -|I3_| +-a--------(--|I3_|           001       LoadImmD[20] 0            LoadImmD[20] *                       B[11]                     
+ *                                    |          |                  010       0            LoadImmD[7]  LoadImmD[7]  *                     a1|b                        
+ *                               ___  |          |                  100       0            LoadImmD[31] LoadImmD[31] *      a         b    ||||  F[11]                 
+ *                LoadImmD[20] -|O0 |-+          |                  101       0            LoadImmD[31] LoadImmD[31] * 0000 0    0000  0   0000 x                      
+ *                        sa07 -|I1 |            |                  111       1            1            B[11]        * 0001 0    0001  0   0001 x                      
+ *                        sa08 -|I2 |            |                                                                   * 0010  0   0010  0   0010 x                      
+ *                        sa09 -|I3_|            |                                                                   * 0011  1   0011  0   0011 x                      
+ *                                              /y\  ___            sa10                                             * 0100 0    0100 0    0100                        
+ *                               LoadImmD[30] --(((-|O0 |           |sa09 F[10]                                      * 0101 0    0101 1    0101  1                     
+ *                                      B[10] --((+-|I1 |-- F[10]   00    LoadImmD[30]                               * 0110      0110 0    0110                        
+ *                                       sa09 --+(--|I2 |           01    LoadImmD[30]                               * 0111      0111 1    0111  1                     
+ *                                       sa10 ---(--|I3_|           10    0                                          * 1000 0    1000  0   1000 x                      
+ *                                               |                  11    B[10]                                      * 1001 0    1001  0   1001 x                      
+ *                                               :                                                                   * 1010 0    1010  1   1010 x                      
+ *                                              /y\  ___            sa10                                             * 1011 0    1011  1   1011 x                      
+ *                               LoadImmD[25] --(((-|O0 |           |sa09 F[5]                                       * 1100      1100 1    1100   1                    
+ *                                       B[5] --((+-|I1 |-- F[5]    00    LoadImmD[25]                               * 1101      1101 1    1101  0                     
+ *                                       sa09 --+(--|I2 |           01    LoadImmD[25]                               * 1110 1    1110 1    1110   1                    
+ *                                       sa10 ---(--|I3_|           10    0                                          * 1111 1    1111 1    1111  1   => d0a0, use ddaa.
+ *                                               |                  11    B[5] 
+ *                                               |
+ *                            ___               /y\  ___            sa09
+ *             LoadImmD[11] -|O0 | LoadImmD[24]-(((-|O0 |           |sa08
+ *                     sa07 -|I1 |       B[4] --((+-|I1 |-- F[4]    ||sa07    a            F[4]
+ *                     sa08--|I2 |       sa07 --+(--|I2 |           000       LoadImmD[11] 0
+ *                     sa09 -|I3_|---------------(--|I3_|           001       LoadImmD[24] LoadImmD[24]
+ *                                               |                  010       LoadImmD[11] LoadImmD[11] 
+ *                                               |                  100       LoadImmD[11] LoadImmD[11] 
+ *                                               |                  101       LoadImmD[24] LoadImmD[24] 
+ *                                               |                  111       LoadImmD[24] B[5] 
+ *                                               :
+ *                            ___               /y\  ___            sa09                 
+ *              LoadImmD[8] -|O0 | LoadImmD[21]-(((-|O0 |           |sa08                
+ *                     sa07 -|I1 |       B[1] --((+-|I1 |-- F[1]    ||sa07    a            F[1] 
+ *                     sa08--|I2 |       sa07 --+(--|I2 |           000       0            a=0  
+ *                     sa09 -|I3_|-------a-------(--|I3_|           001       0            LoadImmD[21]  
+ *                                               |                  010       LoadImmD[8]  a=LoadImmD[8] 
+ *                                               |                  100       LoadImmD[8]  a=LoadImmD[8] 
+ *                                               |                  101       0            LoadImmD[21]  
+ *                                               |                  111       1            B[1] 
+ *                                               |                  
+ *                               ___            /y\  ___            sa09                 
+ *                 LoadImmD[7] -|O0 |----a------(((-|O0 |           |sa08                
+ *                LoadImmD[20] -|I1 |    B[0] --((+-|I1 |-- F[0]    ||sa07    a            F[0] 
+ *                        sa07 -|I2 |    sa08 --+(--|I2 |           000       0            a=0
+ *                        sa09 -|I3_|    sa07 ---(--|I3_|           001       0            a=0
+ *                                               |                  010       0            0
+ *                                              GND                 100       LoadImmD[7]  a=LoadImmD[7]
+ *                                                                  101       LoadImmD[20] a=LoadImmD[20]
+ *                                                                  111       LoadImmD[20] B[0]
+ */
                   
          assign zcy0 = 1'b0;
          SB_LUT4 # ( .LUT_INIT(16'hca00)) L_1788(.O(imm0a), .I3(sa09),  .I2(sa07),.I1(INSTR[20]),.I0(INSTR[7]));      
-         SB_LUT4 # ( .LUT_INIT(16'hca0a)) L_1789(.O(F[0]),  .I3(sa07),  .I2(sa08),.I1(B[0]), .I0(imm0a));  SB_CARRY CY_1789(.CO(zcy1), .CI(zcy0), .I1(sa08),.I0(B[0]));
+         SB_LUT4 # ( .LUT_INIT(16'hca0a)) L_1789(.O(F[0]),  .I3(sa07),  .I2(sa08),.I1(B[0]), .I0(imm0a));      SB_CARRY CY_1789(.CO(zcy1), .CI(zcy0), .I1(sa08),.I0(B[0]));
          SB_LUT4 # ( .LUT_INIT(16'hf220)) L_1790(.O(imm1a), .I3(sa09),  .I2(sa08),.I1(sa07), .I0(INSTR[8]));                                          
          SB_LUT4 # ( .LUT_INIT(16'hcfa0)) L_1791(.O(F[1]),  .I3(imm1a), .I2(sa07),.I1(B[1]), .I0(INSTR[21]));  SB_CARRY CY_1791(.CO(zcy2), .CI(zcy1), .I1(sa07),.I0(B[1]));
          SB_LUT4 # ( .LUT_INIT(16'hf220)) L_1792(.O(imm2a), .I3(sa09),  .I2(sa08),.I1(sa07), .I0(INSTR[9]));                                          
@@ -184,7 +291,7 @@ module m_immexp_zfind_q
          SB_LUT4 # ( .LUT_INIT(16'hc0aa)) L_1803(.O(F[10]), .I3(sa10),  .I2(sa09),.I1(B[10]),.I0(INSTR[30]));  SB_CARRY CY_1803(.CO(zcy11),.CI(zcy10),.I1(sa09),.I0(B[10]));
          SB_LUT4 # ( .LUT_INIT(16'hc008)) L_1804(.O(imm11a),.I3(sa09),  .I2(sa08),.I1(sa07), .I0(INSTR[20]));            
          SB_LUT4 # ( .LUT_INIT(16'hfca0)) L_1805(.O(imm11b),.I3(sa09),  .I2(sa08),.I1(INSTR[31]),.I0(INSTR[7]));     
-         SB_LUT4 # ( .LUT_INIT(16'hddaa)) L_1806(.O(F[11]), .I3(imm11a),.I2(1'b1),.I1(B[11]),.I0(imm11b)); SB_CARRY CY_1806(.CO(zcy12),.CI(zcy11),.I1(1'b1),.I0(B[11]));
+         SB_LUT4 # ( .LUT_INIT(16'hddaa)) L_1806(.O(F[11]), .I3(imm11a),.I2(1'b1),.I1(B[11]),.I0(imm11b));     SB_CARRY CY_1806(.CO(zcy12),.CI(zcy11),.I1(1'b1),.I0(B[11]));
          SB_LUT4 # ( .LUT_INIT(16'hafc0)) L_1808(.O(F[12]), .I3(sa13b), .I2(sa31),.I1(B[12]),.I0(INSTR[12]));  SB_CARRY CY_1808(.CO(zcy13),.CI(zcy12),.I1(sa31),.I0(B[12]));
          SB_LUT4 # ( .LUT_INIT(16'hafc0)) L_1810(.O(F[13]), .I3(sa13b), .I2(sa31),.I1(B[13]),.I0(INSTR[13]));  SB_CARRY CY_1810(.CO(zcy14),.CI(zcy13),.I1(sa31),.I0(B[13]));
          SB_LUT4 # ( .LUT_INIT(16'hafc0)) L_1811(.O(F[14]), .I3(sa13b), .I2(sa31),.I1(B[14]),.I0(INSTR[14]));  SB_CARRY CY_1811(.CO(zcy15),.CI(zcy14),.I1(sa31),.I0(B[14]));

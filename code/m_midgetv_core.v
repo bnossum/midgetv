@@ -37,54 +37,54 @@
        
    Simplified datapath                                                                            
    ======================
-                                                             +------------- shcy[4] 
- Data input                                                  |                  
- DAT_I[31:0] --------------|\   ___  rDee                   /y\                 
-      _______________      | |-|   |-+                      :::  __   ___       
-     |SRAM ..x32     | +---|/  |   | |                 +----(((-|  | >   |  rshiftcnt[4:0]
-     |===============| |       >___| |                 |   -((+-|  |-|   |-+    
-     | DATAOUT[31:0] |-+             |                 |  +-+(--|  | |CE | |    
- +---|DATAIN[31:0]   |               |                 |  |  +--|__| |R__| |    
- | +-|ADR[14:0]      |               |                 |  |  |             |    
- | | | 64 or 128 KiB |               |                 |  |  0             |    
- | | >_______________|               |                 |  +----------------+    
- | |                                 |                 |                       
- | |  +------------------------------+      _______    |       
- | |  |              ___                   |Immed- |   |                        
- | |  |          +--|D Q|------------------|iate   |---(-+          +------ is_bcond 
- | |  |          |  |   |  6- 0 OPCODE     |expand |   | |          |           
- | |  |          |  |   | 11- 7 TRG        |_______|   | |      __  |  __ 
- | |  |          |  |   | 14-12 FUNC3   +--------------(-)-----|  |-+-|  |- raluF 
- | |  |          |  |   | 19-15 SRC1    |              | |  +--|__|   >__|      
- | |  |          |  |CE | 24-20 SRC2    | fC           | |  | fZ                
- | |  |          |  >___| 31-25 FUNC7  /y\             | | /y\                  
- | |  |rDee      |   ___________       :::  _______    | | :::  __     ___      
- | |  +----|\ Di | -| Di        | A   -(((-|~(A^QQ)| B | +-(((-|  | F >   |     I/O address
- | +-ADR_O-| |---+--| ~(Di^Q)   |------((+-|A^QQ^ci|-+-+---((+-|  |---|D Q|-+-- ADR_O[31:0] 
- +-(-------|/   +---| (~Di)&(~Q)|    +-+(--|       | |    -+(--|  |   |CE | |   
- | | DAT_O      |  -|_0_________|    |  +--|_______| |    --+--|__|   |R__| |   
- | |            |                    |  |ci          |      |       .       |   
- | +------------+--------------|\ QQ |  |            |      0               |   
- | |    __    __               | |---+  |            |      Format expand   |   
- | | +-|+1|--| Q|-+- ccnt[5:0]-|/       0/1/raluF    |      and zero-find   |   
- | | | |__|  >__| |                                  |                      |   
- | | +------------+                                  |                      |
- | |                                                 |                      |
- | +-------------------------------------------------(----------------------+
- |                                                   |                    
- +---------------------------------------------------(-------------------+
-                                                     |    ____________   |                
-      jj        --|0000\                             |   |EBR ..x32   |  |                
-      rinst     --|0001 |                            |   |============|  |      data output                 
-      pc        --|0010 |                    B[31:0] |   | RDATA[31:0]|--+----- DAT_O[31:0]                 
-      ttime     --|0011 | Rai                        +---|WDATA[31:0] |                      
-      rInternISR--|0100 |--------------------------------|RADR[h-2:0] |                      
-      rFFFFFF7F --|0101 |   ADR_O[h:2]-|00xx\  Wai       |            |                      
-      r000000FF --|0110 |   TRG[4:0] --|01xx |-----------|WADR[h-2:0] |                      
-      r0000FFFF --|0111 |   jj       --|1000 |           |            |
-      rFFFF7FFF --|1000 |   rinst    --|1001 |           | 1, 2, 4    |                         
-      mtvec     --|1001 |   pc       --|1010 |           > or 8 KiB   |                              
-      r00000000 --|1010 |   ttime    --|1011 |           >____________|                              
+                                                               +------------- shcy[4] 
+ Data input                                                    |                  
+ DAT_I[31:0] --------------|\   ___  rDee                     /y\                 
+      _______________      | |-|   |-+                        :::  __   ___       
+     |SRAM ..x32     | +---|/  |   | |                   +----(((-|  | >   |  rshiftcnt[4:0]
+     |===============| |       >___| |                   |   -((+-|  |-|   |-+    
+     | DATAOUT[31:0] |-+             |                   |  +-+(--|  | |CE | |    
+ +---|DATAIN[31:0]   |               |                   |  |  +--|__| |R__| |    
+ | +-|ADR[14:0]      |               |                   |  |  |             |    
+ | | | 64 or 128 KiB |               |                   |  |  0             |    
+ | | >_______________|               |                   |  +----------------+    
+ | |                                 |                   |                       
+ | |  +------------------------------+        _______    |       
+ | |  |                ___                   |Immed- |   |                        
+ | |  |            +--|D Q|------------------|iate   |---(-+          +------ is_bcond 
+ | |  |            |  |   |  6- 0 OPCODE     |expand |   | |          |           
+ | |  |            |  |   | 11- 7 TRG        |_______|   | |      __  |  __ 
+ | |  |            |  |   | 14-12 FUNC3   +--------------(-)-----|  |-+-|  |- raluF 
+ | |  |            |  |   | 19-15 SRC1    |              | |  +--|__|   >__|      
+ | |  |            |  |CE | 24-20 SRC2    | fC           | |  | fZ                
+ | |  |            |  >___| 31-25 FUNC7  /y\             | | /y\                  
+ | |  |rDee        |   ___________       :::  _______    | | :::  __     ___      
+ | |  +------|\ Di | -| Di        | A   -(((-|~(A^QQ)| B | +-(((-|  | F >   |     I/O address
+ | +-ADR_O/2-| |---+--| ~(Di^Q)   |------((+-|A^QQ^ci|-+-+---((+-|  |---|D Q|-+-- ADR_O[31:0] 
+ +-(---------|/   +---| (~Di)&(~Q)|    +-+(--|       | |    -+(--|  |   |CE | |   
+ | | DAT_O        |  -|_0_________|    |  +--|_______| |    --+--|__|   |R__| |   
+ | |              |                    |  |ci          |      |       .       |   
+ | +--------------+--------------|\ QQ |  |            |      0               |   
+ | |    __      __               | |---+  |            |      Format expand   |   
+ | | +-|+1|----| Q|-+- ccnt[5:0]-|/       0/1/raluF    |      and zero-find   |   
+ | | | |__|    >__| |                                  |                      |   
+ | | +--------------+                                  |                      |
+ | |                                                   |                      |
+ | +---------------------------------------------------(----------------------+
+ |                                                     |                    
+ +-----------------------------------------------------(-------------------+
+                                                       |    ____________   |                
+      jj        --|0000\                               |   |EBR ..x32   |  |                
+      rinst     --|0001 |                              |   |============|  |      data output                 
+      pc        --|0010 |                      B[31:0] |   | RDATA[31:0]|--+----- DAT_O[31:0]                 
+      ttime     --|0011 | Rai                          +---|WDATA[31:0] |                      
+      rInternISR--|0100 |----------------------------------|RADR[h-2:0] |                      
+      rFFFFFF7F --|0101 |   ADR_O[h:2]-|00xx\  Wai         |            |                      
+      r000000FF --|0110 |   TRG[4:0] --|01xx |-------------|WADR[h-2:0] |                      
+      r0000FFFF --|0111 |   jj       --|1000 |             |            |
+      rFFFF7FFF --|1000 |   rinst    --|1001 |             | 1, 2, 4    |                         
+      mtvec     --|1001 |   pc       --|1010 |             > or 8 KiB   |                              
+      r00000000 --|1010 |   ttime    --|1011 |             >____________|                              
       rFFFFFFFF --|1011 |   yy       --|1100 |                                         
       yy        --|1100 |   mecp     --|1101 |                                         
       B[h:2]   ---|1101 |   mcause   --|1110 |                                         
@@ -202,8 +202,6 @@
  *    ( funct3 = 3'b100, opcode = 7'b0110011). However, 
  *    one should really also check that funct7 = 7'b0000000.
  *    With LAZY_DECODE == 1, this check is not performed.
- * 2: Save a very few luts by elimination of all decode
- *    checking. Not recommended.
  * 
  * program0, program1, ... programF
  * --------------------------------
@@ -235,7 +233,7 @@
 
 module m_midgetv_core
   # ( parameter 
-      SRAMADRWIDTH = 0,  EBRADRWIDTH =  8, IWIDTH =  8, NO_CYCLECNT = 1, MTIMETAP =  0, HIGHLEVEL = 0, LAZY_DECODE = 2, // Minimal
+      SRAMADRWIDTH = 0,  EBRADRWIDTH =  8, IWIDTH =  8, NO_CYCLECNT = 1, MTIMETAP =  0, HIGHLEVEL = 0, LAZY_DECODE = 1, // Minimal
 //    SRAMADRWIDTH = 16, EBRADRWIDTH =  8, IWIDTH = 32, NO_CYCLECNT = 0, MTIMETAP = 14, HIGHLEVEL = 0, LAZY_DECODE = 0, // Conventional
 //    SRAMADRWIDTH = 17, EBRADRWIDTH = 11, IWIDTH = 32, NO_CYCLECNT = 0, MTIMETAP = 14, HIGHLEVEL = 0, LAZY_DECODE = 0, // Maximal
 
@@ -865,8 +863,8 @@ module m_midgetv_core
         .clk                            (clk),
         .minx                           (minx[7:0]),
         .progress_ucode                 (progress_ucode));
-   
-   m_ucodepc #(.HIGHLEVEL(1), .LAZY_DECODE(LAZY_DECODE))
+
+   m_ucodepc #(.LAZY_DECODE(LAZY_DECODE))
      inst_ucodepc
        (/*AUTOINST*/
         // Outputs
@@ -883,7 +881,6 @@ module m_midgetv_core
         .sa15                           (sa15),
         .qualint                        (qualint),
         .is_brcond                      (is_brcond),
-        .ADR_O                          (ADR_O[31:0]),
         .INSTR                          (INSTR[31:0]),
         .B                              (B[31:0]),
         .RST_I                          (RST_I),

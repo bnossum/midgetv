@@ -18,8 +18,8 @@ VERILATORFLAGS = -Wall -I$(VERILOGDIR) -I$(SB_SIMMOD) -Mdir $(OBJDIR) -cc --x-as
 #	m_bmask_emask m_condcode m_shiftcounter \
 
 
-MY =  m_ice40sim_SRAM m_ice40sim_EBRonly \
-	 m_ucodepc
+MY =  m_ucodepc  \
+	m_ice40sim_SRAM m_ice40sim_EBRonly
 
 TARGETS:=$(foreach i,$(MY),$(BINDIR)/$(i).bin)
 
