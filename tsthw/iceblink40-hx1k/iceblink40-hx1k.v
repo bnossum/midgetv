@@ -46,7 +46,7 @@ module top
       NO_CYCLECNT     = 0, 
       MTIMETAP        = 0, 
       HIGHLEVEL       = 0,
-      LAZY_DECODE     = 2 // By some very strange reason LAZY_DECODE = 2 conflicts with lattice placement preferences and leads to internal errror in iCECube2.
+      LAZY_DECODE     = 1 
       )
    (
     input      CLK_I,

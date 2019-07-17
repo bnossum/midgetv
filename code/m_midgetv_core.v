@@ -236,7 +236,7 @@ module m_midgetv_core
       SRAMADRWIDTH = 0,  EBRADRWIDTH =  8, IWIDTH =  8, NO_CYCLECNT = 1, MTIMETAP =  0, HIGHLEVEL = 0, LAZY_DECODE = 1, // Minimal
 //    SRAMADRWIDTH = 16, EBRADRWIDTH =  8, IWIDTH = 32, NO_CYCLECNT = 0, MTIMETAP = 14, HIGHLEVEL = 0, LAZY_DECODE = 0, // Conventional
 //    SRAMADRWIDTH = 17, EBRADRWIDTH = 11, IWIDTH = 32, NO_CYCLECNT = 0, MTIMETAP = 14, HIGHLEVEL = 0, LAZY_DECODE = 0, // Maximal
-
+      ALUWIDTH = 32, // __always__ 32
       DBGA = 0,
       parameter [4095:0] program0 = 4096'h0,
       parameter [4095:0] program1 = 4096'h0,
@@ -303,7 +303,7 @@ module m_midgetv_core
    /* verilator lint_on UNUSED */
    /*AUTOWIRE*/
    // Beginning of automatic wires (for undeclared instantiated-module outputs)
-   wire [31:0]          B;                      // From inst_alu of m_alu.v
+   wire [ALUWIDTH-1:0]  B;                      // From inst_alu of m_alu.v
    wire [31:0]          Di;                     // From inst_inputmux of m_inputmux.v
    wire [31:0]          Dsram;                  // From inst_ram of m_ram.v
    wire [2:0]           FUNC3;                  // From inst_opreg of m_opreg.v
@@ -576,21 +576,22 @@ module m_midgetv_core
       .corerunning                      (corerunning),
       .ADR_O                            (ADR_O[31:0]));
 
-   m_alu #(.HIGHLEVEL(HIGHLEVEL), 
+   m_alu #(.ALUWIDTH(ALUWIDTH),
+           .HIGHLEVEL(HIGHLEVEL), 
            .MTIMETAP(MTIMETAP), 
            .SRAMADRWIDTH(SRAMADRWIDTH) )
    inst_alu
      (/*AUTOINST*/
       // Outputs
-      .B                                (B[31:0]),
+      .B                                (B[ALUWIDTH-1:0]),
       .alu_carryout                     (alu_carryout),
       .alu_tapout                       (alu_tapout),
       .alu_minstretofl                  (alu_minstretofl),
       .alu_killwarnings                 (alu_killwarnings),
       // Inputs
-      .Di                               (Di[31:0]),
-      .ADR_O                            (ADR_O[31:0]),
-      .QQ                               (QQ[31:0]),
+      .Di                               (Di[ALUWIDTH-1:0]),
+      .ADR_O                            (ADR_O[ALUWIDTH-1:0]),
+      .QQ                               (QQ[ALUWIDTH-1:0]),
       .alu_carryin                      (alu_carryin),
       .sa06                             (sa06),
       .sa05                             (sa05),
