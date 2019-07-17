@@ -11,7 +11,7 @@ SB_SIMMOD = ../code/sb_sim_rtl
 
 GCCFLAGS = -O3 -I $(OBJDIR) -I/usr/share/verilator/include -I/usr/share/verilator/include/vltstd -Wall
 
-VERILATORFLAGS = -Wall -I$(VERILOGDIR) -I$(SB_SIMMOD) -Mdir $(OBJDIR) -cc --x-assign 1
+VERILATORFLAGS = -Wall -I$(VERILOGDIR) -I$(VERILOGDIR)/simcode -I$(SB_SIMMOD) -Mdir $(OBJDIR) -cc --x-assign 1
 
 #
 #MY = m_inputmux m_cyclecnt m_alu_carryin m_alu m_immexp_zfind_q m_rai m_wai \
@@ -32,6 +32,9 @@ FORCLEANING:=$(foreach i,$(MY),$(OBJDIR)/V$(i)*)
 all:$(TARGETS)
 
 $(OBJDIR)/V%.cpp:$(VERILOGDIR)/%.v
+	verilator $(VERILATORFLAGS) $<
+
+$(OBJDIR)/V%.cpp:$(VERILOGDIR)/simcode/%.v
 	verilator $(VERILATORFLAGS) $<
 
 $(OBJDIR)/V%__ALL.a:$(OBJDIR)/V%.cpp
