@@ -48,8 +48,7 @@ StartTrap:
         andi    x2,x1,0x40
         bnez    x2,trap_unaligned_lhu
         li      x2,0x8000
-//        simdump
-//        simerr  0x3f
+
         xor     x3,x3,x2
         sub     x3,x3,x2                // Sign-extend half-word
 trap_unaligned_lhu:
@@ -76,7 +75,8 @@ NotStacked:
         mret
 
 UncoveredTrap:
-        simerr  4
+        simdump
+        simerr  32
         
         
 #ifndef onlyEBR
@@ -101,7 +101,6 @@ _start:
         lw      x16,1(x1)
         li      x3,0x44332211
         bne     x16,x3,1b
-        simend
 
         lw      x14,2(x1)
         li      x5,0x55443322
@@ -134,16 +133,6 @@ _start:
         lh      x23,9(x1)
         li      x24,0xffffaa99
         bne     x24,x23,9b
-
-        
-//         // A speed test:
-// //        lw      x16,0(x1)
-// //        lw      x14,0(x1)
-// //        lw      x3, 0(x1)    // 115 cycles
-//         lw      x16,1(x1)
-//         lw      x14,2(x1)
-//         lw      x3, 3(x1) // 920 cycles.
-//         // (920-115)/3 = 805/3 = 268 extra cycles per access
 
         simend
 
