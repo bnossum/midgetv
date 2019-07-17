@@ -1,3 +1,8 @@
+// Go through low-level implementation of:
+//     m_progressctrl
+//     m_ram
+//     m_status_and_interrupts
+//
 // Signal rename
 // Reintroduce 2 ROM control.
 //
@@ -543,7 +548,7 @@ module m_midgetv_core
       .mtimeincip                       (mtimeincip),
       .meip                             (meip));
 
-   m_cyclecnt #(.HIGHLEVEL(1), 
+   m_cyclecnt #(.HIGHLEVEL(HIGHLEVEL), 
                 .NO_CYCLECNT(NO_CYCLECNT))
    inst_cyclecnt
      (/*AUTOINST*/
@@ -576,8 +581,8 @@ module m_midgetv_core
       .corerunning                      (corerunning),
       .ADR_O                            (ADR_O[31:0]));
 
-   m_alu #(.ALUWIDTH(ALUWIDTH),
-           .HIGHLEVEL(HIGHLEVEL), 
+   m_alu #(.HIGHLEVEL(HIGHLEVEL), 
+           .ALUWIDTH(ALUWIDTH),
            .MTIMETAP(MTIMETAP), 
            .SRAMADRWIDTH(SRAMADRWIDTH) )
    inst_alu
@@ -921,6 +926,7 @@ module m_midgetv_core
             .meip                       (meip),
             .ctrlreg_we                 (ctrlreg_we));
       end else begin
+         
          assign qualint = 1'b0; // Smallest midgetv has no interrupts
 
          // Keep verilator happy

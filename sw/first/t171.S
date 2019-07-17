@@ -14,7 +14,7 @@
 #endif
 _start:
         // I first do my measurement:
-        li      x21,0xdeadbabe
+        li      x21,0 //xdeadbabe
         la      x22,__mcycle
         sw      x21,0(x22)
         nop
@@ -71,7 +71,7 @@ NO_CYCLECNT_eq_0_NO_RINST_EBR:
         
 NO_CYCLECNT_eq_1:
         // _mcycle degenerates to an instruction counter in this case
-        addi    x1,x21,2
+        addi    x1,x21,3
         beq     x1,x23,Success
         simdump
         simerr  15

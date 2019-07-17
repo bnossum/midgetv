@@ -7,7 +7,7 @@
  * 
  */
 module m_shiftcounter
-  # ( parameter HIGHLEVEL = 1 )   
+  # ( parameter HIGHLEVEL = 0 )   
    (
     input       clk,
     input       sa18,sa19,

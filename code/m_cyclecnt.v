@@ -76,24 +76,18 @@ module m_cyclecnt
             // HIGLEVEL, NO CYCLECNT 
             // =======================================================
             assign QQ[5:2] = ADR_O[5:2];
+            //assign QQ[1:0] = sa16 ? 2'b01 : (sa17 ? ADR_O[1:0] : 2'h3 );
             assign QQ[1:0] = sa16 ? 2'b01 : (sa17 ? ADR_O[1:0] : (ADR_O[1:0] | 2'h3) );
-
-            assign m_cyclecnt_kill = sa17 | sa16 | clk;
+            
+            assign m_cyclecnt_kill = clk;
 
             /*
              * No cycle counter, so no other option than to run the core based 
-             * on start alone. No possibilities to find a bus error. Hovever,
-             * for a startup condition nobuserror is deasserted the very first 
-             * cycle midgetv is released from hardware reset.
+             * on start alone. No possibilities to find a bus error. 
              */
             assign corerunning = start;
             assign nobuserror  = 1'b1;
-            
-//            wire        notveryfirst;
-//            SB_DFF notveryfirst_r( .Q(notveryfirst), .C(clk), .D(1'b1));
-//            
-//            assign nobuserror =  notveryfirst;
-            
+                        
          end else begin
             
             // =======================================================
@@ -138,13 +132,26 @@ module m_cyclecnt
             // =======================================================
             // LOWLEVEL, NO CYCLECNT
             // =======================================================
+            /* 
+             * sa16               sa16              
+             * |sa17              |sa17             
+             * ||ADR_O[1] QQ[1]   ||ADR_O[0] QQ[0]  
+             * 000        1       000        1      
+             * 001        1       001        1      
+             * 010        0       010        0      
+             * 011        1       011        1      
+             * 100        0       100        1      
+             * 101        0       101        1      
+             * 110        0       110        1      
+             * 111        0       111        1      
+             */
             assign QQ[5:2] = ADR_O[5:2];
-            for ( j = 0; j < 2; j = j + 1 ) begin : blk1
-               SB_LUT4 #(.LUT_INIT(16'hbbbb)) qqmux(.O(QQ[j]),.I3(1'b0),.I2(1'b0), .I1(sa17), .I0(ADR_O[j])); 
-            end
+            SB_LUT4 #(.LUT_INIT(16'hfbfb)) qqmux0(.O(QQ[0]),.I3(1'b0),.I2(sa16), .I1(sa17), .I0(ADR_O[0])); 
+            SB_LUT4 #(.LUT_INIT(16'h0b0b)) qqmux1(.O(QQ[1]),.I3(1'b0),.I2(sa16), .I1(sa17), .I0(ADR_O[1])); 
+
             assign corerunning = start;
             assign nobuserror = 1'b1;            
-            assign m_cyclecnt_kill = clk | sa16;
+            assign m_cyclecnt_kill = clk;
 
          end else begin
 

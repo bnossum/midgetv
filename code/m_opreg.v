@@ -10,7 +10,7 @@
  * to arrange.
  */
 module m_opreg
-  # ( parameter HIGHLEVEL = 1 )
+  # ( parameter HIGHLEVEL = 0 )
   ( 
     input         clk,
     input         sa12_and_corerunning,
