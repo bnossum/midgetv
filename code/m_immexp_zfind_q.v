@@ -88,6 +88,11 @@ module m_immexp_zfind_q
     */
    generate
       if ( HIGHLEVEL != 0 ) begin
+
+         // =======================================================
+         // HIGLEVEL
+         // =======================================================
+         
          reg [31:0] F,r_ADR_O;
          reg [2:0]  instrty;
          reg        r_rzcy32;
@@ -144,6 +149,10 @@ module m_immexp_zfind_q
          
       end else begin
 
+         // =======================================================
+         // LOWLEVEL
+         // =======================================================
+         
          wire           sa07h;
          wire           sa09,sa08,sa07;
          wire           sa09h,sa10,sa31,sa13,sa13b;

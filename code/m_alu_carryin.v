@@ -9,8 +9,7 @@
  * Free resources here give msb of quantity to shift right.
  * 
  * In an ideal world, sa02, sa03, raluF, DOUT[0] (in m_ebr) or ADR_O[0] is
- * the origin of the critical path. If SRAM is used without reclocking
- * register, Dsram[0] is also a candidate. If sra_msb is part of the 
+ * the origin of the critical path. If sra_msb is part of the 
  * critical path, it should be made elsewhere.
  *                                          
  *               | alu_carryin                      sa03           
@@ -29,7 +28,7 @@
  *               VCC
  * 
  */
-module m_alu_carryin  # ( parameter HIGHLEVEL = 1 )   
+module m_alu_carryin  # ( parameter HIGHLEVEL = 0 )   
    (
     input        raluF,sa03,sa02,FUNC7_5,
     input        sa12,corerunning,

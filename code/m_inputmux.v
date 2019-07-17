@@ -59,6 +59,9 @@ module m_inputmux
     );
    wire [31:0]         shADR_O = {sra_msb,ADR_O[31:1]};
 
+   // =======================================================
+   // Last part
+   // ---------
    // This is the last part of the input mux. The reason I put it first
    // is because there are placement constraints specified here, and
    // the "genblk" part of code out of Lattice IceCobe should not jump
@@ -66,6 +69,10 @@ module m_inputmux
    generate
       if ( HIGHLEVEL ) begin
 
+         // =======================================================
+         // HIGLEVEL
+         // =======================================================
+         
          reg sa00mod;
          always @(posedge clk)
            sa00mod <=  ACK_I | sram_ack | sysregack | sa00;
@@ -73,6 +80,10 @@ module m_inputmux
 
       end else begin
 
+         // =======================================================
+         // LOWLEVEL
+         // =======================================================
+         
          genvar j;
          wire   cmb_sa00mod;
          wire   sa00mod;
@@ -89,7 +100,11 @@ module m_inputmux
       wire [32:0]      zeros = 33'h0;
 
       if ( MTIMETAP < 14 ) begin
-         // Has DAT_I, no system registers
+         
+         // =======================================================
+         // No system registers
+         // =======================================================
+            
          if ( IWIDTH == 32 )
            assign theio = DAT_I[IWIDTH-1:0];
          else
@@ -114,6 +129,11 @@ module m_inputmux
           */
 
          if ( HIGHLEVEL ) begin
+
+            // =======================================================
+            // Has system registers, HIGLEVEL
+            // =======================================================
+            
             wire [32:0] extDAT_I = {zeros[32:IWIDTH],DAT_I};
             //                     32-18 17          16         15-12   11   10-8 7    6-4  3    2-0 
             wire [31:0] MIP     = {14'h0,mrinstretip,mtimeincip,4'b0000,meip,3'h0,mtip,3'h0,msip,3'h0};
@@ -135,6 +155,11 @@ module m_inputmux
             assign sysregack = aaa & STB_O;
 
          end else begin
+
+            // =======================================================
+            // Has system register, LOWLEVEL
+            // =======================================================
+            
             wire adr2928eq00;
             SB_LUT4 #(.LUT_INIT(16'he0e0)) l_sysregack(   .O(sysregack),   .I3(1'b0), .I2(STB_O), .I1(ADR_O[29]), .I0(ADR_O[28]) ); // 
             SB_LUT4 #(.LUT_INIT(16'h0101)) l_adr2928eq00( .O(adr2928eq00), .I3(1'b0), .I2(1'b0),  .I1(ADR_O[29]), .I0(ADR_O[28]) );
@@ -226,6 +251,11 @@ module m_inputmux
 
    generate
       if ( SRAMADRWIDTH == 0 ) begin
+
+         // =======================================================
+         // No SRAM
+         // =======================================================
+            
          reg [IWIDTH-1:0] r;
          always @(posedge clk)
            r <= theio[IWIDTH-1:0];
@@ -237,12 +267,22 @@ module m_inputmux
       end else begin
 
          if ( HIGHLEVEL ) begin
+
+            // =======================================================
+            // SRAM, HIGHLEVEL
+            // =======================================================
+            
             reg [31:0] r;
             always @(posedge clk)
               r <= STB_O ? theio : Dsram;
             assign rDee = r;
 
          end else begin
+
+            // =======================================================
+            // SRAM, LOWLEVEL
+            // =======================================================
+            
             genvar jj;
             for ( jj = 0; jj < 32; jj = jj + 1 ) begin
                SB_DFF holdinput( .Q(rDee[jj]), .C(clk), .D(theio[jj]) );

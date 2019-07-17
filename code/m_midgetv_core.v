@@ -543,7 +543,7 @@ module m_midgetv_core
       .mtimeincip                       (mtimeincip),
       .meip                             (meip));
 
-   m_cyclecnt #(.HIGHLEVEL(1), 
+   m_cyclecnt #(.HIGHLEVEL(0), 
                 .NO_CYCLECNT(NO_CYCLECNT))
    inst_cyclecnt
      (/*AUTOINST*/

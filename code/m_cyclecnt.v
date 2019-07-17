@@ -8,11 +8,12 @@
  * instructions, which is a maximum of 41 cycles. Between instructions
  * this binary counter is added to ttime, and the counter is reset to
  * 0b000001.
+ * 
  * The cycle counter is multiplexed with ADR_O used by input B of the
- * ALU during WAIT1. 
+ * ALU during a cycle in OpCode fetch.
  *
- * We must also be able to increment the PC with 3 and 4, this
- * functionallity is also taken care of here (together with the carry input).
+ * We must be able to increment the PC with 3 and 4, this functionallity
+ * is also taken care of here (together with the carry input).
  * 
  * If the 6-bit counter overflows when the core is running, we exit to a 
  * trap with bus-error. 
@@ -35,6 +36,23 @@
  *    is supposed to go high and stay high, when midgetv is to be let free.
  * 2. If we have a cyclecounter, start is used as an enable for the counter, and
  *    must be high 64 consequtive cycles to let midgetv free.
+ * 
+ * 
+ * Parameters:
+ * -----------
+ * HIGHLEVEL
+ * ---------
+ * 1 : Understandable
+ * 0 : (Default) Hopefully smaller, certainly less readable
+ * 
+ * NO_CYCLECOUNT
+ * -------------
+ * 0 : Midgetv maintains a 32-bit cycle counter.
+ * 1 : Midgetv has no cycle counter (the counter degenerates into an
+ *     instruction counter, so even in this case a small program
+ *     has some form of a free-running counter). When there is no
+ *     cycle counter, it is not possible to find out if midgetv
+ *     accesses "empty space".
  */
 module m_cyclecnt
   # ( parameter HIGHLEVEL = 0, NO_CYCLECNT = 0 )
@@ -53,6 +71,10 @@ module m_cyclecnt
       if ( HIGHLEVEL ) begin
          
          if ( NO_CYCLECNT == 1 ) begin
+
+            // =======================================================
+            // HIGLEVEL, NO CYCLECNT 
+            // =======================================================
             assign QQ[5:2] = ADR_O[5:2];
             assign QQ[1:0] = sa17 ? ADR_O[1:0] : 2'b11;
             assign m_cyclecnt_kill = sa17 | sa16 | clk;
@@ -71,6 +93,10 @@ module m_cyclecnt
             
          end else begin
             
+            // =======================================================
+            // HIGLEVEL, CYCLECNT
+            // =======================================================
+
             reg [5:0]   rccnt;
             wire [6:0]  ccnt = start ? (sa16 ? 7'h01 : {1'b0,rccnt} + 7'h1) : 7'h1;
             
@@ -98,10 +124,31 @@ module m_cyclecnt
             SB_DFF notveryfirst_r( .Q(notveryfirst), .C(clk), .D(1'b1));
             
             assign buserror = (corerunning & ccnt[6] & ~sa16)
-                              | ~notveryfirst; // giens
+                              | ~notveryfirst; 
          end
 
       end else begin
+
+         genvar j;
+         
+         if ( NO_CYCLECNT == 1 ) begin
+
+            // =======================================================
+            // LOWLEVEL, NO CYCLECNT
+            // =======================================================
+            assign QQ[5:2] = ADR_O[5:2];
+            for ( j = 0; j < 2; j = j + 1 ) begin : blk1
+               SB_LUT4 #(.LUT_INIT(16'hbbbb)) qqmux(.O(QQ[j]),.I3(1'b0),.I2(1'b0), .I1(sa17), .I0(ADR_O[j])); 
+            end
+            assign corerunning = start;
+            assign buserror = 1'b0;            
+            assign m_cyclecnt_kill = clk | sa16;
+
+         end else begin
+
+            // =======================================================
+            // LOWLEVEL, CYCLECNT
+            // =======================================================
 
          /*               __
           *             -|I0 |
@@ -117,63 +164,49 @@ module m_cyclecnt
           *           +--|I3_|                      
           *           |ccntcy[6]
           *          /y\
-          *          |||  ___                              ___         
-          * start   -(((-|I0 |             __   ADR_O[5] -|I0 |           
-          * rcnt[5] -((+-|I1 |-ccnt[5]----|  |-- rcnt[5] -|I1 |- QQ[5] 
-          *    sa16 -+(--|I2 |            >__|      sa16 -|I2 |        
-          *           +--|I3_|                      sa17 -|I3_|        
-          *           |ccntcy[5]
-          *          /y\
-          *          |||  ___                              ___         
-          * start   -(((-|I0 |             __   ADR_O[4] -|I0 |        
-          * rcnt[4] -((+-|I1 |-ccnt[4]----|  |-- rcnt[4] -|I1 |- QQ[4] 
-          *    sa16 -+(--|I2 |            >__|      sa16 -|I2 |        
-          *           +--|I3_|                      sa17 -|I3_|        
-          *           |ccntcy[4]
-          *          /y\
-          *          |||  ___                              ___         
-          * start   -(((-|I0 |             __   ADR_O[3] -|I0 |        
-          * rcnt[3] -((+-|I1 |-ccnt[3]----|  |-- rcnt[3] -|I1 |- QQ[3] 
-          *    sa16 -+(--|I2 |            >__|      sa16 -|I2 |        
-          *           +--|I3_|                      sa17 -|I3_|        
-          *           |ccntcy[3]
-          *          /y\
-          *          |||  ___                              ___         
-          * start   -(((-|I0 |             __   ADR_O[2] -|I0 |        
-          * rcnt[2] -((+-|I1 |-ccnt[2]----|  |-- rcnt[2] -|I1 |- QQ[2] 
-          *    sa16 -+(--|I2 |            >__|      sa16 -|I2 |        
-          *           +--|I3_|                      sa17 -|I3_|        
-          *           |ccntcy[2]
-          *          /y\
-          *          |||  ___                              ___         
-          * start   -(((-|I0 |             __   ADR_O[1] -|I0 |        
-          * rcnt[1] -((+-|I1 |-ccnt[1]----|  |-- rcnt[1] -|I1 |- QQ[1] 
-          *    sa16 -+(--|I2 |            >__|      sa16 -|I2 |        
-          *           +--|I3_|                      sa17 -|I3_|        
-          *           | ccntcy[1]
-          *          /y\
-          *          |||  ___                              ___  
-          * start   -(((-|I0 |             __   ADR_O[0] -|I0 | 
-          * rcnt[0] -((+-|I1 |-ccnt[0]----|  |-- rcnt[0] -|I1 |- QQ[0]
-          *    sa16 -+(--|I2 |            >__|      sa16 -|I2 | 
-          *           +--|I3_|                      sa17 -|I3_|        
+          *          |||  ___                                      ___         
+          * start   -(((-|I0 |             __           ADR_O[5] -|I0 |           
+          * rcnt[5] -((+-|I1 |-ccnt[5]----|  |-- rcnt[5] ---------|I1 |- QQ[5] 
+          *    sa16 -+(--|I2 |            >__|              sa16 -|I2 |        
+          *           +--|I3_|                                   -|I3_|        
+          *           |ccntcy[5]                        
+          *          /y\                                
+          *          |||  ___                                      ___         
+          * start   -(((-|I0 |             __           ADR_O[4] -|I0 |        
+          * rcnt[4] -((+-|I1 |-ccnt[4]----|  |-- rcnt[4] ---------|I1 |- QQ[4] 
+          *    sa16 -+(--|I2 |            >__|              sa16 -|I2 |        
+          *           +--|I3_|                                   -|I3_|        
+          *           |ccntcy[4]                        
+          *          /y\                                
+          *          |||  ___                                      ___         
+          * start   -(((-|I0 |             __           ADR_O[3] -|I0 |        
+          * rcnt[3] -((+-|I1 |-ccnt[3]----|  |-- rcnt[3] ---------|I1 |- QQ[3] 
+          *    sa16 -+(--|I2 |            >__|              sa16 -|I2 |        
+          *           +--|I3_|                                   -|I3_|        
+          *           |ccntcy[3]                        
+          *          /y\                                
+          *          |||  ___                                      ___         
+          * start   -(((-|I0 |             __           ADR_O[2] -|I0 |        
+          * rcnt[2] -((+-|I1 |-ccnt[2]----|  |-- rcnt[2] ---------|I1 |- QQ[2] 
+          *    sa16 -+(--|I2 |            >__|              sa16 -|I2 |        
+          *           +--|I3_|                                   -|I3_|        
+          *           |ccntcy[2]                        
+          *          /y\                                
+          *          |||  ___                                      ___         
+          * start   -(((-|I0 |             __           ADR_O[1] -|I0 |        
+          * rcnt[1] -((+-|I1 |-ccnt[1]----|  |-- rcnt[1] ---------|I1 |- QQ[1] 
+          *    sa16 -+(--|I2 |            >__|              sa16 -|I2 |        
+          *           +--|I3_|                              sa17 -|I3_|        
+          *           | ccntcy[1]                       
+          *          /y\                                
+          *          |||  ___                                      ___  
+          * start   -(((-|I0 |             __           ADR_O[0] -|I0 | 
+          * rcnt[0] -((+-|I1 |-ccnt[0]----|  |-- rcnt[0] ---------|I1 |- QQ[0]
+          *    sa16 -+(--|I2 |            >__|              sa16 -|I2 | 
+          *           +--|I3_|                              sa17 -|I3_|        
           *           |
           *           1
           */
-
-         genvar j;
-         
-         if ( NO_CYCLECNT == 1 ) begin
-
-            assign QQ[5:2] = ADR_O[5:2];
-            for ( j = 0; j < 2; j = j + 1 ) begin : blk1
-               SB_LUT4 #(.LUT_INIT(16'hbbbb)) qqmux(.O(QQ[j]),.I3(1'b0),.I2(1'b0), .I1(sa17), .I0(ADR_O[j])); 
-            end
-            assign corerunning = start;
-            assign buserror = 1'b0;            
-            assign m_cyclecnt_kill = clk | sa16;
-
-         end else begin
 
             wire [5:0] ccnt,rccnt;
             /* verilator lint_off UNOPTFLAT */
