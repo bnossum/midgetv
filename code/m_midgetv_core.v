@@ -2,6 +2,7 @@
 //     m_progressctrl
 //     m_ram
 //     m_status_and_interrupts
+//     m_alu
 //
 // Signal rename
 // Reintroduce 2 ROM control.

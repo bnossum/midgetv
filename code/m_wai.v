@@ -43,6 +43,7 @@ module m_wai
     input [4:0]              TRG,
     input                    sa24,sa25,sa26,sa27,
     output [EBRADRWIDTH-1:0] Wai,
+//    output                   preprealucyin, //     Always VCC.  Experiment not a success
     output                   m_wai_killwarning
     );
    
@@ -75,6 +76,7 @@ module m_wai
             endcase
          end
          assign Wai = extWai[EBRADRWIDTH-1:0];
+//         assign preprealucyin = 1'b1;
       end else begin
          wire preWai0,preWai1,waicy0,waicy1,waicy2,waicy3,waicy4;
 
@@ -88,6 +90,9 @@ module m_wai
          SB_LUT4 #(.LUT_INIT(16'hf2fe)) L_2325(.O(Wai[5]),.I3(waicy4),.I2(sa27),.I1(sa26),.I0(ADR_O[7]));    
          SB_LUT4 #(.LUT_INIT(16'h0202)) L_2326(.O(Wai[6]),.I3(1'b0),.I2(sa27),.I1(sa26),.I0(ADR_O[8]));      
          SB_LUT4 #(.LUT_INIT(16'h0202)) L_2327(.O(Wai[7]),.I3(1'b0),.I2(sa27),.I1(sa26),.I0(ADR_O[9]));      
+//         SB_LUT4 #(.LUT_INIT(16'h0202)) L_2327(.O(Wai[7]),.I3(sa27), .I2(1'b1), .I1(sa26),.I0(ADR_O[9]));  -- in addition the lut value is wrong    
+//         SB_CARRY ppcy(.CO(preprealucyin),                .CI(1'b1), .I1(1'b1), .I0(sa26));
+         
          if ( EBRADRWIDTH > 8 ) begin
             SB_LUT4 #(.LUT_INIT(16'h0202)) L_2327(.O(Wai[8]),.I3(1'b0),.I2(sa27),.I1(sa26),.I0(ADR_O[10]));      
             if ( EBRADRWIDTH > 9 ) begin

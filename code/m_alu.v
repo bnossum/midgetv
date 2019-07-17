@@ -155,31 +155,22 @@ module m_alu
          end
 
          // For retired instructions interrupt
+         wire propcy;
          if (MTIMETAP > 13 && SRAMADRWIDTH != 0 ) begin
-            wire isWrinst = {sa27,sa26,sa25,sa24} == 4'b1001;
-            assign alu_minstretofl = alu_carryout & isWrinst;
+            wire isWrinst; // = {sa27,sa26,sa25,sa24} == 4'b1001;
+            SB_LUT4 #(.LUT_INIT(16'h0200)) l_isWrinst( .O(isWrinst), .I3(sa27), .I2(sa26), .I1(sa25), .I0(sa24));
+            // assign alu_minstretofl = alu_carryout & isWrinst;
+            SB_LUT4 #(.LUT_INIT(16'haa00)) l_alu_minstretofl( .O(alu_minstretofl), .I3(alucy[ALUWIDTH]), .I2(1'b0), .I1(1'b1), .I0(isWrinst));
+            SB_CARRY ca_l_alu_minstretofl( .CO(propcy),                            .CI(alucy[ALUWIDTH]), .I1(1'b0), .I0(1'b1));
          end else begin
+            assign propcy = alucy[ALUWIDTH];
             assign alu_minstretofl = 1'b0; // Keep Verilator happy
          end
-         assign alu_carryout = alucy[ALUWIDTH];
+         assign alu_carryout = propcy;
 
-         // By a reason I do not understand the following give one more LUT.
-         // I get a THRU carry for unknown reasons.
-         //
-         
-//         // For retired instructions interrupt
-//         if (MTIMETAP > 13 && SRAMADRWIDTH != 0 ) begin
-//            wire isWrinst;
-//            SB_LUT4 #(.LUT_INIT(16'h0200)) l_isWrinst( .O(isWrinst), .I3(sa27), .I2(sa26), .I1(sa25), .I0(sa24));
-//            SB_LUT4 #(.LUT_INIT(16'haa00)) l_alu_minstretofl( .O(alu_minstretofl), .I3(alucy[32]), .I2(1'b0), .I1(1'b1), .I0(isWrinst));
-//            SB_CARRY                       l_alu_carryout(   .CO(alu_carryout),    .CI(alucy[32]), .I1(1'b0), .I0(1'b1));
-//         end else begin
-//            assign alu_carryout = alucy[32];
-//            assign alu_minstretofl = 1'b0; // Keep Verilator happy
-//         end
-
-      
-                 
+         // CY[4]       THROUGH           CY[5]               
+         // alucy[4] -> alucy[5]          alucy[5]extra      CI
+         // alucy[5] -> alucy[5]extra ->  alucy[6]           CO
       end
 
    endgenerate
