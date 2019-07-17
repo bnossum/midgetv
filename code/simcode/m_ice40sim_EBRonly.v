@@ -10,7 +10,7 @@ module m_ice40sim_EBRonly
       SRAMADRWIDTH    = 0,  
       SIMEBRADRWIDTH  = 11, 
       IWIDTH          = 32, 
-      NO_CYCLECNT     = 0, 
+      NO_CYCLECNT     = 1, 
       MTIMETAP        = 14, 
       HIGHLEVEL       = 0,
       LAZY_DECODE     = 0

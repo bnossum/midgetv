@@ -1,10 +1,14 @@
         # Check sw of mcycle. This program require
         # SRAM read latency 1, SRAM write latency 0
         # HAS_MINSTRET and HAS_EBR_MINSTRET must match the definition in ucode.h
+        # NO_CYCLECNT must match the definition in the verilog code
+        #
+        # Todo. Change program to autodetect if it has cyclecounter 
         # =============================================================================
 #define HAS_MINSTRET     1
 #define HAS_EBR_MINSTRET 1
-
+#define NO_CYCLECNT      0
+        
 #include "midgetv.inc"
 
         .globl _start
@@ -28,8 +32,13 @@ _start:
         // Each instruction need 1 more cycle to maintain minstret
         addi    x5,x1,10 + 2*2 + 2*HAS_MINSTRET
 #else
+
+#if NO_CYCLECNT == 1
+        addi    x5,x1,2
+#else   
         // Each instruction need 1 more cycle to maintain minstret
         addi    x5,x1,10 + 2*HAS_EBR_MINSTRET
+#endif        
 #endif        
         lw      x4,0(x2)
         bne     x4,x5,1f

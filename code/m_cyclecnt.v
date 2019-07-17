@@ -63,7 +63,7 @@ module m_cyclecnt
     input         start,
     output [31:0] QQ, 
     output        corerunning,
-    output        buserror,
+    output        nobuserror,
     output        m_cyclecnt_kill
     );
 
@@ -71,41 +71,44 @@ module m_cyclecnt
       if ( HIGHLEVEL ) begin
          
          if ( NO_CYCLECNT == 1 ) begin
-
+            
             // =======================================================
             // HIGLEVEL, NO CYCLECNT 
             // =======================================================
             assign QQ[5:2] = ADR_O[5:2];
-            assign QQ[1:0] = sa17 ? ADR_O[1:0] : 2'b11;
+            assign QQ[1:0] = sa16 ? 2'b01 : (sa17 ? ADR_O[1:0] : (ADR_O[1:0] | 2'h3) );
+
             assign m_cyclecnt_kill = sa17 | sa16 | clk;
+
             /*
              * No cycle counter, so no other option than to run the core based 
              * on start alone. No possibilities to find a bus error. Hovever,
-             * for a startup condition buserror is asserted the very first 
+             * for a startup condition nobuserror is deasserted the very first 
              * cycle midgetv is released from hardware reset.
              */
             assign corerunning = start;
-
-            wire        notveryfirst;
-            SB_DFF notveryfirst_r( .Q(notveryfirst), .C(clk), .D(1'b1));
+            assign nobuserror  = 1'b1;
             
-            assign buserror =  ~notveryfirst;
+//            wire        notveryfirst;
+//            SB_DFF notveryfirst_r( .Q(notveryfirst), .C(clk), .D(1'b1));
+//            
+//            assign nobuserror =  notveryfirst;
             
          end else begin
             
             // =======================================================
             // HIGLEVEL, CYCLECNT
             // =======================================================
-
+            
             reg [5:0]   rccnt;
             wire [6:0]  ccnt = start ? (sa16 ? 7'h01 : {1'b0,rccnt} + 7'h1) : 7'h1;
             
             always @(posedge clk) 
               rccnt <= ccnt[5:0];
-         
+            
             assign QQ[5:0] = sa16 ? rccnt : (sa17 ? ADR_O[5:0] : (ADR_O[5:0] | 6'h3) );
-
-
+            
+            
             // Can't get this to work?? Whatever...
             //reg         rcorerunning;
             //always @(posedge clk)
@@ -115,7 +118,7 @@ module m_cyclecnt
             SB_LUT4 #(.LUT_INIT(16'hf8f8)) cmb_running( .O(kluge), .I3(1'b0), .I2(corerunning), .I1(ccnt[6]), .I0(start));
             SB_DFF kluge_r( .Q(corerunning), .C(clk), .D(kluge));
             assign m_cyclecnt_kill = 1'b0;
-
+            
             /*
              * Instruction used 64 cycles, surely an error.
              * Written like this to be equal to lowlevel version: 
@@ -123,8 +126,7 @@ module m_cyclecnt
             wire        notveryfirst;
             SB_DFF notveryfirst_r( .Q(notveryfirst), .C(clk), .D(1'b1));
             
-            assign buserror = (corerunning & ccnt[6] & ~sa16)
-                              | ~notveryfirst; 
+            assign nobuserror = ~(corerunning & ccnt[6] & ~sa16)  & notveryfirst; 
          end
 
       end else begin
@@ -141,7 +143,7 @@ module m_cyclecnt
                SB_LUT4 #(.LUT_INIT(16'hbbbb)) qqmux(.O(QQ[j]),.I3(1'b0),.I2(1'b0), .I1(sa17), .I0(ADR_O[j])); 
             end
             assign corerunning = start;
-            assign buserror = 1'b0;            
+            assign nobuserror = 1'b1;            
             assign m_cyclecnt_kill = clk | sa16;
 
          end else begin
@@ -152,7 +154,7 @@ module m_cyclecnt
 
          /*               __
           *             -|I0 |
-          *             -|I1 |-buserror
+          *             -|I1 |-nobuserror
           *  sa16 -------|I2 |
           *           +--|I3_|
           *           |
@@ -238,7 +240,7 @@ module m_cyclecnt
             SB_DFF rcorerunning_r( .Q(rcrun), .C(clk), .D(cmb_rcrun) );
             assign corerunning = rcrun;
 
-            SB_LUT4 #(.LUT_INIT(16'h0f00)) buserror_l( .O(buserror), .I3(buserrcy), .I2(sa16), .I1(1'b0), .I0(1'b0));
+            SB_LUT4 #(.LUT_INIT(16'hf0ff)) nobuserror_l( .O(nobuserror), .I3(buserrcy), .I2(sa16), .I1(1'b0), .I0(1'b0));
          end
       end
    endgenerate

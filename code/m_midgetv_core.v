@@ -320,7 +320,6 @@ module m_midgetv_core
    wire                 alu_minstretofl;        // From inst_alu of m_alu.v
    wire                 alu_tapout;             // From inst_alu of m_alu.v
    wire [3:0]           bmask;                  // From inst_progressctrl of m_progressctrl.v
-   wire                 buserror;               // From inst_cyclecnt of m_cyclecnt.v
    wire                 ctrlreg_we;             // From inst_progressctrl of m_progressctrl.v
    wire                 enaQ;                   // From inst_progressctrl of m_progressctrl.v
    wire                 is_brcond;              // From inst_condcode of m_condcode.v
@@ -341,6 +340,7 @@ module m_midgetv_core
    wire                 next_STB_O;             // From inst_progressctrl of m_progressctrl.v
    wire                 next_readvalue_unknown; // From inst_ebr of m_ebr.v
    wire                 next_sram_stb;          // From inst_progressctrl of m_progressctrl.v
+   wire                 nobuserror;             // From inst_cyclecnt of m_cyclecnt.v
    wire                 progress_ucode;         // From inst_progressctrl of m_progressctrl.v
    wire                 qualint;                // From inst_status_and_interrupts of m_status_and_interrupts.v
    wire [31:0]          rDee;                   // From inst_inputmux of m_inputmux.v
@@ -543,14 +543,14 @@ module m_midgetv_core
       .mtimeincip                       (mtimeincip),
       .meip                             (meip));
 
-   m_cyclecnt #(.HIGHLEVEL(0), 
+   m_cyclecnt #(.HIGHLEVEL(1), 
                 .NO_CYCLECNT(NO_CYCLECNT))
    inst_cyclecnt
      (/*AUTOINST*/
       // Outputs
       .QQ                               (QQ[31:0]),
       .corerunning                      (corerunning),
-      .buserror                         (buserror),
+      .nobuserror                       (nobuserror),
       .m_cyclecnt_kill                  (m_cyclecnt_kill),
       // Inputs
       .clk                              (clk),
@@ -817,7 +817,7 @@ module m_midgetv_core
       .lastshift                        (lastshift),
       .r_issh0                          (r_issh0),
       .B                                (B[31:0]),
-      .buserror                         (buserror));
+      .nobuserror                       (nobuserror));
    
    m_ucode
      inst_ucode
@@ -885,7 +885,7 @@ module m_midgetv_core
         .INSTR                          (INSTR[31:0]),
         .B                              (B[31:0]),
         .RST_I                          (RST_I),
-        .buserror                       (buserror));
+        .nobuserror                     (nobuserror));
    
    /* Interrupts in midgetv is implemented in an "all or nothing" fashion.
     * If MTIMETAP < 14, we have a minimal system, and no interrupts. Else

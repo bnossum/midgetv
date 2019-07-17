@@ -1,4 +1,6 @@
         # Check bus error when accessing undefined IO address
+        # The verilog code must be compiled with NO_CYCLECNT == 0 for this
+        # program to work
         # =============================================================================
 
 #include "midgetv.inc"
@@ -101,10 +103,16 @@ Common:
 4:      simerr  4
         
         # =============================================================================
-_start:        
+_start:
+        # First find out if the program is compiled with NO_CYCLECNT == 1
+        lw      x1,%lo(__mcycle)(x0)
+        lw      x2,%lo(__mcycle)(x0)
+        add     x1,x1,1
+        beq     x1,x2,NO_CYCLECNT_eq_1
+        
         la      x1,StartTrap
         sw      x1,%lo(__mtvec)(x0)   
-
+        
         li      x1,NOSUCHREG_ADR
 
         
@@ -149,3 +157,7 @@ OffendingJALR:
 //        simend
         
 1:      simerr  99
+
+NO_CYCLECNT_eq_1:
+        // No cycle counter, so no way to get buserrors. Simply end
+        simend

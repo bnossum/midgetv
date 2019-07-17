@@ -22,23 +22,27 @@ ERR:
 9:      simerr  9
 10:     simerr  10
 11:     simerr  11
-12:     simerr  12
+12:     simdump
+        simerr  12
 13:     simerr  13
 14:     simerr  14
 15:     simerr  15
 16:     simerr  16
 17:     simerr  17
 18:     simerr  18
-        
+
+_startm4:       
+        nop
 _start:
         //
         // First for mtvec
         //
         
         // Check csrrw with both source and target register in the "safe range"
+        la      x13,_start
         li      x12,0x12
         csrrw   x11,mtvec,x12
-        bnez    x11,1b                          // Read back 0?
+        bne     x11,x13,1b                      // Read back _start
         lw      x11,%lo(__mtvec)(x0)
         bne     x12,x11,2b                      // Updated to 0x12?
         
@@ -72,26 +76,42 @@ _start:
         
         // Check mscratch
         csrrw   x1,mscratch,x3
-        bnez    x1,12b
+        bnez    x1,10b
         lw      x11,%lo(__mscratch)(x0)
-        bne     x3,x11,12b
+        bne     x3,x11,11b
         
-        // Check mepc
+        // Check mepc.
+        // For midgets with cyclecounter mepc == 0
+        // For midgets without cyclecounter mepc == _start - 4
         csrrw   x1,mepc,x3
-        bnez    x1,12b
+        beqz    x1,1f
+        la      x11,_startm4
+        bne     x1,x11,12b        
+1:      
         lw      x11,%lo(__mepc)(x0)
-        bne     x3,x11,12b
+        bne     x3,x11,13b
         
         // Check mcause
-        csrrw   x1,mcause,x3
-        bnez    x1,12b
+        // For midgets with cyclecounter, mcause == 0
+        // For midgets without cyclecounter mcause == 2, illegal exception
+        csrrw   x1,mcause,x3        
+        beqz    x1,1f
+        li      x11,2
+        bne     x1,x11,14b
+1:      
         lw      x11,%lo(__mcause)(x0)
-        bne     x3,x11,12b
+        bne     x3,x11,15b
         
         // Check mtval
+        // For midgets with cyclecounter, mtval == 0
+        // For midgets without cyclecounter, mtval is the instruction at _startm4
         csrrw   x1,mtval,x3
-        bnez    x1,12b
+        beqz    x1,1f
+        la      x11,_startm4
+        lw      x11,0(x11)
+        bne     x11,x1,16b
+1:      
         lw      x11,%lo(__mtval)(x0)
-        bne     x3,x11,12b
+        bne     x3,x11,17b
         
         simend

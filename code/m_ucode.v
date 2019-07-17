@@ -55,11 +55,11 @@ module m_ucode
    endgenerate
    
    assign sa00 = d[ 0];
-   assign sa02 = d[ 1];
-   assign sa03 = d[ 2];
-   assign sa04 = d[ 3];
-   assign sa05 = d[ 4];
-   assign sa06 = d[ 5];
+   assign sa02 = d[ 1]; //| Governs carry-in and ALU
+   assign sa03 = d[ 2]; //|
+   assign sa04 = d[ 3]; //|
+   assign sa05 = d[ 4]; //|
+   assign sa06 = d[ 5]; //|
    assign sa11 = d[22]; // Immediate expand exactly when we use dinx.
    assign sa12 = d[ 7]; // u_io_i_latch
    assign sa14 = d[ 8]; // Reset Q

@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
          */
         tb->corerunning = 1;
         tb->RST_I       = 0;
-        tb->buserror    = 0;
+        tb->nobuserror  = 1;
         tb->qualint     = 0;
         tb->is_brcond   = 0;
         tb->rinx        = 0;

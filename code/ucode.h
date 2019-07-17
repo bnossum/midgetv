@@ -250,7 +250,7 @@
 
 //                                               Read into   ADR1Mustbe0
 //                      use_brcond  shrep        Instruction |Adr0Mustbe0
-//                      |           |            |           ||use_dinx
+//                      |           |    sa33    |           ||use_dinx
 #define use_dinx      ( O << 6) | ( O << 26) | ( O << 7) | ( xxI << 22) // dinx determines where to start microcode
 #define u_cont        ( O << 6) | ( O << 26) | ( O << 7) | ( OOO << 22) // rinx determines next microcode instruction
 #define u_io_i_latch  ( O << 6) | ( O << 26) | ( I << 7) | ( OOO << 22) // 

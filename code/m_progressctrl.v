@@ -29,7 +29,7 @@ module m_progressctrl
     input        lastshift, //      To halt progress of microcode etc
     input        r_issh0, //        To halt progress of microcode etc
     input [31:0] B, //              Do we access SRAM or I/O ?
-    input        buserror, //       When we have bus error we must have forward progress in ucode
+    input        nobuserror, //     When we have bus error we must have forward progress in ucode
                                    
     output [3:0] SEL_O, //          Byte selects for EBR, SRAM and outputs
     output [3:0] bmask, //          SEL_O is unfortunately also needed in an active low version for EBR
@@ -136,7 +136,7 @@ module m_progressctrl
          assign next_STB_O    = (sa42 & ~B[31] & B[30] & ~badalignment) | (rSTB_O    & ~(ACK_I | sysregack) );
          assign next_sram_stb = (sa42 &  B[31]         & ~badalignment) | (rsram_stb & ~sram_ack);
          always @(posedge clk) 
-           if ( RST_I | buserror ) begin
+           if ( RST_I | ~nobuserror ) begin
               rSTB_O <= 1'b0;
               rsram_stb <= 1'b0;
            end else begin
@@ -159,10 +159,10 @@ module m_progressctrl
          wire next_WE_O = (B[31] | B[30]) & ~badalignment;
          wire next_ctrlreg_we = (B[31:28] == 4'b0010) & ~badalignment;
          always @(posedge clk)
-           if ( (sa14 | RST_I | buserror) ) begin
+           if ( (sa14 | RST_I | ~nobuserror) ) begin
               rWE_O       <= 1'b0;
               rctrlreg_we <= 1'b0;
-           end else if ( sa43 & ~buserror ) begin
+           end else if ( sa43 & nobuserror ) begin
               rWE_O       <= next_WE_O;
               rctrlreg_we <= next_ctrlreg_we;
            end
@@ -176,10 +176,10 @@ module m_progressctrl
          wire h1;
          wire h2;
 //         assign h1 = sa42 & ~B[31] & B[30] & ~badalignment;
-//         assign clrregs = RST_I | buserror;
+//         assign clrregs = RST_I | ~nobuserror;
 //         assign next_STB_O = h1 | (STB_O & ~(ACK_I | sysregack));
          SB_LUT4 #(.LUT_INIT(16'h0400)) l_h1(.O(h1), .I3(sa42), .I2(B[31]), .I1(B[30]), .I0(badalignment)); 
-         SB_LUT4 #(.LUT_INIT(16'heeee)) l_clrregs(.O(clrregs), .I3(1'b0), .I2(1'b0), .I1(RST_I), .I0(buserror)); 
+         SB_LUT4 #(.LUT_INIT(16'hdddd)) l_clrregs(.O(clrregs), .I3(1'b0), .I2(1'b0), .I1(RST_I), .I0(nobuserror)); 
          SB_LUT4 #(.LUT_INIT(16'hff10)) l_next_STB_O( .O(next_STB_O), .I3(h1), .I2(STB_O), .I1(sysregack), .I0(ACK_I)); 
 
          // h0 = sa42 & B[31] & ~badalignment
@@ -192,15 +192,15 @@ module m_progressctrl
          wire next_WE_O,next_ctrlreg_we;
          wire clearweregs,updateweregs,ioregion;
 //         assign ioregion = B[31:28] == 4'b0010;
-//         assign clearweregs = (sa14 | RST_I | buserror);
+//         assign clearweregs = (sa14 | RST_I | ~nobuserror);
 //         assign next_WE_O       = ~clearweregs & ((B[31] | B[30])       & ~badalignment);
 //         assign next_ctrlreg_we = ~clearweregs & ( ioregion & ~badalignment);
-//         assign updateweregs = (sa43 & ~buserror) | clearweregs;
+//         assign updateweregs = (sa43 & nobuserror) | clearweregs;
          SB_LUT4 #(.LUT_INIT(16'h0004)) l_ioregion(.O(ioregion), .I3(B[31]), .I2(B[30]), .I1(B[29]), .I0(B[28]));
-         SB_LUT4 #(.LUT_INIT(16'hfefe)) l_clearweregs(.O(clearweregs), .I3(1'b0), .I2(sa14), .I1(RST_I), .I0(buserror));
+         SB_LUT4 #(.LUT_INIT(16'hfdfd)) l_clearweregs(.O(clearweregs), .I3(1'b0), .I2(sa14), .I1(RST_I), .I0(nobuserror));
          SB_LUT4 #(.LUT_INIT(16'h000e)) l_next_WE_O(.O(next_WE_O), .I3(clearweregs), .I2(badalignment), .I1(B[31]), .I0(B[30]));
          SB_LUT4 #(.LUT_INIT(16'h0202)) I_next_ctrlreg_we(.O(next_ctrlreg_we), .I3(1'b0), .I2(clearweregs), .I1(badalignment), .I0(ioregion));
-         SB_LUT4 #(.LUT_INIT(16'hf4f4)) I_updateweregs( .O(updateweregs), .I3(1'b0), .I2(clearweregs), .I1(sa43), .I0(buserror));
+         SB_LUT4 #(.LUT_INIT(16'hf8f8)) I_updateweregs( .O(updateweregs), .I3(1'b0), .I2(clearweregs), .I1(sa43), .I0(nobuserror));
          SB_DFFE r_WE_O(       .Q(WE_O),       .C(clk), .E(updateweregs), .D(next_WE_O) );
          SB_DFFE r_ctrlreg_we( .Q(ctrlreg_we), .C(clk), .E(updateweregs), .D(next_ctrlreg_we) );
       end
@@ -221,27 +221,31 @@ module m_progressctrl
       if ( SRAMADRWIDTH != 0 ) begin
          if ( HIGHLEVEL ) begin
             assign enaQ            = (sa15 | sa32) & ~lastshift    & ~(STB_O | sram_stb);
-            assign progress_ucode = ((~sa33 | lastshift | r_issh0) & ~(STB_O | sram_stb)) | buserror;
+            assign progress_ucode = ((~sa33 | lastshift | r_issh0) & ~(STB_O | sram_stb)) | ~nobuserror;
          end else begin
             wire h3,hcy;
 //            assign h1 = ~sa33 | lastshift | r_issh0;
-//            assign progress_ucode = (h1 & ~(STB_O | sram_stb)) | buserror;
+//            assign progress_ucode = (h1 & ~(STB_O | sram_stb)) | ~nobuserror;
 //            assign hcy = STB_O | sram_stb;
 //            assign enaQ = (sa15 | sa32) & ~lastshift & ~hcy;
             SB_LUT4 #(.LUT_INIT(16'hefef)) l_h3(.O(h3), .I3(1'b0), .I2(sa33), .I1(lastshift), .I0(r_issh0));
-            SB_LUT4 #(.LUT_INIT(16'hff02)) l_progress_ucode(.O(progress_ucode), .I3(buserror), .I2(STB_O), .I1(sram_stb), .I0(h3));
+            SB_LUT4 #(.LUT_INIT(16'h02ff)) l_progress_ucode(.O(progress_ucode), .I3(nobuserror), .I2(STB_O), .I1(sram_stb), .I0(h3));
             SB_CARRY l_hcy(.CO(hcy), .CI(1'b1), .I1(STB_O), .I0(sram_stb));
             SB_LUT4 #(.LUT_INIT(16'h000e)) l_enaQ(.O(enaQ), .I3(hcy), .I2(lastshift), .I1(sa15), .I0(sa32));
          end
       end else begin
          if ( HIGHLEVEL ) begin
+            reg tmptst;
+            always @(posedge clk)
+              tmptst <= 1'b1;
+            
             assign enaQ            = (sa15 | sa32) & ~lastshift   & ~STB_O;
-            assign progress_ucode = ((~sa33 | lastshift | r_issh0) & ~STB_O) | buserror;
+            assign progress_ucode = ((~sa33 | lastshift | r_issh0 | ~tmptst) & ~STB_O) | ~nobuserror;
          end else begin
             wire g1;
             assign enaQ = (sa15 | sa32) & ~lastshift   & ~STB_O;
             assign g1   = ~sa33 | lastshift | r_issh0;
-            assign progress_ucode = (g1 & ~STB_O) | buserror;
+            assign progress_ucode = (g1 & ~STB_O) | ~nobuserror;
             // Not a success, inflates with 1 LUT
 //            SB_LUT4 #(.LUT_INIT(16'h000e)) l_enaQ(.O(enaQ), .I3(STB_O), .I2(lastshift), .I1(sa15), .I0(sa32));
 //            SB_LUT4 #(.LUT_INIT(16'hefef)) l_g1(.O(g1), .I3(1'b0), .I2(sa33), .I1(lastshift), .I0(r_issh0)); 
