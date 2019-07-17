@@ -4,4 +4,4 @@ Here is:
 - Verilog code of midgetv
 - Microcode of midgetv
 
-Just now there are some more files here, these will be moved
+Together with a few utilities these files should be all that is needed to to make an implementation of `midgetv`.
