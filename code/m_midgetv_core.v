@@ -347,6 +347,7 @@ module m_midgetv_core
    wire                 next_readvalue_unknown; // From inst_ebr of m_ebr.v
    wire                 next_sram_stb;          // From inst_progressctrl of m_progressctrl.v
    wire                 nobuserror;             // From inst_cyclecnt of m_cyclecnt.v
+   wire                 preprealucyin;          // From inst_shiftcounter of m_shiftcounter.v
    wire                 progress_ucode;         // From inst_progressctrl of m_progressctrl.v
    wire                 qualint;                // From inst_status_and_interrupts of m_status_and_interrupts.v
    wire [31:0]          rDee;                   // From inst_inputmux of m_inputmux.v
@@ -580,6 +581,7 @@ module m_midgetv_core
       .FUNC7_5                          (FUNC7_5),
       .sa12                             (sa12),
       .corerunning                      (corerunning),
+      .preprealucyin                    (preprealucyin),
       .ADR_O                            (ADR_O[31:0]));
 
    m_alu #(.HIGHLEVEL(HIGHLEVEL), 
@@ -773,6 +775,7 @@ module m_midgetv_core
         // Outputs
         .lastshift                      (lastshift),
         .r_issh0_not                    (r_issh0_not),
+        .preprealucyin                  (preprealucyin),
         // Inputs
         .clk                            (clk),
         .sa18                           (sa18),

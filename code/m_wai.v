@@ -43,7 +43,6 @@ module m_wai
     input [4:0]              TRG,
     input                    sa24,sa25,sa26,sa27,
     output [EBRADRWIDTH-1:0] Wai,
-//    output                   preprealucyin, //     Always VCC.  Experiment not a success
     output                   m_wai_killwarning
     );
    
@@ -76,22 +75,19 @@ module m_wai
             endcase
          end
          assign Wai = extWai[EBRADRWIDTH-1:0];
-//         assign preprealucyin = 1'b1;
       end else begin
          wire preWai0,preWai1,waicy0,waicy1,waicy2,waicy3,waicy4;
 
          SB_LUT4 #(.LUT_INIT(16'hcaca)) L_2318(.O(preWai0),.I3(1'b0),.I2(sa27),.I1(sa24),.I0(ADR_O[2]));     
-         SB_LUT4 #(.LUT_INIT(16'haae2)) L_2319(.O(Wai[0]),.I3(sa27),.I2(TRG[0]),.I1(sa26),.I0(preWai0));  SB_CARRY CY_2319(.CO(waicy0),.CI(1'b0),.I1(TRG[0]),.I0(sa26));
+         SB_LUT4 #(.LUT_INIT(16'haae2)) L_2319(.O(Wai[0]),.I3(sa27),.I2(TRG[0]),.I1(sa26),.I0(preWai0));    SB_CARRY CY_2319(.CO(waicy0),.CI(1'b0),.I1(TRG[0]),.I0(sa26));
          SB_LUT4 #(.LUT_INIT(16'hcaca)) L_2320(.O(preWai1),.I3(1'b0),.I2(sa27),.I1(sa25),.I0(ADR_O[3]));     
-         SB_LUT4 #(.LUT_INIT(16'haae2)) L_2321(.O(Wai[1]),.I3(sa27),.I2(TRG[1]),.I1(sa26),.I0(preWai1));  SB_CARRY CY_2321(.CO(waicy1),.CI(waicy0),.I1(TRG[1]),.I0(sa26));
+         SB_LUT4 #(.LUT_INIT(16'haae2)) L_2321(.O(Wai[1]),.I3(sa27),.I2(TRG[1]),.I1(sa26),.I0(preWai1));    SB_CARRY CY_2321(.CO(waicy1),.CI(waicy0),.I1(TRG[1]),.I0(sa26));
          SB_LUT4 #(.LUT_INIT(16'hcce2)) L_2322(.O(Wai[2]),.I3(sa27),.I2(TRG[2]),.I1(sa26),.I0(ADR_O[4]));   SB_CARRY CY_2322(.CO(waicy2),.CI(waicy1),.I1(TRG[2]),.I0(sa26));
          SB_LUT4 #(.LUT_INIT(16'hcce2)) L_2323(.O(Wai[3]),.I3(sa27),.I2(TRG[3]),.I1(sa26),.I0(ADR_O[5]));   SB_CARRY CY_2323(.CO(waicy3),.CI(waicy2),.I1(TRG[3]),.I0(sa26));
          SB_LUT4 #(.LUT_INIT(16'h00e2)) L_2324(.O(Wai[4]),.I3(sa27),.I2(TRG[4]),.I1(sa26),.I0(ADR_O[6]));   SB_CARRY CY_2324(.CO(waicy4),.CI(waicy3),.I1(TRG[4]),.I0(sa26));
          SB_LUT4 #(.LUT_INIT(16'hf2fe)) L_2325(.O(Wai[5]),.I3(waicy4),.I2(sa27),.I1(sa26),.I0(ADR_O[7]));    
          SB_LUT4 #(.LUT_INIT(16'h0202)) L_2326(.O(Wai[6]),.I3(1'b0),.I2(sa27),.I1(sa26),.I0(ADR_O[8]));      
          SB_LUT4 #(.LUT_INIT(16'h0202)) L_2327(.O(Wai[7]),.I3(1'b0),.I2(sa27),.I1(sa26),.I0(ADR_O[9]));      
-//         SB_LUT4 #(.LUT_INIT(16'h0202)) L_2327(.O(Wai[7]),.I3(sa27), .I2(1'b1), .I1(sa26),.I0(ADR_O[9]));  -- in addition the lut value is wrong    
-//         SB_CARRY ppcy(.CO(preprealucyin),                .CI(1'b1), .I1(1'b1), .I0(sa26));
          
          if ( EBRADRWIDTH > 8 ) begin
             SB_LUT4 #(.LUT_INIT(16'h0202)) L_2327(.O(Wai[8]),.I3(1'b0),.I2(sa27),.I1(sa26),.I0(ADR_O[10]));      

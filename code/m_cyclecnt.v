@@ -216,7 +216,7 @@ module m_cyclecnt
           *           |
           *           1
           */
-
+            
             wire [5:0] ccnt,rccnt;
             /* verilator lint_off UNOPTFLAT */
             wire [6:0] ccntcy;

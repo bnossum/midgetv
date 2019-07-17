@@ -62,7 +62,7 @@ module m_alu_carryin  # ( parameter HIGHLEVEL = 0 )
    (
     input        raluF,sa03,sa02,FUNC7_5,
     input        sa12,corerunning,
-//    input        preprealucyin,
+    input        preprealucyin,
     input [31:0] ADR_O,
     output reg   alu_carryin,sra_msb,
     output       sa12_and_corerunning,
@@ -101,8 +101,8 @@ module m_alu_carryin  # ( parameter HIGHLEVEL = 0 )
          wire _sra_msb,_alu_carryin;
 
          SB_LUT4 #(.LUT_INIT(16'haa00))  la(.O(sa12_and_corerunning),.I3(sa12),.I2(1'b0),.I1(raluF),.I0(corerunning));
-//         SB_CARRY pcy(.CO(prealucyin), .CI(preprealucyin), .I1(1'b0), .I0(raluF));
-         SB_CARRY pcy(.CO(prealucyin), .CI(1'b1), .I1(1'b0), .I0(raluF));
+         SB_CARRY pcy(.CO(prealucyin), .CI(preprealucyin), .I1(1'b0), .I0(raluF));
+         //SB_CARRY pcy(.CO(prealucyin), .CI(1'b1), .I1(1'b0), .I0(raluF));
          SB_LUT4 #(.LUT_INIT(16'haa00))  lb(.O(_sra_msb),.I3(FUNC7_5),.I2(sa03),.I1(sa02),.I0(ADR_O[31]));
          SB_CARRY cya(.CO(_alu_carryin),.CI(prealucyin),.I1(sa03),.I0(sa02));
          always @(/*AS*/_alu_carryin or _sra_msb) begin
