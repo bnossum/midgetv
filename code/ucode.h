@@ -142,10 +142,11 @@
 
 /* The ALU and cycle counter control
  */
-////                     Cyclecnt etc
-////                     ss             sssss
-////                     11             00000
-////                     10             54321
+////                                    sa06
+////                     Cyclecnt etc   |sa05
+////                     sa17           ||sa04
+////                     |sa16          |||sa03
+////                     ||             ||||sa02
 #define A_nearXOR      ( IO << 10 ) | ( OOOxx << 1 )  // B = D^(~Q)                               
 #define A_passd        ( IO << 10 ) | ( OOIxx << 1 )  // D
 #define A_nearAND      ( IO << 10 ) | ( OIOxx << 1 )  // D&(~Q)   

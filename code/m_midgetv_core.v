@@ -344,7 +344,7 @@ module m_midgetv_core
    wire                 progress_ucode;         // From inst_progressctrl of m_progressctrl.v
    wire                 qualint;                // From inst_status_and_interrupts of m_status_and_interrupts.v
    wire [31:0]          rDee;                   // From inst_inputmux of m_inputmux.v
-   wire                 r_issh0;                // From inst_shiftcounter of m_shiftcounter.v
+   wire                 r_issh0_not;            // From inst_shiftcounter of m_shiftcounter.v
    wire                 raluF;                  // From inst_condcode of m_condcode.v
    wire [7:0]           rinx;                   // From inst_ucode of m_ucode.v
    wire                 rzcy32;                 // From inst_immexp_zfind_q of m_immexp_zfind_q.v
@@ -454,7 +454,7 @@ module m_midgetv_core
    endfunction
    function [3:0] get_progress_ucode_etc;
       // verilator public
-      get_progress_ucode_etc = {progress_ucode,r_issh0, sa33, lastshift };
+      get_progress_ucode_etc = {progress_ucode,~r_issh0_not, sa33, lastshift };
    endfunction
    function [0:0] get_iwe;
       // verilator public
@@ -766,7 +766,7 @@ module m_midgetv_core
        (/*AUTOINST*/
         // Outputs
         .lastshift                      (lastshift),
-        .r_issh0                        (r_issh0),
+        .r_issh0_not                    (r_issh0_not),
         // Inputs
         .clk                            (clk),
         .sa18                           (sa18),
@@ -815,7 +815,7 @@ module m_midgetv_core
       .sa14                             (sa14),
       .sa30                             (sa30),
       .lastshift                        (lastshift),
-      .r_issh0                          (r_issh0),
+      .r_issh0_not                      (r_issh0_not),
       .B                                (B[31:0]),
       .nobuserror                       (nobuserror));
    

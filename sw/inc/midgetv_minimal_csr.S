@@ -34,7 +34,7 @@
         //     registers         mapped to (see midgetv.inc)
 #define csradr_misa     0x301 // 0xc4 __misa      
 #define csradr_mtvec    0x305 // 0xa4 __mtvect    
-#define csradr_mscratch 0x340 // 0xc0 __mscatch   
+#define csradr_mscratch 0x340 // 0xc0 __mscratch   
 #define csradr_mepc     0x341 // 0xb4 __mepc
 #define csradr_mcause   0x342 // 0xb8 __mcause
 #define csradr_mtval    0x343 // 0xbc __mtval

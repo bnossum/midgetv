@@ -13,7 +13,7 @@ module m_shiftcounter
     input       sa18,sa19,
     input [4:0] B,
     output      lastshift,
-    output      r_issh0
+    output      r_issh0_not
     );
 `ifdef verilator
    wire [4:0]   dbg_shiftcnt;
@@ -27,7 +27,7 @@ module m_shiftcounter
       if ( HIGHLEVEL ) begin
 
          reg [4:0]    rshcnt;
-         reg          rr_issh0;
+         reg          rr_issh0_not;
          reg [5:0]   shcnt;
 
          always @(/*AS*/B or rshcnt or sa18 or sa19) begin
@@ -41,10 +41,10 @@ module m_shiftcounter
 
          assign lastshift = ~shcnt[5] & sa18;
          always @(posedge clk) begin
-            rr_issh0 <= lastshift;
+            rr_issh0_not <= ~lastshift;
             rshcnt <= shcnt[4:0];
          end
-         assign r_issh0 = rr_issh0;
+         assign r_issh0_not = rr_issh0_not;
 `ifdef verilator
          assign dbg_shiftcnt = rshcnt[4:0];
 `endif            
@@ -53,8 +53,8 @@ module m_shiftcounter
  *
  *                        +-------- lastshift = ~shcy[4] & sa18. The cycle we are loading the counter is not the last shift..
  *                  ___   |  ___  
- *                 |I0 |  | |I0 | lastshift_dup  __                
- *                 |I1 |--+-|I1-|---------------|  |-- r_issh0
+ *                 |I0 |  | |I0 | ~lastshift     __                
+ *                 |I1 |--+-|I1-|---------------|  |-- r_issh0_not
  *        sa18 ----|I2 |    |I2 |               |  |               
  *              +--|I3_|    |I3_|               >__|               
  *              |shcy[4]
@@ -119,7 +119,6 @@ module m_shiftcounter
          wire       d1,d2,d3,d4;
          wire       shcnt0,shcnt1,shcnt2,shcnt3,shcnt4;
          wire       shcy0,shcy1,shcy2,shcy3,shcy4;
-         wire       lastshift_dup;
          
          SB_LUT4 #(.LUT_INIT(16'h2222)) cmb_d1( .O(d1), .I3(1'b0), .I2(1'b0), .I1(sa19), .I0(B[1]));
          SB_LUT4 #(.LUT_INIT(16'h2222)) cmb_d2( .O(d2), .I3(1'b0), .I2(1'b0), .I1(sa19), .I0(B[2]));
@@ -139,8 +138,9 @@ module m_shiftcounter
          SB_CARRY cmbcy4( .CO(shcy4), .CI(shcy3), .I1(rshcnt[4]), .I0(sa18));
 
          SB_LUT4 #(.LUT_INIT(16'h00f0)) cmb_lastshift( .O(lastshift), .I3(shcy4), .I2(sa18), .I1(1'b0), .I0(1'b0));
-         SB_LUT4 #(.LUT_INIT(16'hff00)) cmb_wasted( .O(lastshift_dup), .I3(lastshift), .I2(1'b0), .I1(1'b0), .I0(1'b0));
-         SB_DFF issh0_reg( .Q(r_issh0), .C(clk), .D(lastshift_dup));
+         wire       lastshift_not;
+         SB_LUT4 #(.LUT_INIT(16'h00ff)) cmb_inv( .O(lastshift_not), .I3(lastshift), .I2(1'b0), .I1(1'b0), .I0(1'b0));
+         SB_DFF issh0_reg( .Q(r_issh0_not), .C(clk), .D(lastshift_not));
 
          SB_DFF reg_shcnt0( .Q(rshcnt[0]), .C(clk), .D(shcnt0));
          SB_DFF reg_shcnt1( .Q(rshcnt[1]), .C(clk), .D(shcnt1));
