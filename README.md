@@ -70,10 +70,10 @@ numbers will slightly change, so treat them as optimistic, and indicative only.
 ### iCEcube2
 Using iCECube2 for compilation (with Lattice LSE as synthesis tool) give the following for the example "hello world" program:
 
-Board/FPGA                          | SB_LUT4  | EBRs | SRAM | Clock (MHz) | Comment
+FPGA/Board                          | SB_LUT4  | EBRs | SRAM | Clock (MHz) | Comment
 ----------------------------------- | -------- | ---- | ---- | ----------- | --------
-`iceblink40-hx1k` `ICE40HX1K-VQ100` | 230 | 5 | 0 | 69 | No `cycle(h)` or `time(h)`. No `instreth`. No interrupts, minimal instruction decode
-`upduino2`        `ICE40UP5K-SG48I` | 370 | 5 | 2 | 29 | `cycle(h)`, `time(h)`, `instret(h)`, interrupts, full instruction decode
+`ICE40HX1K-VQ100``iceblink40-hx1k`  | 230 | 5 | 0 | 69 | No `cycle(h)` or `time(h)`. No `instreth`. No interrupts, nor registers `mip`, `mie` or `mstatus`. Minimal instruction decode
+`ICE40UP5K-SG48I``upduino2`         | 370 | 5 | 2 | 29 | `cycle(h)`, `time(h)`, `instret(h)`, interrupts and registers `mip`, `mie` or `mstatus`, full instruction decode
 
 Note that "Auto lut cascade" must be off in the placer option of
 iCEcube2. This is due to the Lattice preference files where
@@ -84,10 +84,10 @@ Using Yosys 0.7+515, arachne-pnr 0.1+287+0.
 Unfortunately this give the following
 (I would have expected numbers comparable with those for iCECube2, only 31 SB_LUTs larger):
 
-Board/FPGA                          | SB_LUT4  | EBRs | SRAM | Clock (MHz) | Comment
+FPGA/Board                          | SB_LUT4  | EBRs | SRAM | Clock (MHz) | Comment
 ----------------------------------- | -------- | ---- | ---- | ----------- | -------
-`iceblink40-hx1k` `ICE40HX1K-VQ100` | 337      |  5   |  0   | 60 | 72 LUTS larger than expected
-`upduino2`        `ICE40UP5K-SG48I` | 445      |  5   |  2   | 22 | 46 LUTS larger than expected
+`ICE40HX1K-VQ100``iceblink40-hx1k`  | 337      |  5   |  0   | 60 | 72 LUTS larger than expected
+`ICE40UP5K-SG48I``upduino2`         | 445      |  5   |  2   | 22 | 46 LUTS larger than expected
 
 
 ## Incomplete build instructions
