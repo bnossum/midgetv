@@ -73,7 +73,7 @@ Using iCECube2 for compilation (with Lattice LSE as synthesis tool) give the fol
 FPGA/Board                          | SB_LUT4  | EBRs | SRAM | Clock (MHz) | Comment
 ----------------------------------- | -------- | ---- | ---- | ----------- | --------
 `ICE40HX1K-VQ100` `iceblink40-hx1k` | 230 | 5 | 0 | 69 | No `cycle(h)` or `time(h)`. No `instreth`. No interrupts, nor registers `mip`, `mie` or `mstatus`. Minimal instruction decode
-`ICE40UP5K-SG48I` `upduino2`        | 370 | 5 | 2 | 29 | `cycle(h)`, `time(h)`, `instret(h)`, interrupts and registers `mip`, `mie` or `mstatus`, full instruction decode
+`ICE40UP5K-SG48I` `upduino2`        | 370 | 5 | 2 | 29 | `cycle(h)`, `time(h)`, `instret(h)`, interrupts and registers `mip`, `mie` and `mstatus`. Full instruction decode
 
 Note that "Auto lut cascade" must be off in the placer option of
 iCEcube2. This is due to the Lattice preference files where
@@ -85,7 +85,7 @@ Unfortunately this give the following
 (I would have expected numbers comparable with those for iCECube2, only 31 SB_LUTs larger):
 
 FPGA/Board                          | SB_LUT4  | EBRs | SRAM | Clock (MHz) | Comment
------------------------------------ | -------- | ---- | ---- | ----------- | -------
+----------------------------------- | -------- | ---- | ---- | ----------- | --------------------------
 `ICE40HX1K-VQ100` `iceblink40-hx1k` | 337      |  5   |  0   | 60 | 72 LUTS larger than expected
 `ICE40UP5K-SG48I` `upduino2`        | 445      |  5   |  2   | 22 | 46 LUTS larger than expected
 
