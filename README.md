@@ -29,7 +29,7 @@ in microcode, but mostly in software; slow! Interrupt response is also slow.
 
 | Goal          | Result | Comment |
 | ------------- | ------ | ------- |
-| Small implementations size | < 400 SB_LUT4, 5 EBRs | Size varies with included features and toolchain |
+| Small implementations size | < 400 luts, 4 EBRs | Not attained, uses 5 EBRs. Size varies with included features and toolchain |
 | Easy interconnect | Done |  external modules accessed using Wishbone |
 | Full compliance with RV32I as per riscv-spec-v2.2.pdf | Done | A few options allow a smaller core, but then breaks full compliance. |
 | Full compliance with riscv-privileged-v1.10.pdf | Partially done | It is unlikely anyone will need full compliance here, but as a reference I will endeavor to construct this. A current implementation includes just those registers needed to pass the RISC-V rv32i compliance tests |

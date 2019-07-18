@@ -74,7 +74,7 @@
  * UTIE         Read-only  0
  * MSIE         Read/write x  With only M-mode implemented, and only one hart, there is no real
  *                            sense to implement this bit in hardware. However, to be compatible
- *                             we implement it after all.
+ *                            I implement it after all.
  * SSIE         Read-only  0
  * USIE         Read-only  0
  *
@@ -105,146 +105,38 @@
  * 
  */
 module m_status_and_interrupts
-(
-/* verilator lint_off UNUSED */
- input        clk,
- input        alu_tapout, //      True when ttime[MTIMETA] increments from 0 to 1, and isWttime is true
- input        alu_minstretofl, // True when minstret overflows in 32 bits.
- input [31:0] B, //               ALU result, used in "ij" 
- input [31:0] DAT_O, //            From EBR
- input [31:0] ADR_O, //             Address
- input        sa38, //            | Shows if we enters traps, executes "ij", or enters CSR emulation
- input        sa39, //            |
- input        meip, //            External interrupt pending
- input        ctrlreg_we, // User code writes to EBR with address in ADR_O. To find out if we write to mtime, minstreth, mip,mie,mstatus or bit mtip
- output       mrinstretip,
- output       mtimeincip,
- output       mtip,
- output       msip,
- output       mrinstretie,
- output       mtimeincie,
- output       meie,
- output       mtie,
- output       msie,
- output       mpie,
- output       mie, 
- output reg   qualint, //         qualified interrupt pending
- output       m_status_and_interrupts_killwarnings
-/* verilator lint_on UNUSED */
- );
+  # ( parameter HIGHLEVEL = 1 )
+   (
+    /* verilator lint_off UNUSED */
+    input        clk,
+    input        alu_tapout, //      True when ttime[MTIMETA] increments from 0 to 1, and isWttime is true
+    input        alu_minstretofl, // True when minstret overflows in 32 bits.
+    input [31:0] B, //               ALU result, used in "ij" 
+    input [31:0] DAT_O, //           From EBR
+    input [31:0] ADR_O, //           Address
+    input        sa38, //              | Shows if we enters traps, executes "ij", or enters CSR emulation
+    input        sa39, //              |
+    input        meip, //            External interrupt pending
+    input        ctrlreg_we, //      User code writes to EBR with address in ADR_O. To find out if we write to mtime, minstreth, mip,mie,mstatus or bit mtip
+    output       mrinstretip, //       |
+    output       mtimeincip, //        | These are all registers.
+    output       mtip, //              |
+    output       msip, //              |
+    output       mrinstretie, //       |
+    output       mtimeincie, //        |
+    output       meie, //              |
+    output       mtie, //              |
+    output       msie, //              |
+    output       mpie, //              |
+    output       mie, //               | 
+    output       qualint, //         qualified interrupt pending
+    output       m_status_and_interrupts_killwarnings
+    /* verilator lint_on UNUSED */
+    );
+
+   reg           r_incsr;
+
    assign m_status_and_interrupts_killwarnings = &B | &DAT_O | &ADR_O;
-   
-   /* mtimeincip is set when the cycle counter increments to (1<<MTIMETAP).
-    * When user code writes mtime, mtimeincip is cleared
-    */
-   wire       write_to_mtime = ctrlreg_we & ADR_O[13]; 
-   reg        r_mtimeincip;
-   always @(posedge clk)
-     r_mtimeincip <= ( (~r_mtimeincip & alu_tapout) | r_mtimeincip)  & ~write_to_mtime;
-
-   /* minstrethip is set when the retired instruction counter overflows in 32 bits.
-    * When user code write minstreth, minstretip is cleared
-    */
-   wire       write_to_minstreth = ctrlreg_we & ADR_O[14];
-   reg        r_minstrethip;
-   always @(posedge clk)
-     if ( write_to_minstreth ) begin
-        r_minstrethip <= 1'b0;
-     end else if ( alu_minstretofl ) begin
-        r_minstrethip <= 1'b1;
-     end
-        
-   
-//   always @(posedge clk)
-//     r_minstrethip <= ( (~r_minstrethip & alu_minstretofl) | r_minstrethip) & ~write_to_minstreth;
-
-   /* MTIP is set under software control, this should only be used
-    * by the internal interrupt routine that increments {mtimeh,mtime}. 
-    * It is cleared when mtimecmp or mtimecmph is written. 
-    */
-   wire       write_to_mtip = ctrlreg_we & ADR_O[15];
-   wire       write_to_mtimecmpx = ctrlreg_we & ADR_O[19];
-   reg        r_mtip;
-   always @(posedge clk) begin
-     if ( write_to_mtip ) begin
-        r_mtip <= 1'b1;
-     end else if ( write_to_mtimecmpx ) begin
-        r_mtip <= 1'b0;
-     end
-   end
-   
-   /* MSIP is only under software control. This is possible because we have only one hart.
-    */
-   wire       write_to_msip =  ctrlreg_we & ADR_O[18];
-   reg        r_msip;
-   always @(posedge clk)
-     r_msip <= (~write_to_msip & r_msip) | (write_to_msip & DAT_O[3]);
-
-   /* Selective interrupt enable bits in mie are implemented in a straight forward fashion
-    */
-   wire       write_to_mie = ctrlreg_we & ADR_O[17];
-   reg        r_mrinstretie,r_mtimeincie,r_meie,r_mtie,r_msie;
-   always @(posedge clk) begin
-      r_mrinstretie <= (~write_to_mie & r_mrinstretie) | ( write_to_mie & DAT_O[17] );
-      r_mtimeincie  <= (~write_to_mie & r_mtimeincie ) | ( write_to_mie & DAT_O[16] );
-      r_meie        <= (~write_to_mie & r_meie       ) | ( write_to_mie & DAT_O[11] );
-      r_mtie        <= (~write_to_mie & r_mtie       ) | ( write_to_mie & DAT_O[7] );
-      r_msie        <= (~write_to_mie & r_msie       ) | ( write_to_mie & DAT_O[3] );      
-   end
-
-   /* Register mpie is involved. 
-    *   o The user code can write it.
-    *     Here we must see if we have (writeIO & ADR_O[2])
-    *   o When an interrupt is taken, mpie <= mie
-    *     Microcode sets sa[39:38] to isr_intoTrap
-    *   o When a trap occurs, mpie <= mie
-    *     Microcode sets sa[39:38] to isr_intoTrap
-    *   o When MRET is executed, mpie <= 1
-    *     Instruction "ij" will have B[1] == 1 in this case, and sa[39:38] is isr_use_ij
-    *   o When accessing an illegal CSR and transferring control to a trap, mpie <= mie
-    *     Instruction "ij" will have B[0] == 1 in this case, and sa[39:38] is isr_use_ij
-    */
-   wire write_to_mstatus = ctrlreg_we & ADR_O[16];
-   reg  r_mpie,r_mie;
-   wire isr_use_ij = ~sa39 & sa38;
-   wire isr_intoCSR = sa39 & ~sa38;
-   wire isr_intoTrap = sa39 & sa38;
-   wire update_mpie = 
-        write_to_mstatus    |
-        isr_intoTrap        | 
-        (isr_use_ij & B[1]) |
-        (isr_use_ij & B[0]);
-   wire value_new_mpie = 
-        (write_to_mstatus & DAT_O[7]) | 
-        (isr_intoTrap & r_mie)    |
-        (isr_use_ij & B[1] )      |
-        (isr_use_ij & B[0] & r_mie);
-   always @(posedge clk)
-     if ( update_mpie )
-       r_mpie <= value_new_mpie;
-
-   /* Register mie is involved.
-    *   o The user code can write it.
-    *     Here we must see if we have (writeIO & ADR_O[2])
-    *   o When an interrupt is taken, mie <= 0
-    *     Microcode sets sa[39:38] to isr_intoTrap
-    *   o When a trap occurs, mie <= 0
-    *     Microcode sets sa[39:38] to isr_intoTrap
-    *   o When MRET is executed, mie <= mpie
-    *     Instruction "ij" will have B[1] == 1 in this case, and sa[39:38] is isr_use_ij
-    *   o When accessing an illegal CSR and transferring control to a trap, mie <= 0
-    *     Instruction "ij" will have B[0] == 1 in this case, and sa[39:38] is isr_use_ij
-    */
-   wire update_mie = update_mpie;
-   wire value_new_mie =
-        (write_to_mstatus & DAT_O[3]) |
-        (isr_intoTrap & 1'b0)     |
-        (isr_use_ij & B[1] & r_mpie) |
-        (isr_use_ij & B[0] & 1'b0);
-   always @(posedge clk)
-     if (update_mie)
-       r_mie <= value_new_mie;
-
 `ifdef verilator   
    function [12:0] get_interruptinfo;
       // verilator public
@@ -252,60 +144,354 @@ module m_status_and_interrupts
    endfunction
 `endif
    
-   /* An internal register is set while we are in a CSR emulation routine
-    */
-   reg  r_incsr;
-   always @(posedge clk)
-     r_incsr <= isr_intoCSR | (r_incsr & ~isr_use_ij);
+   generate
+      if ( HIGHLEVEL ) begin
+         // =============================================================================
+         // HIGHLEVEL
+         // =============================================================================
 
-   /*                                               __     _
-    * mie -----------------------------------------|  |---| |-- qualint
-    * r_incsr ------------------------------------o|  |   >_|
-    *                                    ____      |  |
-    * mrinstretip --| |-----------------|    |-----|__|
-    * mrinstretie --|&|  +--------------|    |
-    *                    |  +-----------| or |
-    * mtimeincip ---| |--+  |  +--------|    |
-    * mtimeincie ---|&|     |  |  +-----|____|
-    *                       |  |  |
-    * meip ---------| |-----+  |  |
-    * meie ---------|&|        |  |
-    *                          |  |
-    * mtip ---------| |--------+  |
-    * mtie ---------|&|           |
-    *                             |
-    * msip ---------| |-----------+
-    * msie ---------|&|
-    */ 
-   wire possible_interrupt = 
-        (mrinstretip & mrinstretie) |        
-        (mtimeincip  & mtimeincie ) |
-        (meip        & meie       ) |
-        (mtip        & mtie       ) |
-        (msip        & msie       );  
-   wire cmb_qualint = possible_interrupt & r_mie & ~r_incsr;
-   always @(posedge clk)
-     qualint <= cmb_qualint;
+         /* mtimeincip is set when the cycle counter increments to (1<<MTIMETAP).
+          * When user code writes mtime, mtimeincip is cleared
+          */
+         wire       write_to_mtime = ctrlreg_we & ADR_O[13]; 
+         reg        r_mtimeincip;
+         always @(posedge clk)
+           r_mtimeincip <= ( (~r_mtimeincip & alu_tapout) | r_mtimeincip)  & ~write_to_mtime;
+         
+         /* minstrethip is set when the retired instruction counter overflows in 32 bits.
+          * When user code write minstreth, minstretip is cleared
+          */
+         wire       write_to_minstreth = ctrlreg_we & ADR_O[14];
+         reg        r_minstrethip;
+         always @(posedge clk)
+           if ( write_to_minstreth ) begin
+              r_minstrethip <= 1'b0;
+           end else if ( alu_minstretofl ) begin
+              r_minstrethip <= 1'b1;
+           end
+         
+         
+         //   always @(posedge clk)
+         //     r_minstrethip <= ( (~r_minstrethip & alu_minstretofl) | r_minstrethip) & ~write_to_minstreth;
+         
+         /* MTIP is set under software control, this should only be used
+          * by the internal interrupt routine that increments {mtimeh,mtime}. 
+          * It is cleared when mtimecmp or mtimecmph is written. 
+          */
+         wire       write_to_mtip = ctrlreg_we & ADR_O[15];
+         wire       write_to_mtimecmpx = ctrlreg_we & ADR_O[19];
+         reg        r_mtip;
+         always @(posedge clk) begin
+            if ( write_to_mtip ) begin
+               r_mtip <= 1'b1;
+            end else if ( write_to_mtimecmpx ) begin
+               r_mtip <= 1'b0;
+            end
+         end
+         
+         /* MSIP is only under software control. This is possible because we have only one hart.
+          */
+         wire       write_to_msip =  ctrlreg_we & ADR_O[18];
+         reg        r_msip;
+         always @(posedge clk)
+           r_msip <= (~write_to_msip & r_msip) | (write_to_msip & DAT_O[3]);
+         
+         /* Selective interrupt enable bits in mie are implemented in a straight forward fashion
+          */
+         wire       write_to_mie = ctrlreg_we & ADR_O[17];
+         reg        r_mrinstretie,r_mtimeincie,r_meie,r_mtie,r_msie;
+         always @(posedge clk) begin
+            r_mrinstretie <= (~write_to_mie & r_mrinstretie) | ( write_to_mie & DAT_O[17] );
+            r_mtimeincie  <= (~write_to_mie & r_mtimeincie ) | ( write_to_mie & DAT_O[16] );
+            r_meie        <= (~write_to_mie & r_meie       ) | ( write_to_mie & DAT_O[11] );
+            r_mtie        <= (~write_to_mie & r_mtie       ) | ( write_to_mie & DAT_O[7] );
+            r_msie        <= (~write_to_mie & r_msie       ) | ( write_to_mie & DAT_O[3] );      
+         end
+         
+         /* Register mpie is involved. 
+          *   o The user code can write it.
+          *     Here we must see if we have (writeIO & ADR_O[2])
+          *   o When an interrupt is taken, mpie <= mie
+          *     Microcode sets sa[39:38] to isr_intoTrap
+          *   o When a trap occurs, mpie <= mie
+          *     Microcode sets sa[39:38] to isr_intoTrap
+          *   o When MRET is executed, mpie <= 1
+          *     Instruction "ij" will have B[1] == 1 in this case, and sa[39:38] is isr_use_ij
+          *   o When accessing an illegal CSR and transferring control to a trap, mpie <= mie
+          *     Instruction "ij" will have B[0] == 1 in this case, and sa[39:38] is isr_use_ij
+          */
+         wire write_to_mstatus = ctrlreg_we & ADR_O[16];
+         reg  r_mpie,r_mie;
+         wire isr_use_ij = ~sa39 & sa38;
+         wire isr_intoCSR = sa39 & ~sa38;
+         wire isr_intoTrap = sa39 & sa38;
+         wire update_mpie = 
+              write_to_mstatus    |
+              isr_intoTrap        | 
+              (isr_use_ij & B[1]) |
+              (isr_use_ij & B[0]);
+         wire value_new_mpie = 
+              (write_to_mstatus & DAT_O[7]) | 
+              (isr_intoTrap & r_mie)    |
+              (isr_use_ij & B[1] )      |
+              (isr_use_ij & B[0] & r_mie);
+         always @(posedge clk)
+           if ( update_mpie )
+             r_mpie <= value_new_mpie;
+         
+         /* Register mie is involved.
+          *   o The user code can write it.
+          *     Here we must see if we have (writeIO & ADR_O[2])
+          *   o When an interrupt is taken, mie <= 0
+          *     Microcode sets sa[39:38] to isr_intoTrap
+          *   o When a trap occurs, mie <= 0
+          *     Microcode sets sa[39:38] to isr_intoTrap
+          *   o When MRET is executed, mie <= mpie
+          *     Instruction "ij" will have B[1] == 1 in this case, and sa[39:38] is isr_use_ij
+          *   o When accessing an illegal CSR and transferring control to a trap, mie <= 0
+          *     Instruction "ij" will have B[0] == 1 in this case, and sa[39:38] is isr_use_ij
+          */
+         wire update_mie = update_mpie;
+         wire value_new_mie =
+              (write_to_mstatus & DAT_O[3]) |
+              (isr_intoTrap & 1'b0)     |
+              (isr_use_ij & B[1] & r_mpie) |
+              (isr_use_ij & B[0] & 1'b0);
+         always @(posedge clk)
+           if (update_mie)
+             r_mie <= value_new_mie;
+         
+         /* An internal register is set while we are in a CSR emulation routine
+          */
+         always @(posedge clk)
+           r_incsr <= isr_intoCSR | (r_incsr & ~isr_use_ij);
+         
+         /*                                               __     _
+          * mie -----------------------------------------|  |---| |-- qualint
+          * r_incsr ------------------------------------o|  |   >_|
+          *                                    ____      |  |
+          * mrinstretip --| |-----------------|    |-----|__|
+          * mrinstretie --|&|  +--------------|    |
+          *                    |  +-----------| or |
+          * mtimeincip ---| |--+  |  +--------|    |
+          * mtimeincie ---|&|     |  |  +-----|____|
+          *                       |  |  |
+          * meip ---------| |-----+  |  |
+          * meie ---------|&|        |  |
+          *                          |  |
+          * mtip ---------| |--------+  |
+          * mtie ---------|&|           |
+          *                             |
+          * msip ---------| |-----------+
+          * msie ---------|&|
+          */ 
+         wire possible_interrupt = 
+              (mrinstretip & mrinstretie) |        
+              (mtimeincip  & mtimeincie ) |
+              (meip        & meie       ) |
+              (mtip        & mtie       ) |
+              (msip        & msie       );  
+         wire cmb_qualint = possible_interrupt & r_mie & ~r_incsr;
+         reg  r_qualint;
+         always @(posedge clk)
+           r_qualint <= cmb_qualint;
+         assign qualint = r_qualint;
+         
+         /* Registers that can be read by user code are output from this module
+          */
+         // In register mip
+         // -----------------------------------------
+         assign mrinstretip = r_minstrethip;
+         assign mtimeincip  = r_mtimeincip;
+         //     meip          comes from the outside
+         assign mtip        = r_mtip;
+         assign msip        = r_msip;
+         // In register mie
+         // -----------------------------------------
+         assign mrinstretie= r_mrinstretie;
+         assign mtimeincie = r_mtimeincie;
+         assign meie       = r_meie;
+         assign mtie       = r_mtie;
+         assign msie       = r_msie;
+         // In register mstatus
+         // -----------------------------------------
+         assign mpie       = r_mpie;
+         assign mie        = r_mie;
+         
+      end else begin
+         // =============================================================================
+         // LOWLEVEL
+         // =============================================================================
 
-   
-   /* Registers that can be read by user code are output from this module
-    */
-   // In register mip
-   assign mrinstretip = r_minstrethip;
-   assign mtimeincip  = r_mtimeincip;
-   //sign meip comes from the outside
-   assign mtip        = r_mtip;
-   assign msip        = r_msip;
-   // In register mie
-   assign mrinstretie= r_mrinstretie;
-   assign mtimeincie = r_mtimeincie;
-   assign meie       = r_meie;
-   assign mtie       = r_mtie;
-   assign msie       = r_msie;
-   // In register mstatus
-   assign mpie       = r_mpie;
-   assign mie        = r_mie;
-   
-   
-     
+         /* mtimeincip is set when the cycle counter increments to (1<<MTIMETAP).
+          * When user code writes mtime, mtimeincip is cleared
+          */
+         wire       write_to_mtime = ctrlreg_we & ADR_O[13]; 
+         reg        r_mtimeincip;
+         always @(posedge clk)
+           r_mtimeincip <= ( (~r_mtimeincip & alu_tapout) | r_mtimeincip)  & ~write_to_mtime;
+         
+         /* minstrethip is set when the retired instruction counter overflows in 32 bits.
+          * When user code write minstreth, minstretip is cleared
+          */
+         wire       write_to_minstreth = ctrlreg_we & ADR_O[14];
+         reg        r_minstrethip;
+         always @(posedge clk)
+           if ( write_to_minstreth ) begin
+              r_minstrethip <= 1'b0;
+           end else if ( alu_minstretofl ) begin
+              r_minstrethip <= 1'b1;
+           end
+         
+         
+         //   always @(posedge clk)
+         //     r_minstrethip <= ( (~r_minstrethip & alu_minstretofl) | r_minstrethip) & ~write_to_minstreth;
+         
+         /* MTIP is set under software control, this should only be used
+          * by the internal interrupt routine that increments {mtimeh,mtime}. 
+          * It is cleared when mtimecmp or mtimecmph is written. 
+          */
+         wire       write_to_mtip = ctrlreg_we & ADR_O[15];
+         wire       write_to_mtimecmpx = ctrlreg_we & ADR_O[19];
+         reg        r_mtip;
+         always @(posedge clk) begin
+            if ( write_to_mtip ) begin
+               r_mtip <= 1'b1;
+            end else if ( write_to_mtimecmpx ) begin
+               r_mtip <= 1'b0;
+            end
+         end
+         
+         /* MSIP is only under software control. This is possible because we have only one hart.
+          */
+         wire       write_to_msip =  ctrlreg_we & ADR_O[18];
+         reg        r_msip;
+         always @(posedge clk)
+           r_msip <= (~write_to_msip & r_msip) | (write_to_msip & DAT_O[3]);
+         
+         /* Selective interrupt enable bits in mie are implemented in a straight forward fashion
+          */
+         wire       write_to_mie = ctrlreg_we & ADR_O[17];
+         reg        r_mrinstretie,r_mtimeincie,r_meie,r_mtie,r_msie;
+         always @(posedge clk) begin
+            r_mrinstretie <= (~write_to_mie & r_mrinstretie) | ( write_to_mie & DAT_O[17] );
+            r_mtimeincie  <= (~write_to_mie & r_mtimeincie ) | ( write_to_mie & DAT_O[16] );
+            r_meie        <= (~write_to_mie & r_meie       ) | ( write_to_mie & DAT_O[11] );
+            r_mtie        <= (~write_to_mie & r_mtie       ) | ( write_to_mie & DAT_O[7] );
+            r_msie        <= (~write_to_mie & r_msie       ) | ( write_to_mie & DAT_O[3] );      
+         end
+         
+         /* Register mpie is involved. 
+          *   o The user code can write it.
+          *     Here we must see if we have (writeIO & ADR_O[2])
+          *   o When an interrupt is taken, mpie <= mie
+          *     Microcode sets sa[39:38] to isr_intoTrap
+          *   o When a trap occurs, mpie <= mie
+          *     Microcode sets sa[39:38] to isr_intoTrap
+          *   o When MRET is executed, mpie <= 1
+          *     Instruction "ij" will have B[1] == 1 in this case, and sa[39:38] is isr_use_ij
+          *   o When accessing an illegal CSR and transferring control to a trap, mpie <= mie
+          *     Instruction "ij" will have B[0] == 1 in this case, and sa[39:38] is isr_use_ij
+          */
+         wire write_to_mstatus = ctrlreg_we & ADR_O[16];
+         reg  r_mpie,r_mie;
+         wire isr_use_ij = ~sa39 & sa38;
+         wire isr_intoCSR = sa39 & ~sa38;
+         wire isr_intoTrap = sa39 & sa38;
+         wire update_mpie = 
+              write_to_mstatus    |
+              isr_intoTrap        | 
+              (isr_use_ij & B[1]) |
+              (isr_use_ij & B[0]);
+         wire value_new_mpie = 
+              (write_to_mstatus & DAT_O[7]) | 
+              (isr_intoTrap & r_mie)    |
+              (isr_use_ij & B[1] )      |
+              (isr_use_ij & B[0] & r_mie);
+         always @(posedge clk)
+           if ( update_mpie )
+             r_mpie <= value_new_mpie;
+         
+         /* Register mie is involved.
+          *   o The user code can write it.
+          *     Here we must see if we have (writeIO & ADR_O[2])
+          *   o When an interrupt is taken, mie <= 0
+          *     Microcode sets sa[39:38] to isr_intoTrap
+          *   o When a trap occurs, mie <= 0
+          *     Microcode sets sa[39:38] to isr_intoTrap
+          *   o When MRET is executed, mie <= mpie
+          *     Instruction "ij" will have B[1] == 1 in this case, and sa[39:38] is isr_use_ij
+          *   o When accessing an illegal CSR and transferring control to a trap, mie <= 0
+          *     Instruction "ij" will have B[0] == 1 in this case, and sa[39:38] is isr_use_ij
+          */
+         wire update_mie = update_mpie;
+         wire value_new_mie =
+              (write_to_mstatus & DAT_O[3]) |
+              (isr_intoTrap & 1'b0)     |
+              (isr_use_ij & B[1] & r_mpie) |
+              (isr_use_ij & B[0] & 1'b0);
+         always @(posedge clk)
+           if (update_mie)
+             r_mie <= value_new_mie;
+         
+         /* An internal register is set while we are in a CSR emulation routine
+          */
+         always @(posedge clk)
+           r_incsr <= isr_intoCSR | (r_incsr & ~isr_use_ij);
+         
+         /*                                               __     _
+          * mie -----------------------------------------|  |---| |-- qualint
+          * r_incsr ------------------------------------o|  |   >_|
+          *                                    ____      |  |
+          * mrinstretip --| |-----------------|    |-----|__|
+          * mrinstretie --|&|  +--------------|    |
+          *                    |  +-----------| or |
+          * mtimeincip ---| |--+  |  +--------|    |
+          * mtimeincie ---|&|     |  |  +-----|____|
+          *                       |  |  |
+          * meip ---------| |-----+  |  |
+          * meie ---------|&|        |  |
+          *                          |  |
+          * mtip ---------| |--------+  |
+          * mtie ---------|&|           |
+          *                             |
+          * msip ---------| |-----------+
+          * msie ---------|&|
+          */ 
+         wire possible_interrupt = 
+              (mrinstretip & mrinstretie) |        
+              (mtimeincip  & mtimeincie ) |
+              (meip        & meie       ) |
+              (mtip        & mtie       ) |
+              (msip        & msie       );  
+         wire cmb_qualint = possible_interrupt & r_mie & ~r_incsr;
+         reg  r_qualint;
+         always @(posedge clk)
+           r_qualint <= cmb_qualint;
+         assign qualint = r_qualint;
+         
+         
+         /* Registers that can be read by user code are output from this module
+          */
+         // In register mip
+         // -----------------------------------------
+         assign mrinstretip = r_minstrethip;
+         assign mtimeincip  = r_mtimeincip;
+         //     meip          comes from the outside
+         assign mtip        = r_mtip;
+         assign msip        = r_msip;
+         // In register mie
+         // -----------------------------------------
+         assign mrinstretie= r_mrinstretie;
+         assign mtimeincie = r_mtimeincie;
+         assign meie       = r_meie;
+         assign mtie       = r_mtie;
+         assign msie       = r_msie;
+         // In register mstatus
+         // -----------------------------------------
+         assign mpie       = r_mpie;
+         assign mie        = r_mie;
+         
+      end   
+   endgenerate
 endmodule
