@@ -1,7 +1,7 @@
 # midgetv
 
 RISC-V controller with Wishbone interface specifically for Lattice
-iCE40 FPGAs. midgetv is a non-pipelined, multi-cycle, microcoded design. As a
+iCE40 FPGAs. Midgetv is a non-pipelined, multi-cycle, microcoded design. As a
 module, the interconnect of midgetv may be shown as this:
 
    
@@ -23,7 +23,7 @@ register by 31). Average number of clocks per instruction (CPI) seems to be
 around 10. Unaligned word/hword load/store instructions must be performed in
 software and is really slow. CSR instructions are implemented partly
 in microcode, but mostly in software; slow! Interrupt response is also slow. 
-
+The privilege mode of midgetv is always *machine-mode*.
 
 ## Overall goals and results
 
