@@ -65,14 +65,14 @@ All my work is done under Linux.
 
 NB. Real-world usage of midgetv will certainly be larger, and
 slower. While I still make modifications to the Verilog code, these
-numbers will slightly change, so treat them as indicative only.
+numbers will slightly change, so treat them as optimistic, and indicative only.
 
 ### iCEcube2
 Using iCECube2 for compilation (with Lattice LSE as synthesis tool) give the following for the example "hello world" program:
 
 Board/FPGA                          | SB_LUT4  | EBRs | SRAM | Clock (MHz) | Comment
 ----------------------------------- | -------- | ---- | ---- | ----------- | --------
-`iceblink40-hx1k` `ICE40HX1K-VQ100` | 234 | 5 | 0 | 67 | No `cycle(h)` or `time(h)`. No `instreth`. No interrupts, partial instruction decode
+`iceblink40-hx1k` `ICE40HX1K-VQ100` | 230 | 5 | 0 | 69 | No `cycle(h)` or `time(h)`. No `instreth`. No interrupts, minimal instruction decode
 `upduino2`        `ICE40UP5K-SG48I` | 370 | 5 | 2 | 29 | `cycle(h)`, `time(h)`, `instret(h)`, interrupts, full instruction decode
 
 Note that "Auto lut cascade" must be off in the placer option of
