@@ -10,10 +10,7 @@ OBJ = ../../../obj_dir
 CFLAGS = -mabi=ilp32 -march=rv32i -nodefaultlibs -nostartfiles -Os -Wall \
 	-DNOCSR=1 -DonlyEBR=1 -DSP_INITVAL=0x400 
 
-#all :  morse.lst $(BIN)/simmorse \
-#	../../../tsthw/upduino2/ice40loaderprog.hv \
-#	../../../tsthw/iceblink40-hx1k/ice40loaderprog.hv morse.s
-all: ../../../tsthw/upduino2/ice40loaderprog.hv \
+all: $(BIN)/simmorse ../../../tsthw/upduino2/ice40loaderprog.hv \
 	../../../tsthw/iceblink40-hx1k/ice40loaderprog.hv
 
 ../../../tsthw/iceblink40-hx1k/ice40loaderprog.hv: ../../../tsthw/upduino2/ice40loaderprog.hv

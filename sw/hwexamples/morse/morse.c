@@ -64,7 +64,7 @@ static void putc_morse( uint8_t c ) {
  */
 static void puts_morse( uint8_t const *  s ) {
         while ( *s ) {
-                if ( *s == 0xff ) {
+                if ( *s == 0xff ) { // Interword spacing
                         ledoff(5);
                 } else {
                         putc_morse( *s );
@@ -111,15 +111,15 @@ static void puts_morse( uint8_t const *  s ) {
 #define _7 0b100011 ,  // --...
 #define _8 0b100111 ,  // ---..
 #define _9 0b101111 ,  // ----.
-#define __ 0xff     ,
+#define __ 0xff     ,  // Interword spacing
 #define __endstring__ 0
 
-const uint8_t helloworld[] = { _H _E _L _L _O __ _W _O _R _L _D __endstring__  };
+const uint8_t hello_world[] = { _H _E _L _L _O __ _W _O _R _L _D __endstring__  };
 
 //__attribute__((noreturn)) 
 int main( void ) {
         while (1) {
-                puts_morse( helloworld );
+                puts_morse( hello_world );
                 ledoff(10);
 #if sim
                 exit(printf( "\n" ));

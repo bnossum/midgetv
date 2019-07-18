@@ -6,6 +6,7 @@ bin/midgetv_genucode
 bin/ucodeinitval.hv
 bin/m_ucodepc.bin
 bin/m_alu.bin
+bin/simmorse
 
 tsthw/iceblink40-hx1k/.sconsign.dblite
 tsthw/iceblink40-hx1k/hardware.asc
