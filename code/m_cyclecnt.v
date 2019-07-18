@@ -225,29 +225,29 @@ module m_cyclecnt
              *           1
              * 
              * Note subtility in lut of ccnt[0]. The very first cycle sa16 is unknown. We want to kill the carry chain
-             * or elser rcrun will go high prematurely.
+             * or else rcrun will go high prematurely.
              *
-             * sa16
-             * |zero
-             * ||rcnt[0]
-             * |||start  
-             * ||||  ccnt[0]
-             * 0000  1
-             * 0001   1
-             * 0010  1
-             * 0011   0
-             * 0100  1
-             * 0101   1
-             * 0110  1
-             * 0111   0
-             * 1000  1
-             * 1001  1
-             * 1010  1
-             * 1011  1
-             * 1100  1
-             * 1101  1
-             * 1110  1
-             * 1111  1
+             * sa16                                  busserrcy                                       
+             * |zero                                 |sa16                                           
+             * ||rcnt[0]                             ||rcrun                                         
+             * |||start                              |||r_issh0_not                                  
+             * ||||  ccnt[0]                         ||||  veryfirst  buserror  nobusserror          
+             * 0000  1                               0000  1          1         0                    
+             * 0001   1                              0001  0                    1                    
+             * 0010  1                               0010  0                    1                    
+             * 0011   0                              0011  0                    1                    
+             * 0100  1                               0100  1          1         0                    
+             * 0101   1                              0101  0                    1                    
+             * 0110  1                               0110  0                    1                    
+             * 0111   0                              0111  0                    1                    
+             * 1000  1                               1000  1          1         0                    
+             * 1001  1                               1001  0                    1                    
+             * 1010  1                               1010  0          1         0                    
+             * 1011  1                               1011  0          1         0                    
+             * 1100  1                               1100  1          1         0                    
+             * 1101  1                               1101  0                    1                    
+             * 1110  1                               1110  0                    1                    
+             * 1111  1                               1111  0                    1                    
              * 
              */
             
@@ -281,32 +281,6 @@ module m_cyclecnt
             SB_CARRY buserrcy_i( .CO(buserrcy),                    .CI(ccntcy[6]), .I1(rcrun), .I0(1'b0));
             SB_DFF rcorerunning_r( .Q(rcrun), .C(clk), .D(cmb_rcrun) );
             assign corerunning = rcrun;
-
-            //SB_LUT4 #(.LUT_INIT(16'hf0ff)) nobuserror_l( .O(nobuserror), .I3(buserrcy), .I2(sa16), .I1(1'b0), .I0(1'b0));
-
-            /* busserrcy
-             * |sa16
-             * ||rcrun
-             * |||r_issh0_not
-             * ||||  veryfirst  buserror  nobusserror
-             * 0000  1          1         0
-             * 0001  0                    1
-             * 0010  0                    1
-             * 0011  0                    1
-             * 0100  1          1         0
-             * 0101  0                    1
-             * 0110  0                    1
-             * 0111  0                    1
-             * 1000  1          1         0
-             * 1001  0                    1
-             * 1010  0          1         0
-             * 1011  0          1         0
-             * 1100  1          1         0
-             * 1101  0                    1
-             * 1110  0                    1
-             * 1111  0                    1
-             * 
-             */
             SB_LUT4 #(.LUT_INIT(16'he2ee)) nobuserror_l( .O(nobuserror), .I3(buserrcy), .I2(sa16), .I1(rcrun), .I0(r_issh0_not));            
             
          end
