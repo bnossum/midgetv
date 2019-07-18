@@ -68,11 +68,11 @@ slower. While I still make modifications to the Verilog code, these
 numbers will slightly change, so treat them as indicative only.
 
 ### iCEcube2
-Using iCECube2 for compilation give the following for the example "hello world" program:
+Using iCECube2 for compilation (with Lattice LSE as synthesis tool) give the following for the example "hello world" program:
 
-Board/FPGA                          | SB_LUT4  | EBRs | SRAM | Clock (MHz) | Notes
------------------------------------ | -------- | ---- | ---- | ----------- | -----
-`iceblink40-hx1k` `ICE40HX1K-VQ100` | 234 | 5 | 0 | 67 | No `cycle(h)`, `time(h)`, `instret(h)`, no interrupts, partial instruction decode
+Board/FPGA                          | SB_LUT4  | EBRs | SRAM | Clock (MHz) | Comment
+----------------------------------- | -------- | ---- | ---- | ----------- | --------
+`iceblink40-hx1k` `ICE40HX1K-VQ100` | 234 | 5 | 0 | 67 | No `cycle(h)` or `time(h)`. No `instreth`. No interrupts, partial instruction decode
 `upduino2`        `ICE40UP5K-SG48I` | 370 | 5 | 2 | 29 | `cycle(h)`, `time(h)`, `instret(h)`, interrupts, full instruction decode
 
 Note that "Auto lut cascade" must be off in the placer option of
@@ -84,10 +84,10 @@ Using Yosys 0.7+515, arachne-pnr 0.1+287+0.
 Unfortunately this give the following
 (I would have expected numbers comparable with those for iCECube2, only 31 SB_LUTs larger):
 
-Board/FPGA                          | SB_LUT4  | EBRs | SRAM | Clock (MHz)
------------------------------------ | -------- | ---- | ---- | -----------
-`iceblink40-hx1k` `ICE40HX1K-VQ100` | 337      |  5   |  0   | 60         
-`upduino2`        `ICE40UP5K-SG48I` | 445      |  5   |  2   | 22         
+Board/FPGA                          | SB_LUT4  | EBRs | SRAM | Clock (MHz) | Comment
+----------------------------------- | -------- | ---- | ---- | ----------- | -------
+`iceblink40-hx1k` `ICE40HX1K-VQ100` | 337      |  5   |  0   | 60 | 72 LUTS larger than expected
+`upduino2`        `ICE40UP5K-SG48I` | 445      |  5   |  2   | 22 | 46 LUTS larger than expected
 
 
 ## Incomplete build instructions
