@@ -27,14 +27,14 @@ The privilege mode of midgetv is always *machine-mode*.
 
 ## Overall goals and results
 
-| Goal          | Result | Comment |
-| ------------- | ------ | ------- |
-| < 400 SB_LUTS, 4 EBRs | Working | Not attained yet, uses 5 EBRs, 370 SB_LUT4. Should be possible.  Size varies with included features and toolchain |
-| Easy interconnect | Done |  External modules accessed using Wishbone |
-| Full compliance with RV32I as per riscv-spec-v2.2.pdf | Done | Options allow a smaller core, but then breaks full compliance. |
-| Full compliance with riscv-privileged-v1.10.pdf | Partially done | It is unlikely anyone will need full compliance here, but as a reference I will endeavor to construct this. A current implementation includes just those registers needed to pass the RISC-V rv32i compliance tests |
-| Support of "C" standard extension | | Not started. If implemented the size will be considerably larger |
-| Support of "M" standard extension for iCE UltraPlus | | Not started. If implemented the size will be considerably larger |
+     | Goal          | Comment |
+---- | ------------- | ------- |
+-[ ] | < 400 SB_LUTS, 4 EBRs | Not attained yet, uses 5 EBRs, 370 SB_LUT4. Should be possible.  Size varies with included features and toolchain |
+-[x] | Easy interconnect     | External modules accessed using Wishbone |
+-[x] | Full compliance with RV32I as per riscv-spec-v2.2.pdf | Options allow a smaller core, but then breaks full compliance. |
+-[ ] | Full compliance with riscv-privileged-v1.10.pdf | It is unlikely anyone will need full compliance here, but as a reference I will endeavor to construct this. A current implementation includes just those registers needed to pass the RISC-V rv32i compliance tests |
+-[ ] | Support of "C" standard extension | Not started. If implemented the size will be considerably larger |
+-[ ] | Support of "M" standard extension for iCE UltraPlus | Not started. If implemented the size will be considerably larger |
 
 ## Requirements
 
