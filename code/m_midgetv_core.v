@@ -10,7 +10,7 @@
 // Change location of mtimecmp,mtimecmph,mtime,mtimeh to >= 0x80000000 when SRAM is implemented.
 // When an instruction executes from SRAM, disallow any write or read unless ADR_O >= 0x40000000.
 // This protects magical constants and registers from overwrite. The only way to enter code in
-// EBR activated from the user code will be via software interrupts, EBREAK or ECALL. 
+// EBR activated from the user code will be via exceptions, EBREAK or ECALL. 
 // if ( Wpc )
 //   execinSRAM <= B[31];
 // trigger_ucodebranch = (nxtSTB & execinSRAM & ~B[31] & ~B[30])
@@ -28,16 +28,19 @@
    midgetv as a component
    ======================
    
-                      +----------------+
-               CLK_I ->                |- WE_O
-               RST_I -|                |- STB_O
-               start -|                |- CYC_O
-                      |                |- SEL_O[3:0] 
-                meip -|                |- ADR_O[31:0]
-               ACK_I -|                |- DAT_O[31:0]
-   DAT_I[IWIDTH-1:0] -|                |
-                      +----------------+
- 
+   
+                       +----------------+
+                CLK_I ->                |- WE_O
+                RST_I -|                |- STB_O
+                start -|    midgetv     |- CYC_O
+                       |                |- SEL_O[3:0] 
+                 meip -|                |- ADR_O[31:0]
+                ACK_I -|                |- DAT_O[31:0]
+    DAT_I[IWIDTH-1:0] -|                |
+                       |                |- corerunning
+                       |                |- dbga[31:0]
+                       +----------------+
+
        
    Simplified datapath                                                                            
    ======================
@@ -99,12 +102,13 @@
  * m_midgetv_core signal description
  * =================================
  * 
- * Whishbone signals are implemented as per Whishbone specification b4.
+ * Whishbone signals are implemented as per Whishbone specification b4,
+ * see Whishbone B.4 data sheet for m_midgetv_core below.
  * 
  * A note on RST_I. 
  * RST_I is a mandatory input. It acts like a NMI.
  * 
- * Even though the granularity of the whishbone interface is 
+ * Even though the granularity of the Whishbone interface is 
  * 8-bit, all read operations happen as 32-bit operations. SEL_O == 4'b1111.
  * Selection of (signed/unsigned) byte and (signed/unsigned) hword is done
  * internally in midgetv. For write operations, the granularity is 8-bit, 
@@ -127,7 +131,7 @@
  * consequtive cycles before midgetv is started. In this later case
  * it is allowable to let start go low at a later time, it will not
  * affect midgetv.
- * midgetv does not have any hardware reset input
+ * midgetv does not have any hardware reset input.
  * 
  * input:meip
  * ----------
@@ -167,7 +171,7 @@
  * IWIDTH
  * ------
  * Determines the width of external input to midgetv. To be
- * compliant with whishbone, IWIDTH should be 8, 16 or 32.
+ * compliant with Whishbone, IWIDTH should be 8, 16 or 32.
  * When interrupts are included, IWIDTH should probably
  * always be 32.
  * Legal values: From 1 to 32.
@@ -272,13 +276,13 @@ module m_midgetv_core
     output [31:0]      DAT_O, //       Data from midgetv to output devices
     output [3:0]       SEL_O, //       Byte mask for read/write. 
 
-    // The following whishbone signals are not supported:
+    // The following Whishbone signals are not supported:
     //input            ERR_I,RTY_I,STALL_I
     //input [x:0]      TGD_I,
     //output           LOCK_O,
     //output [x:0]     TGA_O,TGC_O,TGD_O, 
 
-    // Non-whishbone signals:
+    // Non-Whishbone signals:
     input              meip, //        External interrupt(s) pending
     input              start, //       Control startup of midgetv
     output             corerunning, // midgetv should now be active. For synchronization of startup

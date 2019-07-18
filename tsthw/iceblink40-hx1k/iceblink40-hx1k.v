@@ -43,10 +43,10 @@ module top
       SRAMADRWIDTH    = 0,
       SIMEBRADRWIDTH  = 8, 
       IWIDTH          = 32, 
-      NO_CYCLECNT     = 0, 
+      NO_CYCLECNT     = 1, 
       MTIMETAP        = 0, 
       HIGHLEVEL       = 0,
-      LAZY_DECODE     = 1 
+      LAZY_DECODE     = 2 
       )
    (
     input      CLK_I,

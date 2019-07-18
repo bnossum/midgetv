@@ -51,6 +51,7 @@
  * Parameter:
  * LAZY_DECODE    0 : Full decode of the riscv instruction. Any unknown instruction leads to a trap
  *                1 : Decode of most riscv instructions. No decode in some minor code spaces
+ *                2 : Near minimal decode of riscv instructions. Not recommended
  */
 module m_ucodepc
   # ( parameter LAZY_DECODE = 0 )
@@ -97,6 +98,7 @@ module m_ucodepc
 `endif
 
    wire         illegal_funct7_or_illegal_rs1_rd;
+   wire         main_illegal;
    
    assign usedinx   = sa28 | !corerunning;
    assign maybranch = Adr0Mustbe0 | Adr1Mustbe0 | use_brcond | (sa32 & ~sa15);
@@ -120,7 +122,7 @@ module m_ucodepc
    /* This frees 8 instances of lui and 4 instances of auipc for the cost of 1 LUT */
    
    generate
-      if ( LAZY_DECODE == 1 ) begin
+      if ( LAZY_DECODE != 0 ) begin
          // =======================================================
          // Nearly full instruction decode. Does not
          // check some minor code spaces.
@@ -202,41 +204,48 @@ module m_ucodepc
              (checkfunct7 & ~funct7_5_dontcare & funct7[5]) |
              illegal_rs1_rd;
       end
-   endgenerate
+
+      if ( LAZY_DECODE == 2 ) begin
+         assign main_illegal = ~INSTR[0];
+      end else begin
          
-   /* The Main illegal signal
-    *
-    * illegal_a = (16'b1100111011000010 >> INSTR[5:2]); opens up for prefix 0001011, custom-0
-    * illegal_b = (16'b1110010011111111 >> INSTR[5:2]);
-    * illegal = (~INSTR[6] & illegal_a) | (INSTR[6] & illegal_b ) | ~INSTR[1] | ~INSTR[0] |
-    *           illegal_funct7_or_illegal_rs1_rd
-    */
-   
-   reg              illegal_a, illegal_b;
-   always @(/*AS*/INSTR)
-     case ( INSTR[5:2] )
-       4'b0000 : {illegal_b,illegal_a} = 2'b10;
-       4'b0001 : {illegal_b,illegal_a} = 2'b11;
-       4'b0010 : {illegal_b,illegal_a} = 2'b10;
-       4'b0011 : {illegal_b,illegal_a} = 2'b10;
-       4'b0100 : {illegal_b,illegal_a} = 2'b10;
-       4'b0101 : {illegal_b,illegal_a} = 2'b10;
-       4'b0110 : {illegal_b,illegal_a} = 2'b11;
-       4'b0111 : {illegal_b,illegal_a} = 2'b11;
-       4'b1000 : {illegal_b,illegal_a} = 2'b00;
-       4'b1001 : {illegal_b,illegal_a} = 2'b01;
-       4'b1010 : {illegal_b,illegal_a} = 2'b11;
-       4'b1011 : {illegal_b,illegal_a} = 2'b01;
-       4'b1100 : {illegal_b,illegal_a} = 2'b00;
-       4'b1101 : {illegal_b,illegal_a} = 2'b10;
-       4'b1110 : {illegal_b,illegal_a} = 2'b11;
-       4'b1111 : {illegal_b,illegal_a} = 2'b11;
-     endcase
-   assign illegal = (~INSTR[6] & illegal_a) | 
-                    (INSTR[6] & illegal_b ) | 
-                    ~INSTR[1] |
-                    ~INSTR[0] |
-                    illegal_funct7_or_illegal_rs1_rd;
+          
+         /* The Main illegal signal
+          *
+          * illegal_a = (16'b1100111011000010 >> INSTR[5:2]); opens up for prefix 0001011, custom-0
+          * illegal_b = (16'b1110010011111111 >> INSTR[5:2]);
+          * illegal = (~INSTR[6] & illegal_a) | (INSTR[6] & illegal_b ) | ~INSTR[1] | ~INSTR[0] |
+          *           illegal_funct7_or_illegal_rs1_rd
+          */
+         
+         reg              illegal_a, illegal_b;
+         always @(/*AS*/INSTR)
+           case ( INSTR[5:2] )
+             4'b0000 : {illegal_b,illegal_a} = 2'b10;
+             4'b0001 : {illegal_b,illegal_a} = 2'b11;
+             4'b0010 : {illegal_b,illegal_a} = 2'b10;
+             4'b0011 : {illegal_b,illegal_a} = 2'b10;
+             4'b0100 : {illegal_b,illegal_a} = 2'b10;
+             4'b0101 : {illegal_b,illegal_a} = 2'b10;
+             4'b0110 : {illegal_b,illegal_a} = 2'b11;
+             4'b0111 : {illegal_b,illegal_a} = 2'b11;
+             4'b1000 : {illegal_b,illegal_a} = 2'b00;
+             4'b1001 : {illegal_b,illegal_a} = 2'b01;
+             4'b1010 : {illegal_b,illegal_a} = 2'b11;
+             4'b1011 : {illegal_b,illegal_a} = 2'b01;
+             4'b1100 : {illegal_b,illegal_a} = 2'b00;
+             4'b1101 : {illegal_b,illegal_a} = 2'b10;
+             4'b1110 : {illegal_b,illegal_a} = 2'b11;
+             4'b1111 : {illegal_b,illegal_a} = 2'b11;
+           endcase
+         assign main_illegal = (~INSTR[6] & illegal_a) | 
+                               (INSTR[6] & illegal_b ) | 
+                               ~INSTR[1] |
+                               ~INSTR[0];
+      end
+   endgenerate
+
+   assign  illegal = main_illegal | illegal_funct7_or_illegal_rs1_rd;
    
    
    /* takebranch. Microcode must diverge when we have an alignment error,
