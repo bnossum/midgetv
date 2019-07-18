@@ -136,23 +136,18 @@ module m_alu
             SB_CARRY ca( .CO(alucy[j+1]),              .CI(alucy[j]), .I1(QQ[j]), .I0(A[j]));
          end
 
-/* verilator lint_off UNUSED */
-         wire isWttime;
-/* verilator lint_on UNUSED */
-         if ( MTIMETAP > 13 ) begin
-            SB_LUT4 #(.LUT_INIT(16'h0800)) l_isWttime( .O(isWttime), .I3(sa27), .I2(sa26), .I1(sa25), .I0(sa24));
-         end else begin
-            assign isWttime = 1'b0; // Keep Verilator happy
-         end
-
-         // For mtimeinc interrupts:
-         if (MTIMETAP >= ALUWIDTH ) begin
-            SB_LUT4 #(.LUT_INIT(16'h6060)) l_alu_tapout( .O(alu_tapout), .I3(1'b0), .I2(isWttime), .I1(B[ALUWIDTH-1]), .I0(A[ALUWIDTH-1]));
-         end else if ( MTIMETAP > 13 ) begin
-            SB_LUT4 #(.LUT_INIT(16'h6060)) l_alu_tapout( .O(alu_tapout), .I3(1'b0), .I2(isWttime), .I1(B[MTIMETAP]), .I0(A[MTIMETAP]));
-         end else begin
+         if ( MTIMETAP <= 13 ) begin
             assign alu_tapout = 1'b0;
-         end
+         end else begin
+            wire isWttime;
+            SB_LUT4 #(.LUT_INIT(16'h0800)) l_isWttime( .O(isWttime), .I3(sa27), .I2(sa26), .I1(sa25), .I0(sa24));
+            // For mtimeinc interrupts:
+            if (MTIMETAP >= ALUWIDTH ) begin
+               SB_LUT4 #(.LUT_INIT(16'h6060)) l_alu_tapout( .O(alu_tapout), .I3(1'b0), .I2(isWttime), .I1(B[ALUWIDTH-1]), .I0(A[ALUWIDTH-1]));
+            end else begin
+               SB_LUT4 #(.LUT_INIT(16'h6060)) l_alu_tapout( .O(alu_tapout), .I3(1'b0), .I2(isWttime), .I1(B[MTIMETAP]), .I0(A[MTIMETAP]));
+            end            
+         end 
 
          // For retired instructions interrupt
          wire propcy;

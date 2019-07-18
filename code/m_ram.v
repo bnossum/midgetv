@@ -4,7 +4,7 @@
  * For licence, see LICENCE
  * -----------------------------------------------------------------------------
  *
- * Nearly Whishbone B.4 data sheet for m_ram. The only reason I can not
+ * Nearly Wishbone B.4 data sheet for m_ram. The only reason I can not
  * call this a Whishbone interface is that midgetv require a read latency
  * of 1 cycle (or higher). In other words, midgetv can not support a 
  * Whishbone classical read cycle with no latency.
@@ -55,7 +55,8 @@
  * 17  4 SB_SPRAM256KA   128 KiB organized as 32 * 15.
  */
 module m_ram
-  # ( parameter SRAMADRWIDTH = 16
+  # ( parameter HIGHLEVEL = 1,
+      SRAMADRWIDTH = 16
       )
    (
     input         CLK_I, // System clock
@@ -82,25 +83,34 @@ module m_ram
    
    localparam SRAM_READLATENCY =  1; // No smaller than 1. For simulation of slow SRAMs can be larger
    localparam SRAM_WRITELATENCY = 0; // Can be higher for simulation of slow SRAMs.
-   
+
    generate
+
+      // -----------------------------------------------------------------------------
+      // No SRAM
+      // -----------------------------------------------------------------------------
       if ( SRAMADRWIDTH == 0 ) begin
          // No SRAM at all
          assign DAT_O = 32'h0;
          assign ACK_O = 1'b0;
          assign m_ram_killwarnings = CLK_I & STB_I & WE_I & &ADR_I & &DAT_I & &SEL_I;
       end else begin
+         
+         // -----------------------------------------------------------------------------
+         // SRAM
+         // -----------------------------------------------------------------------------
          wire [(SRAMADRWIDTH-15)*32-1:0] o;
 `ifdef verilator
          wire [(SRAMADRWIDTH-15)*32-1:0] zo;
 `endif
          wire [SRAMADRWIDTH-16:0]        we;
          wire [7:0]                      srammask;
+         wire                            readack;
+         wire [31:0]                     preDAT_O;
          genvar                          j,k;
-
+         
          assign srammask = {{2{SEL_I[3]}},{2{SEL_I[2]}},{2{SEL_I[1]}},{2{SEL_I[0]}}};
          
-         // Instantiate 2 or 4 SB_SPRAM256KA's
          for ( j = 0; j < SRAMADRWIDTH-15; j = j + 1 ) begin : blk0
             for ( k = 0; k < 2; k = k + 1 ) begin : blk1
                SB_SPRAM256KA sram
@@ -121,82 +131,131 @@ module m_ram
                        );
             end
          end
-
-         wire readack,writeack;
-         wire [31:0] preDAT_O;
          
-         wire writestrobe = STB_I & WE_I;
-         if ( SRAM_WRITELATENCY == 0 ) begin
-            assign writeack = writestrobe;
-         end else begin
-            /* verilator lint_off UNUSED */
-            reg [SRAM_WRITELATENCY:0] writeackdly;
-            /* verilator lint_on UNUSED */
-            always @(posedge CLK_I) begin
-               if ( writeackdly == 0 )
-                 writeackdly[SRAM_WRITELATENCY:0] <= {writestrobe,writeackdly[SRAM_WRITELATENCY:1]};
-               else
-                 writeackdly[SRAM_WRITELATENCY:0] <= {1'b0,writeackdly[SRAM_WRITELATENCY:1]};
-            end
-            assign writeack = writeackdly[1];
-         end
-         
-         if ( SRAMADRWIDTH == 16 ) begin
-            assign we[0] = writestrobe;
-`ifdef verilator
-            if ( SRAM_READLATENCY == 0 ) begin
-               assign preDAT_O = zo[31:0];
+         if ( HIGHLEVEL != 0 ) begin
+            // -----------------------------------------------------------------------------
+            // HIGHLEVEL
+            // -----------------------------------------------------------------------------
+            wire                            writestrobe;
+            wire                            writeack;
+            wire                            readstrobe;
+            
+            assign writestrobe = STB_I & WE_I;
+            if ( SRAM_WRITELATENCY == 0 ) begin
+               assign writeack = writestrobe;
             end else begin
+               /* verilator lint_off UNUSED */
+               reg [SRAM_WRITELATENCY:0] writeackdly;
+               /* verilator lint_on UNUSED */
+               always @(posedge CLK_I) begin
+                  if ( writeackdly == 0 )
+                    writeackdly[SRAM_WRITELATENCY:0] <= {writestrobe,writeackdly[SRAM_WRITELATENCY:1]};
+                  else
+                    writeackdly[SRAM_WRITELATENCY:0] <= {1'b0,writeackdly[SRAM_WRITELATENCY:1]};
+               end
+               assign writeack = writeackdly[1];
+            end
+            
+            assign readstrobe = STB_I & ~WE_I;
+            if ( SRAM_READLATENCY == 0) begin
+               assign readack = readstrobe;
+            end else begin
+               /* verilator lint_off UNUSED */
+               reg [SRAM_READLATENCY:0] readackdly;
+               /* verilator lint_on UNUSED */
+               always @(posedge CLK_I) begin
+                  if ( readackdly == 0 ) 
+                    readackdly[SRAM_READLATENCY:0] <= {readstrobe,readackdly[SRAM_READLATENCY:1]};
+                  else
+                    readackdly[SRAM_READLATENCY:0] <= {1'b0,readackdly[SRAM_READLATENCY:1]};
+               end
+               assign readack = readackdly[1];
+            end
+            assign ACK_O = readack | writeack;
+                        
+            if ( SRAMADRWIDTH == 16 ) begin
+               assign we[0] = writestrobe;
+`ifdef verilator
+               if ( SRAM_READLATENCY == 0 ) begin
+                  assign preDAT_O = zo[31:0];
+               end else begin
+                  assign preDAT_O = o[31:0];
+               end
+`else
                assign preDAT_O = o[31:0];
-            end
-`else
-            assign preDAT_O = o[31:0];
 `endif
-         end else begin
-            assign we[0] = writestrobe & ~ADR_I[16];
-            assign we[1] = writestrobe &  ADR_I[16];
-            // ADR_I[] stable until ACK_O, so need not pipeline ADR_I[16]
-`ifdef verilator
-            if ( SRAM_READLATENCY == 0 ) begin
-               assign preDAT_O = ADR_I[16] ? zo[63:32] : zo[31:0];
             end else begin
-               assign preDAT_O = ADR_I[16] ? o[63:32] : o[31:0];
-            end
-`else
-               assign preDAT_O = ADR_I[16] ? o[63:32] : o[31:0];
-`endif
-         end
-
-         wire readstrobe = STB_I & ~WE_I;
-         if ( SRAM_READLATENCY == 0) begin
-            assign readack = readstrobe;
-         end else begin
-            /* verilator lint_off UNUSED */
-            reg [SRAM_READLATENCY:0] readackdly;
-            /* verilator lint_on UNUSED */
-            always @(posedge CLK_I) begin
-               if ( readackdly == 0 ) 
-                 readackdly[SRAM_READLATENCY:0] <= {readstrobe,readackdly[SRAM_READLATENCY:1]};
-               else
-                 readackdly[SRAM_READLATENCY:0] <= {1'b0,readackdly[SRAM_READLATENCY:1]};
-            end
-            assign readack = readackdly[1];
-         end
-         
-         assign ACK_O = readack | writeack;
+               assign we[0] = writestrobe & ~ADR_I[16];
+               assign we[1] = writestrobe &  ADR_I[16];
+               // ADR_I[] stable until ACK_O, so need not pipeline ADR_I[16]
 `ifdef verilator
-         assign DAT_O = ACK_O ? preDAT_O : 32'habbababa;
+               if ( SRAM_READLATENCY == 0 ) begin
+                  assign preDAT_O = ADR_I[16] ? zo[63:32] : zo[31:0];
+               end else begin
+                  assign preDAT_O = ADR_I[16] ? o[63:32] : o[31:0];
+               end
 `else
-         assign DAT_O = preDAT_O;
+               assign preDAT_O = ADR_I[16] ? o[63:32] : o[31:0];
 `endif
-         assign m_ram_killwarnings = &ADR_I & &o
-`ifdef verilator                                     
-& &zo
+            end
+            
+`ifdef verilator
+            assign DAT_O = ACK_O ? preDAT_O : 32'habbababa;
+`else
+            assign DAT_O = preDAT_O;
 `endif
-;
 
-      end 
-   endgenerate      
+         end else begin
+            
+            // -----------------------------------------------------------------------------
+            // LOWLEVEL
+            // -----------------------------------------------------------------------------
+
+            if ( SRAMADRWIDTH == 16 ) begin
+               SB_LUT4 #(.LUT_INIT(16'h8888)) we_l(.O(we[0]), .I3(1'b0), .I2(1'b0), .I1(STB_I), .I0(WE_I)); 
+               assign preDAT_O = o[31:0];
+            end else begin
+               SB_LUT4 #(.LUT_INIT(16'h0808)) we0_l(.O(we[0]), .I3(1'b0), .I2(ADR_I[16]), .I1(STB_I), .I0(WE_I)); // assign we[0] = writeack & ~ADR_I[16];
+               SB_LUT4 #(.LUT_INIT(16'h8080)) we1_l(.O(we[1]), .I3(1'b0), .I2(ADR_I[16]), .I1(STB_I), .I0(WE_I)); // assign we[1] = writeack &  ADR_I[16];
+               // ADR_I[] stable until ACK_O, so need not pipeline ADR_I[16]
+               assign preDAT_O = ADR_I[16] ? o[63:32] : o[31:0];
+            end
+
+            wire cmb_readack;
+            SB_LUT4 #(.LUT_INIT(16'h0404)) readack_l(.O(cmb_readack), .I3(1'b0), .I2(readack), .I1(STB_I), .I0(WE_I)); 
+            SB_DFF readack_r(.Q(readack), .C(CLK_I), .D(cmb_readack));
+            //assign readstrobe = STB_I & ~WE_I;
+            //reg r_readack;
+            //always @(posedge CLK_I) 
+            //   r_readack <= readstrobe & ~r_readack;
+            //assign readack = r_readack;
+            
+            //assign ACK_O = readack | writeack;
+            SB_LUT4 #(.LUT_INIT(16'hf8f8)) ACK_O_l(.O(ACK_O), .I3(1'b0), .I2(readack), .I1(STB_I), .I0(WE_I)); 
+
+
+
+            /* Not strictly wanted in low-level code,
+             * but keep output strictly equal to
+             * highlevel. This is only in simulation.
+             */
+`ifdef verilator
+            assign DAT_O = ACK_O ? preDAT_O : 32'habbababa;
+`else
+            assign DAT_O = preDAT_O;
+`endif
+         end // HIGHLEVEL
+         
+         assign m_ram_killwarnings = &ADR_I |
+`ifdef verilator                                     
+                                     &zo |
+`endif
+                                     &o;            
+         
+
+      end // SRAM
+   endgenerate
+   
 endmodule
 
 // Local Variables:

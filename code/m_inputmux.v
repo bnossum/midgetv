@@ -255,14 +255,34 @@ module m_inputmux
          // =======================================================
          // No SRAM
          // =======================================================
-            
-         reg [IWIDTH-1:0] r;
-         always @(posedge clk)
-           r <= theio[IWIDTH-1:0];
-         if ( IWIDTH == 32 )
-           assign rDee = r;
-         else
-           assign rDee = {zeros[31:IWIDTH],r};
+           
+         /* Inevitably we will have through LUTs here. Without 
+          * taking great liberties with the whishbone interface it 
+          * is not easy to put these LUT's to use. Because I search 
+          * for and eliminates constructs named *THRU* I make a
+          * low level construct to hide these in lowlevel code.
+          */
+
+         if ( HIGHLEVEL ) begin 
+            reg [IWIDTH-1:0] r;
+            always @(posedge clk)
+              r <= theio[IWIDTH-1:0];
+            if ( IWIDTH == 32 )
+              assign rDee = r;
+            else
+              assign rDee = {zeros[31:IWIDTH],r};
+         end else begin
+            genvar kkk;
+            wire [IWIDTH-1:0] vanity;
+            for ( kkk = 0; kkk < 32; kkk = kkk + 1 ) begin
+               if ( kkk < IWIDTH ) begin
+                  SB_LUT4 #(.LUT_INIT(16'haaaa)) vanity_cmb( .O(vanity[kkk]), .I3(1'b0), .I2(1'b0), .I1(1'b0), .I0(theio[kkk]));
+                  SB_DFF vanity_r( .Q(rDee[kkk]), .C(clk), .D(vanity[kkk]));
+               end else begin
+                  assign rDee[kkk] = 1'b0;
+               end
+            end
+         end
          
       end else begin
 

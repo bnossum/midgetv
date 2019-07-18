@@ -2,7 +2,6 @@
 //     m_progressctrl
 //     m_ram
 //     m_status_and_interrupts
-//     m_alu
 //
 // Signal rename
 // Reintroduce 2 ROM control.
@@ -679,7 +678,7 @@ module m_midgetv_core
     * Comments                         Many signals are shared with the
     *                                  the microcontroller whishbone interface
     */
-   m_ram  #(.SRAMADRWIDTH(SRAMADRWIDTH)) 
+   m_ram  #(.HIGHLEVEL(0), .SRAMADRWIDTH(SRAMADRWIDTH)) 
    inst_ram
      (// Outputs
       .DAT_O                              (Dsram[31:0]),
