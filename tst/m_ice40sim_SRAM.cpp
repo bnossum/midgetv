@@ -384,6 +384,7 @@ void simprintf( uint32_t cy, Vm_ice40sim_SRAM *tb ) {
         g_info.DAT_O          = STARTOFHIER->get_DAT_O();
         g_info.Di             = STARTOFHIER->get_Di();
         g_info.aluop          = STARTOFHIER->get_ALUOP();
+        g_info.corerunning    = STARTOFHIER->get_corerunning();
         common_simprintf( &g_info, cy );
 }
 

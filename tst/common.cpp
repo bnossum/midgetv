@@ -323,21 +323,31 @@ int printfdecodeinstr( uint32_t I ) {
                 
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
-int  p_cy( int lnr, int cy ) {
+int  p_cy( int lnr, int cy, int corerunning ) {
         int n;
         if ( (lnr & 0x1c) == 0 ) {
                 switch ( lnr & 3 )  {
                 case 0 :
-                case 1 :
-                case 2 : n = printf( "     " ); break;
-                case 3 : n = printf( "  cy " );
+                case 1 : n = printf( "     " ); break;
+                case 2 : if ( ! corerunning ) {
+                                n = printf( "start" );
+                        } else {
+                                n = printf( "     " );
+                        }
+                        break;
+                case 3 : if ( ! corerunning ) {
+                                n = printf( "  cy|" );
+                        } else {
+                                n = printf( "  cy " );
+                        }
+                        break;
                 }
         } else {
-                n = printf("%4.4x ", cy );
+                n = printf("%4.4x%c", cy, corerunning ? ' ' : '-' );
         }
         return n;
 }
-
+                
 /////////////////////////////////////////////////////////////////////////////
 int p_minx_ucode( int lnr, uint8_t minx, uint32_t ucode ) {
         int n;
@@ -716,7 +726,7 @@ void common_simprintf( INFOCHUNK * const p, uint32_t cy) {
                         return;
         
 TOP:
-        if ( p->CONF & INFO_cy             ) p_cy( lnr, cy );
+        if ( p->CONF & INFO_cy             ) p_cy( lnr, cy, p->corerunning  );
         if ( p->CONF & INFO_minx_ucode     ) p_minx_ucode( lnr, p->minx, p->ucode );                
         if ( p->CONF & INFO_ucodedbg       ) p_ucodepcdbg( lnr, p->dinx, p->ucodepcinfo );                
         if ( p->CONF & INFO_I              ) p_I( lnr, p->I );

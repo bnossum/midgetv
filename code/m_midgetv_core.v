@@ -1,6 +1,5 @@
 // Go through low-level implementation of:
 //     m_progressctrl
-//     m_ram
 //     m_status_and_interrupts
 //
 // Signal rename
@@ -502,6 +501,10 @@ module m_midgetv_core
       // verilator public
       get_ALUOP = {sa06,sa05,sa04};
    endfunction
+   function [0:0] get_corerunning;
+      // verilator public
+      get_corerunning = corerunning;
+   endfunction
 `endif
 
    /* Flexibility comes at a price. Some variables are not
@@ -563,7 +566,8 @@ module m_midgetv_core
       .sa17                             (sa17),
       .sa16                             (sa16),
       .ADR_O                            (ADR_O[31:0]),
-      .start                            (start));
+      .start                            (start),
+      .r_issh0_not                      (r_issh0_not));
 
    m_alu_carryin #(.HIGHLEVEL(HIGHLEVEL))
    inst_alu_carryin

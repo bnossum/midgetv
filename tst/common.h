@@ -73,6 +73,7 @@ typedef struct {
         uint32_t Di;
         int aluop;
         int dbg_stb_ack;
+        int corerunning;
 } INFOCHUNK;
 
 
