@@ -7,13 +7,14 @@
  */
 module m_ice40sim_EBRonly
   # ( parameter
-      SRAMADRWIDTH    = 0,  
-      SIMEBRADRWIDTH  = 11, 
-      IWIDTH          = 32, 
-      NO_CYCLECNT     = 1, 
-      MTIMETAP        = 14, 
-      HIGHLEVEL       = 0,
-      LAZY_DECODE     = 0
+      SRAMADRWIDTH       = 0,  
+      SIMEBRADRWIDTH     = 11, 
+      IWIDTH             = 32, 
+      NO_CYCLECNT        = 1, 
+      MTIMETAP           = 14, 
+      HIGHLEVEL          = 0,
+      LAZY_DECODE        = 0,
+      DISREGARD_WB4_3_55 = 1
       )
    (
     input CLK_I, // Toggled from verilator
@@ -51,13 +52,14 @@ module m_ice40sim_EBRonly
    
    m_midgetv_core
      #(
-       .SRAMADRWIDTH (   SRAMADRWIDTH   ),
-       .EBRADRWIDTH  (   SIMEBRADRWIDTH ),
-       .IWIDTH       (   IWIDTH         ),
-       .NO_CYCLECNT  (   NO_CYCLECNT    ),
-       .MTIMETAP     (   MTIMETAP       ),
-       .HIGHLEVEL    (   HIGHLEVEL      ),
-       .LAZY_DECODE  (   LAZY_DECODE    ),
+       .SRAMADRWIDTH      ( SRAMADRWIDTH       ),
+       .EBRADRWIDTH       ( SIMEBRADRWIDTH     ),
+       .IWIDTH            ( IWIDTH             ),
+       .NO_CYCLECNT       ( NO_CYCLECNT        ),
+       .MTIMETAP          ( MTIMETAP           ),
+       .HIGHLEVEL         ( HIGHLEVEL          ),
+       .LAZY_DECODE       ( LAZY_DECODE        ),
+       .DISREGARD_WB4_3_55( DISREGARD_WB4_3_55 ),
        .program0(program0),       .program1(program1),       .program2(program2),       .program3(program3),
        .program4(program4),       .program5(program5),       .program6(program6),       .program7(program7),
        .program8(program8),       .program9(program9),       .programA(programA),       .programB(programB),

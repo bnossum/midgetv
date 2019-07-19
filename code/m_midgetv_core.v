@@ -185,16 +185,22 @@
  * counter. 
  * Legal values: 0 or 1.
  * 
+ * MTIMETAP_LOWLIM
+ * ---------------
+ * A constant, but I propagate as a parameter because it is likely to be
+ * changed once I know the maximum number of cycles needed to do *any*
+ * CSR instruction.
+ * 
  * MTIMETAP
  * -------
  * This is for mtime and control registers.
- * When MTIMETAP > 13, the cycle counter give an interrupt
- * after (1<<MTIMETAP) cycles. This interrupt is used to
- * maintain mtime. 
- * When MTIMETAP > 13, we also enable interrupt support
- * and registers mstatus,mie,mip as per the 
- * riscv specification.
- * Legal values: 0, 14-31
+ * When MTIMETAP >= MTIMETAP_LOWLIM, the cycle counter 
+ * give an interrupt after (1<<MTIMETAP) cycles. This interrupt 
+ * is used to maintain mtime. 
+ * When MTIMETAP >= MTIMETAP_LOWLIM, we also enable interrupt 
+ * support and registers mstatus,mie,mip as per the  riscv
+ * specification.
+ * Legal values: 0, MTIMETAP_LOWLIM-31
  * 
  * HIGHLEVEL
  * ---------
@@ -252,6 +258,7 @@ module m_midgetv_core
 //    SRAMADRWIDTH = 17, EBRADRWIDTH = 11, IWIDTH = 32, NO_CYCLECNT = 0, MTIMETAP = 14, HIGHLEVEL = 0, LAZY_DECODE = 0, // Maximal
       ALUWIDTH = 32, // __always__ 32
       DISREGARD_WB4_3_55 = 0,
+      MTIMETAP_LOWLIM = 14, /* ONLY location where this value is really to be set */
       DBGA = 0,
       parameter [4095:0] program0 = 4096'h0,
       parameter [4095:0] program1 = 4096'h0,
@@ -531,7 +538,8 @@ module m_midgetv_core
    m_inputmux #(.HIGHLEVEL(HIGHLEVEL), 
                 .IWIDTH(IWIDTH), 
                 .SRAMADRWIDTH(SRAMADRWIDTH), 
-                .MTIMETAP(MTIMETAP))
+                .MTIMETAP(MTIMETAP),
+                .MTIMETAP_LOWLIM(MTIMETAP_LOWLIM)) 
    inst_inputmux
      (/*AUTOINST*/
       // Outputs
@@ -601,7 +609,8 @@ module m_midgetv_core
 
    m_alu #(.HIGHLEVEL(HIGHLEVEL), 
            .ALUWIDTH(ALUWIDTH),
-           .MTIMETAP(MTIMETAP), 
+           .MTIMETAP(MTIMETAP),
+           .MTIMETAP_LOWLIM(MTIMETAP_LOWLIM),
            .SRAMADRWIDTH(SRAMADRWIDTH) )
    inst_alu
      (/*AUTOINST*/
@@ -803,7 +812,10 @@ module m_midgetv_core
    
    m_progressctrl #(.HIGHLEVEL(HIGHLEVEL),
                     .DISREGARD_WB4_3_55(DISREGARD_WB4_3_55),
-                    .SRAMADRWIDTH(SRAMADRWIDTH)) 
+                    .NO_CYCLECNT(NO_CYCLECNT),
+                    .MTIMETAP(MTIMETAP),
+                    .SRAMADRWIDTH(SRAMADRWIDTH),
+                    .MTIMETAP_LOWLIM(MTIMETAP_LOWLIM)) 
    inst_progressctrl
      (/*AUTOINST*/
       // Outputs
@@ -913,11 +925,11 @@ module m_midgetv_core
         .nobuserror                     (nobuserror));
    
    /* Interrupts in midgetv is implemented in an "all or nothing" fashion.
-    * If MTIMETAP < 14, we have a minimal system, and no interrupts. Else
-    * I implement registers mip, mie, and mstatus.
+    * If MTIMETAP < MTIMETAP_LOWLIM, we have a minimal system, and no 
+    * interrupts. Else I implement registers mip, mie, and mstatus.
     */
    generate
-      if ( MTIMETAP > 13 ) begin
+      if ( MTIMETAP >= MTIMETAP_LOWLIM ) begin
          m_status_and_interrupts inst_status_and_interrupts
            (/*AUTOINST*/
             // Outputs

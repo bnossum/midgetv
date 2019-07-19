@@ -25,7 +25,8 @@ module m_inputmux
   # ( parameter HIGHLEVEL = 0, // 
       IWIDTH = 8,  //             Can in principle be from 1 to 32. Usually 8, 16 or 32.
       SRAMADRWIDTH = 0, //        ice40hx1k and similar has no SRAM
-      MTIMETAP = 0 //             Governs inclusion of registers 
+      MTIMETAP = 0, //            Governs inclusion of registers
+      MTIMETAP_LOWLIM = 32 //     Really a constant
       )
    (
     input              clk,
@@ -100,7 +101,7 @@ module m_inputmux
    generate
       wire [32:0]      zeros = 33'h0;
 
-      if ( MTIMETAP < 14 ) begin
+      if ( MTIMETAP < MTIMETAP_LOWLIM ) begin
          
          // =======================================================
          // No system registers

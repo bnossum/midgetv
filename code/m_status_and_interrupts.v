@@ -4,8 +4,9 @@
  * For licence, see LICENCE
  * -----------------------------------------------------------------------------
  * 
- * If we have MTIMETAP > 13, interrupts and mtime is implemented in midgetv
- * From user code, the following holds:
+ * If we have MTIMETAP >= MTIMETAP_LOWLIM, interrupts and mtime is implemented 
+ * in midgetv. From user code, the following holds:
+ * 
  * Write adr                            Write to
  *   33 22222222221111111111            register           
  *   10 987654321098765432109876543210  or bit             EBR address 

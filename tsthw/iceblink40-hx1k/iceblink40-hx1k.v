@@ -52,6 +52,7 @@ module top
    (
     input      CLK_I,
     input      usartRX,
+    input      ACK_I,     
     output reg led1,
     output reg led2,
     output reg led3,
@@ -95,7 +96,7 @@ module top
       led4 <= corerunning;
    end
    
-   assign ACK_I = STB_O;
+//   assign ACK_I = STB_O;
 
 
    /* The program to include is usually specified in a Makefile. It is 

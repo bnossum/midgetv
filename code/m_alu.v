@@ -17,12 +17,18 @@
  *  110 : nearIOR  B = (~D)|Q     (with cin==0)     
  *  111 : PASSQ    B = Q+cin
  * 
+ * MTIMETAP_LOWLIM
+ * ---------------
+ * A constant, but I propagate as a parameter because it is likely to be
+ * changed once I know the maximum number of cycles needed to do *any*
+ * CSR instruction.
+ * 
  * MTIMETAP
  * --------
  * Parameter MTIMETAP determines the frequency of an increment of mtime. If CSR
- * is implemented the value should be between 14 and 31 inclusive, because CSR
- * instructions can take many cycles, and we don't want to skip any update
- * of mtime.
+ * is implemented the value should be between MTIMETAP_LOWLIM and 31 inclusive, 
+ * because CSR instructions can take many cycles, and we don't want to skip any 
+ * update of mtime.
  * 
  * HIGHLEVEL
  * ---------
@@ -55,10 +61,11 @@
  * while as instantiated from m_midgetv_core ALUWIDTH is always 32.
  */
 module m_alu
-  # ( parameter HIGHLEVEL = 0, 
+  # ( parameter HIGHLEVEL = 0,
       MTIMETAP = 0,
       SRAMADRWIDTH = 0,
-      ALUWIDTH = 8
+      ALUWIDTH = 8,
+      MTIMETAP_LOWLIM = 32
       )
    (
     input [ALUWIDTH-1:0]  Di, //                  First operand to the ALU
@@ -88,7 +95,7 @@ module m_alu
          assign alu_carryout = B[ALUWIDTH-1]^A[ALUWIDTH-1]^QQ[ALUWIDTH-1]^(~sa06);
 
          wire isWttime;
-         if ( MTIMETAP > 13 ) begin
+         if ( MTIMETAP >= MTIMETAP_LOWLIM ) begin
             assign isWttime = {sa27,sa26,sa25,sa24} == 4'b1011;      
          end else begin
             assign isWttime = 1'b0; // Keep Verilator happy
@@ -96,15 +103,15 @@ module m_alu
 
          // For mtimeinc interrupts:
          if (MTIMETAP >= ALUWIDTH ) begin
-            assign alu_tapout = (A[ALUWIDTH-1]^B[ALUWIDTH-1])&isWttime;
-         end else if ( MTIMETAP > 13 ) begin
-            assign alu_tapout = (A[MTIMETAP]^B[MTIMETAP])&isWttime;
+            assign alu_tapout = (A[ALUWIDTH-1]^B[ALUWIDTH-1]) & isWttime;
+         end else if ( MTIMETAP >= MTIMETAP_LOWLIM ) begin
+            assign alu_tapout = (A[MTIMETAP]^B[MTIMETAP]) & isWttime;
          end else begin
             assign alu_tapout = 1'b0;
          end
 
          // For retired instructions interrupt
-         if (MTIMETAP > 13 && SRAMADRWIDTH != 0 ) begin
+         if (MTIMETAP >= MTIMETAP_LOWLIM ) begin
             wire isWrinst = {sa27,sa26,sa25,sa24} == 4'b1001;
             assign alu_minstretofl = alu_carryout & isWrinst;
          end else begin
@@ -136,7 +143,7 @@ module m_alu
             SB_CARRY ca( .CO(alucy[j+1]),              .CI(alucy[j]), .I1(QQ[j]), .I0(A[j]));
          end
 
-         if ( MTIMETAP <= 13 ) begin
+         if ( MTIMETAP < MTIMETAP_LOWLIM ) begin
             assign alu_tapout = 1'b0;
          end else begin
             wire isWttime;
@@ -151,7 +158,7 @@ module m_alu
 
          // For retired instructions interrupt
          wire propcy;
-         if (MTIMETAP > 13 && SRAMADRWIDTH != 0 ) begin
+         if (MTIMETAP >= MTIMETAP_LOWLIM  ) begin
             wire isWrinst; // = {sa27,sa26,sa25,sa24} == 4'b1001;
             SB_LUT4 #(.LUT_INIT(16'h0200)) l_isWrinst( .O(isWrinst), .I3(sa27), .I2(sa26), .I1(sa25), .I0(sa24));
             // assign alu_minstretofl = alu_carryout & isWrinst;

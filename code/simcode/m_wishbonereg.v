@@ -83,7 +83,7 @@ module m_wishbonereg
   # ( parameter INITVAL = 32'hdeadbabe,
       parameter WRITELATENCY = 0,
       parameter READLATENCY  = 0,
-      parameter CHECK_RULE_3_55 = 1
+      parameter CHECK_RULE_3_55 = 0
       )
    (
     input         CLK_I,
