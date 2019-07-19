@@ -164,9 +164,11 @@ endmodule
  *     python ../../../apio/apio build
  *     sudo python3 ../../../iceBurn/iCEburn.py -v -ew hardware.bin 
  * 
- * Another useful command:
+ * Other useful commands:
  * arachne-pnr -d 1k -P vq100 -p iceblink40-hx1k.pcf -o hardware.asc hardware.blif
+ * icetime -d hx1k hardware.asc 
  */
+
 // Local Variables:
 // verilog-library-directories:("." "../../code"  )
 // verilog-library-extensions:(".v" )

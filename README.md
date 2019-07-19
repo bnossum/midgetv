@@ -87,7 +87,7 @@ I save with lut_cascade):
 
 FPGA/Board                          | SB_LUT4  | EBRs | SRAM | Clock (MHz) | Comment
 ----------------------------------- | -------- | ---- | ---- | ----------- | --------------------------
-`ICE40HX1K-VQ100` `iceblink40-hx1k` | 335      |  5   |  0   | 60 | 75 LUTS larger than expected
+`ICE40HX1K-VQ100` `iceblink40-hx1k` | 335      |  5   |  0   | 58 | 75 LUTS larger than expected
 `ICE40UP5K-SG48I` `upduino2`        | 445      |  5   |  2   | 23 | 53 LUTS larger than expected
 
 
