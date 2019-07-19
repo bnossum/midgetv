@@ -71,7 +71,7 @@ numbers will slightly change, so treat them as optimistic, and indicative only.
 Using iCECube2 for compilation (with Lattice LSE as synthesis tool) give the following for the example "hello world" program:
 
 FPGA/Board                          | SB_LUT4  | EBRs | SRAM | Clock (MHz) | Comment
------------------------------------ | -------- | ---- | ---- | ----------- | --------
+:---------------------------------- | :------- | :--- | :--- | :---------- | :-------------------------
 `ICE40HX1K-VQ100` `iceblink40-hx1k` | 228 | 5 | 0 | 69 | No `cycle(h)` or `time(h)`. No `instreth`. No interrupts, nor registers `mip`, `mie` or `mstatus`. Minimal instruction decode
 `ICE40UP5K-SG48I` `upduino2`        | 356 | 5 | 2 | 29 | `cycle(h)`, `time(h)`, `instret(h)`, interrupts and registers `mip`, `mie` and `mstatus`. Full instruction decode
 
@@ -86,7 +86,7 @@ Unfortunately this give the following
 I save with lut_cascade):
 
 FPGA/Board                          | SB_LUT4  | EBRs | SRAM | Clock (MHz) | Comment
------------------------------------ | -------- | ---- | ---- | ----------- | --------------------------
+:---------------------------------- | :------- | :--- | :--- | :---------- | :-------------------------
 `ICE40HX1K-VQ100` `iceblink40-hx1k` | 335      |  5   |  0   | 58 | 75 LUTS larger than expected
 `ICE40UP5K-SG48I` `upduino2`        | 445      |  5   |  2   | 23 | 53 LUTS larger than expected
 
