@@ -59,9 +59,8 @@ module m_rai
     input                    sa21, //     |
     input                    sa22, //     |
     input                    sa23, //     |
-    input                    ACK_I, //    || These may modify sa20
-    input                    sram_ack, // ||
-    input                    sysregack,// ||
+    input                    sram_ack, // || These may modify sa20
+    input                    qACK, //     ||    Qualified acknowledge, usually (ACK_I | sysregack)
     input                    sa34, //     ||
     input                    sa40,
     input                    STB_O,
@@ -91,7 +90,7 @@ module m_rai
          wire [3:0]                sel;
          reg [11:0]                extRai;
 
-         assign anyack    = ACK_I | sram_ack | sysregack;
+         assign anyack    = sram_ack | qACK;
          assign anystrobe = STB_O | sram_stb;
          assign sel[0]    = sa20 & ( (~sa40 & ~sa34 )             |
                                      (~sa40 &  sa34 & anyack )    |
@@ -101,10 +100,6 @@ module m_rai
          assign sel[2]    = sa22;
          assign sel[3]    = sa23 & ( ~sa40 | anystrobe );
 
-//         ( (~sa40 & ~sa34 ) |
-//           (~sa40 &  sa34 ) |
-//           ( sa40 & ~sa34 & anystrobe ) |
-//           ( sa40 &  sa34 & anystrobe ) );
          always @(/*AS*/B or SRC1 or SRC2 or sel or zeros)
            case ( sel )
              4'b0000 : extRai = 12'h20; // jj
@@ -132,20 +127,18 @@ module m_rai
          wire [3:0] sel;
          assign m_rai_killwarning = &B[1:0];
 
-         wire       sel0_helpack,sel0_more_h1,sel0_more,ss0,ss1,b0a,b1a,b2a,b3a,b4a;
+         wire       ss0,ss1,b0a,b1a,b2a,b3a,b4a;
          
-//         assign sel0_helpack = ~sa40 & sa34 & sa20;
-//         assign sel0_more_h1 = (~sa40 & ~sa34) | (sa40 & sa34) | (sa40 & ~sa34 & (STB_O | sram_stb));
-//         assign sel0_more = sa20 & ((sel0_helpack & sysregack) | sel0_more_h1);
-         SB_LUT4 #(.LUT_INIT(16'h0808)) L_sel0_helpack( .O(sel0_helpack), .I3(1'b0), .I2(sa40), .I1(sa34), .I0(sa20));
-         SB_LUT4 #(.LUT_INIT(16'hfe0f)) L_sel0_more_h1( .O(sel0_more_h1), .I3(sa40), .I2(sa34), .I1(STB_O), .I0(sram_stb));
-         SB_LUT4 #(.LUT_INIT(16'hea00)) L_sel0_more(    .O(sel0_more),    .I3(sa20), .I2(sel0_helpack), .I1(sysregack), .I0(sel0_more_h1));
-                   
-//         assign sel[0] =  sel0_more | (sel0_helpack & (ACK_I | sram_ack));
-//         assign sel[3] = sa23 & ( STB_O | sram_stb | ~sa40 );
+//         assign sel[0]    = sa20 & ( (~sa40 &  sa34 & (sram_ack | qACK)  ) |
+//                                     ( sa40 & ~sa34 & (sram_stb | STB_O) ) |
+//                                     (~sa40 & ~sa34 )                      |
+//                                     ( sa40 &  sa34) );
+         wire       sel0hack,sel0h;
+         SB_LUT4 #(.LUT_INIT(16'h00e0)) L_sel0hack( .O(sel0hack), .I3(sa40), .I2(sa34), .I1(sram_ack), .I0(qACK ));
+         SB_LUT4 #(.LUT_INIT(16'hfe0f)) L_sel0h(    .O(sel0h),    .I3(sa40), .I2(sa34), .I1(sram_stb), .I0(STB_O));
+         SB_LUT4 #(.LUT_INIT(16'he0e0)) L_sel_0( .O(sel[0]), .I3(1'b0), .I2(sa20), .I1(sel0h), .I0(sel0hack));         
          assign sel[1] = sa21;
          assign sel[2] = sa22;
-         SB_LUT4 #(.LUT_INIT(16'hffe0)) L_sel_0( .O(sel[0]), .I3(sel0_more), .I2(sel0_helpack), .I1(ACK_I),    .I0(sram_ack));
          SB_LUT4 #(.LUT_INIT(16'hfd00)) L_sel_3( .O(sel[3]), .I3(sa23),      .I2(STB_O),        .I1(sram_stb), .I0(sa40));
          
          

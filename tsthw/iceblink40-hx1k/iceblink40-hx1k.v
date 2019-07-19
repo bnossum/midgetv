@@ -40,13 +40,14 @@
 
 module top
   # ( parameter
-      SRAMADRWIDTH    = 0,
-      SIMEBRADRWIDTH  = 8, 
-      IWIDTH          = 32, 
-      NO_CYCLECNT     = 1, 
-      MTIMETAP        = 0, 
-      HIGHLEVEL       = 0,
-      LAZY_DECODE     = 2 
+      SRAMADRWIDTH       = 0,
+      SIMEBRADRWIDTH     = 8, 
+      IWIDTH             = 32, 
+      NO_CYCLECNT        = 1, 
+      MTIMETAP           = 0, 
+      HIGHLEVEL          = 0,
+      LAZY_DECODE        = 2,
+      DISREGARD_WB4_3_55 = 1
       )
    (
     input      CLK_I,
@@ -109,14 +110,15 @@ module top
    
    m_midgetv_core
      #(
-       .SRAMADRWIDTH (   SRAMADRWIDTH   ),
-       .EBRADRWIDTH  (   SIMEBRADRWIDTH ),
-       .IWIDTH       (   IWIDTH         ),
-       .NO_CYCLECNT  (   NO_CYCLECNT    ),
-       .MTIMETAP     (   MTIMETAP       ),
-       .HIGHLEVEL    (   HIGHLEVEL      ),
-       .LAZY_DECODE  (   LAZY_DECODE    ),
-       .DBGA         (   1'b0           ),
+       .SRAMADRWIDTH       ( SRAMADRWIDTH       ),
+       .EBRADRWIDTH        ( SIMEBRADRWIDTH     ),
+       .IWIDTH             ( IWIDTH             ),
+       .NO_CYCLECNT        ( NO_CYCLECNT        ),
+       .MTIMETAP           ( MTIMETAP           ),
+       .HIGHLEVEL          ( HIGHLEVEL          ),
+       .LAZY_DECODE        ( LAZY_DECODE        ),
+       .DISREGARD_WB4_3_55 ( DISREGARD_WB4_3_55 ),
+       .DBGA               ( 1'b0               ),
        .program0(program0),
        .program1(program1),
        .program2(program2),

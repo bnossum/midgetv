@@ -42,13 +42,14 @@
 
 module mytop
   # ( parameter
-      SRAMADRWIDTH    = 16,
-      SIMEBRADRWIDTH  = 8, 
-      IWIDTH          = 32, 
-      NO_CYCLECNT     = 0, 
-      MTIMETAP        = 16, 
-      HIGHLEVEL       = 0,
-      LAZY_DECODE     = 0
+      SRAMADRWIDTH       = 16,
+      SIMEBRADRWIDTH     = 8, 
+      IWIDTH             = 32, 
+      NO_CYCLECNT        = 0, 
+      MTIMETAP           = 16, 
+      HIGHLEVEL          = 0,
+      LAZY_DECODE        = 0,
+      DISREGARD_WB4_3_55 = 0
       )
    (input      usartRX,
     output     led_red,
@@ -169,13 +170,14 @@ module mytop
    
    m_midgetv_core
      #(
-       .SRAMADRWIDTH (   SRAMADRWIDTH),
-       .EBRADRWIDTH  (SIMEBRADRWIDTH ),
-       .IWIDTH       (   IWIDTH      ),
-       .NO_CYCLECNT  (   NO_CYCLECNT ),
-       .MTIMETAP     (   MTIMETAP    ),
-       .HIGHLEVEL    (   HIGHLEVEL   ),
-       .LAZY_DECODE  (   LAZY_DECODE ),
+       .SRAMADRWIDTH       ( SRAMADRWIDTH       ),
+       .EBRADRWIDTH        ( SIMEBRADRWIDTH     ),
+       .IWIDTH             ( IWIDTH             ),
+       .NO_CYCLECNT        ( NO_CYCLECNT        ),
+       .MTIMETAP           ( MTIMETAP           ),
+       .HIGHLEVEL          ( HIGHLEVEL          ),
+       .LAZY_DECODE        ( LAZY_DECODE        ),
+       .DISREGARD_WB4_3_55 ( DISREGARD_WB4_3_55 ),
        .program0(program0),
        .program1(program1),
        .program2(program2),

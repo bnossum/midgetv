@@ -5,9 +5,9 @@
  * -----------------------------------------------------------------------------
  *
  * Nearly Wishbone B.4 data sheet for m_ram. The only reason I can not
- * call this a Whishbone interface is that midgetv require a read latency
+ * call this a Wishbone interface is that midgetv require a read latency
  * of 1 cycle (or higher). In other words, midgetv can not support a 
- * Whishbone classical read cycle with no latency.
+ * Wishbone classical read cycle with no latency.
  * 
  * --------------------------------------------------------------------
  * Inteface type:                   SLAVE
@@ -20,9 +20,9 @@
  * Data port, maximum operand size: 32-bit
  * Data transfer ordering:          Big endian and/or little endian
  * Data transfer sequencing:        Undefined
- * Supported signal list            Signal name   WHISHBONE Equiv. 
+ * Supported signal list            Signal name   WISHBONE Equiv. 
  *   and cross-reference to         CLK_I         CLK_I        
- *   equivalent WHISHBONE signals:  DAT_I[31:0]   DAT_I()
+ *   equivalent WISHBONE signals:   DAT_I[31:0]   DAT_I()
  *                                  ADR_I[31:0]   ADR_I()
  *                                  STB_I         STB_I        
  *                                  WE_I          WE_I         
@@ -30,15 +30,15 @@
  *                                  DAT_O[31:0]   DAT_O()
  *                                  ACK_O         ACK_O        
  * 
- * The interface to RAM follows the Whishbone B.4 specification, except:
+ * The interface to RAM follows the Wishbone B.4 specification, except:
  *  o  RST_I is not implemented. 
  *     The reason is that if SRAM_READLATENCY == 1 and SRAM_WRITELATENCY == 0,
- *     the whishbone interface of this module can not profit on RST_I in any way.
+ *     the wishbone interface of this module can not profit on RST_I in any way.
  *  o  CYC_I is not implemented. This is simply because midgetv sets 
  *     CYC_O == STB_O, so adding CYC_I does not enhance this module in any way.
  * Please tell me if these assumptions are unresonable. 
  * 
- * The motivation to interface RAM with a Whishbone interface is to later on
+ * The motivation to interface RAM with a Wishbone interface is to later on
  * be able to use a cache. The wrapper is written for efficient instantiation
  * of SRAM in ICE40UP. It is also written so that simulation may play with
  * higher latencies.

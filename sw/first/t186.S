@@ -1,6 +1,7 @@
         # Check bus error when accessing undefined IO address
-        # The verilog code must be compiled with NO_CYCLECNT == 0 for this
-        # program to work
+        # If we have a faulting input device that holds ACK_I high, (note, rule 3.55
+        # in Wishbone B.4), this test program will fail.
+        # See also comment at start.
         # =============================================================================
 
 #include "midgetv.inc"
@@ -105,6 +106,7 @@ Common:
         # =============================================================================
 _start:
         # First find out if the program is compiled with NO_CYCLECNT == 1
+        # If we have no cycle counter, this testprogram can not be used.
         lw      x1,%lo(__mcycle)(x0)
         lw      x2,%lo(__mcycle)(x0)
         add     x1,x1,1

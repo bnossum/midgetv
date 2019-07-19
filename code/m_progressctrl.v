@@ -6,12 +6,12 @@
  * This module is actually several smallish modules in one.
  */
 module m_progressctrl
-  #( parameter HIGHLEVEL = 0, SRAMADRWIDTH = 0) 
+  #( parameter HIGHLEVEL = 0, SRAMADRWIDTH = 0, DISREGARD_WB4_3_55 = 0) 
    (
     input        clk, //            System clock
     input        corerunning, //    Avoid writing of registers when we are not running
     input        RST_I, //          Non-maskable interrupt
-    input        ACK_I, //          Acknowledge from I/O devices
+    input        ACK_I, //          Acknowledge from I/O device.
     /* verilator lint_off UNUSED */
     input        sysregack, //      Acknowledge from system registers
     input        sram_ack, //       Acknowledge from SRAM
@@ -30,7 +30,6 @@ module m_progressctrl
     input        r_issh0_not, //    To halt progress of microcode etc
     input [31:0] B, //              Do we access SRAM or I/O ?
     input        nobuserror, //     When we have bus error we must have forward progress in ucode
-                                   
     output [3:0] SEL_O, //          Byte selects for EBR, SRAM and outputs
     output [3:0] bmask, //          SEL_O is unfortunately also needed in an active low version for EBR
                                    
@@ -43,12 +42,14 @@ module m_progressctrl
                                                                       
     output       enaQ, //           Sample output from ALU
     output       progress_ucode, // Continue execution of microcode
-
+    output       qACK, //           Qualified acknowledge, usually (ACK_I | sysregack)
     output       next_STB_O, //     Output for debugging
     output       next_sram_stb, //  Output for debugging
     output       m_progressctrl_killwarnings // Dummy
    );
-   
+
+
+
    /* During write to registers in output devices, 
     * writes to SRAM,  EBR, we need byte selects. 
     * Non-maskable interrupt clears registers.
@@ -133,7 +134,7 @@ module m_progressctrl
           * Non-maskable interrupt clears registers.
           */
          reg rSTB_O,rsram_stb;
-         assign next_STB_O    = (sa42 & ~B[31] & B[30] & ~badalignment) | (rSTB_O    & ~(ACK_I | sysregack) );
+         assign next_STB_O    = (sa42 & ~B[31] & B[30] & ~badalignment) | (rSTB_O    & ~qACK );
          assign next_sram_stb = (sa42 &  B[31]         & ~badalignment) | (rsram_stb & ~sram_ack);
          always @(posedge clk) 
            if ( RST_I | ~nobuserror ) begin
@@ -170,17 +171,17 @@ module m_progressctrl
          assign ctrlreg_we = rctrlreg_we;         
 
       end else begin
-         /* Uses 1 more LUT
+         /* Uses 1 more LUT, I am beaten by synthesis.
           */
          wire clrregs;
          wire h1;
          wire h2;
 //         assign h1 = sa42 & ~B[31] & B[30] & ~badalignment;
 //         assign clrregs = RST_I | ~nobuserror;
-//         assign next_STB_O = h1 | (STB_O & ~(ACK_I | sysregack));
+//         assign next_STB_O = h1 | (STB_O & ~qACK);
          SB_LUT4 #(.LUT_INIT(16'h0400)) l_h1(.O(h1), .I3(sa42), .I2(B[31]), .I1(B[30]), .I0(badalignment)); 
          SB_LUT4 #(.LUT_INIT(16'hdddd)) l_clrregs(.O(clrregs), .I3(1'b0), .I2(1'b0), .I1(RST_I), .I0(nobuserror)); 
-         SB_LUT4 #(.LUT_INIT(16'hff10)) l_next_STB_O( .O(next_STB_O), .I3(h1), .I2(STB_O), .I1(sysregack), .I0(ACK_I)); 
+         SB_LUT4 #(.LUT_INIT(16'hf4f4)) l_next_STB_O( .O(next_STB_O), .I3(1'b0), .I2(h1), .I1(STB_O), .I0(qACK)); 
 
          // h0 = sa42 & B[31] & ~badalignment
          // next_sram_stb = ~clrregs & (h2 | (sram_stb & ~sram_ack) 
@@ -266,6 +267,81 @@ module m_progressctrl
             SB_LUT4 #(.LUT_INIT(16'h0200)) l_iwe(.O(iwe), .I3(corerunning), .I2(sa41), .I1(WE_O), .I0(r_issh0_not));         
       end
    endgenerate
+
+   generate
+      if ( DISREGARD_WB4_3_55 ) begin
+         assign qACK =  (ACK_I | sysregack);
+      end else begin
+         /* If we ever see an ACK_I without STB_O, the input device is malfunctioning.
+          * There is one situation where this legaly can occur according to Whisbone B.4:
+          * 
+          * PERMISSION 3.35
+          * Under certain circumstances SLAVE interfaces MAY be designed to hold [ACK_O] in the
+          * asserted state. This situation occurs on point-to-point interfaces where there is a single
+          * SLAVE on the interface, and that SLAVE always operates without wait states.
+          * RULE 3.55
+          * MASTER interfaces MUST be designed to operate normally when the SLAVE interface
+          * holds [ACK_I] in the asserted state.      
+          * 
+          * There is not much I can do if the input data structure is faulty (ACK_I wrong).
+          * But I can at least assume we are in the situation as stated in rule 3.55. 
+          * If I observe ACK_I without STB_O, I disregard ACK_I, and uses STB_O instead.
+          * In an attempt to get midgetv to work with a faulty input device, if we later
+          * see ACK_I low, we go back to normal operation. State machine:
+          * 
+          *         sysregack
+          *         | ACK_I
+          *         | | STB_O
+          * State   | | |   Next state qACK
+          * NORMAL  0 0 0   NORMAL     0
+          *         0 0 1   NORMAL     0
+          *         0 1 0   R355       0
+          *         0 1 1   NORMAL     1
+          *         1 0 0   NORMAL     1
+          *         1 0 1   NORMAL     1
+          *         1 1 0   R355       1
+          *         1 1 1   NORMAL     1  <- What should I do here? An input device gives ACK on an address reserved for status registers.
+          * R355    0 0 0   NORMAL     0
+          *         0 0 1   NORMAL     1
+          *         0 1 0   R355       0
+          *         0 1 1   R355       1
+          *         1 0 0   NORMAL     1
+          *         1 0 1   NORMAL     1
+          *         1 1 0   R355       1
+          *         1 1 1   R355       1
+          */
+         reg AckM;
+         reg nextAckM;
+         reg rqACK;
+         always @(/*AS*/ACK_I or STB_O or clk) begin
+            case ({AckM,sysregack,ACK_I,STB_O})
+              4'b0000 : {nextAckM, rqACK} = 2'b00;
+              4'b0001 : {nextAckM, rqACK} = 2'b00;
+              4'b0010 : {nextAckM, rqACK} = 2'b10;
+              4'b0011 : {nextAckM, rqACK} = 2'b01;
+              4'b0100 : {nextAckM, rqACK} = 2'b01;
+              4'b0101 : {nextAckM, rqACK} = 2'b01;
+              4'b0110 : {nextAckM, rqACK} = 2'b11;
+              4'b0111 : {nextAckM, rqACK} = 2'b01;
+              4'b1000 : {nextAckM, rqACK} = 2'b00;
+              4'b1001 : {nextAckM, rqACK} = 2'b01;
+              4'b1010 : {nextAckM, rqACK} = 2'b10;
+              4'b1011 : {nextAckM, rqACK} = 2'b11;
+              4'b1100 : {nextAckM, rqACK} = 2'b01;
+              4'b1101 : {nextAckM, rqACK} = 2'b01;
+              4'b1110 : {nextAckM, rqACK} = 2'b11;
+              4'b1111 : {nextAckM, rqACK} = 2'b11;
+            endcase
+         end
+         always @(posedge clk)
+           AckM <= nextAckM;
+         assign qACK = rqACK;
+      end
+   endgenerate
+
+   
+
+
    
 `ifdef verilator   
    function [6:0] get_dbg_stb_ack;

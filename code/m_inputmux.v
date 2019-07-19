@@ -36,8 +36,7 @@ module m_inputmux
     input              sra_msb, //     Msb to use when rightshifing ADR_O
     input              sa00, //        Main select signal
     input              STB_O, //       Selecte between SRAM and IO, must also give ack when systemregisters written
-    input              ACK_I,
-    input              sram_ack,
+    input              sram_ack, //    Used to select data from SRAM/input devices
     input              mie, //         Machine Interrupt enable in MSTATUS
     input              mpie, //        Machine Previous Interrupt enable in MSTATUS
     input              meie, //        Machine External Interrupt Enable in MIE
@@ -50,6 +49,7 @@ module m_inputmux
     input              mtip,//         Machine Timer Interrupt Pending in MIP
     input              mtimeincip, //  Machine Time Increment Interrupt Pending in MIP
     input              meip, //        Machine External Interrupt Pending in MIP
+    input              qACK, //        Qualified acknowledge, usually (ACK_I | sysregack)
 
     output             sysregack, //   Read/Write acknowledge from MIP/MIE/MSTATUS
     output [31:0]      rDee, //        Output for debugging purposes
@@ -75,7 +75,7 @@ module m_inputmux
          
          reg sa00mod;
          always @(posedge clk)
-           sa00mod <=  ACK_I | sram_ack | sysregack | sa00;
+           sa00mod <=  qACK | sram_ack | sa00;
          assign Di = sa00mod ? (DAT_O & rDee[31:0] | ~DAT_O & shADR_O) : DAT_O;
 
       end else begin
@@ -87,7 +87,8 @@ module m_inputmux
          genvar j;
          wire   cmb_sa00mod;
          wire   sa00mod;
-         SB_LUT4 #(.LUT_INIT(16'hfffe)) inst_presa00mod( .O(cmb_sa00mod), .I3(ACK_I), .I2(sram_ack), .I1(sysregack), .I0(sa00));
+         //SB_LUT4 #(.LUT_INIT(16'hfffe)) inst_presa00mod( .O(cmb_sa00mod), .I3(ACK_I), .I2(sram_ack), .I1(sysregack), .I0(sa00));
+         SB_LUT4 #(.LUT_INIT(16'hfefe)) inst_presa00mod( .O(cmb_sa00mod), .I3(1'b0), .I2(sram_ack), .I1(qACK), .I0(sa00));
          SB_DFF sa00mod_r( .Q(sa00mod), .C(clk), .D(cmb_sa00mod));
          for ( j = 0; j < 32; j = j + 1 ) begin
             SB_LUT4 #(.LUT_INIT(16'hcaf0)) cmb(.O(Di[j]),.I3(sa00mod),.I2(DAT_O[j]),.I1(rDee[j]),.I0(shADR_O[j]));

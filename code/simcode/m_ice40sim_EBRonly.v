@@ -32,8 +32,8 @@ module m_ice40sim_EBRonly
    
    /*AUTOWIRE*/
    // Beginning of automatic wires (for undeclared instantiated-module outputs)
-   wire                 ACK_I;                  // From inst_whishbonereg of m_whishbonereg.v
-   wire [31:0]          DAT_I;                  // From inst_whishbonereg of m_whishbonereg.v
+   wire                 ACK_I;                  // From inst_wishbonereg of m_wishbonereg.v
+   wire [31:0]          DAT_I;                  // From inst_wishbonereg of m_wishbonereg.v
    wire [31:0]          DAT_O;                  // From inst_midgetv_core of m_midgetv_core.v
    wire [3:0]           SEL_O;                  // From inst_midgetv_core of m_midgetv_core.v
    wire                 STB_O;                  // From inst_midgetv_core of m_midgetv_core.v
@@ -83,9 +83,9 @@ module m_ice40sim_EBRonly
       .meip                             (meip),
       .start                            (start));
 
-   // Address decode of whishbone register: 0b0100xxxx_xxxxxxxx_xxxxxxxx_xxxxx1xx
+   // Address decode of wishbone register: 0b0100xxxx_xxxxxxxx_xxxxxxxx_xxxxx1xx
    wire                 STB_I = STB_O & ~ADR_O[29] & ~ADR_O[28] & ADR_O[2];
-   m_whishbonereg inst_whishbonereg
+   m_wishbonereg inst_wishbonereg
      (// Outputs
       .ACK_O                            (ACK_I),
       .DAT_O                            (DAT_I[31:0]),
@@ -100,6 +100,6 @@ module m_ice40sim_EBRonly
 endmodule   
       
 // Local Variables:
-// verilog-library-directories:("."  )
+// verilog-library-directories:("." ".."  )
 // verilog-library-extensions:(".v" )
 // End:

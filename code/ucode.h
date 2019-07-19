@@ -191,32 +191,33 @@
 
 ///* Read address
 // */
-////                                       sa34: Controls read of r00000000 or rFFFFFFFF in last cycle memory/io read
-////                                       |        ssss
-////                                       |        1111            // 
-////                                       |        7654            // 
-#define Rjj                       ( ( O << 27 ) | ( OOOO << 14 ) )  // Scratch register JJ
-#define Rrinst                    ( ( O << 27 ) | ( OOOI << 14 ) )  // noinstret_base
-#define Rpc                       ( ( O << 27 ) | ( OOIO << 14 ) )  // PC
-#define rttime                    ( ( O << 27 ) | ( OOII << 14 ) )  // 
-#define NMIorInInt                ( ( O << 27 ) | ( OIOO << 14 ) )  // 
-#define rFFFFFF7F                 ( ( O << 27 ) | ( OIOI << 14 ) )  // 
-#define r000000FF                 ( ( O << 27 ) | ( OIIO << 14 ) )  // 
-#define r0000FFFF                 ( ( O << 27 ) | ( OIII << 14 ) )  // 
-#define rFFFF7FFF                 ( ( O << 27 ) | ( IOOO << 14 ) )  // 
-#define rmtvec                    ( ( O << 27 ) | ( IOOI << 14 ) )  // trap vector  
-#define r00000000                 ( ( O << 27 ) | ( IOIO << 14 ) )  // 
-#define rFFFFFFFF                 ( ( O << 27 ) | ( IOII << 14 ) )  // 
-#define rHorL                     ( ( I << 27 ) | ( IOII << 14 ) )  // 
-#define Ryy                       ( ( O << 27 ) | ( IIOO << 14 ) )  // Scratch register YY
-#define Ralu                      ( ( O << 27 ) | ( IIOI << 14 ) )  // ALU result is internal read address.
-#define RS2                       ( ( O << 27 ) | ( IIIO << 14 ) )  // Read register specified in registered rs2 field of instruction
-#define RS1                       ( ( O << 27 ) | ( IIII << 14 ) )  // Read register specified in registered rs1 field of instruction
-#define r_xx                      ( ( O << 27 ) | ( xxxx << 14 ) )  // Read address is dont care. 
-#define rHorPC    ( ( I << 30 ) |   ( O << 27 ) | ( IOII << 14 ) )  // 
-#define rHorTtime ( ( I << 30 ) |   ( I << 27 ) | ( IOII << 14 ) )  // 
-//                    |
-//                    sa40 extra select signal for Rai
+////                                        sa34: Controls read of r00000000 or rFFFFFFFF in last cycle memory/io read
+////                                        |        sa23
+////                                        |        |sa22
+////                                        |        ||sa21
+////                                        |        |||sa20
+#define Rjj        ( ( O << 30 ) |   ( O << 27 ) | ( OOOO << 14 ) )  // Scratch register JJ
+#define Rrinst     ( ( O << 30 ) |   ( O << 27 ) | ( OOOI << 14 ) )  // noinstret_base
+#define Rpc        ( ( O << 30 ) |   ( O << 27 ) | ( OOIO << 14 ) )  // PC
+#define rttime     ( ( O << 30 ) |   ( O << 27 ) | ( OOII << 14 ) )  // 
+#define NMIorInInt ( ( O << 30 ) |   ( O << 27 ) | ( OIOO << 14 ) )  // 
+#define rFFFFFF7F  ( ( O << 30 ) |   ( O << 27 ) | ( OIOI << 14 ) )  // 
+#define r000000FF  ( ( O << 30 ) |   ( O << 27 ) | ( OIIO << 14 ) )  // 
+#define r0000FFFF  ( ( O << 30 ) |   ( O << 27 ) | ( OIII << 14 ) )  // 
+#define rFFFF7FFF  ( ( O << 30 ) |   ( O << 27 ) | ( IOOO << 14 ) )  // 
+#define rmtvec     ( ( O << 30 ) |   ( O << 27 ) | ( IOOI << 14 ) )  // trap vector  
+#define r00000000  ( ( O << 30 ) |   ( O << 27 ) | ( IOIO << 14 ) )  // 
+#define rFFFFFFFF  ( ( O << 30 ) |   ( O << 27 ) | ( IOII << 14 ) )  // 
+#define Ryy        ( ( O << 30 ) |   ( O << 27 ) | ( IIOO << 14 ) )  // Scratch register YY
+#define Ralu       ( ( O << 30 ) |   ( O << 27 ) | ( IIOI << 14 ) )  // ALU result is internal read address.
+#define RS2        ( ( O << 30 ) |   ( O << 27 ) | ( IIIO << 14 ) )  // Read register specified in registered rs2 field of instruction
+#define RS1        ( ( O << 30 ) |   ( O << 27 ) | ( IIII << 14 ) )  // Read register specified in registered rs1 field of instruction
+#define r_xx       ( ( O << 30 ) |   ( O << 27 ) | ( xxxx << 14 ) )  // Read address is dont care. 
+#define rHorL      ( ( O << 30 ) |   ( I << 27 ) | ( IOII << 14 ) )  // 
+#define rHorPC     ( ( I << 30 ) |   ( O << 27 ) | ( IOII << 14 ) )  // 
+#define rHorTtime  ( ( I << 30 ) |   ( I << 27 ) | ( IOII << 14 ) )  // 
+//                          |
+//                          sa40 extra select signal for Rai
 
 ///* The Q register
 // */

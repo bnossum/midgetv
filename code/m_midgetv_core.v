@@ -102,21 +102,21 @@
  * m_midgetv_core signal description
  * =================================
  * 
- * Whishbone signals are implemented as per Whishbone specification b4,
- * see Whishbone B.4 data sheet for m_midgetv_core below.
+ * Wishbone signals are implemented as per Wishbone specification b4,
+ * see Wishbone B.4 data sheet for m_midgetv_core below.
  * 
  * A note on RST_I. 
  * RST_I is a mandatory input. It acts like a NMI.
  * 
- * Even though the granularity of the Whishbone interface is 
+ * Even though the granularity of the Wishbone interface is 
  * 8-bit, all read operations happen as 32-bit operations. SEL_O == 4'b1111.
  * Selection of (signed/unsigned) byte and (signed/unsigned) hword is done
  * internally in midgetv. For write operations, the granularity is 8-bit, 
  * and the SEL_O[3:0] signals have meaning. I am unsure whether
  * the lack of a true byte/hword read affects the conformity to the
- * Whishbone specification.
+ * Wishbone specification.
  * 
- * Work. I need to check that I obey Whishbone B4 rule 3.55:
+ * Work. I need to check that I obey Wishbone B4 rule 3.55:
  * MASTER interfaces MUST be designed to operate normally when 
  * the SLAVE interface holds [ACK_I] in the asserted state.
  * 
@@ -171,7 +171,7 @@
  * IWIDTH
  * ------
  * Determines the width of external input to midgetv. To be
- * compliant with Whishbone, IWIDTH should be 8, 16 or 32.
+ * compliant with Wishbone, IWIDTH should be 8, 16 or 32.
  * When interrupts are included, IWIDTH should probably
  * always be 32.
  * Legal values: From 1 to 32.
@@ -210,13 +210,19 @@
  *    ( funct3 = 3'b100, opcode = 7'b0110011). However, 
  *    one should really also check that funct7 = 7'b0000000.
  *    With LAZY_DECODE == 1, this check is not performed.
+ * 2: Nearly no checking. Not recommended.
+ * 
+ * DISREGARD_WB4_3_55 
+ * -------------------
+ * 0: Obey rule 3.55 of Wishbone B.3
+ * 1: Ignore rule 3.55. This should save one! lut. Not recommended.
  * 
  * program0, program1, ... programF
  * --------------------------------
  * These holds the program to initiate in the EBRs.
  * See m_ebr.v for details.
  * 
- * Whishbone B.4 data sheet for m_midgetv_core
+ * Wishbone B.4 data sheet for m_midgetv_core
  * --------------------------------------------------------------------
  * Inteface type:                   MASTER
  * General description:             Microcontroller
@@ -226,9 +232,9 @@
  * Data port, maximum operand size: 32-bit
  * Data transfer ordering:          Big endian and/or little endian
  * Data transfer sequencing:        Undefined
- * Supported signal list            Signal name   WHISHBONE Equiv. 
+ * Supported signal list            Signal name   WISHBONE Equiv. 
  *   and cross-reference to         CLK_I         CLK_I        
- *   equivalent WHISHBONE signals:  DAT_I[31:0]   DAT_I()
+ *   equivalent WISHBONE signals:   DAT_I[31:0]   DAT_I()
  *                                  ADR_O[31:0]   ADR_O()
  *                                  STB_O         STB_O
  *                                  WE_O          WE_O 
@@ -245,6 +251,7 @@ module m_midgetv_core
 //    SRAMADRWIDTH = 16, EBRADRWIDTH =  8, IWIDTH = 32, NO_CYCLECNT = 0, MTIMETAP = 14, HIGHLEVEL = 0, LAZY_DECODE = 0, // Conventional
 //    SRAMADRWIDTH = 17, EBRADRWIDTH = 11, IWIDTH = 32, NO_CYCLECNT = 0, MTIMETAP = 14, HIGHLEVEL = 0, LAZY_DECODE = 0, // Maximal
       ALUWIDTH = 32, // __always__ 32
+      DISREGARD_WB4_3_55 = 0,
       DBGA = 0,
       parameter [4095:0] program0 = 4096'h0,
       parameter [4095:0] program1 = 4096'h0,
@@ -264,11 +271,11 @@ module m_midgetv_core
       parameter [4095:0] programF = 4096'h0
       )
    (
-    // Whishbone signals:
+    // Wishbone signals:
     input              CLK_I, //       System clock, used on rising flank only
-    input              RST_I, //       Whishbone reset equals NMI.
-    input              ACK_I, //       Acknowledge from I/O device
-    input [IWIDTH-1:0] DAT_I, //       Input devices data for midgetv
+    input              RST_I, //       Wishbone reset equals NMI, valid in CLK_I domain.
+    input              ACK_I, //       Acknowledge from I/O device. As I interpret Wishbone B.3, ACK_I is valid in CLK_I domain.    
+    input [IWIDTH-1:0] DAT_I, //       Input devices data for midgetv, valid in CLK_I domain.
     output             CYC_O, //       We do not generate wait states. Observation 3.55 in wbspec_b4: CYC_O = STB_O
     output             STB_O, //       Qualifies ADR_O, DAT_O, SEL_O and WE_O.
     output             WE_O, //        Midgetv writes output to address ADR_O
@@ -276,13 +283,13 @@ module m_midgetv_core
     output [31:0]      DAT_O, //       Data from midgetv to output devices
     output [3:0]       SEL_O, //       Byte mask for read/write. 
 
-    // The following Whishbone signals are not supported:
+    // The following Wishbone signals are not supported:
     //input            ERR_I,RTY_I,STALL_I
     //input [x:0]      TGD_I,
     //output           LOCK_O,
     //output [x:0]     TGA_O,TGC_O,TGD_O, 
 
-    // Non-Whishbone signals:
+    // Non-Wishbone signals:
     input              meip, //        External interrupt(s) pending
     input              start, //       Control startup of midgetv
     output             corerunning, // midgetv should now be active. For synchronization of startup
@@ -291,7 +298,7 @@ module m_midgetv_core
     );
    wire                clk; //   My signal name for the clock. It is only used on rising edge
    assign clk   = CLK_I;
-   assign CYC_O = STB_O; //      See Whishbone B.4 permission 3.40
+   assign CYC_O = STB_O; //      See Wishbone B.4 permission 3.40
    
    
    /* verilator lint_off UNUSED */
@@ -351,6 +358,7 @@ module m_midgetv_core
    wire                 nobuserror;             // From inst_cyclecnt of m_cyclecnt.v
    wire                 preprealucyin;          // From inst_shiftcounter of m_shiftcounter.v
    wire                 progress_ucode;         // From inst_progressctrl of m_progressctrl.v
+   wire                 qACK;                   // From inst_progressctrl of m_progressctrl.v
    wire                 qualint;                // From inst_status_and_interrupts of m_status_and_interrupts.v
    wire [31:0]          rDee;                   // From inst_inputmux of m_inputmux.v
    wire                 r_issh0_not;            // From inst_shiftcounter of m_shiftcounter.v
@@ -516,7 +524,7 @@ module m_midgetv_core
     * better way to disable warnings than the following:
     */
    assign midgetv_core_killwarnings = sa38 & sa39 | meip;
-   
+
    /* -----------------------------------------------------------------------------
     * Datapath
     */
@@ -541,7 +549,6 @@ module m_midgetv_core
       .sra_msb                          (sra_msb),
       .sa00                             (sa00),
       .STB_O                            (STB_O),
-      .ACK_I                            (ACK_I),
       .sram_ack                         (sram_ack),
       .mie                              (mie),
       .mpie                             (mpie),
@@ -554,7 +561,8 @@ module m_midgetv_core
       .msip                             (msip),
       .mtip                             (mtip),
       .mtimeincip                       (mtimeincip),
-      .meip                             (meip));
+      .meip                             (meip),
+      .qACK                             (qACK));
 
    m_cyclecnt #(.HIGHLEVEL(HIGHLEVEL), 
                 .NO_CYCLECNT(NO_CYCLECNT))
@@ -662,7 +670,7 @@ module m_midgetv_core
       .bmask                            (bmask[3:0]),
       .iwe                              (iwe));
 
-   /* Whishbone B.4 data sheet for the ram interface of m_midgetv_core
+   /* Wishbone B.4 data sheet for the ram interface of m_midgetv_core
     * --------------------------------------------------------------------
     * Inteface type:                   MASTER
     * General description:             Microcontroller
@@ -672,9 +680,9 @@ module m_midgetv_core
     * Data port, maximum operand size: 32-bit
     * Data transfer ordering:          Big endian and/or little endian
     * Data transfer sequencing:        Undefined
-    * Supported signal list            Signal name   WHISHBONE Equiv. 
+    * Supported signal list            Signal name   WISHBONE Equiv. 
     *   and cross-reference to         CLK_I         CLK_I        
-    *   equivalent WHISHBONE signals:  Dsram[31:0]   DAT_I()
+    *   equivalent WISHBONE signals:   Dsram[31:0]   DAT_I()
     *                                  ADR_O[31:0]   ADR_O()
     *                                  sram_stb      STB_O
     *                                  WE_O          WE_O 
@@ -684,7 +692,7 @@ module m_midgetv_core
     *                                  sram_ack      ACK_I        
     *                                  RST_I         RST_I
     * Comments                         Many signals are shared with the
-    *                                  the microcontroller whishbone interface
+    *                                  the microcontroller Wishbone interface
     */
    m_ram  #(.HIGHLEVEL(0), .SRAMADRWIDTH(SRAMADRWIDTH)) 
    inst_ram
@@ -723,9 +731,8 @@ module m_midgetv_core
       .sa21                             (sa21),
       .sa22                             (sa22),
       .sa23                             (sa23),
-      .ACK_I                            (ACK_I),
       .sram_ack                         (sram_ack),
-      .sysregack                        (sysregack),
+      .qACK                             (qACK),
       .sa34                             (sa34),
       .sa40                             (sa40),
       .STB_O                            (STB_O),
@@ -794,7 +801,8 @@ module m_midgetv_core
     * Control path
     */
    
-   m_progressctrl #(.HIGHLEVEL(1), 
+   m_progressctrl #(.HIGHLEVEL(HIGHLEVEL),
+                    .DISREGARD_WB4_3_55(DISREGARD_WB4_3_55),
                     .SRAMADRWIDTH(SRAMADRWIDTH)) 
    inst_progressctrl
      (/*AUTOINST*/
@@ -808,6 +816,7 @@ module m_midgetv_core
       .sram_stb                         (sram_stb),
       .enaQ                             (enaQ),
       .progress_ucode                   (progress_ucode),
+      .qACK                             (qACK),
       .next_STB_O                       (next_STB_O),
       .next_sram_stb                    (next_sram_stb),
       .m_progressctrl_killwarnings      (m_progressctrl_killwarnings),

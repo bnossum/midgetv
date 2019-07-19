@@ -1,5 +1,5 @@
 /* 
- * A simple whishbone 32 bit slave port with 8 bit granularity
+ * A simple wishbone 32 bit slave port with 8 bit granularity
  * 
  * WISHBONE DATASHEET
  * ------------------
@@ -29,10 +29,10 @@
 
 //`define SIMPLE_AND_UNDERSTANABLE
 `ifdef SIMPLE_AND_UNDERSTANABLE
-/* This is how the simplest whishbone slave register could be specified.
+/* This is how the simplest wishbone slave register could be specified.
  * I leave it in the code for documentation purposes.
  */
-module m_whishbonereg
+module m_wishbonereg
   (
    input [31:0]  DAT_I,
    input         STB_I,
@@ -63,7 +63,7 @@ module m_whishbonereg
 endmodule
 `else
 /*
- * In order to test my controller, I need a flexible whishbone register.
+ * In order to test my controller, I need a flexible wishbone register.
  * I should be able to set the initial value of the register. 
  * The output should be valid only on the cycle where we give acknowledge.
  * I should be able to set the read latency in number of cycles.
@@ -79,10 +79,11 @@ endmodule
  *   2 |   x
  *  10 |       x
  */
-module m_whishbonereg
+module m_wishbonereg
   # ( parameter INITVAL = 32'hdeadbabe,
-      parameter WRITELATENCY = 10,
-      parameter READLATENCY  = 10
+      parameter WRITELATENCY = 0,
+      parameter READLATENCY  = 0,
+      parameter CHECK_RULE_3_55 = 1
       )
    (
     input         CLK_I,
@@ -96,7 +97,9 @@ module m_whishbonereg
    
    wire [3:0]     ce;
    reg [31:0]     r;
+/* verilator lint_off UNUSED */
    wire           readack,writeack;
+/* verilator lint_on UNUSED */
    
    initial begin
       r = INITVAL;
@@ -149,7 +152,26 @@ module m_whishbonereg
       end
 
    endgenerate
-   assign ACK_O = readack | writeack;
+
+   /* Wishbone B.4 permission 3.35 states: A SLAVE interface MAY
+    * be designed to hold [ACK_O] in the asserted state. This 
+    * situation occurs on point-to-point interfaces where there 
+    * is a single SLAVE on the interface, and that SLAVE always 
+    * operates without wait states.
+    *
+    * I must check that the corresponding rule for the master
+    * (rule 3.55) is fullfilled by midgetv
+    */
+   generate
+      if ( CHECK_RULE_3_55 && 
+           WRITELATENCY == 0 &&
+           READLATENCY  == 0 ) begin
+         assign ACK_O = 1'b1;
+      end else begin
+         assign ACK_O = readack | writeack;
+      end
+   endgenerate
+   
    assign DAT_O = ACK_O ? r : 32'hd0d0d0d0;
 endmodule
 `endif
