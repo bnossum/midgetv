@@ -157,38 +157,27 @@ module m_status_and_interrupts
          wire       write_to_mtime = ctrlreg_we & ADR_O[13]; 
          reg        r_mtimeincip;
          always @(posedge clk)
-           r_mtimeincip <= ( (~r_mtimeincip & alu_tapout) | r_mtimeincip)  & ~write_to_mtime;
+           r_mtimeincip <= ( alu_tapout | r_mtimeincip)  & ~write_to_mtime;
          
          /* minstrethip is set when the retired instruction counter overflows in 32 bits.
           * When user code write minstreth, minstretip is cleared
           */
-         wire       write_to_minstreth = ctrlreg_we & ADR_O[14];
          reg        r_minstrethip;
-         always @(posedge clk)
-           if ( write_to_minstreth ) begin
-              r_minstrethip <= 1'b0;
-           end else if ( alu_minstretofl ) begin
-              r_minstrethip <= 1'b1;
-           end
-         
-         
-         //   always @(posedge clk)
-         //     r_minstrethip <= ( (~r_minstrethip & alu_minstretofl) | r_minstrethip) & ~write_to_minstreth;
+         wire       write_to_minstreth = ctrlreg_we & ADR_O[14];
+         wire       cmb_minstrethip = (alu_minstretofl | r_minstrethip ) & ~write_to_minstreth;
+         always @(posedge clk)         
+           r_minstrethip <= cmb_minstrethip;
          
          /* MTIP is set under software control, this should only be used
           * by the internal interrupt routine that increments {mtimeh,mtime}. 
           * It is cleared when mtimecmp or mtimecmph is written. 
           */
-         wire       write_to_mtip = ctrlreg_we & ADR_O[15];
-         wire       write_to_mtimecmpx = ctrlreg_we & ADR_O[19];
          reg        r_mtip;
-         always @(posedge clk) begin
-            if ( write_to_mtip ) begin
-               r_mtip <= 1'b1;
-            end else if ( write_to_mtimecmpx ) begin
-               r_mtip <= 1'b0;
-            end
-         end
+         wire       write_to_mtip      = ctrlreg_we & ADR_O[15];
+         wire       write_to_mtimecmpx = ctrlreg_we & ADR_O[19];
+         wire       cmb_mtip = (write_to_mtip | r_mtip) & ~write_to_mtimecmpx;
+         always @(posedge clk) 
+            r_mtip <= cmb_mtip;
          
          /* MSIP is only under software control. This is possible because we have only one hart.
           */
@@ -323,68 +312,80 @@ module m_status_and_interrupts
          // =============================================================================
          // LOWLEVEL
          // =============================================================================
+         reg  r_mie;
 
+         
          /* mtimeincip is set when the cycle counter increments to (1<<MTIMETAP).
           * When user code writes mtime, mtimeincip is cleared
           */
-         wire       write_to_mtime = ctrlreg_we & ADR_O[13]; 
-         reg        r_mtimeincip;
-         always @(posedge clk)
-           r_mtimeincip <= ( (~r_mtimeincip & alu_tapout) | r_mtimeincip)  & ~write_to_mtime;
+         //wire       write_to_mtime = ctrlreg_we & ADR_O[13]; 
+         //reg        r_mtimeincip;
+         //always @(posedge clk)
+         //  r_mtimeincip <= ( alu_tapout | r_mtimeincip)  & ~write_to_mtime;
+         wire cmb_mtimeincip, r_mtimeincip;
+         SB_LUT4 #(.LUT_INIT(16'h0eee)) mtimeincip_l( .O(cmb_mtimeincip), .I3(ctrlreg_we), .I2(ADR_O[13]), .I1(r_mtimeincip), .I0(alu_tapout));         
+         SB_DFF mtimeincip_reg( .Q(r_mtimeincip), .C(clk), .D(cmb_mtimeincip) );
          
          /* minstrethip is set when the retired instruction counter overflows in 32 bits.
           * When user code write minstreth, minstretip is cleared
           */
-         wire       write_to_minstreth = ctrlreg_we & ADR_O[14];
-         reg        r_minstrethip;
-         always @(posedge clk)
-           if ( write_to_minstreth ) begin
-              r_minstrethip <= 1'b0;
-           end else if ( alu_minstretofl ) begin
-              r_minstrethip <= 1'b1;
-           end
-         
-         
-         //   always @(posedge clk)
-         //     r_minstrethip <= ( (~r_minstrethip & alu_minstretofl) | r_minstrethip) & ~write_to_minstreth;
+//         wire       write_to_minstreth = ctrlreg_we & ADR_O[14];
+//         wire       cmb_minstrethip = (alu_minstretofl | r_minstrethip ) & ~write_to_minstreth;
+//         always @(posedge clk)         
+//           r_minstrethip <= cmb_minstrethip;
+         wire cmb_minstrethip,r_minstrethip;
+         SB_LUT4 #(.LUT_INIT(16'h0eee)) minstrethip_l( .O(cmb_minstrethip), .I3(ctrlreg_we), .I2(ADR_O[14]), .I1(r_minstrethip), .I0(alu_minstretofl));         
+         SB_DFF minstrethip_reg( .Q(r_minstrethip), .C(clk), .D(cmb_minstrethip) );
          
          /* MTIP is set under software control, this should only be used
           * by the internal interrupt routine that increments {mtimeh,mtime}. 
           * It is cleared when mtimecmp or mtimecmph is written. 
           */
-         wire       write_to_mtip = ctrlreg_we & ADR_O[15];
-         wire       write_to_mtimecmpx = ctrlreg_we & ADR_O[19];
-         reg        r_mtip;
-         always @(posedge clk) begin
-            if ( write_to_mtip ) begin
-               r_mtip <= 1'b1;
-            end else if ( write_to_mtimecmpx ) begin
-               r_mtip <= 1'b0;
-            end
-         end
+         // wire write_to_mtip      = ctrlreg_we & ADR_O[15];
+         // wire write_to_mtimecmpx = ctrlreg_we & ADR_O[19];
+         // wire cmb_mtip = (write_to_mtip | r_mtip) & ~write_to_mtimecmpx;
+         // always @(posedge clk) begin
+         //    r_mtip <= cmb_mtip;
+         wire cmb_mtip,r_mtip;
+         SB_LUT4 #(.LUT_INIT(16'h0caa)) mtip_l( .O(cmb_mtip), .I3(ctrlreg_we), .I2(ADR_O[19]), .I1(ADR_O[15]), .I0(r_mtip));         
+         SB_DFF mtip_reg( .Q(r_mtip), .C(clk), .D(cmb_mtip) );
          
          /* MSIP is only under software control. This is possible because we have only one hart.
           */
-         wire       write_to_msip =  ctrlreg_we & ADR_O[18];
-         reg        r_msip;
-         always @(posedge clk)
-           r_msip <= (~write_to_msip & r_msip) | (write_to_msip & DAT_O[3]);
+         //wire       write_to_msip =  ctrlreg_we & ADR_O[18];
+         //reg        r_msip;
+         //always @(posedge clk)
+         //  r_msip <= (~write_to_msip & r_msip) | (write_to_msip & DAT_O[3]);
+         wire cmb_msip,r_msip;
+         SB_LUT4 #(.LUT_INIT(16'hcaaa)) msip_l( .O(cmb_msip), .I3(ctrlreg_we), .I2(ADR_O[18]), .I1(DAT_O[3]), .I0(r_msip));         
+         SB_DFF msip_reg( .Q(r_msip), .C(clk), .D(cmb_msip) );
          
          /* Selective interrupt enable bits in mie are implemented in a straight forward fashion
           */
-         wire       write_to_mie = ctrlreg_we & ADR_O[17];
-         reg        r_mrinstretie,r_mtimeincie,r_meie,r_mtie,r_msie;
-         always @(posedge clk) begin
-            r_mrinstretie <= (~write_to_mie & r_mrinstretie) | ( write_to_mie & DAT_O[17] );
-            r_mtimeincie  <= (~write_to_mie & r_mtimeincie ) | ( write_to_mie & DAT_O[16] );
-            r_meie        <= (~write_to_mie & r_meie       ) | ( write_to_mie & DAT_O[11] );
-            r_mtie        <= (~write_to_mie & r_mtie       ) | ( write_to_mie & DAT_O[7] );
-            r_msie        <= (~write_to_mie & r_msie       ) | ( write_to_mie & DAT_O[3] );      
-         end
+         //wire       write_to_mie = ctrlreg_we & ADR_O[17];
+         //reg        r_mrinstretie,r_mtimeincie,r_meie,r_mtie,r_msie;
+         //always @(posedge clk) begin
+         //   r_mrinstretie <= (~write_to_mie & r_mrinstretie) | ( write_to_mie & DAT_O[17] );
+         //   r_mtimeincie  <= (~write_to_mie & r_mtimeincie ) | ( write_to_mie & DAT_O[16] );
+         //   r_meie        <= (~write_to_mie & r_meie       ) | ( write_to_mie & DAT_O[11] );
+         //   r_mtie        <= (~write_to_mie & r_mtie       ) | ( write_to_mie & DAT_O[7] );
+         //   r_msie        <= (~write_to_mie & r_msie       ) | ( write_to_mie & DAT_O[3] );      
+         //end
+         wire r_mrinstretie,cmb_mrinstretie,r_mtimeincie,cmb_mtimeincie,r_meie,cmb_meie,r_mtie,cmb_mtie,r_msie,cmb_msie;         
+         SB_LUT4 #(.LUT_INIT(16'hcaaa)) mrinstretie_l( .O(cmb_mrinstretie), .I3(ctrlreg_we), .I2(ADR_O[17]), .I1(DAT_O[17]), .I0(r_mrinstretie));         
+         SB_LUT4 #(.LUT_INIT(16'hcaaa)) mtimeincie_l ( .O(cmb_mtimeincie ), .I3(ctrlreg_we), .I2(ADR_O[17]), .I1(DAT_O[16]), .I0(r_mtimeincie ));         
+         SB_LUT4 #(.LUT_INIT(16'hcaaa)) meie_l       ( .O(cmb_meie       ), .I3(ctrlreg_we), .I2(ADR_O[17]), .I1(DAT_O[11]), .I0(r_meie       ));         
+         SB_LUT4 #(.LUT_INIT(16'hcaaa)) mtie_l       ( .O(cmb_mtie       ), .I3(ctrlreg_we), .I2(ADR_O[17]), .I1(DAT_O[ 7]), .I0(r_mtie       ));         
+         SB_LUT4 #(.LUT_INIT(16'hcaaa)) msie_l       ( .O(cmb_msie       ), .I3(ctrlreg_we), .I2(ADR_O[17]), .I1(DAT_O[ 3]), .I0(r_msie       ));         
+         SB_DFF mrinstretie_reg( .Q(r_mrinstretie), .C(clk), .D(cmb_mrinstretie) );
+         SB_DFF mtimeincie_reg ( .Q(r_mtimeincie ), .C(clk), .D(cmb_mtimeincie ) );
+         SB_DFF meie_reg       ( .Q(r_meie       ), .C(clk), .D(cmb_meie       ) );
+         SB_DFF mtie_reg       ( .Q(r_mtie       ), .C(clk), .D(cmb_mtie       ) );
+         SB_DFF msie_reg       ( .Q(r_msie       ), .C(clk), .D(cmb_msie       ) );
          
          /* Register mpie is involved. 
           *   o The user code can write it.
-          *     Here we must see if we have (writeIO & ADR_O[2])
+          *     Here we must see if we have write to mstatus, ctrlreg_we & ADR_O[16]
           *   o When an interrupt is taken, mpie <= mie
           *     Microcode sets sa[39:38] to isr_intoTrap
           *   o When a trap occurs, mpie <= mie
@@ -394,28 +395,41 @@ module m_status_and_interrupts
           *   o When accessing an illegal CSR and transferring control to a trap, mpie <= mie
           *     Instruction "ij" will have B[0] == 1 in this case, and sa[39:38] is isr_use_ij
           */
-         wire write_to_mstatus = ctrlreg_we & ADR_O[16];
-         reg  r_mpie,r_mie;
-         wire isr_use_ij = ~sa39 & sa38;
-         wire isr_intoCSR = sa39 & ~sa38;
-         wire isr_intoTrap = sa39 & sa38;
-         wire update_mpie = 
-              write_to_mstatus    |
-              isr_intoTrap        | 
-              (isr_use_ij & B[1]) |
-              (isr_use_ij & B[0]);
-         wire value_new_mpie = 
-              (write_to_mstatus & DAT_O[7]) | 
-              (isr_intoTrap & r_mie)    |
-              (isr_use_ij & B[1] )      |
-              (isr_use_ij & B[0] & r_mie);
-         always @(posedge clk)
-           if ( update_mpie )
-             r_mpie <= value_new_mpie;
+         //wire write_to_mstatus = ctrlreg_we & ADR_O[16];
+         //reg  r_mpie,r_mie;
+         //wire isr_use_ij = ~sa39 & sa38;
+         //wire isr_intoTrap = sa39 & sa38;
+         //wire update_mpie = 
+         //     write_to_mstatus    |
+         //     isr_intoTrap        | 
+         //     (isr_use_ij & B[1]) |
+         //     (isr_use_ij & B[0]);
+         //wire value_new_mpie = 
+         //     (write_to_mstatus & DAT_O[7]) | 
+         //     (isr_intoTrap & r_mie)    |
+         //     (isr_use_ij & B[1] )      |
+         //     (isr_use_ij & B[0] & r_mie);
+         //always @(posedge clk)
+         //  if ( update_mpie )
+         //    r_mpie <= value_new_mpie;
+         wire write_to_mstatus,isr_intoTrap,isr_use_ij;
+         wire update_mie_mpie;
+         SB_LUT4 #(.LUT_INIT(16'h8888)) write_to_mstatus_l(.O(write_to_mstatus), .I3(1'b0), .I2(1'b0), .I1(ctrlreg_we), .I0(ADR_O[16]));
+         SB_LUT4 #(.LUT_INIT(16'h8888)) isr_intoTrap_l(.O(isr_intoTrap), .I3(1'b0), .I2(1'b0), .I1(sa39), .I0(sa38));
+         SB_LUT4 #(.LUT_INIT(16'h2222)) isr_use_ij_l(  .O(isr_use_ij),   .I3(1'b0), .I2(1'b0), .I1(sa39), .I0(sa38));         
+         wire tmp = B[1] | B[0];
+         SB_LUT4 #(.LUT_INIT(16'hfeee)) update_mie_mpie_l(  .O(update_mie_mpie), .I3(tmp), .I2(isr_use_ij), .I1(isr_intoTrap), .I0(write_to_mstatus));         
+
+         wire mpiea; //  = (isr_use_ij & B[1] ) | (isr_use_ij & B[0] & r_mie);
+         wire mpieb; //  = (write_to_mstatus & DAT_O[7]) | (isr_intoTrap & r_mie);
+         wire r_mpie; // if ( update_mie_mpie ) r_mpie = mpiea ? 1 : mpieb;
+         SB_LUT4 #(.LUT_INIT(16'hf800)) mpiea_l(  .O(mpiea), .I3(isr_use_ij), .I2(B[1]), .I1(B[0]), .I0(r_mie));
+         SB_LUT4 #(.LUT_INIT(16'hf888)) mpieb_l(  .O(mpieb), .I3(write_to_mstatus), .I2(DAT_O[7]), .I1(isr_intoTrap), .I0(r_mie));         
+         SB_DFFESS reg_mpie( .Q(r_mpie), .C(clk), .E(update_mie_mpie), .S(mpiea), .D(mpieb));
          
          /* Register mie is involved.
           *   o The user code can write it.
-          *     Here we must see if we have (writeIO & ADR_O[2])
+          *     Here we must see if we have write to mstatus
           *   o When an interrupt is taken, mie <= 0
           *     Microcode sets sa[39:38] to isr_intoTrap
           *   o When a trap occurs, mie <= 0
@@ -425,51 +439,69 @@ module m_status_and_interrupts
           *   o When accessing an illegal CSR and transferring control to a trap, mie <= 0
           *     Instruction "ij" will have B[0] == 1 in this case, and sa[39:38] is isr_use_ij
           */
-         wire update_mie = update_mpie;
+// With this: Size 361 LUTs
          wire value_new_mie =
               (write_to_mstatus & DAT_O[3]) |
-              (isr_intoTrap & 1'b0)     |
-              (isr_use_ij & B[1] & r_mpie) |
-              (isr_use_ij & B[0] & 1'b0);
+              (isr_use_ij & B[1] & r_mpie);
          always @(posedge clk)
-           if (update_mie)
+           if (update_mie_mpie)
              r_mie <= value_new_mie;
+         
+// With this: Size 365 LUTs even though it was a reverse engineering of the above.
+// Completely baffeled here         
+//         wire miea; // = isr_use_ij & B[1] & r_mpie;
+//         wire mieb; // = miea | (write_to_mstatus & DAT_O[3]);
+//         wire r_mie; // = if ( update_mie ) r_mie = mieb;
+//         SB_LUT4 #(.LUT_INIT(16'hc000)) miea_l(  .O(miea), .I3(r_mpie), .I2(isr_use_ij), .I1(B[1]), .I0(update_mie_mpie));
+//         SB_LUT4 #(.LUT_INIT(16'h8888)) mieb_l(  .O(mieb), .I3(1'b0), .I2(1'b0), .I1(write_to_mstatus), .I0(DAT_O[3]));         
+//         SB_DFFESS reg_mie( .Q(r_mie), .C(clk), .E(update_mie_mpie), .S(miea), .D(mieb)); // Different PLB than SB_DFFESS above.
+         
          
          /* An internal register is set while we are in a CSR emulation routine
           */
-         always @(posedge clk)
-           r_incsr <= isr_intoCSR | (r_incsr & ~isr_use_ij);
-         
-         /*                                               __     _
-          * mie -----------------------------------------|  |---| |-- qualint
-          * r_incsr ------------------------------------o|  |   >_|
-          *                                    ____      |  |
-          * mrinstretip --| |-----------------|    |-----|__|
-          * mrinstretie --|&|  +--------------|    |
-          *                    |  +-----------| or |
-          * mtimeincip ---| |--+  |  +--------|    |
-          * mtimeincie ---|&|     |  |  +-----|____|
-          *                       |  |  |
-          * meip ---------| |-----+  |  |
-          * meie ---------|&|        |  |
-          *                          |  |
-          * mtip ---------| |--------+  |
-          * mtie ---------|&|           |
+         //wire isr_intoCSR = sa39 & ~sa38;
+         //always @(posedge clk)
+         //  r_incsr <= isr_intoCSR | (r_incsr & ~isr_use_ij);
+         wire cmb_incsr,rr_incsr;
+         SB_LUT4 #(.LUT_INIT(16'h4f44)) incsr_l(  .O(cmb_incsr), .I3(sa39), .I2(sa38), .I1(rr_incsr), .I0(isr_use_ij));
+         SB_DFF reg_incsr( .Q(rr_incsr), .C(clk), .D(cmb_incsr));
+         always @(/*AS*/rr_incsr)
+           r_incsr = rr_incsr;
+         /*                                               ___           __
+          * mie -----------------------------------------|   |---------|  |-- qualint
+          * r_incsr ------------------------------------o| & |         >__|
+          * meip ---------| |-----------------|    |-----|___|          
+          * meie ---------|&|         +-------| or |         
+          *                           | +-----|____|
+          * mrinstretip---| |----|  |-+ |
+          * mrinstretie---|&|  +-|or|   |
+          *                    |        |
+          * mtimeincip ---| |--+        |
+          * mtimeincie ---|&|           |
           *                             |
-          * msip ---------| |-----------+
+          * mtip ---------| |----|  |---+
+          * mtie ---------|&|  +-|or|
+          *                    |
+          * msip ---------| |--+
           * msie ---------|&|
           */ 
-         wire possible_interrupt = 
-              (mrinstretip & mrinstretie) |        
-              (mtimeincip  & mtimeincie ) |
-              (meip        & meie       ) |
-              (mtip        & mtie       ) |
-              (msip        & msie       );  
-         wire cmb_qualint = possible_interrupt & r_mie & ~r_incsr;
-         reg  r_qualint;
-         always @(posedge clk)
-           r_qualint <= cmb_qualint;
-         assign qualint = r_qualint;
+         //wire possible_interrupt = 
+         //     (mrinstretip & mrinstretie) |        
+         //     (mtimeincip  & mtimeincie ) |
+         //     (meip        & meie       ) |
+         //     (mtip        & mtie       ) |
+         //     (msip        & msie       );  
+         //wire cmb_qualint = possible_interrupt & r_mie & ~r_incsr;
+         //reg  r_qualint;
+         //always @(posedge clk)
+         //  r_qualint <= cmb_qualint;
+         //assign qualint = r_qualint;
+         wire pia,pib,pic,cmb_qualint;
+         SB_LUT4 #(.LUT_INIT(16'hf888)) pia_l( .O(pia       ), .I3(msie      ), .I2(msip      ), .I1(mtip       ), .I0(mtie       ));         
+         SB_LUT4 #(.LUT_INIT(16'hf888)) pib_l( .O(pib       ), .I3(mtimeincie), .I2(mtimeincip), .I1(mrinstretip), .I0(mrinstretie));
+         SB_LUT4 #(.LUT_INIT(16'hfeee)) pic_l( .O(pic), .I3(meie), .I2(meip), .I1(pia), .I0(pib));
+         SB_LUT4 #(.LUT_INIT(16'h4040)) qualint_l( .O(cmb_qualint), .I3(1'b0), .I2(pic), .I1(mie), .I0(r_incsr));         
+         SB_DFF qualint_reg( .Q(qualint), .C(clk), .D(cmb_qualint) );
          
          
          /* Registers that can be read by user code are output from this module

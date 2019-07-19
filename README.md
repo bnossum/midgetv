@@ -72,22 +72,23 @@ Using iCECube2 for compilation (with Lattice LSE as synthesis tool) give the fol
 
 FPGA/Board                          | SB_LUT4  | EBRs | SRAM | Clock (MHz) | Comment
 ----------------------------------- | -------- | ---- | ---- | ----------- | --------
-`ICE40HX1K-VQ100` `iceblink40-hx1k` | 230 | 5 | 0 | 69 | No `cycle(h)` or `time(h)`. No `instreth`. No interrupts, nor registers `mip`, `mie` or `mstatus`. Minimal instruction decode
-`ICE40UP5K-SG48I` `upduino2`        | 370 | 5 | 2 | 29 | `cycle(h)`, `time(h)`, `instret(h)`, interrupts and registers `mip`, `mie` and `mstatus`. Full instruction decode
+`ICE40HX1K-VQ100` `iceblink40-hx1k` | 228 | 5 | 0 | 69 | No `cycle(h)` or `time(h)`. No `instreth`. No interrupts, nor registers `mip`, `mie` or `mstatus`. Minimal instruction decode
+`ICE40UP5K-SG48I` `upduino2`        | 356 | 5 | 2 | 29 | `cycle(h)`, `time(h)`, `instret(h)`, interrupts and registers `mip`, `mie` and `mstatus`. Full instruction decode
 
 Note that "Auto lut cascade" must be off in the placer option of
 iCEcube2. This is due to the Lattice preference files where
-"set_cascading" is used to reduce the size of the core by 31 LUTs.
+"set_cascading" is used to reduce the size of the core.
 
 ### yosys/arachne-pnr, icetime
 Using Yosys 0.7+515, arachne-pnr 0.1+287+0.
 Unfortunately this give the following
-(I would have expected numbers comparable with those for iCECube2, only 31 SB_LUTs larger):
+(I would have expected numbers comparable with those for iCECube2, only larger with the SB_LUTs
+I save with lut_cascade):
 
 FPGA/Board                          | SB_LUT4  | EBRs | SRAM | Clock (MHz) | Comment
 ----------------------------------- | -------- | ---- | ---- | ----------- | --------------------------
-`ICE40HX1K-VQ100` `iceblink40-hx1k` | 337      |  5   |  0   | 60 | 72 LUTS larger than expected
-`ICE40UP5K-SG48I` `upduino2`        | 445      |  5   |  2   | 22 | 46 LUTS larger than expected
+`ICE40HX1K-VQ100` `iceblink40-hx1k` | 335      |  5   |  0   | 60 | 75 LUTS larger than expected
+`ICE40UP5K-SG48I` `upduino2`        | 445      |  5   |  2   | 23 | 53 LUTS larger than expected
 
 
 ## Incomplete build instructions
@@ -128,7 +129,7 @@ Note. This will be modified.
    - midgetv_bin2ebr to transform morse.bin to ice40loaderprog.hv in
      directories tsthw/iceblink40-hx1k and tsthw/upduino2
 1. Go to directory tsthw/upduino2.
-   - In the top of the wrapper toplevel
+   - near the end of the wrapper toplevel
      verilog file upduino2.v are some hints on how to compile a FPGA image.
    - Alternatively, iceCube2 can be used. A suitable project is hopefully
       available in directory tsthw/upduino2/iCEcube2_flow.

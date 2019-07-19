@@ -27,9 +27,9 @@ module m_progressctrl
     input        sa30, //           Special case, strobe for "SW" must respect word alignment
     input        lastshift, //      To halt progress of microcode etc
     input        r_issh0_not, //    To halt progress of microcode etc
-    input [31:0] B, //              Do we access SRAM or I/O ?
+    input [31:0] B, //              Do we access SRAM or I/O? Only B[31] used but due to Verilator...
     input        nobuserror, //     When we have bus error we must have forward progress in ucode
-    output [3:0] SEL_O, //          Byte selects for EBR, SRAM and outputs
+    output [3:0] SEL_O, //          Byte selects for SRAM and outputs
     output [3:0] bmask, //          SEL_O is unfortunately also needed in an active low version for EBR
                                    
     output       iwe, //            Write of EBR
@@ -90,7 +90,7 @@ module m_progressctrl
          assign SEL_O = rSEL_O;
          assign bmask = rbmask;
 
-      end else begin
+      end else begin : blka
          wire [3:0] cmb_asel,cmb_bsel;
          wire       usedefault,en;
          
@@ -99,20 +99,40 @@ module m_progressctrl
          SB_LUT4 #(.LUT_INIT(16'h004d)) l_cmb_bsel1( .O(cmb_bsel[1]), .I3(usedefault), .I2(sa24), .I1(B[1]), .I0(B[0]));
          SB_LUT4 #(.LUT_INIT(16'h001b)) l_cmb_bsel2( .O(cmb_bsel[2]), .I3(usedefault), .I2(sa24), .I1(B[1]), .I0(B[0]));
          SB_LUT4 #(.LUT_INIT(16'h0017)) l_cmb_bsel3( .O(cmb_bsel[3]), .I3(usedefault), .I2(sa24), .I1(B[1]), .I0(B[0]));
-         SB_LUT4 #(.LUT_INIT(16'h005c)) l_cmb_asel0( .O(cmb_asel[0]), .I3(RST_I), .I2(sa41), .I1(SEL_O[0]), .I0(cmb_bsel[0]));
-         SB_LUT4 #(.LUT_INIT(16'h005c)) l_cmb_asel1( .O(cmb_asel[1]), .I3(RST_I), .I2(sa41), .I1(SEL_O[1]), .I0(cmb_bsel[1]));
-         SB_LUT4 #(.LUT_INIT(16'h005c)) l_cmb_asel2( .O(cmb_asel[2]), .I3(RST_I), .I2(sa41), .I1(SEL_O[2]), .I0(cmb_bsel[2]));
-         SB_LUT4 #(.LUT_INIT(16'h005c)) l_cmb_asel3( .O(cmb_asel[3]), .I3(RST_I), .I2(sa41), .I1(SEL_O[3]), .I0(cmb_bsel[3]));
+         SB_LUT4 #(.LUT_INIT(16'h5555)) l_cmb_asel0( .O(cmb_asel[0]), .I3(1'b0), .I2(1'b0), .I1(1'b0), .I0(cmb_bsel[0]));
+         SB_LUT4 #(.LUT_INIT(16'h5555)) l_cmb_asel1( .O(cmb_asel[1]), .I3(1'b0), .I2(1'b0), .I1(1'b0), .I0(cmb_bsel[1]));
+         SB_LUT4 #(.LUT_INIT(16'h5555)) l_cmb_asel2( .O(cmb_asel[2]), .I3(1'b0), .I2(1'b0), .I1(1'b0), .I0(cmb_bsel[2]));
+         SB_LUT4 #(.LUT_INIT(16'h5555)) l_cmb_asel3( .O(cmb_asel[3]), .I3(1'b0), .I2(1'b0), .I1(1'b0), .I0(cmb_bsel[3]));
 
          SB_LUT4 #(.LUT_INIT(16'heeee)) l_en( .O(en), .I3(1'b0), .I2(1'b0), .I1(RST_I), .I0(sa41) );
          SB_DFFESS r_bsel0( .Q(bmask[0]), .C(clk), .E(en), .S(RST_I), .D(cmb_bsel[0]));
          SB_DFFESS r_bsel1( .Q(bmask[1]), .C(clk), .E(en), .S(RST_I), .D(cmb_bsel[1]));
          SB_DFFESS r_bsel2( .Q(bmask[2]), .C(clk), .E(en), .S(RST_I), .D(cmb_bsel[2]));
          SB_DFFESS r_bsel3( .Q(bmask[3]), .C(clk), .E(en), .S(RST_I), .D(cmb_bsel[3]));
-         SB_DFF r_asel0( .Q(SEL_O[0]), .C(clk), .D(cmb_asel[0]));
-         SB_DFF r_asel1( .Q(SEL_O[1]), .C(clk), .D(cmb_asel[1]));
-         SB_DFF r_asel2( .Q(SEL_O[2]), .C(clk), .D(cmb_asel[2]));
-         SB_DFF r_asel3( .Q(SEL_O[3]), .C(clk), .D(cmb_asel[3]));
+         SB_DFFESR r_asel0( .Q(SEL_O[0]), .C(clk), .E(en), .R(RST_I), .D(cmb_asel[0]));
+         SB_DFFESR r_asel1( .Q(SEL_O[1]), .C(clk), .E(en), .R(RST_I), .D(cmb_asel[1]));
+         SB_DFFESR r_asel2( .Q(SEL_O[2]), .C(clk), .E(en), .R(RST_I), .D(cmb_asel[2]));
+         SB_DFFESR r_asel3( .Q(SEL_O[3]), .C(clk), .E(en), .R(RST_I),. D(cmb_asel[3]));
+
+//         SB_LUT4 #(.LUT_INIT(16'hfff9)) l_usedefault( .O(usedefault), .I3(sa27), .I2(sa26), .I1(sa25), .I0(sa24));
+//         SB_LUT4 #(.LUT_INIT(16'h004e)) l_cmb_bsel0( .O(cmb_bsel[0]), .I3(usedefault), .I2(sa24), .I1(B[1]), .I0(B[0]));
+//         SB_LUT4 #(.LUT_INIT(16'h004d)) l_cmb_bsel1( .O(cmb_bsel[1]), .I3(usedefault), .I2(sa24), .I1(B[1]), .I0(B[0]));
+//         SB_LUT4 #(.LUT_INIT(16'h001b)) l_cmb_bsel2( .O(cmb_bsel[2]), .I3(usedefault), .I2(sa24), .I1(B[1]), .I0(B[0]));
+//         SB_LUT4 #(.LUT_INIT(16'h0017)) l_cmb_bsel3( .O(cmb_bsel[3]), .I3(usedefault), .I2(sa24), .I1(B[1]), .I0(B[0]));
+//         SB_LUT4 #(.LUT_INIT(16'h005c)) l_cmb_asel0( .O(cmb_asel[0]), .I3(RST_I), .I2(sa41), .I1(SEL_O[0]), .I0(cmb_bsel[0]));
+//         SB_LUT4 #(.LUT_INIT(16'h005c)) l_cmb_asel1( .O(cmb_asel[1]), .I3(RST_I), .I2(sa41), .I1(SEL_O[1]), .I0(cmb_bsel[1]));
+//         SB_LUT4 #(.LUT_INIT(16'h005c)) l_cmb_asel2( .O(cmb_asel[2]), .I3(RST_I), .I2(sa41), .I1(SEL_O[2]), .I0(cmb_bsel[2]));
+//         SB_LUT4 #(.LUT_INIT(16'h005c)) l_cmb_asel3( .O(cmb_asel[3]), .I3(RST_I), .I2(sa41), .I1(SEL_O[3]), .I0(cmb_bsel[3]));
+//
+//         SB_LUT4 #(.LUT_INIT(16'heeee)) l_en( .O(en), .I3(1'b0), .I2(1'b0), .I1(RST_I), .I0(sa41) );
+//         SB_DFFESS r_bsel0( .Q(bmask[0]), .C(clk), .E(en), .S(RST_I), .D(cmb_bsel[0]));
+//         SB_DFFESS r_bsel1( .Q(bmask[1]), .C(clk), .E(en), .S(RST_I), .D(cmb_bsel[1]));
+//         SB_DFFESS r_bsel2( .Q(bmask[2]), .C(clk), .E(en), .S(RST_I), .D(cmb_bsel[2]));
+//         SB_DFFESS r_bsel3( .Q(bmask[3]), .C(clk), .E(en), .S(RST_I), .D(cmb_bsel[3]));
+//         SB_DFF r_asel0( .Q(SEL_O[0]), .C(clk), .D(cmb_asel[0]));
+//         SB_DFF r_asel1( .Q(SEL_O[1]), .C(clk), .D(cmb_asel[1]));
+//         SB_DFF r_asel2( .Q(SEL_O[2]), .C(clk), .D(cmb_asel[2]));
+//         SB_DFF r_asel3( .Q(SEL_O[3]), .C(clk), .D(cmb_asel[3]));
       end
    endgenerate
 

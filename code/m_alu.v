@@ -75,6 +75,7 @@ module m_alu
     input                 sa06,sa05,sa04,//       Determines ALU operation
     input                 sa27,sa26,sa25,sa24, // To decode Wttime and Wrinst
     output [ALUWIDTH-1:0] B, //                   ALU result
+    output                A31,
     output                alu_carryout, //        ALU carry out
     output                alu_tapout, //          Used to trigger interrupt for mtime increment/mcycle update
     output                alu_minstretofl, //     Used to trigger interrupt for retired instructions
@@ -142,7 +143,8 @@ module m_alu
             SB_LUT4 #(.LUT_INIT(16'hc369)) b(.O(B[j]), .I3(alucy[j]), .I2(QQ[j]), .I1(A[j]),.I0(sa06));
             SB_CARRY ca( .CO(alucy[j+1]),              .CI(alucy[j]), .I1(QQ[j]), .I0(A[j]));
          end
-
+         assign A31 = A[ALUWIDTH-1];
+         
          if ( MTIMETAP < MTIMETAP_LOWLIM ) begin
             assign alu_tapout = 1'b0;
          end else begin

@@ -47,7 +47,10 @@ module m_condcode # ( parameter HIGHLEVEL = 0 )
     input        clk, //          System clock
     input        alu_carryout, // Out of the ALU carry chain
     input [2:0]  FUNC3, //        from INSTRUCTION register
+    /* verilator lint_off UNUSED */
     input [31:0] Di, //           To get Di[31]
+    /* verilator lint_on UNUSED */
+    input        A31,
     input [31:0] QQ, //           To get QQ[31]
     input        rzcy32, //       Registered zero-detect from m_immexp_zfind_q
     output       raluF, //        Registered aluF for use by SLT(I)/SLTU(I)
@@ -113,7 +116,8 @@ module m_condcode # ( parameter HIGHLEVEL = 0 )
          wire pre_cmb_aluF;
          wire wcmb_aluF;
          SB_LUT4 #(.LUT_INIT(16'hc8c8)) pre_cmb_aluF_l(.O(pre_cmb_aluF),.I3(1'b0),  .I2(FUNC3[2]),.I1(FUNC3[1]),.I0(FUNC3[0]));
-         SB_LUT4 #(.LUT_INIT(16'h40fe)) cmb_aluF_l(.O(wcmb_aluF),.I3(alu_carryout), .I2(Di[31]), .I1(QQ[31]),.I0(pre_cmb_aluF));
+         //SB_LUT4 #(.LUT_INIT(16'h40fe)) cmb_aluF_l(.O(wcmb_aluF),.I3(alu_carryout), .I2(Di[31]), .I1(QQ[31]),.I0(pre_cmb_aluF));
+         SB_LUT4 #(.LUT_INIT(16'h40fe)) cmb_aluF_l(.O(wcmb_aluF),.I3(alu_carryout), .I2(A31), .I1(QQ[31]),.I0(pre_cmb_aluF));
          SB_DFF raluF_r(.Q(raluF),.C(clk),.D(wcmb_aluF));
          SB_LUT4 #(.LUT_INIT(16'h5ac3)) is_brcond_l(.O(is_brcond),.I3(FUNC3[2]),.I2(FUNC3[0]),.I1(rzcy32),.I0(raluF));
       end

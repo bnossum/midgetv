@@ -7,11 +7,6 @@
  * At least for me, the clock of iceblink40-hx1k is not stable at startup
  * when set to run at 33 MHz. Hence I always use a 64 cycle startup timer,
  * parameter NO_CYCLECNT == 0.
- * 
- * In general, this should be enough to load an image:
- *     python ../../../apio/apio clean
- *     python ../../../apio/apio build
- *     sudo python3 ../../../iceBurn/iCEburn.py -v -ew hardware.bin 
  */
 
 /*
@@ -52,7 +47,6 @@ module top
    (
     input      CLK_I,
     input      usartRX,
-    input      ACK_I,     
     output reg led1,
     output reg led2,
     output reg led3,
@@ -96,7 +90,11 @@ module top
       led4 <= corerunning;
    end
    
-//   assign ACK_I = STB_O;
+   reg rACK_I;
+   always @(posedge CLK_I) begin
+      rACK_I <= STB_O;
+   end
+   assign ACK_I = rACK_I;
 
 
    /* The program to include is usually specified in a Makefile. It is 
@@ -160,6 +158,15 @@ module top
      
 endmodule   
       
+/* 
+ * In general, this should be enough to load an image:
+ *     python ../../../apio/apio clean
+ *     python ../../../apio/apio build
+ *     sudo python3 ../../../iceBurn/iCEburn.py -v -ew hardware.bin 
+ * 
+ * Another useful command:
+ * arachne-pnr -d 1k -P vq100 -p iceblink40-hx1k.pcf -o hardware.asc hardware.blif
+ */
 // Local Variables:
 // verilog-library-directories:("." "../../code"  )
 // verilog-library-extensions:(".v" )

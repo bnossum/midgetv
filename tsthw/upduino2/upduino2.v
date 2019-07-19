@@ -4,14 +4,6 @@
  * For licence, see LICENCE
  * -----------------------------------------------------------------------------
  * Risc-v in a iCE40UP5K.
- * 
- * In general, the fillowing should suffice for image generation and uploading:
- *     python ../../../apio/apio clean
- *     python ../../../apio/apio build
- *     sudo python ../../../apio/apio upload
- *
- * Another useful command:
- * /usr/local/bin/arachne-pnr -r -d 5k -P sg48 -o hardware.asc -p up5k.pcf hardware.blif
  */
 
 
@@ -218,6 +210,15 @@ module mytop
      
 endmodule   
       
+/* 
+ * In general, the fillowing should suffice for image generation and uploading:
+ *     python ../../../apio/apio clean
+ *     python ../../../apio/apio build
+ *     sudo python ../../../apio/apio upload
+ *
+ * Another useful command:
+ * /usr/local/bin/arachne-pnr -r -d 5k -P sg48 -o hardware.asc -p up5k.pcf hardware.blif
+ */
 // Local Variables:
 // verilog-library-directories:("." "../../code"  )
 // verilog-library-extensions:(".v" )

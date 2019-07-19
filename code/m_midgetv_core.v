@@ -1,5 +1,4 @@
 // Go through low-level implementation of:
-//     m_progressctrl
 //     m_status_and_interrupts
 //
 // Signal rename
@@ -325,6 +324,7 @@ module m_midgetv_core
    /* verilator lint_on UNUSED */
    /*AUTOWIRE*/
    // Beginning of automatic wires (for undeclared instantiated-module outputs)
+   wire                 A31;                    // From inst_alu of m_alu.v
    wire [ALUWIDTH-1:0]  B;                      // From inst_alu of m_alu.v
    wire [31:0]          Di;                     // From inst_inputmux of m_inputmux.v
    wire [31:0]          Dsram;                  // From inst_ram of m_ram.v
@@ -616,6 +616,7 @@ module m_midgetv_core
      (/*AUTOINST*/
       // Outputs
       .B                                (B[ALUWIDTH-1:0]),
+      .A31                              (A31),
       .alu_carryout                     (alu_carryout),
       .alu_tapout                       (alu_tapout),
       .alu_minstretofl                  (alu_minstretofl),
@@ -789,6 +790,7 @@ module m_midgetv_core
         .alu_carryout                   (alu_carryout),
         .FUNC3                          (FUNC3[2:0]),
         .Di                             (Di[31:0]),
+        .A31                            (A31),
         .QQ                             (QQ[31:0]),
         .rzcy32                         (rzcy32));
 
@@ -930,7 +932,8 @@ module m_midgetv_core
     */
    generate
       if ( MTIMETAP >= MTIMETAP_LOWLIM ) begin
-         m_status_and_interrupts inst_status_and_interrupts
+         m_status_and_interrupts  #(.HIGHLEVEL(HIGHLEVEL))
+         inst_status_and_interrupts
            (/*AUTOINST*/
             // Outputs
             .mrinstretip                (mrinstretip),
@@ -960,7 +963,7 @@ module m_midgetv_core
       end else begin
          
          assign qualint = 1'b0; // Smallest midgetv has no interrupts
-
+         
          // Keep verilator happy
          assign meie        = 1'b0;                   
          assign mie         = 1'b0;                    

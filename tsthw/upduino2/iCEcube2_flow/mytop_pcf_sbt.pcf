@@ -16,7 +16,7 @@
 set_io_ff usartRX -in ON
 set_io_ff usartTX -out ON
 
-###Cascading List 32
+### These are input mux LUTs, goes to INSTRUCTION ff and cascaded to luta of alu.v
 set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_0..cmb
 set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_1..cmb
 set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_2..cmb
@@ -48,5 +48,10 @@ set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_27..cmb
 set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_28..cmb
 set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_29..cmb
 set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_30..cmb
-# set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_31..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_31..cmb
 
+### Tgo to register and cascated through inverting lut to anoter register
+set_cascading inst_midgetv_core.inst_progressctrl.blka.l_cmb_bsel0
+set_cascading inst_midgetv_core.inst_progressctrl.blka.l_cmb_bsel1
+set_cascading inst_midgetv_core.inst_progressctrl.blka.l_cmb_bsel2
+set_cascading inst_midgetv_core.inst_progressctrl.blka.l_cmb_bsel3

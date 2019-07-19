@@ -27,7 +27,7 @@ set_io led3 53 -io_std SB_LVCMOS -pullup no
 set_io led4 51 -io_std SB_LVCMOS -pullup no
 set_io usartRX 60 -io_std SB_LVCMOS -pullup no
 
-###Cascading List 32
+### These are input mux LUTs, goes to INSTRUCTION ff and cascaded to luta of alu.v
 set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_0..cmb
 set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_1..cmb
 set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_2..cmb
@@ -59,4 +59,10 @@ set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_27..cmb
 set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_28..cmb
 set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_29..cmb
 set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_30..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_31..cmb
 
+# This simple project have no byte addressed output.
+# set_cascading inst_midgetv_core.inst_progressctrl.blka.l_cmb_bsel0
+# set_cascading inst_midgetv_core.inst_progressctrl.blka.l_cmb_bsel1
+# set_cascading inst_midgetv_core.inst_progressctrl.blka.l_cmb_bsel2
+# set_cascading inst_midgetv_core.inst_progressctrl.blka.l_cmb_bsel3
