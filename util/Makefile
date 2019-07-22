@@ -4,7 +4,9 @@
 # For licence, see LICENCE
 # -----------------------------------------------------------------------------
 
-TRG := ../bin/midgetv_bin2ebr ../bin/midgetv_genucode ../bin/midgetv_ucode_linepermutate ../bin/midgetv_indirectEBR ../bin/midgetv_tablefold
+TRG := ../bin/midgetv_bin2ebr ../bin/midgetv_genucode  ../bin/midgetv_indirectEBR
+
+# ../bin/midgetv_tablefold ../bin/midgetv_ucode_linepermutate
 
 all:$(TRG)
 

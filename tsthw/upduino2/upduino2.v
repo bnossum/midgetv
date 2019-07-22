@@ -26,7 +26,7 @@
 `include "../../code/m_status_and_interrupts.v"
 `include "../../code/m_ucode.v" 
 `include "../../code/m_3ebr.v"
-`include "../../bin/m_2ebr.v"
+`include "../../obj_dir/m_2ebr.v"
 `include "../../code/m_ucodepc.v"
 `include "../../code/m_progressctrl.v"
 `include "../../code/m_midgetv_core.v"

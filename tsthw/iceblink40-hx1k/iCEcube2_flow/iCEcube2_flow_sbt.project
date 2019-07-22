@@ -67,7 +67,7 @@ VHDL2008=False
 VerilogIncludeSearchPath=
 
 [tool options]
-PlacerEffortLevel=high
+PlacerEffortLevel=std
 PlacerAutoLutCascade=no
 PlacerAutoRamCascade=no
 PlacerPowerDriven=no
