@@ -6,8 +6,8 @@
  *
  * Nearly Wishbone B.4 data sheet for m_ram. The only reason I can not
  * call this a Wishbone interface is that midgetv require a read latency
- * of 1 cycle (or higher). In other words, midgetv can not support a 
- * Wishbone classical read cycle with no latency.
+ * of 1 cycle (or higher). In other words, midgetv can not support SRAM
+ * implemented as a Wishbone classical read cycle with no latency.
  * 
  * --------------------------------------------------------------------
  * Inteface type:                   SLAVE
@@ -36,6 +36,8 @@
  *     the wishbone interface of this module can not profit on RST_I in any way.
  *  o  CYC_I is not implemented. This is simply because midgetv sets 
  *     CYC_O == STB_O, so adding CYC_I does not enhance this module in any way.
+ *  o  Whishbone B.4 rule 3.55 is disregarded
+ * 
  * Please tell me if these assumptions are unresonable. 
  * 
  * The motivation to interface RAM with a Wishbone interface is to later on
@@ -48,11 +50,18 @@
  * 
  * Parameter description: SRAMADRWIDTH
  * --------------------------------
- * Legal addresswidth 
- *  |  Resources         SRAM
- *  0  0 SB_SPRAM256KA,    0 KiB no SRAM implemented,
- * 16  2 SB_SPRAM256KA    64 KiB organized as 32 * 14,
- * 17  4 SB_SPRAM256KA   128 KiB organized as 32 * 15.
+ *
+ * Tested
+ * |  SRAMADRWIDTH
+ * x  0     0 KiB SRAM No SRAM implemented
+ *    10    1 KiB SRAM (2 EBRs masquerading as SRAM)
+ *    11    2 KiB SRAM (4 EBRs masquerading as SRAM)
+ *    12    4 KiB SRAM (8 EBRs masquerading as SRAM)
+ *    13    8 KiB SRAM (16 EBRs masquerading as SRAM)
+ *    14               Not supported
+ *    15   32 KiB SRAM (1 SB_SPRAM256KA, needs additional logic)
+ * x  16   64 KiB SRAM (2 SB_SPRAM256KA)   64 KiB organized as 32 * 14,
+ *    17  128 KiB SRAM (4 SB_SPRAM256KA)  128 KiB organized as 32 * 15.
  */
 module m_ram
   # ( parameter HIGHLEVEL = 1,

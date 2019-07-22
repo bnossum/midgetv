@@ -39,7 +39,7 @@ module mytop
       IWIDTH             = 32, 
       NO_CYCLECNT        = 0, 
       MTIMETAP           = 16, 
-      HIGHLEVEL          = 1,
+      HIGHLEVEL          = 0,
       LAZY_DECODE        = 0,
       DISREGARD_WB4_3_55 = 0
       )

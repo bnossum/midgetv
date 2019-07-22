@@ -79,7 +79,7 @@ Using iCECube2 for compilation (with Lattice LSE as synthesis tool for
 low-level code, Synplify Pro for high-level code) give the following
 for the example "hello world" program:
 
-##### Lowlevel
+##### Lowlevel morse example
 FPGA/Board                          | SB_LUT4  | EBRs | SRAM | Clock  (MHz)  | Comment
 :---------------------------------- | :------- | :--- | :--- | :---------- | :-------------------------
 `ICE40HX1K-VQ100` `iceblink40-hx1k` | 247 | 4 | 0 | 62 | No `cycle(h)` or `time(h)`. No `instreth`. No interrupts, nor registers `mip`, `mie` or `mstatus`. Minimal instruction decode. Disregards rule 3.55 of Wishbone B.4.
@@ -89,14 +89,14 @@ Note that "Auto lut cascade" must be off in the placer option of
 iCEcube2. This is due to the Lattice preference files where
 "set_cascading" is used to reduce the size of the core.
 
-##### Highlevel
+##### Highlevel morse example
 FPGA/Board                          | SB_LUT4  | EBRs | SRAM | Clock  (MHz)  | Comment
 :---------------------------------- | :------- | :--- | :--- | :---------- | :-------------------------
 `ICE40HX1K-VQ100` `iceblink40-hx1k` | 444 | 4 | 0 | 70 | No `cycle(h)` or `time(h)`. No `instreth`. No interrupts, nor registers `mip`, `mie` or `mstatus`. Minimal instruction decode. Disregards rule 3.55 of Wishbone B.4.
 `ICE40UP5K-SG48I` `upduino2`        | 547 | 4 | 2 | 28 | Most options enabled.
 
 
-#### yosys/arachne-pnr, icetime
+#### yosys/arachne-pnr, icetime, lowlevel morse example
 Using Yosys 0.7+515, arachne-pnr 0.1+287+0.
 Unfortunately this give the following
 (I would have expected numbers comparable with those for iCECube2, only larger with the SB_LUTs
@@ -145,12 +145,12 @@ Note. This will be modified.
    - compile crt0.S to crt0.o (Note that this crt0 is a joke, very incomplete).
    - link to get morse.bin
    - midgetv_bin2ebr to transform morse.bin to ice40loaderprog.hv in
-     directories tsthw/iceblink40-hx1k and tsthw/upduino2
-1. Go to directory tsthw/upduino2.
+     directories hwtst/iceblink40-hx1k and hwtst/upduino2
+1. Go to directory hwtst/upduino2.
    - near the end of the wrapper toplevel
      verilog file upduino2.v are some hints on how to compile a FPGA image.
    - Alternatively, iceCube2 can be used. A suitable project is hopefully
-      available in directory tsthw/upduino2/iCEcube2_flow.
+      available in directory hwtst/upduino2/iCEcube2_flow.
 1. Upload to the upduino2 board. A similar procedure is to be followed for
    the iceblink40-hx1k board
    

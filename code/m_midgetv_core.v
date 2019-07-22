@@ -1,18 +1,3 @@
-// Signal rename
-//
-// Lockout access to EBR if executing in SRAM.
-// ------------------------------------------
-// Change location of mtimecmp,mtimecmph,mtime,mtimeh to >= 0x80000000 when SRAM is implemented.
-// When an instruction executes from SRAM, disallow any write or read unless ADR_O >= 0x40000000.
-// This protects magical constants and registers from overwrite. The only way to enter code in
-// EBR activated from the user code will be via exceptions, EBREAK or ECALL. 
-// if ( Wpc )
-//   execinSRAM <= B[31];
-// trigger_ucodebranch = (nxtSTB & execinSRAM & ~B[31] & ~B[30])
-// Note: Wpc must be changed so no write to PC happens if this would trigger_ucodebranch,
-// otherwise we can not give a precise exception (pc lost).
-// Note: When a invalid location exception occurs, we set minx 0x07f (in m_ucodepc.v).
-
 /* -----------------------------------------------------------------------------
  * Part of midgetv
  * 2019. Copyright B. Nossum.
@@ -93,6 +78,18 @@
       SRC2[4:0] --|1110 |   mtval    --|1111/                                          
       SRC1[4:0] --|1111/                                                              
                                                                                
+// TODO: 
+// Lockout access to EBR if executing in SRAM.
+// ------------------------------------------
+// When an instruction executes from SRAM, disallow any write or read unless ADR_O >= 0x40000000.
+// This protects magical constants and registers from overwrite. The only way to enter code in
+// EBR activated from the user code will be via exceptions, EBREAK or ECALL. 
+// if ( Wpc )
+//   execOutsideEBR <= B[31] | B[30];
+// trigger_ucodebranch = (nxtSTB & execOutsideEBR & ~B[31] & ~B[30])
+// Note: Wpc must be changed so no write to PC happens if this would trigger_ucodebranch,
+// otherwise we can not give a precise exception (pc lost).
+
  * ----------------------------------------------------------------------------
  * m_midgetv_core signal description
  * =================================
@@ -110,10 +107,6 @@
  * and the SEL_O[3:0] signals have meaning. I am unsure whether
  * the lack of a true byte/hword read affects the conformity to the
  * Wishbone specification.
- * 
- * Work. I need to check that I obey Wishbone B4 rule 3.55:
- * MASTER interfaces MUST be designed to operate normally when 
- * the SLAVE interface holds [ACK_I] in the asserted state.
  * 
  * input:start
  * ------------------  
@@ -150,10 +143,8 @@
  * 
  * SRAMADRWIDTH
  * ------------
- * Determines the amount of SRAM in midgetv. Legal values:
- * 0     0 KiB SRAM 
- * 16   64 KiB SRAM
- * 17  128 KiB SRAM
+ * Determines the amount of SRAM in midgetv. 
+ * Valid parameters: 0, 16, 17. See m_ram.v for details.
  * 
  * EBRADRWIDTH
  * -----------
@@ -167,35 +158,33 @@
  * ------
  * Determines the width of external input to midgetv. To be
  * compliant with Wishbone, IWIDTH should be 8, 16 or 32.
- * When interrupts are included, IWIDTH should probably
- * always be 32.
+ * When interrupts are included, IWIDTH should be 32.
  * Legal values: From 1 to 32.
  * 
  * NO_CYCLECNT
  * -----------
- * Normally midgetv support a 32-bit cycle counter (the
- * low 32 bits of mcycle). To save a very few resources,
- * it can be suppressed, If suppressed, one still have a
- * 32 bit counter, that works as a retired instruction
- * counter. 
- * Legal values: 0 or 1.
+ * 
+ * Normally midgetv support a 32-bit cycle counter (the low 32 bits of
+ * mcycle). To save a very few resources, it can be suppressed, If
+ * suppressed, one still have a 32 bit counter, that works as a
+ * retired instruction counter.  Legal values: 0 or 1.
  * 
  * MTIMETAP_LOWLIM
  * ---------------
- * A constant, but I propagate as a parameter because it is likely to be
- * changed once I know the maximum number of cycles needed to do *any*
- * CSR instruction.
+ * A constant, but I propagate as a parameter because it is likely to
+ * be changed once I know the maximum number of cycles needed to do
+ * *any* CSR instruction.
  * 
+ *  
  * MTIMETAP
  * -------
  * This is for mtime and control registers.
- * When MTIMETAP >= MTIMETAP_LOWLIM, the cycle counter 
- * give an interrupt after (1<<MTIMETAP) cycles. This interrupt 
- * is used to maintain mtime. 
+ * When MTIMETAP >= MTIMETAP_LOWLIM, the cycle counter   give an 
+ * interrupt after (1<<MTIMETAP) cycles. This interrupt is used to 
+ * maintain mtime. 
  * When MTIMETAP >= MTIMETAP_LOWLIM, we also enable interrupt 
- * support and registers mstatus,mie,mip as per the  riscv
- * specification.
- * Legal values: 0, MTIMETAP_LOWLIM-31
+ * support and registers mstatus,mie,mip as per the riscv
+ * specification.  Legal values: 0, MTIMETAP_LOWLIM-31
  * 
  * HIGHLEVEL
  * ---------
@@ -216,12 +205,12 @@
  * DISREGARD_WB4_3_55 
  * -------------------
  * 0: Obey rule 3.55 of Wishbone B.3
- * 1: Ignore rule 3.55. This should save one! lut. Not recommended.
+ * 1: Ignore rule 3.55. This should save one! LUT. Not recommended.
  * 
  * UCODEOPT
  * --------
  * 0: Use 3 EBRs for control. 
- * 1: Use 2EBRs + LUTs for control (recommended)
+ * 1: Use 2EBRs + ~20 LUTs for control (recommended)
  * 
  * program0, program1, ... programF
  * --------------------------------
@@ -256,9 +245,9 @@ module m_midgetv_core
       SRAMADRWIDTH = 0,  EBRADRWIDTH =  8, IWIDTH =  8, NO_CYCLECNT = 1, MTIMETAP =  0, HIGHLEVEL = 0, LAZY_DECODE = 1, // Minimal
 //    SRAMADRWIDTH = 16, EBRADRWIDTH =  8, IWIDTH = 32, NO_CYCLECNT = 0, MTIMETAP = 14, HIGHLEVEL = 0, LAZY_DECODE = 0, // Conventional
 //    SRAMADRWIDTH = 17, EBRADRWIDTH = 11, IWIDTH = 32, NO_CYCLECNT = 0, MTIMETAP = 14, HIGHLEVEL = 0, LAZY_DECODE = 0, // Maximal
-      ALUWIDTH = 32, // __always__ 32
+      ALUWIDTH = 32, // __Always__ 32
       DISREGARD_WB4_3_55 = 0,
-      MTIMETAP_LOWLIM = 14, /* ONLY location where this value is really to be set */
+      MTIMETAP_LOWLIM = 14, /* __Only__ location where this value is really to be set */
       UCODEOPT = 1, 
       DBGA = 0,
       parameter [4095:0] program0 = 4096'h0,

@@ -1,5 +1,5 @@
         # Principle of the internal ISR.
-        # This file is a note, not for texting and execution.
+        # This file is a note, not for testing and execution.
         # =============================================================================
 #include "midgetv.inc"
 #include "midgetv_minimal_csr.S"
