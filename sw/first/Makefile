@@ -65,14 +65,14 @@ RESULTSSRAM    := $(foreach i,$(TARGETSSRAM),$(OBJDIRSRAM)/$(i).result.txt)
 
 all: ../../obj_dir/results.txt $(BINTARGETSEBR) $(BINTARGETSSRAM) \
 	$(LSTTARGETSEBR) $(LSTTARGETSSRAM) \
-	../../tsthw/upduino2/ice40loaderprog.hv	\
-	../../tsthw/iceblink40-hx1k/ice40loaderprog.hv \
+	../../hwtst/upduino2/ice40loaderprog.hv	\
+	../../hwtst/iceblink40-hx1k/ice40loaderprog.hv \
 	$(OBJDIREBR)/iceblink40-hx1kblink.lst
 
-../../tsthw/upduino2/ice40loaderprog.hv:$(OBJDIREBR)/upduino2blink.bin
+../../hwtst/upduino2/ice40loaderprog.hv:$(OBJDIREBR)/upduino2blink.bin
 	../../bin/midgetv_bin2ebr -i $< -o $@
 
-../../tsthw/iceblink40-hx1k/ice40loaderprog.hv:$(OBJDIREBR)/iceblink40-hx1kblink.bin
+../../hwtst/iceblink40-hx1k/ice40loaderprog.hv:$(OBJDIREBR)/iceblink40-hx1kblink.bin
 	../../bin/midgetv_bin2ebr -i $< -o $@
 
 ../../obj_dir/results.txt: $(RESULTSEBR) $(RESULTSSRAM)

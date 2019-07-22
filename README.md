@@ -70,12 +70,12 @@ slower. While I still make modifications to the Verilog code, these
 numbers will slightly change, so treat them as optimistic, and indicative only.
 
 #### iCEcube2
-Using iCECube2 for compilation (with Lattice LSE as synthesis tool) give the following for the example "hello world" program:
+Using iCECube2 for compilation (with Lattice LSE as synthesis tool for low-level code, Synplify Pro for high-level code) give the following for the example "hello world" program:
 
-FPGA/Board                          | SB_LUT4  | EBRs | SRAM | Clock (MHz) | Comment
+FPGA/Board                          | SB_LUT4 lowlevel/highlevel | EBRs | SRAM | Clock lowlevel/highlevel (MHz)  | Comment
 :---------------------------------- | :------- | :--- | :--- | :---------- | :-------------------------
-`ICE40HX1K-VQ100` `iceblink40-hx1k` | 247 | 4 | 0 | 62 | No `cycle(h)` or `time(h)`. No `instreth`. No interrupts, nor registers `mip`, `mie` or `mstatus`. Minimal instruction decode. Disregards rule 3.55 of Wishbone B.4.
-`ICE40UP5K-SG48I` `upduino2`        | 379 | 4 | 2 | 28 | Most options enabled.
+`ICE40HX1K-VQ100` `iceblink40-hx1k` | 247/444 | 4 | 0 | 62/70 | No `cycle(h)` or `time(h)`. No `instreth`. No interrupts, nor registers `mip`, `mie` or `mstatus`. Minimal instruction decode. Disregards rule 3.55 of Wishbone B.4.
+`ICE40UP5K-SG48I` `upduino2`        | 379/547 | 4 | 2 | 28/28 | Most options enabled.
 
 Note that "Auto lut cascade" must be off in the placer option of
 iCEcube2. This is due to the Lattice preference files where
@@ -87,11 +87,12 @@ Unfortunately this give the following
 (I would have expected numbers comparable with those for iCECube2, only larger with the SB_LUTs
 I save with lut_cascade):
 
-FPGA/Board                          | SB_LUT4  | EBRs | SRAM | Clock (MHz) | Comment
+FPGA/Board                          | SB_LUT4 lowlevel/highlevel  | EBRs | SRAM | Clock lowlevel (MHz) | Comment
 :---------------------------------- | :------- | :--- | :--- | :---------- | :-------------------------
-`ICE40HX1K-VQ100` `iceblink40-hx1k` | 354      |  4   |  0   | 60 | 76 LUTS larger than expected
-`ICE40UP5K-SG48I` `upduino2`        | 466      |  4   |  2   | 25 | 51 LUTS larger than expected
+`ICE40HX1K-VQ100` `iceblink40-hx1k` | 354/381  |  4   |  0   | 60 | 76 LUTS larger than expected (for lowlevel code)
+`ICE40UP5K-SG48I` `upduino2`        | 466/542  |  4   |  2   | 25 | 51 LUTS larger than expected (for lowlevel code)
 
+On the other hand yosys do *better* than Synplify Pro on the (ahem..) highlevel code.
 
 ### Incomplete build instructions
 

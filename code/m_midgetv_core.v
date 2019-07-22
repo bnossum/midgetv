@@ -1,8 +1,4 @@
-// Go through low-level implementation of:
-//     m_status_and_interrupts
-//
 // Signal rename
-// Reintroduce 2 ROM control.
 //
 // Lockout access to EBR if executing in SRAM.
 // ------------------------------------------

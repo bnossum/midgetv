@@ -10,13 +10,13 @@ OBJ = ../../../obj_dir
 CFLAGS = -mabi=ilp32 -march=rv32i -nodefaultlibs -nostartfiles -Os -Wall \
 	-DNOCSR=1 -DonlyEBR=1 -DSP_INITVAL=0x400 
 
-all: $(BIN)/simmorse ../../../tsthw/upduino2/ice40loaderprog.hv \
-	../../../tsthw/iceblink40-hx1k/ice40loaderprog.hv
+all: $(BIN)/simmorse ../../../hwtst/upduino2/ice40loaderprog.hv \
+	../../../hwtst/iceblink40-hx1k/ice40loaderprog.hv
 
-../../../tsthw/iceblink40-hx1k/ice40loaderprog.hv: ../../../tsthw/upduino2/ice40loaderprog.hv
-	cp $< $@
+../../../hwtst/iceblink40-hx1k/ice40loaderprog.hv: $(OBJ)/morse.bin 
+	../../../bin/midgetv_bin2ebr -i $< -o $@
 
-../../../tsthw/upduino2/ice40loaderprog.hv: $(OBJ)/morse.bin 
+../../../hwtst/upduino2/ice40loaderprog.hv: $(OBJ)/morse.bin 
 	../../../bin/midgetv_bin2ebr -i $< -o $@
 
 $(BIN)/simmorse:morse.c
@@ -48,5 +48,5 @@ clean:
 	rm -f $(BIN)/simmorse \
 	$(OBJ)/crt0.o \
 	$(OBJ)/morse.bin \
-	../../../tsthw/upduino2/ice40loaderprog.hv \
-	../../../tsthw/iceblink40-hx1k/ice40loaderprog.hv
+	../../../hwtst/upduino2/ice40loaderprog.hv \
+	../../../hwtst/iceblink40-hx1k/ice40loaderprog.hv
