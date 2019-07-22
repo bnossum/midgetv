@@ -1,5 +1,10 @@
-/*
- * A small library for binary vectors
+/* -----------------------------------------------------------------------------
+ * Part of midgetv
+ * 2019. Copyright B. Nossum.
+ * For licence, see LICENCE
+ * -----------------------------------------------------------------------------
+ *
+ * Quick and dirty routines to handle binary vectors
  */
 #include "bnvector.h"
 

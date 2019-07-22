@@ -1,9 +1,16 @@
-# Utilities
+## Utilities
 
-## midgetv_genucode
-The microcode of `midgetv` must be compiled from a C header form to `localparam` Verilog.
+### midgetv_genucode
 
-## midgetv_bin2ebr
+The microcode of `midgetv` is compiled from a C header form to
+`localparam` Verilog suitable to be stored in 3 EBRs (see m_3ebr.v).
+
+### midgetv_indirectEBR
+
+The microcode of `modgetv` is compiled from a C header form to a
+Verilog module that uses 2 EBRs.
+
+### midgetv_bin2ebr
 
 The program running in `midgetv` at power-on must be in initialized
 EBR. These EBRs also holds constants used by `midgetv`. The seqence is

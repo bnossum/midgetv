@@ -1,4 +1,4 @@
-# midgetv code
+## midgetv code
 
 Here is:
 - Verilog code of midgetv

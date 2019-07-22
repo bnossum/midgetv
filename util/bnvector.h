@@ -1,3 +1,11 @@
+/* -----------------------------------------------------------------------------
+ * Part of midgetv
+ * 2019. Copyright B. Nossum.
+ * For licence, see LICENCE
+ * -----------------------------------------------------------------------------
+ *
+ * Quick and dirty routines to handle binary vectors
+ */
 #ifndef _bnvector_h
 #define _bnvector_h 1
 #include <stdint.h>
