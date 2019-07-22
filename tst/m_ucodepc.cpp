@@ -21,17 +21,22 @@
 #define fname STR(nakedfname)
 
 uint8_t reachability[256] = {
-#define X(label,txt,def,reachability,mask,instr) reachability,
+#define X(label,txt,def,reachability,mask,instr,hitnr) reachability,
 #include fname
 };
 
 uint32_t mask[256] = {
-#define X(label,txt,def,reachability,mask,instr) mask,
+#define X(label,txt,def,reachability,mask,instr,hitnr) mask,
+#include fname
+};
+
+uint32_t facit_hit[256] = {
+#define X(label,txt,def,reachability,mask,instr,hitnr) hitnr,
 #include fname
 };
         
 uint32_t instr[256] = {
-#define X(label,txt,def,reachability,mask,instr) instr,
+#define X(label,txt,def,reachability,mask,instr,hitnr) instr,
 #include fname
 };
         
@@ -100,6 +105,13 @@ int main(int argc, char **argv) {
                 } else if ( reachability[minx] == 1 ) {
                         /* Note.
                            Test is lax for ECALL. ECALL strict decoding must be performed elsewhere
+                           We have one common entry point for 
+                               ECALL
+                               EBREAK  
+                               ECALL
+                               (U/S/M)RET
+                               WFI
+                               other unsupported in same minor encoding
                         */
                         /* Change to 
                            if ( (instr[minx] & mask[minx]) != (INSTR & localmask) ) {
@@ -137,8 +149,8 @@ int main(int argc, char **argv) {
                 case 1 :
                         /* This entry in the table is the entrypoint of an instruction to run
                          */
-                        if ( hit[i] == 0 ) {
-                                printf( "0x%.2x should be hit, but is not\n", i );
+                        if ( hit[i] != facit_hit[i] ) {
+                                printf( "0x%.2x should be hit 0x%x times, but is hit 0x%x times\n", i, facit_hit[i], hit[i] );
                         }
                         break;
                 case 2 :
@@ -154,7 +166,7 @@ int main(int argc, char **argv) {
                 case 3 :
                         /* There are a few locations that is accessed by other means than 
                          * an instruction sequence or as an entry point for legal or illegal OpCodes.
-                         * This is the case for NMI or qualified interrupt. Not part of this test
+                         * This is the case for NMI or qualified interrupt. Not part of this test.
                          */
                         break;
                 default :

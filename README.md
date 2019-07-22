@@ -72,8 +72,8 @@ Using iCECube2 for compilation (with Lattice LSE as synthesis tool) give the fol
 
 FPGA/Board                          | SB_LUT4  | EBRs | SRAM | Clock (MHz) | Comment
 :---------------------------------- | :------- | :--- | :--- | :---------- | :-------------------------
-`ICE40HX1K-VQ100` `iceblink40-hx1k` | 228 | 5 | 0 | 69 | No `cycle(h)` or `time(h)`. No `instreth`. No interrupts, nor registers `mip`, `mie` or `mstatus`. Minimal instruction decode
-`ICE40UP5K-SG48I` `upduino2`        | 356 | 5 | 2 | 29 | `cycle(h)`, `time(h)`, `instret(h)`, interrupts and registers `mip`, `mie` and `mstatus`. Full instruction decode
+`ICE40HX1K-VQ100` `iceblink40-hx1k` | 228 | 5 | 0 | 69 | No `cycle(h)` or `time(h)`. No `instreth`. No interrupts, nor registers `mip`, `mie` or `mstatus`. Minimal instruction decode. Disregards rule 3.55 of Wishbone B.4.
+`ICE40UP5K-SG48I` `upduino2`        | 356 | 5 | 2 | 29 | `cycle(h)`, `time(h)`, `instret(h)`, interrupts and registers `mip`, `mie` and `mstatus`. Full instruction decode.
 
 Note that "Auto lut cascade" must be off in the placer option of
 iCEcube2. This is due to the Lattice preference files where

@@ -109,7 +109,7 @@ module m_ucodepc
    assign dinx[4:2] = INSTR[6:4];
    
    /* assign dinx[7:5] = INSTR[14:12]; Need some more space, so index sligthly more elaborate */
-   assign dinx[6:5] = INSTR[13:12];
+   assign dinx[5] = INSTR[12];
    /* Candidates to compress:
     * INSTR[6:0]
     * 6543210
@@ -118,9 +118,9 @@ module m_ucodepc
     * 0010111 auipc
     * 1101111jal
     */
-   assign dinx[7]   = INSTR[14] & (INSTR[4:2] != 3'b101);
-   /* This frees 8 instances of lui and 4 instances of auipc for the cost of 1 LUT */
-   
+   assign dinx[7]   = INSTR[14] & (INSTR[4:2] != 3'b101) & (INSTR[5:2] != 4'b1011);
+   assign dinx[6]   = INSTR[13] & (INSTR[4:2] != 3'b101);
+
    generate
       if ( LAZY_DECODE != 0 ) begin
          // =======================================================
@@ -281,6 +281,6 @@ module m_ucodepc
    // assign minx[1]   = corerunning & (usedinx_or_RST_I ? ( (dinx[1] | illegal_or_qualint_AND_corerunning) & ~RST_I)     : rinx[1]);
    // assign minx[0]   = corerunning & (~nobuserror | (usedinx_or_RST_I ? (illegal_or_qualint_or_RST_I_AND_corerunning ? qualint_or_RST_I : dinx[0]) : (maybranch ? takebranch : rinx[0])));
    
-   assign ucodepc_killwarnings = INSTR[31] | &INSTR[29:15] | &INSTR[11:7] | &B;
+   assign ucodepc_killwarnings = INSTR[31] | &INSTR[29:15] | &INSTR[11:7] | &B | INSTR[1];
    
 endmodule

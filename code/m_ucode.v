@@ -8,7 +8,7 @@
  * 
  */
 module m_ucode
-  # ( parameter UCODEOPT = 0 )
+  # ( parameter UCODEOPT = 1 )
    (
     input        clk,
     input [7:0]  minx,

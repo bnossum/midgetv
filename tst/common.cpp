@@ -713,11 +713,11 @@ int p_interruptinfo( int lnr, int interruptinfo ) {
 void common_simprintf( INFOCHUNK * const p, uint32_t cy) {
         static int lnr;        
         const char *ucodetxt[256] = {
-#define X(label,txt,val,reachability,mask,instr) txt,
+#define X(label,txt,val,reachability,mask,instr,hitnr) txt,
 #include "../code/ucode.h"
         };
         const char *ucodelabeltxt[256] = {
-#define X(label,txt,val,reachability,mask,instr) STR(label),
+#define X(label,txt,val,reachability,mask,instr,hitnr) STR(label),
 #include "../code/ucode.h"
         };
                 
