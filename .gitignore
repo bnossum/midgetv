@@ -8,6 +8,7 @@ bin/m_ucodepc.bin
 bin/m_alu.bin
 bin/simmorse
 bin/midgetv_indirectEBR
+bin/m_2ebr
 
 tsthw/iceblink40-hx1k/.sconsign.dblite
 tsthw/iceblink40-hx1k/hardware.asc
