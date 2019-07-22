@@ -72,8 +72,8 @@ Using iCECube2 for compilation (with Lattice LSE as synthesis tool) give the fol
 
 FPGA/Board                          | SB_LUT4  | EBRs | SRAM | Clock (MHz) | Comment
 :---------------------------------- | :------- | :--- | :--- | :---------- | :-------------------------
-`ICE40HX1K-VQ100` `iceblink40-hx1k` | 228 | 5 | 0 | 69 | No `cycle(h)` or `time(h)`. No `instreth`. No interrupts, nor registers `mip`, `mie` or `mstatus`. Minimal instruction decode. Disregards rule 3.55 of Wishbone B.4.
-`ICE40UP5K-SG48I` `upduino2`        | 356 | 5 | 2 | 29 | `cycle(h)`, `time(h)`, `instret(h)`, interrupts and registers `mip`, `mie` and `mstatus`. Full instruction decode.
+`ICE40HX1K-VQ100` `iceblink40-hx1k` | 247 | 4 | 0 | 62 | No `cycle(h)` or `time(h)`. No `instreth`. No interrupts, nor registers `mip`, `mie` or `mstatus`. Minimal instruction decode. Disregards rule 3.55 of Wishbone B.4.
+`ICE40UP5K-SG48I` `upduino2`        | 379 | 4 | 2 | 28 | Most options enabled.
 
 Note that "Auto lut cascade" must be off in the placer option of
 iCEcube2. This is due to the Lattice preference files where
@@ -147,8 +147,8 @@ Note. This will be modified.
 
 ## Todo
 
-- Cleanup on code, with some optimized code to reinsert
 - Verification on startup conditions must be tighter
+- Cleanup on code
 - Write and test exhaustive CSR code, just now only a minimum exists
 - Better documentation
 - A number of test programs on modules will be added
@@ -156,5 +156,5 @@ Note. This will be modified.
 - Test on external interrupts
 - Test on nested interrupts
 - Better linker scripts
-
+- Proper `crt0.S`
 
