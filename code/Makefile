@@ -8,12 +8,13 @@
 #
 
 GEN_CODE_DIR := ../bin
+OBJ_DIR := ../obj_dir
 
 TRG := $(GEN_CODE_DIR)/ucodeinitval.hv ../obj_dir/m_2ebr.v
 
 all: $(TRG)
 
-../obj_dir/m_2ebr.v:../bin/midgetv_indirectEBR ../code/ucode.h
+$(OBJ_DIR)/m_2ebr.v:../bin/midgetv_indirectEBR ../code/ucode.h
 	../bin/midgetv_indirectEBR > $@
 # 
 #
@@ -34,6 +35,11 @@ $(GEN_CODE_DIR)/ucodeinitval.hv: | $(GEN_CODE_DIR)
 
 $(GEN_CODE_DIR):
 	mkdir -p $(GEN_CODE_DIR)
+
+$(OBJ_DIR)/m_2ebr.v: | $(OBJ_DIR)
+
+$(OBJ_DIR):
+	mkdir -p $(OBJ_DIR)
 
 clean:
 	rm $(TRG)
