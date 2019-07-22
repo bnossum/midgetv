@@ -21,8 +21,8 @@ Midgetv trades speed for size. Each RISCV instruction uses between 4
 clock cycles (for ADDI) and around 40 clock cycles (for shifts of a
 register by 31). Average number of clocks per instruction (CPI) seems to be
 around 10. Unaligned word/hword load/store instructions must be performed in
-software and is really slow. CSR instructions are implemented partly
-in microcode, but mostly in software; slow! Interrupt response is also slow. 
+software and is really slow. CSR instructions are decoded 
+in microcode, but executed by emulation software, also slow. Interrupt response is also slow. 
 The privilege mode of midgetv is always *machine-mode*.
 
 ## Overall goals and results
