@@ -1,4 +1,4 @@
-# midgetv
+## midgetv
 
 RISC-V controller with Wishbone interface specifically for Lattice
 iCE40 FPGAs. Midgetv is a non-pipelined, multi-cycle, microcoded design. As a
@@ -25,18 +25,18 @@ software and is really slow. CSR instructions are decoded
 in microcode, but executed by emulation software, also slow. Interrupt response is also slow. 
 The privilege mode of midgetv is always *machine-mode*.
 
-## Overall goals and results
+### Overall goals and results
 
 Goal          | Comment |
 ------------- | ------- |
 < 400 SB_LUTS, 4 EBRs | Size varies with included features and toolchains. |
 Easy interconnect     | External modules accessed using Wishbone. |
 Full compliance with RV32I as per riscv-spec-v2.2.pdf | Options allow a smaller core, but then breaks full compliance. |
-Full compliance with riscv-privileged-v1.10.pdf | It is unlikely anyone will need full compliance here, but as a reference I will endeavor to construct this. A current implementation includes just those registers needed to pass the RISC-V rv32i compliance tests |
+Full compliance with riscv-privileged-v1.10.pdf | It is unlikely anyone will need full compliance here, but as a reference I will endeavour to construct this. A current implementation includes just those registers needed to pass the RISC-V rv32i compliance tests |
 Support of "C" standard extension | Not started. If implemented the size will be considerably larger |
 Support of "M" standard extension for iCE UltraPlus | Not started. If implemented the size will be considerably larger |
 
-## Requirements
+### Requirements
 
 I try not to tie-in this code to any particular tools, but there are
 certain dependencies. To compile the code with least effort you need:
@@ -53,7 +53,7 @@ certain dependencies. To compile the code with least effort you need:
 
 All my work is done under Linux.
   
-## Status 
+### Status 
 - Passes internal instruction testing program in simulation
 - Passes the RISC-V rv32i compliance tests in simulation
 - A C-program ("hello world" in morse) is compiled to
@@ -61,13 +61,13 @@ All my work is done under Linux.
 - The same program is compiled to iCE40UP5K FPGAs and programmed to
   the upduino2 development board
 
-## Results
+### Results
 
 NB. Real-world usage of midgetv will certainly be larger, and
 slower. While I still make modifications to the Verilog code, these
 numbers will slightly change, so treat them as optimistic, and indicative only.
 
-### iCEcube2
+#### iCEcube2
 Using iCECube2 for compilation (with Lattice LSE as synthesis tool) give the following for the example "hello world" program:
 
 FPGA/Board                          | SB_LUT4  | EBRs | SRAM | Clock (MHz) | Comment
@@ -79,7 +79,7 @@ Note that "Auto lut cascade" must be off in the placer option of
 iCEcube2. This is due to the Lattice preference files where
 "set_cascading" is used to reduce the size of the core.
 
-### yosys/arachne-pnr, icetime
+#### yosys/arachne-pnr, icetime
 Using Yosys 0.7+515, arachne-pnr 0.1+287+0.
 Unfortunately this give the following
 (I would have expected numbers comparable with those for iCECube2, only larger with the SB_LUTs
@@ -87,31 +87,31 @@ I save with lut_cascade):
 
 FPGA/Board                          | SB_LUT4  | EBRs | SRAM | Clock (MHz) | Comment
 :---------------------------------- | :------- | :--- | :--- | :---------- | :-------------------------
-`ICE40HX1K-VQ100` `iceblink40-hx1k` | 335      |  5   |  0   | 58 | 75 LUTS larger than expected
-`ICE40UP5K-SG48I` `upduino2`        | 445      |  5   |  2   | 23 | 53 LUTS larger than expected
+`ICE40HX1K-VQ100` `iceblink40-hx1k` | 354      |  4   |  0   | 60 | 76 LUTS larger than expected
+`ICE40UP5K-SG48I` `upduino2`        | 466      |  4   |  2   | 25 | 51 LUTS larger than expected
 
 
-## Incomplete build instructions
+### Incomplete build instructions
 
-### 1: Utilities
+#### 1: Utilities
 "make" in directory util to build a few utilities
 
-### 2: Part of Verilog code
+#### 2: Part of Verilog code
 "make" in directory code to generate some verilog include files.
 
-### 3: Simulators
+#### 3: Simulators
 "make" in directory tst to compile simulators
  - m_ice40sim_SRAM.bin and
  - m_ice40sim_EBRonly.bin
 
 
-### Basic verification of instructions
+#### Basic verification of instructions
 1. "make" in directory sw/first to compile a bunch of small test
    assembler programs (riscv instructions) to binary images, then
    simulate using simulators made in step 3.
 2. "cat ../../obj_dir/results.txt" to see how simulation went.
 
-### Basic verification of instructions as per riscv conformance testing
+#### Basic verification of instructions as per riscv conformance testing
 1. "make" in directory sw/second to compile a bunch of small test
    assembler programs (stubs around included compliance program code).
    Note that the compliance tests is a dependent project, but I do
@@ -120,7 +120,7 @@ FPGA/Board                          | SB_LUT4  | EBRs | SRAM | Clock (MHz) | Com
 2. "./runall" to simulate the programs compiled in step 1 (takes some time).
 3. "./compareall" to compare simulated output with reference output.
 
-### Compilation of the "morse" C-program to a development board
+#### Compilation of the "morse" C-program to a development board
 Note. This will be modified.
 1. "make" in directory sw/hwexamples/morse to:
    - compile morse.c to morse.o
@@ -137,7 +137,7 @@ Note. This will be modified.
    the iceblink40-hx1k board
    
 
-## Semantic Versioning API specification
+### Semantic Versioning API specification
 1. Input and Output signals to m_midgetv_core.v are parts of the API.
    See module m_midgetv_core in m_midgetv_core.v
 2. The memory map of midgetv is part of the API. See midgetv.inc in `sw/inc`
@@ -145,7 +145,7 @@ Note. This will be modified.
    utility `midgetv_bin2ebr` is part of the API.
 
 
-## Todo
+### Todo
 
 - Verification on startup conditions must be tighter
 - Cleanup on code
