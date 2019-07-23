@@ -22,15 +22,15 @@ Midgetv trades speed for size:
   - Usable: ~400 SB_LUT4s, 2 EBR, 2 SRAMs
   - Largest (so far): With absolutely all options enabled the core need ~422 SB_LUT4s, 18 EBRs and 4 SRAMs.
   - Typical clock frequencies (worst case conditions):
-    - ICE40HX1L: 54 MHz
+    - ICE40HX1K: 57 MHz
     - ICE40UP5K: 24 MHz
 
-Each RISCV instruction use between 4 clock
-cycles and about 40 clock cycles (for shifts of a register
-by 31). Average number of clocks per instruction (CPI) is
-~9. Unaligned word/hword load/store instructions must be performed in
-software (something like [this](sw/first/t160.S)). CSR instructions are 
-decoded in microcode, but executed by [emulation  software](sw/inc/midgetv_minimal_csr.S).
+Each RISCV instruction use between 4 clock cycles and about 40 clock
+cycles (for shifts of a register by 31). Average number of clocks per
+instruction (CPI) is ~9. Unaligned word/hword load/store instructions
+must be performed in software (something like
+[this](sw/first/t160.S)). CSR instructions are decoded in microcode,
+but executed by [emulation software](sw/inc/midgetv_minimal_csr.S).
 The privilege mode of midgetv is always *machine-mode*.
 
 ### Overall goals 
@@ -113,8 +113,8 @@ Metrics for lowlevel code variant only:
 
 FPGA/Board                          | SB_LUT4   | EBRs | SRAM | Clock (MHz) | Comment
 :---------------------------------- | :------- | :--- | :--- | :---------- | :-------------------------
-`ICE40HX1K-VQ100` `iceblink40-hx1k` | 354  |  4   |  0   | 60 | 76 LUTS larger than expected
-`ICE40UP5K-SG48I` `upduino2`        | 466  |  4   |  2   | 25 | 51 LUTS larger than expected
+`ICE40HX1K-VQ100` `iceblink40-hx1k` | 354  |  4   |  0   | 60 | 76 SB_LUTS larger than expected
+`ICE40UP5K-SG48I` `upduino2`        | 466  |  4   |  2   | 25 | 51 SB_LUTS larger than expected
 
 
 ### Incomplete build instructions
