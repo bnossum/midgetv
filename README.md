@@ -22,9 +22,9 @@ Midgetv trades speed for size. The smallest toy implementation require
 cycles (for ADDI) and about 40 clock cycles (for shifts of a register
 by 31). Average number of clocks per instruction (CPI) is
 ~10. Unaligned word/hword load/store instructions must be performed in
-software. CSR instructions are decoded in microcode, but executed by
-emulation software. The privilege mode of midgetv is always
-*machine-mode*.
+software (something like [this](sw/first/t160.S)). CSR instructions are 
+decoded in microcode, but executed by [emulation  software](sw/inc/midgetv_minimal_csr.S).
+The privilege mode of midgetv is always *machine-mode*.
 
 ### Overall goals 
  -  [x] Targetable to all ICE40 devices that have EBR
