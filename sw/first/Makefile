@@ -41,7 +41,7 @@ TARGETSSRAM := t101 t102 t103 t104 t105 t106 t107 t108 t109 \
 OBJDIREBR := ../../obj_dir/first
 OBJDIRSRAM := ../../obj_dir/sfirst
 
-#.SECONDARY:
+# .SECONDARY:
 
 #
 # Midget with no SRAM, 8k EBR, etc.
@@ -112,10 +112,10 @@ $(OBJDIRSRAM)/%.out : $(OBJDIRSRAM)/%.o
 
 # The binary image is simulated
 $(OBJDIREBR)/%.result.txt: $(OBJDIREBR)/%.bin
-	$(MIDGETVICE40EBR) -c 0x1000 -s -l $@ -i $<
+	$(MIDGETVICE40EBR) -c 0x1000  -s -l $@ -i $<
 
 $(OBJDIRSRAM)/%.result.txt: $(OBJDIRSRAM)/%.bin
-	$(MIDGETVICE40SRAM) -c 0x2000 -s -l $@ -i $<
+	$(MIDGETVICE40SRAM) -c 0x2000 -s  -l $@ -i $<
 
 
 $(BINTARGETSEBR): | $(OBJDIREBR)

@@ -1,5 +1,4 @@
-        # Handle for misaligned lw.
-        # Each unaligned access costs around 270 extra clock cycles
+        # Simplified example handle for misaligned lw/lh/lhu.
         # =============================================================================
 #include "midgetv.inc"
 #define NoCSR_exception 0
@@ -7,6 +6,7 @@
 
         .globl _start
         # =============================================================================
+Alignment_mepc: .word   0
 trap_x0:        .word   0
 trap_x1:        .word   0
 trap_x2:        .word   0
@@ -19,13 +19,20 @@ StartTrap:
         sw      x3,%lo(trap_x3)(x0)
 
         lw      x1,%lo(__mcause)(x0)
-        addi    x1,x1,-4
-        bnez    x1,UncoveredTrap
+        li      x2,4
+        bne     x1,x2,UncoveredTrap
 
-        // Read value we want using two consequtive lw accesses
+        /* Read value we want using two consequtive lw accesses
+         * But before we do that, we should stack the interrupt
+         * status, because we may get a buserror if we just fall
+         * out of an IO region. Presently I do not do this, this
+         * example is large enough as it is. But I must stack mepc
+        */
+        lw      x1,%lo(__mepc)(x0)
+        sw      x1,%lo(Alignment_mepc)(x0)
         lw      x1,%lo(__mtval)(x0)     // Unaligned address
         andi    x2,x1,0xfffffffc        // Aligned
-        lw      x3,4(x2)                // Need 8, 16, or 24 bits of this
+        lw      x3,4(x2)                // Need 8, 16, or 24 bits of this -- 
         lw      x2,0(x2)                // Need 8, 16, or 24 bits of this
         andi    x1,x1,3                 // 1    (r4<<24) | (r3>>8) 
         slli    x1,x1,3                 // 2    (r4<<16) | (r3>>16)
@@ -34,7 +41,8 @@ StartTrap:
         addi    x1,x1,32
         sll     x3,x3,x1
         or      x3,x3,x2                // Value in x3
-
+        lw      x1,%lo(Alignment_mepc)(x0)
+        sw      x1,%lo(__mepc)(x0)
         // One of:
         // lh   ...001xxxxx0000011       .001xxxx
         // lw   ...010xxxxx0000011       .010xxxx
@@ -63,6 +71,7 @@ trap_unaligned_lw:
 NotStacked:     
         sw      x3,0(x1)                // Store to destination register
 
+IgnoreLoadAccesFault:
         // Modify return address
         lw      x1,%lo(__mepc)(x0)
         addi    x1,x1,4
@@ -75,9 +84,13 @@ NotStacked:
         mret
 
 UncoveredTrap:
+#ifndef onlyEBR
+        // Ignore Load Access Fault
+        li      x2,5
+        beq     x1,x2,IgnoreLoadAccesFault
+#endif        
         simdump
         simerr  32
-        
         
 #ifndef onlyEBR
         .section .text
@@ -94,12 +107,15 @@ UncoveredTrap:
         
         
 _start:
-        la      x1,StartTrap
+        la      x1,StartTrap            // Set up the exception handle
         sw      x1,%lo(__mtvec)(x0)
         la      x1,A_33221100
         
+        // Check unaligned lw
         lw      x16,1(x1)
         li      x3,0x44332211
+        li      x8,SLOWREGADR
+        sw      x3,0(x8)                // For a test at the end
         bne     x16,x3,1b
 
         lw      x14,2(x1)
@@ -110,6 +126,7 @@ _start:
         li      x4,0x66554433
         bne     x3,x4,3b
 
+        // Check unaligned lhu
         lhu     x7,1(x1)
         li      x6,0x00002211
         bne     x6,x7,4b
@@ -118,6 +135,7 @@ _start:
         li      x2,0x00004433
         bne     x4,x2,5b
 
+        // Check unaligned lh
         lh      x3,1(x1)
         li      x6,0x00002211
         bne     x6,x3,6b
@@ -134,6 +152,13 @@ _start:
         li      x24,0xffffaa99
         bne     x24,x23,9b
 
+#ifndef onlyEBR
+        // Where we have cyclecounter, and subsequently can find a bus error,
+        // fall off the edge of an input operation due to alignment fault.
+        // Here we first trigger an alignment fault. In the exception handle
+        // we will then subsequently get a bus error.
+        lw      x25,1(x8)
+#endif        
         simend
 
         .section .data

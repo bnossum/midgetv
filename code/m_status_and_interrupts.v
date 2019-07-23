@@ -13,32 +13,29 @@
  *     support one hart). MSIP is simply a bit in the MIP register.
  * mtimecmph/mtimecmp: 
  *     Real value is in EBR 0xf8/0xfc. 
- *     Writing is triggered by write at 0x000800f8/0x000800fc
  * mtimeh/mtime is exposed as a memory-mapped machine-mode read/write register
- *     Real value is in EBR 0xe0/0xe4. Writing is triggered by write
- *     at 0x000020e0/0x000000e4
- *
+ *     Real value is in EBR 0xe0/0xe4.
  * 
- * Write adr                            Write to                               
- *   33 22222222221111111111            register           
- *   10 987654321098765432109876543210  or bit             EBR address       Side effect on write
- * 0b00 1xxxxxxxxxxxxxxx1xxxxx111000xx  register mtime     0xe0 mtime        Clears mtimeincip
- * 0b00 1xxxxxxxxxxxxxx1xxxxxx111011xx  register minstreth 0xec minstreth    Clears minstreth
- * 0b00 1xxxxxxxxxxxxx1xxxxxxx100000xx  bit mtip           0x80 __jj
- * 0b00 1xxxxxxxxxxxx1xxxxxxxx100000xx  register mstatus   0x80 __jj
- * 0b00 1xxxxxxxxxxx1xxxxxxxxx100000xx  register mie       0x80 __jj
- * 0b00 1xxxxxxxxxx1xxxxxxxxxx100000xx  register mip       0x80 __jj         Updates msip
- * 0b00 1xxxxxxxxx1xxxxxxxxxxx111110xx  register mtimecmp  0xf7 mtimecmp     Clears mtip
- * 0b00 1xxxxxxxxx1xxxxxxxxxxx111111xx  register mtimecmph 0xf7 mtimecmph    Clears mtip
+ *   Write adr
+ *   3322222222221111111111            Write to           EBR Address
+ *   10987654321098765432109876543210  register or bit    |    Reg. name    Side effect on write
+ * 0b001xxxxxxxxxxxxxxx1xxxxx111000xx  register mtime     0xe0 mtime        Clears mtimeincip
+ * 0b001xxxxxxxxxxxxxx1xxxxxx111011xx  register minstreth 0xec minstreth    Clears minstreth
+ * 0b001xxxxxxxxxxxxx1xxxxxxx100000xx  bit mtip           0x80 __jj
+ * 0b001xxxxxxxxxxxx1xxxxxxxx100000xx  register mstatus   0x80 __jj
+ * 0b001xxxxxxxxxxx1xxxxxxxxx100000xx  register mie       0x80 __jj
+ * 0b001xxxxxxxxxx1xxxxxxxxxx100000xx  register mip       0x80 __jj         Updates msip
+ * 0b001xxxxxxxxx1xxxxxxxxxxx111110xx  register mtimecmp  0xf8 mtimecmp     Clears mtip
+ * 0b001xxxxxxxxx1xxxxxxxxxxx111111xx  register mtimecmph 0xfc mtimecmph    Clears mtip
  * 
  * Read adr                            
- *   33 22222222221111111111            
- *   10 987654321098765432109876543210  Read register      
- * 0b01 100xxxxxxxxxxxxxxxxxxxxxxxxxxx  All normal input frome external port
- * 0b01 101xxxxxxxxxxxxxxxxxxxxxxxxxxx  mip
- * 0b01 110xxxxxxxxxxxxxxxxxxxxxxxxxxx  mie
- * 0b01 111xxxxxxxxxxxxxxxxxxxxxxxxxxx  mstatus
- * 0b01 0xxxxxxxxxxxxxxxxxxxxxxxxxxxxx  reserved for future extension
+ *   3322222222221111111111            
+ *   10987654321098765432109876543210  Read register      
+ * 0b010xxxxxxxxxxxxxxxxxxxxxxxxxxxxx  reserved for future extension
+ * 0b01100xxxxxxxxxxxxxxxxxxxxxxxxxxx  All normal input frome external port
+ * 0b01101xxxxxxxxxxxxxxxxxxxxxxxxxxx  mip
+ * 0b01110xxxxxxxxxxxxxxxxxxxxxxxxxxx  mie
+ * 0b01111xxxxxxxxxxxxxxxxxxxxxxxxxxx  mstatus
  * 
  * The reason for the change is that I will disallow read/write to EBR when executing in
  * SRAM. This protects the registers and constants. We may still access anything when

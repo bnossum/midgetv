@@ -33,7 +33,8 @@
         // the assemblers rightfully relies on x0 == 0. Writing directly to __pc will 
         // fail for a subtle reason, in the microcode one will then try to write and 
         // read a location in EBR in the same clock cycle. This is undefined.
-        // In all, there are 8 words that should never be written.
+        // In all, there are 7 words that should never be changed, amd one location
+        // that should never be written.
         // 
         // There are a number of locations that can be written, but usually are not,
         // for example one can directly change a register xn by writing a word to
@@ -44,24 +45,24 @@
         .option norelax //      Never
         .org 0x0 //             write
 STARTOFEBR: //                  these   // Wordaaddress   Wai   
-        .word 0   //                *   // 0x00 00000000  0x00 Register x0      
-        .word 0   //                .   // 0x04 00000100  0x01 Register x1
-        .word SP_INITVAL  //        .   // 0x04 00000100  0x01 Register x2 == sp
-                  //                .   // :::
-                  //                .   // 0x7c 01111100  0x1e Register x31
-        .org 0x80 //                .   //
-__jj:           .word 0  //         .   // 0x80 10000000  0x20 ucode register
-__rinst:        .word 0  //         .   // 0x84 10000100  0x21 32-lsb of instret counter
-__pc:           .word _start-4   // *   // 0x88 10001000  0x22 Program counter
-__mcycle:       .word 0          // .   // 0x8c 10001100  0x23 32-lsb of cycle counter
-__rNMI_IIV:     .word 0          // .   // 0x90 10010000  0x24 Must point to handlers for NMI/Internal interrupts
-cteffffff7f:    .word 0xffffff7f // *   // 0x94 10010100  0x25 For sign extension in "lb"
-cte000000ff:    .word 0x000000ff // *   // 0x98 10011000  0x26 Mask in "lb", "lbu", also for entrypoint CSR
-cte0000ffff:    .word 0x0000ffff // *   // 0x9c 10011100  0x27 Mask in "lh" and "lhu"
-cteffff7fff:    .word 0xffff7fff // *   // 0xa0 10100000  0x28 For sign extension in "lh"
-__mtvec:        .word _start     // .   // 0xa4 10100100  0x29 Should point to excption handler.
-cte00000000:    .word 0x00000000 // *   // 0xa8 10101000  0x2a ucode constant. 
-cteffffffff:    .word 0xffffffff // *   // 0xac 10101100  0x2b ucode constant.
+        .word 0   //                x   // 0x00 00000000  0x00 Register x0      
+        .word 0   //                    // 0x04 00000100  0x01 Register x1
+        .word SP_INITVAL  //            // 0x04 00000100  0x01 Register x2 == sp
+                  //                    // :::
+                  //                    // 0x7c 01111100  0x1e Register x31
+        .org 0x80 //                    //
+__jj:           .word 0  //             // 0x80 10000000  0x20 ucode register
+__rinst:        .word 0  //             // 0x84 10000100  0x21 32-lsb of instret counter
+__pc:           .word _start-4   // x   // 0x88 10001000  0x22 Program counter
+__mcycle:       .word 0          //     // 0x8c 10001100  0x23 32-lsb of cycle counter
+__rNMI_IIV:     .word 0          //     // 0x90 10010000  0x24 Must point to handlers for NMI/Internal interrupts
+cteffffff7f:    .word 0xffffff7f // x   // 0x94 10010100  0x25 For sign extension in "lb"
+cte000000ff:    .word 0x000000ff // x   // 0x98 10011000  0x26 Mask in "lb", "lbu", also for entrypoint CSR
+cte0000ffff:    .word 0x0000ffff // x   // 0x9c 10011100  0x27 Mask in "lh" and "lhu"
+cteffff7fff:    .word 0xffff7fff // x   // 0xa0 10100000  0x28 For sign extension in "lh"
+__mtvec:        .word _start     //     // 0xa4 10100100  0x29 Should point to excption handler.
+cte00000000:    .word 0x00000000 // x   // 0xa8 10101000  0x2a ucode constant. 
+cteffffffff:    .word 0xffffffff // x   // 0xac 10101100  0x2b ucode constant.
 __yy:           .word 0                 // 0xb0 10110000  0x2c ucode register.
 __mepc:         .word 0                 // 0xb4 10110100  0x2d For exception handling
 __mcause:       .word 0                 // 0xb8 10111000  0x2e For exception handling
@@ -76,7 +77,7 @@ _ex_rrd:        .word 4 		// 0xd8 |
 _ex_rtmp:       .word 5 		// 0xdc | 
 _mtime:         .word 0 		// 0xe0 Read/write from user code. Updated by internal interrupt
 _mtimeh:        .word 0 		// 0xe4 Read/write from user code. Updated by internal interrupt
-__freefornow_e8:.word 0                 // 0xe8 Free location
+__freefornow_e8:.word 0                 // 0xe8
 _minstreth:     .word 0 		// 0xec Read/write from user code. Updated by internal interrupt
 _mcycleh:       .word 0 		// 0xf0 Read/write from user code. Updated by internal interrupt
 __freefornow_f4:.word 0                 // 0xf4
@@ -93,7 +94,7 @@ EntryCSR:                               //0x108 Microcode branches to here when 
         
 //        .section .EBRram, "a"
         // =============================================================================
-        // Midgetv is usually implemented with some SRAM, but can be used without.
+        // Midgetv can be used without any SRAM.
         // For these very constrained implementations it should be considered to
         // remove system support for CSR instructions, and simplify or eliminate
         // interrupts.
@@ -102,7 +103,9 @@ EntryCSR:                               //0x108 Microcode branches to here when 
         // ===========
         // Coarse regions:
         // 0x3fffffff-0x00000000 EBR               00
-        // 0x7fffffff-0x40000000 IO                01
+        // 0x5fffffff-0x40000000 reserved          010
+        // 0x67ffffff-0x60000000 IO                01100
+        // 0x7fffffff-0x68000000 System registers  011bb   with bb != 2'b00
         // 0xffffffff-0x80000000 SRAM              1x
         //
         // Memory map of the start of EBR
@@ -195,7 +198,7 @@ EntryCSR:                               //0x108 Microcode branches to here when 
 
 #define __write_bit_mtip    0x20008080 // Sets mtip. Should only be used in internalISR
 
-//        // The following is mapped to EBR instead of IO for historical reasons.
+//        // The following is mapped to EBR instead of IO
 //        // I see no need to change it
 #define __write_mstatus     0x20010080  
 #define __write_mie         0x20020080 
@@ -207,14 +210,14 @@ EntryCSR:                               //0x108 Microcode branches to here when 
         // The only difference is that the muxing is implemented in m_inputmux
         // instead of being externally visible
                                          // 31        18 17           16          15 12 11   10 8 7    6 4 3    2 0          
-#define __read_mip          0x50000000   // 000000000000 mrinstretip  mtimeincip  0000  meip 000  mtip 000 msip 000  MIP     
-#define __read_mie          0x60000000   // 000000000000 mrinstrettie mtimeincie  0000  meie 000  mtie 000 msie 000  MIE     
-#define __read_mstatus      0x70000000   // 000000000000 0            0           0001  1    000  mpie 000 mie  000  MSTATUS 
+#define __read_mip          0x68000000   // 000000000000 mrinstretip  mtimeincip  0000  meip 000  mtip 000 msip 000  MIP     
+#define __read_mie          0x70000000   // 000000000000 mrinstrettie mtimeincie  0000  meie 000  mtie 000 msie 000  MIE     
+#define __read_mstatus      0x78000000   // 000000000000 0            0           0001  1    000  mpie 000 mie  000  MSTATUS 
 
         // minstreth lives in software, in EBR ram.
 #define __read_minstreth    0x000000fc
 
         // =============================================================================
         // During simulation a whishbone register is at a defined address.
-#define SLOWREGADR     0x40000004
-#define NOSUCHREG_ADR  0x40000008
+#define SLOWREGADR     0x60000004
+#define NOSUCHREG_ADR  0x60000008
