@@ -970,7 +970,7 @@
 /* 4b */Y( 0,     0 , _CSRRW_2           , 0, 0xffffffff, 0x00000000, 0          )
 /* 4c */Y( 1,     0 , _SLT_0             , 1, 0xfe00707f, 0x00002033, (1<<15)    ) // SLT
 /* 4d */Y( 0,     0 , _L4d,"q:4d", unx   , 0, 0xffffffff, 0x00000000, 0          )
-/* 4e */Y( 0,  0x07 , _eILL0b            , 2, 0xffffffff, 0x00000000, 0          )  
+/* 4e */Y( 0,  0x07 , _eILL0b            , 0, 0xffffffff, 0x00000000, 0          )  
 /* 4f */Y( 0,  0x07 , _MRET_8            , 0, 0xffffffff, 0x00000000, 0          ) 
 /* 50 */Y( 0,  0x03 , _LW_1              , 0, 0xffffffff, 0x00000000, 0          ) 
 /* 51 */Y( 0,  0x03 , _LDAF(LDAF_LW)     , 0, 0xffffffff, 0x00000000, 0          )
@@ -1106,7 +1106,7 @@
 /* d3 */Y( 0,  0x10 , _aFaultd           , 0, 0xffffffff, 0x00000000, 0          )
 /* d4 */Y( 0,     0 , _aFault_2          , 0, 0xffffffff, 0x00000000, 0          )
 /* d5 */Y( 0,     0 , _eFetch2           , 0, 0xffffffff, 0x00000000, 0          )
-/* d6 */Y( 0,  0x14 , _eILL0c            , 2, 0xffffffff, 0x00000000, 0          )  
+/* d6 */Y( 0,  0x14 , _eILL0c            , 0, 0xffffffff, 0x00000000, 0          )  
 /* d7 */Y( 0,  0x14 , _ECALL_3           , 0, 0xffffffff, 0x00000000, 0          )
 /* d8 */Y( 1,     0 , _BLTU              , 1, 0x0000707f, 0x00006063, (1<<22)    ) // BLTU
 /* d9 */Y( 1,     0 , _ILL_0(_Ld9)       , 2, 0xffffffff, 0x00000000, 0          ) // illegal
@@ -1130,7 +1130,7 @@
 /* eb */Y( 0,     0 , _LH_3              , 0, 0xffffffff, 0x00000000, 0          )
 /* ec */Y( 1,     0 , _AND_0             , 1, 0xfe00707f, 0x00007033, (1<<15)    ) // AND
 /* ed */Y( 0,     0 , _Lef,"q:ef", unx   , 0, 0xffffffff, 0x00000000, 0          )
-/* ee */Y( 0,  0x13 , _eILL0a            , 2, 0xffffffff, 0x00000000, 0          )  
+/* ee */Y( 0,  0x13 , _eILL0a            , 0, 0xffffffff, 0x00000000, 0          )  
 /* ef */Y( 0,  0x13 , _WFI_5             , 0, 0xffffffff, 0x00000000, 0          )  
 /* f0 */Y( 0,  0x15 , _LBU_2             , 0, 0xffffffff, 0x00000000, 0          )
 /* f1 */Y( 0,  0x15 , _aFaulte           , 0, 0xffffffff, 0x00000000, 0          )
