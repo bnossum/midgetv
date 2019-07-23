@@ -8,7 +8,7 @@
  * 
  */
 module m_ucode
-  # ( parameter UCODEOPT = 1 )
+  # ( parameter NO_UCODEOPT = 0 )
    (
     input        clk,
     input [7:0]  minx,
@@ -33,7 +33,7 @@ module m_ucode
    wire [47:0]          d;                      // From inst_3ebr of m_3ebr.v, ...
    // End of automatics
    generate
-      if ( UCODEOPT == 0 ) begin
+      if ( NO_UCODEOPT == 1 ) begin
          m_3ebr inst_3ebr
            (/*AUTOINST*/
             // Outputs

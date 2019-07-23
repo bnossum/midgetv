@@ -207,10 +207,10 @@
  * 0: Obey rule 3.55 of Wishbone B.3
  * 1: Ignore rule 3.55. This should save one! LUT. Not recommended.
  * 
- * UCODEOPT
+ * NO_UCODEOPT
  * --------
- * 0: Use 3 EBRs for control. 
- * 1: Use 2EBRs + ~20 LUTs for control (recommended)
+ * 0: Use 2EBRs + ~20 LUTs for control (recommended)
+ * 1: Use 3 EBRs for control. 
  * 
  * program0, program1, ... programF
  * --------------------------------
@@ -248,7 +248,7 @@ module m_midgetv_core
       ALUWIDTH = 32, // __Always__ 32
       DISREGARD_WB4_3_55 = 0,
       MTIMETAP_LOWLIM = 14, /* __Only__ location where this value is really to be set */
-      UCODEOPT = 1, 
+      NO_UCODEOPT = 0, 
       DBGA = 0,
       parameter [4095:0] program0 = 4096'h0,
       parameter [4095:0] program1 = 4096'h0,
@@ -848,7 +848,7 @@ module m_midgetv_core
       .B                                (B[31:0]),
       .nobuserror                       (nobuserror));
    
-   m_ucode #(.UCODEOPT(UCODEOPT))
+   m_ucode #(.NO_UCODEOPT(NO_UCODEOPT))
      inst_ucode
        (/*AUTOINST*/
         // Outputs
