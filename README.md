@@ -19,23 +19,28 @@ module, the interconnect of midgetv may be shown as this:
 
 Midgetv trades speed for size. The smallest toy implementation require
 < 250 SB_LUT4s and 4 EBRs. Each RISCV instruction uses between 4 clock
-cycles (for ADDI) and around 40 clock cycles (for shifts of a register
-by 31). Average number of clocks per instruction (CPI) seems to be
-around 10. Unaligned word/hword load/store instructions must be
-performed in software. CSR instructions are decoded in microcode, but
-executed by emulation software. The privilege mode of midgetv is
-always *machine-mode*.
+cycles (for ADDI) and about 40 clock cycles (for shifts of a register
+by 31). Average number of clocks per instruction (CPI) is
+~10. Unaligned word/hword load/store instructions must be performed in
+software. CSR instructions are decoded in microcode, but executed by
+emulation software. The privilege mode of midgetv is always
+*machine-mode*.
 
-### Overall goals and results
+### Overall goals 
+  - Targetable to all ICE40 devices that have EBR
+  - Support for SRAM in ICE40 devices that have SRAM
+  - Easy interconnect
+  - Complience with RV32I as per riscv-spec-v2.2.pdf
+  - Compliance with riscv-privileged-v1.10.pdf
+  - Support of "C" standard extension
+  - Support of "M" standard extension
 
-Goal          | Comment |
-------------- | ------- |
-< 400 SB_LUTS, 4 EBRs | Size varies with included features and toolchains. |
-Easy interconnect     | External modules accessed using Wishbone. |
-Full compliance with RV32I as per riscv-spec-v2.2.pdf | Options allow a smaller core, but then breaks full compliance. |
-Full compliance with riscv-privileged-v1.10.pdf | It is unlikely anyone will need full compliance here, but as a reference I will endeavour to construct this. A current implementation includes just those registers needed to pass the RISC-V rv32i compliance tests |
-Support of "C" standard extension | Not started. If implemented the size will be considerably larger |
-Support of "M" standard extension for iCE UltraPlus | Not started. If implemented the size will be considerably larger |
+### Overall results
+  - Tested on ICE40HX1K
+  - Tested on ICE40UP5K
+  - Wishbone interface
+  - Passes the RISC-V rv32i compliance tests in simulation
+ 
 
 ### Requirements
 
@@ -54,19 +59,16 @@ certain dependencies. To compile the code with least effort you need:
 
 All my work is done under Linux.
   
-### Status 
-- Passes internal instruction testing program in simulation
-- Passes the RISC-V rv32i compliance tests in simulation
-- A C-program ("hello world" in morse) is compiled to
-  iCE40HX1K and programmed to the iceblink40-hx1k board
-- The same program is compiled to iCE40UP5K FPGAs and programmed to
-  the upduino2 development board
 
-### Results
+### Some more results
 
-NB. Real-world usage of midgetv will certainly be larger, and
-slower. While I still make modifications to the Verilog code, these
-numbers will slightly change, so treat them as optimistic, and indicative only.
+A C-program ("hello world" in morse) is compiled to iCE40HX1K and
+programmed to the iceblink40-hx1k board.  The same program is compiled
+to iCE40UP5K FPGAs and programmed to the upduino2 development
+board. Some resulting sizes of the core is described below.
+Real-world usage of midgetv will certainly be larger, and
+slower. These numbers will slightly change, so treat them as slightly
+optimistic, and indicative only.
 
 Most of the code of `midgetv` is written in two versions, one
 "highlevel" version at RTL, and one "lowlevel" version where I use
@@ -114,7 +116,7 @@ FPGA/Board                          | SB_LUT4 lowlevel  | EBRs | SRAM | Clock (M
 "make" in directory util to build a few utilities
 
 #### 2: Part of Verilog code
-"make" in directory code to generate some verilog include files.
+"make" in directory code to generate some Verilog include files.
 
 #### 3: Simulators
 "make" in directory tst to compile simulators
@@ -166,8 +168,8 @@ Note. This will be modified.
 
 - Verification on startup conditions must be tighter
 - Cleanup on code
-- Write and test exhaustive CSR code, just now only a minimum exists
 - Better documentation
+- Write and test exhaustive CSR code, just now only a minimum exists
 - A number of test programs on modules will be added
 - Bootloader program
 - Test on external interrupts
