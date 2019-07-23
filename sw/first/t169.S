@@ -3,6 +3,7 @@
         # =============================================================================
 #include "midgetv.inc"
 #include "midgetv_minimal_csr.S"
+        #define MTIMETAP 17
         
         .globl _start
         # =============================================================================
@@ -22,11 +23,11 @@ InternalISR:
          * instructions, (MTIMETAP = 17) at 122 Hz. Overhead is then around
          * 100*240/0x20000 = 0.2% Acceptable.
          *
-         * The ISR should be something like this (assumes MTIMETAP = 14):
+         * The InternalISR should be something like this:
          *
-	 * void ISR( void ) {
+	 * void InternalISR( void ) {
 	 *        if ( mtimeincip && mtimeincie ) {
-	 *                if ( (_mcycle & 0xffffc000) = 0 )                 
+	 *                if ( (_mcycle & ~((1u << MTIMETAP)-1)  == 0 ) 
 	 *                        _mcyvcleh++; // overflow in mcycle
 	 *                if ( ++_mtime == 0 ) // Clears mtimeincip
 	 *                        ++_mtimeh;
@@ -40,6 +41,7 @@ InternalISR:
          *                        // priority, and we may have pending external or
          *                        // software interrupts.
 	 *        }
+         *       
 	 *        if ( minstretip ) {
 	 *                minstreth++; // Clears minstrethip
 	 *                return;
@@ -51,23 +53,26 @@ InternalISR:
          *                // It is the responsability of the trap handle
          *                // to write to the external device that give interrupts.
 	 *        }
+         *
 	 *        if ( msip && msie ) {
 	 *                mcause = 3 | 0x80000000;
 	 *                goto TrapHandle;
          *                // It is the responsability of the trap handle
          *                // to clear msip after the software interrupt is processed.
 	 *        }
+         *
 	 *        if ( mtip && mtie ) {
 	 *                mcause = 7 | 0x80000000; 
 	 *                goto TrapHandle;
          *                // It is the responsability of the trap handle
-         *                // to write ti mtimecmp, this clears mtip.
+         *                // to write to mtimecmp(h), this clears mtip.
 	 *        }
-	 *}
+	 * }
+         *
          */      
 
-        // First store working registers. Because interrupts and csr emulation
-        // is mutually exclusive, we can use the same locations.
+        // First store two working registers. Because interrupts and csr 
+        // emulation are mutually exclusive, we can use the same locations.
         sw      x1,%lo(_ex_rCSRadr)(x0)
         sw      x2,%lo(_ex_rCSRty)(x0)
         li      x1,__read_mip
@@ -83,7 +88,7 @@ InternalISR:
         bne     x2,x0,ISR_minstret      // 13
         andi    x2,x1,0xfffff800        // 14
         bne     x2,x0,ISR_meie          // 15
-        andi    x2,x1,8                 // 16
+        andi    x2,x1,0x80              // 16
         beq     x2,x0,ISR_mtip          // 17
 ISR_msip:       
         li      x1,3                                    // 18   meie
@@ -94,7 +99,7 @@ Join1:                                                  //
         // Restore registers, continue at Trap                      mtip
         lw      x2,%lo(_ex_rCSRty)(x0)                  // 22   21  20
         lw      x1,%lo(_ex_rCSRadr)(x0)                 // 23   22  21
-        ij      0,0x0a4+0,0 // From internalISR to trap // 24   23  22
+        ij      0,0x0a4+0,0                             // 24   23  22                   From internalISR to trap
 ISR_meie:
         li      x1,11                                   //      16  
         j       Join1                                   //      17  
@@ -103,45 +108,45 @@ ISR_mtip:                                               //          mtip
         j       Join1                                   //          19
         
 ISR_minstret:                                           // minstret
-        li      x1,__write_minstreth                    // 14
-        lw      x2,0(x1)                                // 15
+        li      x1,(__write_minstreth & 0xfffff000)     // 14
+        lw      x2,(__write_minstreth & 0x000007ff)(x1) // 15
         addi    x2,x2,1                                 // 16   mtimeinc
-        sw      x2,0(x1)        // Clears minstretip    // 17   shortest
+        sw      x2,(__write_minstreth & 0x000007ff)(x1) // 17   shortest                Clears minstretip
 Join2:  // Restore registers, return                    //      path    longest path
-        lw      x2,%lo(_ex_rCSRty)(x0)                  // 18   26      37
-        lw      x1,%lo(_ex_rCSRadr)(x0)                 // 19   27      38
-        mret                                            // 20   28      39
+        lw      x2,%lo(_ex_rCSRty)(x0)                  // 18   27      37
+        lw      x1,%lo(_ex_rCSRadr)(x0)                 // 19   28      38
+        mret                                            // 20   29      39
 
 ISR_mtimeinc:
         lw      x1,%lo(__mcycle)(x0)                    //      11      11
-        li      x2,0xffffc000                           //      12      12
+        li      x2,~((1<<MTIMETAP)-1)                   //      12      12
         and     x2,x2,x1                                //      13      13
-        beq     x2,x0,1f                                //      14      15
+        bne     x2,x0,1f                                //      14      15
         lw      x1,%lo(_mcycleh)(x0)                    //              16
         addi    x1,x1,1                                 //              17
         sw      x1,%lo(_mcycleh)(x0)                    //              18
 1:
-        lw      x1,%lo(_mtime)(x0)                      //      15      19
-        addi    x1,x1,1                                 //      16      20
-        sw      x1,%lo(_mtime)(x0) // Clears mtimeincip //      17      21
-        lw      x2,%lo(changeme_mtimeh)(x0)             //      18      22
-        bne     x1,x0,1f                                //      19      23
-        addi    x2,x2,1                                 //              24
-        sw      x2,%lo(changeme_mtimeh)(x0)             //              25
+        li      x2,(__write_mtime & 0xfffff000)         //      15      19
+        lw      x1,(__write_mtime & 0x00000fff)(x2)     //      16      20
+        addi    x1,x1,1                                 //      17      21
+        sw      x1,(__write_mtime & 0x00000fff)(x2)     //      18      22              Clears mtimeincip
+        lw      x2,%lo(changeme_mtimeh)(x0)             //      19      23
+        bne     x1,x0,1f                                //      20      24
+        addi    x2,x2,1                                 //              25
+        sw      x2,%lo(changeme_mtimeh)(x0)             //              26
 1:
-        sw      x3,%lo(_ex_rrs1)(x0)                    //      20      26
-        lw      x3,%lo(_mtimecmph)(x0)                  //      21      27
-        bgtu    x3,x2,PostTimerInterrupt                //      22      28
-        bne     x3,x2,end_ISR_mtimeinc                  //      23      29
-        lw      x3,%lo(_mtimecmp)(x0)                   //              30
-        bltu    x3,x1,end_ISR_mtimeinc                  //              31
-PostTimerInterrupt:             
-        li      x1,__write_bit_mtip                     //              32
-        li      x2,0x80                                 //              33
-        sw      x2,0(x1)                                //              34
+        sw      x3,%lo(_ex_rrs1)(x0)                    //      21      27
+        lw      x3,%lo(_mtimecmph)(x0)                  //      22      28
+        bgtu    x3,x2,PostTimerInterrupt                //      23      29
+        bne     x3,x2,end_ISR_mtimeinc                  //      24      30
+        lw      x3,%lo(_mtimecmp)(x0)                   //              31
+        bltu    x3,x1,end_ISR_mtimeinc                  //              32
+PostTimerInterrupt: // Data written to __write_bit_mtip is irrelevant
+        li      x1,(__write_bit_mtip & 0xfffff000)      //              33
+        sw      x0,(__write_bit_mtip & 0x00000fff)(x1)  //              34
 end_ISR_mtimeinc:       
-        lw      x3,%lo(_ex_rrs1)(x0)                    //      24      35
-        j       Join2                                   //      25      36
+        lw      x3,%lo(_ex_rrs1)(x0)                    //      25      35
+        j       Join2                                   //      26      36
         
         # =============================================================================
 #ifndef onlyEBR

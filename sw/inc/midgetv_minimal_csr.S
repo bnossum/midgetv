@@ -23,7 +23,7 @@
  *                        4       0x000007ff
  *                        8       0x00000fff
  *                        16      0x00001fff
- * 0x000020ff-0x00002000  Writing to this range clear the mtimeinc)state ff.
+ * 0x000020ff-0x00002000  Writing to this range clear the mtimeinc state ff.
  *                        We use partiall addressing decode, and should only
  *                        use write to _mtime at 0x000020b4.
  * 

@@ -22,10 +22,9 @@ Midgetv trades speed for size. The smallest toy implementation require
 cycles (for ADDI) and around 40 clock cycles (for shifts of a register
 by 31). Average number of clocks per instruction (CPI) seems to be
 around 10. Unaligned word/hword load/store instructions must be
-performed in software and is really slow. CSR instructions are decoded
-in microcode, but executed by emulation software, also slow. Interrupt
-response is also slow.  The privilege mode of midgetv is always
-*machine-mode*.
+performed in software. CSR instructions are decoded in microcode, but
+executed by emulation software. The privilege mode of midgetv is
+always *machine-mode*.
 
 ### Overall goals and results
 
@@ -103,10 +102,10 @@ Unfortunately this give the following
 I save with lut_cascade): On the other hand yosys do *better* than Synplify Pro on the (ahem..) highlevel code.
 Metrics for lowlevel code variant only:
 
-FPGA/Board                          | SB_LUT4 lowlevel/highlevel  | EBRs | SRAM | Clock lowlevel (MHz) | Comment
+FPGA/Board                          | SB_LUT4 lowlevel  | EBRs | SRAM | Clock (MHz) | Comment
 :---------------------------------- | :------- | :--- | :--- | :---------- | :-------------------------
-`ICE40HX1K-VQ100` `iceblink40-hx1k` | 354  |  4   |  0   | 60 | 76 LUTS larger than expected (for lowlevel code)
-`ICE40UP5K-SG48I` `upduino2`        | 466  |  4   |  2   | 25 | 51 LUTS larger than expected (for lowlevel code)
+`ICE40HX1K-VQ100` `iceblink40-hx1k` | 354  |  4   |  0   | 60 | 76 LUTS larger than expected
+`ICE40UP5K-SG48I` `upduino2`        | 466  |  4   |  2   | 25 | 51 LUTS larger than expected
 
 
 ### Incomplete build instructions
