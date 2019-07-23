@@ -17,13 +17,18 @@ module, the interconnect of midgetv may be shown as this:
                        |                |- dbga[31:0]
                        +----------------+
 
-Midgetv trades speed for size. The smallest toy implementation require
-~250 SB_LUT4s and 4 EBRs. With absolutely all options enabled the core need ~422 SB_LUT4s, 18 EBRs and 4 SRAMs,  
+Midgetv trades speed for size:
+  - Smallest: A toy implementation require ~250 SB_LUT4s and 4 EBRs. 
+  - Usable: ~400 SB_LUT4s, 2 EBR, 2 SRAMs
+  - Largest (so far): With absolutely all options enabled the core need ~422 SB_LUT4s, 18 EBRs and 4 SRAMs.
+  - Typical clock frequencies (worst case conditions):
+    - ICE40HX1L: 54 MHz
+    - ICE40UP5K: 24 MHz
 
-Each RISCV instruction uses between 4 clock
-cycles (for ADDI) and about 40 clock cycles (for shifts of a register
+Each RISCV instruction use between 4 clock
+cycles and about 40 clock cycles (for shifts of a register
 by 31). Average number of clocks per instruction (CPI) is
-~10. Unaligned word/hword load/store instructions must be performed in
+~9. Unaligned word/hword load/store instructions must be performed in
 software (something like [this](sw/first/t160.S)). CSR instructions are 
 decoded in microcode, but executed by [emulation  software](sw/inc/midgetv_minimal_csr.S).
 The privilege mode of midgetv is always *machine-mode*.
@@ -64,13 +69,12 @@ All my work is done under Linux.
 
 ### Hello World
 
-A C-program ("hello world" in morse) is compiled to iCE40HX1K and
-programmed to the iceblink40-hx1k board.  The same program is compiled
-to iCE40UP5K FPGAs and programmed to the upduino2 development
-board. Some resulting sizes of the core is described below.
-Real-world usage of midgetv will certainly be larger, and
-slower. These numbers will change, so treat them as slightly
-optimistic, and indicative only.
+A C-program (["hello world"](sw/hwexamples/morse/morse.c) in morse) is
+compiled to iCE40HX1K and programmed to the iceblink40-hx1k board.
+The same program is compiled to iCE40UP5K FPGAs and programmed to the
+upduino2 development board. Some resulting sizes of the core is
+described below.  These numbers will change, so treat them as
+slightly optimistic, and indicative only.
 
 Most of the code of `midgetv` is written in two versions, one
 "highlevel" version at RTL, and one "lowlevel" version where I use
@@ -78,8 +82,7 @@ those tricks I can to reduce the implementation size.
 
 #### iCEcube2
 
-Using iCECube2 for compilation (with Lattice LSE as synthesis tool for
-low-level code, Synplify Pro for high-level code) give the following
+With iCECube2 for compilation (Lattice LSE as synthesis tool), we get the following sizes and speeds 
 for the example "hello world" program:
 
 ##### Lowlevel morse example
@@ -93,6 +96,8 @@ iCEcube2. This is due to the Lattice preference files where
 "set_cascading" is used to reduce the size of the core.
 
 ##### Highlevel morse example
+With iCEcube2 for compilation (Synplify Pro as synthesis tool), we get the following:
+
 FPGA/Board                          | SB_LUT4  | EBRs | SRAM | Clock  (MHz)  
 :---------------------------------- | :------- | :--- | :--- | :----------  
 `ICE40HX1K-VQ100` `iceblink40-hx1k` | 444 | 4 | 0 | 70 
