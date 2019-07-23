@@ -92,8 +92,8 @@ FPGA/Board                          | SB_LUT4  | EBRs | SRAM | Clock  (MHz)  | C
 `ICE40UP5K-SG48I` `upduino2`        | 379 | 4 | 2 | 28 | Most options enabled.
 
 Note that "Auto lut cascade" must be off in the placer option of
-iCEcube2. This is due to the Lattice preference files where
-"set_cascading" is used to reduce the size of the core.
+iCEcube2. This is due to the [Lattice preference file](hwtst/upduino2/iCEcube2_flow/mytop_pcf_sbt.pcf)
+ where "set_cascading" is used to reduce the size of the core.
 
 ##### Highlevel morse example
 With iCEcube2 for compilation (Synplify Pro as synthesis tool), we get the following:
