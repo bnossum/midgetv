@@ -171,28 +171,24 @@ RestoreWorkingRegisters:
         ij      0,0x100,0                       // Exit. pc = CSRretadr, inCSR = 0
         
         // -------------------------------------------------------
-        // Some small parts of the code and some data
-        // is located here to save space
-        
-        // -------------------------------------------------------
         // CSRRS or CSRRSI
         // If rrs1 is zero, we should in principle not write the
         // CSR, but because all 6 CSR registers I implement are
         // idempotent I can disregard this.
         //
 DoCSRS:
-        or      rrs1,rrs1,rtmp          // 0xe0 New value for CSR = oldCSR | rs1 
-        j       Join_from_CSRS          // 0xe4
+        or      rrs1,rrs1,rtmp          // New value for CSR = oldCSR | rs1 
+        j       Join_from_CSRS          // 
 
 UnsupportedCSR:
-        li      rtmp,0                  // 0xe8
-        j       RestoreWorkingRegisters // 0xec
+        li      rtmp,0                  // 
+        j       RestoreWorkingRegisters // 
         
 mCSRADRTBL:
-        .byte 0xc0,0xb4,0xb8,0xbc       // 0xf0
-        .byte 0xc4,0xa4,0,0             // 0xf4
-        nop                             // 0xf8
-        nop                             // 0xfc
+        .byte 0xc0,0xb4,0xb8,0xbc       // 
+        .byte 0xc4,0xa4,0,0             // 
+        nop                             // 
+        nop                             // 
         
         
 
