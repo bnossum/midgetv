@@ -27,13 +27,13 @@ emulation software. The privilege mode of midgetv is always
 *machine-mode*.
 
 ### Overall goals 
-  [x] Targetable to all ICE40 devices that have EBR
-  [x] Support for SRAM in ICE40 devices that have SRAM
-  [x] Easy interconnect
-  [x] Complience with RV32I as per riscv-spec-v2.2.pdf
-  [ ] Compliance with riscv-privileged-v1.10.pdf
-  [ ] Support of "C" standard extension
-  [ ] Support of "M" standard extension
+ -  [x] Targetable to all ICE40 devices that have EBR
+ -  [x] Support for SRAM in ICE40 devices that have SRAM
+ -  [x] Easy interconnect
+ -  [x] Complience with RV32I as per riscv-spec-v2.2.pdf
+ -  [ ] Compliance with riscv-privileged-v1.10.pdf
+ -  [ ] Support of "C" standard extension
+ -  [ ] Support of "M" standard extension
 
 ### Overall results
   - Tested on ICE40HX1K
