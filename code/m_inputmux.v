@@ -113,20 +113,6 @@ module m_inputmux
          assign sysregack = 1'b0;
       end else begin         
          /* Has DAT_I and registers MIP, MIE and MSTATUS 
-          * Here I should probably do something to let midgetv work 
-          * with interrupts without the need of a 32-bit input interface.  
-          * This does not have to be very difficult, simply map to more addresses.
-          * In the case of 8-bit interface:
-          * ADR_O[29:29],ADR_O[3:2]
-          * 0000 : extDAT_I[31:0]};
-          * 0001 : undef
-          * 001x : undef
-          * 0100 : MIP[7:0]
-          * 0101 : MIP[15:8]
-          * 0110 : MIP[23:16]
-          * 0111 : MIP[31:24]
-          * 10xx : The 4 bytes of MIE
-          * 11xx : The 4 bytes of MSTATUS
           */
 
          if ( HIGHLEVEL ) begin
@@ -146,11 +132,15 @@ module m_inputmux
             reg [31:0]  defeatlattice_theio;
             
             always @(/*AS*/ADR_O or MIE or MIP or MSTATUS or extDAT_I) 
-              case ( ADR_O[29:28] )
-                2'b00 : { aaa, defeatlattice_theio} = {1'b0, extDAT_I[31:0]};
-                2'b01 : { aaa, defeatlattice_theio} = {1'b1, MIP};
-                2'b10 : { aaa, defeatlattice_theio} = {1'b1, MIE};
-                2'b11 : { aaa, defeatlattice_theio} = {1'b1, MSTATUS};
+              case ( ADR_O[29:27] )
+                3'b000 : { aaa, defeatlattice_theio} = {1'b0, extDAT_I[31:0]};
+                3'b001 : { aaa, defeatlattice_theio} = {1'b0, extDAT_I[31:0]};
+                3'b010 : { aaa, defeatlattice_theio} = {1'b0, extDAT_I[31:0]};
+                3'b011 : { aaa, defeatlattice_theio} = {1'b0, extDAT_I[31:0]};
+                3'b100 : { aaa, defeatlattice_theio} = {1'b1, MIP}; // Really free for another system reg
+                3'b101 : { aaa, defeatlattice_theio} = {1'b1, MIP};
+                3'b110 : { aaa, defeatlattice_theio} = {1'b1, MIE};
+                3'b111 : { aaa, defeatlattice_theio} = {1'b1, MSTATUS};
               endcase
             assign theio = defeatlattice_theio;
             assign sysregack = aaa & STB_O;
@@ -161,59 +151,57 @@ module m_inputmux
             // Has system register, LOWLEVEL
             // =======================================================
             
-            wire adr2928eq00;
-            SB_LUT4 #(.LUT_INIT(16'he0e0)) l_sysregack(   .O(sysregack),   .I3(1'b0), .I2(STB_O), .I1(ADR_O[29]), .I0(ADR_O[28]) ); // 
-            SB_LUT4 #(.LUT_INIT(16'h0101)) l_adr2928eq00( .O(adr2928eq00), .I3(1'b0), .I2(1'b0),  .I1(ADR_O[29]), .I0(ADR_O[28]) );
+            SB_LUT4 #(.LUT_INIT(16'he000)) l_sysregack(   .O(sysregack),   .I3(STB_O), .I2(ADR_O[29]), .I1(ADR_O[28]), .I0(ADR_O[27]) ); // 
             genvar k;
             for ( k = 0; k < 32; k = k + 1 ) begin
                if ( k == 3 ) begin
-//                  wire k3a = (~ADR_O[29] & ~ADR_O[28] & DAT_I[3] ) | (~ADR_O[29] & ADR_O[28] & msip );
-//                  wire k3b = ( ADR_O[29] & ~ADR_O[28] & msie     ) | ( ADR_O[29] & ADR_O[28] & mie  );
+//                  wire k3a = (~ADR_O[28] & ~ADR_O[27] & DAT_I[3] ) | (~ADR_O[28] & ADR_O[27] & msip );
+//                  wire k3b = ( ADR_O[28] & ~ADR_O[27] & msie     ) | ( ADR_O[28] & ADR_O[27] & mie  );
 //                  assign theio[3] = (~STB_O & Dsram[3]) | (STB_O & (k3a | k3b));
                   wire k3a,k3b;
-                  SB_LUT4 #(.LUT_INIT(16'h00ac)) l_k3a( .O(k3a), .I3(ADR_O[29]), .I2(ADR_O[28]), .I1(DAT_I[3]), .I0(msip));
-                  SB_LUT4 #(.LUT_INIT(16'hac00)) l_k3b( .O(k3b), .I3(ADR_O[29]), .I2(ADR_O[28]), .I1(msie),     .I0(mie));
+                  SB_LUT4 #(.LUT_INIT(16'h00ac)) l_k3a( .O(k3a), .I3(ADR_O[28]), .I2(ADR_O[27]), .I1(DAT_I[3]), .I0(msip));
+                  SB_LUT4 #(.LUT_INIT(16'hac00)) l_k3b( .O(k3b), .I3(ADR_O[28]), .I2(ADR_O[27]), .I1(msie),     .I0(mie));
                   SB_LUT4 #(.LUT_INIT(16'hfcaa)) l_theio3( .O(theio[3]), .I3(STB_O), .I2(k3a), .I1(k3b), .I0(Dsram[3]));                  
                end else if ( k == 7 ) begin
-//                  wire k7a = (~ADR_O[29] & ~ADR_O[28] & DAT_I[7] ) | (~ADR_O[29] & ADR_O[28] & mtip );
-//                  wire k7b = ( ADR_O[29] & ~ADR_O[28] & mtie     ) | ( ADR_O[29] & ADR_O[28] & mpie );
+//                  wire k7a = (~ADR_O[28] & ~ADR_O[27] & DAT_I[7] ) | (~ADR_O[28] & ADR_O[27] & mtip );
+//                  wire k7b = ( ADR_O[28] & ~ADR_O[27] & mtie     ) | ( ADR_O[28] & ADR_O[27] & mpie );
 //                  assign theio[7] = (~STB_O & Dsram[7]) | (STB_O & (k7a | k7b));
                   wire k7a,k7b;
-                  SB_LUT4 #(.LUT_INIT(16'h00ac)) l_k7a( .O(k7a), .I3(ADR_O[29]), .I2(ADR_O[28]), .I1(DAT_I[7]), .I0(mtip));
-                  SB_LUT4 #(.LUT_INIT(16'hac00)) l_k7b( .O(k7b), .I3(ADR_O[29]), .I2(ADR_O[28]), .I1(mtie),     .I0(mpie));
+                  SB_LUT4 #(.LUT_INIT(16'h00ac)) l_k7a( .O(k7a), .I3(ADR_O[28]), .I2(ADR_O[27]), .I1(DAT_I[7]), .I0(mtip));
+                  SB_LUT4 #(.LUT_INIT(16'hac00)) l_k7b( .O(k7b), .I3(ADR_O[28]), .I2(ADR_O[27]), .I1(mtie),     .I0(mpie));
                   SB_LUT4 #(.LUT_INIT(16'hfcaa)) l_theio7( .O(theio[7]), .I3(STB_O), .I2(k7a), .I1(k7b), .I0(Dsram[7]));                  
                end else if ( k == 11 ) begin
-//                  wire k11a = (~ADR_O[29] & ~ADR_O[28] & DAT_I[11] ) | (~ADR_O[29] & ADR_O[28] & meip );
-//                  wire k11b = ( ADR_O[29] & ~ADR_O[28] & meie      ) | ( ADR_O[29] & ADR_O[28] & 1'b1 );
+//                  wire k11a = (~ADR_O[28] & ~ADR_O[27] & DAT_I[11] ) | (~ADR_O[28] & ADR_O[27] & meip );
+//                  wire k11b = ( ADR_O[28] & ~ADR_O[27] & meie      ) | ( ADR_O[28] & ADR_O[27] & 1'b1 );
 //                  assign theio[11] = (~STB_O & Dsram[11]) | (STB_O & (k11a | k11b));
                   wire k11a,k11b;
-                  SB_LUT4 #(.LUT_INIT(16'h00ac)) l_k11a( .O(k11a), .I3(ADR_O[29]), .I2(ADR_O[28]), .I1(DAT_I[11]), .I0(meip));
-                  SB_LUT4 #(.LUT_INIT(16'hac00)) l_k11b( .O(k11b), .I3(ADR_O[29]), .I2(ADR_O[28]), .I1(meie),      .I0(1'b1));
+                  SB_LUT4 #(.LUT_INIT(16'h00ac)) l_k11a( .O(k11a), .I3(ADR_O[28]), .I2(ADR_O[27]), .I1(DAT_I[11]), .I0(meip));
+                  SB_LUT4 #(.LUT_INIT(16'hac00)) l_k11b( .O(k11b), .I3(ADR_O[28]), .I2(ADR_O[27]), .I1(meie),      .I0(1'b1));
                   SB_LUT4 #(.LUT_INIT(16'hfcaa)) l_theio11( .O(theio[11]), .I3(STB_O), .I2(k11a), .I1(k11b), .I0(Dsram[11]));                  
                end else if ( k == 12 ) begin
-//                  wire k12 = (~ADR_O[29] & ~ADR_O[28] & DAT_I[12] ) | (ADR_O[29] & ADR_O[28]) ;
+//                  wire k12 = (~ADR_O[28] & ~ADR_O[27] & DAT_I[12] ) | (ADR_O[28] & ADR_O[27]) ;
 //                  assign theio[12] = (~STB_O & Dsram[12]) | (STB_O & k12);
                   wire k12;
-                  SB_LUT4 #(.LUT_INIT(16'hc2c2)) l_k12( .O(k12), .I3(1'b0), .I2(ADR_O[29]), .I1(ADR_O[28]), .I0(DAT_I[12]));
+                  SB_LUT4 #(.LUT_INIT(16'hc2c2)) l_k12( .O(k12), .I3(1'b0), .I2(ADR_O[28]), .I1(ADR_O[27]), .I0(DAT_I[12]));
                   SB_LUT4 #(.LUT_INIT(16'hcaca)) l_theio12( .O(theio[12]), .I3(1'b0), .I2(STB_O), .I1(k12), .I0(Dsram[12]));                  
                end else if ( k == 16 ) begin
-//                  wire k16a = (~ADR_O[29] & ~ADR_O[28] & DAT_I[16]  ) | (~ADR_O[29] & ADR_O[28] & mtimeincip );
-//                  wire k16b = ( ADR_O[29] & ~ADR_O[28] & mtimeincie );
+//                  wire k16a = (~ADR_O[28] & ~ADR_O[27] & DAT_I[16]  ) | (~ADR_O[28] & ADR_O[27] & mtimeincip );
+//                  wire k16b = ( ADR_O[28] & ~ADR_O[27] & mtimeincie );
 //                  assign theio[16] = (~STB_O & Dsram[16]) | (STB_O & (k16a | k16b));
                   wire k16a,k16b;
-                  SB_LUT4 #(.LUT_INIT(16'h00ac)) l_k16a( .O(k16a), .I3(ADR_O[29]), .I2(ADR_O[28]), .I1(DAT_I[16]), .I0(mtimeincip));
-                  SB_LUT4 #(.LUT_INIT(16'hac00)) l_k16b( .O(k16b), .I3(ADR_O[29]), .I2(ADR_O[28]), .I1(mtimeincie),.I0(1'b0));
+                  SB_LUT4 #(.LUT_INIT(16'h00ac)) l_k16a( .O(k16a), .I3(ADR_O[28]), .I2(ADR_O[27]), .I1(DAT_I[16]), .I0(mtimeincip));
+                  SB_LUT4 #(.LUT_INIT(16'hac00)) l_k16b( .O(k16b), .I3(ADR_O[28]), .I2(ADR_O[27]), .I1(mtimeincie),.I0(1'b0));
                   SB_LUT4 #(.LUT_INIT(16'hfcaa)) l_theio16( .O(theio[16]), .I3(STB_O), .I2(k16a), .I1(k16b), .I0(Dsram[16]));                  
                end else if ( k == 17 ) begin
                   /* STB_O
-                   * |ADR_O[29:28]
+                   * |ADR_O[28:27]
                    * 0xx  Dsram[17]
                    * 100  DAT_I[17]
                    * 101  mrinstretip
                    * 110  mrinstretie
                    * 111  1'b0
                    * 
-                   * ADR_O[29:28]
+                   * ADR_O[28:27]
                    * ||  luta         lutb
                    * 00  DAT_I[17]    0
                    * 01  mrinstretip  0
@@ -225,25 +213,26 @@ module m_inputmux
                    * 1     luta | lutb
                    * 
                    */
-//                  wire k17a = (~ADR_O[29] & ~ADR_O[28] & DAT_I[17]  ) | (~ADR_O[29] & ADR_O[28] & mrinstretip);
-//                  wire k17b = ( ADR_O[29] & ~ADR_O[28] & mrinstretie);
+//                  wire k17a = (~ADR_O[28] & ~ADR_O[27] & DAT_I[17]  ) | (~ADR_O[28] & ADR_O[27] & mrinstretip);
+//                  wire k17b = ( ADR_O[28] & ~ADR_O[27] & mrinstretie);
 //                  assign theio[17] = (~STB_O & Dsram[17]) | (STB_O & (k17a | k17b));
                   wire k17a,k17b;
-                  SB_LUT4 #(.LUT_INIT(16'h00ac)) l_k17a( .O(k17a), .I3(ADR_O[29]), .I2(ADR_O[28]), .I1(DAT_I[17]), .I0(mrinstretip));
-                  SB_LUT4 #(.LUT_INIT(16'hac00)) l_k17b( .O(k17b), .I3(ADR_O[29]), .I2(ADR_O[28]), .I1(mrinstretie),.I0(1'b0));
+                  SB_LUT4 #(.LUT_INIT(16'h00ac)) l_k17a( .O(k17a), .I3(ADR_O[28]), .I2(ADR_O[27]), .I1(DAT_I[17]), .I0(mrinstretip));
+                  SB_LUT4 #(.LUT_INIT(16'hac00)) l_k17b( .O(k17b), .I3(ADR_O[28]), .I2(ADR_O[27]), .I1(mrinstretie),.I0(1'b0));
                   SB_LUT4 #(.LUT_INIT(16'hfcaa)) l_theio17( .O(theio[17]), .I3(STB_O), .I2(k17a), .I1(k17b), .I0(Dsram[17]));                  
                end else begin
                   /*            
                    * For most bits:
                    * STB_O ----------------+ 
                    *                __     |
-                   * adr2928eq00 --| &|    |     
+                   * ADR_O[30] ---o| &|    |     
                    * DAT_I[x] -----|__|---|1\    __
                    *                      |  |--|  |-- rDee[x]
                    * Dsram[x] ------------|0/   >__|
                    * 
                    */
-                  SB_LUT4 #(.LUT_INIT(16'hc0aa)) l_mux( .O(theio[k]), .I3(STB_O), .I2(adr2928eq00), .I1(DAT_I[k]), .I0(Dsram[k]));
+                  wire adrok = ADR_O[30:27] == 4'b1100;
+                  SB_LUT4 #(.LUT_INIT(16'hc0aa)) l_mux( .O(theio[k]), .I3(STB_O), .I2(adrok),   .I1(DAT_I[k]), .I0(Dsram[k]));
                end
             end // for-loop
          end // HIGHLEVEL

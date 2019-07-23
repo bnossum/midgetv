@@ -67,7 +67,7 @@ programmed to the iceblink40-hx1k board.  The same program is compiled
 to iCE40UP5K FPGAs and programmed to the upduino2 development
 board. Some resulting sizes of the core is described below.
 Real-world usage of midgetv will certainly be larger, and
-slower. These numbers will slightly change, so treat them as slightly
+slower. These numbers will change, so treat them as slightly
 optimistic, and indicative only.
 
 Most of the code of `midgetv` is written in two versions, one

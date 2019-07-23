@@ -85,8 +85,9 @@ module m_ice40sim_EBRonly
       .meip                             (meip),
       .start                            (start));
 
-   // Address decode of wishbone register: 0b0100xxxx_xxxxxxxx_xxxxxxxx_xxxxx1xx
-   wire                 STB_I = STB_O & ~ADR_O[29] & ~ADR_O[28] & ADR_O[2];
+   // Address decode of wishbone register: 0b01100xxx_xxxxxxxx_xxxxxxxx_xxxxx1xx
+   // Because we have STB_O I do not have to decode ADR_O[31:30]
+   wire                 STB_I = STB_O & ADR_O[29] & ~ADR_O[28] & ~ADR_O[27] & ADR_O[2];
    m_wishbonereg inst_wishbonereg
      (// Outputs
       .ACK_O                            (ACK_I),

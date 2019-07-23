@@ -6,26 +6,71 @@
  * 
  * If we have MTIMETAP >= MTIMETAP_LOWLIM, interrupts and mtime is implemented 
  * in midgetv. From user code, the following holds:
+ *
+ * Stated as memory-mapped in riscv-privileged:
+ * Machine-level MSIP bit: 
+ *     Exposed for writing by remote harts. Not implemented here (we only
+ *     support one hart). MSIP is simply a bit in the MIP register.
+ * mtimecmph/mtimecmp: 
+ *     Real value is in EBR 0xf8/0xfc. 
+ *     Writing is triggered by write at 0x000800f8/0x000800fc
+ * mtimeh/mtime is exposed as a memory-mapped machine-mode read/write register
+ *     Real value is in EBR 0xe0/0xe4. Writing is triggered by write
+ *     at 0x000020e0/0x000000e4
+ *
  * 
- * Write adr                            Write to
+ * Write adr                            Write to                               
  *   33 22222222221111111111            register           
- *   10 987654321098765432109876543210  or bit             EBR address 
- * 0b00 1xxxxxxxxxxxxxxx1xxxxx111000xx  register mtime     0xe0 mtime
- * 0b00 1xxxxxxxxxxxxxx1xxxxxx111111xx  register minstreth 0xec minstreth
+ *   10 987654321098765432109876543210  or bit             EBR address       Side effect on write
+ * 0b00 1xxxxxxxxxxxxxxx1xxxxx111000xx  register mtime     0xe0 mtime        Clears mtimeincip
+ * 0b00 1xxxxxxxxxxxxxx1xxxxxx111011xx  register minstreth 0xec minstreth    Clears minstreth
  * 0b00 1xxxxxxxxxxxxx1xxxxxxx100000xx  bit mtip           0x80 __jj
  * 0b00 1xxxxxxxxxxxx1xxxxxxxx100000xx  register mstatus   0x80 __jj
  * 0b00 1xxxxxxxxxxx1xxxxxxxxx100000xx  register mie       0x80 __jj
- * 0b00 1xxxxxxxxxx1xxxxxxxxxx100000xx  register mip       0x80 __jj
- * 0b00 1xxxxxxxxx1xxxxxxxxxxx111110xx  register mtimecmp  0xf7 mtimecmp
- * 0b00 1xxxxxxxxx1xxxxxxxxxxx111111xx  register mtimecmph 0xf7 mtimecmph
+ * 0b00 1xxxxxxxxxx1xxxxxxxxxx100000xx  register mip       0x80 __jj         Updates msip
+ * 0b00 1xxxxxxxxx1xxxxxxxxxxx111110xx  register mtimecmp  0xf7 mtimecmp     Clears mtip
+ * 0b00 1xxxxxxxxx1xxxxxxxxxxx111111xx  register mtimecmph 0xf7 mtimecmph    Clears mtip
  * 
  * Read adr                            
  *   33 22222222221111111111            
  *   10 987654321098765432109876543210  Read register      
- * 0b01 00xxxxxxxxxxxxxxxxxxxxxxxxxxxx  All real input in this address range
- * 0b01 01xxxxxxxxxxxxxxxxxxxxxxxxxxxx  mip
- * 0b01 10xxxxxxxxxxxxxxxxxxxxxxxxxxxx  mie
- * 0b01 11xxxxxxxxxxxxxxxxxxxxxxxxxxxx  mstatus
+ * 0b01 100xxxxxxxxxxxxxxxxxxxxxxxxxxx  All normal input frome external port
+ * 0b01 101xxxxxxxxxxxxxxxxxxxxxxxxxxx  mip
+ * 0b01 110xxxxxxxxxxxxxxxxxxxxxxxxxxx  mie
+ * 0b01 111xxxxxxxxxxxxxxxxxxxxxxxxxxx  mstatus
+ * 0b01 0xxxxxxxxxxxxxxxxxxxxxxxxxxxxx  reserved for future extension
+ * 
+ * The reason for the change is that I will disallow read/write to EBR when executing in
+ * SRAM. This protects the registers and constants. We may still access anything when
+ * executing in EBR. The only way to get from SRAM to EBR will be via an exception or 
+ * a CSR instruction.
+ * 
+ * Changes to get this to happen:
+ * 1. FF that say "executes in SRAM":
+ * 2. If executing in SRAM, and a write-attempt to __pc is made which is outside
+ *    of SRAM, give exception instead. 
+ * 3. If executing in SRAM, and a read or write attemt is done to EBR, give exception.
+ * 
+ * This is only an outline of the idea:
+ * 
+ * always @(posedge clk) begin
+ *    if ( Wpc ) begin
+ *       if ( EXECinSRAM == 0 ) begin
+ *          EXECinSRAM <= B[31] | B[30];
+ *       end else begin
+ *          if ( isr_intoCSR || isr_intoTrap ) begin
+ *             EXECinSRAM <= 0;
+ *          end else if ( B[31] | B[30] ) begin
+ *             exception_illegal_adr;
+ *          end
+ *       end
+ *    end
+ * end
+ *
+ * The FF is easy to implement. The decision to give illegal exception is more
+ * tricky, and involves considerable work in microcode. 
+ *
+ * ===============================================================
  *
  * Layout of register:
  * -------------------
