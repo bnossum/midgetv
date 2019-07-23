@@ -91,10 +91,10 @@ iCEcube2. This is due to the Lattice preference files where
 "set_cascading" is used to reduce the size of the core.
 
 ##### Highlevel morse example
-FPGA/Board                          | SB_LUT4  | EBRs | SRAM | Clock  (MHz)  | Comment
-:---------------------------------- | :------- | :--- | :--- | :---------- | :-------------------------
-`ICE40HX1K-VQ100` `iceblink40-hx1k` | 444 | 4 | 0 | 70 | No `cycle(h)` or `time(h)`. No `instreth`. No interrupts, nor registers `mip`, `mie` or `mstatus`. Minimal instruction decode. Disregards rule 3.55 of Wishbone B.4.
-`ICE40UP5K-SG48I` `upduino2`        | 547 | 4 | 2 | 28 | Most options enabled.
+FPGA/Board                          | SB_LUT4  | EBRs | SRAM | Clock  (MHz)  
+:---------------------------------- | :------- | :--- | :--- | :----------  
+`ICE40HX1K-VQ100` `iceblink40-hx1k` | 444 | 4 | 0 | 70 
+`ICE40UP5K-SG48I` `upduino2`        | 547 | 4 | 2 | 28
 
 
 #### yosys/arachne-pnr, icetime, lowlevel morse example
@@ -104,7 +104,7 @@ Unfortunately this give the following
 I save with lut_cascade): On the other hand yosys do *better* than Synplify Pro on the (ahem..) highlevel code.
 Metrics for lowlevel code variant only:
 
-FPGA/Board                          | SB_LUT4 lowlevel  | EBRs | SRAM | Clock (MHz) | Comment
+FPGA/Board                          | SB_LUT4   | EBRs | SRAM | Clock (MHz) | Comment
 :---------------------------------- | :------- | :--- | :--- | :---------- | :-------------------------
 `ICE40HX1K-VQ100` `iceblink40-hx1k` | 354  |  4   |  0   | 60 | 76 LUTS larger than expected
 `ICE40UP5K-SG48I` `upduino2`        | 466  |  4   |  2   | 25 | 51 LUTS larger than expected
