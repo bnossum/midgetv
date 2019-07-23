@@ -164,11 +164,10 @@ Note. This will be modified.
    
 
 ### Semantic Versioning API specification
-1. Input and Output signals to m_midgetv_core.v are parts of the API.
-   See module m_midgetv_core in m_midgetv_core.v
-2. The memory map of midgetv is part of the API. See midgetv.inc in `sw/inc`
+1. Signal interface to module [`m_midgetv_core`](code/m_midgetv_core.v) is part of the API.
+2. The coarse [memory map](sw/inc/midgetv.inc) of midgetv is part of the API. 
 3. The way a binary file is mapped to `localparam` specifications by the
-   utility `midgetv_bin2ebr` is part of the API.
+   utility [`midgetv_bin2ebr`](util/midgetv_bin2ebr.c) is part of the API.
 
 
 ### Todo
