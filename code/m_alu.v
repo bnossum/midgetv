@@ -75,7 +75,7 @@ module m_alu
     input                 sa06,sa05,sa04,//       Determines ALU operation
     input                 sa27,sa26,sa25,sa24, // To decode Wttime and Wrinst
     output [ALUWIDTH-1:0] B, //                   ALU result
-    output                A31,
+    output                A31, //                 A[31] == Di[31] during ADD, used in m_condcode.
     output                alu_carryout, //        ALU carry out
     output                alu_tapout, //          Used to trigger interrupt for mtime increment/mcycle update
     output                alu_minstretofl, //     Used to trigger interrupt for retired instructions
@@ -130,10 +130,6 @@ module m_alu
          genvar j;
 
          /* verilator lint_off UNOPTFLAT */
-         /* I am unable to remove this warning. According to the user
-          * manual, simulation will still be correct, but slower.
-          * I refuse to duplicate the 3 lines 32 times.
-          */
          wire [ALUWIDTH:0] alucy; 
          /* verilator lint_on UNOPTFLAT */
 

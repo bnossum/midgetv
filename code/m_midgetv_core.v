@@ -780,7 +780,6 @@ module m_midgetv_core
         .clk                            (clk),
         .alu_carryout                   (alu_carryout),
         .FUNC3                          (FUNC3[2:0]),
-        .Di                             (Di[31:0]),
         .A31                            (A31),
         .QQ                             (QQ[31:0]),
         .rzcy32                         (rzcy32));

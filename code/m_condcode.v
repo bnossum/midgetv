@@ -41,15 +41,17 @@
  * 110   BLTU          ~alu_carryout                                     raluF
  * 111   BGEU          ~alu_carryout                                     ~raluF
  * 
+ * For most comparisons the msb of Di[31:0] is used. But for all of these cases
+ * we have A[31] == Di[31:0] (the ALU perform operation ADD for all these cases). 
+ * A[31] is located in the middle of the ALU. We use A[31] instead of Di[31] 
+ * because Di[31] is used chained, and it would cost a REP LUT to actually use 
+ * Di[31]. 
  */
 module m_condcode # ( parameter HIGHLEVEL = 0 )
    (
     input        clk, //          System clock
     input        alu_carryout, // Out of the ALU carry chain
     input [2:0]  FUNC3, //        from INSTRUCTION register
-    /* verilator lint_off UNUSED */
-    input [31:0] Di, //           To get Di[31]
-    /* verilator lint_on UNUSED */
     input        A31,
     input [31:0] QQ, //           To get QQ[31]
     input        rzcy32, //       Registered zero-detect from m_immexp_zfind_q
@@ -58,17 +60,17 @@ module m_condcode # ( parameter HIGHLEVEL = 0 )
     output       m_condcode_killwarnings
     );
 
-   assign m_condcode_killwarnings = &Di | &QQ;
+   assign m_condcode_killwarnings = &QQ;
    generate      
       if ( HIGHLEVEL ) begin
          reg            cmb_aluF,tmp_raluF,tmp_is_brcond;
          
-         always @(/*AS*/Di or FUNC3 or QQ or alu_carryout)
+         always @(/*AS*/A31 or FUNC3 or QQ or alu_carryout)
            case (FUNC3)
-             3'b010 : cmb_aluF = ((Di[31]^QQ[31])&(~alu_carryout)) | (Di[31]&QQ[31]);
+             3'b010 : cmb_aluF = ((A31^QQ[31])&(~alu_carryout)) | (A31&QQ[31]);
              3'b011 : cmb_aluF = ~alu_carryout; 
-             3'b100 : cmb_aluF = ((Di[31]^QQ[31])&(~alu_carryout)) | (Di[31]&QQ[31]);
-             3'b101 : cmb_aluF = ((Di[31]^QQ[31])&(~alu_carryout)) | (Di[31]&QQ[31]);
+             3'b100 : cmb_aluF = ((A31^QQ[31])&(~alu_carryout)) | (A31&QQ[31]);
+             3'b101 : cmb_aluF = ((A31^QQ[31])&(~alu_carryout)) | (A31&QQ[31]);
              3'b110 : cmb_aluF = ~alu_carryout;
              3'b111 : cmb_aluF = ~alu_carryout;
 //             default: cmb_aluF = 1'b?;  Strange, with this line, Verilator fails
@@ -98,13 +100,13 @@ module m_condcode # ( parameter HIGHLEVEL = 0 )
          assign raluF = tmp_raluF;
 
       end else begin
-         /*              ___    0 : use (~alu_carryout&(Di[31]^QQ[31])) | (Di[31]&QQ[31])
+         /*              ___    0 : use (~alu_carryout&(A31^QQ[31])) | (A31&QQ[31])
           *   FUNC3[0] -|I0 |-+ 1 : use ~alu_carryout
           *   FUNC3[1] -|I1 | |
           *   FUNC3[2] -|I2_| |   ___                   +----------------------- raluF
           *                   +--|I0 |               _  |           ___
           *   QQ[31] ------------|I1 |-- cmb_aluF --| |-+----------|I0 |-------- is_brcond
-          *   Di[31] ------------|I2 |              >_|  rzcy32 ---|I1 |
+          *   A31--- ------------|I2 |              >_|  rzcy32 ---|I1 |
           *                 +----|I3_|                   FUNC3[0] -|I2 |
           *                 |                            FUNC3[2] -|I3_|
           *                 | alu_carryout
@@ -116,7 +118,6 @@ module m_condcode # ( parameter HIGHLEVEL = 0 )
          wire pre_cmb_aluF;
          wire wcmb_aluF;
          SB_LUT4 #(.LUT_INIT(16'hc8c8)) pre_cmb_aluF_l(.O(pre_cmb_aluF),.I3(1'b0),  .I2(FUNC3[2]),.I1(FUNC3[1]),.I0(FUNC3[0]));
-         //SB_LUT4 #(.LUT_INIT(16'h40fe)) cmb_aluF_l(.O(wcmb_aluF),.I3(alu_carryout), .I2(Di[31]), .I1(QQ[31]),.I0(pre_cmb_aluF));
          SB_LUT4 #(.LUT_INIT(16'h40fe)) cmb_aluF_l(.O(wcmb_aluF),.I3(alu_carryout), .I2(A31), .I1(QQ[31]),.I0(pre_cmb_aluF));
          SB_DFF raluF_r(.Q(raluF),.C(clk),.D(wcmb_aluF));
          SB_LUT4 #(.LUT_INIT(16'h5ac3)) is_brcond_l(.O(is_brcond),.I3(FUNC3[2]),.I2(FUNC3[0]),.I1(rzcy32),.I0(raluF));
