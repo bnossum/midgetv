@@ -18,7 +18,7 @@ module, the interconnect of midgetv may be shown as this:
                        +----------------+
 
 Midgetv trades speed for size. The smallest toy implementation require
-< 250 SB_LUT4s and 4 EBRs. Each RISCV instruction uses between 4 clock
+~250 SB_LUT4s and 4 EBRs. Each RISCV instruction uses between 4 clock
 cycles (for ADDI) and about 40 clock cycles (for shifts of a register
 by 31). Average number of clocks per instruction (CPI) is
 ~10. Unaligned word/hword load/store instructions must be performed in
@@ -60,7 +60,7 @@ certain dependencies. To compile the code with least effort you need:
 All my work is done under Linux.
   
 
-### Some more results
+### Hello World
 
 A C-program ("hello world" in morse) is compiled to iCE40HX1K and
 programmed to the iceblink40-hx1k board.  The same program is compiled

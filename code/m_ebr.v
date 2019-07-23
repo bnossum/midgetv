@@ -22,7 +22,7 @@
  * Initiation of the EBRs is done via parameters. 
  * We have 2,4,8 or 16 EBRs, and initiate each one of these 
  * from a "stripe" of 256 entries. Schematically shown for the
- * largest config:
+ * largest configuration:
  * 
  *            4095        3840 3839 ..  512 511________ 256 255___________0
  * program0   INIT_0 for EBR15      ..      INIT_0 for EBR1 INIT_0 for EBR0

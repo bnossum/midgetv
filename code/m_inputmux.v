@@ -45,7 +45,7 @@ module m_inputmux
     input              msie, //        Machine Software Interrupt Enable in MIE
     input              mtie, //        Machine Timer Interrupt Enable in MIE
     input              mtimeincie, //  Machine Time Increment Interrupt Enable in MIE
-    input              mrinstretip, // Machine Retired Instructions Retired Interrupt Pendin in MIP. RENAME
+    input              mrinstretip, // Machine Retired Instructions Retired Interrupt Pending in MIP. RENAME
     input              msip, //        Machine Software Interrupt Pending in MIP
     input              mtip,//         Machine Timer Interrupt Pending in MIP
     input              mtimeincip, //  Machine Time Increment Interrupt Pending in MIP
@@ -53,9 +53,9 @@ module m_inputmux
     input              qACK, //        Qualified acknowledge, usually (ACK_I | sysregack)
 
     output             sysregack, //   Read/Write acknowledge from MIP/MIE/MSTATUS
+    output [31:0]      Di, //          Data out of mux
     output [31:0]      rDee, //        Output for debugging purposes
     output [31:0]      theio, //       Output for debugging purposes
-    output [31:0]      Di, //          Data out of mux
     output             m_inputmux_killwarnings // No need to connect
     );
    wire [31:0]         shADR_O = {sra_msb,ADR_O[31:1]};
@@ -88,7 +88,6 @@ module m_inputmux
          genvar j;
          wire   cmb_sa00mod;
          wire   sa00mod;
-         //SB_LUT4 #(.LUT_INIT(16'hfffe)) inst_presa00mod( .O(cmb_sa00mod), .I3(ACK_I), .I2(sram_ack), .I1(sysregack), .I0(sa00));
          SB_LUT4 #(.LUT_INIT(16'hfefe)) inst_presa00mod( .O(cmb_sa00mod), .I3(1'b0), .I2(sram_ack), .I1(qACK), .I0(sa00));
          SB_DFF sa00mod_r( .Q(sa00mod), .C(clk), .D(cmb_sa00mod));
          for ( j = 0; j < 32; j = j + 1 ) begin
@@ -322,5 +321,3 @@ module m_inputmux
                                     &zeros | meip | &Dsram | STB_O;
    
 endmodule
-
-

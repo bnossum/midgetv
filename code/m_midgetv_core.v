@@ -144,15 +144,7 @@
  * SRAMADRWIDTH
  * ------------
  * Determines the amount of SRAM in midgetv. 
- * Valid parameters: 0, 16, 17. See m_ram.v for details.
- * 
- * EBRADRWIDTH
- * -----------
- * Determines the size of EBR in midgetv. Legal values:
- *  8    1 kiB EBR 
- *  9    2 kiB EBR
- * 10    4 kiB EBR
- * 11    8 kiB EBR
+ * See m_ram.v for details.
  * 
  * IWIDTH
  * ------
@@ -161,13 +153,16 @@
  * When interrupts are included, IWIDTH should be 32.
  * Legal values: From 1 to 32.
  * 
+ * 
  * NO_CYCLECNT
  * -----------
+ * 0 : Cycle counter available
+ * 1 : No cycle counter.
  * 
  * Normally midgetv support a 32-bit cycle counter (the low 32 bits of
- * mcycle). To save a very few resources, it can be suppressed, If
+ * mcycle). To save 12 LUTs, it can be suppressed, If
  * suppressed, one still have a 32 bit counter, that works as a
- * retired instruction counter.  Legal values: 0 or 1.
+ * retired instruction counter. Legal values: 0 or 1.
  * 
  * MTIMETAP_LOWLIM
  * ---------------
@@ -179,19 +174,24 @@
  * MTIMETAP
  * -------
  * This is for mtime and control registers.
- * When MTIMETAP >= MTIMETAP_LOWLIM, the cycle counter   give an 
+ * When MTIMETAP >= MTIMETAP_LOWLIM, the cycle counter give an 
  * interrupt after (1<<MTIMETAP) cycles. This interrupt is used to 
- * maintain mtime. 
+ * increment {mtimeh,mtime}. 
  * When MTIMETAP >= MTIMETAP_LOWLIM, we also enable interrupt 
  * support and registers mstatus,mie,mip as per the riscv
- * specification.  Legal values: 0, MTIMETAP_LOWLIM-31
+ * specification. Legal values: 0, MTIMETAP_LOWLIM to 31.
  * 
  * HIGHLEVEL
  * ---------
- * Most of the code for midgetv exists in "highlevel"
- * RTL code, but also in a version where iCE40 native
- * building blocks (SB_LUT4, SB_DFF, etc) are instantiated.
+ * 0 : Use ICE primitives. Recommended
+ * 1 : Use RTL synthesis
  * 
+ * Most of the code for midgetv exists in "highlevel" RTL code, but also
+ * in a version where iCE40 native building blocks (SB_LUT4, SB_DFF,
+ * etc) are instantiated. For many of the modules the difference is
+ * slight, but some modules (for example m_immexp_zfind_q) have a huge
+ * difference in size.
+ *  
  * LAZY_DECODE
  * -----------
  * 0: All instructions are fully decoded, riscv compliance.
@@ -211,6 +211,15 @@
  * --------
  * 0: Use 2EBRs + ~20 LUTs for control (recommended)
  * 1: Use 3 EBRs for control. 
+ * 
+ * EBRADRWIDTH
+ * -----------
+ * Determines the size of EBR in midgetv. Legal values:
+ *  8    1 kiB EBR 
+ *  9    2 kiB EBR
+ * 10    4 kiB EBR
+ * 11    8 kiB EBR
+ * See m_ebr.v for details.
  * 
  * program0, program1, ... programF
  * --------------------------------
@@ -242,30 +251,29 @@
 
 module m_midgetv_core
   # ( parameter 
-      SRAMADRWIDTH = 0,  EBRADRWIDTH =  8, IWIDTH =  8, NO_CYCLECNT = 1, MTIMETAP =  0, HIGHLEVEL = 0, LAZY_DECODE = 1, // Minimal
-//    SRAMADRWIDTH = 16, EBRADRWIDTH =  8, IWIDTH = 32, NO_CYCLECNT = 0, MTIMETAP = 14, HIGHLEVEL = 0, LAZY_DECODE = 0, // Conventional
-//    SRAMADRWIDTH = 17, EBRADRWIDTH = 11, IWIDTH = 32, NO_CYCLECNT = 0, MTIMETAP = 14, HIGHLEVEL = 0, LAZY_DECODE = 0, // Maximal
-      ALUWIDTH = 32, // __Always__ 32
-      DISREGARD_WB4_3_55 = 0,
-      MTIMETAP_LOWLIM = 14, /* __Only__ location where this value is really to be set */
-      NO_UCODEOPT = 0, 
-      DBGA = 0,
-      parameter [4095:0] program0 = 4096'h0,
-      parameter [4095:0] program1 = 4096'h0,
-      parameter [4095:0] program2 = 4096'h0,
-      parameter [4095:0] program3 = 4096'h0,
-      parameter [4095:0] program4 = 4096'h0,
-      parameter [4095:0] program5 = 4096'h0,
-      parameter [4095:0] program6 = 4096'h0,
-      parameter [4095:0] program7 = 4096'h0,
-      parameter [4095:0] program8 = 4096'h0,
-      parameter [4095:0] program9 = 4096'h0,
-      parameter [4095:0] programA = 4096'h0,
-      parameter [4095:0] programB = 4096'h0,
-      parameter [4095:0] programC = 4096'h0,
-      parameter [4095:0] programD = 4096'h0,
-      parameter [4095:0] programE = 4096'h0,
-      parameter [4095:0] programF = 4096'h0
+      SRAMADRWIDTH = 0,  EBRADRWIDTH =  8, IWIDTH =  8, NO_CYCLECNT = 1, MTIMETAP =  0, HIGHLEVEL = 0, LAZY_DECODE = 1, DISREGARD_WB4_3_55 = 1,// Minimal
+//    SRAMADRWIDTH = 16, EBRADRWIDTH =  8, IWIDTH = 32, NO_CYCLECNT = 0, MTIMETAP = 14, HIGHLEVEL = 0, LAZY_DECODE = 1, DISREGARD_WB4_3_55 = 0,// Conventional
+//    SRAMADRWIDTH = 17, EBRADRWIDTH = 11, IWIDTH = 32, NO_CYCLECNT = 0, MTIMETAP = 14, HIGHLEVEL = 0, LAZY_DECODE = 0, DISREGARD_WB4_3_55 = 0,// Maximal
+      ALUWIDTH = 32, //        Always 32      
+      MTIMETAP_LOWLIM = 14, // Only location where this value is really to be set 
+      NO_UCODEOPT = 0, //      Only set to 1 during debugging
+      DBGA = 0, //             Only set to 1 during debugging
+      parameter [4095:0] program0 = 4096'h0, // | 
+      parameter [4095:0] program1 = 4096'h0, // | Always specified by module
+      parameter [4095:0] program2 = 4096'h0, // | that instantiates m_midgetv_core
+      parameter [4095:0] program3 = 4096'h0, // | 
+      parameter [4095:0] program4 = 4096'h0, // | 
+      parameter [4095:0] program5 = 4096'h0, // | 
+      parameter [4095:0] program6 = 4096'h0, // | 
+      parameter [4095:0] program7 = 4096'h0, // | 
+      parameter [4095:0] program8 = 4096'h0, // | 
+      parameter [4095:0] program9 = 4096'h0, // | 
+      parameter [4095:0] programA = 4096'h0, // | 
+      parameter [4095:0] programB = 4096'h0, // | 
+      parameter [4095:0] programC = 4096'h0, // | 
+      parameter [4095:0] programD = 4096'h0, // | 
+      parameter [4095:0] programE = 4096'h0, // | 
+      parameter [4095:0] programF = 4096'h0  // | 
       )
    (
     // Wishbone signals:
@@ -281,19 +289,19 @@ module m_midgetv_core
     output [3:0]       SEL_O, //       Byte mask for read/write. 
 
     // The following Wishbone signals are not supported:
-    //input            ERR_I,RTY_I,STALL_I
-    //input [x:0]      TGD_I,
-    //output           LOCK_O,
-    //output [x:0]     TGA_O,TGC_O,TGD_O, 
+    //input        ERR_I,RTY_I,STALL_I
+    //input [x:0]  TGD_I,
+    //output       LOCK_O,
+    //output [x:0] TGA_O,TGC_O,TGD_O, 
 
     // Non-Wishbone signals:
     input              meip, //        External interrupt(s) pending
     input              start, //       Control startup of midgetv
     output             corerunning, // midgetv should now be active. For synchronization of startup
-    output [31:0]      dbga, //     For hardware debugging
+    output [31:0]      dbga, //        For hardware debugging
     output             midgetv_core_killwarnings // To tie-off unused signals. Do not connect.
     );
-   wire                clk; //   My signal name for the clock. It is only used on rising edge
+   wire                clk; //   My signal name for the clock.
    assign clk   = CLK_I;
    assign CYC_O = STB_O; //      See Wishbone B.4 permission 3.40
    
@@ -535,9 +543,9 @@ module m_midgetv_core
      (/*AUTOINST*/
       // Outputs
       .sysregack                        (sysregack),
+      .Di                               (Di[31:0]),
       .rDee                             (rDee[31:0]),
       .theio                            (theio[31:0]),
-      .Di                               (Di[31:0]),
       .m_inputmux_killwarnings          (m_inputmux_killwarnings),
       // Inputs
       .clk                              (clk),
