@@ -18,7 +18,7 @@ module, the interconnect of midgetv may be shown as this:
                        +----------------+
 
 Midgetv trades speed for size. The smallest toy implementation require
-~250 SB_LUT4s and 4 EBRs. With absolutely all options enable the core need ~422 SB_LUT4s, 18 EBRs and 4 SRAMs,  
+~250 SB_LUT4s and 4 EBRs. With absolutely all options enabled the core need ~422 SB_LUT4s, 18 EBRs and 4 SRAMs,  
 
 Each RISCV instruction uses between 4 clock
 cycles (for ADDI) and about 40 clock cycles (for shifts of a register

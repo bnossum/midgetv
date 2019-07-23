@@ -6,8 +6,7 @@
 
         .globl _start
         # =============================================================================
-Alignment_mepc: .word   0
-trap_x0:        .word   0
+Al_mepc_trap_x0:.word   0
 trap_x1:        .word   0
 trap_x2:        .word   0
 trap_x3:        .word   0
@@ -29,7 +28,7 @@ StartTrap:
          * example is large enough as it is. But I must stack mepc
         */
         lw      x1,%lo(__mepc)(x0)
-        sw      x1,%lo(Alignment_mepc)(x0)
+        sw      x1,%lo(Al_mepc_trap_x0)(x0)
         lw      x1,%lo(__mtval)(x0)     // Unaligned address
         andi    x2,x1,0xfffffffc        // Aligned
         lw      x3,4(x2)                // Need 8, 16, or 24 bits of this -- 
@@ -41,7 +40,7 @@ StartTrap:
         addi    x1,x1,32
         sll     x3,x3,x1
         or      x3,x3,x2                // Value in x3
-        lw      x1,%lo(Alignment_mepc)(x0)
+        lw      x1,%lo(Al_mepc_trap_x0)(x0)
         sw      x1,%lo(__mepc)(x0)
         // One of:
         // lh   ...001xxxxx0000011       .001xxxx
@@ -67,7 +66,7 @@ trap_unaligned_lw:
         andi    x1,x1,0x7c              // Destination register of lw
         li      x2,4*3
         bgt     x1,x2,NotStacked
-        addi    x1,x1,%lo(trap_x0)
+        addi    x1,x1,%lo(Al_mepc_trap_x0)
 NotStacked:     
         sw      x3,0(x1)                // Store to destination register
 
@@ -153,10 +152,10 @@ _start:
         bne     x24,x23,9b
 
 #ifndef onlyEBR
+        // Test falling off the edge of an input operation due to alignment fault.
         // Where we have cyclecounter, and subsequently can find a bus error,
-        // fall off the edge of an input operation due to alignment fault.
-        // Here we first trigger an alignment fault. In the exception handle
-        // we will then subsequently get a bus error.
+        // this is feasible. Here we first trigger an alignment fault. In the 
+        // exception handle we will then subsequently get a bus error.
         lw      x25,1(x8)
 #endif        
         simend
