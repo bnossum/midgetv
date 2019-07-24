@@ -19,7 +19,7 @@ module, the interconnect of midgetv may be shown as this:
 
 Midgetv trades speed for size:
   - Smallest: A toy implementation require ~250 SB_LUT4s and 4 EBRs. 
-  - Usable: ~400 SB_LUT4s, 2 EBR, 2 SRAMs
+  - Usable: ~390 SB_LUT4s, 2 EBR, 2 SRAMs
   - Largest (so far): With absolutely all options enabled the core need ~422 SB_LUT4s, 18 EBRs and 4 SRAMs.
   - Typical clock frequencies (worst case conditions):
     - ICE40HX1K: 57 MHz

@@ -77,18 +77,6 @@
       B[h:2]   ---|1101 |   mcause   --|1110 |                                         
       SRC2[4:0] --|1110 |   mtval    --|1111/                                          
       SRC1[4:0] --|1111/                                                              
-                                                                               
-// TODO: 
-// Lockout access to EBR if executing in SRAM.
-// ------------------------------------------
-// When an instruction executes from SRAM, disallow any write or read unless ADR_O >= 0x40000000.
-// This protects magical constants and registers from overwrite. The only way to enter code in
-// EBR activated from the user code will be via exceptions, EBREAK or ECALL. 
-// if ( Wpc )
-//   execOutsideEBR <= B[31] | B[30];
-// trigger_ucodebranch = (nxtSTB & execOutsideEBR & ~B[31] & ~B[30])
-// Note: Wpc must be changed so no write to PC happens if this would trigger_ucodebranch,
-// otherwise we can not give a precise exception (pc lost).
 
  * ----------------------------------------------------------------------------
  * m_midgetv_core signal description
@@ -200,7 +188,9 @@
  *    ( funct3 = 3'b100, opcode = 7'b0110011). However, 
  *    one should really also check that funct7 = 7'b0000000.
  *    With LAZY_DECODE == 1, this check is not performed.
- * 2: Nearly no checking. Not recommended.
+ * 2: Nearly no checking. Not recommended. Example,
+ *    "XOR" can be decoded by 
+ *    ( funct3 = 3'b100, opcode[6:2] = 5'b01100).
  * 
  * DISREGARD_WB4_3_55 
  * -------------------
@@ -679,8 +669,8 @@ module m_midgetv_core
       .bmask                            (bmask[3:0]),
       .iwe                              (iwe));
 
-   /* Wishbone B.4 data sheet for the ram interface of m_midgetv_core
-    * --------------------------------------------------------------------
+   /* Nearly Wishbone B.4 data sheet for the ram interface of m_midgetv_core
+    * ----------------------------------------------------------------------
     * Inteface type:                   MASTER
     * General description:             Microcontroller
     * Supported cycles:                MASTER, READ/WRITE
@@ -700,8 +690,9 @@ module m_midgetv_core
     *                                  DAT_O[31:0]   DAT_O()
     *                                  sram_ack      ACK_I        
     *                                  RST_I         RST_I
-    * Comments                         Many signals are shared with the
-    *                                  the microcontroller Wishbone interface
+    * Comments Many signals are shared with the the microcontroller Wishbone interface
+    *          Midgetv require a read latency of 1 cycle or higher. Hence this is not
+    *          a full Wishbone interface.
     */
    m_ram  #(.HIGHLEVEL(0), .SRAMADRWIDTH(SRAMADRWIDTH)) 
    inst_ram

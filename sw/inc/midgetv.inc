@@ -101,12 +101,12 @@ EntryCSR:                               //0x108 Microcode branches to here when 
         //
         // Memory map:
         // ===========
-        // Coarse regions:
-        // 0x3fffffff-0x00000000 EBR               00
-        // 0x5fffffff-0x40000000 reserved          010
+        // Coarse regions:                         ADR_O[31:27]
+        // 0x3fffffff-0x00000000 EBR               00xxx
+        // 0x5fffffff-0x40000000 reserved          010xx
         // 0x67ffffff-0x60000000 IO                01100
-        // 0x7fffffff-0x68000000 System registers  011bb   with bb != 2'b00
-        // 0xffffffff-0x80000000 SRAM              1x
+        // 0x7fffffff-0x68000000 System registers  011yy   with yy != 2'b00
+        // 0xffffffff-0x80000000 SRAM              1xxxx
         //
         // Memory map of the start of EBR
         // ==============================
