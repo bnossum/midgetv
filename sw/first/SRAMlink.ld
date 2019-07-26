@@ -9,6 +9,7 @@ MEMORY
   ebr (rwx)      : ORIGIN = 0x00000000, LENGTH = 8K
   poordesign (r) : ORIGIN = 0x00000400, LENGTH = 64K
   ram (rwx)      : ORIGIN = 0xFFFF0000, LENGTH = 64K
+/*  ram (rwx)      : ORIGIN = 0xFFFE0000, LENGTH = 128K */
 }
 
 SECTIONS
@@ -17,7 +18,8 @@ SECTIONS
   .theEBRram : {
     *(.EBRram*)
   } >ebr
-  . = 0xffff0000;
+  . = 0xffff0000; 
+ /* . = 0xfffe0000; */
   .theSRAM : {
     *(.text*)
     *(.rodata*)

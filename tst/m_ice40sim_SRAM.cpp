@@ -17,8 +17,8 @@
 /* Naming of Verilator of generator blocks is a mystery for me. 
  * This macro __must__ correspond to parameter SRAMADRWIDTH in m_ice40sim_SRAM.v
  */
-//#define SRAM_ADRLINES 16
-#define SRAM_ADRLINES 17
+#define SRAM_ADRLINES 16
+//#define SRAM_ADRLINES 17
 
 
 #define _main

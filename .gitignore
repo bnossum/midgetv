@@ -9,7 +9,7 @@ bin/m_alu.bin
 bin/midgetv_indirectEBR
 bin/m_2ebr
 bin/simmorse
-bin/simerastosthenes
+bin/simeratosthenes
 
 hwtst/iceblink40-hx1k/.sconsign.dblite
 hwtst/iceblink40-hx1k/hardware.asc

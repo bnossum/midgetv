@@ -86,9 +86,12 @@ module mytop
    always @(posedge clklf) 
      hfen <= (hfen + 4'h1) | {hfen[3],3'h0};
 
+   // Changed clock from 24 to 12 MHz due to timing after arachne-pnr, we
+   // are down to 22 MHz. (iCEcube stays at around 28).
+   //
    // CLKHF_DIV "0b00"  48 MHz
    //           "0b01"  24 MHz
-   //           "0b10"  12 MHz
+   //           "0b10"  12 MHz  <-- Our choice
    //           "0b11"   6 MHz
    SB_HFOSC 
      # ( .CLKHF_DIV( "0b10" )        
