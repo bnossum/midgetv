@@ -10,21 +10,21 @@ OBJ = ../../../obj_dir
 CFLAGS = -mabi=ilp32 -march=rv32i -nodefaultlibs -nostartfiles -Os -Wall \
 	-DNOCSR=1 -DonlyEBR=1 -DSP_INITVAL=0x400 
 
-all: $(BIN)/simerastosthenes \
-	$(OBJ)/erastosthenes.lst \
+all: $(BIN)/simeratosthenes \
+	$(OBJ)/eratosthenes.lst \
 	../../../hwtst/upduino2/ice40loaderprog.hv 
 
 
-../../../hwtst/iceblink40-hx1k/ice40loaderprog.hv: $(OBJ)/erastosthenes.bin 
+../../../hwtst/iceblink40-hx1k/ice40loaderprog.hv: $(OBJ)/eratosthenes.bin 
 	../../../bin/midgetv_bin2ebr -i $< -o $@
 
-../../../hwtst/upduino2/ice40loaderprog.hv: $(OBJ)/erastosthenes.bin 
+../../../hwtst/upduino2/ice40loaderprog.hv: $(OBJ)/eratosthenes.bin 
 	../../../bin/midgetv_bin2ebr -i $< -o $@
 
-$(BIN)/simerastosthenes:erastosthenes.c
+$(BIN)/simeratosthenes:eratosthenes.c
 	gcc -Wall -Wextra -Dsim=1 -o $@ $< 
 
-$(OBJ)/erastosthenes.o: | $(OBJ)/crt0.o
+$(OBJ)/eratosthenes.o: | $(OBJ)/crt0.o
 
 .SECONDARY:
 
@@ -50,8 +50,8 @@ $(OBJ)/%.o:%.s
 	riscv32-unknown-elf-objdump -M numeric,no-aliases -D $< > $@
 
 clean:
-	rm -f $(BIN)/simerastosthenes \
+	rm -f $(BIN)/simeratosthenes \
 	$(OBJ)/crt0.o \
-	$(OBJ)/erastosthenes.bin \
+	$(OBJ)/eratosthenes.bin \
 	../../../hwtst/upduino2/ice40loaderprog.hv \
 	../../../hwtst/iceblink40-hx1k/ice40loaderprog.hv
