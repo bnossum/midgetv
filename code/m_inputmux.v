@@ -231,7 +231,8 @@ module m_inputmux
                    * Dsram[x] ------------|0/   >__|
                    * 
                    */
-                  wire adrok = ADR_O[30:27] == 4'b1100;
+                  wire adrok; // = ADR_O[30:27] == 4'b1100 )
+                  SB_LUT4 #(.LUT_INIT(16'h1000)) l_adrok( .O(adrok), .I3(ADR_O[30]), .I2(ADR_O[29]),   .I1(ADR_O[28]), .I0(ADR_O[27]));
                   SB_LUT4 #(.LUT_INIT(16'hc0aa)) l_mux( .O(theio[k]), .I3(STB_O), .I2(adrok),   .I1(DAT_I[k]), .I0(Dsram[k]));
                end
             end // for-loop

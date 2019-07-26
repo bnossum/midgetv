@@ -16,6 +16,8 @@
 `include "../../code/m_alu.v"
 `include "../../code/m_immexp_zfind_q.v"
 `include "../../code/m_ram.v"
+`include "../../code/m_ram_a16.v"
+`include "../../code/m_ram_a17.v"
 `include "../../code/m_ebr.v"
 `include "../../code/m_rai.v"
 `include "../../code/m_wai.v"
@@ -34,7 +36,7 @@
 
 module mytop
   # ( parameter
-      SRAMADRWIDTH       = 16,
+      SRAMADRWIDTH       = 17,
       SIMEBRADRWIDTH     = 8, 
       IWIDTH             = 32, 
       NO_CYCLECNT        = 0, 

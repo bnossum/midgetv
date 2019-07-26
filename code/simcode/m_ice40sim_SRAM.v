@@ -9,7 +9,7 @@
  */
 module m_ice40sim_SRAM
   # ( parameter
-      SRAMADRWIDTH       = 16,  
+      SRAMADRWIDTH       = 17,  
       SIMEBRADRWIDTH     =  8, 
       IWIDTH             = 32, 
       NO_CYCLECNT        = 0, 

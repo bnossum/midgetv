@@ -1,0 +1,49 @@
+/*  =============================================================================
+    Part of midgetv
+    2019. Copyright B. Nossum.
+    For licence, see LICENCE
+    =============================================================================
+    Check SRAM seems to be working by the sieve of Eratosthenes.
+*/
+#include <stdint.h>
+
+#if sim
+// Simulation on PC
+#define sim_RAMSIZE ((1<<16)-1)
+#include <stdint.h>
+#include <stdlib.h>
+#include <stdio.h>
+uint8_t theSRAM[(1<<17)/8];
+uint8_t *SRAM = theSRAM;
+#else
+#endif
+
+
+/////////////////////////////////////////////////////////////////////////////
+uint32_t find_sizeofram( void ) {
+        int i = 2;
+        int adr1,adr2;
+        while (1) {
+                adr1 = (1<<i);
+                adr2 = (1<<(i+1));
+#if sim
+                adr1 &= sim_RAMSIZE;
+                adr2 &= sim_RAMSIZE;
+#endif
+                *(SRAM+adr1) = 0;
+                *(SRAM+adr2) = 0x55;
+                if ( *(SRAM+adr1) != 0 )
+                        break;
+                i++;
+        }
+                return i;
+        }       
+        
+/////////////////////////////////////////////////////////////////////////////
+int main( void ) {
+        uint32_t sizeofram = find_sizeofram();
+#if sim
+        exit(printf( "Ramsize : 0x%x\n", sizeofram ));
+#endif
+}
+        

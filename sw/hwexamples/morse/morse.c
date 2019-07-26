@@ -1,3 +1,10 @@
+/*  =============================================================================
+    Part of midgetv
+    2019. Copyright B. Nossum.
+    For licence, see LICENCE
+    =============================================================================
+    Blink out a morse message
+*/
 #include <stdint.h>
 
 
@@ -8,7 +15,7 @@
 int dummyled;
 int volatile * volatile LED = &dummyled;
 #else
-#define LED (uint32_t *)0x40000004
+#define LED (uint32_t *)0x60000004
 #endif
 
 

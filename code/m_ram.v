@@ -65,7 +65,7 @@
  *    16   64 KiB SRAM (2 SB_SPRAM256KA)   64 KiB organized as 32 * 14,
  *    17  128 KiB SRAM (4 SB_SPRAM256KA)  128 KiB organized as 32 * 15.
  */
-module m_newram
+module m_ram
   # ( parameter HIGHLEVEL = 1,
       SRAMADRWIDTH = 16
       )
@@ -81,7 +81,6 @@ module m_newram
     output        m_ram_killwarnings
     );
 
-   /*AUTOWIRE*/
    generate
       if ( SRAMADRWIDTH == 0 ) begin
          // No SRAM at all
@@ -89,13 +88,14 @@ module m_newram
          assign ACK_O = 1'b0;
          assign m_ram_killwarnings = CLK_I & STB_I & WE_I & &ADR_I & &DAT_I & &SEL_I;
       end else if ( SRAMADRWIDTH == 16 ) begin
+         wire            m_ram_a16_killwarnings;
          m_ram_a16 #(.HIGHLEVEL(HIGHLEVEL))
          m_ram_inst
            (/*AUTOINST*/
             // Outputs
             .DAT_O                      (DAT_O[31:0]),
             .ACK_O                      (ACK_O),
-            .m_ram_killwarnings         (m_ram_killwarnings),
+            .m_ram_a16_killwarnings     (m_ram_a16_killwarnings),
             // Inputs
             .CLK_I                      (CLK_I),
             .DAT_I                      (DAT_I[31:0]),
@@ -103,16 +103,18 @@ module m_newram
             .STB_I                      (STB_I),
             .WE_I                       (WE_I),
             .SEL_I                      (SEL_I[3:0]));
-         assign m_ram_killwarnings = CLK_I & STB_I & WE_I & &ADR_I & &DAT_I & &SEL_I;
+         assign m_ram_killwarnings = CLK_I & STB_I & WE_I & &ADR_I & &DAT_I & &SEL_I | m_ram_a16_killwarnings;
          
       end else begin
+         wire            m_ram_a17_killwarnings;
+         // End of automatics
          m_ram_a17 #(.HIGHLEVEL(HIGHLEVEL))
          m_ram_inst
            (/*AUTOINST*/
             // Outputs
             .DAT_O                      (DAT_O[31:0]),
             .ACK_O                      (ACK_O),
-            .m_ram_killwarnings         (m_ram_killwarnings),
+            .m_ram_a17_killwarnings     (m_ram_a17_killwarnings),
             // Inputs
             .CLK_I                      (CLK_I),
             .DAT_I                      (DAT_I[31:0]),
@@ -120,6 +122,8 @@ module m_newram
             .STB_I                      (STB_I),
             .WE_I                       (WE_I),
             .SEL_I                      (SEL_I[3:0]));
+
+         assign m_ram_killwarnings = CLK_I & STB_I & WE_I & &ADR_I & &DAT_I & &SEL_I | m_ram_a17_killwarnings;
       end
    endgenerate
 endmodule
