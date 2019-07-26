@@ -7,6 +7,7 @@
 
     This program may be simulated, but with the default size of SRAM, we have:
 
+    64 KiB:
     Thu Jul 25 10:03:54 CEST 2019
     ../../obj_dir/erastosthenes.bin          success 26782493 instructions in 233562018 cycles, cpi =  8.72 At 24 MHz, runtime =                9.732 s
     Thu Jul 25 10:31:27 CEST 2019
@@ -14,17 +15,22 @@
     So a 30 min simulation time, long.
     Incidentially this indicates the simulator clock speed f = 233562018/1653 = 141 kHz.
 
+    128 KiB:
+    Fri Jul 26 07:47:52 CEST 2019
+    erastosthenes.bin                        success 46571369 instructions in 403939617 cycles, cpi =  8.67 At 24 MHz, runtime = 16.831               s
+    Fri Jul 26 08:40:02 CEST 2019
     
 */
 #include <stdint.h>
 
 #if sim
 // Simulation on PC
-#define sim_ADRLINES 4
+#define sim_ADRLINES 17
 #define sim_RAMSIZEBYTES ((1<<sim_ADRLINES))
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <assert.h>
 uint8_t theSRAM[sim_RAMSIZEBYTES];
 uint8_t *SRAM = theSRAM;
 int dummyled;
@@ -76,8 +82,12 @@ void simdump( void ) {
 
 /////////////////////////////////////////////////////////////////////////////
 void fillmemFFFFFFFF( uint32_t *p, unsigned int n) {
-        while ( n-- )
+        while ( n-- ) {
+#if sim
+                assert( (uint8_t *)p < SRAM + sim_RAMSIZEBYTES );
+#endif
                 *p++ = 0xffffffff;
+        }
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -100,8 +110,11 @@ int main( void ) {
         int looplim;
         int i,j;
         
-        *LED = 0;
+        *LED = 8;
         byteadrwidth = find_sizeofram();
+#if sim
+        printf( "byteadrwidth = %d\n", byteadrwidth );
+#endif
         //byteadrwidth = 10;
 
         bitadrwidth = byteadrwidth + 3;
@@ -117,11 +130,7 @@ int main( void ) {
                 n -= 64;
                 SRAM += 8;
         }
-        fillmemFFFFFFFF( (uint32_t *)SRAM, n>>2 );
-
-//        *(uint32_t *)SRAM = looplim;
-//        simdump();
-//        simend();
+        fillmemFFFFFFFF( (uint32_t *)SRAM, n>>5 );
 
 #if sim
         printf( "Ramsize in bits : n=0x%x. Looplim = 0x%x\n", n, looplim );
@@ -167,6 +176,8 @@ int main( void ) {
         }
 #else
         if ( ok ) {
+                *LED = 4;
+        } else {
                 *LED = 2;
         }
 #endif

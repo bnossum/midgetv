@@ -24,30 +24,31 @@ module m_ram_a17
          // -----------------------------------------------------------------------------
    wire [63:0]    o;
    wire [63:0]    zo;
-   wire [7:0]     srammaskA = {{2{SEL_I[3]}},{2{SEL_I[2]}},{2{SEL_I[1]}},{2{SEL_I[0]}}};
-   wire [15:0]    srammask  = {srammaskA,srammaskA};
+   wire [7:0]     srammask = {{2{SEL_I[3]}},{2{SEL_I[2]}},{2{SEL_I[1]}},{2{SEL_I[0]}}};
    wire [1:0]     we;
    
    generate
-      genvar      k;
+      genvar      j,k;
       
-      for ( k = 0; k < 4; k = k + 1 ) begin
-         SB_SPRAM256KA sram
-                (
-                 .DATAIN     ( DAT_I[16*(k/2)+15 : 16*(k/2)]  ),
-                 .ADDRESS    ( ADR_I[15 : 2]                  ),
-                 .MASKWREN   ( srammask[4*k+3 : 4*k]          ),
-                 .WREN       ( we[k/2]                        ),
-                 .CLOCK      ( CLK_I                          ),
-                 .CHIPSELECT ( 1'b1                           ),
-                 .POWEROFF   ( 1'b1                           ), // Note. Shockingly bad name. Shame on Lattice
-                 .STANDBY    ( 1'b0                           ),
-                 .SLEEP      ( 1'b0                           ),
-`ifdef verilator                                              
-                 .preDATAOUT ( zo[16*k+15 : 16*k]             ),
-`endif                                                        
-                 .DATAOUT    ( o[16*k+15 : 16*k]              )
-                 );
+      for ( j = 0; j < 2; j = j + 1 ) begin : blk0
+         for ( k = 0; k < 2; k = k + 1 ) begin : blk1
+            SB_SPRAM256KA sram
+                   (
+                    .DATAIN     ( DAT_I[k*16+15 : k*16]       ),
+                    .ADDRESS    ( ADR_I[15 : 2]               ),
+                    .MASKWREN   ( srammask[k*4+3 : k*4]       ),
+                    .WREN       ( we[j]                       ),
+                    .CLOCK      ( CLK_I                       ),
+                    .CHIPSELECT ( 1'b1                        ),
+                    .POWEROFF   ( 1'b1 ), // Note. Shockingly bad name. Shame on Lattice
+                    .STANDBY    ( 1'b0                        ),
+                    .SLEEP      ( 1'b0                        ),
+`ifdef verilator                       
+                    .preDATAOUT ( zo[j*32+k*16+15 : j*32+k*16]),
+`endif
+                    .DATAOUT    ( o[j*32+k*16+15 : j*32+k*16] )
+                    );
+         end
       end
    endgenerate
    

@@ -15,7 +15,9 @@
 #include <inttypes.h>
 
 /* Naming of Verilator of generator blocks is a mystery for me. 
+ * This macro __must__ correspond to parameter SRAMADRWIDTH in m_ice40sim_SRAM.v
  */
+//#define SRAM_ADRLINES 16
 #define SRAM_ADRLINES 17
 
 
@@ -91,23 +93,21 @@ uint32_t getsram( void *vtb, uint32_t byteadr ) {
 
 // With 16-bit ADR:
 #if SRAM_ADRLINES == 16
-    d =   (tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ram->genblk2__DOT__genblk1__DOT__m_ram_inst->sram0->get_as_16(wa) <<  0 );
-    d |=  (tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ram->genblk2__DOT__genblk1__DOT__m_ram_inst->sram1->get_as_16(wa) << 16 );
-//    TOP__v__inst_ice40sim_EBRonly__inst_midgetv_core__inst_ram__genblk2__DOT__genblk1__DOT__m_ram_inst__sram0__get_as_16(wa) <<  0 );
-//    TOP__v__inst_ice40sim_EBRonly__inst_midgetv_core__inst_ram__genblk2__DOT__genblk1__DOT__m_ram_inst__sram1__get_as_16(wa) << 16 );
+        d =   (tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ram->genblk2__DOT__genblk1__DOT__m_ram_inst->sram0->get_as_16(wa) <<  0 );
+        d |=  (tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ram->genblk2__DOT__genblk1__DOT__m_ram_inst->sram1->get_as_16(wa) << 16 );
 #elif SRAM_ADRLINES == 17
-    if ( (byteadr & 0x10000) == 0 ) {
-            d =  (tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ram->genblk2__DOT__genblk2__DOT__m_ram_inst->genblk1__BRA__0__KET____DOT__sram->get_as_16(wa) <<  0 );
-            d |= (tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ram->genblk2__DOT__genblk2__DOT__m_ram_inst->genblk1__BRA__1__KET____DOT__sram->get_as_16(wa) <<  0 );
-//uint3          TOP__v__inst_ice40sim_EBRonly__inst_midgetv_core__inst_ram__genblk2__DOT__genblk2__DOT__m_ram_inst__genblk1__BRA__0__KET____DOT__sram__get_as_16(uint32_t adr);
-    } else {
-            d =  (tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ram->genblk2__DOT__genblk2__DOT__m_ram_inst->genblk1__BRA__2__KET____DOT__sram->get_as_16(wa) <<  0 );
-            d |= (tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ram->genblk2__DOT__genblk2__DOT__m_ram_inst->genblk1__BRA__3__KET____DOT__sram->get_as_16(wa) <<  0 );
-    }
+        if ( (byteadr & 0x10000) == 0 ) {
+                d =  (tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ram->genblk2__DOT__genblk2__DOT__m_ram_inst->blk0__BRA__0__KET____DOT__blk1__BRA__0__KET____DOT__sram->get_as_16(wa) <<  0 );
+                d |= (tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ram->genblk2__DOT__genblk2__DOT__m_ram_inst->blk0__BRA__0__KET____DOT__blk1__BRA__1__KET____DOT__sram->get_as_16(wa) << 16 );
+        } else {
+                d =  (tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ram->genblk2__DOT__genblk2__DOT__m_ram_inst->blk0__BRA__1__KET____DOT__blk1__BRA__0__KET____DOT__sram->get_as_16(wa) <<  0 );
+                d |= (tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ram->genblk2__DOT__genblk2__DOT__m_ram_inst->blk0__BRA__1__KET____DOT__blk1__BRA__1__KET____DOT__sram->get_as_16(wa) << 16 );
+        }
 #endif
-       return d;
-
+        return d;        
 }
+
+//../../obj_dir/Vm_ice40sim_SRAM_SB_SPRAM256KA.h:    uint32_t     TOP__v__inst_ice40sim_EBRonly__inst_midgetv_core__inst_ram__genblk2__DOT__genblk2__DOT__m_ram_inst__blk0__BRA__0__KET____DOT__blk1__BRA__0__KET____DOT__sram__get_as_16(uint32_t adr);
 
 /////////////////////////////////////////////////////////////////////////////
 /* Not finished.
@@ -195,9 +195,9 @@ void initialize_ebr_sram( Vm_ice40sim_SRAM *tb, FILE *fi, char *finame ) {
                 tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ram->genblk2__DOT__genblk1__DOT__m_ram_inst->sram0->set_as_16(k>>2,h);
 #elif SRAM_ADRLINES == 17
                 if ( (k & 0x10000) == 0 ) {
-                        tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ram->genblk2__DOT__genblk2__DOT__m_ram_inst->genblk1__BRA__0__KET____DOT__sram->set_as_16(k>>2,h);
+                        tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ram->genblk2__DOT__genblk2__DOT__m_ram_inst->blk0__BRA__0__KET____DOT__blk1__BRA__0__KET____DOT__sram->set_as_16(k>>2,h);
                 } else {
-                        tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ram->genblk2__DOT__genblk2__DOT__m_ram_inst->genblk1__BRA__2__KET____DOT__sram->set_as_16(k>>2,h);
+                        tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ram->genblk2__DOT__genblk2__DOT__m_ram_inst->blk0__BRA__1__KET____DOT__blk1__BRA__0__KET____DOT__sram->set_as_16(k>>2,h);
                 }
 #endif
                 h = (ebr[j+3]<<8) | ebr[j+2];
@@ -206,9 +206,9 @@ void initialize_ebr_sram( Vm_ice40sim_SRAM *tb, FILE *fi, char *finame ) {
                 tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ram->genblk2__DOT__genblk1__DOT__m_ram_inst->sram1->set_as_16(k>>2,h);
 #elif SRAM_ADRLINES == 17
                 if ( (k & 0x10000) == 0 ) {
-                        tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ram->genblk2__DOT__genblk2__DOT__m_ram_inst->genblk1__BRA__1__KET____DOT__sram->set_as_16(k>>2,h);
+                        tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ram->genblk2__DOT__genblk2__DOT__m_ram_inst->blk0__BRA__0__KET____DOT__blk1__BRA__1__KET____DOT__sram->set_as_16(k>>2,h);
                 } else {
-                        tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ram->genblk2__DOT__genblk2__DOT__m_ram_inst->genblk1__BRA__3__KET____DOT__sram->set_as_16(k>>2,h);
+                        tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ram->genblk2__DOT__genblk2__DOT__m_ram_inst->blk0__BRA__1__KET____DOT__blk1__BRA__1__KET____DOT__sram->set_as_16(k>>2,h);
                 }
 #endif
         }

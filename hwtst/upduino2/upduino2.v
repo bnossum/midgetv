@@ -86,8 +86,12 @@ module mytop
    always @(posedge clklf) 
      hfen <= (hfen + 4'h1) | {hfen[3],3'h0};
 
+   // CLKHF_DIV "0b00"  48 MHz
+   //           "0b01"  24 MHz
+   //           "0b10"  12 MHz
+   //           "0b11"   6 MHz
    SB_HFOSC 
-     # ( .CLKHF_DIV( "0b01" )        
+     # ( .CLKHF_DIV( "0b10" )        
          )
    inthosc(.CLKHFPU(1'b1),    // Power on
            .CLKHFEN(hfen[3]), // Enable output
