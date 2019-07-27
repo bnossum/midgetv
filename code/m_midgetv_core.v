@@ -635,6 +635,7 @@ module m_midgetv_core
         .clk                            (clk),
         .sa11                           (sa11),
         .sa14                           (sa14),
+        .corerunning                    (corerunning),
         .enaQ                           (enaQ),
         .INSTR                          (INSTR[31:0]));
    

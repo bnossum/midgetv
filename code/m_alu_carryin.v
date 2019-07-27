@@ -8,9 +8,6 @@
  * 
  * Free resources here give msb of quantity to shift right.
  * 
- * In an ideal world, sa02, sa03, raluF, DOUT[0] (in m_ebr) or ADR_O[0] is
- * the origin of the critical path. If sra_msb is part of the 
- * critical path, it should be made elsewhere.
  *                                          
  *               | alu_carryin                      sa03           
  *              /y\     ___                         |sa02          
@@ -55,8 +52,9 @@
  *               |
  *               VCC
  * 
- * The experiment was not a success, I start to believe I use too many
- * input signals to a PLB. 
+ * The experiment was not a success, for unknown reasons. But by making
+ * preprealucyin out of the 5-bit shiftcounter instead, I succeded.
+ * 
  */
 module m_alu_carryin  # ( parameter HIGHLEVEL = 0 )   
    (

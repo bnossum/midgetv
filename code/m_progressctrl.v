@@ -114,34 +114,15 @@ module m_progressctrl
          SB_DFFESR r_asel2( .Q(SEL_O[2]), .C(clk), .E(en), .R(RST_I), .D(cmb_asel[2]));
          SB_DFFESR r_asel3( .Q(SEL_O[3]), .C(clk), .E(en), .R(RST_I),. D(cmb_asel[3]));
 
-//         SB_LUT4 #(.LUT_INIT(16'hfff9)) l_usedefault( .O(usedefault), .I3(sa27), .I2(sa26), .I1(sa25), .I0(sa24));
-//         SB_LUT4 #(.LUT_INIT(16'h004e)) l_cmb_bsel0( .O(cmb_bsel[0]), .I3(usedefault), .I2(sa24), .I1(B[1]), .I0(B[0]));
-//         SB_LUT4 #(.LUT_INIT(16'h004d)) l_cmb_bsel1( .O(cmb_bsel[1]), .I3(usedefault), .I2(sa24), .I1(B[1]), .I0(B[0]));
-//         SB_LUT4 #(.LUT_INIT(16'h001b)) l_cmb_bsel2( .O(cmb_bsel[2]), .I3(usedefault), .I2(sa24), .I1(B[1]), .I0(B[0]));
-//         SB_LUT4 #(.LUT_INIT(16'h0017)) l_cmb_bsel3( .O(cmb_bsel[3]), .I3(usedefault), .I2(sa24), .I1(B[1]), .I0(B[0]));
-//         SB_LUT4 #(.LUT_INIT(16'h005c)) l_cmb_asel0( .O(cmb_asel[0]), .I3(RST_I), .I2(sa41), .I1(SEL_O[0]), .I0(cmb_bsel[0]));
-//         SB_LUT4 #(.LUT_INIT(16'h005c)) l_cmb_asel1( .O(cmb_asel[1]), .I3(RST_I), .I2(sa41), .I1(SEL_O[1]), .I0(cmb_bsel[1]));
-//         SB_LUT4 #(.LUT_INIT(16'h005c)) l_cmb_asel2( .O(cmb_asel[2]), .I3(RST_I), .I2(sa41), .I1(SEL_O[2]), .I0(cmb_bsel[2]));
-//         SB_LUT4 #(.LUT_INIT(16'h005c)) l_cmb_asel3( .O(cmb_asel[3]), .I3(RST_I), .I2(sa41), .I1(SEL_O[3]), .I0(cmb_bsel[3]));
-//
-//         SB_LUT4 #(.LUT_INIT(16'heeee)) l_en( .O(en), .I3(1'b0), .I2(1'b0), .I1(RST_I), .I0(sa41) );
-//         SB_DFFESS r_bsel0( .Q(bmask[0]), .C(clk), .E(en), .S(RST_I), .D(cmb_bsel[0]));
-//         SB_DFFESS r_bsel1( .Q(bmask[1]), .C(clk), .E(en), .S(RST_I), .D(cmb_bsel[1]));
-//         SB_DFFESS r_bsel2( .Q(bmask[2]), .C(clk), .E(en), .S(RST_I), .D(cmb_bsel[2]));
-//         SB_DFFESS r_bsel3( .Q(bmask[3]), .C(clk), .E(en), .S(RST_I), .D(cmb_bsel[3]));
-//         SB_DFF r_asel0( .Q(SEL_O[0]), .C(clk), .D(cmb_asel[0]));
-//         SB_DFF r_asel1( .Q(SEL_O[1]), .C(clk), .D(cmb_asel[1]));
-//         SB_DFF r_asel2( .Q(SEL_O[2]), .C(clk), .D(cmb_asel[2]));
-//         SB_DFF r_asel3( .Q(SEL_O[3]), .C(clk), .D(cmb_asel[3]));
       end
    endgenerate
 
    wire             badalignment;
    generate
       if ( stb_HIGHLEVEL == 0 || we_HIGHLEVEL == 0 ) begin
-         SB_LUT4 #(.LUT_INIT(16'he0e0)) l_badalignment( .O(badalignment), .I3(1'b0), .I2(sa30), .I1(B[1]), .I0(B[0]));
+         SB_LUT4 #(.LUT_INIT(16'he0ff)) l_badalignment( .O(badalignment), .I3(corerunning), .I2(sa30), .I1(B[1]), .I0(B[0]));
       end else begin
-         assign badalignment = sa30 & (B[1] | B[0]); // 
+         assign badalignment = ~corerunning | (sa30 & (B[1] | B[0])); // 
       end
    endgenerate
    

@@ -14,6 +14,7 @@ module m_immexp_zfind_q
     input         clk, //         System clock
     input         sa11, //        True when immediate expand
     input         sa14, //        If high, clear Q. (enaQ must also be high)
+    input         corerunning, // When not running, keep Q clear.
     input         enaQ, //        Update Q
    /* verilator lint_off UNUSED */
     input [31:0]  INSTR, //       Using input [31:2] INSTRUCTION makes verilator fail in lowlevel
@@ -135,7 +136,7 @@ module m_immexp_zfind_q
          
          always @(posedge clk) begin
             if ( enaQ ) begin
-               if ( sa14 ) begin
+               if ( sa14 | ~corerunning ) begin
                   r_ADR_O <= 32'h0;
                   r_rzcy32 <= 1'b0;
                end else begin
@@ -323,9 +324,11 @@ module m_immexp_zfind_q
          SB_LUT4 # ( .LUT_INIT(16'hafc0)) L_1829(.O(F[31]), .I3(sa13),  .I2(sa10),.I1(B[31]),.I0(INSTR[31]));  SB_CARRY CY_1829(.CO(zcy32),.CI(zcy31),.I1(sa10),.I0(B[31]));
          
          SB_LUT4 # ( .LUT_INIT(16'hff00)) cmb_zcy32(.O(BisnotZero), .I3(zcy32), .I2(1'b0), .I1(1'b0), .I0(1'b0));
-         
+
+         wire           sa14_or_nCORERUNNING;
+         SB_LUT4 # ( .LUT_INIT(16'hbbbb)) cmb_sa14_or_nCORERUNNING( .O(sa14_or_nCORERUNNING), .I3(1'b0), .I2(1'b0), .I1(corerunning), .I0(sa14));
          for ( j = 0; j < 32; j = j + 1 ) begin : blk0
-            SB_DFFESR r(.Q(ADR_O[j]), .C(clk), .E(enaQ), .D(F[j]), .R(sa14));
+            SB_DFFESR r(.Q(ADR_O[j]), .C(clk), .E(enaQ), .D(F[j]), .R(sa14_or_nCORERUNNING));
          end
          SB_DFFESR rNE0(.Q(rzcy32), .D(BisnotZero), .C(clk), .E(enaQ), .R(sa14));
       end

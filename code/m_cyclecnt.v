@@ -32,8 +32,8 @@
  * 1x    ADR_O[5:0]           Let through ADR_O
  * 
  * This module also determines if midgetv is up and running. 
- * 1. If we have no cyclecounter, corerunning = start, an external signal that
- *    is supposed to go high and stay high, when midgetv is to be let free.
+ * 1. If we have no cyclecounter, corerunning goes high one cycle after
+ *    input signal "start is asserted.  
  * 2. If we have a cyclecounter, start is used as an enable for the counter, and
  *    must be high 64 consequtive cycles to let midgetv free.
  * 
@@ -85,12 +85,19 @@ module m_cyclecnt
             assign m_cyclecnt_kill = clk;
 
             /*
-             * No cycle counter, so no other option than to run the core based 
-             * on start alone. No possibilities to find a bus error. 
+             * No cycle counter, so no possibilities to find a bus error. 
              */
-            assign corerunning = start;
             assign nobuserror  = 1'b1;
                         
+            /*
+             * Wait 1 cycle (even if "start" is hardcoded to 1'b1),
+             * to get valid data out of EBRs
+             */
+            reg rcrun;
+            always @(posedge clk)
+              rcrun <= rcrun | start;
+            assign corerunning = rcrun;
+            
          end else begin
             
             // =======================================================
@@ -152,10 +159,18 @@ module m_cyclecnt
             SB_LUT4 #(.LUT_INIT(16'hfbfb)) qqmux0(.O(QQ[0]),.I3(1'b0),.I2(sa16), .I1(sa17), .I0(ADR_O[0])); 
             SB_LUT4 #(.LUT_INIT(16'h0b0b)) qqmux1(.O(QQ[1]),.I3(1'b0),.I2(sa16), .I1(sa17), .I0(ADR_O[1])); 
 
-            assign corerunning = start;
             assign nobuserror = 1'b1;            
             assign m_cyclecnt_kill = clk;
 
+            // Inflates from 147 to 153! Why?
+//            wire cmb_rcrun;
+//            SB_LUT4 #(.LUT_INIT(16'heeee)) cmb_rcrun_l(.O(cmb_rcrun), .I3(1'b0), .I2(1'b0), .I1(corerunning), .I0(start));
+//            SB_DFF rcrun(.Q(corerunning), .C(clk), .D(cmb_rcrun));
+            reg rcrun;
+            always @(posedge clk)
+              rcrun <= rcrun | start;
+            assign corerunning = rcrun;
+            
          end else begin
 
             // =======================================================

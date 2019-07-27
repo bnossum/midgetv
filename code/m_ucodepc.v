@@ -100,7 +100,7 @@ module m_ucodepc
    wire         illegal_funct7_or_illegal_rs1_rd;
    wire         main_illegal;
    
-   assign usedinx   = sa28 | !corerunning;
+   assign usedinx   = sa28;
    assign maybranch = Adr0Mustbe0 | Adr1Mustbe0 | use_brcond | (sa32 & ~sa15);
    
    // Slight mangling of INSTRUCTION to an index. 
@@ -245,7 +245,7 @@ module m_ucodepc
       end
    endgenerate
 
-   assign  illegal = main_illegal | illegal_funct7_or_illegal_rs1_rd;
+   assign  illegal = (main_illegal | illegal_funct7_or_illegal_rs1_rd) & corerunning;
    
    
    /* takebranch. Microcode must diverge when we have an alignment error,
@@ -264,23 +264,19 @@ module m_ucodepc
     * B[31] -------------|_|
     */
    wire             qualint_or_RST_I = qualint | RST_I;
-   wire             illegal_or_qualint = (illegal | qualint) & corerunning;
-   wire             illegal_or_qualint_or_RST_I = (illegal | qualint | RST_I) & corerunning;
+   wire             illegal_or_qualint = (illegal | qualint);
+   wire             illegal_or_qualint_or_RST_I = (illegal | qualint | RST_I);
    assign takebranch = 
                        (Adr0Mustbe0 & B[0]) |
                        (Adr1Mustbe0 & B[1]) |                
                        (use_brcond & is_brcond) |
                        (sa32 & ~sa15 & B[31] );
-   wire             usedinx_or_RST_I = usedinx | RST_I;
-   assign minx[7:2] = {6{corerunning}} & (usedinx_or_RST_I ? (dinx[7:2] | {6{illegal_or_qualint_or_RST_I}}) : rinx[7:2]);
-   assign minx[1]   = corerunning & (usedinx_or_RST_I ? ( (dinx[1] | illegal_or_qualint) & ~RST_I)     : rinx[1]);
-   assign minx[0]   = corerunning & (~nobuserror | (usedinx_or_RST_I ? (illegal_or_qualint_or_RST_I ? qualint_or_RST_I : dinx[0]) : (maybranch ? takebranch : rinx[0])));
+   wire             usedinx_or_RST_I = usedinx | RST_I | ~corerunning;
 
-   // // Alternative. Revise this when analyzing startup conditions
-   // assign minx[7:2] = usedinx_or_RST_I ? (dinx[7:2] | {6{illegal_or_qualint_or_RST_I_AND_corerunning}}) : rinx[7:2];
-   // assign minx[1]   = corerunning & (usedinx_or_RST_I ? ( (dinx[1] | illegal_or_qualint_AND_corerunning) & ~RST_I)     : rinx[1]);
-   // assign minx[0]   = corerunning & (~nobuserror | (usedinx_or_RST_I ? (illegal_or_qualint_or_RST_I_AND_corerunning ? qualint_or_RST_I : dinx[0]) : (maybranch ? takebranch : rinx[0])));
-   
+   assign minx[7:2] = (usedinx_or_RST_I ? (dinx[7:2] | {6{illegal_or_qualint_or_RST_I}}) : rinx[7:2]);
+   assign minx[1]   = (usedinx_or_RST_I ? ( (dinx[1] | illegal_or_qualint) & ~RST_I) : rinx[1]);
+   assign minx[0]   = (~nobuserror | (usedinx_or_RST_I ? (illegal_or_qualint_or_RST_I ? qualint_or_RST_I : dinx[0]) : (maybranch ? takebranch : rinx[0])));   
+
    assign ucodepc_killwarnings = INSTR[31] | &INSTR[29:15] | &INSTR[11:7] | &B | INSTR[1];
    
 endmodule

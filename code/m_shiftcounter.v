@@ -3,18 +3,29 @@
  * 2019. Copyright B. Nossum.
  * For licence, see LICENCE
  * -----------------------------------------------------------------------------
- * This is a 5-bit down counter.
+ * This is a 5-bit down counter. This module also give a 1'b1 on a carry chain,
+ * to save one LUT in the ALU.
  * 
+ * {sa19,sa18}
+ * 00           Load shift counter from low 5 bits of accumulator
+ * 10           Load shift counter as follows:  B[1:0]   
+ *                                              00      0
+ *                                              01      8
+ *                                              10     16
+ *                                              11     24
+ * 01           Count down
+ * 11           Hold
+ *             
  */
 module m_shiftcounter
   # ( parameter HIGHLEVEL = 0 )   
    (
-    input       clk,
-    input       sa18,sa19,
-    input [4:0] B,
-    output      lastshift,
-    output      r_issh0_not,
-    output      preprealucyin // Always 1
+    input       clk, //          System clock
+    input       sa18,sa19, //    Operation
+    input [4:0] B, //            For initial value
+    output      lastshift, //    Counter decrements to zero
+    output      r_issh0_not, //  Needed for shifts of zero.
+    output      preprealucyin // Always 1, saves one LUT in the alu.
     );
 `ifdef verilator
    wire [4:0]   dbg_shiftcnt;
@@ -26,11 +37,11 @@ module m_shiftcounter
    
    generate
       if ( HIGHLEVEL ) begin
-
-         reg [4:0]    rshcnt;
-         reg          rr_issh0_not;
-         reg [5:0]   shcnt;
-
+         
+         reg [4:0] rshcnt;
+         reg       rr_issh0_not;
+         reg [5:0] shcnt;
+         
          always @(/*AS*/B or rshcnt or sa18 or sa19) begin
             case ( {sa19,sa18} )
               2'b00 : shcnt = {1'b0,B[4:0]};
@@ -51,73 +62,6 @@ module m_shiftcounter
          assign dbg_shiftcnt = rshcnt[4:0];
 `endif            
       end else begin
-/*
- *
- *                        +-------- lastshift = ~shcy[4] & sa18. The cycle we are loading the counter is not the last shift..
- *                  ___   |  ___  
- *                 |I0 |  | |I0 | ~lastshift     __                
- *                 |I1 |--+-|I1-|---------------|  |-- r_issh0_not
- *        sa18 ----|I2 |    |I2 |               |  |               
- *              +--|I3_|    |I3_|               >__|               
- *              |shcy[4]
- *             /y\  ___
- *  d4   ------(((-|I0 |     __
- *  sa18 ------+((-|I1 |----|  |-- rshcnt[4]
- *  rshcnt[4] --(+-|I2 |    |  |
- *              +--|I3_|    >__|               
- *              |shcy[3]
- *             /y\  ___
- *  d3   ------(((-|I0 |     __
- *  sa18 ------+((-|I1 |----|  |-- rshcnt[3]
- *  rshcnt[3] --(+-|I2 |    |  |
- *              +--|I3_|    >__|
- *              |shcy[2]
- *             /y\  ___
- *  d2   ------(((-|I0 |     __
- *  sa18 ------+((-|I1 |----|  |-- rshcnt[2]
- *  rshcnt[2] --(+-|I2 |    |  |
- *              +--|I3_|    >__|
- *              |shcy[1]
- *             /y\  ___
- *  d1   ------(((-|I0 |     __
- *  sa18 ------+((-|I1 |----|  |-- rshcnt[1]
- *  rshcnt[1] --(+-|I2 |    |  |
- *              +--|I3_|    >__|
- *              |shcy[0]
- *             /y\  ___
- *  sa18 ------(((-|I0 |     __
- *  sa19 ------+((-|I1 |----|  |-- rshcnt[0]
- *  rshcnt[0] --(+-|I2 |    |  |
- *  B[0] -------(--|I3_|    >__|
- *              |
- *              vcc
- * 
- *            ___ 
- *  B[1] ----|I0 |-- d1 = ~sa19 & B[1]
- *  sa19 ----|I1 |
- *       ----|I2 |
- *       ----|I3_|
- * 
- *            ___ 
- *  B[2] ----|I0 |-- d2 = ~sa19 & B[2]
- *  sa19 ----|I1 |
- *       ----|I2 |
- *       ----|I3_|
- * 
- *            ___ 
- *  B[3] ----|I0 |-- d3 = (~sa19 & B[3]) | sa19 & B[0]
- *  B[0] ----|I1 |
- *  sa19 ----|I2 |
- *       ----|I3_|
- * 
- *            ___ 
- *  B[4] ----|I0 |-- d4 = (~sa19 & B[4]) | sa19 & B[1]
- *  B[1] ----|I1 |
- *  sa19 ----|I2 |
- *       ----|I3_|
- * 
- */
-
 /*
  *              | preprealucyin == VCC
  *              |
