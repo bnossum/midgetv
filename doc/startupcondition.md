@@ -14,23 +14,23 @@ m_alu.v                    | 0 |
 m_alu_carryin.v            | 0 |
 m_condcode.v               | 1 | `raluF_r`
 m_cyclecnt.v               | Lowlevel, 1 | `corerunning == rcrun`. 
-                           | Higlevel, 7 | `corerunning == rcrun`.  
-                           |             | `rcnt[5:0]`
+               x           | Higlevel, 7 | `corerunning == rcrun`.  
+               x           |    x        | `rcnt[5:0]`
 m_ebr.v                    | 0 | But this is the registers etc of midgetv. Attention to signal `iwe`
 m_immexp_zfind_q.v         |32 | Give `ADR_O`
 m_inputmux.v               |1+IWIDTH  | Pipelined `sa00mod`
-                           |          | `rDee[IWIDTH-1:0]`
-m_midgetv_core.v           |0  |
+              x            | x        | `rDee[IWIDTH-1:0]`
+m_midgetv_core.v           |0  | x
 m_opreg.v                  |32 | `OpC`
 m_progressctrl.v           |12 | `bmask[3:0]`, `SEL_O[3:0]`, `STB_O`, `sram_stb`, `WE_O`, `ctrlreg_we`, `AckM`
-m_rai.v                    | 0 |
-m_ram.v                    | 0 |
+m_rai.v                    | 0 | x
+m_ram.v                    | 0 | x
 m_ram_a16.v/m_ram_a17.v    | 1 | `readack`
 m_shiftcounter.v           | 1 | `r_issh0_not`
 m_status_and_interrupts.v  |12 | `mrinstretip, mtimeincip, mtip, msip, mrinstretie, mtimeincie, meie, mtie, msie, mpie, mie, qualint`
-m_ucode.v                  | 0 |
-m_ucodepc.v                | 0 |
-m_wai.v                    | 0 |
+m_ucode.v                  | 0 | x
+m_ucodepc.v                | 0 | x
+m_wai.v                    | 0 | x
 
 The state of these flipflops must be such that we do not have any
 `STB_O`, `sram_stb`, `iwe` or write to `OpC`, `ADR_O`, or any of the
