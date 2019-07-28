@@ -172,11 +172,9 @@ Note. This will be modified.
 
 ### Todo
 
-- Verification on startup conditions must be tighter
 - Cleanup on code
 - Better documentation
 - Write and test exhaustive CSR code, just now only a minimum exists
-- A number of test programs on modules will be added
 - Bootloader program
 - Test on external interrupts
 - Test on nested interrupts

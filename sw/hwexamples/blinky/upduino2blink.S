@@ -1,10 +1,4 @@
-        # Hardwaretest on upduino board
-        # Just enough to get anything at all on hardware.
-        # Use commands:
-        #       python ../../../apio/apio clean
-        #       python ../../../apio/apio build
-        #       sudo python ../../../apio/apio upload
-        #
+        # Blinky on upduino board
         # =============================================================================
 #include "midgetv.inc"
         

@@ -14,8 +14,10 @@
 # because timing is different for instructions in SRAM and
 # EBR.
 #
-# Work to be done in SRAM config on:
-# t135.S - t151.S, t173-t174
+# Usefull to find how all simulations starts, first
+# remove the -s (silent flag) from simulation, then:
+# make clean; make | grep "^0000... " > first_instr.txt
+#
 
 TARGETSEBR  := t101 t102 t103 t104 t105 t106 t107 t108 t109 \
 	t110 t111 t112 t113 t114 t115 t116 t117 t118 t119 \
@@ -64,16 +66,7 @@ RESULTSSRAM    := $(foreach i,$(TARGETSSRAM),$(OBJDIRSRAM)/$(i).result.txt)
 
 
 all: ../../obj_dir/results.txt $(BINTARGETSEBR) $(BINTARGETSSRAM) \
-	$(LSTTARGETSEBR) $(LSTTARGETSSRAM) \
-	../../hwtst/upduino2/ice40loaderprog.hv	\
-	../../hwtst/iceblink40-hx1k/ice40loaderprog.hv \
-	$(OBJDIREBR)/iceblink40-hx1kblink.lst
-
-../../hwtst/upduino2/ice40loaderprog.hv:$(OBJDIREBR)/upduino2blink.bin
-	../../bin/midgetv_bin2ebr -i $< -o $@
-
-../../hwtst/iceblink40-hx1k/ice40loaderprog.hv:$(OBJDIREBR)/iceblink40-hx1kblink.bin
-	../../bin/midgetv_bin2ebr -i $< -o $@
+	$(LSTTARGETSEBR) $(LSTTARGETSSRAM) 
 
 ../../obj_dir/results.txt: $(RESULTSEBR) $(RESULTSSRAM)
 	cat $(RESULTSEBR) $(RESULTSSRAM) > $@
@@ -112,7 +105,7 @@ $(OBJDIRSRAM)/%.out : $(OBJDIRSRAM)/%.o
 
 # The binary image is simulated
 $(OBJDIREBR)/%.result.txt: $(OBJDIREBR)/%.bin
-	$(MIDGETVICE40EBR) -c 0x1000  -s -l $@ -i $<
+	$(MIDGETVICE40EBR) -c 0x1000 -s  -l $@ -i $<
 
 $(OBJDIRSRAM)/%.result.txt: $(OBJDIRSRAM)/%.bin
 	$(MIDGETVICE40SRAM) -c 0x2000 -s  -l $@ -i $<
@@ -132,6 +125,6 @@ clean:
 	rm ../../obj_dir/results.txt $(LSTTARGETSEBR) $(LSTTARGETSSRAM) \
 	$(RESULTSEBR) $(RESULTSSRAM) \
 	$(OBJDIREBR)/*bin $(OBJDIRSRAM)/*bin \
-	$(OBJDIREBR)/*out.map $(OBJDIRSRAM)/*out.map
+	$(OBJDIREBR)/*out.map 
 
 

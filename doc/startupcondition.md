@@ -14,12 +14,10 @@ only around 90 of these, I briefly list them all:
 | m_alu_carryin.v            | 0 | |
 | m_condcode.v               | 1 | `raluF_r` |
 | m_cyclecnt.v               | Lowlevel, 1 | `corerunning == rcrun`. |
-|                           | Highlevel, 7 | `corerunning == rcrun`.  |
-|                           |             | `rcnt[5:0]`|
+|                           | Highlevel, 7 | `corerunning == rcrun`, `rcnt[5:0]`.  |
 |m_ebr.v                    | 0 | But this is the registers etc of midgetv. Attention to signal `iwe`|
 |m_immexp_zfind_q.v         |32 | Give `ADR_O`|
-|m_inputmux.v               |1+IWIDTH  | Pipelined `sa00mod`|
-|                           |          | `rDee[IWIDTH-1:0]`|
+|m_inputmux.v               |1+IWIDTH  | Pipelined `sa00mod`,`rDee[IWIDTH-1:0]`|
 |m_midgetv_core.v           |0  |  |
 |m_opreg.v                  |32 | `OpC`|
 |m_progressctrl.v           |12 | `bmask[3:0]`, `SEL_O[3:0]`, `STB_O`, `sram_stb`, `WE_O`, `ctrlreg_we`, `AckM`|
