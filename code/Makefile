@@ -24,7 +24,7 @@ $(OBJ_DIR)/m_2ebr.v:../bin/midgetv_indirectEBR ../code/ucode.h
 ../bin/midgetv_genucode:../util/midgetv_genucode.c ../code/ucode.h
 	gcc -Wall -Wextra -Dnakedfname=../code/ucode.h -o $@ $< 
 
-../bin/midgetv_indirectEBR:../util/midgetv_indirectEBR.c ../util/bnvector.c 
+../bin/midgetv_indirectEBR:../util/midgetv_indirectEBR.c ../util/bnvector.c
 	gcc -O3 -Wall -Wextra -Dnakedfname=../code/ucode.h -o $@ $^ 
 
 
