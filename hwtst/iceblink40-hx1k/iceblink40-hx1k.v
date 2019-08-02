@@ -49,6 +49,7 @@ module top
    (
     input      CLK_I,
     input      usartRX,
+    output reg usartTX,
     output reg led1,
     output reg led2,
     output reg led3,
@@ -85,9 +86,10 @@ module top
     */
    always @(posedge CLK_I) begin
       if ( CYC_O & STB_O & WE_O ) begin
-         led1 <= DAT_O[0];
-         led2 <= DAT_O[1];
-         led3 <= DAT_O[2];
+         usartTX <= DAT_O[0];
+         led1 <= DAT_O[1];
+         led2 <= DAT_O[2];
+         led3 <= DAT_O[3];
       end      
       led4 <= corerunning;
    end

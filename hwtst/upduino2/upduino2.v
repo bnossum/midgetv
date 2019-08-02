@@ -46,23 +46,25 @@ module mytop
       DISREGARD_WB4_3_55 = 0
       )
    (input      usartRX,
+    output     SPI_SSn,
     output     led_red,
     output     led_green,
     output     led_blue, 
     output reg usartTX
     );
+   reg         meta_usartRX;
+   reg         redled,greenled,blueled;
    wire        start = 1'b1;
    wire        ACK_I;
-   reg         meta_usartRX;
-   
-   reg         redled,greenled,blueled;
    wire        CLK_I;   
 
 
-   /* We want a 24 MHz (+/- 10%)  clock. It must be stable
+   assign SPI_SSn = 1'b1;
+   
+   /* We want a 12 MHz (+/- 10%)  clock. It must be stable
     * before we apply it to midgetv. According to 
     * SBT_ICE_Technology_Library.pdf it must be held off for 100 us, 
-    * this is 2400 cycles at 24 MHz. 
+    * this is 4800 cycles at 48 MHz. 
     * 
     * So, how do we play this? We use the LFOSC to count a few
     * cycles, at 10 kHz each count is 100 us. (Incidentally 
@@ -100,7 +102,8 @@ module mytop
            .CLKHFEN(hfen[3]), // Enable output
            .CLKHF(CLK_I));
 
-   /* In this test program we use the LEDs directly
+   /* In this test program we use the LEDs directly, no PWM
+    * We drive the pins at 4 mA.
     */
    SB_RGBA_DRV
      # ( .CURRENT_MODE("0b1"     ),
@@ -152,6 +155,9 @@ module mytop
         greenled <= DAT_O[2];
         blueled  <= DAT_O[3];
      end
+
+     
+
    
    reg rACK_I;
    always @(posedge CLK_I) begin
