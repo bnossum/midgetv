@@ -4,39 +4,39 @@
 # For licence, see LICENCE
 # -----------------------------------------------------------------------------
 
-BIN = ../../../bin
-OBJ = ../../../obj_dir
+BINDIR = ../../../bin
+OBJDIR = ../../../obj_dir
 
 CFLAGS = -mabi=ilp32 -march=rv32i -nodefaultlibs -nostartfiles -Os -Wall \
 	-DNOCSR=1 -DonlyEBR=1 -DSP_INITVAL=0x400 
 
-all: $(BIN)/simmorse ../../../hwtst/upduino2/ice40loaderprog.hv \
+all: $(BINDIR)/simmorse ../../../hwtst/upduino2/ice40loaderprog.hv \
 	../../../hwtst/iceblink40-hx1k/ice40loaderprog.hv
 
-../../../hwtst/iceblink40-hx1k/ice40loaderprog.hv: $(OBJ)/morse.bin 
+../../../hwtst/iceblink40-hx1k/ice40loaderprog.hv: $(OBJDIR)/morse.bin 
 	../../../bin/midgetv_bin2ebr -i $< -o $@
 
-../../../hwtst/upduino2/ice40loaderprog.hv: $(OBJ)/morse.bin 
+../../../hwtst/upduino2/ice40loaderprog.hv: $(OBJDIR)/morse.bin 
 	../../../bin/midgetv_bin2ebr -i $< -o $@
 
-$(BIN)/simmorse:morse.c
+$(BINDIR)/simmorse:morse.c
 	gcc -Wall -Wextra -Dsim=1 -o $@ $< 
 
-$(OBJ)/morse.o: | $(OBJ)/crt0.o
+$(OBJDIR)/morse.o: | $(OBJDIR)/crt0.o
 
 # .SECONDARY:
 
-$(OBJ)/%.s:%.c
+$(OBJDIR)/%.s:%.c
 	riscv32-unknown-elf-gcc -S $(CFLAGS) -TEBRlink.ld  -I ./ -o $@ $<
 
-$(OBJ)/%.o:%.c 
+$(OBJDIR)/%.o:%.c 
 	riscv32-unknown-elf-gcc -c $(CFLAGS) -TEBRlink.ld  -I ./ -o $@ $<
 
-$(OBJ)/%.o:%.S
-	riscv32-unknown-elf-gcc -c $(CFLAGS) -TEBRlink.ld  -I ./ -I ../../inc/ -Wa,-a=$(OBJ)/$*.slst -o $@ $<
+$(OBJDIR)/%.o:%.S
+	riscv32-unknown-elf-gcc -c $(CFLAGS) -TEBRlink.ld  -I ./ -I ../../inc/ -Wa,-a=$(OBJDIR)/$*.slst -o $@ $<
 
 %.out:%.o
-	riscv32-unknown-elf-ld -TEBRlink.ld -nodefaultlibs -nostartfiles -o $@ $(OBJ)/crt0.o $< -M > $(OBJ)/$(*F).map
+	riscv32-unknown-elf-ld -TEBRlink.ld -nodefaultlibs -nostartfiles -o $@ $(OBJDIR)/crt0.o $< -M > $(OBJDIR)/$(*F).map
 
 %.bin:%.out
 	riscv32-unknown-elf-objcopy -Obinary $< $@ 
@@ -45,8 +45,8 @@ $(OBJ)/%.o:%.S
 	riscv32-unknown-elf-objdump -M numeric,no-aliases -D $< > $@
 
 clean:
-	rm -f $(BIN)/simmorse \
-	$(OBJ)/crt0.o \
-	$(OBJ)/morse.bin \
+	rm -f $(BINDIR)/simmorse \
+	$(OBJDIR)/crt0.o \
+	$(OBJDIR)/morse.bin \
 	../../../hwtst/upduino2/ice40loaderprog.hv \
 	../../../hwtst/iceblink40-hx1k/ice40loaderprog.hv
