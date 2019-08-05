@@ -3,124 +3,152 @@
     2019. Copyright B. Nossum.
     For licence, see LICENCE
     =============================================================================
-    Rudiments of serial communication.
-
 */
 #include <stdint.h>
 
-#define __mcycle (uint32_t volatile *)0x0000008c
+typedef struct {
+        uint32_t           rrr[31]; // These are x1..x31.
+        uint32_t           jj;
+        volatile uint32_t  rinst;
+        uint32_t           pc;
+        volatile uint32_t  mcycle;
+} SYSEBR_TypeDef;
 
-#define UARTTX (uint32_t volatile *)0x60000004 // When write: Bit 0. Leds on bits [3:1].
-#define UARTRX (uint32_t volatile *)0x60000004 // When read:  Bit 0
+typedef struct {
+        volatile uint32_t D;
+} UART_TypeDef;
 
-/////////////////////////////////////////////////////////////////////////////
-void simend( void ) {
-#if sim
-        exit( fprintf(stderr,"Simend\n" ) );
-#else
-        __asm__("sltu x0,x0,x0");
-#endif
-}
+#define IOBASE 0x60000000
+#define UART_BASE (IOBASE+0x4u)
+#define UART ((UART_TypeDef *)UART_BASE)
 
-/////////////////////////////////////////////////////////////////////////////
-void simdump( void ) {
-#if sim
-        ;
-#else
-        __asm__("sltu x0,x31,x31");
-#endif
-}
+/* Attempts to aliase SYSEBR_TypeDef to address 0 lead to desasters,
+   mixup with NULL in GCC suspected. */
 
+#define SYSEBR ((SYSEBR_TypeDef *)0x4)
 
 /////////////////////////////////////////////////////////////////////////////
-/* The autobaud character is '?', 0x3F, bitpattern on the line:
- * ___------------------______---
- * S  0  1  2  3  4  5  6  7  F
- *    |                       |
- */
-uint32_t autobaud( void ) {
-        // Wait for falling flank startbit
-        while ( *UARTRX & 1 )
-                ;
-        // Wait for rising flank
-        do {
-                *__mcycle = 0;
-        } while ( (*UARTRX & 1) == 0 );
-        
-        // Wait for second falling flank
-        while ( *UARTRX & 1 )
-                ;
-        // Wait for second rising flank
-        while ( (*UARTRX & 1) == 0 )
-                ;
-        return *__mcycle;
-}
+uint32_t g_bitrate;
+uint32_t g_bitrate_div2;
+
 
 /////////////////////////////////////////////////////////////////////////////
-void near_putchar( uint32_t bitrate, int c ) {
-        int n = bitrate;
+void near_putchar( int c ) {
+        uint32_t n = g_bitrate;
         c = (c | 0x100) << 1;
         c &= 0x3ff;
 
-        *__mcycle = 0;
+        SYSEBR->mcycle = 0;
         while ( c ) {
-                *UARTTX = c;
+                UART->D = c;
                 c >>= 1;
-                while ( *__mcycle < n )
+                while ( SYSEBR->mcycle < n )
                         ;
-                n += bitrate;
+                n += g_bitrate;
         }
         return;
 }
         
 /////////////////////////////////////////////////////////////////////////////
-int near_getchar( uint32_t bitrate ) {
-        uint32_t w = bitrate + bitrate/2;
+int near_getchar( void ) {
+        uint32_t w = g_bitrate + g_bitrate/2;
         int b = 0;
         int n = 8;
 
-        while ( (*UARTRX & 1) == 0 )
+        while ( UART->D == 0 )
                 ; // Previous transaction, I cheat on frame bit.
+
         // Wait for falling flank startbit
-        while ( *UARTRX & 1 )
-                *__mcycle = 0;
+        while ( UART->D  )
+                SYSEBR->mcycle = 0;
         do {
-                while ( *__mcycle < w )
+                while ( SYSEBR->mcycle < w )
                         ;
-                if ( *UARTRX & 1 ) {
+                if ( UART->D ) {
                         b = (b>>1) | 0x80;
                 } else {
                         b = (b>>1);
                 }
-                w += bitrate;
+                w += g_bitrate;
         } while ( --n > 0 );
         return b;
 }
 
+
+
 /////////////////////////////////////////////////////////////////////////////
-static void near_puts( const uint32_t bitrate, const char *s ) {
+static void near_puts( const char *s ) {
         while ( *s ) {
-                near_putchar( bitrate, *s );
+                near_putchar( *s );
                 s++;
         }
 }
 
 
 /////////////////////////////////////////////////////////////////////////////
-int main( void ) {
-        int a = 32;
-        *UARTTX = 1;
-        uint32_t bitrate = autobaud()/8;
+void clumsyhexprint( const uint32_t ab ) {
+        int i,a;
 
-        near_puts( bitrate, "Hello. I am a parrot:" );
+        for ( i = 7; i >= 0; i-- ) {
+                a = ab >> (i*4);
+                a &= 15;
+                if ( a < 10 ) {
+                        near_putchar( '0'+a );
+                } else {
+                        near_putchar( 'a'-10 + a );
+                }
+        }
+}
+
+/////////////////////////////////////////////////////////////////////////////
+/* The autobaud character is '?', 0x3F, bitpattern on the line:
+ * ___------------------______---
+ * S  0  1  2  3  4  5  6  7  F
+ *    |                       |
+ *
+ * The number of cycles needed per bit is known to +/- 2 cycles. 
+ * With a 12 MHz clock, at 115200 bps, each bit should nominally 
+ * need 104 cycles. Normally USART communications succeed when one
+ * is inside a +/- 2.5% frequency limit.
+ */
+uint32_t autobaud( void ) {
+        uint32_t atstart;
+
+        // Wait for falling flank startbit
+        while ( UART->D )
+                ;
+        // Wait for rising flank
+        while ( UART->D == 0 )
+                ;
+        // Start of rising flank known  with uncertainty 0-15 cycles.
+        atstart = SYSEBR->mcycle; 
+
+        // Wait for second falling flank
+        while ( UART->D )
+                ;
+        // Wait for second rising flank
+        while ( UART->D == 0 )
+                ;
+        // Start of rising flank known  with uncertainty 0-15 cycles.
+        // Number of cycles needed for 8 bit times is know to -15 / 15 cycles.
+        return SYSEBR->mcycle - atstart;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+int main( void ) {
+        int a;
+
+        UART->D = 1;
+        uint32_t ab = autobaud();
+        g_bitrate = ab/8;
+        g_bitrate_div2 = g_bitrate/2;
+
+        near_puts( "Cycles per 8bits:" );
+        clumsyhexprint(ab);
+        near_putchar( '\n' );
         while (1) {
-                a = near_getchar(bitrate);
-                near_putchar( bitrate, a+1);
-                simdump();
-                simend();
-                //++a;
-                //if ( a > 127 )
-                //        a = 32;
+                a = near_getchar();
+                near_putchar(a);
         }
 }
 

@@ -82,7 +82,7 @@ endmodule
 module m_wishbonereg
   # ( parameter INITVAL = 32'hdeadbabe,
       parameter WRITELATENCY = 0,
-      parameter READLATENCY  = 3,
+      parameter READLATENCY  = 1,
       parameter CHECK_RULE_3_55 = 0
       )
    (
