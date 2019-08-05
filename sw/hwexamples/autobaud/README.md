@@ -4,7 +4,7 @@ Rudiments of serial communication. The purpose of this program is to be
 a starting point for a bootloader for the upduino2 board.
 
 The first transmitted character must be one of
-| |
+| autobaud byte |
 | --- | 
 | 0x01        |
 | 0x03        |
