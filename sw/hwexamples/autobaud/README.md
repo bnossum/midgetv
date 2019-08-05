@@ -18,10 +18,11 @@ As written in 'C' we __nearly__ get 115200 bps with a 12 MHz clock. Timing for d
 of what bitrate to use succeed up to 115200 bps:
 
 The autobaud character is '?', 0x3F, bitpattern on the line:
-`___------------------______---`
-` S  0  1  2  3  4  5  6  7  F `
-`    |                       | `
-
+```
+___------------------______---
+S  0  1  2  3  4  5  6  7  F 
+   |                       | 
+```
 The number of cycles needed per bit is known to +/- 2 cycles. 
 With a 12 MHz clock, at 115200 bps, each bit should nominally 
 need 104 cycles. Normally USART communications succeed when one
