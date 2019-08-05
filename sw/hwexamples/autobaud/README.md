@@ -4,6 +4,7 @@ Rudiments of serial communication. The purpose of this program is to be
 a starting point for a bootloader for the upduino2 board.
 
 The first transmitted character must be one of
+| |
 | --- | 
 | 0x01        |
 | 0x03        |
@@ -17,7 +18,7 @@ The first transmitted character must be one of
 As written in 'C' we __nearly__ get 115200 bps with a 12 MHz clock. Timing for detection
 of what bitrate to use succeed up to 115200 bps:
 
-The autobaud character is '?', 0x3F, bitpattern on the line:
+The preferred autobaud character is '?', 0x3F, bitpattern on the line:
 ```
 ___------------------______---
 S  0  1  2  3  4  5  6  7  F 
