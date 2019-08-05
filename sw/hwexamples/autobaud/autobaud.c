@@ -28,51 +28,16 @@ typedef struct {
 #define SYSEBR ((SYSEBR_TypeDef *)0x4)
 
 /////////////////////////////////////////////////////////////////////////////
+uint32_t autobaud( void ); 
+void near_putchar( int c );
+int near_getchar( void );
+
+/////////////////////////////////////////////////////////////////////////////
 uint32_t g_bitrate;
-uint32_t g_bitrate_div2;
 
 
-/////////////////////////////////////////////////////////////////////////////
-void near_putchar( int c ) {
-        uint32_t n = g_bitrate;
-        c = (c | 0x100) << 1;
-        c &= 0x3ff;
 
-        SYSEBR->mcycle = 0;
-        while ( c ) {
-                UART->D = c;
-                c >>= 1;
-                while ( SYSEBR->mcycle < n )
-                        ;
-                n += g_bitrate;
-        }
-        return;
-}
-        
-/////////////////////////////////////////////////////////////////////////////
-int near_getchar( void ) {
-        uint32_t w = g_bitrate + g_bitrate/2;
-        int b = 0;
-        int n = 8;
 
-        while ( UART->D == 0 )
-                ; // Previous transaction, I cheat on frame bit.
-
-        // Wait for falling flank startbit
-        while ( UART->D  )
-                SYSEBR->mcycle = 0;
-        do {
-                while ( SYSEBR->mcycle < w )
-                        ;
-                if ( UART->D ) {
-                        b = (b>>1) | 0x80;
-                } else {
-                        b = (b>>1);
-                }
-                w += g_bitrate;
-        } while ( --n > 0 );
-        return b;
-}
 
 
 
@@ -100,6 +65,27 @@ void clumsyhexprint( const uint32_t ab ) {
         }
 }
 
+/////////////////////////////////////////////////////////////////////////////
+int main( void ) {
+        int a;
+
+        UART->D = 1;
+        uint32_t ab = autobaud();
+        g_bitrate = ab/8;
+
+        near_puts( "Cycles per 8bits: 0x" );
+        clumsyhexprint(ab);
+//        while (1)
+//                UART->D = 15;
+        near_putchar( '\n' );
+        while (1) {
+                a = near_getchar();
+                near_putchar(a);
+        }
+}
+
+
+#if 0
 /////////////////////////////////////////////////////////////////////////////
 /* The autobaud character is '?', 0x3F, bitpattern on the line:
  * ___------------------______---
@@ -135,20 +121,47 @@ uint32_t autobaud( void ) {
 }
 
 /////////////////////////////////////////////////////////////////////////////
-int main( void ) {
-        int a;
+void near_putchar( int c ) {
+        uint32_t n = g_bitrate;
+        c = (c | 0x100) << 1;
+        c &= 0x3ff;
 
-        UART->D = 1;
-        uint32_t ab = autobaud();
-        g_bitrate = ab/8;
-        g_bitrate_div2 = g_bitrate/2;
-
-        near_puts( "Cycles per 8bits:" );
-        clumsyhexprint(ab);
-        near_putchar( '\n' );
-        while (1) {
-                a = near_getchar();
-                near_putchar(a);
+        SYSEBR->mcycle = 0;
+        while ( c ) {
+                UART->D = c;
+                c >>= 1;
+                while ( SYSEBR->mcycle < n )
+                        ;
+                n += g_bitrate;
         }
 }
 
+/////////////////////////////////////////////////////////////////////////////
+int near_getchar( void ) {
+        while ( UART->D == 0 )
+                ; // Possibly in previous transaction, I cheat on frame bit.
+
+// Wait for falling flank startbit
+//        while ( UART->D  )
+//                SYSEBR->mcycle = 0;
+// The following give shorter code:
+        while ( (SYSEBR->mcycle = UART->D) )
+                ;
+                
+        uint32_t w = g_bitrate/2;
+        int b = 0;
+        int n = 1;
+
+        do {
+                w += g_bitrate;
+                while ( SYSEBR->mcycle < w )
+                        ;
+                if ( UART->D ) 
+                        b |= n;
+                n = n + n; // GCC naturally selects a "slli x14,x14,1" here. But "add x14,x14,x14" would have been better in midgetv.
+        } while ( n != 0x100 );
+        return b;
+}
+
+
+#endif
