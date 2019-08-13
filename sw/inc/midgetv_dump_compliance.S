@@ -3,7 +3,7 @@
 midgetv_dump_compliance:
         la      s1,midgetv_compliance_data_begin
         la      s2,midgetv_compliance_data_end
-        li      a1,0x40000004   // "USART"
+        li      a1,0x60000004   // "USART"
 
 2:      add     s3,s1,12
 1:      lw      a0,(s3)
