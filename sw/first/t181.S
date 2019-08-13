@@ -81,13 +81,19 @@ _start:
         bne     x3,x11,11b
         
         // Check mepc.
-        // For midgets with cyclecounter mepc == 0
-        // For midgets without cyclecounter mepc == _start - 4
+        // Before:
+        //      For midgets with cyclecounter mepc == 0
+        //      For midgets without cyclecounter mepc == _start - 4
+        // Now:
+        //      mcpc == 1. 
         csrrw   x1,mepc,x3
         beqz    x1,1f
-        la      x11,_startm4
-        bne     x1,x11,12b        
-1:      
+
+        simdump
+        simerr 64        
+        la      x24,_startm4 // Should not reach here
+        bne     x1,x24,12b   //     
+1:
         lw      x11,%lo(__mepc)(x0)
         bne     x3,x11,13b
         
