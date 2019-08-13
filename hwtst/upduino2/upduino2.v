@@ -19,6 +19,10 @@
 `include "../../code/m_ram_a16.v"
 `include "../../code/m_ram_a17.v"
 `include "../../code/m_ebr.v"
+`include "../../code/m_ebr_w16.v"
+`include "../../code/m_ebr_w8.v"
+`include "../../code/m_ebr_w4.v"
+`include "../../code/m_ebr_w2.v"
 `include "../../code/m_rai.v"
 `include "../../code/m_wai.v"
 `include "../../code/m_opreg.v"
@@ -36,8 +40,8 @@
 
 module mytop
   # ( parameter
-      SRAMADRWIDTH       = 17,
-      SIMEBRADRWIDTH     = 8, 
+      SRAMADRWIDTH       = 16,
+      FORCEEBRADRWIDTH   = 11, 
       IWIDTH             = 32, 
       NO_CYCLECNT        = 0, 
       MTIMETAP           = 16, 
@@ -178,29 +182,17 @@ module mytop
    m_midgetv_core
      #(
        .SRAMADRWIDTH       ( SRAMADRWIDTH       ),
-       .EBRADRWIDTH        ( SIMEBRADRWIDTH     ),
+       .EBRADRWIDTH        ( FORCEEBRADRWIDTH   ),
        .IWIDTH             ( IWIDTH             ),
        .NO_CYCLECNT        ( NO_CYCLECNT        ),
        .MTIMETAP           ( MTIMETAP           ),
        .HIGHLEVEL          ( HIGHLEVEL          ),
        .LAZY_DECODE        ( LAZY_DECODE        ),
        .DISREGARD_WB4_3_55 ( DISREGARD_WB4_3_55 ),
-       .program0(program0),
-       .program1(program1),
-       .program2(program2),
-       .program3(program3),
-       .program4(program4),
-       .program5(program5),
-       .program6(program6),
-       .program7(program7),
-       .program8(program8),
-       .program9(program9),
-       .programA(programA),
-       .programB(programB),
-       .programC(programC),
-       .programD(programD),
-       .programE(programE),
-       .programF(programF)
+       .prg00(prg00),       .prg01(prg01),       .prg02(prg02),       .prg03(prg03),
+       .prg04(prg04),       .prg05(prg05),       .prg06(prg06),       .prg07(prg07),
+       .prg08(prg08),       .prg09(prg09),       .prg0A(prg0A),       .prg0B(prg0B),
+       .prg0C(prg0C),       .prg0D(prg0D),       .prg0E(prg0E),       .prg0F(prg0F)
        )
    inst_midgetv_core
      (// Inputs
