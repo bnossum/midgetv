@@ -21,13 +21,8 @@ INFOCHUNK g_info = {
 };
 
 
-/*
- * A preliminary speed test indicates the simulator corresponds to a
- * target with a 144 kHz clock
- */
 /////////////////////////////////////////////////////////////////////////////
-//#define  EBRADRWIDTH  8 // Is a parameter to m_midgetv, 
-#define    EBRADRWIDTH  11 // Is a parameter to m_midgetv, for m_ice40sim_0_11_32_0_1_0_1_0 it is fixed to 11
+#define    EBRADRWIDTH  11 // Is a parameter to m_midgetv. MUST match def in m_ice40sim_EBRonly.v
 
 #include "Vm_ice40sim_EBRonly__Syms.h"
 #include "verilated.h"
@@ -42,51 +37,49 @@ uint32_t getebr( void *vtb, uint32_t byteadr ) {
         uint32_t wa = byteadr/4;
         if ( byteadr & 3 )
                 ferr( "Que?\n" );
-#if EBRADRWIDTH == 8
-#error BITROT
-        Vm_ice40 *tb =(Vm_ice40 *)vtb;
-        d =  (tb->v->inst_midgetv_core->inst_ebr->b0__BRA__0__KET____DOT__ebr->get_as_16(wa) <<  0);
-        d |= (tb->v->inst_midgetv_core->inst_ebr->b0__BRA__1__KET____DOT__ebr->get_as_16(wa) << 16);
-#elif EBRADRWIDTH == 9
-#error BITROT
-        int sliceshift = (wa&1)*8;
-        d =  ( (tb->v->inst_midgetv_core->inst_ebr->b0__BRA__0__KET____DOT__ebr->get_as_16(wa/2) >> sliceshift) & 255 )<<  0);
-        d |= ( (tb->v->inst_midgetv_core->inst_ebr->b0__BRA__1__KET____DOT__ebr->get_as_16(wa/2) >> sliceshift) & 255 )<<  8);
-        d |= ( (tb->v->inst_midgetv_core->inst_ebr->b0__BRA__2__KET____DOT__ebr->get_as_16(wa/2) >> sliceshift) & 255 )<< 16);
-        d |= ( (tb->v->inst_midgetv_core->inst_ebr->b0__BRA__3__KET____DOT__ebr->get_as_16(wa/2) >> sliceshift) & 255 )<< 24);
-#elif EBRADRWIDTH == 10
-#error BITROT
-        int sliceshift = (wa&3)*4;
-        d =  ( (tb->v->inst_midgetv_core->inst_ebr->b0__BRA__0__KET____DOT__ebr->get_as_16(wa/4) >> sliceshift) & 15 )<<  0);
-        d |= ( (tb->v->inst_midgetv_core->inst_ebr->b0__BRA__1__KET____DOT__ebr->get_as_16(wa/4) >> sliceshift) & 15 )<<  4);
-        d |= ( (tb->v->inst_midgetv_core->inst_ebr->b0__BRA__2__KET____DOT__ebr->get_as_16(wa/4) >> sliceshift) & 15 )<<  8);
-        d |= ( (tb->v->inst_midgetv_core->inst_ebr->b0__BRA__3__KET____DOT__ebr->get_as_16(wa/4) >> sliceshift) & 15 )<< 12);
-        d |= ( (tb->v->inst_midgetv_core->inst_ebr->b0__BRA__4__KET____DOT__ebr->get_as_16(wa/4) >> sliceshift) & 15 )<< 16);
-        d |= ( (tb->v->inst_midgetv_core->inst_ebr->b0__BRA__5__KET____DOT__ebr->get_as_16(wa/4) >> sliceshift) & 15 )<< 20);
-        d |= ( (tb->v->inst_midgetv_core->inst_ebr->b0__BRA__6__KET____DOT__ebr->get_as_16(wa/4) >> sliceshift) & 15 )<< 24);
-        d |= ( (tb->v->inst_midgetv_core->inst_ebr->b0__BRA__7__KET____DOT__ebr->get_as_16(wa/4) >> sliceshift) & 15 )<< 28);
-        
-#elif EBRADRWIDTH == 11 
         Vm_ice40sim_EBRonly *tb = (Vm_ice40sim_EBRonly *) vtb;
-        int sliceshift = (wa&7)*2;
-        d =  (((tb->v->inst_midgetv_core->inst_ebr->b0__BRA__0__KET____DOT__ebr->get_as_16(  wa/8) >> sliceshift) & 3) <<  0);
-        d |= (((tb->v->inst_midgetv_core->inst_ebr->b0__BRA__1__KET____DOT__ebr->get_as_16(  wa/8) >> sliceshift) & 3) <<  2);
-        d |= (((tb->v->inst_midgetv_core->inst_ebr->b0__BRA__2__KET____DOT__ebr->get_as_16(  wa/8) >> sliceshift) & 3) <<  4);
-        d |= (((tb->v->inst_midgetv_core->inst_ebr->b0__BRA__3__KET____DOT__ebr->get_as_16(  wa/8) >> sliceshift) & 3) <<  6);
-        d |= (((tb->v->inst_midgetv_core->inst_ebr->b0__BRA__4__KET____DOT__ebr->get_as_16(  wa/8) >> sliceshift) & 3) <<  8);
-        d |= (((tb->v->inst_midgetv_core->inst_ebr->b0__BRA__5__KET____DOT__ebr->get_as_16(  wa/8) >> sliceshift) & 3) << 10);
-        d |= (((tb->v->inst_midgetv_core->inst_ebr->b0__BRA__6__KET____DOT__ebr->get_as_16(  wa/8) >> sliceshift) & 3) << 12);
-        d |= (((tb->v->inst_midgetv_core->inst_ebr->b0__BRA__7__KET____DOT__ebr->get_as_16(  wa/8) >> sliceshift) & 3) << 14);
-        d |= (((tb->v->inst_midgetv_core->inst_ebr->b0__BRA__8__KET____DOT__ebr->get_as_16(  wa/8) >> sliceshift) & 3) << 16);
-        d |= (((tb->v->inst_midgetv_core->inst_ebr->b0__BRA__9__KET____DOT__ebr->get_as_16(  wa/8) >> sliceshift) & 3) << 18);
-        d |= (((tb->v->inst_midgetv_core->inst_ebr->b0__BRA__10__KET____DOT__ebr->get_as_16( wa/8) >> sliceshift) & 3) << 20);
-        d |= (((tb->v->inst_midgetv_core->inst_ebr->b0__BRA__11__KET____DOT__ebr->get_as_16( wa/8) >> sliceshift) & 3) << 22);
-        d |= (((tb->v->inst_midgetv_core->inst_ebr->b0__BRA__12__KET____DOT__ebr->get_as_16( wa/8) >> sliceshift) & 3) << 24);
-        d |= (((tb->v->inst_midgetv_core->inst_ebr->b0__BRA__13__KET____DOT__ebr->get_as_16( wa/8) >> sliceshift) & 3) << 26);
-        d |= (((tb->v->inst_midgetv_core->inst_ebr->b0__BRA__14__KET____DOT__ebr->get_as_16( wa/8) >> sliceshift) & 3) << 28);
-        d |= (((tb->v->inst_midgetv_core->inst_ebr->b0__BRA__15__KET____DOT__ebr->get_as_16( wa/8) >> sliceshift) & 3) << 30);
+#if EBRADRWIDTH == 8
+        d =  (tb->v->inst_midgetv_core->inst_ebr->ebrb->genblk1__DOT__mem->get_as_16(wa) <<  0);
+        d |= (tb->v->inst_midgetv_core->inst_ebr->ebrh->genblk1__DOT__mem->get_as_16(wa) << 16);
+
+#elif EBRADRWIDTH == 9
+        uint32_t mwa = ((wa>>1) | (wa<<8)) & 0x1ff;
+        d =  (tb->v->inst_midgetv_core->inst_ebr->ebrb->genblk2__DOT__ebrb->genblk1__DOT__mem->get_as_8(mwa) <<  0);
+        d |= (tb->v->inst_midgetv_core->inst_ebr->ebrb->genblk2__DOT__ebrh->genblk1__DOT__mem->get_as_8(mwa) <<  8);
+        d |= (tb->v->inst_midgetv_core->inst_ebr->ebrh->genblk2__DOT__ebrb->genblk1__DOT__mem->get_as_8(mwa) << 16);
+        d |= (tb->v->inst_midgetv_core->inst_ebr->ebrh->genblk2__DOT__ebrh->genblk1__DOT__mem->get_as_8(mwa) << 24);
+
+#elif EBRADRWIDTH == 10
+        uint32_t mwa = ((wa>>2) | (wa<<8)) & 0x3ff;
+        d =  (tb->v->inst_midgetv_core->inst_ebr->ebrb->genblk2__DOT__ebrb->genblk2__DOT__ebrb->genblk1__DOT__mem->get_as_4(mwa) <<  0);
+        d |= (tb->v->inst_midgetv_core->inst_ebr->ebrb->genblk2__DOT__ebrb->genblk2__DOT__ebrh->genblk1__DOT__mem->get_as_4(mwa) <<  4);
+        d |= (tb->v->inst_midgetv_core->inst_ebr->ebrb->genblk2__DOT__ebrh->genblk2__DOT__ebrb->genblk1__DOT__mem->get_as_4(mwa) <<  8);
+        d |= (tb->v->inst_midgetv_core->inst_ebr->ebrb->genblk2__DOT__ebrh->genblk2__DOT__ebrh->genblk1__DOT__mem->get_as_4(mwa) << 12);
+        d |= (tb->v->inst_midgetv_core->inst_ebr->ebrh->genblk2__DOT__ebrb->genblk2__DOT__ebrb->genblk1__DOT__mem->get_as_4(mwa) << 16);
+        d |= (tb->v->inst_midgetv_core->inst_ebr->ebrh->genblk2__DOT__ebrb->genblk2__DOT__ebrh->genblk1__DOT__mem->get_as_4(mwa) << 20);
+        d |= (tb->v->inst_midgetv_core->inst_ebr->ebrh->genblk2__DOT__ebrh->genblk2__DOT__ebrb->genblk1__DOT__mem->get_as_4(mwa) << 24);
+        d |= (tb->v->inst_midgetv_core->inst_ebr->ebrh->genblk2__DOT__ebrh->genblk2__DOT__ebrh->genblk1__DOT__mem->get_as_4(mwa) << 28);
+
+#elif EBRADRWIDTH == 11 
+        uint32_t mwa = ((wa>>3) | (wa<<8)) & 0x7ff;
+        d =  (tb->v->inst_midgetv_core->inst_ebr->ebrb->genblk2__DOT__ebrb->genblk2__DOT__ebrb->genblk2__DOT__ebrb->mem->get_as_2(mwa) <<  0);
+        d |= (tb->v->inst_midgetv_core->inst_ebr->ebrb->genblk2__DOT__ebrb->genblk2__DOT__ebrb->genblk2__DOT__ebrh->mem->get_as_2(mwa) <<  2);
+        d |= (tb->v->inst_midgetv_core->inst_ebr->ebrb->genblk2__DOT__ebrb->genblk2__DOT__ebrh->genblk2__DOT__ebrb->mem->get_as_2(mwa) <<  4);
+        d |= (tb->v->inst_midgetv_core->inst_ebr->ebrb->genblk2__DOT__ebrb->genblk2__DOT__ebrh->genblk2__DOT__ebrh->mem->get_as_2(mwa) <<  6);
+        d |= (tb->v->inst_midgetv_core->inst_ebr->ebrb->genblk2__DOT__ebrh->genblk2__DOT__ebrb->genblk2__DOT__ebrb->mem->get_as_2(mwa) <<  8);
+        d |= (tb->v->inst_midgetv_core->inst_ebr->ebrb->genblk2__DOT__ebrh->genblk2__DOT__ebrb->genblk2__DOT__ebrh->mem->get_as_2(mwa) << 10);
+        d |= (tb->v->inst_midgetv_core->inst_ebr->ebrb->genblk2__DOT__ebrh->genblk2__DOT__ebrh->genblk2__DOT__ebrb->mem->get_as_2(mwa) << 12);
+        d |= (tb->v->inst_midgetv_core->inst_ebr->ebrb->genblk2__DOT__ebrh->genblk2__DOT__ebrh->genblk2__DOT__ebrh->mem->get_as_2(mwa) << 14);
+        d |= (tb->v->inst_midgetv_core->inst_ebr->ebrh->genblk2__DOT__ebrb->genblk2__DOT__ebrb->genblk2__DOT__ebrb->mem->get_as_2(mwa) << 16);
+        d |= (tb->v->inst_midgetv_core->inst_ebr->ebrh->genblk2__DOT__ebrb->genblk2__DOT__ebrb->genblk2__DOT__ebrh->mem->get_as_2(mwa) << 18);
+        d |= (tb->v->inst_midgetv_core->inst_ebr->ebrh->genblk2__DOT__ebrb->genblk2__DOT__ebrh->genblk2__DOT__ebrb->mem->get_as_2(mwa) << 20);
+        d |= (tb->v->inst_midgetv_core->inst_ebr->ebrh->genblk2__DOT__ebrb->genblk2__DOT__ebrh->genblk2__DOT__ebrh->mem->get_as_2(mwa) << 22);
+        d |= (tb->v->inst_midgetv_core->inst_ebr->ebrh->genblk2__DOT__ebrh->genblk2__DOT__ebrb->genblk2__DOT__ebrb->mem->get_as_2(mwa) << 24);
+        d |= (tb->v->inst_midgetv_core->inst_ebr->ebrh->genblk2__DOT__ebrh->genblk2__DOT__ebrb->genblk2__DOT__ebrh->mem->get_as_2(mwa) << 26);
+        d |= (tb->v->inst_midgetv_core->inst_ebr->ebrh->genblk2__DOT__ebrh->genblk2__DOT__ebrh->genblk2__DOT__ebrb->mem->get_as_2(mwa) << 28);
+        d |= (tb->v->inst_midgetv_core->inst_ebr->ebrh->genblk2__DOT__ebrh->genblk2__DOT__ebrh->genblk2__DOT__ebrh->mem->get_as_2(mwa) << 30);
 #else
-#error Not yet
+#error Unsupported EBR address width
 #endif
         return d;
 }
@@ -117,14 +110,7 @@ void initialize_ebr( void *vtb, FILE *fi, char *finame ) {
         int i,j,c;
         const int MAXEBR =  (16 * (4*1024)); // 16 EBR blocks give this number of bits
         uint8_t ebr[MAXEBR/8];
-#if EBRADRWIDTH == 8
-        uint32_t h;
-        Vm_ice40 *tb =(Vm_ice40 *)vtb;
-#elif EBRADRWIDTH == 11 
         Vm_ice40sim_EBRonly *tb = (Vm_ice40sim_EBRonly *)vtb;
-#else
-#error Not yet
-#endif
         
         for ( i = 0; i < MAXEBR/8+1; i++ ) {
                 if ( (c=getc(fi)) == EOF )
@@ -143,66 +129,60 @@ void initialize_ebr( void *vtb, FILE *fi, char *finame ) {
         
 #if EBRADRWIDTH == 8
         for ( j = 0; j < i; j += 4 ) {
-                h = (ebr[j+1]<<8) | ebr[j+0];
-                //if ( j == 0xc4 ) printf( "Lowhalf = 0x%4.4x\n", h );
-                tb->v->inst_midgetv_core->inst_ebr->b0__BRA__0__KET____DOT__ebr->set_as_16(j>>2,h);
-                h = (ebr[j+3]<<8) | ebr[j+2];
-                //if ( j == 0xc4 ) printf( "Highhalf= 0x%4.4x\n", h );
-                tb->v->inst_midgetv_core->inst_ebr->b0__BRA__1__KET____DOT__ebr->set_as_16(j>>2,h);
+                uint32_t hb,hh;
+                hb = (ebr[j+1]<<8) | ebr[j+0];
+                hh = (ebr[j+3]<<8) | ebr[j+2];
+                //tb->v->inst_midgetv_core->inst_ebr->b0__BRA__0__KET____DOT__genblk5__DOT__ebr->set_as_16(j>>2,hb);
+                //tb->v->inst_midgetv_core->inst_ebr->b0__BRA__1__KET____DOT__genblk5__DOT__ebr->set_as_16(j>>2,hh);
+                tb->v->inst_midgetv_core->inst_ebr->ebrb->genblk1__DOT__mem->set_as_16(j>>2,hb);
+                tb->v->inst_midgetv_core->inst_ebr->ebrh->genblk1__DOT__mem->set_as_16(j>>2,hh);
+        }
+#elif EBRADRWIDTH == 9
+        for ( j = 0; j < i; j += 4 ) {
+                uint32_t jj = j>>2;
+                uint32_t mjj = ((jj>>1) | (jj<<8)) & 0x1ff;
+
+                tb->v->inst_midgetv_core->inst_ebr->ebrb->genblk2__DOT__ebrb->genblk1__DOT__mem->set_as_8(mjj,ebr[j+0]);
+                tb->v->inst_midgetv_core->inst_ebr->ebrb->genblk2__DOT__ebrh->genblk1__DOT__mem->set_as_8(mjj,ebr[j+1]);
+                tb->v->inst_midgetv_core->inst_ebr->ebrh->genblk2__DOT__ebrb->genblk1__DOT__mem->set_as_8(mjj,ebr[j+2]);
+                tb->v->inst_midgetv_core->inst_ebr->ebrh->genblk2__DOT__ebrh->genblk1__DOT__mem->set_as_8(mjj,ebr[j+3]);
+        }
+#elif EBRADRWIDTH == 10
+        for ( j = 0; j < i; j += 4 ) {
+                uint32_t jj = j>>2;
+                uint32_t mjj = ((jj>>2) | (jj<<8)) & 0x3ff;
+		tb->v->inst_midgetv_core->inst_ebr->ebrb->genblk2__DOT__ebrb->genblk2__DOT__ebrb->genblk1__DOT__mem->set_as_4(mjj,(ebr[j+0] >> 0) & 15);
+		tb->v->inst_midgetv_core->inst_ebr->ebrb->genblk2__DOT__ebrb->genblk2__DOT__ebrh->genblk1__DOT__mem->set_as_4(mjj,(ebr[j+0] >> 4) & 15);
+		tb->v->inst_midgetv_core->inst_ebr->ebrb->genblk2__DOT__ebrh->genblk2__DOT__ebrb->genblk1__DOT__mem->set_as_4(mjj,(ebr[j+1] >> 0) & 15);
+		tb->v->inst_midgetv_core->inst_ebr->ebrb->genblk2__DOT__ebrh->genblk2__DOT__ebrh->genblk1__DOT__mem->set_as_4(mjj,(ebr[j+1] >> 4) & 15);
+		tb->v->inst_midgetv_core->inst_ebr->ebrh->genblk2__DOT__ebrb->genblk2__DOT__ebrb->genblk1__DOT__mem->set_as_4(mjj,(ebr[j+2] >> 0) & 15);
+		tb->v->inst_midgetv_core->inst_ebr->ebrh->genblk2__DOT__ebrb->genblk2__DOT__ebrh->genblk1__DOT__mem->set_as_4(mjj,(ebr[j+2] >> 4) & 15);
+		tb->v->inst_midgetv_core->inst_ebr->ebrh->genblk2__DOT__ebrh->genblk2__DOT__ebrb->genblk1__DOT__mem->set_as_4(mjj,(ebr[j+3] >> 0) & 15);
+		tb->v->inst_midgetv_core->inst_ebr->ebrh->genblk2__DOT__ebrh->genblk2__DOT__ebrh->genblk1__DOT__mem->set_as_4(mjj,(ebr[j+3] >> 4) & 15);
         }
 #elif EBRADRWIDTH == 11
-                
-        int k;
-        uint16_t ew[16];
-        for ( k = 0; k < 16; k++ )
-                ew[k] = 0;
-        for ( j = 0; j < MAXEBR/8; j += 4 ) {
-                uint32_t w;
-                uint32_t wa = j/4;
-
-                if ( j < i ) {
-                        w =
-                                ((uint32_t)ebr[j+0] << 0) |
-                                ((uint32_t)ebr[j+1] << 8) |
-                                ((uint32_t)ebr[j+2] <<16) |
-                                ((uint32_t)ebr[j+3] <<24);
-                } else {
-                        w = 0;
-                }
-                
-                // Two and two bits of w to each of 16 ebrs, organized as 16 wide.
-                
-                for ( k = 0; k < 16; k++ ) 
-                        ew[k] |= ( ((w >> (k*2)) & 3) << (2*(wa&7)) );
-                
-                if ( (wa & 7) == 7 ) {
-                        for ( k = 0; k < 16; k++ ) {
-                                switch ( k ) {
-                                case 0x0 : tb->v->inst_midgetv_core->inst_ebr->b0__BRA__0__KET____DOT__ebr->set_as_16(  wa/8, ew[k] ); break;
-                                case 0x1 : tb->v->inst_midgetv_core->inst_ebr->b0__BRA__1__KET____DOT__ebr->set_as_16(  wa/8, ew[k] ); break;
-                                case 0x2 : tb->v->inst_midgetv_core->inst_ebr->b0__BRA__2__KET____DOT__ebr->set_as_16(  wa/8, ew[k] ); break;
-                                case 0x3 : tb->v->inst_midgetv_core->inst_ebr->b0__BRA__3__KET____DOT__ebr->set_as_16(  wa/8, ew[k] ); break;
-                                case 0x4 : tb->v->inst_midgetv_core->inst_ebr->b0__BRA__4__KET____DOT__ebr->set_as_16(  wa/8, ew[k] ); break;
-                                case 0x5 : tb->v->inst_midgetv_core->inst_ebr->b0__BRA__5__KET____DOT__ebr->set_as_16(  wa/8, ew[k] ); break;
-                                case 0x6 : tb->v->inst_midgetv_core->inst_ebr->b0__BRA__6__KET____DOT__ebr->set_as_16(  wa/8, ew[k] ); break;
-                                case 0x7 : tb->v->inst_midgetv_core->inst_ebr->b0__BRA__7__KET____DOT__ebr->set_as_16(  wa/8, ew[k] ); break;
-                                case 0x8 : tb->v->inst_midgetv_core->inst_ebr->b0__BRA__8__KET____DOT__ebr->set_as_16(  wa/8, ew[k] ); break;
-                                case 0x9 : tb->v->inst_midgetv_core->inst_ebr->b0__BRA__9__KET____DOT__ebr->set_as_16(  wa/8, ew[k] ); break;
-                                case 0xa : tb->v->inst_midgetv_core->inst_ebr->b0__BRA__10__KET____DOT__ebr->set_as_16( wa/8, ew[k] ); break;
-                                case 0xb : tb->v->inst_midgetv_core->inst_ebr->b0__BRA__11__KET____DOT__ebr->set_as_16( wa/8, ew[k] ); break;
-                                case 0xc : tb->v->inst_midgetv_core->inst_ebr->b0__BRA__12__KET____DOT__ebr->set_as_16( wa/8, ew[k] ); break;
-                                case 0xd : tb->v->inst_midgetv_core->inst_ebr->b0__BRA__13__KET____DOT__ebr->set_as_16( wa/8, ew[k] ); break;
-                                case 0xe : tb->v->inst_midgetv_core->inst_ebr->b0__BRA__14__KET____DOT__ebr->set_as_16( wa/8, ew[k] ); break;
-                                case 0xf : tb->v->inst_midgetv_core->inst_ebr->b0__BRA__15__KET____DOT__ebr->set_as_16( wa/8, ew[k] ); break;                                        
-                                }
-                        }
-                        for ( k = 0; k < 16; k++ )
-                                ew[k] = 0;
-                }
+        for ( j = 0; j < i; j += 4 ) {
+                uint32_t jj = j>>2;
+                uint32_t mjj = ((jj>>3) | (jj<<8)) & 0x7ff;
+        	tb->v->inst_midgetv_core->inst_ebr->ebrb->genblk2__DOT__ebrb->genblk2__DOT__ebrb->genblk2__DOT__ebrb->mem->set_as_2(mjj,(ebr[j+0] >> 0) & 3);
+        	tb->v->inst_midgetv_core->inst_ebr->ebrb->genblk2__DOT__ebrb->genblk2__DOT__ebrb->genblk2__DOT__ebrh->mem->set_as_2(mjj,(ebr[j+0] >> 2) & 3);
+        	tb->v->inst_midgetv_core->inst_ebr->ebrb->genblk2__DOT__ebrb->genblk2__DOT__ebrh->genblk2__DOT__ebrb->mem->set_as_2(mjj,(ebr[j+0] >> 4) & 3);
+        	tb->v->inst_midgetv_core->inst_ebr->ebrb->genblk2__DOT__ebrb->genblk2__DOT__ebrh->genblk2__DOT__ebrh->mem->set_as_2(mjj,(ebr[j+0] >> 6) & 3);
+        	tb->v->inst_midgetv_core->inst_ebr->ebrb->genblk2__DOT__ebrh->genblk2__DOT__ebrb->genblk2__DOT__ebrb->mem->set_as_2(mjj,(ebr[j+1] >> 0) & 3);
+        	tb->v->inst_midgetv_core->inst_ebr->ebrb->genblk2__DOT__ebrh->genblk2__DOT__ebrb->genblk2__DOT__ebrh->mem->set_as_2(mjj,(ebr[j+1] >> 2) & 3);
+        	tb->v->inst_midgetv_core->inst_ebr->ebrb->genblk2__DOT__ebrh->genblk2__DOT__ebrh->genblk2__DOT__ebrb->mem->set_as_2(mjj,(ebr[j+1] >> 4) & 3);
+        	tb->v->inst_midgetv_core->inst_ebr->ebrb->genblk2__DOT__ebrh->genblk2__DOT__ebrh->genblk2__DOT__ebrh->mem->set_as_2(mjj,(ebr[j+1] >> 6) & 3);
+        	tb->v->inst_midgetv_core->inst_ebr->ebrh->genblk2__DOT__ebrb->genblk2__DOT__ebrb->genblk2__DOT__ebrb->mem->set_as_2(mjj,(ebr[j+2] >> 0) & 3);
+        	tb->v->inst_midgetv_core->inst_ebr->ebrh->genblk2__DOT__ebrb->genblk2__DOT__ebrb->genblk2__DOT__ebrh->mem->set_as_2(mjj,(ebr[j+2] >> 2) & 3);
+        	tb->v->inst_midgetv_core->inst_ebr->ebrh->genblk2__DOT__ebrb->genblk2__DOT__ebrh->genblk2__DOT__ebrb->mem->set_as_2(mjj,(ebr[j+2] >> 4) & 3);
+        	tb->v->inst_midgetv_core->inst_ebr->ebrh->genblk2__DOT__ebrb->genblk2__DOT__ebrh->genblk2__DOT__ebrh->mem->set_as_2(mjj,(ebr[j+2] >> 6) & 3);
+        	tb->v->inst_midgetv_core->inst_ebr->ebrh->genblk2__DOT__ebrh->genblk2__DOT__ebrb->genblk2__DOT__ebrb->mem->set_as_2(mjj,(ebr[j+3] >> 0) & 3);
+        	tb->v->inst_midgetv_core->inst_ebr->ebrh->genblk2__DOT__ebrh->genblk2__DOT__ebrb->genblk2__DOT__ebrh->mem->set_as_2(mjj,(ebr[j+3] >> 2) & 3);
+        	tb->v->inst_midgetv_core->inst_ebr->ebrh->genblk2__DOT__ebrh->genblk2__DOT__ebrh->genblk2__DOT__ebrb->mem->set_as_2(mjj,(ebr[j+3] >> 4) & 3);
+        	tb->v->inst_midgetv_core->inst_ebr->ebrh->genblk2__DOT__ebrh->genblk2__DOT__ebrh->genblk2__DOT__ebrh->mem->set_as_2(mjj,(ebr[j+3] >> 6) & 3);
         }
-                
 #else
-#error Not yet
+#error Unsupported EBR address width
 #endif
 //        readout_ebr( "Just a test\n", 1, tb );
 
@@ -224,11 +204,7 @@ enum {
 };
 
 int check_for_simulationhint( FILE *lfo, char *imagetosimnamep, void *vtb, int silent) {
-#if EBRADRWIDTH == 8
-        Vm_ice40 *tb = (Vm_ice40 *)vtb;
-#elif EBRADRWIDTH == 11
         Vm_ice40sim_EBRonly *tb = (Vm_ice40sim_EBRonly *)vtb;
-#endif
         static uint32_t prevI = 0;
         static int st;
         uint32_t I = tb->v->inst_midgetv_core->get_I();
@@ -522,16 +498,14 @@ int main(int argc, char **argv) {
 	// Initialize Verilators variables
         Verilated::commandArgs(argc, argv);
 
-        tb->eval(); // This does do the 'initial' of verilog
-
-//        readout_ebr( "After tb->eval()\n", 1, tb );
+        readout_ebr( "Virgin\n", 1, tb );
+        tb->eval(); // Do the 'initial' of verilog
+        readout_ebr( "After tb->eval()\n", 1, tb );
         
         initialize_ebr( tb, imagetosim, imagetosimname );
-
-//        readout_ebr( "After custom init with program to simulate\n", 1, tb );
-//        exit(0);
-//        //readout_ucode( tb );
-
+        readout_ebr( "After custom init with program to simulate\n", 1, tb );
+        //exit(0);
+        
         int cy;
         for ( cy = 0; cy < cyclelimit; cy++ ) {
 

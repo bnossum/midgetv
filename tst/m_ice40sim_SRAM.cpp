@@ -46,27 +46,10 @@ uint32_t getebr( Vm_ice40sim_SRAM *tb, uint32_t byteadr ) {
         if ( byteadr & 3 )
                 ferr( "Que?\n" );
 #if EBRADRWIDTH == 8 
-        d =  (tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ebr->b0__BRA__0__KET____DOT__ebr->get_as_16( wa ) <<  0);
-        d |= (tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ebr->b0__BRA__1__KET____DOT__ebr->get_as_16( wa ) << 16);
-#elif EBRADRWIDTH == 11 
-        int sliceshift = (wa&7)*2;
-
-        d =  (((tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ebr->b0__BRA__0__KET____DOT__ebr->get_as_16(  wa/8) >> sliceshift) & 3) <<  0);
-        d |= (((tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ebr->b0__BRA__1__KET____DOT__ebr->get_as_16(  wa/8) >> sliceshift) & 3) <<  2);
-        d |= (((tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ebr->b0__BRA__2__KET____DOT__ebr->get_as_16(  wa/8) >> sliceshift) & 3) <<  4);
-        d |= (((tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ebr->b0__BRA__3__KET____DOT__ebr->get_as_16(  wa/8) >> sliceshift) & 3) <<  6);
-        d |= (((tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ebr->b0__BRA__4__KET____DOT__ebr->get_as_16(  wa/8) >> sliceshift) & 3) <<  8);
-        d |= (((tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ebr->b0__BRA__5__KET____DOT__ebr->get_as_16(  wa/8) >> sliceshift) & 3) << 10);
-        d |= (((tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ebr->b0__BRA__6__KET____DOT__ebr->get_as_16(  wa/8) >> sliceshift) & 3) << 12);
-        d |= (((tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ebr->b0__BRA__7__KET____DOT__ebr->get_as_16(  wa/8) >> sliceshift) & 3) << 14);
-        d |= (((tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ebr->b0__BRA__8__KET____DOT__ebr->get_as_16(  wa/8) >> sliceshift) & 3) << 16);
-        d |= (((tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ebr->b0__BRA__9__KET____DOT__ebr->get_as_16(  wa/8) >> sliceshift) & 3) << 18);
-        d |= (((tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ebr->b0__BRA__10__KET____DOT__ebr->get_as_16( wa/8) >> sliceshift) & 3) << 20);
-        d |= (((tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ebr->b0__BRA__11__KET____DOT__ebr->get_as_16( wa/8) >> sliceshift) & 3) << 22);
-        d |= (((tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ebr->b0__BRA__12__KET____DOT__ebr->get_as_16( wa/8) >> sliceshift) & 3) << 24);
-        d |= (((tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ebr->b0__BRA__13__KET____DOT__ebr->get_as_16( wa/8) >> sliceshift) & 3) << 26);
-        d |= (((tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ebr->b0__BRA__14__KET____DOT__ebr->get_as_16( wa/8) >> sliceshift) & 3) << 28);
-        d |= (((tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ebr->b0__BRA__15__KET____DOT__ebr->get_as_16( wa/8) >> sliceshift) & 3) << 30);
+//        d =  (tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ebr->b0__BRA__0__KET____DOT__genblk5__DOT__ebr->get_as_16(wa) <<  0);
+//        d |= (tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ebr->b0__BRA__1__KET____DOT__genblk5__DOT__ebr->get_as_16(wa) << 16);
+        d =  (tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ebr->ebrb->genblk1__DOT__mem->get_as_16(wa) <<  0);
+        d |= (tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ebr->ebrh->genblk1__DOT__mem->get_as_16(wa) << 16);
 #else
 #error Not yet
 #endif
@@ -178,12 +161,11 @@ void initialize_ebr_sram( Vm_ice40sim_SRAM *tb, FILE *fi, char *finame ) {
         uint32_t h;
         //if ( i < 1024 ) ferr( "Image can not be suited for 2 EBR rams and 2 SRAMs\n" );
         for ( j = 0; j < 1024; j += 4 ) {
-                h = (ebr[j+1]<<8) | ebr[j+0];
-                //if ( j == 0x88 ) printf( "Lowhalf = 0x%4.4x\n", h );
-                tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ebr->b0__BRA__0__KET____DOT__ebr->set_as_16(j>>2,h);
-                h = (ebr[j+3]<<8) | ebr[j+2];
-                //if ( j == 0x88 ) printf( "Highhalf= 0x%4.4x\n", h );
-                tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ebr->b0__BRA__1__KET____DOT__ebr->set_as_16(j>>2,h);
+                uint32_t hb,hh;
+                hb = (ebr[j+1]<<8) | ebr[j+0];
+                hh = (ebr[j+3]<<8) | ebr[j+2];
+                tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ebr->ebrb->genblk1__DOT__mem->set_as_16(j>>2,hb);
+                tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ebr->ebrh->genblk1__DOT__mem->set_as_16(j>>2,hh);
         }
         /* Fill in SRAM
          */
