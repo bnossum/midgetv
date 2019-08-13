@@ -437,9 +437,6 @@ void printf_result(
         printf( "      .WCLKE( 1'b0                ),\n" );
         printf( "      .WDATA( 16'h0               ),\n" );
         printf( "      .WE(    1'b0                ),\n" );
-        printf( "`ifdef verilator\n" );
-        printf( "      .sim_pre_RDATA( sim_a),\n" );
-        printf( "`endif\n" );
         printf( "      .MASK(  16'h0               )\n" );
         printf( "      );\n" );
         printf( "   \n" );
@@ -460,9 +457,6 @@ void printf_result(
         printf( "      .WCLKE( 1'b0                ),\n" );
         printf( "      .WDATA( 16'h0               ),\n" );
         printf( "      .WE(    1'b0                ),\n" );
-        printf( "`ifdef verilator\n" );
-        printf( "      .sim_pre_RDATA( sim_b),\n" );
-        printf( "`endif\n" );
         printf( "      .MASK(  16'h0               )\n" );
         printf( "      );\n" );
         printf( "\n" );
