@@ -11,12 +11,16 @@ CFLAGS = -mabi=ilp32 -march=rv32i -nodefaultlibs -nostartfiles -Os -Wall \
 	-DNOCSR=1 -DonlyEBR=1 -DSP_INITVAL=0x400 
 
 all: $(BINDIR)/simmorse ../../../hwtst/upduino2/ice40loaderprog.hv \
-	../../../hwtst/iceblink40-hx1k/ice40loaderprog.hv
+	../../../hwtst/iceblink40-hx1k/ice40loaderprog.hv \
+	../../../hwtst/max_upduino2/ice40loaderprog.hv
 
 ../../../hwtst/iceblink40-hx1k/ice40loaderprog.hv: $(OBJDIR)/morse.bin 
 	../../../bin/midgetv_bin2ebr -i $< -o $@
 
 ../../../hwtst/upduino2/ice40loaderprog.hv: $(OBJDIR)/morse.bin 
+	../../../bin/midgetv_bin2ebr -i $< -o $@
+
+../../../hwtst/max_upduino2/ice40loaderprog.hv: $(OBJDIR)/morse.bin 
 	../../../bin/midgetv_bin2ebr -i $< -o $@
 
 $(BINDIR)/simmorse:morse.c

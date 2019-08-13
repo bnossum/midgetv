@@ -12,10 +12,14 @@ GCCFLAGS = -mabi=ilp32 -march=rv32i -nodefaultlibs -nostartfiles -I ../../inc/ -
 LDFLAGS = -nodefaultlibs -nostartfiles --discard-none --cref -Map $@.map
 
 all: ../../../hwtst/upduino2/ice40loaderprog.hv \
+	../../../hwtst/max_upduino2/ice40loaderprog.hv \
 	../../../hwtst/iceblink40-hx1k/ice40loaderprog.hv
 
 ../../../hwtst/upduino2/ice40loaderprog.hv:$(OBJDIREBR)/blinky.bin
 	../../../bin/midgetv_bin2ebr -i $< -o $@
+
+../../../hwtst/max_upduino2/ice40loaderprog.hv:$(OBJDIREBR)/blinky.bin
+	../../../bin/midgetv_bin2ebr -w 11 -i $< -o $@
 
 ../../../hwtst/iceblink40-hx1k/ice40loaderprog.hv:$(OBJDIREBR)/blinky.bin
 	../../../bin/midgetv_bin2ebr -i $< -o $@

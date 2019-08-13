@@ -1,4 +1,4 @@
-o/*  =============================================================================
+/*  =============================================================================
     Part of midgetv
     2019. Copyright B. Nossum.
     For licence, see LICENCE
@@ -123,8 +123,8 @@ static void puts_morse( uint8_t const *  s ) {
 
 const uint8_t hello_world[] = { _H _E _L _L _O __ _W _O _R _L _D __endstring__  };
 
-//__attribute__((noreturn)) 
 int main( void ) {
+
         while (1) {
                 puts_morse( hello_world );
                 ledoff(10);
