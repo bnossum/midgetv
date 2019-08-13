@@ -90,11 +90,11 @@ module m_wai
          SB_LUT4 #(.LUT_INIT(16'h0202)) L_2327(.O(Wai[7]),.I3(1'b0),.I2(sa27),.I1(sa26),.I0(ADR_O[9]));      
          
          if ( EBRADRWIDTH > 8 ) begin
-            SB_LUT4 #(.LUT_INIT(16'h0202)) L_2327(.O(Wai[8]),.I3(1'b0),.I2(sa27),.I1(sa26),.I0(ADR_O[10]));      
+            SB_LUT4 #(.LUT_INIT(16'h0202)) L_93(.O(Wai[8]),.I3(1'b0),.I2(sa27),.I1(sa26),.I0(ADR_O[10]));      
             if ( EBRADRWIDTH > 9 ) begin
-               SB_LUT4 #(.LUT_INIT(16'h0202)) L_2327(.O(Wai[9]),.I3(1'b0),.I2(sa27),.I1(sa26),.I0(ADR_O[11]));      
+               SB_LUT4 #(.LUT_INIT(16'h0202)) L_95(.O(Wai[9]),.I3(1'b0),.I2(sa27),.I1(sa26),.I0(ADR_O[11]));      
                if ( EBRADRWIDTH > 10 ) begin
-                  SB_LUT4 #(.LUT_INIT(16'h0202)) L_2327(.O(Wai[10]),.I3(1'b0),.I2(sa27),.I1(sa26),.I0(ADR_O[12]));      
+                  SB_LUT4 #(.LUT_INIT(16'h0202)) L_97(.O(Wai[10]),.I3(1'b0),.I2(sa27),.I1(sa26),.I0(ADR_O[12]));      
                end
             end
          end

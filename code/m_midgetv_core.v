@@ -85,8 +85,8 @@
  * Wishbone signals are implemented as per Wishbone specification b4,
  * see Wishbone B.4 data sheet for m_midgetv_core below.
  * 
- * A note on RST_I. 
- * RST_I is a mandatory input. It acts like a NMI.
+ * input:RST_I. 
+ * RST_I is a mandatory input for Wishbone. On the core it acts like a NMI.
  * 
  * Even though the granularity of the Wishbone interface is 
  * 8-bit, all read operations happen as 32-bit operations. SEL_O == 4'b1111.
@@ -171,7 +171,7 @@
  * 
  * HIGHLEVEL
  * ---------
- * 0 : Use ICE primitives. Recommended
+ * 0 : Use iCE primitives. Recommended
  * 1 : Use RTL synthesis
  * 
  * Most of the code for midgetv exists in "highlevel" RTL code, but also
@@ -182,7 +182,7 @@
  *  
  * LAZY_DECODE
  * -----------
- * 0: All instructions are fully decoded, riscv compliance.
+ * 0: All supported instructions are fully decoded, riscv compliance.
  * 1: Some minor code spaces are not checked. For example,
  *    "XOR" can be decoded by 
  *    ( funct3 = 3'b100, opcode = 7'b0110011). However, 
@@ -194,12 +194,12 @@
  * 
  * DISREGARD_WB4_3_55 
  * -------------------
- * 0: Obey rule 3.55 of Wishbone B.3
- * 1: Ignore rule 3.55. This should save one! LUT. Not recommended.
+ * 0: Obey rule 3.55 of Wishbone B.3, recommended.
+ * 1: Ignore rule 3.55. This should save one! LUT. 
  * 
  * NO_UCODEOPT
  * --------
- * 0: Use 2EBRs + ~20 LUTs for control (recommended)
+ * 0: Use 2EBRs + ~20 LUTs for control, recommended.
  * 1: Use 3 EBRs for control. 
  * 
  * EBRADRWIDTH
@@ -211,7 +211,7 @@
  * 11    8 kiB EBR
  * See m_ebr.v for details.
  * 
- * program0, program1, ... programF
+ * prg00, prg01, ... prg0F
  * --------------------------------
  * These holds the program to initiate in the EBRs.
  * See m_ebr.v for details.
@@ -248,22 +248,22 @@ module m_midgetv_core
       MTIMETAP_LOWLIM = 14, // Only location where this value is really to be set 
       NO_UCODEOPT = 0, //      Only set to 1 during debugging
       DBGA = 0, //             Only set to 1 during debugging
-      parameter [4095:0] program0 = 4096'h0, // | 
-      parameter [4095:0] program1 = 4096'h0, // | Always specified by module
-      parameter [4095:0] program2 = 4096'h0, // | that instantiates m_midgetv_core
-      parameter [4095:0] program3 = 4096'h0, // | 
-      parameter [4095:0] program4 = 4096'h0, // | 
-      parameter [4095:0] program5 = 4096'h0, // | 
-      parameter [4095:0] program6 = 4096'h0, // | 
-      parameter [4095:0] program7 = 4096'h0, // | 
-      parameter [4095:0] program8 = 4096'h0, // | 
-      parameter [4095:0] program9 = 4096'h0, // | 
-      parameter [4095:0] programA = 4096'h0, // | 
-      parameter [4095:0] programB = 4096'h0, // | 
-      parameter [4095:0] programC = 4096'h0, // | 
-      parameter [4095:0] programD = 4096'h0, // | 
-      parameter [4095:0] programE = 4096'h0, // | 
-      parameter [4095:0] programF = 4096'h0  // | 
+      parameter [4095:0] prg00 = 4096'h0, // | 
+      parameter [4095:0] prg01 = 4096'h0, // | Always specified by module
+      parameter [4095:0] prg02 = 4096'h0, // | that instantiates m_midgetv_core
+      parameter [4095:0] prg03 = 4096'h0, // | 
+      parameter [4095:0] prg04 = 4096'h0, // | 
+      parameter [4095:0] prg05 = 4096'h0, // | 
+      parameter [4095:0] prg06 = 4096'h0, // | 
+      parameter [4095:0] prg07 = 4096'h0, // | 
+      parameter [4095:0] prg08 = 4096'h0, // | 
+      parameter [4095:0] prg09 = 4096'h0, // | 
+      parameter [4095:0] prg0A = 4096'h0, // | 
+      parameter [4095:0] prg0B = 4096'h0, // | 
+      parameter [4095:0] prg0C = 4096'h0, // | 
+      parameter [4095:0] prg0D = 4096'h0, // | 
+      parameter [4095:0] prg0E = 4096'h0, // | 
+      parameter [4095:0] prg0F = 4096'h0  // |
       )
    (
     // Wishbone signals:
@@ -640,22 +640,10 @@ module m_midgetv_core
         .INSTR                          (INSTR[31:0]));
    
    m_ebr #(.EBRADRWIDTH(EBRADRWIDTH),
-           .program0(program0),
-           .program1(program1),
-           .program2(program2),
-           .program3(program3),
-           .program4(program4),
-           .program5(program5),
-           .program6(program6),
-           .program7(program7),
-           .program8(program8),
-           .program9(program9),
-           .programA(programA),
-           .programB(programB),
-           .programC(programC),
-           .programD(programD),
-           .programE(programE),
-           .programF(programF)
+           .prg00(prg00),.prg01(prg01),.prg02(prg02),.prg03(prg03),
+           .prg04(prg04),.prg05(prg05),.prg06(prg06),.prg07(prg07),
+           .prg08(prg08),.prg09(prg09),.prg0A(prg0A),.prg0B(prg0B),
+           .prg0C(prg0C),.prg0D(prg0D),.prg0E(prg0E),.prg0F(prg0F)
            )
    inst_ebr
      (/*AUTOINST*/

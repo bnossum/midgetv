@@ -8,32 +8,32 @@
  * in this Blockram, this is the home of my Bootloader.
  *
  *
- *                             sa[23:20]       
- *    READ                     read Read       WRITE      sa[27:24]        
- *    ADR                      sel  Select     ADR                            
- *    9876543210               ||||                       write 
- *    ---------------------------------------+            sel    Comment
- *    __B[9:2]     Alu         1101 11 B[9:2]+----------------------------
- *    000_SRC200   rs2         1110 10 SRC2    __Q[9:2]   00xx  
- *    000_SRC100   rs1         1111 01 SRC1    00u__TRG   0100   u = 1 if TRG == 0
- *                                                        0101   free
- *                                                        011x   free
- * 20 0010000000   jj          0000 00         00100000   1000  
- * 21 0010000100   rinst       0001 00         00100001   1001   aka minstret
- * 22 0010001000   pc          0010 00         00100010   1010  
- * 23 0010001100   ttime       0011 00         00100011   1011   aka mcycle          
- * 24 0010010000   rInternISR  0100 00                           
- * 25 0010010100   rFFFFFF7F   0101 00         x
- * 26 0010011000   r000000FF   0110 00         
- * 27 0010011100   r0000FFFF   0111 00         
- * 28 0010100000   rFFFF7FFF   1000 00         
- * 29 0010100100   mtvec       1001 00         
- * 2a 0010101000   r00000000   1010 00         x
- * 2b 0010101100   rFFFFFFFF   1011 00         
- * 2c 0010110000   yy          1100            00101100   1100  
- * 2d 0010110100   mepc                        00101101   1101  
- * 2e 0010111000   mcause                      00101110   1110  
- * 2f 0010111100   mtval                       00101111   1111                
+ *                                sa[23:20]       
+ *       READ                     read Read       WRITE      sa[27:24]        
+ *       ADR                      sel  Select     ADR                            
+ *       9876543210               ||||                       write 
+ *       ---------------------------------------+            sel    Comment
+ *       __B[9:2]     Alu         1101 11 B[9:2]+----------------------------
+ *       000_SRC200   rs2         1110 10 SRC2    __Q[9:2]   00xx  
+ *       000_SRC100   rs1         1111 01 SRC1    00u__TRG   0100   u = 1 if TRG == 0
+ *                                                           0101   free
+ *                                                           011x   free
+ * 80 20 0010000000   jj          0000 00         00100000   1000  
+ * 84 21 0010000100   rinst       0001 00         00100001   1001   aka minstret
+ * 88 22 0010001000   pc          0010 00         00100010   1010  
+ * 8c 23 0010001100   ttime       0011 00         00100011   1011   aka mcycle          
+ * 90 24 0010010000   rInternISR  0100 00                           
+ * 94 25 0010010100   rFFFFFF7F   0101 00         x
+ * 98 26 0010011000   r000000FF   0110 00         
+ * 9c 27 0010011100   r0000FFFF   0111 00         
+ * a0 28 0010100000   rFFFF7FFF   1000 00         
+ * a4 29 0010100100   mtvec       1001 00         
+ * a8 2a 0010101000   r00000000   1010 00         x
+ * ac 2b 0010101100   rFFFFFFFF   1011 00         
+ * b0 2c 0010110000   yy          1100            00101100   1100  
+ * b4 2d 0010110100   mepc                        00101101   1101  
+ * b8 2e 0010111000   mcause                      00101110   1110  
+ * bc 2f 0010111100   mtval                       00101111   1111                
  * 
  * There are a few irregularities on the read address. 
  *     sa23 may be modified. This is used to either read rFFFFFFFF or tinytime 

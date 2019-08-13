@@ -45,9 +45,6 @@ module m_3ebr
             .WCLKE( 1'b0                ),
             .WDATA( 16'h0               ),
             .WE(    1'b0                ),
-`ifdef verilator
-            .sim_pre_RDATA( sim_a),
-`endif
             .MASK(  16'h0               )
             );
          
@@ -68,9 +65,6 @@ module m_3ebr
             .WCLKE( 1'b0                ),
             .WDATA( 16'h0               ),
             .WE(    1'b0                ),
-`ifdef verilator
-            .sim_pre_RDATA( sim_b),
-`endif
             .MASK(  16'h0               )
             );
          
@@ -91,9 +85,6 @@ module m_3ebr
             .WCLKE( 1'b0                ),
             .WDATA( 16'h0               ),
             .WE(    1'b0                ),
-`ifdef verilator
-            .sim_pre_RDATA( sim_c),
-`endif
             .MASK(  16'h0               )
             );
       end else begin
