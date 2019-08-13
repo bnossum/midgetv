@@ -75,13 +75,6 @@ $(OBJDIRSRAM)/%.out : $(OBJDIRSRAM)/%.o
 %.lst:%.out
 	riscv32-unknown-elf-objdump -M numeric,no-aliases -D $< > $@
 
-# The binary image is simulated
-$(OBJDIREBR)/%.result.txt: $(OBJDIREBR)/%.bin
-	$(MIDGETVICE40EBR) -c 0x1000 -s -l $@ -i $<
-
-$(OBJDIRSRAM)/%.result.txt: $(OBJDIRSRAM)/%.bin
-	$(MIDGETVICE40SRAM) -c 0x1000 -s -l $@ -i $<
-
 # Directories for result may need to be made
 $(OBJDIREBR):
 	mkdir -p $(OBJDIREBR)
