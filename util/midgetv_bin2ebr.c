@@ -4,19 +4,23 @@
  * For licence, see LICENCE
  * -----------------------------------------------------------------------------
  * Utility to map a binary file over to localparam as needed when compiling
- * m_ice40.v. The original binary file is to have a load address = relocation
- * address starting at 0.
- *
+ * m_ice40.v. 
  * Possible enhancement:
  * While this utility allows maximum utilization of EBR resources for iCE40
  * LP640, LP1K, LP4K, HX1K, HX4K and iCE40UP3K, it is conceivable to initiate
  * even more memory for LP8K, HX8K and iCE40UP5K. This is not done now.
- * An example of what could be done:
- * iCE40 LP8K and HX8K has 32 EBR blocks. A maximum size midgetv utilization
- * could for instance use these as follows:
- *  4 EBRs for microcode
- * 16 EBRs for what in the rest of midgetv is called "EBR ram"
- *  8 EBRs connected to what midgetv calls "SRAM" -- this can be initiated.
+ *
+ * The strategy is simple:
+ *  o The load address = relocation address starting at 0.
+ *  o A binary file is read byte by byte, interpreted word by word. 
+ *    The binary file is assumed little endian.
+ *  o The first 4096 bits are represented as prg00, the next
+ *    4096 bits goes to prg01, etc. The size of 4096 bit is chosen becase
+ *    it seems to be a size that passes through all tool-chains.
+ *  o In iCE40, the maximum size to represent is 8 KiB, represented by
+ *    prg00 through prg0F.
+ *  o It is the work of the initcode in verilog to do any division/mangling
+ *    of the bits.
  */ 
 
 #include <stdint.h>
@@ -29,26 +33,22 @@
 #define ferr(...) exit(fprintf(stderr,__VA_ARGS__))
 
 uint8_t program[16*4096/8]; // Bits
-uint8_t stripe[16][4096/8]; 
 
 int main(int argc, char *argv[]) {
         int opt;
-        FILE *fi = NULL, *fo = NULL;
-        int n = -1, w = -1;
+        FILE *fi = stdin;
+        FILE *fo = stdout;
+        int w = -1;
         char *finame = NULL;
         
         while ((opt = getopt(argc, argv, "hw:i:o:")) != -1) {
                 switch (opt) {
                 case 'w' :
                         w = atoi(optarg);
-                        switch (w) {
-                        case 8 : n = 2; break;
-                        case 9 : n = 4; break;
-                        case 10 : n = 8; break;
-                        case 11 : n = 16; break;
-                        default :
-                                ferr( "Supported address width of EBR is 8,9,10 or 11. (-h for help)\n" );
-                        }
+                        if ( w < 10 || w > 13 )
+                                ferr( "Unsupported amount of EBR.\n"
+                                      "w = 10 minimum  (1 KiB EBR, 2 EBRs used)\n"
+                                      "w = 13 maximum  (9 KiB EBR, 16 EBRs used)\n" );
                         break;
                 case 'i':
                         if ( (fi = fopen(optarg,"r")) == NULL )
@@ -67,18 +67,17 @@ int main(int argc, char *argv[]) {
                                 "source.\n"
                                 "Usage: %s [-h] [-w width] -i inname -o outname\n"
                                 "    -h This help\n"
-                                "    -i inname is the name of the binary image to use as source. Mandatory\n"
-                                "    -o outname is the name of the resulting file to be `included in Verilog\n"
-                                "       source. Mandatory.\n"
-                                "    -w To set the width of the EBR data path to use. Legal values are:\n"
-                                "            8  Smallest supported midgetv, 256 words, 1 KiB\n"
-                                "            9  512 words, 2 KiB\n"
-                                "            10 1024 words, 4 KiB\n"
-                                "            11 2048 words, 8 KiB\n"
+                                "    -i inname is the name of the binary image to use as source.\n"
+                                "    -o outname is the name of the resulting file to be `included in Verilog source.\n"
+                                "    -w The number of address bits of the EBR data path to use.\n"
+                                "       Legal values are:\n"
+                                "            10  256 words, 1 KiB\n"
+                                "            11  512 words, 2 KiB\n"
+                                "            12 1024 words, 4 KiB\n"
+                                "            13 2048 words, 8 KiB\n"
                                 "\n"
-                                "    If w is given, and the binary file is too large, the binary file is\n"
-                                "    truncated. The reason for this behaviour is that the binary image may be\n"
-                                "    intended for a split between EBR and SRAM. If w is not given, it is\n"
+                                "    If w is given, and the binary file is too large, output is\n"
+                                "    truncated accordingly. If w is not given, it is\n"
                                 "    calculated based on the size of the binary image.\n",
                                 argv[0]);
                         return -1;
@@ -92,113 +91,47 @@ int main(int argc, char *argv[]) {
         int c,i = 0;
         uint8_t *bp = program; 
         while ( (c=fgetc(fi)) != EOF ) {
-                if ( w > 0 && i >= (1<<(n*4)) )
+                if ( w > 0 && i >= (1<<w) ) {
+                        ferr( "PP\n" );
                         break; // User imposed limit
-                if ( i >= 8*1024 )
-                        ferr( "Binary image maximum size %d bytes exceeded (-h for help)\n", 8*1024 );
+                }
+                if ( i >= (1<<13) )
+                        ferr( "Binary image maximum size %d bytes exceeded (-h for help)\n", 1<<13 );
                 *bp++ = c;
                 i++;
         }
         fclose(fi);
         
-        if ( n == -1 ) {
-                if ( i <= 1*1024 ) {
-                        w = 8; n = 2;
-                } else if ( i <= 2*1024 ) {
-                        w = 9; n = 4;
-                } else if ( i <= 4*1024 ) {
-                        w = 10; n = 8;
-                } else {
-                        w = 11; n = 16;
-                }
+        if ( w == -1 ) {
+                for ( w = 10; w < 13; w++ )
+                        if ( i <= (1<<w) )
+                                break;
+                if ( w >= 13 )
+                        ferr( "Que?\n" );
         }
-        if ( i > 512*n )
-                ferr( "Binary image is %d > requested maximum program %d bytes (n = %d, -h for help)\n", i, 512*n, n );
 
-        /*
-         * The below could be generalized, but for what reason?
-         */
-        int b,ebrnr,initposlow,initposhigh,stripenr,stripebitnr,initpos;
-        if ( n == 2 ) {
-                // The first 1 KiB = 8 kibi of program to be used.
-                for ( i = 0; i < 8*1024; i++ ) {
-                        b = (program[i/8] >> ( i & 7)) & 1;
-                        initposlow  = (i >>  0) & 15; // Low part bit position in an INIT_x
-                        ebrnr       = (i >>  4) & 1;  // What EBR
-                        initposhigh = (i >>  5) & 15; // High part of bit position
-                        stripenr    = (i >>  9) & 15; // What INIT_x
-                        initpos     = (initposhigh<<4) + initposlow;
-                        stripebitnr = 256*ebrnr + initpos;
-                        assert( stripenr < 16 );
-                        assert( stripebitnr < (8*1024/16) );
-                        stripe[stripenr][stripebitnr/8] |= (b<<(stripebitnr&7));
-                }
-        } else if ( n == 4 ) {
-                // The first 2 KiB = 16 kibi of program to be used.
-                for ( i = 0; i < 16*1024; i++ ) {
-                        b = (program[i/8] >> ( i & 7)) & 1;
-                        initposlow  = (i >>  0) & 7;  // Low part bit position in an INIT_x
-                        ebrnr       = (i >>  3) & 3;  // What EBR
-                        initposhigh = (i >>  5) & 31; // High part of bit position
-                        stripenr    = (i >> 10) & 15; // What INIT_x
-                        initpos     = (initposhigh<<3) + initposlow;
-                        stripebitnr = 256*ebrnr + initpos;
-                        assert( stripenr < 16 );
-                        assert( initpos < 256 );
-                        assert( ebrnr < 4 );
-                        assert( stripebitnr < (16*1024/16) );
-                        stripe[stripenr][stripebitnr/8] |= (b<<(stripebitnr&7));
-                }
-        } else if ( n == 8 ) {
-                // The first 4 KiB = 32 kibi of program to be used.
-                for ( i = 0; i < 32*1024; i++ ) {
-                        b = (program[i/8] >> ( i & 7)) & 1;
-                        initposlow  = (i >>  0) & 3;  // Low part bit position in an INIT_x
-                        ebrnr       = (i >>  2) & 7;  // What EBR
-                        initposhigh = (i >>  5) & 63; // High part of bit position
-                        stripenr    = (i >> 11) & 15; // What INIT_x
-                        initpos     = (initposhigh<<2) + initposlow;
-                        stripebitnr = 256*ebrnr + initpos;
-                        assert( stripenr < 16 );
-                        assert( initpos < 256 );
-                        assert( ebrnr < 8 );
-                        assert( stripebitnr < (32*1024/16) );
-                        stripe[stripenr][stripebitnr/8] |= (b<<(stripebitnr&7));
-                }
-        } else {                
-                // The first 8 KiB = 64 kibi of program to be used.
-                for ( i = 0; i < 64*1024; i++ ) {
-                        b = (program[i/8] >> ( i & 7)) & 1;
-                        initposlow  = (i >>  0) & 1;  // Low part bit position in an INIT_x
-                        ebrnr       = (i >>  1) & 15; // What EBR
-                        initposhigh = (i >>  5) & 127;// High part of bit position
-                        stripenr    = (i >> 12) & 15; // What INIT_x
-                        initpos     = (initposhigh<<1) + initposlow;
-                        stripebitnr = 256*ebrnr + initpos;
-                        assert( stripenr < 16 );
-                        assert( initpos < 256 );
-                        assert( ebrnr < 16 );
-                        assert( stripebitnr < (64*1024/16) );
-                        stripe[stripenr][stripebitnr/8] |= (b<<(stripebitnr&7));
-                }
-        }
-        
         fprintf( fo, "// Initial values for midgetv EBRs.\n"
-                 "// Generated by %s from %s.\n// %d EBRs used.\n", argv[0], finame, n );
-        fprintf( fo, "localparam EBRADRWIDTH = %d;\n", w );
-        
+                 "// Generated by %s from %s.\n// %d EBRs used.\n",
+                 argv[0], finame, (1<<(w-9)) );
+        fprintf( fo, "localparam EBRADRWIDTH = %d;\n", w-2 );
+
         int k;
         for ( k = 0; k < 16; k++ ) {
-//                fprintf( fo, "localparam program%X = %d'h", k, 256*n ); See issue 6.
-                fprintf( fo, "localparam program%X = %d'h", k, 4096 );
-                for ( i = 32*n-1; i >= 0; i-- ) {
-                        fprintf( fo, "%2.2x", stripe[k][i] );
+                fprintf( fo, "localparam prg%2.2X = 4096'h", k );
+                for ( i = 511; i >= 0; i-- ) {
+                        fprintf( fo, "%2.2x", program[k*512+i] );
                         if ( i && (i & 31) == 0 )
                                 fprintf( fo, "_" );
                 }
                 fprintf( fo, ";\n" );
         }
-                
+
+// Does not work for SimplifyPro + Lattice iCECube2. Buffer overflow when reading edif from SimplifyPro        
+//        fprintf( fo, "localparam prg = 65536'h" );
+//        for ( i = 65536/8-1; i >= 0; i-- )
+//                fprintf( fo, "%2.2x", program[i] );
+//        fprintf( fo, ";\n" );
+        
         fclose( fo );
         return 0;
 }
