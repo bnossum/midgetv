@@ -48,3 +48,9 @@ hwtst/upduino2/iCEcube2_flow/synlog.tcl
 hwtst/upduino2/iCEcube2_flow/xxx_lse_cp_file_list
 hwtst/upduino2/iCEcube2_flow/xxx_lse_sign_file
 hwtst/upduino2/ice40loaderprog.hv
+
+hwtst/max_upduino2/.sconsign.dblite
+hwtst/max_upduino2/hardware.asc
+hwtst/max_upduino2/hardware.bin
+hwtst/max_upduino2/hardware.blif
+hwtst/max_upduino2/ice40loaderprog.hv
