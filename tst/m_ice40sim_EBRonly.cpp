@@ -498,12 +498,12 @@ int main(int argc, char **argv) {
 	// Initialize Verilators variables
         Verilated::commandArgs(argc, argv);
 
-        readout_ebr( "Virgin\n", 1, tb );
+        //readout_ebr( "Virgin\n", 1, tb );
         tb->eval(); // Do the 'initial' of verilog
-        readout_ebr( "After tb->eval()\n", 1, tb );
+        //readout_ebr( "After tb->eval()\n", 1, tb );
         
         initialize_ebr( tb, imagetosim, imagetosimname );
-        readout_ebr( "After custom init with program to simulate\n", 1, tb );
+        //readout_ebr( "After custom init with program to simulate\n", 1, tb );
         //exit(0);
         
         int cy;
