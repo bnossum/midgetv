@@ -8,7 +8,7 @@
 module m_ice40sim_EBRonly
   # ( parameter
       SRAMADRWIDTH       = 0,  
-      SIMEBRADRWIDTH     = 11, 
+      SIMEBRADRWIDTH     = 11,  // MUST match corresponding macro in m_ice4sim_EBRonly.cpp
       IWIDTH             = 32, 
       NO_CYCLECNT        = 1, 
       MTIMETAP           = 14, 
@@ -45,11 +45,27 @@ module m_ice40sim_EBRonly
     * irrelevant during simulation, because then the simulator write 
     * the program to simulate into EBR. 
     */
+//localparam [4095:0] program0 = 4096'h0;
+//localparam [4095:0] program1 = 4096'h0;
+//localparam [4095:0] program2 = 4096'h0;
+//localparam [4095:0] program3 = 4096'h0;
+//localparam [4095:0] program4 = 4096'h0;
+//localparam [4095:0] program5 = 4096'h0;
+//localparam [4095:0] program6 = 4096'h0;
+//localparam [4095:0] program7 = 4096'h0;
+//localparam [4095:0] program8 = 4096'h0;
+//localparam [4095:0] program9 = 4096'h0;
+//localparam [4095:0] programA = 4096'h0;
+//localparam [4095:0] programB = 4096'h0;
+//localparam [4095:0] programC = 4096'h0;
+//localparam [4095:0] programD = 4096'h0;
+//localparam [4095:0] programE = 4096'h0;
+//localparam [4095:0] programF = 4096'h0;
 `ifndef defaulticeprog 
- `define defaulticeprog "ice40loaderprog.hv" 
+ `define defaulticeprog "../../hwtst/iceblink40-hx1k/ice40loaderprog.hv" 
 `endif 
 `include `defaulticeprog
-   
+
    m_midgetv_core
      #(
        .SRAMADRWIDTH      ( SRAMADRWIDTH       ),
@@ -60,10 +76,10 @@ module m_ice40sim_EBRonly
        .HIGHLEVEL         ( HIGHLEVEL          ),
        .LAZY_DECODE       ( LAZY_DECODE        ),
        .DISREGARD_WB4_3_55( DISREGARD_WB4_3_55 ),
-       .program0(program0),       .program1(program1),       .program2(program2),       .program3(program3),
-       .program4(program4),       .program5(program5),       .program6(program6),       .program7(program7),
-       .program8(program8),       .program9(program9),       .programA(programA),       .programB(programB),
-       .programC(programC),       .programD(programD),       .programE(programE),       .programF(programF)
+       .prg00(prg00),       .prg01(prg01),       .prg02(prg02),       .prg03(prg03),
+       .prg04(prg04),       .prg05(prg05),       .prg06(prg06),       .prg07(prg07),
+       .prg08(prg08),       .prg09(prg09),       .prg0A(prg0A),       .prg0B(prg0B),
+       .prg0C(prg0C),       .prg0D(prg0D),       .prg0E(prg0E),       .prg0F(prg0F)
        )
    inst_midgetv_core
      (/*AUTOINST*/
