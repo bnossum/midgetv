@@ -54,3 +54,4 @@ hwtst/max_upduino2/hardware.asc
 hwtst/max_upduino2/hardware.bin
 hwtst/max_upduino2/hardware.blif
 hwtst/max_upduino2/ice40loaderprog.hv
+hwtst/max_upduino2/iCEcube2_flow/*
