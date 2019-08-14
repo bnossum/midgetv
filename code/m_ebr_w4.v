@@ -12,8 +12,8 @@ module m_ebr_w4
       )
    (
     input [3:0]             B, //     Output from ALU
-    input [EBRADRWIDTH-1:0] Rai, //   Read adddress
-    input [EBRADRWIDTH-1:0] Wai, //   Write adddress
+    input [EBRADRWIDTH-1:0] Rai, //   Read address
+    input [EBRADRWIDTH-1:0] Wai, //   Write address
     input                   clk, //   System clock
     input                   we, //    Write enable
     output [3:0]            DAT_O //  Registered output

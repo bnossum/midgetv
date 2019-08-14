@@ -10,8 +10,8 @@ module m_ebr_w2
       )
    (
     input [1:0]  B, //     Output from ALU
-    input [10:0] Rai, //   Read adddress
-    input [10:0] Wai, //   Write adddress
+    input [10:0] Rai, //   Read address
+    input [10:0] Wai, //   Write address
     input        clk, //   System clock
     input        we, //    Write enable
     output [1:0] DAT_O //  Registered output

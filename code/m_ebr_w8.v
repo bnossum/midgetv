@@ -14,8 +14,8 @@ module m_ebr_w8
       )
    (
     input [7:0]             B, //     Output from ALU
-    input [EBRADRWIDTH-1:0] Rai, //   Read adddress
-    input [EBRADRWIDTH-1:0] Wai, //   Write adddress
+    input [EBRADRWIDTH-1:0] Rai, //   Read address
+    input [EBRADRWIDTH-1:0] Wai, //   Write address
     input                   clk, //   System clock
     input                   bmask, // Byte mask for write, active LUW
     input                   iwe, //   Write enable
