@@ -5,10 +5,6 @@
  * -----------------------------------------------------------------------------
  * Utility to map a binary file over to localparam as needed when compiling
  * m_ice40.v. 
- * Possible enhancement:
- * While this utility allows maximum utilization of EBR resources for iCE40
- * LP640, LP1K, LP4K, HX1K, HX4K and iCE40UP3K, it is conceivable to initiate
- * even more memory for LP8K, HX8K and iCE40UP5K. This is not done now.
  *
  * The strategy is simple:
  *  o The load address = relocation address starting at 0.
@@ -19,8 +15,35 @@
  *    it seems to be a size that passes through all tool-chains.
  *  o In iCE40, the maximum size to represent is 8 KiB, represented by
  *    prg00 through prg0F.
- *  o It is the work of the initcode in verilog to do any division/mangling
- *    of the bits.
+ *  o It is the work of the initcode in verilog to do the surprisingly tricky
+ *    distribution and mangling of the bits so they end up in the right EBR 
+ *    .INIT and at the right location in each .INIT.
+ *
+ * While it would be much easier to let an off-line tool handle distribution and
+ * mangling of the binary file to produce a number of INIT_x's, this would have 
+ * the disadvantage that a binary image would have had to be produced to a 
+ * __specific__ EBR size. Midgetv can use 2, 4, 8 or 16 EBRs, and with the 
+ * selected method the same program as compiled to prg0x (my version of INIT_x) 
+ * can be loaded to any size midgetv (provided it is large enough of cause).
+ * 
+ * Possible enhancement:
+ * This utility only fills the EBR used as system memory. But several ICE chips
+ * will have "spare" EBRs that could be used using the SRAM or IO interface. These
+ * EBRs could also be initiated. This is not done now - after all EBRs also have
+ * other use.
+ *
+ *                  |                        | Possible enhancement
+ * Available        |  The situation now     | Used  Used
+ * resources        |  midget  midget  Spare | as    as   Still
+ * Chip      NrEBR  |  ucode   maxSys  EBRs  | SRAM  IO   spares
+ * ---------------- | ---------------------- | -----------------
+ * LP640         8  |  2        4       2    | 2          0
+ * LP1K/HX1K    16  |  2        8       6    | 4     2    0
+ * LP4K/HX4K    20  |  2       16       2    | 2          0
+ * LP8K/HX8K    32  |  2       16      14    | 8     4    2
+ * ICE40UP3K    20  |  2       16       2    |       2    0
+ * ICE40UP5K    30  |  2       16      12    |       8    4
+ *
  */ 
 
 #include <stdint.h>
