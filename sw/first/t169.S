@@ -122,9 +122,9 @@ ISR_mtimeinc:
         li      x2,~((1<<MTIMETAP)-1)                   //      12      12
         and     x2,x2,x1                                //      13      13
         bne     x2,x0,1f                                //      14      15
-        lw      x1,%lo(_mcycleh)(x0)                    //              16
+        lw      x1,%lo(__mcycleh)(x0)                   //              16
         addi    x1,x1,1                                 //              17
-        sw      x1,%lo(_mcycleh)(x0)                    //              18
+        sw      x1,%lo(__mcycleh)(x0)                   //              18
 1:
         li      x2,(__write_mtime & 0xfffff000)         //      15      19
         lw      x1,(__write_mtime & 0x00000fff)(x2)     //      16      20
@@ -136,10 +136,10 @@ ISR_mtimeinc:
         sw      x2,%lo(changeme_mtimeh)(x0)             //              26
 1:
         sw      x3,%lo(_ex_rrs1)(x0)                    //      21      27
-        lw      x3,%lo(_mtimecmph)(x0)                  //      22      28
+        lw      x3,%lo(__mtimecmph)(x0)                 //      22      28
         bgtu    x3,x2,PostTimerInterrupt                //      23      29
         bne     x3,x2,end_ISR_mtimeinc                  //      24      30
-        lw      x3,%lo(_mtimecmp)(x0)                   //              31
+        lw      x3,%lo(__mtimecmp)(x0)                  //              31
         bltu    x3,x1,end_ISR_mtimeinc                  //              32
 PostTimerInterrupt: // Data written to __write_bit_mtip is irrelevant
         li      x1,(__write_bit_mtip & 0xfffff000)      //              33

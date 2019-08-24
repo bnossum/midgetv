@@ -14,7 +14,7 @@ StartTrap: # Not taken
 _start:
         la      x1,StartTrap
         sw      x1,%lo(__mtvec)(x0)
-        li      x1,SLOWREGADR
+        li      x1,LEDREG
         li      x2,0x1234567
         lw      x3,0(x1)        # Load
         sw      x2,0(x1)        # Store

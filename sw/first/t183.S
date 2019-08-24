@@ -15,7 +15,7 @@ _start:
 //        la      x1,_trap_handler
 //        csrrw   x0,mtvec,x1
         
-        li      x1,SLOWREGADR
+        li      x1,LEDREG
 
         // test aligned LW
 //        lw      x2,0x88(x0)     // PC as a comparison in trace

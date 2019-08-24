@@ -113,7 +113,7 @@ _start:
         // Check unaligned lw
         lw      x16,1(x1)
         li      x3,0x44332211
-        li      x8,SLOWREGADR
+        li      x8,LEDREG
         sw      x3,0(x8)                // For a test at the end
         bne     x16,x3,1b
 

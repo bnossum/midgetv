@@ -16,7 +16,7 @@ _start:
 //        csrrw   x0,mtvec,x1
 
         // test aligned SW
-        li      x1,SLOWREGADR-4
+        li      x1,LEDREG-4
         li      x2,0x01234567
         sw      x2,4(x1)
         lw      x3,4(x1)       

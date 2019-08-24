@@ -15,7 +15,7 @@ StartTrap: # Not taken
 _start:
         la      x1,StartTrap
         sw      x1,%lo(__mtvec)(x0)
-        li      x1,SLOWREGADR
+        li      x1,LEDREG
 
         lb      x2,0(x1)        # we always read 0xffffffbe
         li      x3,0xffffffbe

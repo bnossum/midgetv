@@ -17,11 +17,11 @@ _start:
 
         // First prime the register
         li      x4,0xdeadbeef
-        li      x5,SLOWREGADR
+        li      x5,LEDREG
         sw      x4,0(x5)
         
         // test unaligned SH
-        li      x1,SLOWREGADR+1
+        li      x1,LEDREG+1
         li      x2,0x0123
         sh      x2,0(x1)
         lw      x6,0(x5)
@@ -53,14 +53,14 @@ simend
 _trap_handler:
         // Accept exceptions with combinations
         // x1             x2          Case
-        // SLOWREGADR+1   0x00000123  A
-        // SLOWREGADR+1   0x76543210  B
-        // SLOWREGADR+2   0x76543211  C
-        // SLOWREGADR+3   0x76543212  D
+        // LEDREG+1   0x00000123  A
+        // LEDREG+1   0x76543210  B
+        // LEDREG+2   0x76543211  C
+        // LEDREG+3   0x76543212  D
         // All other exceptions give error.
         // I do not conserve registers.
         li      x12,0x76543210
-        li      x11,SLOWREGADR+1
+        li      x11,LEDREG+1
         beq     x1,x11,CaseA_or_CaseB
         addi    x11,x11,1
         beq     x1,x11,CaseC
