@@ -19,6 +19,10 @@
 `include "../../code/m_ram_a16.v"
 `include "../../code/m_ram_a17.v"
 `include "../../code/m_ebr.v"
+`include "../../code/m_ebr_w16.v"
+`include "../../code/m_ebr_w8.v"
+`include "../../code/m_ebr_w4.v"
+`include "../../code/m_ebr_w2.v"
 `include "../../code/m_rai.v"
 `include "../../code/m_wai.v"
 `include "../../code/m_opreg.v"
@@ -140,6 +144,24 @@ module mytop
       meta_usartRX <= usartRX;
    end
 
+   /* IO adr map of max_upduino2. Write
+    *     3322 2222 2222 1111 1111 11
+    *     1098 7654 3210 9876 5432 1098 7654 3210
+    * 32'b0110_0xxx_xxxx_xxxx_xxxx xxxx xxxx xxx1  Free
+    * 32'b0110_0xxx_xxxx_xxxx_xxxx xxxx xxxx xx1x  Free
+    * 32'b0110_0xxx_xxxx_xxxx_xxxx xxxx xxxx x1xx  LED
+    * 32'b0110_0xxx_xxxx_xxxx_xxxx xxxx xxxx 1xxx  UART
+    * 32'b0110_0xxx_xxxx_xxxx_xxxx xxxx xxx1 xxxx  Free
+    * :::
+    * 32'b0110_0xx1_xxxx_xxxx_xxxx xxxx xxxx xxxx  Free
+    * 32'b0110_0x1x_xxxx_xxxx_xxxx xxxx xxxx xxxx  
+    * 32'b0110_01xx_xxxx_xxxx_xxxx xxxx xxxx xxxx  
+    * 
+    * IO adr map of max_upduino2. Read
+    *     3322 2222 2222 1111 1111 11
+    *     1098 7654 3210 9876 5432 1098 7654 3210
+    * 32'b0110_0xxx_xxxx_xxxx_xxxx xxxx xxxx xxxx  UART
+    */
    /* Asynchronous data input is first registered in the IO FF,
     * it then follows one path, with a fanout of 1, to the
     * rDee register in m_inputmux. These two consequtive
@@ -148,19 +170,16 @@ module mytop
     *
     */
    always @(posedge CLK_I) 
-     if ( CYC_O & STB_O & WE_O ) begin
-        usartTX  <= DAT_O[0];
-        redled   <= DAT_O[1];
-        greenled <= DAT_O[2];
-        blueled  <= DAT_O[3];
+     if ( STB_O & WE_O & ADR_O[2] ) begin
+        redled   <= DAT_O[0];
+        greenled <= DAT_O[1];
+        blueled  <= DAT_O[2];
      end
-
-//   always @(posedge CLK_I)  begin
-//      greenled  <= dbga[0]; // iserror: Any error detected
-//      usartTX   <= dbga[1]; // Avoid optimizing.
-//      blueled   <= dbga[2]; // Error in bit 0, 1
-//   end
-
+   
+   always @(posedge CLK_I) 
+     if ( STB_O & WE_O & ADR_O[3] ) begin
+        usartTX  <= DAT_O[0];
+     end
    
    reg rACK_I;
    always @(posedge CLK_I) begin
@@ -186,22 +205,10 @@ module mytop
        .HIGHLEVEL          ( HIGHLEVEL          ),
        .LAZY_DECODE        ( LAZY_DECODE        ),
        .DISREGARD_WB4_3_55 ( DISREGARD_WB4_3_55 ),
-       .program0(program0),
-       .program1(program1),
-       .program2(program2),
-       .program3(program3),
-       .program4(program4),
-       .program5(program5),
-       .program6(program6),
-       .program7(program7),
-       .program8(program8),
-       .program9(program9),
-       .programA(programA),
-       .programB(programB),
-       .programC(programC),
-       .programD(programD),
-       .programE(programE),
-       .programF(programF)
+       .prg00(prg00),       .prg01(prg01),       .prg02(prg02),       .prg03(prg03),
+       .prg04(prg04),       .prg05(prg05),       .prg06(prg06),       .prg07(prg07),
+       .prg08(prg08),       .prg09(prg09),       .prg0A(prg0A),       .prg0B(prg0B),
+       .prg0C(prg0C),       .prg0D(prg0D),       .prg0E(prg0E),       .prg0F(prg0F)
        )
    inst_midgetv_core
      (// Inputs
