@@ -9,7 +9,7 @@ NMI:
         nop
 InternalISR:
 Continue:       
-        li      x1,SLOWREGADR
+        li      x1,LEDREG
         sw      x3,0(x1)                // To LEDs
         addi    x3,x3,1
         li      x4,0x40000
