@@ -37,7 +37,7 @@ typedef struct {
         volatile uint32_t       ex_rtmp;       
         const volatile uint32_t mtime;         // Write adr is different
         volatile uint32_t       mtimeh;        
-        uint32_t                bitrate;       // Used by midgetv_blast/free
+        uint32_t                freefornow_e8;
         const volatile uint32_t minstreth;     // Write adr is different
         volatile uint32_t       mcycleh;       
         uint32_t                freefornow_f4;
@@ -48,13 +48,9 @@ typedef struct {
         void (*Entry_CSR )(void);    
 } SYSEBR_TypeDef;
 
-typedef struct {
-        volatile uint32_t D;
-} UART_TypeDef;
-
 /* A note to self:
    Even though the leds are output registers, they must be declared volatile.
-   It turned out that the following othwise fails:
+   It turned out that the following otherwise fails:
    int main( void ) {
            while ( 1 )
                    LED->D = 5;
@@ -67,6 +63,16 @@ typedef struct {
 typedef struct {
         volatile uint32_t D;
 } LED_TypeDef;
+
+/* The bitbang UART is generally to be made available for boards where FDTI
+ * is the interface to PC. iceblink40-hx1k uses AT90USB216, with a propriatary
+ * program (Digilent JTAG), and here I have acked a sort-of EPP interface.
+ * This interface is only used when there is no bitbang UART, and hence I
+ * reuse the IO address.
+ */
+typedef struct {
+        volatile uint32_t D;
+} UART_TypeDef;
 
 typedef struct {
         volatile uint32_t D; // Data
@@ -82,11 +88,11 @@ typedef struct {
 #define UART_BASE (IOBASE +0x00000008u) 
 #define EPP_BASE  (IOBASE +0x00000008u) 
 
-/* Attempts to aliase SYSEBR_TypeDef to address 0 lead to desasters,
+/* Attempts to aliase SYSEBR_TypeDef to address 0 lead to disasters,
    mixup with NULL in GCC suspected. */
-#define SYSEBR ((SYSEBR_TypeDef *)SYS_BASE )
-#define UART   ((UART_TypeDef *)  UART_BASE)
-#define EPP    ((EPP_TypeDef *)   EPP_BASE)
-#define LED    ((LED_TypeDef *)   LED_BASE )
+#define SYSEBR ((SYSEBR_TypeDef *) SYS_BASE   )
+#define UART   ((UART_TypeDef *)   UART_BASE  )
+#define EPP    ((EPP_TypeDef *)    EPP_BASE   )
+#define LED    ((LED_TypeDef *)    LED_BASE   )
 
 
