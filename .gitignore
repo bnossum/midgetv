@@ -55,3 +55,11 @@ hwtst/max_upduino2/hardware.bin
 hwtst/max_upduino2/hardware.blif
 hwtst/max_upduino2/ice40loaderprog.hv
 hwtst/max_upduino2/iCEcube2_flow/*
+
+hwtst/max_iceblink40-hx1k/.sconsign.dblite
+hwtst/max_iceblink40-hx1k/hardware.asc
+hwtst/max_iceblink40-hx1k/hardware.bin
+hwtst/max_iceblink40-hx1k/hardware.blif
+hwtst/max_iceblink40-hx1k/ice40loaderprog.hv
+hwtst/max_iceblink40-hx1k/iCEcube2_flow/*
+
