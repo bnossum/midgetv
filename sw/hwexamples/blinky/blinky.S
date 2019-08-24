@@ -1,11 +1,10 @@
         # Blinky on iceblinck40-hx1k and upduino2 boards 
         # =============================================================================        
-#define SP_INITVAL 0xdeadbabe
 #include "midgetv.inc"
         .globl _start
 _start:        
-        li      x1,SLOWREGADR
-        addi    x3,x3,-2
+        li      x1,LEDREG
+        addi    x3,x3,-1
         sw      x3,0(x1)                // To LEDs
 //        li      x4,0x1000     // Suitable for iceblinck40-hx1k with a 330 kHz clock
 //        li      x4,0x10000    // Suitable for iceblinck40-hx1k with a 3.3 MHz clock
