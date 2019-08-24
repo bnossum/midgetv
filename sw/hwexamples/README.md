@@ -1,4 +1,4 @@
-Different small programs to test midgetv
+Different small programs to test midgetv. All of these programs are to be compiled to `ice40loaderprog.hv` in respective directories for hardware platforms. The hardware platform verilog code is then to be compiled and uploaded.
 
 |    | Program       | Description
 | -- | ------------- | ------------
