@@ -77,12 +77,12 @@ _ex_rrd:        .word 4 		// 0xd8 |
 _ex_rtmp:       .word 5 		// 0xdc | 
 _mtime:         .word 0 		// 0xe0 Read/write from user code. Updated by internal interrupt
 _mtimeh:        .word 0 		// 0xe4 Read/write from user code. Updated by internal interrupt
-__freefornow_e8:.word 0                 // 0xe8
-_minstreth:     .word 0 		// 0xec Read/write from user code. Updated by internal interrupt
-_mcycleh:       .word 0 		// 0xf0 Read/write from user code. Updated by internal interrupt
+__bitrate      :.word 0                 // 0xe8 Used by midgetv_blast. Else free.
+__minstreth:    .word 0 		// 0xec Read/write from user code. Updated by internal interrupt
+__mcycleh:      .word 0 		// 0xf0 Read/write from user code. Updated by internal interrupt
 __freefornow_f4:.word 0                 // 0xf4
-_mtimecmp:      .word 0 		// 0xf8 Read/write from user code. 
-_mtimecmph:     .word 0 		// 0xfc Read/write from user code. 
+__mtimecmp:     .word 0 		// 0xf8 Read/write from user code. 
+__mtimecmph:    .word 0 		// 0xfc Read/write from user code. 
         .org 0x100  			//
 CSRretadr:      .word 0			//0x100 Microcode writes PC to CSRretadr when a CSR instruction is seen.
 Entry_xRET:     ij      0,0xb6,0        //0x104 Microcode branches to here when MRET/SRET/URET is seen
@@ -219,5 +219,8 @@ EntryCSR:                               //0x108 Microcode branches to here when 
 
         // =============================================================================
         // During simulation a whishbone register is at a defined address.
-#define SLOWREGADR     0x60000004
-#define NOSUCHREG_ADR  0x60000008
+//efine SLOWREGADR     0x60000004
+//efine NOSUCHREG_ADR  0x60000008
+#define NOSUCHREG_ADR  0x60000000
+#define LEDREG         0x60000004
+#define UARTREG        0x60000008
