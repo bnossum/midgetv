@@ -3,8 +3,9 @@
  * 2019. Copyright B. Nossum.
  * For licence, see LICENCE
  * -----------------------------------------------------------------------------
- * Utility to map a binary file over to localparam as needed when compiling
- * m_ice40.v. 
+ * Utility to map a binary file over to local parameters prg00, prg01, ... prg0F
+ * that will ultimately end up as parameters INIT_0, INIT_1, ... INIT_F for the
+ * 2, 4, 8 or 16 SB_RAM40_4K instances used as base probram mempry in midgetv.
  *
  * The strategy is simple:
  *  o The load address = relocation address starting at 0.
@@ -12,7 +13,7 @@
  *    The binary file is assumed little endian.
  *  o The first 4096 bits are represented as prg00, the next
  *    4096 bits goes to prg01, etc. The size of 4096 bit is chosen becase
- *    it seems to be a size that passes through all tool-chains.
+ *    it seems to be a size that passes through all? tool-chains.
  *  o In iCE40, the maximum size to represent is 8 KiB, represented by
  *    prg00 through prg0F.
  *  o It is the work of the initcode in verilog to do the surprisingly tricky
@@ -32,17 +33,16 @@
  * EBRs could also be initiated. This is not done now - after all EBRs also have
  * other use.
  *
- *                  |                        | Possible enhancement
- * Available        |  The situation now     | Used  Used
- * resources        |  midget  midget  Spare | as    as   Still
- * Chip      NrEBR  |  ucode   maxSys  EBRs  | SRAM  IO   spares
- * ---------------- | ---------------------- | -----------------
- * LP640         8  |  2        4       2    | 2          0
- * LP1K/HX1K    16  |  2        8       6    | 4     2    0
- * LP4K/HX4K    20  |  2       16       2    | 2          0
- * LP8K/HX8K    32  |  2       16      14    | 8     4    2
- * ICE40UP3K    20  |  2       16       2    |       2    0
- * ICE40UP5K    30  |  2       16      12    |       8    4
+ * Available            |  The situation now             | 
+ * resources  Nr   Nr   |  midget  midget  midget  Spare | Max
+ * Chip       EBR  SRAM |  ucode   maxSys  maxSRAM EBRs  | Progsize 
+ * -------------------- | ------------------------------ | --------- 
+ * LP640        8     0 |  2        4      0        2    |   2 KiB 
+ * LP1K/HX1K   16     0 |  2        8      0        6    |   4 KiB
+ * LP4K/HX4K   20     0 |  2       16      0        2    |   8 KiB
+ * LP8K/HX8K   32     0 |  2       16      0       14    |   8 KiB
+ * ICE40UP3K   20     4 |  2       16      4        2    | 136 KiB  
+ * ICE40UP5K   30     4 |  2       16      4       12    | 136 KiB  
  *
  */ 
 
