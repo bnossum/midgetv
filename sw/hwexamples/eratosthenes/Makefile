@@ -12,12 +12,8 @@ CFLAGS = -mabi=ilp32 -march=rv32i -nodefaultlibs -nostartfiles -Os -Wall \
 
 all: $(BIN)/simeratosthenes \
 	$(OBJ)/eratosthenes.lst \
-	../../../hwtst/upduino2/ice40loaderprog.hv \
-	../../../hwtst/iceblink40-hx1k/ice40loaderprog.hv
+	../../../hwtst/upduino2/ice40loaderprog.hv 
 
-
-../../../hwtst/iceblink40-hx1k/ice40loaderprog.hv: $(OBJ)/eratosthenes.bin 
-	../../../bin/midgetv_bin2ebr -i $< -o $@
 
 ../../../hwtst/upduino2/ice40loaderprog.hv: $(OBJ)/eratosthenes.bin 
 	../../../bin/midgetv_bin2ebr -i $< -o $@
