@@ -66,7 +66,7 @@
  *    17  128 KiB SRAM (4 SB_SPRAM256KA)  128 KiB organized as 32 * 15.
  */
 module m_ram
-  # ( parameter HIGHLEVEL = 1,
+  # ( parameter HIGHLEVEL = 0,
       SRAMADRWIDTH = 16
       )
    (

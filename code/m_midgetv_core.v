@@ -683,7 +683,7 @@ module m_midgetv_core
     *          Midgetv require a read latency of 1 cycle or higher. Hence this is not
     *          a full Wishbone interface.
     */
-   m_ram  #(.HIGHLEVEL(0), .SRAMADRWIDTH(SRAMADRWIDTH)) 
+   m_ram  #(.HIGHLEVEL(HIGHLEVEL), .SRAMADRWIDTH(SRAMADRWIDTH)) 
    inst_ram
      (// Outputs
       .DAT_O                              (Dsram[31:0]),
