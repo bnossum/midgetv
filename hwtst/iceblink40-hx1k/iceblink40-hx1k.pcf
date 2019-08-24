@@ -3,5 +3,3 @@ set_io --warn-no-port led2 56
 set_io --warn-no-port led3 53
 set_io --warn-no-port led4 51
 set_io --warn-no-port CLK_I 13
-set_io --warn-no-port usartRX 40
-set_io --warn-no-port usartTX 37

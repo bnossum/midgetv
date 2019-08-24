@@ -17,7 +17,6 @@ set_io_ff led1 -out ON
 set_io_ff led2 -out ON
 set_io_ff led3 -out ON
 set_io_ff led4 -out ON
-set_io_ff usartRX -in ON
 
 ###IOSet List 6
 set_io CLK_I 13 -io_std SB_LVCMOS -pullup no
@@ -25,7 +24,6 @@ set_io led1 59 -io_std SB_LVCMOS -pullup no
 set_io led2 56 -io_std SB_LVCMOS -pullup no
 set_io led3 53 -io_std SB_LVCMOS -pullup no
 set_io led4 51 -io_std SB_LVCMOS -pullup no
-set_io usartRX 60 -io_std SB_LVCMOS -pullup no
 
 ### These are input mux LUTs, goes to INSTRUCTION ff and cascaded to luta of alu.v
 set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_0..cmb

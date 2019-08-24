@@ -20,6 +20,10 @@
 `include "../../code/m_ram_a16.v"
 `include "../../code/m_ram_a17.v"
 `include "../../code/m_ebr.v"
+`include "../../code/m_ebr_w16.v"
+`include "../../code/m_ebr_w8.v"
+`include "../../code/m_ebr_w4.v"
+`include "../../code/m_ebr_w2.v"
 `include "../../code/m_rai.v"
 `include "../../code/m_wai.v"
 `include "../../code/m_opreg.v"
@@ -29,7 +33,7 @@
 `include "../../code/m_status_and_interrupts.v"
 `include "../../code/m_ucode.v" 
 `include "../../code/m_3ebr.v"
-`include "../../obj_dir/m_2ebr.v" 
+`include "../../obj_dir/m_2ebr.v"
 `include "../../code/m_ucodepc.v"
 `include "../../code/m_progressctrl.v"
 `include "../../code/m_midgetv_core.v"
@@ -38,8 +42,8 @@
 module top
   # ( parameter
       SRAMADRWIDTH       = 0,
-      SIMEBRADRWIDTH     = 8, 
-      IWIDTH             = 32, 
+      FORCEEBRADRWIDTH   = 8, 
+      IWIDTH             = 1, 
       NO_CYCLECNT        = 1, 
       MTIMETAP           = 0, 
       HIGHLEVEL          = 0,
@@ -48,15 +52,12 @@ module top
       )
    (
     input      CLK_I,
-    input      usartRX,
-    output reg usartTX,
     output reg led1,
     output reg led2,
     output reg led3,
     output reg led4 
     );
    wire        ACK_I;
-   reg         meta_usartRX;
    
 
    /*AUTOWIRE*/
@@ -73,10 +74,6 @@ module top
    // End of automatics
    
    
-   always @(posedge CLK_I ) begin
-      meta_usartRX <= usartRX;
-   end
-
    /* Asynchronous data input is first registered in the IO FF,
     * it then follows one path, with a fanout of 1, to the
     * rDee register in m_inputmux. These two consequtive
@@ -84,15 +81,15 @@ module top
     * inputs.
     *
     */
-   always @(posedge CLK_I) begin
-      if ( CYC_O & STB_O & WE_O ) begin
-         usartTX <= DAT_O[0];
-         led1 <= DAT_O[1];
-         led2 <= DAT_O[2];
-         led3 <= DAT_O[3];
-      end      
+   always @(posedge CLK_I)  begin
+      if ( STB_O & WE_O & ADR_O[2] ) begin
+         led1  <= DAT_O[0];
+         led2  <= DAT_O[1];
+         led3  <= DAT_O[2];
+      end
       led4 <= corerunning;
    end
+   
    
    reg rACK_I;
    always @(posedge CLK_I) begin
@@ -106,45 +103,31 @@ module top
       the program to simulate.
     */
 `ifndef defaulticeprog 
- `define defaulticeprog "ice40loaderprog.hv"
+ `define defaulticeprog "ice40loaderprog.hv" 
 `endif 
 `include `defaulticeprog
-
    
    m_midgetv_core
      #(
        .SRAMADRWIDTH       ( SRAMADRWIDTH       ),
-       .EBRADRWIDTH        ( SIMEBRADRWIDTH     ),
+       .EBRADRWIDTH        ( FORCEEBRADRWIDTH   ),
        .IWIDTH             ( IWIDTH             ),
        .NO_CYCLECNT        ( NO_CYCLECNT        ),
        .MTIMETAP           ( MTIMETAP           ),
        .HIGHLEVEL          ( HIGHLEVEL          ),
        .LAZY_DECODE        ( LAZY_DECODE        ),
        .DISREGARD_WB4_3_55 ( DISREGARD_WB4_3_55 ),
-       .DBGA               ( 1'b0               ),
-       .program0(program0),
-       .program1(program1),
-       .program2(program2),
-       .program3(program3),
-       .program4(program4),
-       .program5(program5),
-       .program6(program6),
-       .program7(program7),
-       .program8(program8),
-       .program9(program9),
-       .programA(programA),
-       .programB(programB),
-       .programC(programC),
-       .programD(programD),
-       .programE(programE),
-       .programF(programF)
+       .prg00(prg00),       .prg01(prg01),       .prg02(prg02),       .prg03(prg03),
+       .prg04(prg04),       .prg05(prg05),       .prg06(prg06),       .prg07(prg07),
+       .prg08(prg08),       .prg09(prg09),       .prg0A(prg0A),       .prg0B(prg0B),
+       .prg0C(prg0C),       .prg0D(prg0D),       .prg0E(prg0E),       .prg0F(prg0F)
        )
    inst_midgetv_core
      (// Inputs
       .RST_I                            (1'b0),
       .meip                             (1'b0),
       .start                            (1'b1),
-      .DAT_I                            ({31'h0,meta_usartRX}),
+      .DAT_I                            (32'h0),
       /*AUTOINST*/
       // Outputs
       .CYC_O                            (CYC_O),
@@ -172,7 +155,6 @@ endmodule
  * arachne-pnr -d 1k -P vq100 -p iceblink40-hx1k.pcf -o hardware.asc hardware.blif
  * icetime -d hx1k hardware.asc 
  */
-
 // Local Variables:
 // verilog-library-directories:("." "../../code" "../../obj_dir"  )
 // verilog-library-extensions:(".v" )
