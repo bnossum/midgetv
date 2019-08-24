@@ -10,12 +10,11 @@ OBJ = ../../../obj_dir
 CFLAGS = -mabi=ilp32 -march=rv32i -nodefaultlibs -nostartfiles -Os -Wall -Wextra\
 	-DNOCSR=1 -DonlyEBR=1 -DSP_INITVAL=0x2f00  -I ../../inc/
 
-all: $(OBJ)/midgetv_blast.lst \
-	../../../hwtst/max_upduino2/ice40loaderprog.hv \
-	../../../hwtst/max_iceblink40-hx1k/ice40loaderprog.hv \
-	$(OBJ)/mb.lst \
-	$(OBJ)/mb2.lst \
-	$(OBJ)/midgetv_iceblink40hx1k_blast.lst
+all:	$(OBJ)/mb.lst \
+	$(OBJ)/mb2.lst 
+
+# 	../../../hwtst/max_upduino2/ice40loaderprog.hv \
+# 	../../../hwtst/max_iceblink40-hx1k/ice40loaderprog.hv \
 
 ../../../hwtst/max_upduino2/ice40loaderprog.hv: $(OBJ)/midgetv_blast.bin 
 	../../../bin/midgetv_bin2ebr < $< > $@
@@ -56,8 +55,9 @@ $(OBJ)/%.o:%.S
 $(OBJ)/midgetv_blast.o: $(OBJ)/crt0.o $(OBJ)/ab.o
 
 clean:
-	rm -f $(OBJ)/crt0.o \
-	$(OBJ)/midgetv_blast.bin \
+	rm -f \
+	$(OBJ)/mb.lst \
+	$(OBJ)/mb2.lst \
 	../../../hwtst/max_upduino2/ice40loaderprog.hv \
 	../../../hwtst/max_iceblink40-hx1k/ice40loaderprog/ice40loaderprog.hv 	
 

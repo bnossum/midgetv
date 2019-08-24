@@ -59,7 +59,7 @@ LoadBlockLoop:
         jalr    x0,0(regY)              // 0x50 x20  	                go();
 DataLoadLoop:                           //       	        do {
         jal     retreg,getchar          // 0x54 x21  	                a = getchar();
-        sb      regP,0(regL)            // 0x58 x22  	                *loadadr++ == a;
+        sb      regP,0(regL)            // 0x58 x22  	                *loadadr++ = a;
         addi    regL,regL,1             // 0x5c x23  	                LED = a;
         bltu    regL,regY,DataLoadLoop  // 0x60 x24  	        } while ( loadadr < end )  
         j       LoadBlockHead           // 0x64 x25     }
