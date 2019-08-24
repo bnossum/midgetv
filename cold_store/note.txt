@@ -1,0 +1,21 @@
+Investigation on com to board.
+
+bnossum@x230b:~/GITSTUFF/GIT/midgetv/sw/hwexamples/xmodemboot$ tail /var/log/syslog
+Aug 15 06:07:15 x230b mtp-probe: checking bus 1, device 94: "/sys/devices/pci0000:00/0000:00:1a.0/usb1/1-1/1-1.2"
+Aug 15 06:07:15 x230b mtp-probe: bus: 1, device: 94 was not an MTP device
+Aug 15 06:09:10 x230b kernel: [408224.715144] usb 1-1.2: USB disconnect, device number 94
+Aug 15 06:12:32 x230b kernel: [408426.640496] usb 1-1.2: new full-speed USB device number 95 using ehci-pci
+Aug 15 06:12:32 x230b kernel: [408426.736006] usb 1-1.2: New USB device found, idVendor=1443, idProduct=0007
+Aug 15 06:12:32 x230b kernel: [408426.736011] usb 1-1.2: New USB device strings: Mfr=1, Product=2, SerialNumber=0
+Aug 15 06:12:32 x230b kernel: [408426.736014] usb 1-1.2: Product: Digilent Adept USB Device
+Aug 15 06:12:32 x230b kernel: [408426.736016] usb 1-1.2: Manufacturer: Digilent
+Aug 15 06:12:33 x230b mtp-probe: checking bus 1, device 95: "/sys/devices/pci0000:00/0000:00:1a.0/usb1/1-1/1-1.2"
+Aug 15 06:12:33 x230b mtp-probe: bus: 1, device: 95 was not an MTP device
+
+
+
+udevadm info -a -p /sys/devices/pci0000:00/0000:00:1a.0/usb1/1-1/1-1.2 | less
+
+
+
+http://www.reactivated.net/writing_udev_rules.html

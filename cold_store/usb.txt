@@ -1,0 +1,182 @@
+Found on web.
+SUBSYSTEM=="usb", ACTION=="add", ATTRS{idVendor}=="03eb", ATTRS{idProduct}=="2ffa", MODE="660", GROUP="uucp", SYMLINK+="at90usb-%k"
+
+
+Tries
+SUBSYSTEM=="usb", ACTION=="add", ATTRS{idVendor}=="1443", ATTRS{idProduct}=="0007", MODE="666", GROUP="dialout", SYMLINK+="at90usb-%k"
+
+
+Starting with something that works, the ipduino2 card. In /var/log/syslog:
+============================================================================
+Aug 18 08:02:50 x230b kernel: [ 2026.250775] usb 1-1.2: new high-speed USB device number 9 using ehci-pci
+Aug 18 08:02:50 x230b kernel: [ 2026.344385] usb 1-1.2: New USB device found, idVendor=0403, idProduct=6014
+Aug 18 08:02:50 x230b kernel: [ 2026.344393] usb 1-1.2: New USB device strings: Mfr=1, Product=2, SerialNumber=0
+Aug 18 08:02:50 x230b kernel: [ 2026.344397] usb 1-1.2: Product: Single RS232-HS
+Aug 18 08:02:50 x230b kernel: [ 2026.344401] usb 1-1.2: Manufacturer: FTDI
+Aug 18 08:02:50 x230b mtp-probe: checking bus 1, device 9: "/sys/devices/pci0000:00/0000:00:1a.0/usb1/1-1/1-1.2"
+Aug 18 08:02:50 x230b mtp-probe: bus: 1, device: 9 was not an MTP device
+Aug 18 08:02:51 x230b kernel: [ 2027.387685] usbcore: registered new interface driver usbserial
+Aug 18 08:02:51 x230b kernel: [ 2027.387770] usbcore: registered new interface driver usbserial_generic
+Aug 18 08:02:51 x230b kernel: [ 2027.387842] usbserial: USB Serial support registered for generic
+Aug 18 08:02:51 x230b kernel: [ 2027.398647] usbcore: registered new interface driver ftdi_sio
+Aug 18 08:02:51 x230b kernel: [ 2027.398721] usbserial: USB Serial support registered for FTDI USB Serial Device
+Aug 18 08:02:51 x230b kernel: [ 2027.399087] ftdi_sio 1-1.2:1.0: FTDI USB Serial Device converter detected
+Aug 18 08:02:51 x230b kernel: [ 2027.399195] usb 1-1.2: Detected FT232H
+Aug 18 08:02:51 x230b kernel: [ 2027.399959] usb 1-1.2: FTDI USB Serial Device converter now attached to ttyUSB0
+
+
+From "lsusb -v "
+
+Bus 001 Device 009: ID 0403:6014 Future Technology Devices International, Ltd FT232H Single HS USB-UART/FIFO IC
+Device Descriptor:
+  bLength                18
+  bDescriptorType         1
+  bcdUSB               2.00
+  bDeviceClass            0 (Defined at Interface level)
+  bDeviceSubClass         0 
+  bDeviceProtocol         0 
+  bMaxPacketSize0        64
+  idVendor           0x0403 Future Technology Devices International, Ltd
+  idProduct          0x6014 FT232H Single HS USB-UART/FIFO IC
+  bcdDevice            9.00
+  iManufacturer           1 
+  iProduct                2 
+  iSerial                 0 
+  bNumConfigurations      1
+  Configuration Descriptor:
+    bLength                 9
+    bDescriptorType         2
+    wTotalLength           32
+    bNumInterfaces          1
+    bConfigurationValue     1
+    iConfiguration          0 
+    bmAttributes         0x80
+      (Bus Powered)
+    MaxPower              500mA
+    Interface Descriptor:
+      bLength                 9
+      bDescriptorType         4
+      bInterfaceNumber        0
+      bAlternateSetting       0
+      bNumEndpoints           2
+      bInterfaceClass       255 Vendor Specific Class
+      bInterfaceSubClass    255 Vendor Specific Subclass
+      bInterfaceProtocol    255 Vendor Specific Protocol
+      iInterface              2 
+      Endpoint Descriptor:
+        bLength                 7
+        bDescriptorType         5
+        bEndpointAddress     0x81  EP 1 IN
+        bmAttributes            2
+          Transfer Type            Bulk
+          Synch Type               None
+          Usage Type               Data
+        wMaxPacketSize     0x0200  1x 512 bytes
+        bInterval               0
+      Endpoint Descriptor:
+        bLength                 7
+        bDescriptorType         5
+        bEndpointAddress     0x02  EP 2 OUT
+        bmAttributes            2
+          Transfer Type            Bulk
+          Synch Type               None
+          Usage Type               Data
+        wMaxPacketSize     0x0200  1x 512 bytes
+        bInterval               0
+
+
+    
+Continue with what I want: iceblink40-hx1k board:
+==================================================
+Aug 18 08:27:48 x230b kernel: [ 3524.903052] usb 1-1.2: new full-speed USB device number 15 using ehci-pci
+Aug 18 08:27:48 x230b kernel: [ 3524.999205] usb 1-1.2: New USB device found, idVendor=1443, idProduct=0007
+Aug 18 08:27:48 x230b kernel: [ 3524.999213] usb 1-1.2: New USB device strings: Mfr=1, Product=2, SerialNumber=0
+Aug 18 08:27:48 x230b kernel: [ 3524.999218] usb 1-1.2: Product: Digilent Adept USB Device
+Aug 18 08:27:48 x230b kernel: [ 3524.999221] usb 1-1.2: Manufacturer: Digilent
+Aug 18 08:27:48 x230b mtp-probe: checking bus 1, device 15: "/sys/devices/pci0000:00/0000:00:1a.0/usb1/1-1/1-1.2"
+Aug 18 08:27:48 x230b mtp-probe: bus: 1, device: 15 was not an MTP device
+
+I see that usbserial is not activated, so this will not work. From "lsusb -v":
+us 001 Device 015: ID 1443:0007 Digilent Development board JTAG
+Device Descriptor:
+  bLength                18
+  bDescriptorType         1
+  bcdUSB               2.00
+  bDeviceClass            0 (Defined at Interface level)
+  bDeviceSubClass         0 
+  bDeviceProtocol         0 
+  bMaxPacketSize0        16
+  idVendor           0x1443 Digilent
+  idProduct          0x0007 Development board JTAG
+  bcdDevice            0.00
+  iManufacturer           1 Digilent
+  iProduct                2 Digilent Adept USB Device
+  iSerial                 0 
+  bNumConfigurations      1
+  Configuration Descriptor:
+    bLength                 9
+    bDescriptorType         2
+    wTotalLength           46
+    bNumInterfaces          1
+    bConfigurationValue     1
+    iConfiguration          0 
+    bmAttributes         0x80
+      (Bus Powered)
+    MaxPower              100mA
+    Interface Descriptor:
+      bLength                 9
+      bDescriptorType         4
+      bInterfaceNumber        0
+      bAlternateSetting       0
+      bNumEndpoints           4
+      bInterfaceClass         0 (Defined at Interface level)
+      bInterfaceSubClass      0 
+      bInterfaceProtocol      0 
+      iInterface              0 
+      Endpoint Descriptor:
+        bLength                 7
+        bDescriptorType         5
+        bEndpointAddress     0x01  EP 1 OUT
+        bmAttributes            2
+          Transfer Type            Bulk
+          Synch Type               None
+          Usage Type               Data
+        wMaxPacketSize     0x0010  1x 16 bytes
+        bInterval               0
+      Endpoint Descriptor:
+        bLength                 7
+        bDescriptorType         5
+        bEndpointAddress     0x82  EP 2 IN
+        bmAttributes            2
+          Transfer Type            Bulk
+          Synch Type               None
+          Usage Type               Data
+        wMaxPacketSize     0x0010  1x 16 bytes
+        bInterval               0
+      Endpoint Descriptor:
+        bLength                 7
+        bDescriptorType         5
+        bEndpointAddress     0x03  EP 3 OUT
+        bmAttributes            2
+          Transfer Type            Bulk
+          Synch Type               None
+          Usage Type               Data
+        wMaxPacketSize     0x0040  1x 64 bytes
+        bInterval               0
+      Endpoint Descriptor:
+        bLength                 7
+        bDescriptorType         5
+        bEndpointAddress     0x84  EP 4 IN
+        bmAttributes            2
+          Transfer Type            Bulk
+          Synch Type               None
+          Usage Type               Data
+        wMaxPacketSize     0x0040  1x 64 bytes
+        bInterval               0
+Device Status:     0x0000
+  (Bus Powered)
+
+
+
+https://askubuntu.com/questions/629619/how-to-install-libusb
+
