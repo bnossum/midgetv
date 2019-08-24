@@ -38,10 +38,10 @@
 `include "../../code/m_midgetv_core.v"
 
 
-module mytop
+module top
   # ( parameter
       SRAMADRWIDTH       = 16,
-      FORCEEBRADRWIDTH   = 11, 
+      FORCEEBRADRWIDTH   = 8, 
       IWIDTH             = 32, 
       NO_CYCLECNT        = 0, 
       MTIMETAP           = 16, 
@@ -58,7 +58,6 @@ module mytop
     );
    reg         meta_usartRX;
    reg         redled,greenled,blueled;
-   wire        start = 1'b1;
    wire        ACK_I;
    wire        CLK_I;   
 
@@ -153,14 +152,19 @@ module mytop
     *
     */
    always @(posedge CLK_I) 
-     if ( CYC_O & STB_O & WE_O ) begin
-        usartTX  <= DAT_O[0];
-        redled   <= DAT_O[1];
-        greenled <= DAT_O[2];
-        blueled  <= DAT_O[3];
+     if ( STB_O & WE_O & ADR_O[2] ) begin
+        redled   <= DAT_O[0];
+        greenled <= DAT_O[1];
+//        blueled  <= DAT_O[2];
      end
-
-     
+   
+   always @(posedge CLK_I) 
+     blueled <= usartRX;
+   
+   always @(posedge CLK_I) 
+     if ( STB_O & WE_O & ADR_O[3] ) begin
+        usartTX  <= DAT_O[0];
+     end
 
    
    reg rACK_I;
@@ -198,6 +202,7 @@ module mytop
      (// Inputs
       .RST_I                            (1'b0),
       .meip                             (1'b0),
+      .start                            (1'b1),
       .DAT_I                            ({31'h0,meta_usartRX}),
       /*AUTOINST*/
       // Outputs
@@ -212,13 +217,12 @@ module mytop
       .midgetv_core_killwarnings        (midgetv_core_killwarnings),
       // Inputs
       .CLK_I                            (CLK_I),
-      .ACK_I                            (ACK_I),
-      .start                            (start));
+      .ACK_I                            (ACK_I));
      
 endmodule   
       
 /* 
- * In general, the fillowing should suffice for image generation and uploading:
+ * In general, this should be enough to load an image:
  *     python ../../../apio/apio clean
  *     python ../../../apio/apio build
  *     sudo python ../../../apio/apio upload
@@ -227,6 +231,6 @@ endmodule
  * /usr/local/bin/arachne-pnr -r -d 5k -P sg48 -o hardware.asc -p up5k.pcf hardware.blif
  */
 // Local Variables:
-// verilog-library-directories:("." "../../code"  )
+// verilog-library-directories:("." "../../code" "../../obj_dir"  )
 // verilog-library-extensions:(".v" )
 // End:
