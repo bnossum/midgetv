@@ -1,5 +1,6 @@
 obj_dir/*
-bin/iceblinckcom
+nobackup_cold_store/*
+bin/iceblinkcom
 bin/m_ice40sim_EBRonly.bin
 bin/m_ice40sim_SRAM.bin
 bin/midgetv_bin2ebr
