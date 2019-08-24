@@ -5,27 +5,12 @@
     =============================================================================
 */
 #include <stdint.h>
+#include "midgetv.h"
 
-typedef struct {
-        uint32_t           rrr[31]; // These are x1..x31.
-        uint32_t           jj;
-        volatile uint32_t  rinst;
-        uint32_t           pc;
-        volatile uint32_t  mcycle;
-} SYSEBR_TypeDef;
+#define DBGLED(x) do { LED->D = (x); } while (1)
 
-typedef struct {
-        volatile uint32_t D;
-} UART_TypeDef;
-
-#define IOBASE 0x60000000
-#define UART_BASE (IOBASE+0x4u)
-#define UART ((UART_TypeDef *)UART_BASE)
-
-/* Attempts to aliase SYSEBR_TypeDef to address 0 lead to desasters,
-   mixup with NULL in GCC suspected. */
-
-#define SYSEBR ((SYSEBR_TypeDef *)0x4)
+#define HALT(x) while (1) {DBGLED(x);}
+//#define HALT(x)
 
 /////////////////////////////////////////////////////////////////////////////
 uint32_t autobaud( void ); 
@@ -34,11 +19,6 @@ int near_getchar( void );
 
 /////////////////////////////////////////////////////////////////////////////
 uint32_t g_bitrate;
-
-
-
-
-
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -65,18 +45,38 @@ void clumsyhexprint( const uint32_t ab ) {
         }
 }
 
+///////////////////////////////////////////////////////////////////////////////
+//static void simend( void ) {
+//#if sim
+//        exit( fprintf(stderr,"Simend\n" ) );
+//#else
+//        __asm__("sltu x0,x0,x0");
+//#endif
+//}
+//
+///////////////////////////////////////////////////////////////////////////////
+//static void simdump( void ) {
+//#if sim
+//        ;
+//#else
+//        __asm__("sltu x0,x31,x31");
+//#endif
+//}
+
 /////////////////////////////////////////////////////////////////////////////
 int main( void ) {
         int a;
 
         UART->D = 1;
+
         uint32_t ab = autobaud();
+        // Not here
+//        HALT(7);
+        
         g_bitrate = ab/8;
 
         near_puts( "Cycles per 8bits: 0x" );
         clumsyhexprint(ab);
-//        while (1)
-//                UART->D = 15;
         near_putchar( '\n' );
         while (1) {
                 a = near_getchar();
@@ -84,8 +84,11 @@ int main( void ) {
         }
 }
 
+/////////////////////////////////////////////////////////////////////////////
+__inline void simend( void ) {
+        __asm__("sltu x0,x0,x0");
+}
 
-#if 0
 /////////////////////////////////////////////////////////////////////////////
 /* The autobaud character is '?', 0x3F, bitpattern on the line:
  * ___------------------______---
@@ -100,9 +103,12 @@ int main( void ) {
 uint32_t autobaud( void ) {
         uint32_t atstart;
 
+        // Here
         // Wait for falling flank startbit
+        simend();
         while ( UART->D )
                 ;
+//        HALT(2); // Not here
         // Wait for rising flank
         while ( UART->D == 0 )
                 ;
@@ -164,4 +170,3 @@ int near_getchar( void ) {
 }
 
 
-#endif
