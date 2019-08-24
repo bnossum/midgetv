@@ -3,7 +3,7 @@
         // 2019. Copyright B. Nossum.
         // For licence, see LICENCE
         // =============================================================================
-        // For midgetv in iceblink40-hx1k only.
+        // For midgetv in iceblink40-hx1k only. 
         //
         //                          Loadable
         // Regions:                 |    Contents
@@ -89,20 +89,3 @@ __yy:           .word 0                 // 0xb0 10110000  0x2c ucode register.
         .org    0xb4
 
         // -----------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        
-
-

@@ -3,12 +3,12 @@
         // 2019. Copyright B. Nossum.
         // For licence, see LICENCE
         // =============================================================================
+        // For midgetv in hardware where a bitbang UART is possible.
         //
         // Loadable regions:
         // -----------------
         // 0x00000093 - 0x00000090      __rNMI_IIV
-        // 0x000000a7 - 0x000000a4      __mtvec
-        // (top adr)  - 0x000000c4      Remaining memory.
+        // (top adr)  - 0x000000c0      Remaining memory.
         //
         // =============================================================================
         
@@ -23,7 +23,7 @@
 #define regB      x6
 #define regC      x7
 #define rBitrate  x8
-#define rByterate x9
+#define rBytelim  x9
 #define regIO     x10
 
         
@@ -56,7 +56,7 @@ LBHead: li      regC,-8                 // 0x05c x23 while (1) {
         sb      regP,16(regC)           // 0x064 x25              *p++ = getchar // Writes to regL and regY
         addi    regC,regC,1             // 0x068 x26 
         bne     regC,x0,1b              // 0x06c x27      }
-        beq     regL,x0,_mtvec          // 0x070 x28    	if ( loadadr == 0 )  go()
+        beq     regL,x0,__mtvec         // 0x070 x28    	if ( loadadr == 0 )  go()
 DataL:  jal     retreg,getchar          // 0x074 x29    	do {                   
         sb      regP,0(regL)            // 0x078 x30                    regP = getchar()  
         j       LastFew                 // 0x07c x31
@@ -81,7 +81,7 @@ LastFew:
         bltu    regL,regY,DataL         // 0x0b8  	} while ( loadar < end )
         j       LBHead                  // 0x0bc     }
 
-        .org    0xc4                    //       This code can be overwritten
+        .org    0xc0                    //       This code can be overwritten
 _start:                                 //       by the loading process.
         sw      regW,UARTOFS(regIO)     // 0x0c0 UART-D = 1
         sw      regW,LEDOFS(regIO)      // 0x0c4 Alive
@@ -102,7 +102,7 @@ ABL:    lw      regP,UARTOFS(regIO)     // 0x0c8 while ( UART->D )
         srli    rBitrate,rBitrate,5     // 0x100 rBitrate = (4*autobaud+16)/32 + FUDGEFACTOR
         slli    rBytelim,rBitrate,3     // 0x104           = (4*autobaud+CTE)/32
         add     rBytelim,rBytelim,rBitrate//x108 Bytelim is 9 bit times (frame bit is included)
-        j       LBH                     // 0x10c
+        j       LBHead                  // 0x10c
                                                
 
 
