@@ -8,16 +8,15 @@ BIN = ../../../bin
 OBJ = ../../../obj_dir
 
 CFLAGS = -mabi=ilp32 -march=rv32i -nodefaultlibs -nostartfiles -Os -Wall -Wextra\
-	-DNOCSR=1 -DonlyEBR=1 -DSP_INITVAL=0x2000 
+	-DNOCSR=1 -DonlyEBR=1 -DSP_INITVAL=0x2f00  -I ../../inc/
 
 all: $(OBJ)/xmodemboot.lst \
 	../../../hwtst/max_upduino2/ice40loaderprog.hv
 
 
 ../../../hwtst/max_upduino2/ice40loaderprog.hv: $(OBJ)/xmodemboot.bin 
-	../../../bin/midgetv_bin2ebr -n 8 -i $< -o $@
+	../../../bin/midgetv_bin2ebr < $< > $@
 
-$(OBJ)/xmodemboot.o: | $(OBJ)/crt0.o $(OBJ)/ab.o
 
 # .SECONDARY:
 
@@ -39,7 +38,10 @@ $(OBJ)/%.o:%.S
 %.lst:%.out
 	riscv32-unknown-elf-objdump -M numeric,no-aliases -D $< > $@
 
+$(OBJ)/xmodemboot.o: $(OBJ)/crt0.o $(OBJ)/ab.o
+
 clean:
 	rm -f $(OBJ)/crt0.o \
 	$(OBJ)/xmodemboot.bin \
 	../../../hwtst/max_upduino2/ice40loaderprog.hv
+
