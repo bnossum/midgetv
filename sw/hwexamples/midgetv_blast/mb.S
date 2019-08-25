@@ -31,12 +31,12 @@
         .org 0  //                         adr  
         .word	0                       // 0x000  x0 Never touch 
         .word	0			// 0x004  x1 retreg          Link register
-        .word	0			// 0x008  x2 regL            Load address/Sentinel
-        .word	0			// 0x00c  x3 regY            Block limit/Entry point
-        .word	4			// 0x010  x4 regW            Working register
+        .word	0			// 0x008  x2 regC            Loop/index
+        .word	0			// 0x00c  x3 regL            Load address/Sentinel
+        .word	4			// 0x010  x4 regY            Block limit/Entry point
         .word	0			// 0x014  x5 regP            Result from getchar
         .word   1                       // 0x018  x6 regB            Working register
-        .word	0			// 0x01c  x7 regC            Loop/index
+        .word	0			// 0x01c  x7 regW            Working register
         .word	16 + 32*-4		// 0x020  x8 rBitrate        Found by autobaud at start
         .word	0			// 0x024  x9 rBytelim        Found by autobaud at start
         .word	0x60000000		// 0x028 x10 regIO           Constant
@@ -56,7 +56,7 @@ getchar:lw      regP,UARTOFS(regIO)     // 0x02c x11
         jalr    x0,0(retreg)            // 0x060 x24 Returns with byte in regP[7:0]
 LBHead: li      regC,-8                 // 0x064 x25 while (1) {
 1:      jal     retreg,getchar          // 0x068 x26         for ( i = -8; i < 0; i++ ) {
-        sb      regP,16(regC)           // 0x06c x27                 *p++ = getchar // Writes to regL and regY
+        sb      regP,20(regC)           // 0x06c x27                 *p++ = getchar // Fills regL and regY
         addi    regC,regC,1             // 0x070 x28 
         bne     regC,x0,1b              // 0x074 x29         }
         bne     regL,x0,DataL           // 0x078 x30   	     if ( loadadr== 0 )

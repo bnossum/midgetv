@@ -11,15 +11,15 @@ CFLAGS = -mabi=ilp32 -march=rv32i -nodefaultlibs -nostartfiles -Os -Wall -Wextra
 	-DNOCSR=1 -DonlyEBR=1 -DSP_INITVAL=0x2f00  -I ../../inc/
 
 all:	$(OBJ)/mb.lst \
-	$(OBJ)/mb2.lst 
+	$(OBJ)/mb2.lst \
+	../../../hwtst/max_iceblink40-hx1k/ice40loaderprog.hv
 
 # 	../../../hwtst/max_upduino2/ice40loaderprog.hv \
-# 	../../../hwtst/max_iceblink40-hx1k/ice40loaderprog.hv \
 
 ../../../hwtst/max_upduino2/ice40loaderprog.hv: $(OBJ)/midgetv_blast.bin 
 	../../../bin/midgetv_bin2ebr < $< > $@
 
-../../../hwtst/max_iceblink40-hx1k/ice40loaderprog.hv: $(OBJ)/midgetv_iceblink40hx1k_blast.bin 
+../../../hwtst/max_iceblink40-hx1k/ice40loaderprog.hv: $(OBJ)/inspiration_midgetv_iceblink40hx1k_blast.bin 
 	../../../bin/midgetv_bin2ebr < $< > $@
 
 
@@ -35,14 +35,14 @@ $(OBJ)/%.o:%.S
 	riscv32-unknown-elf-gcc -c $(CFLAGS) -TEBRlink.ld  -I ./ -I ../../inc/ -Wa,-a=$(OBJ)/$*.slst -o $@ $<
 
 %mb.out:%mb.o
-	riscv32-unknown-elf-ld -TEBRlink.ld -nodefaultlibs -nostartfiles -o $@ $< -M > $(OBJ)/$(*F).map
+	riscv32-unknown-elf-ld -TEBRlink.ld -nodefaultlibs -nostartfiles -o $@ $< -M > $(OBJ)/$(@F).map
 
 %mb2.out:%mb2.o
 	riscv32-unknown-elf-ld -TEBRlink.ld -nodefaultlibs -nostartfiles -o $@ $< -M > $(OBJ)/$(*F).map
 
 
 %.out:%.o
-	riscv32-unknown-elf-ld -TEBRlink.ld -nodefaultlibs -nostartfiles -o $@ $(OBJ)/crt0.o $< -M > $(OBJ)/$(*F).map
+	riscv32-unknown-elf-ld -TEBRlink.ld -nodefaultlibs -nostartfiles -o $@ $(OBJ)/crt0.o $< -M > $(OBJ)/$((*F).map
 
 # Suitable for midgetv_blast. riscv32-unknown-elf-ld -TEBRlink.ld -nodefaultlibs -nostartfiles -o $@ $(OBJ)/crt0.o $(OBJ)/ab.o $< -M > $(OBJ)/$(*F).map
 
@@ -52,7 +52,7 @@ $(OBJ)/%.o:%.S
 %.lst:%.out
 	riscv32-unknown-elf-objdump -M numeric,no-aliases -D $< > $@
 
-$(OBJ)/midgetv_blast.o: $(OBJ)/crt0.o $(OBJ)/ab.o
+# $(OBJ)/midgetv_blast.o: $(OBJ)/crt0.o $(OBJ)/ab.o
 
 clean:
 	rm -f \

@@ -15,7 +15,7 @@
 #include <stdint.h>
 #include "midgetv.h"
 
-
+#if 0
 #define DBGLED(x) do { LED->D = (x); } while (0)
 
 int near_getchar( void ) {
@@ -47,9 +47,9 @@ int __attribute__((naked)) main( void ) {
 
         }
 }
-                
-#if 0
-Preliminary test
+#endif                
+
+//Preliminary test
 int __attribute__((naked)) main( void ) {
         uint32_t cnt = 0;
         
@@ -61,4 +61,4 @@ int __attribute__((naked)) main( void ) {
                 }
         }
 }
-#endif
+
