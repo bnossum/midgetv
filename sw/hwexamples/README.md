@@ -1,8 +1,8 @@
 Different small programs to test midgetv. All of these programs are to be compiled to `ice40loaderprog.hv` in respective directories for hardware platforms. The hardware platform verilog code is then to be compiled and uploaded.
 
-### Programs
+### List of programs
 
-|    | Program       | Description
+| #  | Program       | Description
 | -- | ------------- | ------------
 | 1  | blinky        | Everyones favorite first program. 
 | 2  | morse         | Hello world on a LED
