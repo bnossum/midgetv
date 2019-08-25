@@ -12,10 +12,14 @@ CFLAGS = -mabi=ilp32 -march=rv32i -nodefaultlibs -nostartfiles -Os -Wall \
 
 all: $(BINDIR)/simmorse ../../../hwtst/upduino2/ice40loaderprog.hv \
 	../../../hwtst/iceblink40-hx1k/ice40loaderprog.hv \
+	../../../hwtst/max_iceblink40-hx1k/ice40loaderprog.hv \
 	../../../hwtst/max_upduino2/ice40loaderprog.hv \
 	$(OBJDIR)/morse.lst \
 
 ../../../hwtst/iceblink40-hx1k/ice40loaderprog.hv: $(OBJDIR)/morse.bin 
+	../../../bin/midgetv_bin2ebr -i $< -o $@
+
+../../../hwtst/max_iceblink40-hx1k/ice40loaderprog.hv: $(OBJDIR)/morse.bin 
 	../../../bin/midgetv_bin2ebr -i $< -o $@
 
 ../../../hwtst/upduino2/ice40loaderprog.hv: $(OBJDIR)/morse.bin 
@@ -27,7 +31,7 @@ all: $(BINDIR)/simmorse ../../../hwtst/upduino2/ice40loaderprog.hv \
 $(BINDIR)/simmorse:morse.c
 	gcc -Wall -Wextra -Dsim=1 -o $@ $< 
 
-$(OBJDIR)/morse.o: | $(OBJDIR)/crt0.o
+$(OBJDIR)/morse.o: | $(OBJDIR)/morse_crt0.o
 
 # .SECONDARY:
 
@@ -41,7 +45,7 @@ $(OBJDIR)/%.o:%.S
 	riscv32-unknown-elf-gcc -c $(CFLAGS) -TEBRlink.ld  -I ./ -I ../../inc/ -Wa,-a=$(OBJDIR)/$*.slst -o $@ $<
 
 %.out:%.o
-	riscv32-unknown-elf-ld -TEBRlink.ld -nodefaultlibs -nostartfiles -o $@ $(OBJDIR)/crt0.o $< -M > $(OBJDIR)/$(*F).map
+	riscv32-unknown-elf-ld -TEBRlink.ld -nodefaultlibs -nostartfiles -o $@ $(OBJDIR)/morse_crt0.o $< -M > $(OBJDIR)/$(*F).map
 
 %.bin:%.out
 	riscv32-unknown-elf-objcopy -Obinary $< $@ 
@@ -51,7 +55,7 @@ $(OBJDIR)/%.o:%.S
 
 clean:
 	rm -f $(BINDIR)/simmorse \
-	$(OBJDIR)/crt0.o \
+	$(OBJDIR)/morse_crt0.o \
 	$(OBJDIR)/morse.bin \
 	../../../hwtst/upduino2/ice40loaderprog.hv \
 	../../../hwtst/iceblink40-hx1k/ice40loaderprog.hv
