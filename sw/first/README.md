@@ -1,1 +1,1 @@
-Here are very short test programs to test instructions.
+Here are short programs to test instructions.

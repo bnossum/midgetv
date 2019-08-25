@@ -6,5 +6,4 @@ Some files are just to allow simulation of the riscv compliance test suite for r
 
 A minimal implementation of CSR instructions is in file `midgetv_minimal_csr.S`.
 
-A most inportant include file is `midgetv.inc`. The file
-`midgetv2.inc`, nearly the same, will be eliminated later.
+Inportant include files are `midgetv.inc` and `midgetv.h`.

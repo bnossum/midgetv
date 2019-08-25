@@ -1,3 +1,9 @@
+        // =============================================================================
+        // Part of midgetv
+        // 2019. Copyright B. Nossum.
+        // For licence, see LICENCE
+        // =============================================================================
+
 /* The start of EBR is taken up by registers.
  * Then comes magic constants and system registers
  * Originally 
