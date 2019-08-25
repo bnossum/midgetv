@@ -11,7 +11,7 @@ Different small programs to test midgetv. All of these programs are to be compil
 | 5  | xmodemboot    | Simple monitor with xmodem upload capabilities (not finished)
 | 6  | midgetv_blast | Upload a new program to midgetv without Verilog recompile (not finished at all)
 
-### What program on what platform?                    
+### What program works on what platform?                    
                     
 | Platform            | 1 | 2 | 3 | 4 | 5 | 6
 | ------------------- | --|---|---|---|---|---

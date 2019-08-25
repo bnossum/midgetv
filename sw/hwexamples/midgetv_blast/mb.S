@@ -30,16 +30,16 @@
         
         .org 0  //                         adr  
         .word	0                       // 0x000  x0 Never touch 
-        .word	0			// 0x004  x1 retreg          Link register
+        .word	0			// 0x004  x1 retreg          Link register                       
         .word	0			// 0x008  x2 regC            Loop/index
         .word	0			// 0x00c  x3 regL            Load address/Sentinel
         .word	4			// 0x010  x4 regY            Block limit/Entry point
-        .word	0			// 0x014  x5 regP            Result from getchar
-        .word   1                       // 0x018  x6 regB            Working register
-        .word	0			// 0x01c  x7 regW            Working register
+        .word	0			// 0x014  x5 regP            Result from getchar                 
+        .word   1                       // 0x018  x6 regB            Working register                    
+        .word	0			// 0x01c  x7 regW            Working register                    
         .word	16 + 32*-4		// 0x020  x8 rBitrate        Found by autobaud at start
         .word	0			// 0x024  x9 rBytelim        Found by autobaud at start
-        .word	0x60000000		// 0x028 x10 regIO           Constant
+        .word	0x60000000		// 0x028 x10 regIO           Constant                            
 getchar:lw      regP,UARTOFS(regIO)     // 0x02c x11
         beq     regP,x0,getchar         // 0x030 x12 Wait for framebit when low bitrates 
         lw      regP,UARTOFS(regIO)     // 0x034 x13
