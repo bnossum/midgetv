@@ -143,11 +143,11 @@ module m_ram_a16
          SB_LUT4 #(.LUT_INIT(16'hf8f8)) ACK_O_l(.O(ACK_O), .I3(1'b0), .I2(readack), .I1(STB_I), .I0(WE_I)); 
          
          
+`ifdef verilator
          /* Not strictly wanted in low-level code,
           * but keep output strictly equal to
           * highlevel. This is only in simulation.
           */
-`ifdef verilator
          assign DAT_O = ACK_O ? preDAT_O : 32'habbababa;
 `else
          assign DAT_O = preDAT_O;

@@ -23,7 +23,9 @@ module m_ram_a17
          // SRAM
          // -----------------------------------------------------------------------------
    wire [63:0]    o;
+`ifdef verilator
    wire [63:0]    zo;
+`endif
    wire [7:0]     srammask = {{2{SEL_I[3]}},{2{SEL_I[2]}},{2{SEL_I[1]}},{2{SEL_I[0]}}};
    wire [1:0]     we;
    

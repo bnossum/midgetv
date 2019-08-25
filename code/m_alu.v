@@ -63,7 +63,6 @@
 module m_alu
   # ( parameter HIGHLEVEL = 0,
       MTIMETAP = 0,
-      SRAMADRWIDTH = 0,
       ALUWIDTH = 8,
       MTIMETAP_LOWLIM = 32
       )

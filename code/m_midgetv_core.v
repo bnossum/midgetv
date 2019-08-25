@@ -524,6 +524,8 @@ module m_midgetv_core
    /* -----------------------------------------------------------------------------
     * Datapath
     */
+   localparam xHIGHLEVEL = 1'b1;
+   localparam xSRAMADRWIDTH = 10;
    m_inputmux #(.HIGHLEVEL(HIGHLEVEL), 
                 .IWIDTH(IWIDTH), 
                 .SRAMADRWIDTH(SRAMADRWIDTH), 
@@ -599,8 +601,8 @@ module m_midgetv_core
    m_alu #(.HIGHLEVEL(HIGHLEVEL), 
            .ALUWIDTH(ALUWIDTH),
            .MTIMETAP(MTIMETAP),
-           .MTIMETAP_LOWLIM(MTIMETAP_LOWLIM),
-           .SRAMADRWIDTH(SRAMADRWIDTH) )
+           .MTIMETAP_LOWLIM(MTIMETAP_LOWLIM)
+           )
    inst_alu
      (/*AUTOINST*/
       // Outputs
@@ -648,8 +650,8 @@ module m_midgetv_core
    inst_ebr
      (/*AUTOINST*/
       // Outputs
-      .next_readvalue_unknown           (next_readvalue_unknown),
       .DAT_O                            (DAT_O[31:0]),
+      .next_readvalue_unknown           (next_readvalue_unknown),
       // Inputs
       .B                                (B[31:0]),
       .Rai                              (Rai[EBRADRWIDTH-1:0]),
@@ -698,7 +700,8 @@ module m_midgetv_core
       // Outputs
       .m_ram_killwarnings               (m_ram_killwarnings),
       // Inputs
-      .CLK_I                            (CLK_I));
+      .CLK_I                            (CLK_I),
+      .bmask                            (bmask[3:0]));
    
    /* -----------------------------------------------------------------------------
     * Control path / Data path interface

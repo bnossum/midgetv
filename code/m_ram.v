@@ -55,15 +55,16 @@
  *
  * Tested
  * |  SRAMADRWIDTH
- *    0     0 KiB SRAM No SRAM implemented
- *    10    1 KiB SRAM (2 EBRs masquerading as SRAM)
- *    11    2 KiB SRAM (4 EBRs masquerading as SRAM)
- *    12    4 KiB SRAM (8 EBRs masquerading as SRAM)
- *    13    8 KiB SRAM (16 EBRs masquerading as SRAM)
- *    14               Not supported
- *    15   32 KiB SRAM (1 SB_SPRAM256KA, needs additional logic)
- *    16   64 KiB SRAM (2 SB_SPRAM256KA)   64 KiB organized as 32 * 14,
- *    17  128 KiB SRAM (4 SB_SPRAM256KA)  128 KiB organized as 32 * 15.
+ * x   0    0   KiB SRAM No SRAM implemented
+ *     9    0.5 KiB SRAM (1 EBR and logic masquarading as SRAM)
+ *    10    1   KiB SRAM (2 EBRs masquerading as SRAM)
+ *    11    2   KiB SRAM (4 EBRs masquerading as SRAM)
+ *    12    4   KiB SRAM (8 EBRs masquerading as SRAM)                     [11:2]
+ *    13    8   KiB SRAM (16 EBRs masquerading as SRAM)                    [12:2]
+ *    14   16   KiB SRAM (32 EBRs and logic masquerading as SRAM)          [13:2]
+ *    15   32   KiB SRAM (1 SB_SPRAM256KA, and logic)                      [14:2]
+ *    16   64   KiB SRAM (2 SB_SPRAM256KA)   64 KiB organized as 32 * 14,  [15:2]
+ *    17  128   KiB SRAM (4 SB_SPRAM256KA)  128 KiB organized as 32 * 15.  [16:2]
  */
 module m_ram
   # ( parameter HIGHLEVEL = 0,
@@ -76,36 +77,21 @@ module m_ram
     input         STB_I, // Ram is accessed
     input         WE_I, //  Write cycle
     input [3:0]   SEL_I, // Byte select signals
+    input [3:0]   bmask, // Inverse of above
     output [31:0] DAT_O, // Data out
     output        ACK_O, // Acknowledge after operation
     output        m_ram_killwarnings
     );
 
+   /*AUTOWIRE*/
+   
    generate
       if ( SRAMADRWIDTH == 0 ) begin
          // No SRAM at all
          assign DAT_O = 32'h0;
          assign ACK_O = 1'b0;
          assign m_ram_killwarnings = CLK_I & STB_I & WE_I & &ADR_I & &DAT_I & &SEL_I;
-      end else if ( SRAMADRWIDTH == 16 ) begin
-         wire            m_ram_a16_killwarnings;
-         m_ram_a16 #(.HIGHLEVEL(HIGHLEVEL))
-         m_ram_inst
-           (/*AUTOINST*/
-            // Outputs
-            .DAT_O                      (DAT_O[31:0]),
-            .ACK_O                      (ACK_O),
-            .m_ram_a16_killwarnings     (m_ram_a16_killwarnings),
-            // Inputs
-            .CLK_I                      (CLK_I),
-            .DAT_I                      (DAT_I[31:0]),
-            .ADR_I                      (ADR_I[15:0]),
-            .STB_I                      (STB_I),
-            .WE_I                       (WE_I),
-            .SEL_I                      (SEL_I[3:0]));
-         assign m_ram_killwarnings = CLK_I & STB_I & WE_I & &ADR_I & &DAT_I & &SEL_I | m_ram_a16_killwarnings;
-         
-      end else begin
+      end else if ( SRAMADRWIDTH == 17 ) begin
          wire            m_ram_a17_killwarnings;
          // End of automatics
          m_ram_a17 #(.HIGHLEVEL(HIGHLEVEL))
@@ -124,11 +110,68 @@ module m_ram
             .SEL_I                      (SEL_I[3:0]));
 
          assign m_ram_killwarnings = CLK_I & STB_I & WE_I & &ADR_I & &DAT_I & &SEL_I | m_ram_a17_killwarnings;
+      end else if ( SRAMADRWIDTH == 16 ) begin
+         wire            m_ram_a16_killwarnings;
+         m_ram_a16 #(.HIGHLEVEL(HIGHLEVEL)) // 15:2 used as address
+         m_ram_inst
+           (/*AUTOINST*/
+            // Outputs
+            .DAT_O                      (DAT_O[31:0]),
+            .ACK_O                      (ACK_O),
+            .m_ram_a16_killwarnings     (m_ram_a16_killwarnings),
+            // Inputs
+            .CLK_I                      (CLK_I),
+            .DAT_I                      (DAT_I[31:0]),
+            .ADR_I                      (ADR_I[15:0]),
+            .STB_I                      (STB_I),
+            .WE_I                       (WE_I),
+            .SEL_I                      (SEL_I[3:0]));
+         assign m_ram_killwarnings = CLK_I & STB_I & WE_I & &ADR_I & &DAT_I & &SEL_I | m_ram_a16_killwarnings;
+         
+      end else if ( SRAMADRWIDTH >= 10 && SRAMADRWIDTH <= 13 ) begin
+
+         wire we;
+         if ( HIGHLEVEL ) begin
+            assign we  = STB_I & WE_I;
+            reg  readack;
+            wire cmb_readack = ~readack & STB_I & ~WE_I;
+            always @(posedge CLK_I)
+              readack <= cmb_readack;
+            assign ACK_O = readack | we;
+         end else begin
+            wire readack;
+            wire cmb_readack;
+            SB_LUT4 #(.LUT_INIT(16'h8888)) we_l(.O(we), .I3(1'b0), .I2(1'b0), .I1(STB_I), .I0(WE_I));
+            SB_LUT4 #(.LUT_INIT(16'h0404)) readack_l(.O(cmb_readack), .I3(1'b0), .I2(readack), .I1(STB_I), .I0(WE_I)); 
+            SB_DFF readack_r(.Q(readack), .C(CLK_I), .D(cmb_readack));
+            SB_LUT4 #(.LUT_INIT(16'hf8f8)) ACK_O_l(.O(ACK_O), .I3(1'b0), .I2(readack), .I1(STB_I), .I0(WE_I)); 
+         end
+
+         
+         wire       next_readvalue_unknown;
+         m_ebr #(.EBRADRWIDTH(SRAMADRWIDTH-2))
+         inst_ram (// Inputs
+                   .Rai                 (ADR_I[SRAMADRWIDTH-1:2]),
+                   .Wai                 (ADR_I[SRAMADRWIDTH-1:2]),
+                   .iwe                 (we),
+                   .B                   (DAT_I[31:0]),
+                   .clk                 (CLK_I),
+                   /*AUTOINST*/
+                   // Outputs
+                   .DAT_O               (DAT_O[31:0]),
+                   .next_readvalue_unknown(next_readvalue_unknown),
+                   // Inputs
+                   .bmask               (bmask[3:0]));
+
+         assign m_ram_killwarnings = &ADR_I | next_readvalue_unknown;
+         
+      end else begin
+         unsupported_sramwidth inst_can_not_have_this();
       end
    endgenerate
 endmodule
 
 // Local Variables:
-// verilog-library-directories:("."  )
+// verilog-library-directories:("." "sb_sim_rtl" )
 // verilog-library-extensions:(".v" )
 // End:
