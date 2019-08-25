@@ -103,12 +103,10 @@ __inline void simend( void ) {
 uint32_t autobaud( void ) {
         uint32_t atstart;
 
-        // Here
         // Wait for falling flank startbit
         simend();
         while ( UART->D )
                 ;
-//        HALT(2); // Not here
         // Wait for rising flank
         while ( UART->D == 0 )
                 ;
@@ -144,6 +142,7 @@ void near_putchar( int c ) {
 
 /////////////////////////////////////////////////////////////////////////////
 int near_getchar( void ) {
+
         while ( UART->D == 0 )
                 ; // Possibly in previous transaction, I cheat on frame bit.
 
@@ -168,5 +167,4 @@ int near_getchar( void ) {
         } while ( n != 0x100 );
         return b;
 }
-
 

@@ -6,11 +6,6 @@
  * Risc-v in a iCE40UP5K. Max size midgetv.
  */
 
-
-
-/*
- *  During synthesis I do not stomach to list all these files in the Makefile
- */
 `include "../../code/m_inputmux.v"
 `include "../../code/m_alu_carryin.v"
 `include "../../code/m_alu.v"
@@ -41,6 +36,7 @@
 module mytop
   # ( parameter
       SRAMADRWIDTH       = 17,
+      FORCEEBRADRWIDTH   = 11,
       IWIDTH             = 32, 
       NO_CYCLECNT        = 0, 
       MTIMETAP           = 16, 
@@ -198,7 +194,7 @@ module mytop
    m_midgetv_core
      #(
        .SRAMADRWIDTH       ( SRAMADRWIDTH       ),
-       .EBRADRWIDTH        ( EBRADRWIDTH        ),
+       .EBRADRWIDTH        ( FORCEEBRADRWIDTH   ),
        .IWIDTH             ( IWIDTH             ),
        .NO_CYCLECNT        ( NO_CYCLECNT        ),
        .MTIMETAP           ( MTIMETAP           ),

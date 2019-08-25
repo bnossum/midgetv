@@ -11,12 +11,16 @@ CFLAGS = -mabi=ilp32 -march=rv32i -nodefaultlibs -nostartfiles -Os -Wall -Wextra
 	-DNOCSR=1 -DonlyEBR=1 -DSP_INITVAL=0x400 -I ./ -I ../../inc/ 
 
 all: $(OBJ)/autobaud.lst \
-	../../../hwtst/upduino2/ice40loaderprog.hv 
+	../../../hwtst/upduino2/ice40loaderprog.hv \
+	../../../hwtst/max_upduino2/ice40loaderprog.hv 
 
 ../../../hwtst/upduino2/ice40loaderprog.hv: $(OBJ)/autobaud.bin 
 	../../../bin/midgetv_bin2ebr -i $< -o $@
 
-$(OBJ)/autobaud.o: | $(OBJ)/crt0.o $(OBJ)/ab.o
+../../../hwtst/max_upduino2/ice40loaderprog.hv: $(OBJ)/autobaud.bin 
+	../../../bin/midgetv_bin2ebr -i $< -o $@
+
+$(OBJ)/autobaud.o: | $(OBJ)/autobaud_crt0.o 
 
 # .SECONDARY:
 
@@ -30,7 +34,7 @@ $(OBJ)/%.o:%.S
 	riscv32-unknown-elf-gcc -c $(CFLAGS) -TEBRlink.ld  -Wa,-a=$(OBJ)/$*.slst -o $@ $<
 
 %.out:%.o
-	riscv32-unknown-elf-ld -TEBRlink.ld -nodefaultlibs -nostartfiles -o $@ $(OBJ)/crt0.o $< -M > $(OBJ)/$(*F).map
+	riscv32-unknown-elf-ld -TEBRlink.ld -nodefaultlibs -nostartfiles -o $@ $(OBJ)/autobaud_crt0.o $< -M > $(OBJ)/$(*F).map
 
 %.bin:%.out
 	riscv32-unknown-elf-objcopy -Obinary $< $@ 
@@ -39,7 +43,8 @@ $(OBJ)/%.o:%.S
 	riscv32-unknown-elf-objdump -M numeric,no-aliases -D $< > $@
 
 clean:
-	rm -f $(OBJ)/crt0.o \
+	rm -f $(OBJ)/autobaud_crt0.o \
 	$(OBJ)/autobaud.bin \
-	../../../hwtst/upduino2/ice40loaderprog.hv 
+	../../../hwtst/upduino2/ice40loaderprog.hv \
+	../../../hwtst/max_upduino2/ice40loaderprog.hv 
 

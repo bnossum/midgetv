@@ -8,15 +8,15 @@ Different small programs to test midgetv. All of these programs are to be compil
 | 2  | morse         | Hello world on a LED
 | 3  | eratosthenes  | A first check on RAMs by sieving primes
 | 4  | autobaud      | Start of bitbang UART communication
-| 5  | midgetv_blast | Upload a new program to midgetv without Verilog recompile
-| 6  | xmodemboot    | Simple monitor with xmodem upload capabilities
+| 5  | xmodemboot    | Simple monitor with xmodem upload capabilities (not finished)
+| 6  | midgetv_blast | Upload a new program to midgetv without Verilog recompile (not finished at all)
 
 ### What program on what platform?                    
                     
 | Platform            | 1 | 2 | 3 | 4 | 5 | 6
 | ------------------- | --|---|---|---|---|---
-| iceblink40-hx1k     | y | y | n | n | ? | n
-| max_iceblink40-hx1k | y | y | y | n | ? | n
-| upduino2            | y | y | y | ? | ? | ?
-| max_upduino2        | ? | ? | ? | ? | ? | ?
+| iceblink40-hx1k     | y | y | n | n | n | ?
+| max_iceblink40-hx1k | y | y | y | n | n | ?
+| upduino2            | y | y | y | y | n | ?
+| max_upduino2        | y | y | y | y | y | ?
 
