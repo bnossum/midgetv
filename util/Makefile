@@ -5,13 +5,13 @@
 # -----------------------------------------------------------------------------
 
 TRG := ../bin/midgetv_bin2ebr ../bin/midgetv_genucode  ../bin/midgetv_indirectEBR \
-	../bin/iceblinckcom
+	../bin/iceblinkcom
 
 # ../bin/midgetv_tablefold ../bin/midgetv_ucode_linepermutate
 
 all:$(TRG)
 
-../bin/iceblinckcom: iceblinkcom.c
+../bin/iceblinkcom: iceblinkcom.c
 	gcc -Wall -Wextra -I /usr/include/libusb-1.0  -o $@ $< -lusb-1.0
 
 ../bin/midgetv_genucode:../util/midgetv_genucode.c ../code/ucode.h
