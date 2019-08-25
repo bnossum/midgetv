@@ -4,9 +4,7 @@
  * For licence, see LICENCE
  * -----------------------------------------------------------------------------
  * Risc-v in a iCE40HX1K on a iceblink40-hx1k board.
- * At least for me, the clock of iceblink40-hx1k is not stable at startup
- * when set to run at 33 MHz. Hence I always use a 64 cycle startup timer,
- * parameter NO_CYCLECNT == 0.
+ * This implementation is to use as many resouces as possible.
  */
 
 /*
@@ -41,14 +39,14 @@
 
 
 module top
-  # ( parameter
-      SRAMADRWIDTH       = 0,
-      FORCEEBRADRWIDTH   = 8, 
-      IWIDTH             = 32, 
+  # ( parameter                // ucode  2 EBRs
+      SRAMADRWIDTH       = 12, // Hence  8 EBRs 
+      FORCEEBRADRWIDTH   = 9,  // Hence  4 EBRS
+      IWIDTH             = 32, // Total 14 of 16 EBRs
       NO_CYCLECNT        = 0, 
-      MTIMETAP           = 0, 
+      MTIMETAP           = 16, 
       HIGHLEVEL          = 0,
-      LAZY_DECODE        = 2,
+      LAZY_DECODE        = 0,
       DISREGARD_WB4_3_55 = 0
       )
    (

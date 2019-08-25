@@ -10,7 +10,7 @@
  */
 
 /*
- *  During synthesis I do not stomach to list all these files in the Makefile
+ *  I do not stomach to list all these files in a Makefile
  */
 `include "../../code/m_inputmux.v"
 `include "../../code/m_alu_carryin.v"
@@ -44,7 +44,7 @@ module top
       SRAMADRWIDTH       = 0,
       FORCEEBRADRWIDTH   = 8, 
       IWIDTH             = 1, 
-      NO_CYCLECNT        = 1, 
+      NO_CYCLECNT        = 0, 
       MTIMETAP           = 0, 
       HIGHLEVEL          = 0,
       LAZY_DECODE        = 2,
