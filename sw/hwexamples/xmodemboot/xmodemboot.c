@@ -8,14 +8,29 @@
 #include "midgetv.h"
 
 /////////////////////////////////////////////////////////////////////////////
-uint32_t autobaud( void ); 
-void near_putchar( int c );
-int near_getchar_TO( uint32_t timeoutlim  );
+//uint32_t autobaud( void ); 
+//void near_putchar( int c );
+//int near_getchar_TO( uint32_t timeoutlim  );
 
 
 /////////////////////////////////////////////////////////////////////////////
 uint32_t g_bitrate;
 
+/////////////////////////////////////////////////////////////////////////////
+void near_putchar( int c ) {
+        uint32_t n = g_bitrate;
+        c = (c | 0x100) << 1;
+        c &= 0x3ff;
+
+        SYSEBR->mcycle = 0;
+        while ( c ) {
+                UART->D = c;
+                c >>= 1;
+                while ( SYSEBR->mcycle < n )
+                        ;
+                n += g_bitrate;
+        }
+}
 
 /////////////////////////////////////////////////////////////////////////////
 /* puts add a newline, and returns a nonnegative number on success.
@@ -60,7 +75,6 @@ void clumsyhexprint( const uint32_t ab ) {
 #define to1s (TIMEOUTLIM_1S)
 
 
-#if 0
 /////////////////////////////////////////////////////////////////////////////
 int near_getchar_TO( uint32_t tolim ) {
         volatile uint32_t to = 0;
@@ -87,7 +101,13 @@ int near_getchar_TO( uint32_t tolim ) {
         } while ( n != 0x100 );
         return b;
 }
-#endif
+
+/////////////////////////////////////////////////////////////////////////////
+int near_getchar( void ) {
+        return near_getchar_TO( 0x7ffff000 );
+}
+
+
 
 /////////////////////////////////////////////////////////////////////////////
 enum {
@@ -210,142 +230,40 @@ void dump( uint32_t *p, uint32_t len ) {
 }
 
 
-#if 0
-/*
-File: printf.c
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+/* The autobaud character is '?', 0x3F, bitpattern on the line:
+ * ___------------------______---
+ * S  0  1  2  3  4  5  6  7  F
+ *    |                       |
+ *
+ * The number of cycles needed per bit is known to +/- 2 cycles. 
+ * With a 12 MHz clock, at 115200 bps, each bit should nominally 
+ * need 104 cycles. Normally USART communications succeed when one
+ * is inside a +/- 2.5% frequency limit.
+ */
+uint32_t cautobaud( void ) { // FITTE
+        uint32_t atstart;
 
-Copyright (C) 2004,2008  Kustaa Nyholm
+        // Wait for falling flank startbit
+        while ( UART->D )
+                ;
+        // Wait for rising flank
+        while ( UART->D == 0 )
+                ;
+        // Start of rising flank known  with uncertainty 0-15 cycles.
+        atstart = SYSEBR->mcycle; 
 
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version.
-
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
-*/
-//putchar#include <stdio.h>
-
-//#include "printf.h"
-
-
-//void putchar(char c);
-
-static char* bf;
-static char buf[12];
-static unsigned int num;
-static char uc;
-static char zs;
-
-static void out(char c) {
-    *bf++ = c;
-    }
-
-static void outDgt(char dgt) {
-	out(dgt+(dgt<10 ? '0' : (uc ? 'A' : 'a')-10));
-	zs=1;
-    }
-	
-static void divOut(unsigned int div) {
-    unsigned char dgt=0;
-	num &= 0xffff; // just for testing the code  with 32 bit ints
-	while (num>=div) {
-		num -= div;
-		dgt++;
-		}
-	if (zs || dgt>0) 
-		outDgt(dgt);
-    }	
-
-void tfp_printf(char *fmt, ...)	{
-	va_list va;
-	char ch;
-	char* p;
-	
-	va_start(va,fmt);
-	
-	while ((ch=*(fmt++))) {
-		if (ch!='%') {
-			near_putchar(ch);
-                }
-		else {
-			char lz=0;
-			char w=0;
-			ch=*(fmt++);
-			if (ch=='0') {
-				ch=*(fmt++);
-				lz=1;
-				}
-			if (ch>='0' && ch<='9') {
-				w=0;
-				while (ch>='0' && ch<='9') {
-					w=(((w<<2)+w)<<1)+ch-'0';
-					ch=*fmt++;
-					}
-				}
-			bf=buf;
-			p=bf;
-			zs=0;
-			switch (ch) {
-				case 0: 
-					goto abort;
-				case 'u':
-				case 'd' : 
-					num=va_arg(va, unsigned int);
-					if (ch=='d' && (int)num<0) {
-						num = -(int)num;
-						out('-');
-						}
-					divOut(10000);
-					divOut(1000);
-					divOut(100);
-					divOut(10);
-					outDgt(num);
-					break;
-				case 'x': 
-				case 'X' : 
-				    uc= ch=='X';
-					num=va_arg(va, unsigned int);
-					divOut(0x1000);
-					divOut(0x100);
-					divOut(0x10);
-					outDgt(num);
-					break;
-				case 'c' : 
-					out((char)(va_arg(va, int)));
-					break;
-				case 's' : 
-					p=va_arg(va, char*);
-					break;
-				case '%' :
-					out('%');
-				default:
-					break;
-				}
-			*bf=0;
-			bf=p;
-			while (*bf++ && w > 0)
-				w--;
-			while (w-- > 0) 
-				near_putchar(lz ? '0' : ' ');
-			while ((ch= *p++))
-				near_putchar(ch);
-			}
-		}
-	abort:;
-	va_end(va);
+        // Wait for second falling flank
+        while ( UART->D )
+                ;
+        // Wait for second rising flank
+        while ( UART->D == 0 )
+                ;
+        // Start of rising flank known  with uncertainty 0-15 cycles.
+        // Number of cycles needed for 8 bit times is know to -15 / 15 cycles.
+        return SYSEBR->mcycle - atstart;
 }
-#endif
-
-
-
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -356,7 +274,7 @@ int main( void ) {
         uint8_t *loadadr = (uint8_t *)0xfffe0000u;
         
         UART->D = 1;
-        uint32_t ab = autobaud();
+        uint32_t ab = cautobaud();
         SYSEBR->freefornow_f4 = ab; // For debug
 
 //        // Fill SRAM with a pattern,

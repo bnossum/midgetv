@@ -13,10 +13,8 @@ CFLAGS = -mabi=ilp32 -march=rv32i -nodefaultlibs -nostartfiles -Os -Wall -Wextra
 all: $(OBJ)/xmodemboot.lst \
 	../../../hwtst/max_upduino2/ice40loaderprog.hv
 
-
 ../../../hwtst/max_upduino2/ice40loaderprog.hv: $(OBJ)/xmodemboot.bin 
 	../../../bin/midgetv_bin2ebr < $< > $@
-
 
 # .SECONDARY:
 
@@ -30,7 +28,8 @@ $(OBJ)/%.o:%.S
 	riscv32-unknown-elf-gcc -c $(CFLAGS) -TEBRlink.ld  -I ./ -I ../../inc/ -Wa,-a=$(OBJ)/$*.slst -o $@ $<
 
 %.out:%.o
-	riscv32-unknown-elf-ld -TEBRlink.ld -nodefaultlibs -nostartfiles -o $@ $(OBJ)/crt0.o $(OBJ)/ab.o $< -M > $(OBJ)/$(*F).map
+	riscv32-unknown-elf-ld -TEBRlink.ld -nodefaultlibs -nostartfiles -o $@ \
+	$(OBJ)/xmodemboot_crt0.o $(OBJ)/xmodemboot_ab.o $< -M > $(OBJ)/$(*F).map
 
 %.bin:%.out
 	riscv32-unknown-elf-objcopy -Obinary $< $@ 
@@ -38,10 +37,11 @@ $(OBJ)/%.o:%.S
 %.lst:%.out
 	riscv32-unknown-elf-objdump -M numeric,no-aliases -D $< > $@
 
-$(OBJ)/xmodemboot.o: $(OBJ)/crt0.o $(OBJ)/ab.o
+$(OBJ)/xmodemboot.o: $(OBJ)/xmodemboot_crt0.o $(OBJ)/xmodemboot_ab.o
 
 clean:
-	rm -f $(OBJ)/crt0.o \
+	rm -f $(OBJ)/xmodemboot_crt0.o \
+	$(OBJ)/xmodemboot_ab.o \
 	$(OBJ)/xmodemboot.bin \
 	../../../hwtst/max_upduino2/ice40loaderprog.hv
 
