@@ -151,15 +151,20 @@ module top
     * inputs.
     *
     */
+
+   reg bluesource_is_uart;
    always @(posedge CLK_I) 
      if ( STB_O & WE_O & ADR_O[2] ) begin
         redled   <= DAT_O[0];
         greenled <= DAT_O[1];
-//        blueled  <= DAT_O[2];
+        bluesource_is_uart  <= DAT_O[31];
      end
    
-   always @(posedge CLK_I) 
-     blueled <= usartRX;
+   always @(posedge CLK_I)
+     if ( bluesource_is_uart )
+       blueled <= usartRX;
+     else if ( STB_O & WE_O & ADR_O[2] ) 
+       blueled <= DAT_O[2];
    
    always @(posedge CLK_I) 
      if ( STB_O & WE_O & ADR_O[3] ) begin
