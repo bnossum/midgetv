@@ -65,6 +65,7 @@ module m_digilent
    wire [7:0]   theout; // Byte read by PC during an EPP read data cycle.
    wire [7:0]   in;
    reg [0:0]    adr;
+   wire         nWRITEsig;
    wire         sampledata = nADDRSTB & ~nWRITEsig;
 
    SB_IO #( .PIN_TYPE( 6'b 1010_01), .NEG_TRIGGER(1'b1))
@@ -84,7 +85,6 @@ module m_digilent
     * instantiated.
     */
    wire         cmb_nWAIT = !(nADDRSTB & nDATASTB);
-   wire         nWRITEsig;
    SB_IO #( .PIN_TYPE( 6'b 0110_00), .NEG_TRIGGER(1'b1))
    the_nWAIT ( .PACKAGE_PIN( nWAIT ),.D_OUT_0( cmb_nWAIT ));
    SB_IO #( .PIN_TYPE( 6'b 0000_01), .NEG_TRIGGER(1'b1))
