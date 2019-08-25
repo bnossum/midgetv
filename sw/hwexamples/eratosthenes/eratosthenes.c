@@ -25,7 +25,7 @@
 
 #if sim
 // Simulation on PC
-#define sim_ADRLINES 4
+#define sim_ADRLINES 14
 #define sim_RAMSIZEBYTES ((1<<sim_ADRLINES))
 #include <stdint.h>
 #include <stdlib.h>
@@ -37,25 +37,27 @@ int dummyled;
 int volatile * volatile LED = &dummyled;
 #else
 uint8_t *SRAM = (uint8_t *)0x80000000;
-#define LED (uint32_t *)0x60000004
+#define LED (volatile uint32_t *)0x60000004
 #endif
 
 
 
 /////////////////////////////////////////////////////////////////////////////
-uint32_t find_sizeofram( void ) {
-        int i = 2;
-        int adr1,adr2;
+/* The SRAM will alias. This is used to find the amount of SRAM we really have
+ */
+static uint32_t find_sizeofram( void ) {
+        int i = 0;
+        int adrofs1,adrofs2;
         while (1) {
-                adr1 = (1<<i);
-                adr2 = (1<<(i+1));
+                adrofs1 = (1<<i);
+                adrofs2 = (1<<(i+1));
 #if sim
-                adr1 &= (sim_RAMSIZEBYTES-1);
-                adr2 &= (sim_RAMSIZEBYTES-1);
+                adrofs1 &= (sim_RAMSIZEBYTES-1);
+                adrofs2 &= (sim_RAMSIZEBYTES-1);
 #endif
-                *(SRAM+adr1) = 0;
-                *(SRAM+adr2) = 0x55;
-                if ( *(SRAM+adr1) != 0 )
+                *(SRAM+adrofs1) = 0x55;
+                *(SRAM+adrofs2) = 0;
+                if ( *(SRAM+adrofs1) != 0x55 )
                         break;
                 i++;
         }        
@@ -63,7 +65,7 @@ uint32_t find_sizeofram( void ) {
 }       
         
 /////////////////////////////////////////////////////////////////////////////
-void simend( void ) {
+static void simend( void ) {
 #if sim
         exit( fprintf(stderr,"Simend\n" ) );
 #else
@@ -72,7 +74,7 @@ void simend( void ) {
 }
 
 /////////////////////////////////////////////////////////////////////////////
-void simdump( void ) {
+static void simdump( void ) {
 #if sim
         ;
 #else
@@ -91,26 +93,55 @@ void fillmemFFFFFFFF( uint32_t *p, unsigned int n) {
 }
 
 /////////////////////////////////////////////////////////////////////////////
-int isbitset(int i ) {
+static int isbitset(int i ) {
         return *(SRAM + (i>>3)) & (1<<(i&7));
 }
 
 /////////////////////////////////////////////////////////////////////////////
-void bitclear(int i ) {
+static void bitclear(int i ) {
         *(SRAM + (i>>3)) &= ~(1<<(i&7));
 }
 
+/////////////////////////////////////////////////////////////////////////////
+//void showhalt( void ) {
+//        int i = 0;
+//#if sim
+//        return;
+//#endif
+//        while (1) {
+//                i++;
+//                *LED = (i >> 12) & 3;
+//        }
+//}
+
+
+/////////////////////////////////////////////////////////////////////////////
+/* From the PC simulation we have precalculated what
+   the checksum should be
+*/
+const uint32_t facit[18-10] = {
+        0x001f3, // 10
+        0x01013, // 11
+        0x026c9, // 12
+        0x04763, // 13
+        0x11b0a, // 14
+        0x31b85, // 15
+        0x10965, // 16
+        0x29b6f  // 17
+};
 
 /////////////////////////////////////////////////////////////////////////////
 int main( void ) {
         volatile uint32_t checksum = 0;
+        int ok = 0;
         uint32_t byteadrwidth;
         uint32_t bitadrwidth;
         int n;
         int looplim;
         int i,j;
         
-        *LED = 8; // Blue
+        *LED = 4; // Blue
+
         byteadrwidth = find_sizeofram();
 #if sim
         printf( "byteadrwidth = %d\n", byteadrwidth );
@@ -161,41 +192,22 @@ int main( void ) {
                 }
         }
 
-        /* From the PC simulation we have precalculated what
-           the checksum should be
-        */
-        int ok = 0;
-        switch ( byteadrwidth ) {
-#if sim
-        case 4 :  ok = checksum == 0x0004a; break;
-        case 5 :  ok = checksum == 0x00081; break;
-        case 6 :  ok = checksum == 0x00154; break;                
-        case 15 : ok = checksum == 0x31b85; break;
-#endif
-        case 16 : ok = checksum == 0x10965; break;
-        case 17 :
-                /* If a full 2^17 bit SRAM is used, the highest recorded prime would be
-                   1048573 -> ok = facit == 0xd64a6;
-                   But when a 2^17 - 64 bit SRAM is used, the higest recorded prime is
-                   1048507 
-                */
-                ok = checksum == 0x29b6f;
-                break;
-        }
+        ok = facit[byteadrwidth-10] == checksum;
+
 #if sim
         if ( ok ) {
-                printf( "\nOK\n" );
+                printf( "\nOK - checksum = 0x%8.8x\n", checksum );
         } else {
                 printf( "\nError or %d Uncovered. Facit:0x%x\n", byteadrwidth, checksum );
         }
 #else
         if ( ok ) {
-                *LED = 4; // Green
+                *LED = 2; // Green
         } else {
-                *LED = 2; // Red
+                *LED = 1; // Red
         }
 #endif
-        while ( 1) {
+        while ( 1 ) {                
                 simend(); // Hang on devboard
         }
 }
