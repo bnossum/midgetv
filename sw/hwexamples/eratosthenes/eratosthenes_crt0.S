@@ -1,3 +1,6 @@
+/* This is a primitive crt0 for eratosthenes.c
+ */
+
 #include "midgetv.inc"
         
         .globl _start
