@@ -149,7 +149,7 @@ void doesitworkatall( libusb_device_handle *dh ) {
 /* Around 16 s no matter the frequency on iceblink40-hx1k.
  * Transfer speed 10*1000*8/16 = 5000 bps.
  */
-void speedtest_pc2midget( libusb_device_handle *dh ) {
+void speedtest_pc2midgetv( libusb_device_handle *dh ) {
         for ( int i = 0; i < 10*1000; i++ ) {
                 while ( bnusb_readreg( dh, 1 ) & 2 )
                         ;
@@ -158,7 +158,7 @@ void speedtest_pc2midget( libusb_device_handle *dh ) {
 }
 
 /////////////////////////////////////////////////////////////////////////////
-void pc2midget( libusb_device_handle *dh, FILE *fi ) {
+void pc2midgetv( libusb_device_handle *dh, FILE *fi ) {
         int c;
 
         while ( (c = fgetc(fi)) != EOF ) {
@@ -238,9 +238,9 @@ int main( int argc, char *argv[] ) {
                 bnusb_writereg( dh, adr, data );
                 break;
         case 't' : doesitworkatall(dh); break;
-        case 's' : speedtest_pc2midget( dh ); break;
+        case 's' : speedtest_pc2midgetv( dh ); break;
         case 'p' :
-                pc2midget( dh, fi );
+                pc2midgetv( dh, fi );
                 fclose( fi );
                 break;
         default : ferr( "Internal error\n" );
