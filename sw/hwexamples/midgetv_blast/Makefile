@@ -12,16 +12,10 @@ CFLAGS = -mabi=ilp32 -march=rv32i -nodefaultlibs -nostartfiles -Os -Wall -Wextra
 
 all:	$(OBJ)/mb.lst \
 	$(OBJ)/mb2.lst \
-	../../../hwtst/max_iceblink40-hx1k/ice40loaderprog.hv
+	../../../hwtst/upduino2/ice40loaderprog.hv
 
-# 	../../../hwtst/max_upduino2/ice40loaderprog.hv \
-
-../../../hwtst/max_upduino2/ice40loaderprog.hv: $(OBJ)/midgetv_blast.bin 
+../../../hwtst/upduino2/ice40loaderprog.hv: $(OBJ)/mb.bin 
 	../../../bin/midgetv_bin2ebr < $< > $@
-
-../../../hwtst/max_iceblink40-hx1k/ice40loaderprog.hv: $(OBJ)/inspiration_midgetv_iceblink40hx1k_blast.bin 
-	../../../bin/midgetv_bin2ebr < $< > $@
-
 
 # .SECONDARY:
 
@@ -58,6 +52,5 @@ clean:
 	rm -f \
 	$(OBJ)/mb.lst \
 	$(OBJ)/mb2.lst \
-	../../../hwtst/max_upduino2/ice40loaderprog.hv \
-	../../../hwtst/max_iceblink40-hx1k/ice40loaderprog/ice40loaderprog.hv 	
+	../../../hwtst/upduino2/ice40loaderprog.hv
 
