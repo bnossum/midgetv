@@ -128,16 +128,14 @@ GotWhat:mv      x10,regP
         
         // In: x10 is value to output to LEDs
         // Output a 32-bit value by LEDs.
-        // Output a 16-bit value by LEDs.
-        // red == 1
-        // green = 0
+        // Output red for a 1, green for a 0.
         // from msb to lsb
         // Hang.
 BINBLINK:
         li      x3,IOregion
-
-        li      x5,16
-        slli    x10,x10,16      // 16 lsb to be shown
+        //li      x5,32
+        li      x5,16           // Output a 16-bit value by LEDs.
+        slli    x10,x10,16      // 16 lsbs to be shown
 
 2:      sw      x0,LEDOFS(x3)
         jal     x1,DLY
@@ -147,9 +145,9 @@ BINBLINK:
         li      x6,0x80000000
         and     x6,x6,x10
         beq     x6,x0,isZero
-        li      x6,1
+        li      x6,1            // Red
         j       1f
-isZero: li      x6,2
+isZero: li      x6,2            // Green
 1:      
         
         sw      x6,LEDOFS(x3)
