@@ -12,7 +12,7 @@ MEMORY
 SECTIONS
 {
   .header : {
-    LONG(0x3f3f3f3f)
+    LONG(0x01071f3f)
     LONG(0x00000100)
     LONG(_payloadend)
   } 

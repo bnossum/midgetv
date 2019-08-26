@@ -63,50 +63,52 @@ LBHead: li      regC,-8                 // 0x064 x25 while (1) {
         jalr    x0,0(regY)              // 0x07c x31                 go();
         
         .org    0x80                    //      
-__jj:           .word 0          //     // 0x080 ucode register
-__rinst:        .word 0          //     // 0x084 32-lsb of instret counter
-__pc:           .word _start-4   // x   // 0x088 Program counter
-__mcycle:       .word 0          //     // 0x08c 32-lsb of cycle counter
-__rNMI_IIV:     .word 0          //     // 0x090 Must point to handlers for NMI/Internal interrupts
-cteffffff7f:    .word 0xffffff7f // x   // 0x094 For sign extension in "lb"
-cte000000ff:    .word 0x000000ff // x   // 0x098 Mask in "lb", "lbu", also for entrypoint CSR
-cte0000ffff:    .word 0x0000ffff // x   // 0x09c Mask in "lh" and "lhu"
-cteffff7fff:    .word 0xffff7fff // x   // 0x0a0 For sign extension in "lh"
-__mtvec:        .word 0          //     // 0x0a4 Should point to excption handler.
-cte00000000:    .word 0x00000000 // x   // 0x0a8 ucode constant. 
-cteffffffff:    .word 0xffffffff // x   // 0x0ac ucode constant.
-__yy:           .word 0                 // 0x0b0 ucode register.
-        .org    0xb4
+__jj:           .word 0          //     // 0x080     ucode register
+__rinst:        .word 0          //     // 0x084     32-lsb of instret counter
+__pc:           .word _start-4   // x   // 0x088     Program counter
+__mcycle:       .word 0          //     // 0x08c     32-lsb of cycle counter
+__rNMI_IIV:     .word 0          //     // 0x090     Must point to handlers for NMI/Internal interrupts
+cteffffff7f:    .word 0xffffff7f // x   // 0x094     For sign extension in "lb"
+cte000000ff:    .word 0x000000ff // x   // 0x098     Mask in "lb", "lbu", also for entrypoint CSR
+cte0000ffff:    .word 0x0000ffff // x   // 0x09c     Mask in "lh" and "lhu"
+cteffff7fff:    .word 0xffff7fff // x   // 0x0a0     For sign extension in "lh"
+__mtvec:        .word 0          //     // 0x0a4     Should point to excption handler.
+cte00000000:    .word 0x00000000 // x   // 0x0a8     ucode constant. 
+cteffffffff:    .word 0xffffffff // x   // 0x0ac     ucode constant.
+__yy:           .word 0                 // 0x0b0     ucode register.
+        .org    0xb4                                 
+                                                     
+DataL:                                               
+        jal     retreg,getchar          // 0x0b4                 do {                   
+        sb      regP,0(regL)            // 0x0b8                         regP = getchar()
+        addi    regL,regL,1             // 0x0bc     	             *loadadr++ = regP; 	
+        sb      regP,LEDOFS(regIO)      // 0x0c0                         LEDs = regP;
+        bltu    regL,regY,DataL         // 0x0c4                 } while ( loadar < end )
+        j       LBHead                  // 0x0c8         }
+                                                     
+        .org    0xcc                    //           This code can be overwritten
+_start:                                 //           by the loading process.
+        sw      regW,UARTOFS(regIO)     // 0x0cc     UART-D = 1, source for blue led is uartrx.
+        sw      regW,LEDOFS(regIO)      // 0x0d0     Alive
+ABL:    lw      regP,UARTOFS(regIO)     // 0x0d4     while ( UART->D )
+        bne     regP,x0,ABL             // 0x0d8          ;
+1:      lw      regP,UARTOFS(regIO)     // 0x0dc     while ( UART->D == 0)
+        beq     regP,x0,1b              // 0x0e0          ;
+        lw	regC,%lo(__mcycle)(x0)  // 0x0e4     atstart = SYSEBR->mcycle;
+        sub     rBitrate,rBitrate,regC  // 0x0e8     
+1:      lw      regP,UARTOFS(regIO)     // 0x0ec     while ( UART->D )
+        bne     regP,x0,1b              // 0x0f0          ;
+1:      lw      regP,UARTOFS(regIO)     // 0x0f4     while ( UART->D == 0)
+        beq     regP,x0,1b              // 0x0f8          ;
+        lw      regC,%lo(__mcycle)(x0)  // 0x0fc     atend  = SYSEBR->mcycle;
+        add     rBitrate,rBitrate,regC  // 0x100     ab = ab + (atend - atstart)
+        addi    regB,regB,-1            // 0x104     4 times
+        bne     regB,x0,ABL             // 0x108         
+        srli    rBitrate,rBitrate,5     // 0x10c     rBitrate = (4*autobaud+16)/32 + FUDGEFACTOR
+        slli    rBytelim,rBitrate,3     // 0x110              = (4*autobaud+16+32*FUDGEFACTOR)/32
+        j       LBHead                  // 0x114
 
-DataL:
-        jal     retreg,getchar          // 0x0b4             do {                   
-        sb      regP,0(regL)            // 0x0b8                     regP = getchar()
-        addi    regL,regL,1             // 0x0bc 	             *loadadr++ = regP; 	
-        sb      regP,LEDOFS(regIO)      // 0x0c0                     LEDs = regP;
-        bltu    regL,regY,DataL         // 0x0c4             } while ( loadar < end )
-        j       LBHead                  // 0x0c8     }
-
-        .org    0xcc                    //       This code can be overwritten
-_start:                                 //       by the loading process.
-        sw      regW,UARTOFS(regIO)     // 0x0cc UART-D = 1, source for blue led is uartrx.
-        sw      regW,LEDOFS(regIO)      // 0x0d0 Alive
-ABL:    lw      regP,UARTOFS(regIO)     // 0x0d4 while ( UART->D )
-        bne     regP,x0,ABL             // 0x0d8      ;
-1:      lw      regP,UARTOFS(regIO)     // 0x0dc while ( UART->D == 0)
-        beq     regP,x0,1b              // 0x0e0      ;
-        lw	regC,%lo(__mcycle)(x0)  // 0x0e4 atstart = SYSEBR->mcycle;
-        sub     rBitrate,rBitrate,regC  // 0x0e8 
-1:      lw      regP,UARTOFS(regIO)     // 0x0ec while ( UART->D )
-        bne     regP,x0,1b              // 0x0f0      ;
-1:      lw      regP,UARTOFS(regIO)     // 0x0f4 while ( UART->D == 0)
-        beq     regP,x0,1b              // 0x0f8      ;
-        lw      regC,%lo(__mcycle)(x0)  // 0x0fc atend  = SYSEBR->mcycle;
-        add     rBitrate,rBitrate,regC  // 0x100 ab = ab + (atend - atstart)
-        addi    regB,regB,-1            // 0x104 4 times
-        bne     regB,x0,ABL             // 0x108     
-        srli    rBitrate,rBitrate,5     // 0x10c rBitrate = (4*autobaud+16)/32 + FUDGEFACTOR
-        slli    rBytelim,rBitrate,3     // 0x110          = (4*autobaud+16+32*FUDGEFACTOR)/32
-       j       LBHead                  // 0x114
+#if 0        
 //dbg1  mv      x10,rBitrate
 //dbg1  j       BINBLINK
         
@@ -171,3 +173,4 @@ DBGCNTLEDS:
         jal     x1,DLY
         j       DBGCNTLEDS
         
+#endif
