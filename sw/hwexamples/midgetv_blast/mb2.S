@@ -31,11 +31,12 @@
 #define regL   x12  // Load address
 #define regY   x13  // Block limit
 
+        .globl _start
         .org 0  //                         adr  reg 
         .word   0                       // 0x00 x0  Never touch
         .word   0                       // 0x04 x1 
-        .word   0x2000                  // 0x08 x2  In case SP is not loaded, 
-        .word   0                       // 0x0c x3          use sensible startvalue
+        .word   0                       // 0x08 x2
+        .word   0                       // 0x0c x3           
         .word   0                       // 0x10 x4
         .word   0                       // 0x14 x5
         .word   1                       // 0x18 x6  regA

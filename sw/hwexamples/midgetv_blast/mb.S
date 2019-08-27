@@ -3,7 +3,7 @@
         // 2019. Copyright B. Nossum.
         // For licence, see LICENCE
         // =============================================================================
-        // For midgetv in hardware where a bitbang UART is possible. 
+        // For midgetv implemented on hardware where a bitbang UART is possible. 
         //
         // Loadable regions:
         // -----------------
@@ -11,35 +11,37 @@
         // 0x000000a7 - 0x000000a4      __mtvec
         // (top adr)  - 0x000000cc      Most part of memory.
         //
+        // Note - conventionally dynamic loading of midgetv happens from address 0x1000
+        //
         // =============================================================================
         
 #define LEDOFS  4
 #define UARTOFS 8
 
 #define retreg    x1
-#define regC      x2
+#define regC      x2 // Note in particular that when the program is released, sp == 0.
 #define regL      x3
 #define regY      x4
 #define regP      x5
 #define regB      x6
 #define regW      x7
-#define rBitrate  x8
-#define rBytelim  x9
+#define rBitrate  x8 // Note. crt0 can copy out this to continue communication.
+#define rBytelim  x9 // Note. crt0 can copy out this to continue communication.
 #define regIO     x10
         .globl _start
-        .org 0  //                         adr
-Registers:      
-        .word	0                       // 0x000  x0 Never touch 
-        .word	0			// 0x004  x1 retreg          Link register                       
-        .word	0			// 0x008  x2 regC            Loop/index
-        .word	0			// 0x00c  x3 regL            Load address/Sentinel
-        .word	0			// 0x010  x4 regY            Block limit/Entry point
-        .word	0			// 0x014  x5 regP            Result from getchar                 
-        .word   4                       // 0x018  x6 regB            Working register                    
-        .word	0x80000001		// 0x01c  x7 regW            Working register                    
-        .word	16 + 32*-4		// 0x020  x8 rBitrate        Found by autobaud at start
-        .word	0			// 0x024  x9 rBytelim        Found by autobaud at start
-        .word	0x60000000		// 0x028 x10 regIO           Constant                            
+        .org 0  //                         
+Registers:      //                         adr   reg Name/Usage____________________________  At go()
+        .word	0                       // 0x000  x0 Never touch                             0x00000000
+        .word	0			// 0x004  x1 retreg      Link register               0x0000006c
+        .word	0			// 0x008  x2 regC        Loop/index                  0x00000000
+        .word	0			// 0x00c  x3 regL        Load address/Sentinel       0x00000000
+        .word	0			// 0x010  x4 regY        Block limit/Entry point     ep = Entry point
+        .word	0			// 0x014  x5 regP        Result from getchar         (uint8_t) ep
+        .word   4                       // 0x018  x6 regB        Working register            ep & 1
+        .word	0x80000001		// 0x01c  x7 regW        Working register            >= rBytelim
+        .word	16 + 32*-4		// 0x020  x8 rBitrate    Found by autobaud at start  Nr cycles in an UARTBIT
+        .word	0			// 0x024  x9 rBytelim    Found by autobaud at start  Nr cycles in 8 UARTBITs
+        .word	0x60000000		// 0x028 x10 regIO       Constant                    0x60000000
 getchar:lw      regB,UARTOFS(regIO)     // 0x02c x11
         beq     regB,x0,getchar         // 0x030 x12 Wait for framebit when low bitrates 
 1:      lw      regB,UARTOFS(regIO)     // 0x034 x13
@@ -61,7 +63,7 @@ LBHead: li      regC,-8                 // 0x064 x25 while (1) {
         bne     regC,x0,1b              // 0x074 x29         }
         bne     regL,x0,DataL           // 0x078 x30   	     if ( loadadr== 0 )
         jalr    x0,0(regY)              // 0x07c x31                 go();
-        
+                                        //                           
         .org    0x80                    //      
 __jj:           .word 0          //     // 0x080     ucode register
 __rinst:        .word 0          //     // 0x084     32-lsb of instret counter
@@ -107,68 +109,3 @@ ABL:    lw      regP,UARTOFS(regIO)     // 0x0d4     while ( UART->D )
         srli    rBitrate,rBitrate,5     // 0x10c     rBitrate = (4*autobaud+16)/32 + FUDGEFACTOR
         slli    rBytelim,rBitrate,3     // 0x110              = (4*autobaud+16+32*FUDGEFACTOR)/32
         j       LBHead                  // 0x114
-
-#if 0        
-//dbg1  mv      x10,rBitrate
-//dbg1  j       BINBLINK
-        
-
-        /* During debug, see that we have a basic communication.
-         *  o The bitrate.
-         *    I dechipher the bitrate to be 0x9dcd for 300bps.
-         *    This is right according to autobaud.
-         *  o Ensured I could receive a character.
-         *
-         */
-#define IOregion 0x60000000
-
-Show_Y: mv      regL,regY
-Show_L: mv      regP,regL
-GotWhat:mv      x10,regP
-        
-        // In: x10 is value to output to LEDs
-        // Output a 32-bit value by LEDs.
-        // Output red for a 1, green for a 0.
-        // from msb to lsb
-        // Hang.
-BINBLINK:
-        li      x3,IOregion
-        //li      x5,32
-        li      x5,16           // Output a 16-bit value by LEDs.
-        slli    x10,x10,16      // 16 lsbs to be shown
-
-2:      sw      x0,LEDOFS(x3)
-        jal     x1,DLY
-
-//        slt     x6,x0,x10
-//        addi    x6,x6,1
-        li      x6,0x80000000
-        and     x6,x6,x10
-        beq     x6,x0,isZero
-        li      x6,1            // Red
-        j       1f
-isZero: li      x6,2            // Green
-1:      
-        
-        sw      x6,LEDOFS(x3)
-        jal     x1,DLY
-        slli    x10,x10,1
-        addi    x5,x5,-1
-        bne     x5,x0,2b
-1:      sw      x0,LEDOFS(x3)
-        j       1b
-        
-
-DLY:    li      x6,0x80000
-1:      addi    x6,x6,-1
-        bne     x6,x0,1b
-        jalr    x0,0(x1)
-
-DBGCNTLEDS:    
-        li      x3,IOregion
-        sw      x5,LEDOFS(x3)
-        addi    x5,x5,1
-        jal     x1,DLY
-        j       DBGCNTLEDS
-        
-#endif
