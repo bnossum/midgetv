@@ -11,10 +11,17 @@
         // 0x000000a7 - 0x000000a4      __mtvec
         // (top adr)  - 0x000000cc      Most part of memory.
         //
-        // Note - conventionally dynamic loading of midgetv happens from address 0x1000
+        // Note - by convention dynamic loading of midgetv happens from address 0x100.
         //
+        // The program is 27 instructions, 10 registers are used. The strategy to let
+        // the loader live in memory usually reserved for registers is inspired by the
+        // fact that riscv does not specify any startup value for registers, so all
+        // programs must assume the registers are unknown. An equally good strategy
+        // would be to let the loader program live in program space later used for the
+        // stack.
         // =============================================================================
         
+#define IOREGION 0x60000000
 #define LEDOFS  4
 #define UARTOFS 8
 
@@ -26,7 +33,7 @@
 #define regB      x6
 #define regW      x7
 #define rBitrate  x8 // Note. crt0 can copy out this to continue communication.
-#define rBytelim  x9 // Note. crt0 can copy out this to continue communication.
+#define rBytelim  x9 
 #define regIO     x10
         .globl _start
         .org 0  //                         
@@ -41,7 +48,7 @@ Registers:      //                         adr   reg Name/Usage_________________
         .word	0x80000001		// 0x01c  x7 regW        Working register            >= rBytelim
         .word	16 + 32*-4		// 0x020  x8 rBitrate    Found by autobaud at start  Nr cycles in an UARTBIT
         .word	0			// 0x024  x9 rBytelim    Found by autobaud at start  Nr cycles in 8 UARTBITs
-        .word	0x60000000		// 0x028 x10 regIO       Constant                    0x60000000
+        .word	IOREGION		// 0x028 x10 regIO       Constant                    0x60000000
 getchar:lw      regB,UARTOFS(regIO)     // 0x02c x11
         beq     regB,x0,getchar         // 0x030 x12 Wait for framebit when low bitrates 
 1:      lw      regB,UARTOFS(regIO)     // 0x034 x13
@@ -91,7 +98,7 @@ DataL:
         .org    0xcc                    //           This code can be overwritten
 _start:                                 //           by the loading process.
         sw      regW,UARTOFS(regIO)     // 0x0cc     UART-D = 1, source for blue led is uartrx.
-        sw      regW,LEDOFS(regIO)      // 0x0d0     Alive
+        sw      regW,LEDOFS(regIO)      // 0x0d0     Autobaud-loop next:
 ABL:    lw      regP,UARTOFS(regIO)     // 0x0d4     while ( UART->D )
         bne     regP,x0,ABL             // 0x0d8          ;
 1:      lw      regP,UARTOFS(regIO)     // 0x0dc     while ( UART->D == 0)

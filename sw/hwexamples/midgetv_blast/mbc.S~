@@ -1,0 +1,33 @@
+#define retreg  x1
+        
+getchar:
+        c.lw    regB,UARTOFS(regIO)
+        c.beqz  regB,getchar
+1:      c.lw    regB,UARTOFS(regIO)
+        c.bnez  regB,1b
+        c.sw    regB,%lo(__mcycle)(regB)
+        c.srli  regW,rBitrate,1
+2:      c.add   regW,rBitrate
+1:      c.lw    regB.%lo(__mcycle)(regZ)
+        bltu    regB,regW,1b
+        c.lw    regB,UARTOFS(regIO)
+        c.srli  regP,regP,1
+        c.or    regP,regB
+        bltu    regW,rBytelim,2b
+        c.jr    retreg
+
+LBHead: c.li    regC,-8
+1:      c.jal   getchar
+        sb      regP,20(regC)
+        c.addi  regC,1
+        c.bnez  regC,1b
+        c.bnez  regL,DataL
+        c.jr    regY
+DataL:
+        c.jal   getchar
+        sb      regP,0(regL)
+        c.addi  regL,1
+        sb      regP,LEDOFS(regIO)
+        bltu    regL,regY,DataL
+        c.j     LBHead
+        

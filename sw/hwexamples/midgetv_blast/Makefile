@@ -13,7 +13,10 @@ CFLAGS = -mabi=ilp32 -march=rv32i -nodefaultlibs -nostartfiles -Os -Wall -Wextra
 all:	$(OBJ)/mb.lst \
 	$(OBJ)/mb2.lst \
 	../../../hwtst/upduino2/ice40loaderprog.hv \
-	../../../hwtst/max_iceblink40-hx1k/ice40loaderprog.hv
+	../../../hwtst/max_iceblink40-hx1k/ice40loaderprog.hv \
+	$(OBJ)/inspiration_midgetv_blast.lst \
+	$(OBJ)/dummy.o \
+	$(OBJ)/mbc.lst
 
 ../../../hwtst/upduino2/ice40loaderprog.hv: $(OBJ)/mb.bin 
 	../../../bin/midgetv_bin2ebr < $< > $@
@@ -35,12 +38,15 @@ $(OBJ)/%.o:%.S
 %mb.out:%mb.o
 	riscv32-unknown-elf-ld -TEBRlink.ld -nodefaultlibs -nostartfiles -o $@ $< -M > $(OBJ)/$(@F).map
 
+%mbc.out:%mbc.o
+	riscv32-unknown-elf-ld -TEBRlink.ld -nodefaultlibs -nostartfiles -o $@ $< -M > $(OBJ)/$(@F).map
+
 %mb2.out:%mb2.o
 	riscv32-unknown-elf-ld -TEBRlink.ld -nodefaultlibs -nostartfiles -o $@ $< -M > $(OBJ)/$(*F).map
 
 
 %.out:%.o
-	riscv32-unknown-elf-ld -TEBRlink.ld -nodefaultlibs -nostartfiles -o $@ $(OBJ)/crt0.o $< -M > $(OBJ)/$((*F).map
+	riscv32-unknown-elf-ld -TEBRlink.ld -nodefaultlibs -nostartfiles -o $@ $(OBJ)/crt0.o $(OBJ)/dummy.o $< -M > $(OBJ)/$((*F).map
 
 # Suitable for midgetv_blast. riscv32-unknown-elf-ld -TEBRlink.ld -nodefaultlibs -nostartfiles -o $@ $(OBJ)/crt0.o $(OBJ)/ab.o $< -M > $(OBJ)/$(*F).map
 
