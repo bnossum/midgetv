@@ -54,17 +54,18 @@
  * --------------------------------
  *
  * Tested
- * |  SRAMADRWIDTH
- * x   0    0   KiB SRAM No SRAM implemented
- *     9    0.5 KiB SRAM (1 EBR and logic masquarading as SRAM)
- *    10    1   KiB SRAM (2 EBRs masquerading as SRAM)
- *    11    2   KiB SRAM (4 EBRs masquerading as SRAM)
- *    12    4   KiB SRAM (8 EBRs masquerading as SRAM)                     [11:2]
- *    13    8   KiB SRAM (16 EBRs masquerading as SRAM)                    [12:2]
- *    14   16   KiB SRAM (32 EBRs and logic masquerading as SRAM)          [13:2]
- *    15   32   KiB SRAM (1 SB_SPRAM256KA, and logic)                      [14:2]
- *    16   64   KiB SRAM (2 SB_SPRAM256KA)   64 KiB organized as 32 * 14,  [15:2]
- *    17  128   KiB SRAM (4 SB_SPRAM256KA)  128 KiB organized as 32 * 15.  [16:2]
+ * | Implemented 
+ * | | SRAMADRWIDTH
+ * x    0    0   KiB SRAM No SRAM implemented
+ *      9    0.5 KiB SRAM (1 EBR and logic masquarading as SRAM)
+ *   x 10    1   KiB SRAM (2 EBRs masquerading as SRAM)
+ *   x 11    2   KiB SRAM (4 EBRs masquerading as SRAM)
+ * x x 12    4   KiB SRAM (8 EBRs masquerading as SRAM)                     [11:2]
+ *   x 13    8   KiB SRAM (16 EBRs masquerading as SRAM)                    [12:2]
+ *     14   16   KiB SRAM (32 EBRs and logic masquerading as SRAM)          [13:2]
+ *     15   32   KiB SRAM (1 SB_SPRAM256KA, and logic)                      [14:2]
+ * x x 16   64   KiB SRAM (2 SB_SPRAM256KA)   64 KiB organized as 32 * 14,  [15:2]
+ * x x 17  128   KiB SRAM (4 SB_SPRAM256KA)  128 KiB organized as 32 * 15.  [16:2]
  */
 module m_ram
   # ( parameter HIGHLEVEL = 0,

@@ -416,7 +416,7 @@ module m_midgetv_core
    /*
     * SB_RAM40_4K will return rubbish when the read address equals the write address,
     * and a write is performed. I treat this as an error. But if the data
-    * is not to be used, we have no problem. There is at least one frequent occation
+    * is not to be used, we have no problem. There is at least one frequent occasion
     * that must be weeded out: 
     * During opcode read from SRAM we do:
     * StdIncPC:  writePC readALU
@@ -526,11 +526,11 @@ module m_midgetv_core
     */
    localparam xHIGHLEVEL = 1'b1;
    localparam xSRAMADRWIDTH = 10;
-   m_inputmux #(.HIGHLEVEL(HIGHLEVEL), 
-                .IWIDTH(IWIDTH), 
-                .SRAMADRWIDTH(SRAMADRWIDTH), 
-                .MTIMETAP(MTIMETAP),
-                .MTIMETAP_LOWLIM(MTIMETAP_LOWLIM)) 
+   m_inputmux #(.HIGHLEVEL(       HIGHLEVEL       ), 
+                .IWIDTH(          IWIDTH          ), 
+                .SRAMADRWIDTH(    SRAMADRWIDTH    ), 
+                .MTIMETAP(        MTIMETAP        ),
+                .MTIMETAP_LOWLIM( MTIMETAP_LOWLIM )) 
    inst_inputmux
      (/*AUTOINST*/
       // Outputs
@@ -563,8 +563,8 @@ module m_midgetv_core
       .meip                             (meip),
       .qACK                             (qACK));
 
-   m_cyclecnt #(.HIGHLEVEL(HIGHLEVEL), 
-                .NO_CYCLECNT(NO_CYCLECNT))
+   m_cyclecnt #(.HIGHLEVEL(   HIGHLEVEL   ), 
+                .NO_CYCLECNT( NO_CYCLECNT ))
    inst_cyclecnt
      (/*AUTOINST*/
       // Outputs
@@ -598,10 +598,10 @@ module m_midgetv_core
       .preprealucyin                    (preprealucyin),
       .ADR_O                            (ADR_O[31:0]));
 
-   m_alu #(.HIGHLEVEL(HIGHLEVEL), 
-           .ALUWIDTH(ALUWIDTH),
-           .MTIMETAP(MTIMETAP),
-           .MTIMETAP_LOWLIM(MTIMETAP_LOWLIM)
+   m_alu #(.HIGHLEVEL(       HIGHLEVEL       ), 
+           .ALUWIDTH(        ALUWIDTH        ),
+           .MTIMETAP(        MTIMETAP        ),
+           .MTIMETAP_LOWLIM( MTIMETAP_LOWLIM )
            )
    inst_alu
      (/*AUTOINST*/
@@ -708,8 +708,7 @@ module m_midgetv_core
     */
    
    // Internal read and write addresses
-   m_rai #(.HIGHLEVEL(HIGHLEVEL), 
-           .EBRADRWIDTH(EBRADRWIDTH))
+   m_rai #(.HIGHLEVEL(HIGHLEVEL), .EBRADRWIDTH(EBRADRWIDTH))
    inst_rai
      (/*AUTOINST*/
       // Outputs
@@ -730,8 +729,7 @@ module m_midgetv_core
       .STB_O                            (STB_O),
       .sram_stb                         (sram_stb));
 
-   m_wai #(.HIGHLEVEL(HIGHLEVEL), 
-           .EBRADRWIDTH(EBRADRWIDTH))
+   m_wai #(.HIGHLEVEL(HIGHLEVEL), .EBRADRWIDTH(EBRADRWIDTH))
    inst_wai
      (/*AUTOINST*/
       // Outputs
@@ -793,12 +791,12 @@ module m_midgetv_core
     * Control path
     */
    
-   m_progressctrl #(.HIGHLEVEL(HIGHLEVEL),
-                    .DISREGARD_WB4_3_55(DISREGARD_WB4_3_55),
-                    .NO_CYCLECNT(NO_CYCLECNT),
-                    .MTIMETAP(MTIMETAP),
-                    .SRAMADRWIDTH(SRAMADRWIDTH),
-                    .MTIMETAP_LOWLIM(MTIMETAP_LOWLIM)) 
+   m_progressctrl #(.HIGHLEVEL(          HIGHLEVEL          ),
+                    .DISREGARD_WB4_3_55( DISREGARD_WB4_3_55 ),
+                    .NO_CYCLECNT(        NO_CYCLECNT        ),
+                    .MTIMETAP(           MTIMETAP           ),
+                    .SRAMADRWIDTH(       SRAMADRWIDTH       ),
+                    .MTIMETAP_LOWLIM(    MTIMETAP_LOWLIM    )) 
    inst_progressctrl
      (/*AUTOINST*/
       // Outputs

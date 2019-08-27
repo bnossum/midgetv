@@ -18,6 +18,10 @@
  * 10                                                 w&m3  w&m3  w&m2  w&m2  w&m1  w&m1  w&m0  w&m0
  * 11 w&m3  w&m3  w&m3  w&m3  ie&m2 ie&m2 ie&m2 ie&m2 w&m1  w&m1  w&m1  w&m1  w&m0  w&m0  w&m0  w&m0
  * 
+ * Rather belatedly I saw a reference to a a silicon bug, https://github.com/YosysHQ/yosys/issues/101.
+ * It seems that one should use RCLKE/WCLKE instead of RE/WE. As luck will have it, the bug is that
+ * mem[0] is spuriously written by 0 between configuration and before the core is released. As luck 
+ * will have it, mem[0] should **always** be 0 in midgetv, so I do not change anything now.
  */
 module m_ebr
   # ( parameter EBRADRWIDTH = 8,
