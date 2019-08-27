@@ -1,0 +1,2 @@
+
+hexdump -ve '"%4.4_ax  " 4/4 "%8.8x " 1/0 "\n"'  file    // Usefull command
