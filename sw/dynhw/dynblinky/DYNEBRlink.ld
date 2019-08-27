@@ -1,12 +1,13 @@
-/* Documentme
+/* I can't really pretend to understand link scrips even though I 
+ * have used them for years.
  */
 OUTPUT_ARCH( "riscv" )
 ENTRY( _start )
 
 MEMORY 
 {
-  hdr (rwx) : ORIGIN = 0x000000f4, LENGTH = 12
-  ebr (rwx) : ORIGIN = 0x00000100, LENGTH = 8K
+  hdr (RWX) : ORIGIN = 0x000000f4, LENGTH = 12
+  ebr (RWX) : ORIGIN = 0x00000100, LENGTH = 8K - 0x100
 }
 
 SECTIONS
@@ -16,11 +17,12 @@ SECTIONS
     LONG(0x00000100)
     LONG(_payloadend)
   } 
-  . = 0x100;
   .theEBRram : {
-    *(.EBRram*)
+    *(.DYNEBRram*) 
     *(.srodata*)
     *(.rodata*)   
+    *(.text.startup)
+    *(.text)
     *(.text*)
     *(.data*)
     *(.bss*)
@@ -28,6 +30,6 @@ SECTIONS
     _payloadend = . ;
     LONG(0x00000000)
     LONG(_start)
-  } >ebr
+  } > ebr
 }
 

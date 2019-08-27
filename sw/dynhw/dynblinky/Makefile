@@ -15,12 +15,19 @@ all: $(OBJ)/dynblinky.bin $(OBJ)/dynblinky.lst
 
 $(OBJ)/dynblinky.o: | $(OBJ)/dynblinky_crt0.o 
 
-$(OBJ)/%.o:%.c 
-	riscv32-unknown-elf-gcc -c $(CFLAGS) -I ./ -o $@ $<
+#$(OBJ)/%.o:%.c 
+#	riscv32-unknown-elf-gcc -c $(CFLAGS) -I ./ -o $@ $<
+
+.SECONDARY:
+
+$(OBJ)/%.S:%.c 
+	riscv32-unknown-elf-gcc -S $(CFLAGS) -I ./ -o $@ $<
 
 $(OBJ)/%.o:%.S
-	riscv32-unknown-elf-gcc -c $(CFLAGS) -TDYNEBRlink.ld  -Wa,-a=$(OBJ)/$*.slst -o $@ $<
+	riscv32-unknown-elf-gcc -c $(CFLAGS) -o $@ $<
 
+%.o:%.S
+	riscv32-unknown-elf-gcc -c $(CFLAGS) -o $@ $<
 
 %.out:%.o
 	riscv32-unknown-elf-ld -TDYNEBRlink.ld -nodefaultlibs -nostartfiles -o $@ $(OBJ)/dynblinky_crt0.o $< -M > $(OBJ)/$(*F).map
@@ -32,4 +39,5 @@ $(OBJ)/%.o:%.S
 	riscv32-unknown-elf-objdump -M numeric,no-aliases -D $< > $@
 
 clean:
-	rm -f $(OBJ)/dynblinky.bin $(OBJ)/dynblinky.lst $(OBJ)/dynblinky_crt0.o 
+	rm -f $(OBJ)/dynblinky.bin $(OBJ)/dynblinky.lst $(OBJ)/dynblinky.o $(OBJ)/dynblinky_crt0.o \
+	$(OBJ)/dynblinky.s $(OBJ)/dynblinky.S $(OBJ)/dynblinky_crt0.slst $(OBJ)/dynblinky.map $(OBJ)/dynblinky.out
