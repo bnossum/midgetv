@@ -42,7 +42,7 @@
  * 111   BGEU          ~alu_carryout                                     ~raluF
  * 
  * For most comparisons the msb of Di[31:0] is used. But for all of these cases
- * we have A[31] == Di[31:0] (the ALU perform operation ADD for all these cases). 
+ * we have A[31:0] == Di[31:0] (the ALU perform operation ADD for all these cases). 
  * A[31] is located in the middle of the ALU. We use A[31] instead of Di[31] 
  * because Di[31] is used chained, and it would cost a REP LUT to actually use 
  * Di[31]. 
