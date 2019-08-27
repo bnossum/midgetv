@@ -20,7 +20,7 @@
         .word (((\ofs) & 0xfff)<<20) + (((\rs1nr) & 31)<<15) + (((\rdnr) & 31)<<7) + 0b0001011
         .endm
         
-STARTOFEBR: //          address   Wai                                                                           these   // Worda
+//STARTOFEBR: //         address   Wai                                                                           these   // Worda
 #define __jj             0x80 //  10000000  0x20 ucode register                                           .word 0  //             
 #define __rinst          0x84 //  10000100  0x21 32-lsb of instret counter                                .word 0  //             
 #define __pc             0x88 //  10001000  0x22 Program counter                                          .word _start-4   // x   
@@ -62,10 +62,6 @@ STARTOFEBR: //          address   Wai                                           
 #define changeme_mtimeh 0xe4        
 
 
-        .section .EBRram, "a"
-        .option norelax
-        .org 0x0
-        
         // =============================================================================
         // Midgetv can be used without any SRAM.
         // For these very constrained implementations it should be considered to

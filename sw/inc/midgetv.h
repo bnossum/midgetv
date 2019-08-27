@@ -72,7 +72,7 @@ typedef struct {
 
 /* The bitbang UART is generally to be made available for boards where FDTI
  * is the interface to PC. iceblink40-hx1k uses AT90USB216, with a propriatary
- * program (Digilent JTAG), and here I have acked a sort-of EPP interface.
+ * program (Digilent JTAG), and here I have hacked a sort-of EPP interface.
  * This interface is only used when there is no bitbang UART, and hence I
  * reuse the IO address.
  */
@@ -94,8 +94,6 @@ typedef struct {
 #define UART_BASE (IOBASE +0x00000008u) 
 #define EPP_BASE  (IOBASE +0x00000008u) 
 
-/* Attempts to aliase SYSEBR_TypeDef to address 0 lead to disasters,
-   mixup with NULL in GCC suspected. */
 #define SYSEBR ((SYSEBR_TypeDef *) SYS_BASE   )
 #define UART   ((UART_TypeDef *)   UART_BASE  )
 #define EPP    ((EPP_TypeDef *)    EPP_BASE   )
