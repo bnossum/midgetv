@@ -39,8 +39,8 @@
         .org 0  //                      // reg  Name            When go()
         .word 0         		//  x0  x0              0
         .word 4*2 			//  x1  regT     	8                                    
-        .word 0xdeadbabe		//  x2  regL     	0 at GO                              
-        .word 0         		//  x3  regY     	ep=Entrypint at GO                   
+        .word 0xdeadbabe		//  x2  regL     	0 
+        .word 0         		//  x3  regY     	ep=Entrypoint
         .word 4*4 			//  x4  regE     	16                                   
         .word 0x60000000		//  x5  regIO    	0x60000000                           
         .word 0 			//  x6  regP     	(uint8_t) ep | 0x100                 
@@ -89,6 +89,10 @@ __yy:           .word 0                 // 0x0b0     ucode register.
         //
         .org    0xb4
 
+        //
+        // First calculate bitrate with autobaud,
+        // then branch to loader routine in getblk
+        //
 _start:                                 
         sw      regW,UARTOFS(regIO)     // 0x0b4     UART->D = 1
         sw      regW,LEDOFS(regIO)      // 0x0b8     Light green and red led, source for blue led is ~uartrx.
@@ -106,8 +110,8 @@ ABL:    lw      regP,UARTOFS(regIO)     // 0x0bc     while ( UART->D )
         add     rBitrate,rBitrate,r9bit // 0x0e8     ab = ab + (atend - atstart)
         addi    regB,regB,-1            // 0x0ec     4 times
         bne     regB,x0,ABL             // 0x0f0         
-        srli    rBitrate,rBitrate,5     // 0x0f4     rBitrate = (4*autobaud+16)/32 - 4
-        addi    rBitrate,rBitrate,-4    // 0x0f8
+        srli    rBitrate,rBitrate,5     // 0x0f4     rBitrate = (4*autobaud+16)/32 - 4  [b]
+        addi    rBitrate,rBitrate,-5    // 0x0f8
         srli    regB,rBitrate,1         // 0x0fc
         addi    regB,regB,-14           // 0x100     
         sw      regB,%lo(__rNMI_IIV)(x0)// 0x104     g_bitrate/2 - 14
@@ -116,6 +120,21 @@ ABL:    lw      regP,UARTOFS(regIO)     // 0x0bc     while ( UART->D )
         sb      x0,LEDOFS(regIO)        // 0x114     Turn of green and red led. Source for blue led is still ~uartrx
         j       getblk                  // 0x118
 
-        /* At 115200 the routine is marginal.
-         * The fudgefactors are really needed - I don't know why
+        /* At 12 MHz, bitrate 115200, this routine is marginal.
+         * The fudgefactor at [b] is really needed - I don't know why
+         *
+         * Short investigation:
+         * FUDGE
+         *     0  Failed 3/3
+         *    -2  Failed 3/3
+         *    -3  Works 3/3
+         *    -4  Works. Tested many > 50 times
+         *    -6  Works 3/3
+         *    -8  Works 3/3
+         *    -9  Failed 3/6
+         *   -10  Failed 3/3
+         *   -12  Failed 3/3
+         *   -16  Failed 3/3
+         *
+         * Hence I select the fudge factor -5.
          */
