@@ -4,7 +4,7 @@
 // For licence, see LICENCE
 // =============================================================================
 // Verify SRAM read/write. This should really be regression code, I found
-// an error in ACK_O of 17-bit wide SRAM
+// an error in ACK_O of 17-bit wide SRAM, but it has magically disappeared...
 
 #include <stdio.h>
 #include "midgetv.h"

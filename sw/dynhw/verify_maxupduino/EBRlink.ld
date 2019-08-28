@@ -1,0 +1,27 @@
+/* Linker script only to be used in low-level testing of midget.
+ * This script are for files where everything is located in EBR.
+ * I Needed this for simulation before the simulator can handle files that are dynamically loaded.
+ */
+OUTPUT_ARCH( "riscv" )
+ENTRY( _start )
+
+MEMORY 
+{
+  ebr (rwx) : ORIGIN = 0x00000000, LENGTH = 8K
+}
+
+SECTIONS
+{
+  . = 0;
+  .theEBRram : {
+    *(.magicconstants)
+    *(.EBRram*)
+    *(.srodata*)
+    *(.rodata*)   
+    *(.text*)
+    *(.data*)
+    *(.bss*)
+    *(COMMON)
+  } >ebr
+}
+

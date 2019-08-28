@@ -33,6 +33,7 @@ $(OBJ)/%.o:%.S
 %.out:%.o
 	riscv32-unknown-elf-ld -TDYNEBRlink.ld -nodefaultlibs -nostartfiles -o $@ $(OBJ)/verify_maxupduino_crt0.o $< -M > $(OBJ)/$(*F).map
 
+# Needed this for simulation before the simulator can handle files that are dynamically loaded.
 # %.out:%.o
 #	riscv32-unknown-elf-ld -TEBRlink.ld -nodefaultlibs -nostartfiles -o $@ $(OBJ)/verify_maxupduino_crt0.o $< -M > $(OBJ)/$(*F).map
 
