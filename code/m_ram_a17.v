@@ -32,8 +32,8 @@ module m_ram_a17
    generate
       genvar      j,k;
       
-      for ( j = 0; j < 2; j = j + 1 ) begin : blk0
-         for ( k = 0; k < 2; k = k + 1 ) begin : blk1
+      for ( j = 0; j < 2; j = j + 1 ) begin : blk0 //    j is Parallell based on ADR_I[16]
+         for ( k = 0; k < 2; k = k + 1 ) begin : blk1 // k is low/high of a word
             SB_SPRAM256KA sram
                    (
                     .DATAIN     ( DAT_I[k*16+15 : k*16]       ),
@@ -55,30 +55,32 @@ module m_ram_a17
    endgenerate
    
    
-   //`ifdef verilator
-//         wire [(SRAMADRWIDTH-15)*32-1:0] zo;
-//`endif
-//         wire [SRAMADRWIDTH-16:0]        we;
-//         wire [7:0]                      srammask;
-//         wire                            readack;
    wire [31:0] preDAT_O;
    wire        readack;
-//         genvar                          j,k;
-//         
-//    
+   
    generate
       if ( HIGHLEVEL != 0 ) begin
          // -----------------------------------------------------------------------------
          // HIGHLEVEL
+         // Note to self - at some stage I had a problem with this ram. Erostathenes
+         // passed ok, but verify_maxupduino failed.
+         // This either had to do with 
+         //   o  how the writestrobe was deasserted
+         //   o  pipelining of A[16]
+         //   o  how readack was declared.
+         // But when I now try to pin it down, everything works. Leave this messy
+         // code until such time that I can find out what happens.
          // -----------------------------------------------------------------------------
+//bn         wire hello_readack;
          wire writestrobe;
          wire writeack;
          wire readstrobe;
          
-         assign writestrobe = STB_I & WE_I;
+         assign writestrobe = STB_I &  WE_I;
+         assign readstrobe  = STB_I & ~WE_I;
+
          assign writeack = writestrobe;
          
-         assign readstrobe = STB_I & ~WE_I;
          /* verilator lint_off UNUSED */
          reg [1:0] readackdly;
          /* verilator lint_on UNUSED */
@@ -88,15 +90,25 @@ module m_ram_a17
             else
               readackdly[1:0] <= {1'b0,readackdly[1:1]};
          end
-         assign readack = readackdly[1];
+//bn         assign hello_readack = readackdly[1];
+//bn         assign ACK_O = hello_readack | writeack;
 
+         assign readack = readackdly[1];
          assign ACK_O = readack | writeack;
+
+
+//         wire writestrobe = STB_I &  WE_I;
+//         reg hello_readack;
+//         wire cmb_readack = ~hello_readack & STB_I & ~WE_I;
+//         always @(posedge CLK_I)
+//           hello_readack <= cmb_readack;
+//         assign ACK_O = hello_readack | writestrobe;
          
          assign we[0] = writestrobe & ~ADR_I[16];
          assign we[1] = writestrobe &  ADR_I[16];
          // ADR_I[] stable until ACK_O, so need not pipeline ADR_I[16]
          assign preDAT_O = ADR_I[16] ? o[63:32] : o[31:0];
-         
+
 `ifdef verilator
          assign DAT_O = ACK_O ? preDAT_O : 32'habbababa;
 `else
@@ -108,6 +120,7 @@ module m_ram_a17
          // -----------------------------------------------------------------------------
          // LOWLEVEL
          // -----------------------------------------------------------------------------
+//bn         wire        readack;
          
          SB_LUT4 #(.LUT_INIT(16'h0808)) we0_l(.O(we[0]), .I3(1'b0), .I2(ADR_I[16]), .I1(STB_I), .I0(WE_I)); // assign we[0] = writeack & ~ADR_I[16];
          SB_LUT4 #(.LUT_INIT(16'h8080)) we1_l(.O(we[1]), .I3(1'b0), .I2(ADR_I[16]), .I1(STB_I), .I0(WE_I)); // assign we[1] = writeack &  ADR_I[16];

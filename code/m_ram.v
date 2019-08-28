@@ -78,7 +78,9 @@ module m_ram
     input         STB_I, // Ram is accessed
     input         WE_I, //  Write cycle
     input [3:0]   SEL_I, // Byte select signals
+    /* verilator lint_off UNUSED */
     input [3:0]   bmask, // Inverse of above
+    /* verilator lint_on UNUSED */
     output [31:0] DAT_O, // Data out
     output        ACK_O, // Acknowledge after operation
     output        m_ram_killwarnings
@@ -110,8 +112,10 @@ module m_ram
             .WE_I                       (WE_I),
             .SEL_I                      (SEL_I[3:0]));
 
-         assign m_ram_killwarnings = CLK_I & STB_I & WE_I & &ADR_I & &DAT_I & &SEL_I | m_ram_a17_killwarnings;
+         assign m_ram_killwarnings = &bmask & CLK_I & STB_I & WE_I & &ADR_I & &DAT_I & &SEL_I | m_ram_a17_killwarnings;
+
       end else if ( SRAMADRWIDTH == 16 ) begin
+
          wire            m_ram_a16_killwarnings;
          m_ram_a16 #(.HIGHLEVEL(HIGHLEVEL)) // 15:2 used as address
          m_ram_inst
@@ -127,7 +131,7 @@ module m_ram
             .STB_I                      (STB_I),
             .WE_I                       (WE_I),
             .SEL_I                      (SEL_I[3:0]));
-         assign m_ram_killwarnings = CLK_I & STB_I & WE_I & &ADR_I & &DAT_I & &SEL_I | m_ram_a16_killwarnings;
+         assign m_ram_killwarnings = &bmask & CLK_I & STB_I & WE_I & &ADR_I & &DAT_I & &SEL_I | m_ram_a16_killwarnings;
          
       end else if ( SRAMADRWIDTH >= 10 && SRAMADRWIDTH <= 13 ) begin
 
@@ -166,9 +170,12 @@ module m_ram
 
          assign m_ram_killwarnings = &ADR_I | next_readvalue_unknown;
          
-      end else begin
+      end
+`ifndef verilator
+      else begin
          unsupported_sramwidth inst_can_not_have_this();
       end
+`endif
    endgenerate
 endmodule
 
