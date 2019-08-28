@@ -66,8 +66,14 @@ typedef struct {
    main:
            j main
  */
-typedef struct {
+typedef union {
         volatile uint32_t D;
+        struct {
+                uint8_t D;
+                uint8_t b1;
+                uint8_t b2;
+                uint8_t CTRL;
+        } s;
 } LED_TypeDef;
 
 /* The bitbang UART is generally to be made available for boards where FDTI
@@ -84,19 +90,20 @@ typedef struct {
         volatile uint32_t D; // Data
         volatile uint32_t S; // Status
 } EPP_TypeDef;
-        
-#define EBRBASE  0x00000000
-#define IOBASE   0x60000000
-#define SRAMBASE 0x80000000
 
-#define SYS_BASE  (EBRBASE+0x00000080u)
-#define LED_BASE  (IOBASE +0x00000004u)
-#define UART_BASE (IOBASE +0x00000008u) 
-#define EPP_BASE  (IOBASE +0x00000008u) 
+//                                 Coarse regions                         ADR_O[31:27]
+#define EBRBASE      0x00000000 // 0x3fffffff-0x00000000 EBR              00xxx
+#define RESERVEDBASE 0xxxxxxxxx // 0x5fffffff-0x40000000 reserved         010xx
+#define IOBASE       0x60000000 // 0x67ffffff-0x60000000 IO               01100
+#define SYSREGBASE   0x68000000 // 0x7fffffff-0x68000000 System registers 011yy with yy != 2'b00
+#define SRAMBASE     0x80000000 // 0xffffffff-0x80000000 SRAM             1xxxx
 
-#define SYSEBR ((SYSEBR_TypeDef *) SYS_BASE   )
-#define UART   ((UART_TypeDef *)   UART_BASE  )
-#define EPP    ((EPP_TypeDef *)    EPP_BASE   )
-#define LED    ((LED_TypeDef *)    LED_BASE   )
+#define VITALSYS_BASE  (EBRBASE+0x00000080u)
+#define LED_BASE       (IOBASE +0x00000004u)
+#define UART_BASE      (IOBASE +0x00000008u) 
+#define EPP_BASE       (IOBASE +0x00000008u) 
 
-
+#define SYSEBR ((SYSEBR_TypeDef *) VITALSYS_BASE   )
+#define UART   ((UART_TypeDef *)   UART_BASE       )
+#define EPP    ((EPP_TypeDef *)    EPP_BASE        )
+#define LED    ((LED_TypeDef *)    LED_BASE        )

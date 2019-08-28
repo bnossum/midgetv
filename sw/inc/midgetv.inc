@@ -143,18 +143,8 @@ EntryCSR:                               //0x108 Microcode branches to here when 
         // interrupt routine. Preliminary testing indicate the real program will
         // start at around 0x300. And this leads to the obvious choice to let two
         // EBR rams hold system code (csr emulation, mret emulation, and internal
-        // interrupt), and leave the SRAM for user code.
-        // 
-        // The following sizes of RAM exists for midgetv in ice40. Tested versions
-        // are those with 8k and 65k RAM.
-        // 
-        //     \   No     64k    128k   
-        //      \  Sram   SRAM   SRAM   
-        // NrEBR +-------------------- 
-        // 2     | 1k     65k    129k
-        // 4     | 2k     66k    130k
-        // 8     | 4k     68k    132k
-        // 16    | 8k     72k    136k
+        // interrupt), and leave the SRAM for user code. But other configurations
+        // exists.
         // 
         // 
         // A few utility macros used during simulation:
