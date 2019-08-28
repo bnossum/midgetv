@@ -157,12 +157,13 @@ module top
      if ( STB_O & WE_O & ADR_O[2] ) begin
         redled   <= DAT_O[0];
         greenled <= DAT_O[1];
-        bluesource_is_uart  <= DAT_O[31];
+        if ( SEL_O[3] ) 
+          bluesource_is_uart  <= DAT_O[31];
      end
    
    always @(posedge CLK_I)
      if ( bluesource_is_uart )
-       blueled <= usartRX;
+       blueled <= meta_usartRX;
      else if ( STB_O & WE_O & ADR_O[2] ) 
        blueled <= DAT_O[2];
    
@@ -208,7 +209,7 @@ module top
       .RST_I                            (1'b0),
       .meip                             (1'b0),
       .start                            (1'b1),
-      .DAT_I                            ({24'h0,meta_usartRX,7'h0}),
+      .DAT_I                            ({23'h0,meta_usartRX,8'h0}),
       /*AUTOINST*/
       // Outputs
       .CYC_O                            (CYC_O),

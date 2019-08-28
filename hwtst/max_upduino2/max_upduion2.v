@@ -165,23 +165,38 @@ module mytop
     * inputs.
     *
     */
+
+   /* Primary debug output is 3 LEDs. It should come as no
+    * surprise that it is contention on their use!
+    * 
+    */
+   reg bluesource_is_uart;
    always @(posedge CLK_I) 
      if ( STB_O & WE_O & ADR_O[2] ) begin
         redled   <= DAT_O[0];
         greenled <= DAT_O[1];
-        blueled  <= DAT_O[2];
+        if ( SEL_O[3] ) 
+          bluesource_is_uart  <= DAT_O[31];
      end
+   
+   always @(posedge CLK_I)
+     if ( bluesource_is_uart )
+       blueled <= ~meta_usartRX;
+     else if ( STB_O & WE_O & ADR_O[2] ) 
+       blueled <= DAT_O[2];
    
    always @(posedge CLK_I) 
      if ( STB_O & WE_O & ADR_O[3] ) begin
         usartTX  <= DAT_O[0];
      end
+
    
    reg rACK_I;
    always @(posedge CLK_I) begin
       rACK_I <= STB_O;
    end
    assign ACK_I = rACK_I;
+
 
 
    /* The program to include will usually be specified in a Makefile. 
@@ -210,7 +225,7 @@ module mytop
      (// Inputs
       .RST_I                            (1'b0),
       .meip                             (1'b0),
-      .DAT_I                            ({24'h0,meta_usartRX,7'h0}),
+      .DAT_I                            ({23'h0,meta_usartRX,8'h0}),
       /*AUTOINST*/
       // Outputs
       .CYC_O                            (CYC_O),
