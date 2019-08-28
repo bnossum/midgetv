@@ -60,7 +60,7 @@ cteffffff7f:    .word 0xffffff7f // x   // 0x94 10010100  0x25 For sign extensio
 cte000000ff:    .word 0x000000ff // x   // 0x98 10011000  0x26 Mask in "lb", "lbu", also for entrypoint CSR
 cte0000ffff:    .word 0x0000ffff // x   // 0x9c 10011100  0x27 Mask in "lh" and "lhu"
 cteffff7fff:    .word 0xffff7fff // x   // 0xa0 10100000  0x28 For sign extension in "lh"
-__mtvec:        .word _start     //     // 0xa4 10100100  0x29 Should point to excption handler.
+__mtvec:        .word _start     //     // 0xa4 10100100  0x29 Should point to exception handler.
 cte00000000:    .word 0x00000000 // x   // 0xa8 10101000  0x2a ucode constant. 
 cteffffffff:    .word 0xffffffff // x   // 0xac 10101100  0x2b ucode constant.
 __yy:           .word 0                 // 0xb0 10110000  0x2c ucode register.
