@@ -9,13 +9,13 @@
         // -----------------
         // 0x00000093 - 0x00000090      __rNMI_IIV
         // 0x000000a7 - 0x000000a4      __mtvec
-        // (top adr)  - 0x000000b4      Most part of memory.
+        // (top adr)  - 0x000000b4      Most parts of memory.
         //
         // The strategy to let the loader live in memory usually reserved for registers 
         // is inspired by the fact that riscv does not specify any startup value for 
         // registers, so all programs should (must!) assume registers are unknown.
         //
-        // Program tested with a clock frequency of 12 MHz nominally, upload at 115200
+        // Program tested with a clock frequency of 12 MHz nominally, upload at 115200.
         // =============================================================================
 #define IOREGION 0x60000000
 #define LEDOFS  4
@@ -90,11 +90,11 @@ __yy:           .word 0                 // 0x0b0     ucode register.
         // ======================================================= //
         .org    0xb4
         
-__mepc:         .word 0                 // 0xb4 10110100  0x2d For exception handling
-__mcause:       .word 0                 // 0xb8 10111000  0x2e For exception handling
-__mtval:        .word 0                 // 0xbc 10111100  0x2f For exception handling
-__mscratch:     .word 0                 // 0xc0 Used by CSR code
-__misa:         .word 0x40800100        // 0xc4 Used by CSR code. RV32I base ISA, nonstd. ext. present, XLEN = 32
+__mepc:         .word 0                 // 0x0b4 10110100  0x2d For exception handling
+__mcause:       .word 0                 // 0x0b8 10111000  0x2e For exception handling
+__mtval:        .word 0                 // 0x0bc 10111100  0x2f For exception handling
+__mscratch:     .word 0                 // 0x0c0 Used by CSR code
+__misa:         .word 0x40800100        // 0x0c4 Used by CSR code. RV32I base ISA, nonstd. ext. present, XLEN = 32
 
         //
         //  In case the user did not remember/bother to make an exception
@@ -102,51 +102,51 @@ __misa:         .word 0x40800100        // 0xc4 Used by CSR code. RV32I base ISA
         //
 ExceptH:
 1:
-        addi    x3,x3,1                 // 0xc8
-        li      x1,IOREGION             // 0xcc
-        sw      x3,LEDOFS(x1)           // 0xd0 
-2:      addi    x1,x1,0x7FF             // 0xd4 
-        bgt     x1,x0,2b                // 0xd8
-        j       1b                      // 0xdc                                     
+        addi    x3,x3,1                 // 0x0c8
+        li      x1,IOREGION             // 0x0cc
+        sw      x3,LEDOFS(x1)           // 0x0d0 
+2:      addi    x1,x1,0x7FF             // 0x0d4 
+        bgt     x1,x0,2b                // 0x0d8
+        j       1b                      // 0x0dc                                     
 
         .macro ij rdnr=0,ofs=0,rs1nr=0
         .word (((\ofs) & 0xfff)<<20) + (((\rs1nr) & 31)<<15) + (((\rdnr) & 31)<<7) + 0b0001011
         .endm
 
-_mtime:         .word 0 		// 0xe0 Read/write from user code. Updated by internal interrupt
-_mtimeh:        .word 0 		// 0xe4 Read/write from user code. Updated by internal interrupt
-__bitrate:      .word 0                 // 0xe8 For use by loaded program.
-__minstreth:    .word 0 		// 0xec Read/write from user code. Updated by internal interrupt
-__mcycleh:      .word 0 		// 0xf0 Read/write from user code. Updated by internal interrupt
-__freefornow_f4:.word 0                 // 0xf4
-__mtimecmp:     .word 0xffffffff        // 0xf8 Read/write from user code. 
-__mtimecmph:    .word 0xffffffff	// 0xfc Read/write from user code. 
+_mtime:         .word 0 		// 0x0e0 Read/write from user code. Updated by internal interrupt
+_mtimeh:        .word 0 		// 0x0e4 Read/write from user code. Updated by internal interrupt
+__bitrate:      .word 0                 // 0x0e8 For use by loaded program.
+__minstreth:    .word 0 		// 0x0ec Read/write from user code. Updated by internal interrupt
+__mcycleh:      .word 0 		// 0x0f0 Read/write from user code. Updated by internal interrupt
+__freefornow_f4:.word 0                 // 0x0f4
+__mtimecmp:     .word 0xffffffff        // 0x0f8 Read/write from user code. 
+__mtimecmph:    .word 0xffffffff	// 0x0fc Read/write from user code. 
         .org 0x100  			//
-CSRretadr:      .word 0			//0x100 Microcode writes PC to CSRretadr when a CSR instruction is seen.
-Entry_xRET:     ij      0,0xb6,0        //0x104 Microcode branches to here when MRET/SRET/URET is seen
-EntryCSR:       j       ExceptH         //0x108 Microcode branches to here when a CSR instruction is seen
+CSRretadr:      .word 0			// 0x100 Microcode writes PC to CSRretadr when a CSR instruction is seen.
+Entry_xRET:     ij      0,0xb6,0        // 0x104 Microcode branches to here when MRET/SRET/URET is seen
+EntryCSR:       j       ExceptH         // 0x108 Microcode branches to here when a CSR instruction is seen
                 
         //
         // First calculate bitrate with autobaud,
         // then branch to loader routine in getblk
         //
 _start:                                 
-        sw      regW,UARTOFS(regIO)     // UART->D = 1
-        sw      regW,LEDOFS(regIO)      // Light green and red led, source for blue led is ~uartrx.
-ABL:    lw      regP,UARTOFS(regIO)     // while ( UART->D )
-        bne     regP,x0,ABL             //      ;
-1:      lw      regP,UARTOFS(regIO)     // while ( UART->D == 0)
-        beq     regP,x0,1b              //      ;
-        lw	r9bit,%lo(__mcycle)(x0) // atstart = SYSEBR->mcycle;
-        sub     rBitrate,rBitrate,r9bit // 
-1:      lw      regP,UARTOFS(regIO)     // while ( UART->D )
-        bne     regP,x0,1b              //      ;
-1:      lw      regP,UARTOFS(regIO)     // while ( UART->D == 0)
-        beq     regP,x0,1b              //      ;
-        lw      r9bit,%lo(__mcycle)(x0) // atend  = SYSEBR->mcycle;
-        add     rBitrate,rBitrate,r9bit // ab = ab + (atend - atstart)
-        addi    regB,regB,-1            // 4 times
-        bne     regB,x0,ABL             //     
+        sw      regW,UARTOFS(regIO)     // UART->D = 1. Light green and red led, source for blue led is ~uartrx.
+        sw      regW,LEDOFS(regIO)      // for ( i = 0; i < 4; i++ ) {
+ABL:    lw      regP,UARTOFS(regIO)     //         while ( UART->D )
+        bne     regP,x0,ABL             //              ;
+1:      lw      regP,UARTOFS(regIO)     //         while ( UART->D == 0)
+        beq     regP,x0,1b              //              ;
+        lw	r9bit,%lo(__mcycle)(x0) //         atstart = SYSEBR->mcycle;
+        sub     rBitrate,rBitrate,r9bit //         
+1:      lw      regP,UARTOFS(regIO)     //         while ( UART->D )
+        bne     regP,x0,1b              //              ;
+1:      lw      regP,UARTOFS(regIO)     //         while ( UART->D == 0)
+        beq     regP,x0,1b              //              ;
+        lw      r9bit,%lo(__mcycle)(x0) //         atend  = SYSEBR->mcycle;
+        add     rBitrate,rBitrate,r9bit //         ab = ab + (atend - atstart)
+        addi    regB,regB,-1            //         
+        bne     regB,x0,ABL             // }    
         srli    rBitrate,rBitrate,5     // rBitrate = (4*autobaud+16)/32 
         addi    rBitrate,rBitrate,-5    //            - 5; // [b]
 //        srli    regB,rBitrate,1       //
