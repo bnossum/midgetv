@@ -26,11 +26,11 @@
 #define regL            x2   
 #define regY            x3   
 #define regE            x4   
-#define regIO           x5   
+#define r9bit           x5   
 #define regP            x6   
 #define regW            x7   
 #define regB            x8   
-#define r9bit           x9   
+#define regIO           x9   
 #define rBitrate       x10   
 
         .globl _start
@@ -40,16 +40,16 @@
         .word 0xdeadbabe		//  x2  regL     	0 
         .word 0         		//  x3  regY     	ep=Entrypoint
         .word 4*4 			//  x4  regE     	ep
-        .word 0x60000000		//  x5  regIO    	0x60000000                           
+        .word 0 			//  x5  r9bit    	9*Bitrate                            
         .word 0 			//  x6  regP     	(uint8_t) ep | 0x100                 
         .word 0x80000003		//  x7  regW     	9*rBitrate + rBitrate/2 - 14         
         .word 4 			//  x8  regB     	0x100                                
-        .word 0 			//  x9  r9bit    	9*Bitrate                            
+        .word 0x60000000		//  x9  regIO    	0x60000000
         .word 16 			// x10  rBitrate 	Bitrate                               
 Header:
-        li      regT,4*2                // x11    //         Header is written into regL 
+        li      regT,4*2                // x11    //         Header is written into regL
         li      regE,4*4                // x12    //         and regY
-getblk: lw      regB,UARTOFS(regIO)     // x13    //   |     
+getblk: lw      regB,UARTOFS(regIO)     // x13    //   |
         bne     regB,x0,getblk          // x14    //   |     Wait for startbit
         sw      x0,%lo(__mcycle)(x0)    // x15    //   |     Timebase when to sample
         addi    regT,regT,1             // x16    //   |     Increment store index here allready, to save time at [a]

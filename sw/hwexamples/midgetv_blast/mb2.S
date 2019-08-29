@@ -5,18 +5,14 @@
         // =============================================================================
         // For midgetv in iceblink40-hx1k only. 
         //
-        //                          Loadable
-        // Regions:                 |    Contents
-        // -----------------        |    ---------------------- 
-        // 0x00000023 - 0x00000004  yes  x1-x7
-        // 0x0000008f - 0x00000024  no    x8-x31 and internal registers
-        // 0x00000093 - 0x00000090  yes  __rNMI_IIV
-        // 0x000000a3 - 0x00000094  no   Constants
-        // 0x000000a7 - 0x000000a4  yes  __mtvec
-        // 0x000000b3 - 0x000000a8  no   Internal registers and constants
-        // (top adr)  - 0x000000b4  yes  Remaining memory.
+        //                          
+        // Loadable regions:
+        // -----------------        
+        // 0x00000023 - 0x00000004      x1-x7
+        // 0x00000093 - 0x00000090      __rNMI_IIV
+        // 0x000000a7 - 0x000000a4      __mtvec
+        // (top adr)  - 0x000000b4      Most parts of memory.
         //
-        // Note - by convention dynamic loading of midgetv happens from address 0x100.
         //
         // =============================================================================
         
