@@ -93,7 +93,7 @@ typedef struct {
 
 //                                 Coarse regions                         ADR_O[31:27]
 #define EBRBASE      0x00000000 // 0x3fffffff-0x00000000 EBR              00xxx
-#define RESERVEDBASE 0xxxxxxxxx // 0x5fffffff-0x40000000 reserved         010xx
+#define RESERVEDBASE 0x40000000 // 0x5fffffff-0x40000000 reserved         010xx
 #define IOBASE       0x60000000 // 0x67ffffff-0x60000000 IO               01100
 #define SYSREGBASE   0x68000000 // 0x7fffffff-0x68000000 System registers 011yy with yy != 2'b00
 #define SRAMBASE     0x80000000 // 0xffffffff-0x80000000 SRAM             1xxxx
