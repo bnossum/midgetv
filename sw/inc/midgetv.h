@@ -91,6 +91,14 @@ typedef struct {
         volatile uint32_t S; // Status
 } EPP_TypeDef;
 
+/* The FM transmitter
+ */
+typedef struct {
+        volatile uint32_t D;
+} FMXMIT_TypeDef;
+#define FM_OE     (1<<14)
+#define FM_FCLKEN (1<<13)
+
 //                                 Coarse regions                         ADR_O[31:27]
 #define EBRBASE      0x00000000 // 0x3fffffff-0x00000000 EBR              00xxx
 #define RESERVEDBASE 0x40000000 // 0x5fffffff-0x40000000 reserved         010xx
@@ -102,8 +110,10 @@ typedef struct {
 #define LED_BASE       (IOBASE +0x00000004u)
 #define UART_BASE      (IOBASE +0x00000008u) 
 #define EPP_BASE       (IOBASE +0x00000008u) 
+#define FMXMIT_BASE    (IOBASE +0x00000010u)
 
 #define SYSEBR ((SYSEBR_TypeDef *) VITALSYS_BASE   )
 #define UART   ((UART_TypeDef *)   UART_BASE       )
 #define EPP    ((EPP_TypeDef *)    EPP_BASE        )
 #define LED    ((LED_TypeDef *)    LED_BASE        )
+#define FMXMIT ((FMXMIT_TypeDef *) FMXMIT_BASE     )

@@ -62,7 +62,7 @@ int main( void ) {
 #elif WRITETYPE == HWORDTYPE
                 int j;
                 for ( j = 0; j < 2; j++ ) {
-                        *(uint8_t *)(i*2 + j + (uint16_t)SRAM) = i >> ( j >> 4 );
+                        *(uint8_t *)(i*2 + j + (uint16_t)SRAM) = i >> ( j >> 4 ); // ???? Surely an error here? Retest.
 #else                
                 *(SRAM+i) = i;
 #endif                

@@ -1,0 +1,86 @@
+# ##############################################################################
+# Based on:
+# iCEcube PCF
+# Version:            2017.08.27940
+# File Generated:     Aug 19 2019 22:26:36
+# Family & Device:    iCE40HX1K
+# Package:            VQ100
+# ##############################################################################
+
+#
+# IO 
+#
+set_io padnADDRSTB 26
+set_io padCLK_I 13
+set_io padDB[0] 42
+set_io padDB[1] 41
+set_io padDB[2] 40
+set_io padDB[3] 37
+set_io padDB[4] 36
+set_io padDB[5] 34
+set_io padDB[6] 30
+set_io padDB[7] 29
+set_io padnDATASTB 27
+set_io padSS_B 49
+set_io padnWAIT 33
+set_io padnWRITE 28
+set_io padled[0] 59
+set_io padled[1] 56
+set_io padled[2] 53
+set_io padled[3] 51
+set_io padantennae 66
+#
+# Buffer of FM transmit close to led[3]
+#
+ble_pack T_12_3_lc_0 {i_fm_xmit.i_antennaebuf,i_fm_xmit.r_antennaebuf}
+clb_pack T_12_3 {T_12_3_lc_0}
+set_location T_12_3 12 3
+
+
+#
+# Use some FFs in IO. Presently disabled
+#
+# set_io_ff led[0] -out ON
+# set_io_ff led[1] -out ON
+# set_io_ff led[2] -out ON
+# set_io_ff padDB[0] -in ON
+# set_io_ff padDB[2] -out ON
+# set_io_ff padDB[3] -out ON
+# set_io_ff padDB[4] -out ON
+# set_io_ff padDB[5] -out ON
+# set_io_ff padDB[6] -out ON
+# set_io_ff padDB[7] -out ON
+
+
+#
+# These are input mux LUTs, goes to INSTRUCTION ff and cascaded to luta of alu.v
+#
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_0..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_1..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_2..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_3..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_4..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_5..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_6..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_7..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_8..cmb  
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_9..cmb  
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_10..cmb 
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_11..cmb 
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_12..cmb 
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_13..cmb 
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_14..cmb 
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_15..cmb 
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_16..cmb 
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_17..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_18..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_19..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_20..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_21..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_22..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_23..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_24..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_25..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_26..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_27..cmb
+set_cascading inst_midgetv_core.inst_inputmux.genblk1.genblk1_28..cmb

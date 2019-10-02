@@ -121,7 +121,9 @@ static void puts_morse( uint8_t const *  s ) {
 #define __ 0xff     ,  // Interword spacing
 #define __endstring__ 0
 
-const uint8_t hello_world[] = { _H _E _L _L _O __ _W _O _R _L _D __endstring__  };
+const uint8_t hello_world[] = { _H _E _L _L _O __ _W _O _R _L _D __
+                                _N _I _C _E __ _T _O __ _S _E _E __ _Y _O _U
+                                __endstring__  };
 
 int main( void ) {
 

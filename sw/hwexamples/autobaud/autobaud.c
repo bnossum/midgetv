@@ -67,7 +67,7 @@ void clumsyhexprint( const uint32_t ab ) {
 int main( void ) {
         int a;
 
-        UART->D = 1;
+        UART->D = 0x80000001;
 
         uint32_t ab = autobaud();
         // Not here
@@ -132,7 +132,7 @@ void near_putchar( int c ) {
 
         SYSEBR->mcycle = 0;
         while ( c ) {
-                UART->D = c;
+                UART->D = c | 0x80000000;
                 c >>= 1;
                 while ( SYSEBR->mcycle < n )
                         ;

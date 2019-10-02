@@ -34,7 +34,8 @@
 `include "../../obj_dir/m_2ebr.v"
 `include "../../code/m_ucodepc.v"
 `include "../../code/m_progressctrl.v"
-`include "../div/m_digilent.v" 
+`include "../div/m_digilent.v"
+`include "../div/m_fm_xmit.v"
 `include "../../code/m_midgetv_core.v"
 
 
@@ -50,18 +51,19 @@ module top
       DISREGARD_WB4_3_55 = 0
       )
    (
-    input            CLK_I,
-    output reg [3:0] led,
+    input        padCLK_I, //    33 MHz system clock
+    output [3:0] padled, //      Observables
 //    inout [3:0]      btn, 
-    output           SS_B,
+    output       padSS_B, //     To disable SPI Flash after configuration
+    
+    input        padnADDRSTB, // Address strobe, active low
+    input        padnDATASTB, // Data strobe, active low
+    input        padnWRITE, //   PC Write, active low
+    inout [7:0]  padDB, //       8-bit bidirectional address/data.
+    output       padnWAIT, //    Handshake signal, see below
 
-    input            nADDRSTB, // Address strobe, active low
-    input            nDATASTB, // Data strobe, active low
-    input            nWRITE, //   PC Write, active low
-    inout [7:0]      padDB, //    8-bit bidirectional address/data.
-    output           nWAIT //    Handshake signal, see below
+    output       padantennae //  FM XMIT
     );
-   assign SS_B = 1'b1; // Disable SPI Flash after configuration
    
    /*AUTOWIRE*/
    // Beginning of automatic wires (for undeclared instantiated-module outputs)
@@ -71,9 +73,12 @@ module top
    wire [3:0]           SEL_O;                  // From inst_midgetv_core of m_midgetv_core.v
    wire                 STB_O;                  // From inst_midgetv_core of m_midgetv_core.v
    wire                 WE_O;                   // From inst_midgetv_core of m_midgetv_core.v
+   wire                 antennae;               // From i_fm_xmit of m_fm_xmit.v
    wire                 corerunning;            // From inst_midgetv_core of m_midgetv_core.v
    wire [31:0]          dbga;                   // From inst_midgetv_core of m_midgetv_core.v
    wire                 digilent_ACK_O;         // From inst_digilent of m_digilent.v
+   wire [0:0]           fm_xmit_DAT_O;          // From i_fm_xmit of m_fm_xmit.v
+   wire                 fm_xmt_ACK_O;           // From i_fm_xmit of m_fm_xmit.v
    wire                 midgetv_core_killwarnings;// From inst_midgetv_core of m_midgetv_core.v
    // End of automatics
    
@@ -82,21 +87,28 @@ module top
    /* -----------------------------------------------------------------------------
     * Wishbone interconnect.
     */
-   wire                 led_ACK_O;
-   wire led_STB_I      = STB_O & ADR_O[2];
-   wire digilent_STB_I = STB_O & ADR_O[3];
-   wire ACK_I = led_ACK_O | digilent_ACK_O;
-
+   wire          led_ACK_O;
+   wire          led_STB_I      = STB_O & ADR_O[2];
+   wire          digilent_STB_I = STB_O & ADR_O[3];
+   wire          fm_xmit_STB_I  = STB_O & ADR_O[4];
+   wire          ACK_I = led_ACK_O | digilent_ACK_O | fm_xmt_ACK_O;
+   
+   wire          CLK_I;
+   //assign SS_B = 1'b1; // Disable SPI Flash after configuration
+   SB_IO #(.PIN_TYPE( 6'b 0110_01)) theSS_B(.PACKAGE_PIN(padSS_B), .D_OUT_0(1'b1));
+   SB_GB_IO #(.PIN_TYPE( 6'b0000_01)) theCLK_I(.PACKAGE_PIN(padCLK_I),.GLOBAL_BUFFER_OUTPUT(CLK_I));
    
    /* -----------------------------------------------------------------------------
-    * Interface to LEDs, so small that we do the code here
+    * Interface to LEDs, so small that we do the code here.
     */
+   reg [3:0] rled;
    always @(posedge CLK_I)  begin
       if ( led_STB_I & WE_O  ) begin
-         led[2:0]  <= DAT_O[2:0];
+         rled[3:0]  <= DAT_O[3:0];
       end
-      led[3] <= corerunning;
    end
+   //assign led = {antennae,rled};
+   SB_IO #(.PIN_TYPE( 6'b 0110_01)) theled [3:0] (.PACKAGE_PIN(padled), .D_OUT_0(rled));
    assign led_ACK_O = led_STB_I;
    
    /* -----------------------------------------------------------------------------
@@ -115,14 +127,32 @@ module top
         .WE_I(        WE_O           ),
         /*AUTOINST*/
         // Outputs
-        .nWAIT                          (nWAIT),
+        .padnWAIT                       (padnWAIT),
         // Inouts
         .padDB                          (padDB[7:0]),
         // Inputs
         .CLK_I                          (CLK_I),
-        .nADDRSTB                       (nADDRSTB),
-        .nDATASTB                       (nDATASTB),
-        .nWRITE                         (nWRITE));
+        .padnADDRSTB                    (padnADDRSTB),
+        .padnDATASTB                    (padnDATASTB),
+        .padnWRITE                      (padnWRITE));
+   
+   /* -----------------------------------------------------------------------------
+    * Interface to FM transmitter
+    */
+   m_fm_xmit i_fm_xmit
+     (// Outputs
+      .ACK_O                            (fm_xmt_ACK_O),
+      .DAT_O                            (fm_xmit_DAT_O[0:0]),
+      .antennae                         (antennae),
+      // Inputs
+      .DAT_I                            (DAT_O[14:0]),
+      .STB_I                            (fm_xmit_STB_I),
+      .WE_I                             (WE_O),
+      /*AUTOINST*/
+      // Inputs
+      .CLK_I                            (CLK_I));
+   SB_IO #(.PIN_TYPE( 6'b 0110_01)) theantennae (.PACKAGE_PIN(padantennae), .D_OUT_0(antennae));
+
    
    /* -----------------------------------------------------------------------------
     * Core
@@ -152,7 +182,7 @@ module top
       .RST_I                            (1'b0),
       .meip                             (1'b0),
       .start                            (1'b1),
-      .DAT_I                            ({24'h0,digilent_DAT_O}),
+      .DAT_I                            ({23'h0,fm_xmit_DAT_O,digilent_DAT_O}),
       /*AUTOINST*/
       // Outputs
       .CYC_O                            (CYC_O),

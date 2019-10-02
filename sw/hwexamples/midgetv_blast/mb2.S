@@ -79,6 +79,53 @@ __mtvec:        .word 0          //     // 0xa4 10100100  0x29 Should point to e
 cte00000000:    .word 0x00000000 // x   // 0xa8 10101000  0x2a ucode constant. 
 cteffffffff:    .word 0xffffffff // x   // 0xac 10101100  0x2b ucode constant.
 __yy:           .word 0                 // 0xb0 10110000  0x2c ucode register.
-        .org    0xb4
 
-        // -----------------------------------------------------------------------------
+        // ======================================================= //
+        //                                                         //
+        //  Anything from here can be overwritten during loading.  //
+        //                                                         //
+        // ======================================================= //
+        .org    0xb4
+        
+__mepc:         .word 0                 // 0x0b4 For exception handling
+__mcause:       .word 0                 // 0x0b8 For exception handling
+__mtval:        .word 0                 // 0x0bc For exception handling
+__mscratch:     .word 0                 // 0x0c0 Used by CSR code
+__misa:         .word 0x40800100        // 0x0c4 Used by CSR code. RV32I base ISA, nonstd. ext. present, XLEN = 32
+
+        //
+        //  In case the user did not remember/bother to make an exception
+        //  handler, and the loaded program leaves these locations untouched:
+        //
+ExceptH:
+1:
+        addi    x3,x3,1                 // 0x0c8
+        li      x1,IOREGION             // 0x0cc
+        sw      x3,LEDOFS(x1)           // 0x0d0 
+2:      addi    x1,x1,0x7FF             // 0x0d4 
+        bgt     x1,x0,2b                // 0x0d8
+        j       1b                      // 0x0dc                                     
+
+        //
+        // Defensive coding.
+        // In case the use did not remember/bother to write CSR emulation code,
+        // and the loader program leaves these locations untouched, I arrange
+        // for a default exception handle to kick in.
+        //
+        .macro ij rdnr=0,ofs=0,rs1nr=0
+        .word (((\ofs) & 0xfff)<<20) + (((\rs1nr) & 31)<<15) + (((\rdnr) & 31)<<7) + 0b0001011
+        .endm
+
+_mtime:         .word 0 		// 0x0e0 Read/write from user code. Updated by internal interrupt
+_mtimeh:        .word 0 		// 0x0e4 Read/write from user code. Updated by internal interrupt
+__bitrate:      .word 0                 // 0x0e8 For use by loaded program.
+__minstreth:    .word 0 		// 0x0ec Read/write from user code. Updated by internal interrupt
+__mcycleh:      .word 0 		// 0x0f0 Read/write from user code. Updated by internal interrupt
+__freefornow_f4:.word 0                 // 0x0f4
+__mtimecmp:     .word 0xffffffff        // 0x0f8 Read/write from user code. 
+__mtimecmph:    .word 0xffffffff	// 0x0fc Read/write from user code. 
+        .org 0x100  			//
+CSRretadr:      .word 0			// 0x100 Microcode writes PC to CSRretadr when a CSR instruction is seen.
+Entry_xRET:     ij      0,0xb6,0        // 0x104 Microcode branches to here when MRET/SRET/URET is seen
+EntryCSR:       j       ExceptH         // 0x108 Microcode branches to here when a CSR instruction is seen
+                

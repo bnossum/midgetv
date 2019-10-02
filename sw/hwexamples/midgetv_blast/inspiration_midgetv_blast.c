@@ -15,6 +15,12 @@
  * The program is preceeded by an identificator word: 
  * 0x01071f3f    this is used to set the bitrate of the bitbang UART.
  *
+ * On the wire:
+ *    S01234567FS01234567FS01234567FS01234567F
+ * ---_-_______-_---_____-_-----___-_------__-
+ *
+ *     
+ *
  * Then follows zero or more of these packets:
  * load          Where to write a block. 
  * len != 0      Size of data in bytes

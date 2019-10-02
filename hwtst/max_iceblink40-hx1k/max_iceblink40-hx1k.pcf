@@ -1,20 +1,24 @@
-set_io --warn-no-port CLK_I       13
-set_io --warn-no-port led[0]      59
-set_io --warn-no-port led[1]      56
-set_io --warn-no-port led[2]      53
-set_io --warn-no-port led[3]      51
+#
+# For icestorm
+#
+
+set_io --warn-no-port padCLK_I       13
+set_io --warn-no-port padled[0]      59
+set_io --warn-no-port padled[1]      56
+set_io --warn-no-port padled[2]      53
+set_io --warn-no-port padled[3]      51
 
 # set_io --warn-no-port btn[1]      60
 # set_io --warn-no-port btn[2]      57
 # set_io --warn-no-port btn[3]      54
 # set_io --warn-no-port btn[4]      52
 
-set_io --warn-no-port SS_B        49
+set_io --warn-no-port padSS_B        49
 
-set_io --warn-no-port nADDRSTB    26      
-set_io --warn-no-port nDATASTB    27
-set_io --warn-no-port nWRITE      28
-set_io --warn-no-port nWAIT       33
+set_io --warn-no-port padnADDRSTB    26      
+set_io --warn-no-port padnDATASTB    27
+set_io --warn-no-port padnWRITE      28
+set_io --warn-no-port padnWAIT       33
 set_io --warn-no-port padDB[0]    42
 set_io --warn-no-port padDB[1]    41
 set_io --warn-no-port padDB[2]    40
@@ -24,7 +28,7 @@ set_io --warn-no-port padDB[5]    34
 set_io --warn-no-port padDB[6]    30
 set_io --warn-no-port padDB[7]    29
 
-
+set_io --warn-no-port padantennae 66
 
 
 

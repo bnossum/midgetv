@@ -28,6 +28,7 @@
  * Bit 1 : 1 if a byte waits to be read by midgetv.
  * 
  */
+
 module m_digilent
   (
    input        CLK_I, //    System clock
@@ -38,17 +39,21 @@ module m_digilent
    output [7:0] DAT_O, //    Data to midgetv
    output       ACK_O, //    Acknowledge after operation
    
-   input        nADDRSTB, // Address strobe, active low
-   input        nDATASTB, // Data strobe, active low
-   input        nWRITE, //   PC Write, active low
-   inout [7:0]  padDB, //    8-bit bidirectional address/data.
-   output       nWAIT  //    Handshake signal, see below
+   input        padnADDRSTB, // Address strobe, active low
+   input        padnDATASTB, // Data strobe, active low
+   input        padnWRITE, //   PC Write, active low
+   inout [7:0]  padDB, //       8-bit bidirectional address/data.
+   output       padnWAIT  //    Handshake signal, see below
    );
 
    /* =================================================
     * Part of the code that communicates with AT90USB2
     * =================================================
     */
+
+   wire         nDATASTB,nADDRSTB;
+   SB_IO #( .PIN_TYPE(6'b 0000_01)) the_nDATASTB( .PACKAGE_PIN( padnDATASTB ),.D_IN_0(nDATASTB) );
+   SB_IO #( .PIN_TYPE(6'b 0000_01)) the_nADDRSTB( .PACKAGE_PIN( padnADDRSTB ),.D_IN_0(nADDRSTB) );
    
    /* When nWAIT is low it is OK to start a cycle (assert a strobe), 
     * when high it indicates that it is OK to  end the cycle 
@@ -86,9 +91,9 @@ module m_digilent
     */
    wire         cmb_nWAIT = !(nADDRSTB & nDATASTB);
    SB_IO #( .PIN_TYPE( 6'b 0110_00), .NEG_TRIGGER(1'b1))
-   the_nWAIT ( .PACKAGE_PIN( nWAIT ),.D_OUT_0( cmb_nWAIT ));
+   the_nWAIT ( .PACKAGE_PIN( padnWAIT ),.D_OUT_0( cmb_nWAIT ));
    SB_IO #( .PIN_TYPE( 6'b 0000_01), .NEG_TRIGGER(1'b1))
-   the_nWRITE( .PACKAGE_PIN( nWRITE),.D_IN_0( nWRITEsig ));
+   the_nWRITE( .PACKAGE_PIN( padnWRITE),.D_IN_0( nWRITEsig ));
   
    always @(posedge nADDRSTB)
      if ( ~nWRITEsig )
