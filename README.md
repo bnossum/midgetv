@@ -1,9 +1,7 @@
 ## midgetv
 
 RISC-V controller with Wishbone interface specifically for Lattice
-iCE40 FPGAs. Midgetv is a non-pipelined, multi-cycle, microcoded design. As a
-module, the interconnect of midgetv may be shown as this:
-
+iCE40 FPGAs. 
    
                        +----------------+
                 CLK_I ->                |- WE_O
@@ -16,14 +14,12 @@ module, the interconnect of midgetv may be shown as this:
                        |                |- corerunning
                        |                |- dbga[31:0]
                        +----------------+
-
-Midgetv trades speed for size:
-  - Smallest: A toy implementation require ~250 SB_LUT4s and 4 EBRs. 
-  - Usable: ~390 SB_LUT4s, 2 EBR, 2 SRAMs
-  - Largest (so far): With absolutely all options enabled the core need ~422 SB_LUT4s, 18 EBRs and 4 SRAMs.
-  - Typical clock frequencies (worst case conditions):
-    - ICE40HX1K: 57 MHz
-    - ICE40UP5K: 24 MHz
+                       
+Midgetv is a non-pipelined, multi-cycle, microcoded design that trades speed for size. 
+The smallest implementation require around 250 SB_LUT4s and 4 EBRs, the largest require
+around 425 SB_LUT4s, 18 EBRs and 4 SPRAMS. Typical clock frequencies (worst case conditions):
+ - ICE40HX1K: 57 MHz
+ - ICE40UP5K: 24 MHz
 
 Each RISCV instruction use between 4 clock cycles and about 40 clock
 cycles (for shifts of a register by 31). Average number of clocks per
