@@ -61,11 +61,11 @@ least effort you need:
 All my work is done under Linux.
 
 ### Examples of midgetv on hardware
-See [here](work/hwtest/README.md)
+See [here](work/hwtst)
 
 ### Example programs
-See [here](work/sw/hwexamples/README.md)
+See [here](work/sw/hwexamples)
 
 ### Simulation of midgetv in Verilator
-See [here](work/tst/README.md) for the simulator code. Many small programs to test specific instructions in midgetv is [here](work/sw/first), and code to do the riscv compliance test suite is [here](work/sw/second).
+See [here](work/tst) for the simulator code. Many small programs to test specific instructions in midgetv is [here](work/sw/first), and code to do the riscv compliance test suite is [here](work/sw/second).
 
