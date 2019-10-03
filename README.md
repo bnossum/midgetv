@@ -1,8 +1,3 @@
-## midgetv
-
-RISC-V controller with Wishbone interface specifically for Lattice
-iCE40 FPGAs. 
-   
                        +----------------+
                 CLK_I ->                |- WE_O
                 RST_I -|                |- STB_O
@@ -15,21 +10,25 @@ iCE40 FPGAs.
                        |                |- dbga[31:0]
                        +----------------+
                        
-Midgetv is a non-pipelined, multi-cycle, microcoded design that trades
-speed for size.  The smallest implementation require around 265
-SB_LUT4s and 4 EBRs (but still passes all programs in the rv32i test
-suite), the largest require around 425 SB_LUT4s, 18 EBRs and 4
-SPRAMS. Typical clock frequencies (worst case conditions):
- - ICE40HX1K: 57 MHz
+## midgetv
+   
+Midgetv is non-pipelined and microcoded - it trades speed for
+size. The smallest possibly useful implementation requires around 263
+SB_LUT4s and 4 EBRs (but still successfully executes all programs in
+the rv32i test suite). The largest implementation currently require
+around 411 SB_LUT4s, 18 EBRs and 4 SPRAMS. Typical clock frequencies
+(worst case conditions):
+ - ICE40HX1K: 65 MHz
  - ICE40UP5K: 24 MHz
 
 Each RISCV instruction use between 4 clock cycles and about 40 clock
 cycles (for shifts of a register by 31). Average number of clocks per
 instruction (CPI) is ~9. Unaligned word/hword load/store instructions
 must be performed in software (something like
-[this](work/sw/first/t160.S)). CSR instructions are decoded in microcode,
-but executed by [emulation software](work/sw/inc/midgetv_minimal_csr.S).
-The privilege mode of midgetv is always *machine-mode*.
+[this](work/sw/first/t160.S)). CSR instructions are decoded in
+microcode, but executed by
+[emulation software](work/sw/inc/midgetv_minimal_csr.S).  The
+privilege mode of midgetv is always *machine-mode*.
 
 ### Overall goals 
  -  [x] Targetable to all ICE40 devices that have EBR
@@ -58,7 +57,7 @@ least effort you need:
 - Emacs if you want to modify the code easily (for Verilog-Mode)
 - A toolchain for FPGA compilation and upload, for example:
   - iCEcube2 from Lattice
-  - A toolchain based on the eminent icestorm project, such as: yosys/arachne-pnr/icepack
+  - A toolchain based on the cery impressive icestorm project, such as: yosys/arachne-pnr/icepack
 
 All my work is done under Linux.
 
@@ -87,6 +86,7 @@ See [here](work/tst) for the simulator code. Many small programs to test specifi
 - Write and test exhaustive CSR code, just now only a minimum exists
 - Bootloader program
 - Test on external interrupts
-- Test on nested interrupts
+- Test on nested interrupts/exceptions
 - Better linker scripts
 - Proper `crt0.S`
+- Table that show clockcycles used per instruction
