@@ -16,8 +16,9 @@ iCE40 FPGAs.
                        +----------------+
                        
 Midgetv is a non-pipelined, multi-cycle, microcoded design that trades speed for size. 
-The smallest implementation require around 250 SB_LUT4s and 4 EBRs, the largest require
-around 425 SB_LUT4s, 18 EBRs and 4 SPRAMS. Typical clock frequencies (worst case conditions):
+The smallest implementation require around 250 SB_LUT4s and 4 EBRs (but still passes all 
+programs in the rv32i test suite), the largest require around 425 SB_LUT4s, 18 EBRs and 
+4 SPRAMS. Typical clock frequencies (worst case conditions):
  - ICE40HX1K: 57 MHz
  - ICE40UP5K: 24 MHz
 
