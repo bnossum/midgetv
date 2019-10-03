@@ -1,4 +1,4 @@
-![picture of midgetv](work/doc/m_midgetcore.png)
+![picture of midgetv](doc/m_midgetcore.png)
                        
 ## midgetv
    
