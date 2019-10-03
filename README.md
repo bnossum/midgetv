@@ -1,14 +1,4 @@
-                       +----------------+
-                CLK_I ->                |- WE_O
-                RST_I -|                |- STB_O
-                start -|    midgetv     |- CYC_O
-                       |                |- SEL_O[3:0] 
-                 meip -|                |- ADR_O[31:0]
-                ACK_I -|                |- DAT_O[31:0]
-    DAT_I[IWIDTH-1:0] -|                |
-                       |                |- corerunning
-                       |                |- dbga[31:0]
-                       +----------------+
+![picture of midgetv](work/doc/m_midgetcore.png)
                        
 ## midgetv
    
