@@ -14,6 +14,7 @@ all: $(BINDIR)/simmorse ../../../hwtst/upduino2/ice40loaderprog.hv \
 	../../../hwtst/iceblink40-hx1k/ice40loaderprog.hv \
 	../../../hwtst/max_iceblink40-hx1k/ice40loaderprog.hv \
 	../../../hwtst/max_upduino2/ice40loaderprog.hv \
+	../../../hwtst/for_size_estimate/ice40loaderprog.hv \
 	$(OBJDIR)/morse.lst \
 
 ../../../hwtst/iceblink40-hx1k/ice40loaderprog.hv: $(OBJDIR)/morse.bin 
@@ -26,6 +27,9 @@ all: $(BINDIR)/simmorse ../../../hwtst/upduino2/ice40loaderprog.hv \
 	../../../bin/midgetv_bin2ebr -i $< -o $@
 
 ../../../hwtst/max_upduino2/ice40loaderprog.hv: $(OBJDIR)/morse.bin 
+	../../../bin/midgetv_bin2ebr -i $< -o $@
+
+../../../hwtst/for_size_estimate/ice40loaderprog.hv: $(OBJDIR)/morse.bin 
 	../../../bin/midgetv_bin2ebr -i $< -o $@
 
 $(BINDIR)/simmorse:morse.c
