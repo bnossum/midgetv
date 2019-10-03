@@ -27,8 +27,8 @@ Each RISCV instruction use between 4 clock cycles and about 40 clock
 cycles (for shifts of a register by 31). Average number of clocks per
 instruction (CPI) is ~9. Unaligned word/hword load/store instructions
 must be performed in software (something like
-[this](sw/first/t160.S)). CSR instructions are decoded in microcode,
-but executed by [emulation software](sw/inc/midgetv_minimal_csr.S).
+[this](work/sw/first/t160.S)). CSR instructions are decoded in microcode,
+but executed by [emulation software](work/sw/inc/midgetv_minimal_csr.S).
 The privilege mode of midgetv is always *machine-mode*.
 
 ### Overall goals 
