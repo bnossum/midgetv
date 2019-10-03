@@ -12,8 +12,8 @@ set_option -project_relative_includes 1
 
 #device options
 set_option -technology SBTiCE40
-set_option -part iCE40LP640
-set_option -package SWG16TR
+set_option -part iCE40HX1K
+set_option -package VQ100
 set_option -speed_grade 
 set_option -part_companion ""
 

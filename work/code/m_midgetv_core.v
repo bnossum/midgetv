@@ -524,8 +524,6 @@ module m_midgetv_core
    /* -----------------------------------------------------------------------------
     * Datapath
     */
-   localparam xHIGHLEVEL = 1'b1;
-   localparam xSRAMADRWIDTH = 10;
    m_inputmux #(.HIGHLEVEL(       HIGHLEVEL       ), 
                 .IWIDTH(          IWIDTH          ), 
                 .SRAMADRWIDTH(    SRAMADRWIDTH    ), 
