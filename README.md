@@ -60,3 +60,13 @@ least effort you need:
 
 All my work is done under Linux.
 
+### Examples of midgetv on hardware
+See [here](work/hwtest/README.md] 
+
+### Example programs
+See [here](work/sw/hwexamples/README.md)
+
+### Simulation of midgetv in Verilator
+See [here](work/tst/README.md) for the simulator code, and [](work/sw/first)/[](work/sw/second) for programs that are simulated.
+
+
