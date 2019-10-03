@@ -66,7 +66,14 @@ getblk: lw      regB,UARTOFS(regIO)     // x13    //   |
         mv      regE,regY               // x29    //         data chunk read.
         bne     regL,x0,getblk          // x30    //         We want a data chunk? If we do, get a data block next
         jalr    x0,0(regY)              // x31    //         Do not want data chunk so this must be a Go(). Release program.
-        .org    0x80             // never write locations marked with 'x'
+
+        // ======================================================= //
+        //                                                         //
+        //  Magic constants. most of these must not be touched     //
+        //                                                         //
+        // ======================================================= //
+        .org    0x80        
+                                 // never write locations marked with 'x'
 __jj:           .word 0          // |   // 0x080     ucode register
 __rinst:        .word 0          // |   // 0x084     32-lsb of instret counter
 __pc:           .word _start-4   // x   // 0x088     Program counter
