@@ -99,10 +99,10 @@ module m_progressctrl
          SB_LUT4 #(.LUT_INIT(16'h004d)) l_cmb_bsel1( .O(cmb_bsel[1]), .I3(usedefault), .I2(sa24), .I1(B[1]), .I0(B[0]));
          SB_LUT4 #(.LUT_INIT(16'h001b)) l_cmb_bsel2( .O(cmb_bsel[2]), .I3(usedefault), .I2(sa24), .I1(B[1]), .I0(B[0]));
          SB_LUT4 #(.LUT_INIT(16'h0017)) l_cmb_bsel3( .O(cmb_bsel[3]), .I3(usedefault), .I2(sa24), .I1(B[1]), .I0(B[0]));
-         SB_LUT4 #(.LUT_INIT(16'h5555)) l_cmb_asel0( .O(cmb_asel[0]), .I3(1'b0), .I2(1'b0), .I1(1'b0), .I0(cmb_bsel[0]));
-         SB_LUT4 #(.LUT_INIT(16'h5555)) l_cmb_asel1( .O(cmb_asel[1]), .I3(1'b0), .I2(1'b0), .I1(1'b0), .I0(cmb_bsel[1]));
-         SB_LUT4 #(.LUT_INIT(16'h5555)) l_cmb_asel2( .O(cmb_asel[2]), .I3(1'b0), .I2(1'b0), .I1(1'b0), .I0(cmb_bsel[2]));
-         SB_LUT4 #(.LUT_INIT(16'h5555)) l_cmb_asel3( .O(cmb_asel[3]), .I3(1'b0), .I2(1'b0), .I1(1'b0), .I0(cmb_bsel[3]));
+         SB_LUT4 #(.LUT_INIT(16'h0F0F)) l_cmb_asel0( .O(cmb_asel[0]), .I3(1'b0), .I2(cmb_bsel[0]), .I1(1'b0), .I0(1'b0));
+         SB_LUT4 #(.LUT_INIT(16'h0F0F)) l_cmb_asel1( .O(cmb_asel[1]), .I3(1'b0), .I2(cmb_bsel[1]), .I1(1'b0), .I0(1'b0));
+         SB_LUT4 #(.LUT_INIT(16'h0F0F)) l_cmb_asel2( .O(cmb_asel[2]), .I3(1'b0), .I2(cmb_bsel[2]), .I1(1'b0), .I0(1'b0));
+         SB_LUT4 #(.LUT_INIT(16'h0F0F)) l_cmb_asel3( .O(cmb_asel[3]), .I3(1'b0), .I2(cmb_bsel[3]), .I1(1'b0), .I0(1'b0));
 
          SB_LUT4 #(.LUT_INIT(16'heeee)) l_en( .O(en), .I3(1'b0), .I2(1'b0), .I1(RST_I), .I0(sa41) );
          SB_DFFESS r_bsel0( .Q(bmask[0]), .C(clk), .E(en), .S(RST_I), .D(cmb_bsel[0]));
