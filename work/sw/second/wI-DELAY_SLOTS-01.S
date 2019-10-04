@@ -4,4 +4,4 @@
 _start: 
         j       _midgetstart
 #include "midgetv_dump_compliance.S"
-#include "../../../riscv-compliance/riscv-test-suite/rv32i/src/I-DELAY_SLOTS-01.S"
+#include "I-DELAY_SLOTS-01.S"

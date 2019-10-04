@@ -5,4 +5,4 @@
 _start: 
         j       _midgetstart
 #include "midgetv_dump_compliance.S"
-#include "../../../riscv-compliance/riscv-test-suite/rv32i/src/I-CSRRCI-01.S"
+#include "I-CSRRCI-01.S"

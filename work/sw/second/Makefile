@@ -47,7 +47,7 @@ all: $(BINTARGETSEBR) $(BINTARGETSSRAM)
 # Specify only rv32i instructions to be used.
 # Bare metal.
 # Some include file locations
-GCCFLAGS = -mabi=ilp32 -march=rv32i -nodefaultlibs -nostartfiles -I ../inc/ -I ./
+GCCFLAGS = -mabi=ilp32 -march=rv32i -nodefaultlibs -nostartfiles -I ../inc/ -I ./ -I ../../../../riscv-compliance/riscv-test-suite/rv32i/src/
 
 # When linking, flags to make map file.
 LDFLAGS = -nodefaultlibs -nostartfiles --discard-none --cref -Map $@.map

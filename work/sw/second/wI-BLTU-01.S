@@ -3,4 +3,4 @@
         .section .text
 #include "midgetv_dump_compliance.S"
 _start: 
-#include "../../../riscv-compliance/riscv-test-suite/rv32i/src/I-BLTU-01.S"
+#include "I-BLTU-01.S"
