@@ -73,6 +73,7 @@ module m_alu
     input                 alu_carryin, //         Carry in to ALU
     input                 sa06,sa05,sa04,//       Determines ALU operation
     input                 sa27,sa26,sa25,sa24, // To decode Wttime and Wrinst
+//  input                 clk, an experiment
     output [ALUWIDTH-1:0] B, //                   ALU result
     output                A31, //                 A[31] == Di[31] during ADD, used in m_condcode.
     output                alu_carryout, //        ALU carry out
@@ -139,7 +140,32 @@ module m_alu
             SB_CARRY ca( .CO(alucy[j+1]),              .CI(alucy[j]), .I1(QQ[j]), .I0(A[j]));
          end
          assign A31 = A[ALUWIDTH-1];
-         
+  
+         /* -------------------------------------------------------
+          * A timing experiment. What if I split the adder in 2 or 4?
+          * No split (normak case) Max frq 70.5
+          * Split by 2:            Max frq 82.7
+          * Split by 4:            Max frq 81.9
+          * 
+          * The alu is not the only obstacle for a faster midgetv. 
+          * Experiment concluded
+          */
+//         wire [3:0]        cmbXCY;
+//         assign alucy[0] = alu_carryin;
+//         genvar            k;
+//         for ( k = 0; k < 4; k = k + 1 ) begin
+//            for ( j = 0; j < 8; j = j + 1 ) begin : blk1
+//               SB_LUT4 #(.LUT_INIT(16'h01b4)) a(.O(A[8*k+j]), .I3(sa05), .I2(Di[8*k+j]), .I1(sa04), .I0(ADR_O[8*k+j]));
+//               SB_LUT4 #(.LUT_INIT(16'hc369)) b(.O(B[8*k+j]), .I3(alucy[8*k+j]), .I2(QQ[8*k+j]), .I1(A[8*k+j]),.I0(sa06));
+//               if ( j != 7 )
+//                 SB_CARRY ca( .CO(alucy[8*k+j+1]),              .CI(alucy[8*k+j]), .I1(QQ[8*k+j]), .I0(A[8*k+j]));
+//               else
+//                 SB_CARRY ca( .CO(cmbXCY[k]),               .CI(alucy[8*k+j]), .I1(QQ[8*k+j]), .I0(A[8*k+j]));
+//            end            
+//            SB_DFF experimentXCY( .Q(alucy[8*(k+1)]), .C(clk), .D(cmbXCY[k]) );
+//         end
+//         assign A31 = A[ALUWIDTH-1];
+       
          if ( MTIMETAP < MTIMETAP_LOWLIM ) begin
             assign alu_tapout = 1'b0;
          end else begin
