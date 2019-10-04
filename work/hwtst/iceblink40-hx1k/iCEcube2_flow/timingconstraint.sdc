@@ -9,5 +9,5 @@
 # ##############################################################################
 
 ####---- CreateClock list ----1
-create_clock  -period 13.00 -name {CLK_I} [get_ports {CLK_I}] 
+create_clock  -period 7.00 -name {CLK_I} [get_ports {CLK_I}] 
 

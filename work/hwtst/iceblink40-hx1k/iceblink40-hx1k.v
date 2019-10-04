@@ -127,7 +127,7 @@ module top
       .RST_I                            (1'b0),
       .meip                             (1'b0),
       .start                            (1'b1),
-      .DAT_I                            (32'h0),
+      .DAT_I                            (1'b0),
       /*AUTOINST*/
       // Outputs
       .CYC_O                            (CYC_O),
