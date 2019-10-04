@@ -65,3 +65,5 @@ work/hwtst/max_iceblink40-hx1k/hardware.blif
 work/hwtst/max_iceblink40-hx1k/ice40loaderprog.hv
 work/hwtst/max_iceblink40-hx1k/iCEcube2_flow/*
 
+work/hwtst/for_size_estimate/ice40loaderprog.hv
+work/hwtst/for_size_estimate/t1/*
