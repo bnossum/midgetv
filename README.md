@@ -5,7 +5,7 @@
 Midgetv is non-pipelined and microcoded - it trades speed for
 size. The smallest possibly useful implementation requires around 256
 SB_LUT4s and 4 EBRs (but still successfully executes all programs in
-the rv32i test suite). The largest implementation currently require
+the rv32i test suite in simulation). The largest implementation currently require
 around 411 SB_LUT4s, 18 EBRs and 4 SPRAMS. Typical clock frequencies
 (worst case conditions):
  - ICE40HX1K: 65 MHz
@@ -69,14 +69,13 @@ See [here](work/tst) for the simulator code. Many small programs to test specifi
    utility [`midgetv_bin2ebr`](work/util/midgetv_bin2ebr.c) is part of the API.
 
 
-### Todo
-
-- Cleanup on code
-- Better documentation
+### Future plans
+- Bootloader program (nearly there)
 - Write and test exhaustive CSR code, just now only a minimum exists
-- Bootloader program
 - Test on external interrupts
 - Test on nested interrupts/exceptions
+- Cleanup on code
+- Better documentation
 - Better linker scripts
 - Proper `crt0.S`
 - Table that show clockcycles used per instruction
