@@ -1,0 +1,1 @@
+Pretty awful FM modulation. This give noise over the whole FM band. For iceblink40-hx1k only
