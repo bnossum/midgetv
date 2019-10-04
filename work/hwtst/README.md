@@ -1,6 +1,6 @@
 ### Hardware platforms with example(s) of use of midgetv
 
-Currently I only own two platforms.
+Currently I only own two boards.
 
 | Board            | Platform            | Comment |
 | ---------------- | ------------------- | ------- |
