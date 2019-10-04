@@ -8,7 +8,7 @@
 module m_ice40sim_EBRonly
   # ( parameter
       SRAMADRWIDTH       = 0,  
-      SIMEBRADRWIDTH     = 11,  // MUST match corresponding macro in m_ice4sim_EBRonly.cpp
+      SIMEBRADRWIDTH     = 9,  // MUST match corresponding macro in m_ice4sim_EBRonly.cpp
       IWIDTH             = 32, 
       NO_CYCLECNT        = 1, 
       MTIMETAP           = 14, 

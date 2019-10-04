@@ -22,7 +22,7 @@ INFOCHUNK g_info = {
 
 
 /////////////////////////////////////////////////////////////////////////////
-#define    EBRADRWIDTH  11 // Is a parameter to m_midgetv. MUST match def in m_ice40sim_EBRonly.v
+#define    EBRADRWIDTH  9 // Is a parameter to m_midgetv. MUST match def in m_ice40sim_EBRonly.v
 
 #include "Vm_ice40sim_EBRonly__Syms.h"
 #include "verilated.h"
