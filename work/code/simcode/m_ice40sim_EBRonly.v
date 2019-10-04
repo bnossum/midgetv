@@ -5,6 +5,9 @@
  * -----------------------------------------------------------------------------
  * This plays the role of a testbench together with verilator.
  */
+
+
+
 module m_ice40sim_EBRonly
   # ( parameter
       SRAMADRWIDTH       = 0,  
@@ -13,13 +16,13 @@ module m_ice40sim_EBRonly
       NO_CYCLECNT        = 1, 
       MTIMETAP           = 14, 
       HIGHLEVEL          = 0,
-      LAZY_DECODE        = 0,
+      LAZY_DECODE        = 2,
       DISREGARD_WB4_3_55 = 1
       )
    (
     input CLK_I, // Toggled from verilator
     input RST_I, // NMI
-    input meip //   External interrupt pending
+    input meip  //  External interrupt pending
     );
    wire   start = 1'b1; // Startup happens after 64 clock cycles. 
    
