@@ -3,7 +3,7 @@
 ## midgetv
    
 Midgetv is non-pipelined and microcoded - it trades speed for
-size. The smallest possibly useful implementation requires around 263
+size. The smallest possibly useful implementation requires around 256
 SB_LUT4s and 4 EBRs (but still successfully executes all programs in
 the rv32i test suite). The largest implementation currently require
 around 411 SB_LUT4s, 18 EBRs and 4 SPRAMS. Typical clock frequencies
@@ -47,7 +47,7 @@ least effort you need:
 - Emacs if you want to modify the code easily (for Verilog-Mode)
 - A toolchain for FPGA compilation and upload, for example:
   - iCEcube2 from Lattice
-  - A toolchain based on the cery impressive icestorm project, such as: yosys/arachne-pnr/icepack
+  - A toolchain based on the very impressive icestorm project, such as: yosys/arachne-pnr/icepack
 
 All my work is done under Linux.
 
