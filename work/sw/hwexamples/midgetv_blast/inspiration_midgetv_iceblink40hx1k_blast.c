@@ -9,7 +9,7 @@
     FPGA recompile.
 
     The program to be loaded must follow the format described in
-    midgetv_blast.c
+    inspiration_midgetv_blast.c
 
 */
 #include <stdint.h>

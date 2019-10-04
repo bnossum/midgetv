@@ -135,3 +135,55 @@ int main( void ) {
 
         }
 }
+
+
+/*
+ * The program in mb.S is hard to understand.
+ * Perhaps this may help?
+ */
+typedef struct {
+        uint32_t regL;
+        uint32_t regY;
+} BLK;
+
+BLK blk  = {0,0};
+uint32_t regE = 0;
+uint32_t regB,regT,regW;
+uint32_t rBitrate = cycles_in_a_bit;
+uint32_t r9bit = 9*cycles_in_a_bit;
+uint32_t regP = 0; // Shift register
+
+//  SYSEBR->mcycle is hardware cycle counter
+//  UART->D is uart RX in bit 8
+
+while (1) {
+
+        if ( regE == blk.regY ) {
+                regT = (uint32_t)&blk;
+                regE = (uint32_t)&blk + sizeof(BLK);
+        } else {
+                regT = blk.regL;
+                regE = blk.regY;
+                if ( blk.regL == 0)
+                        (void (*)(void))blk.regY;
+        }
+
+        do {
+                // Wait for startbit
+                while ( (regB = UART->D) != 0 )
+                        ;
+                SYSEBR->mcycle = 0;
+                regT++;
+                regW = rBitrate/2;
+                do {
+                        regW += rBitrate;
+                        regP |= regB;
+                        regP >>= 1;
+                        while ( SYSEBR->mcycle < regW )
+                                ;
+                        regB = UART->D;
+                } while ( regW < r9bit );
+                *(regT-1) = regP;
+        } while ( regT != regE );
+
+}       
