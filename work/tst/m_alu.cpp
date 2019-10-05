@@ -29,15 +29,18 @@ int main(int argc, char **argv) {
 
 
         for ( ctrl = 0; ctrl < (1<<4); ctrl++ ) {
+                /* Want to check all combinations of carry-in and
+                 * ALU operations. I do not check mtime and 
+                 * minstretofl constructions */
                 tb->sa04 = ( ctrl >>  0) & 1;
                 tb->sa05 = ( ctrl >>  1) & 1;
                 tb->sa06 = ( ctrl >>  2) & 1;
                 cin      = ( ctrl >>  3) & 1;
                 aluop    = ctrl & 7;
-                tb->sa24 = 0; //( ctrl >>  4) & 1;
-                tb->sa25 = 0; //( ctrl >>  5) & 1;
-                tb->sa26 = 0; //( ctrl >>  6) & 1;
-                tb->sa27 = 0; //( ctrl >>  7) & 1;
+                tb->sa24 = 0; 
+                tb->sa25 = 0; 
+                tb->sa26 = 0; 
+                tb->sa27 = 0; 
                 
                 cin = ( aluop == 6 ) ? 0 : cin;
                 tb->alu_carryin = cin;
@@ -73,7 +76,12 @@ int main(int argc, char **argv) {
 
                                 if ( aluop == 4 ) {
                                         if ( tb->alu_carryout != facit_co ) {
-                                                ferr( "Error\n" );
+                                                ferr( "Carry out error when ctrl = 0x%x. "
+                                                      "Di=%x, ADR_O=%d, cin=%d\n"
+                                                      "facti_co=%d while tb->alu_carryout=%d\n",
+                                                      ctrl, Di, ADR_O, cin,
+                                                      facit_co, tb->alu_carryout
+                                                        );
                                         }
                                 }
 

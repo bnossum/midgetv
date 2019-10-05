@@ -297,7 +297,7 @@ module m_midgetv_core
    
    
    /* verilator lint_off UNUSED */
-   wire                 alu_killwarnings;       // From inst_alu of m_alu.v
+//   wire                 alu_killwarnings;       // From inst_alu of m_alu.v
    wire                 m_alu_carryin_killwarnings;// From inst_alu_carryin of m_alu_carryin.v
    wire                 m_condcode_killwarnings;// From inst_condcode of m_condcode.v
    wire                 m_cyclecnt_kill;        // From inst_cyclecnt of m_cyclecnt.v
@@ -609,7 +609,6 @@ module m_midgetv_core
       .alu_carryout                     (alu_carryout),
       .alu_tapout                       (alu_tapout),
       .alu_minstretofl                  (alu_minstretofl),
-      .alu_killwarnings                 (alu_killwarnings),
       // Inputs
       .Di                               (Di[ALUWIDTH-1:0]),
       .ADR_O                            (ADR_O[ALUWIDTH-1:0]),
