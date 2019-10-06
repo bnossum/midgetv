@@ -185,11 +185,6 @@ module m_alu_highlevel
     * and the low-level code, but is equal when it counts - during ADD.
     */
    assign {alu_carryout,B} = s_alu[2] ? A+QQ+{{ALUWIDTH{1'b0}},alu_carryin} : {1'b0,~(A^QQ)};
-   //   always @(*)
-   //     if ( s_alu[2] ) 
-   //       {alu_carryout,B} = A+QQ+{{ALUWIDTH{1'b0}},alu_carryin};  
-   //     else
-   //       B = ~(A^QQ);
 
    /* For mtimeinc interrupts, only defined when we tap out
     * a bit of mtime.
@@ -242,7 +237,7 @@ module m_alu_lowlevel
    wire [ALUWIDTH:0]      alucy; 
    /* verilator lint_on UNOPTFLAT */
 
-   /* This is the aly proper
+   /* This is the alu proper
     */
    assign alucy[0] = alu_carryin;
    for ( j = 0; j < ALUWIDTH; j = j + 1 ) begin : blk1
@@ -282,8 +277,5 @@ module m_alu_lowlevel
    end
    assign alu_carryout = propcy;
    
-   // CY[4]       THROUGH           CY[5]               
-   // alucy[4] -> alucy[5]          alucy[5]extra      CI
-   // alucy[5] -> alucy[5]extra ->  alucy[6]           CO
 endmodule
 
