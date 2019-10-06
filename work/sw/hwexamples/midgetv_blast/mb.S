@@ -142,7 +142,7 @@ EntryCSR:       j       ExceptH         // 0x108 Microcode branches to here when
         // First calculate bitrate with autobaud,
         // then branch to loader routine in getblk
         //
-_start:                                 
+_start:
         sw      regW,UARTOFS(regIO)     // UART->D = 1. Light green and red led, source for blue led is ~uartrx.
         sw      regW,LEDOFS(regIO)      // for ( i = 0; i < 4; i++ ) {
 ABL:    lw      regP,UARTOFS(regIO)     //         while ( UART->D )
@@ -154,8 +154,8 @@ ABL:    lw      regP,UARTOFS(regIO)     //         while ( UART->D )
 1:      lw      regP,UARTOFS(regIO)     //         while ( UART->D )
         bne     regP,x0,1b              //              ;
                                         //
-        addi    regB,regB,LastLoop      //         // Is this the last round?
-        beq     regB,x0,1f              //         // Yes, break    
+        addi    regB,regB,-1            //         Is this the last round?
+        beq     regB,x0,LastLoop        //         Yes, break    
         
 1:      lw      regP,UARTOFS(regIO)     //         while ( UART->D == 0)
         beq     regP,x0,1b              //              ;

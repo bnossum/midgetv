@@ -44,8 +44,8 @@ BYTEWRITE
 #define HWORDTYPE 1
 #define WORDTYPE  2
 
-#define WRITETYPE  WORDTYPE
-#define READDTYPE  WORDTYPE
+#define WRITETYPE  HWORDTYPE
+#define READDTYPE  HWORDTYPE
 
 /////////////////////////////////////////////////////////////////////////////
 int main( void ) {
@@ -61,8 +61,8 @@ int main( void ) {
                         *(uint8_t *)(i*4 + j + (uint8_t *)SRAM) = i >> ( j << 3 );
 #elif WRITETYPE == HWORDTYPE
                 int j;
-                for ( j = 0; j < 2; j++ ) {
-                        *(uint8_t *)(i*2 + j + (uint16_t)SRAM) = i >> ( j >> 4 ); // ???? Surely an error here? Retest.
+                for ( j = 0; j < 2; j++ ) 
+                        *(uint16_t *)(i*2 + j + (uint16_t *)SRAM) = i >> ( j << 4 ); 
 #else                
                 *(SRAM+i) = i;
 #endif                
@@ -100,7 +100,8 @@ int main( void ) {
         simend();
         
         while (1) {
-                LED->D = ++i & 2;
+                // 2 Blue blinks in succession, longer pause
+                LED->D = (++i & 2) << 1;
                 cywait(0x10000);
                 LED->D = 0;
                 cywait(0x40000);

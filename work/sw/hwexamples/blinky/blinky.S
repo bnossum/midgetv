@@ -5,6 +5,7 @@
 _start:        
         li      x1,LEDREG
         addi    x3,x3,-1
+        andi    x3,x3,7     
         sw      x3,0(x1)                // To LEDs
 //        li      x4,0x1000     // Suitable for iceblinck40-hx1k with a 330 kHz clock
 //        li      x4,0x10000    // Suitable for iceblinck40-hx1k with a 3.3 MHz clock

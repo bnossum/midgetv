@@ -137,6 +137,7 @@ int main( void ) {
 }
 
 
+#if 0
 /*
  * The program in mb.S is hard to understand.
  * Perhaps this may help?
@@ -187,3 +188,4 @@ while (1) {
         } while ( regT != regE );
 
 }       
+#endif

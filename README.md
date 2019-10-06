@@ -53,13 +53,17 @@ least effort you need:
 All my work is done under Linux.
 
 ### Examples of midgetv on hardware
-See [here](work/hwtst)
+See [here](work/hwtst). Hardware that can implement a bit-bang UART
+may load a program without Verilog recompule, see directories
+[midgetv_blast](work/sw/hwexamples/midgetv_blast/) and [dynl(work/sw/dynhw/).
 
 ### Example programs
 See [here](work/sw/hwexamples)
 
 ### Simulation of midgetv in Verilator
-See [here](work/tst) for the simulator code. Many small programs to test specific instructions in midgetv is [here](work/sw/first), and code to do the riscv compliance test suite is [here](work/sw/second).
+See [here](work/tst) for the simulator code. Many small programs to
+test specific instructions in midgetv is [here](work/sw/first), and
+code to do the riscv compliance test suite is [here](work/sw/second).
 
 
 
@@ -71,7 +75,6 @@ See [here](work/tst) for the simulator code. Many small programs to test specifi
 
 
 ### Future plans
-- Bootloader program (nearly there)
 - Write and test exhaustive CSR code, just now only a minimum exists
 - Test on external interrupts
 - Test on nested interrupts/exceptions
