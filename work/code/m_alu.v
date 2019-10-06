@@ -5,17 +5,32 @@
  * -----------------------------------------------------------------------------
  * The alu. Operations:
  * 
- *  sa06
- *  |sa05
- *  ||sa04
- *  000 : nearXOR  B = D^(~Q)   
- *  001 : PASSD    B = D
- *  010 : nearAND  B = D&(~Q)   
- *  011 : INVQ     B = ~Q       
- *  100 : ADD      B = D+Q+cin  
- *  101 : SHLQ     B = (Q<<1)|cin (with D=0xffffffff) 
- *  110 : nearIOR  B = (~D)|Q     (with cin==0)     
- *  111 : PASSQ    B = Q+cin
+ * sa06
+ * |sa05
+ * ||sa04
+ * 000 : nearXOR  B = D^(~Q)   
+ * 001 : PASSD    B = D
+ * 010 : nearAND  B = D&(~Q)   
+ * 011 : INVQ     B = ~Q       
+ * 100 : ADD      B = D+Q+cin  
+ * 101 : SHLQ     B = (Q<<1)|cin (with D=0xffffffff) 
+ * 110 : nearIOR  B = (~D)|Q     (with cin==0)     
+ * 111 : PASSQ    B = Q+cin
+ * 
+ * The ALU is constructed out of two columns of LUTs. 
+ *      
+ *                        | co                  sa05 
+ *                       /y\                    |sa04               sa06  
+ *         ___           |||     ___            ||  A               |   B       
+ * Q    --|I0 | A sa06 --(((----|I0 | B         --  -               -   -       
+ * sa04 --|I1 |----------+((----|I1 |--         00  Di              0   ~(A^QQ)  
+ * Di   --|I2 |    QQ  ---(+----|I2 |           01  ~(Di^Q)         1   A^QQ^cin 
+ * sa05 --|I3_|           +-----|I3_|           10  (~Di)&(~Q)       
+ *                        |                     11  0       
+ *                        cin       
+ *   
+ *  luta=0x01b4 lutb=0xc369
+ * 
  * 
  * MTIMETAP_LOWLIM
  * ---------------
@@ -32,12 +47,10 @@
  * 
  * HIGHLEVEL
  * ---------
- * The size requirement of this module should be 64 or 65 LUTs. 
- * Highlevel synthesis gives 69 LUTs. But to get the INSTRUCTION registers
- * packed with the luts of the input mux, and using the combinatorical output
- * of the input mux to the A-part of the alu, hand-placement is needed.
- * Then it is easier to use the low level implementation. The low level
- * implementation is the tested one.
+ * To get the INSTRUCTION registers packed with the luts of the input mux, and 
+ * using the combinatorical output of the input mux to the A-part of the alu, 
+ * hand-placement is needed. Easiest done with the  low level implementation. 
+ * The low level implementation is the tested one.
  * 
  * ALUWIDTH
  * --------
@@ -45,6 +58,14 @@
  * it can be instantiated in a slimmer version. To avoid to have to make
  * a wrapper program for simulation the default value of ALUWIDTH is set to 8,
  * while as instantiated from m_midgetv_core ALUWIDTH is always 32.
+ * 
+ * 
+ * A note on the size of the module. 
+ * I compiled this module as in a scratch project to assess the size.
+ *                          
+ * HIGHLEVEL Lattice LSE :  97 SB_LUT4s
+ * HIGHLEVEL Synplify Pro:  66 SB_LUT4s
+ * LOWLEVEL:                65 SB_LUT4s       
  */
 
 /* verilator lint_off DECLFILENAME */
@@ -52,7 +73,11 @@
 module m_alu
   # ( parameter HIGHLEVEL = 0,
       MTIMETAP = 0,
+`ifdef verilator      
       ALUWIDTH = 8,
+`else
+      ALUWIDTH = 32,
+`endif
       MTIMETAP_LOWLIM = 32
       )
    (
@@ -66,15 +91,15 @@ module m_alu
     output                A31, //                 A[31] == Di[31] during ADD, used in m_condcode.
     output                alu_carryout, //        ALU carry out
     output                alu_tapout, //          Used to trigger interrupt for mtime increment/mcycle update
-    output                alu_minstretofl //     Used to trigger interrupt for retired instructions
-//    output                alu_killwarnings //     To keep Verilator happy
+    output                alu_minstretofl //      Used to trigger interrupt for retired instructions
     );
 
    if ( HIGHLEVEL ) begin
-      m_alu_highlevel #(.ALUWIDTH(        ALUWIDTH        ),
-                        .MTIMETAP(        MTIMETAP        ),
-                        .MTIMETAP_LOWLIM( MTIMETAP_LOWLIM )
-                        )
+      m_alu_highlevel #
+        (.ALUWIDTH(        ALUWIDTH        ),
+         .MTIMETAP(        MTIMETAP        ),
+         .MTIMETAP_LOWLIM( MTIMETAP_LOWLIM )
+         )
       inst
         (/*AUTOINST*/
          // Outputs
@@ -96,10 +121,11 @@ module m_alu
          .sa25                          (sa25),
          .sa24                          (sa24));
    end else begin
-      m_alu_lowlevel #(.ALUWIDTH(        ALUWIDTH        ),
-                       .MTIMETAP(        MTIMETAP        ),
-                       .MTIMETAP_LOWLIM( MTIMETAP_LOWLIM )
-                       )
+      m_alu_lowlevel #
+        (.ALUWIDTH(        ALUWIDTH        ),
+         .MTIMETAP(        MTIMETAP        ),
+         .MTIMETAP_LOWLIM( MTIMETAP_LOWLIM )
+         )
       inst
         (/*AUTOINST*/
          // Outputs
@@ -128,29 +154,29 @@ endmodule
 /* =============================================================================
  */
 module m_alu_highlevel
-  # ( MTIMETAP = 0,
+  # ( parameter MTIMETAP = 0,
       ALUWIDTH = 8,
       MTIMETAP_LOWLIM = 32
       )
    (
-    input [ALUWIDTH-1:0]      Di, //                  First operand to the ALU
-    input [ALUWIDTH-1:0]      ADR_O, //               Normally second operand to ALU
-    input [ALUWIDTH-1:0]      QQ, //                  Alternate second operand to ALU
-    input                     alu_carryin, //         Carry in to ALU
-    input                     sa06,sa05,sa04,//       Determines ALU operation
+    input [ALUWIDTH-1:0]  Di,
+    input [ALUWIDTH-1:0]  ADR_O,
+    input [ALUWIDTH-1:0]  QQ, 
+    input                 alu_carryin,
+    input                 sa06,sa05,sa04,
 /* verilator lint_off UNUSED */
-    input                     sa27,sa26,sa25,sa24, // To decode Wttime and Wrinst
+    input                 sa27,sa26,sa25,sa24, 
 /* verilator lint_on UNUSED */ 
-    output reg [ALUWIDTH-1:0] B, //                   ALU result
-    output                    A31, //                 A[31] == Di[31] during ADD, used in m_condcode.
-    output reg                alu_carryout, //        ALU carry out
-    output                    alu_tapout, //          Used to trigger interrupt for mtime increment/mcycle update
-    output                    alu_minstretofl //      Used to trigger interrupt for retired instructions
+    output [ALUWIDTH-1:0] B,
+    output                A31,
+    output                alu_carryout,
+    output                alu_tapout,
+    output                alu_minstretofl
     );   
-   reg [ALUWIDTH-1:0]         A;
+   reg [ALUWIDTH-1:0]     A;
    
-   /* Model the first row of LUTs. Also set A31 used instead of Di[31] in m_condcode
-    * so a chained LUT can be used. See m_condcode
+   /* Model of the first row of LUTs. Also set A31 used instead of Di[31] 
+    * in m_condcode so a chained LUT can be used. See m_condcode.
     */
    always @(/*AS*/ADR_O or Di or sa04 or sa05) 
      case ({sa05,sa04})
@@ -161,74 +187,58 @@ module m_alu_highlevel
      endcase
    assign A31 = A[ALUWIDTH-1];
    
-   /* Model second ro of LUTs. The carry out is different in the highlevel
+   /* Model second row of LUTs. The carry out is different in the highlevel
     * and the low-level code, but is equal when it counts - during ADD.
     */
-   always @(/*AS*/A or ALUWIDTH or QQ or alu_carryin or sa06) 
-     if ( sa06 ) 
-       {alu_carryout,B} = A+QQ+{{ALUWIDTH{1'b0}},alu_carryin};  
-     else
-       B = ~(A^QQ);
+   assign {alu_carryout,B} = sa06 ? A+QQ+{{ALUWIDTH{1'b0}},alu_carryin} : {1'b0,~(A^QQ)};
+   //   always @(*)
+   //     if ( sa06 ) 
+   //       {alu_carryout,B} = A+QQ+{{ALUWIDTH{1'b0}},alu_carryin};  
+   //     else
+   //       B = ~(A^QQ);
 
    /* For mtimeinc interrupts, only defined when we tap out
     * a bit of mtime.
     */
-   if ( MTIMETAP < MTIMETAP_LOWLIM ) begin
+   if ( MTIMETAP < MTIMETAP_LOWLIM || MTIMETAP >= ALUWIDTH ) begin
       assign alu_tapout = 1'b0;
    end else begin
       wire isWttime;
       assign isWttime = {sa27,sa26,sa25,sa24} == 4'b1011;      
-      if (MTIMETAP >= ALUWIDTH ) begin
-         assign alu_tapout = ~A[ALUWIDTH-1] & B[ALUWIDTH-1] & isWttime;
-      end else begin
-         assign alu_tapout = (A[MTIMETAP]^B[MTIMETAP]) & isWttime;
-      end 
+      assign alu_tapout = (A[MTIMETAP]^B[MTIMETAP]) & isWttime;
    end
    
    /* For retired instructions interrupt
     */
-   if (MTIMETAP >= MTIMETAP_LOWLIM ) begin
+   if (MTIMETAP < MTIMETAP_LOWLIM ) begin
+      assign alu_minstretofl = 1'b0; 
+   end else begin
       wire isWrinst = {sa27,sa26,sa25,sa24} == 4'b1001;
       assign alu_minstretofl = alu_carryout & isWrinst;
-   end else begin
-      assign alu_minstretofl = 1'b0; // Keep Verilator happy
    end
 endmodule
 
 /* =============================================================================
- * The ALU is constructed out of two columns of LUTs. 
- *      
- *                        | co                  sa05 
- *                       /y\                    |sa04               sa06  
- *         ___           |||     ___            ||  A               |   B       
- * Q    --|I0 | A sa06 --(((----|I0 | B         --  -               -   -       
- * sa04 --|I1 |----------+((----|I1 |--         00  Di              0   ~(A^QQ)  
- * Di   --|I2 |    QQ  ---(+----|I2 |           01  ~(Di^Q)         1   A^QQ^cin 
- * sa05 --|I3_|           +-----|I3_|           10  (~Di)&(~Q)       
- *                        |                     11  0       
- *                        cin       
- *   
- *  luta=0x01b4 lutb=0xc369
  */
 module m_alu_lowlevel
-  # ( MTIMETAP = 0,
+  # ( parameter MTIMETAP = 0,
       ALUWIDTH = 8,
       MTIMETAP_LOWLIM = 32
       )
    (
-    input [ALUWIDTH-1:0]  Di, //                  First operand to the ALU
-    input [ALUWIDTH-1:0]  ADR_O, //               Normally second operand to ALU
-    input [ALUWIDTH-1:0]  QQ, //                  Alternate second operand to ALU
-    input                 alu_carryin, //         Carry in to ALU
-    input                 sa06,sa05,sa04,//       Determines ALU operation
+    input [ALUWIDTH-1:0]  Di,
+    input [ALUWIDTH-1:0]  ADR_O,
+    input [ALUWIDTH-1:0]  QQ, 
+    input                 alu_carryin, 
+    input                 sa06,sa05,sa04,
 /* verilator lint_off UNUSED */
-    input                 sa27,sa26,sa25,sa24, // To decode Wttime and Wrinst
+    input                 sa27,sa26,sa25,sa24,
 /* verilator lint_on UNUSED */ 
-    output [ALUWIDTH-1:0] B, //                   ALU result
-    output                A31, //                 Used in m_condcode.
-    output                alu_carryout, //        ALU carry out
-    output                alu_tapout, //          Used to trigger interrupt for mtime increment/mcycle update
-    output                alu_minstretofl //      Used to trigger interrupt for retired instructions
+    output [ALUWIDTH-1:0] B,
+    output                A31,
+    output                alu_carryout,
+    output                alu_tapout,
+    output                alu_minstretofl
     );
    
    wire [ALUWIDTH-1:0]    A;
@@ -251,17 +261,12 @@ module m_alu_lowlevel
    /* When we increment the low 32-bit of mtime, we have a carry into bit MTIMETAP only
     * when the output bit B[MTIMETAP] is set, bit the input bit A[MTIMETAP] was clear. 
     */
-   if ( MTIMETAP < MTIMETAP_LOWLIM ) begin
+   if ( MTIMETAP < MTIMETAP_LOWLIM || MTIMETAP > ALUWIDTH ) begin
       assign alu_tapout = 1'b0;
    end else begin
       wire isWttime;
       SB_LUT4 #(.LUT_INIT(16'h0800)) l_isWttime( .O(isWttime), .I3(sa27), .I2(sa26), .I1(sa25), .I0(sa24));
-      // For mtimeinc interrupts:
-      if (MTIMETAP >= ALUWIDTH ) begin
-         SB_LUT4 #(.LUT_INIT(16'h4064)) l_alu_tapout( .O(alu_tapout), .I3(1'b0), .I2(isWttime), .I1(B[ALUWIDTH-1]), .I0(A[ALUWIDTH-1]));
-      end else begin
-         SB_LUT4 #(.LUT_INIT(16'h4040)) l_alu_tapout( .O(alu_tapout), .I3(1'b0), .I2(isWttime), .I1(B[MTIMETAP]), .I0(A[MTIMETAP]));
-      end            
+      SB_LUT4 #(.LUT_INIT(16'h4040)) l_alu_tapout( .O(alu_tapout), .I3(1'b0), .I2(isWttime), .I1(B[MTIMETAP]), .I0(A[MTIMETAP]));
    end 
 
    /* If we have interrupts I assume we also have an instruction counter.
@@ -271,15 +276,15 @@ module m_alu_lowlevel
     * See issue #13.
     */
    wire propcy;
-   if (MTIMETAP >= MTIMETAP_LOWLIM  ) begin
+   if (MTIMETAP < MTIMETAP_LOWLIM  ) begin
+      assign propcy = alucy[ALUWIDTH];
+      assign alu_minstretofl = 1'b0; // Keep Verilator happy
+   end else begin
       wire isWrinst; // = {sa27,sa26,sa25,sa24} == 4'b1001;
       SB_LUT4 #(.LUT_INIT(16'h0200)) l_isWrinst( .O(isWrinst), .I3(sa27), .I2(sa26), .I1(sa25), .I0(sa24));
       // assign alu_minstretofl = alu_carryout & isWrinst;
       SB_LUT4 #(.LUT_INIT(16'haa00)) l_alu_minstretofl( .O(alu_minstretofl), .I3(alucy[ALUWIDTH]), .I2(1'b0), .I1(1'b1), .I0(isWrinst));
       SB_CARRY ca_l_alu_minstretofl( .CO(propcy),                            .CI(alucy[ALUWIDTH]), .I1(1'b0), .I0(1'b1));
-   end else begin
-      assign propcy = alucy[ALUWIDTH];
-      assign alu_minstretofl = 1'b0; // Keep Verilator happy
    end
    assign alu_carryout = propcy;
    
