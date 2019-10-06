@@ -239,19 +239,9 @@ module m_alu_lowlevel
    /* This is the alu proper
     */
    assign alucy[0] = alu_carryin;
-   SB_LUT4 #(.LUT_INIT(16'h01b4)) a [ALUWIDTH-1:0] (.O(A), .I3(s_alu[1]), .I2(Di), .I1(s_alu[0]), .I0(ADR_O));
-   SB_LUT4 #(.LUT_INIT(16'hc369)) b [ALUWIDTH-1:0] (.O(B), .I3(alucy[ALUWIDTH-1:0]), .I2(QQ), .I1(A),.I0(s_alu[2]));
-   SB_CARRY ca [ALUWIDTH-1:0] ( .CO(alucy[ALUWIDTH:1]),    .CI(alucy[ALUWIDTH-1:0]), .I1(QQ), .I0(A));
+   bn_l4 #(.I(16'h01b4)) a [ALUWIDTH-1:0] (.o(A), .i3(s_alu[1]), .i2(Di), .i1(s_alu[0]), .i0(ADR_O));
+   bn_lcy4 #(.I(16'hc369)) b [ALUWIDTH-1:0] (.o(B), .co(alucy[ALUWIDTH:1]), .i3(alucy[ALUWIDTH-1:0]), .i2(QQ), .i1(A),.i0(s_alu[2]));
    assign A31 = A[ALUWIDTH-1];
-
-//   genvar                 j;
-//   assign alucy[0] = alu_carryin;
-//   for ( j = 0; j < ALUWIDTH; j = j + 1 ) begin : blk1
-//      SB_LUT4 #(.LUT_INIT(16'h01b4)) a(.O(A[j]), .I3(s_alu[1]), .I2(Di[j]), .I1(s_alu[0]), .I0(ADR_O[j]));
-//      SB_LUT4 #(.LUT_INIT(16'hc369)) b(.O(B[j]), .I3(alucy[j]), .I2(QQ[j]), .I1(A[j]),.I0(s_alu[2]));
-//      SB_CARRY ca( .CO(alucy[j+1]),              .CI(alucy[j]), .I1(QQ[j]), .I0(A[j]));
-//   end
-//   assign A31 = A[ALUWIDTH-1];
 
    /* When we increment the low 32-bit of mtime, we have a carry into bit MTIMETAP only
     * when the output bit B[MTIMETAP] is set, bit the input bit A[MTIMETAP] was clear. 
@@ -260,8 +250,8 @@ module m_alu_lowlevel
       assign alu_tapout = 1'b0;
    end else begin
       wire isWttime;
-      SB_LUT4 #(.LUT_INIT(16'h0800)) l_isWttime( .O(isWttime), .I3(sa27), .I2(sa26), .I1(sa25), .I0(sa24));
-      SB_LUT4 #(.LUT_INIT(16'h4040)) l_alu_tapout( .O(alu_tapout), .I3(1'b0), .I2(isWttime), .I1(B[MTIMETAP]), .I0(A[MTIMETAP]));
+      bn_l4v #(.I(16'h0800)) l_isWttime( .o(isWttime), .i({sa27,sa26,sa25,sa24}));
+      bn_l4v #(.I(16'h4040)) l_alu_tapout( .o(alu_tapout), .i({1'b0,isWttime,B[MTIMETAP],A[MTIMETAP]}));
    end 
 
    /* If we have interrupts I assume we also have an instruction counter.
@@ -275,11 +265,9 @@ module m_alu_lowlevel
       assign propcy = alucy[ALUWIDTH];
       assign alu_minstretofl = 1'b0; // Keep Verilator happy
    end else begin
-      wire isWrinst; // = {sa27,sa26,sa25,sa24} == 4'b1001;
-      SB_LUT4 #(.LUT_INIT(16'h0200)) l_isWrinst( .O(isWrinst), .I3(sa27), .I2(sa26), .I1(sa25), .I0(sa24));
-      // assign alu_minstretofl = alu_carryout & isWrinst;
-      SB_LUT4 #(.LUT_INIT(16'haa00)) l_alu_minstretofl( .O(alu_minstretofl), .I3(alucy[ALUWIDTH]), .I2(1'b0), .I1(1'b1), .I0(isWrinst));
-      SB_CARRY ca_l_alu_minstretofl( .CO(propcy),                            .CI(alucy[ALUWIDTH]), .I1(1'b0), .I0(1'b1));
+      wire isWrinst;
+      bn_l4v #(.I(16'h0200)) l_isWrinst( .o(isWrinst), .i({sa27,sa26,sa25,sa24}));
+      bn_lcy4v #(.I(16'haa00)) l_alu_minstretofl( .o(alu_minstretofl), .co(propcy), .i({alucy[ALUWIDTH],2'b01,isWrinst}));
    end
    assign alu_carryout = propcy;
    

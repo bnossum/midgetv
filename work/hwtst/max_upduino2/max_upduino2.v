@@ -6,6 +6,7 @@
  * Risc-v in a iCE40UP5K. Max size midgetv.
  */
 
+`include "../../code/m_ice_shortcuts.v"
 `include "../../code/m_inputmux.v"
 `include "../../code/m_alu_carryin.v"
 `include "../../code/m_alu.v"

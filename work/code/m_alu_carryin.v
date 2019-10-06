@@ -68,38 +68,32 @@ module m_alu_carryin  # ( parameter HIGHLEVEL = 0 )
     input        preprealucyin,
     /* verilator lint_on UNUSED */
     input [31:0] ADR_O,
-    output reg   alu_carryin,sra_msb,
+    output       alu_carryin,sra_msb,
     output       sa12_and_corerunning,
     output       m_alu_carryin_killwarnings
     );
    
    assign m_alu_carryin_killwarnings = &ADR_O;
    generate
-      if ( HIGHLEVEL != 0 ) begin         
+      if ( HIGHLEVEL != 0 ) begin
+         reg r_alu_carryin, r_sra_msb;
          always @(/*AS*/raluF or s_alu_carryin) 
            case ( s_alu_carryin )
-             2'b00 : alu_carryin = 1'b0;
-             2'b01 : alu_carryin = raluF;
-             2'b10 : alu_carryin = raluF;
-             2'b11 : alu_carryin = 1'b1;
+             2'b00 : r_alu_carryin = 1'b0;
+             2'b01 : r_alu_carryin = raluF;
+             2'b10 : r_alu_carryin = raluF;
+             2'b11 : r_alu_carryin = 1'b1;
            endcase
          always @(/*AS*/ADR_O or FUNC7_5) 
-           sra_msb = FUNC7_5 ? ADR_O[31] : 1'b0;
+           r_sra_msb = FUNC7_5 ? ADR_O[31] : 1'b0;
          assign sa12_and_corerunning = sa12 & corerunning;
-
+         assign sra_msb = r_sra_msb;
+         assign alu_carryin = r_alu_carryin;
       end else begin
          
          wire prealucyin;
-         wire _sra_msb,_alu_carryin;
-
-         SB_LUT4 #(.LUT_INIT(16'haa00))  la(.O(sa12_and_corerunning),.I3(sa12),.I2(1'b0), .I1(raluF),.I0(corerunning));
-         SB_CARRY pcy(.CO(prealucyin),                     .CI(preprealucyin), .I1(1'b0), .I0(raluF));
-         SB_LUT4 #(.LUT_INIT(16'haa00))  lb(.O(_sra_msb),.I3(FUNC7_5),.I2(s_alu_carryin[1]),.I1(s_alu_carryin[0]),.I0(ADR_O[31]));
-         SB_CARRY cya(.CO(_alu_carryin),              .CI(prealucyin),.I1(s_alu_carryin[1]),.I0(s_alu_carryin[0]));
-         always @(/*AS*/_alu_carryin or _sra_msb) begin
-            alu_carryin = _alu_carryin;
-            sra_msb = _sra_msb;
-         end
+         bn_lcy4v_b #(.I(16'haa00))  la(.o(sa12_and_corerunning),.co(prealucyin),  .ci(preprealucyin), .i({sa12,1'b0,raluF,corerunning}));
+         bn_lcy4v_b #(.I(16'haa00))  lb(.o(sra_msb),             .co(alu_carryin), .ci(prealucyin),    .i({FUNC7_5,s_alu_carryin,ADR_O[31]}));
 
       end
       
