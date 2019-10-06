@@ -20,7 +20,6 @@ int main(int argc, char **argv) {
         uint32_t tmpB,facit_co;
         uint8_t facit_B;
 
-        
 	// Initialize Verilators variables
 	Verilated::commandArgs(argc, argv);
 

@@ -244,7 +244,6 @@ module m_midgetv_core
       SRAMADRWIDTH = 0,  EBRADRWIDTH =  8, IWIDTH =  8, NO_CYCLECNT = 1, MTIMETAP =  0, HIGHLEVEL = 0, LAZY_DECODE = 1, DISREGARD_WB4_3_55 = 1,// Minimal
 //    SRAMADRWIDTH = 16, EBRADRWIDTH =  8, IWIDTH = 32, NO_CYCLECNT = 0, MTIMETAP = 14, HIGHLEVEL = 0, LAZY_DECODE = 1, DISREGARD_WB4_3_55 = 0,// Conventional
 //    SRAMADRWIDTH = 17, EBRADRWIDTH = 11, IWIDTH = 32, NO_CYCLECNT = 0, MTIMETAP = 14, HIGHLEVEL = 0, LAZY_DECODE = 0, DISREGARD_WB4_3_55 = 0,// Maximal
-      ALUWIDTH = 32, //        Always 32      
       MTIMETAP_LOWLIM = 14, // Only location where this value is really to be set 
       NO_UCODEOPT = 0, //      Only set to 1 during debugging
       DBGA = 0, //             Only set to 1 during debugging
@@ -291,6 +290,8 @@ module m_midgetv_core
     output [31:0]      dbga, //        For hardware debugging
     output             midgetv_core_killwarnings // To tie-off unused signals. Do not connect.
     );
+   localparam ALUWIDTH = 32;
+   
    wire                clk; //   My signal name for the clock.
    assign clk   = CLK_I;
    assign CYC_O = STB_O; //      See Wishbone B.4 permission 3.40
