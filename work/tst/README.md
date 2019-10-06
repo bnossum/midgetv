@@ -15,7 +15,7 @@ highlevel code, etc.
 ### Testin ALU carry in
 
 The program `m_alu_carryin` iterates over all possible inputs to
-[`m_alu_carryin`](../code/m_alu_carryib.v) and compares with a facit.
+[`m_alu_carryin`](../code/m_alu_carryin.v) and compares with a facit.
 
 ### Testing the ALU
 
