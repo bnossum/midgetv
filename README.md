@@ -54,7 +54,7 @@ All my work is done under Linux.
 
 ### Examples of midgetv on hardware
 See [here](work/hwtst). Hardware that can implement a bit-bang UART
-may load a program without Verilog recompule, see directories
+may load a program without Verilog recompile, see directories
 [midgetv_blast](work/sw/hwexamples/midgetv_blast/) and [dynhw](work/sw/dynhw/).
 
 ### Example programs
