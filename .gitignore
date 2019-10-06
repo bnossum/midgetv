@@ -1,17 +1,6 @@
 work/obj_dir/*
 work/nobackup_cold_store/*
-work/bin/iceblinkcom
-work/bin/m_ice40sim_EBRonly.bin
-work/bin/m_ice40sim_SRAM.bin
-work/bin/midgetv_bin2ebr
-work/bin/midgetv_genucode
-work/bin/ucodeinitval.hv
-work/bin/m_ucodepc.bin
-work/bin/m_alu.bin
-work/bin/midgetv_indirectEBR
-work/bin/m_2ebr
-work/bin/simmorse
-work/bin/simeratosthenes
+work/bin/*
 
 work/hwtst/iceblink40-hx1k/.sconsign.dblite
 work/hwtst/iceblink40-hx1k/hardware.asc
@@ -31,6 +20,7 @@ work/hwtst/iceblink40-hx1k/iCEcube2_flow/top_prim.v
 work/hwtst/iceblink40-hx1k/iCEcube2_flow/xxx_lse_cp_file_list
 work/hwtst/iceblink40-hx1k/iCEcube2_flow/xxx_lse_sign_file
 work/hwtst/iceblink40-hx1k/ice40loaderprog.hv
+work/hwtst/iceblink40-hx1k/scratch/*
 
 work/hwtst/upduino2/.sconsign.dblite
 work/hwtst/upduino2/hardware.asc
