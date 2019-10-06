@@ -26,8 +26,9 @@ a corresponding interface, see `m_digilent.v`. Usage:
 ### Format of the program to upload
 This is chunk based. There are one header word, and two chunk types.
 
-| Header word  | 0x01071f3f                       |
+|              |                                  |
 | ------------ | -------------------------------- |
+| Header word  | 0x01071f3f                       |
 | Data chunk:  | uint32_t loadadr                 |
 |              | uint32_t endloadadr              |
 |              | endloadadr-loadadr bytes of data |
@@ -43,6 +44,7 @@ little-endian. Granularity is byte-based.
 The most used scenario will perhaps be a file compiled for SRAM,
 starting execution at _start. In that case the file will be:
 
+|            |
 | ---------- |
 | 0x01071f3f |
 | 0x80000000 |
@@ -53,6 +55,7 @@ starting execution at _start. In that case the file will be:
 
 For platforms with no SRAM:
 
+|            |
 | ---------- |
 | 0x01071f3f |
 | 0x00000100 |
