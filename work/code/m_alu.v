@@ -231,7 +231,6 @@ module m_alu_lowlevel
     );
    
    wire [ALUWIDTH-1:0]    A;
-   genvar                 j;
    
    /* verilator lint_off UNOPTFLAT */
    wire [ALUWIDTH:0]      alucy; 
@@ -240,12 +239,19 @@ module m_alu_lowlevel
    /* This is the alu proper
     */
    assign alucy[0] = alu_carryin;
-   for ( j = 0; j < ALUWIDTH; j = j + 1 ) begin : blk1
-      SB_LUT4 #(.LUT_INIT(16'h01b4)) a(.O(A[j]), .I3(s_alu[1]), .I2(Di[j]), .I1(s_alu[0]), .I0(ADR_O[j]));
-      SB_LUT4 #(.LUT_INIT(16'hc369)) b(.O(B[j]), .I3(alucy[j]), .I2(QQ[j]), .I1(A[j]),.I0(s_alu[2]));
-      SB_CARRY ca( .CO(alucy[j+1]),              .CI(alucy[j]), .I1(QQ[j]), .I0(A[j]));
-   end
+   SB_LUT4 #(.LUT_INIT(16'h01b4)) a [ALUWIDTH-1:0] (.O(A), .I3(s_alu[1]), .I2(Di), .I1(s_alu[0]), .I0(ADR_O));
+   SB_LUT4 #(.LUT_INIT(16'hc369)) b [ALUWIDTH-1:0] (.O(B), .I3(alucy[ALUWIDTH-1:0]), .I2(QQ), .I1(A),.I0(s_alu[2]));
+   SB_CARRY ca [ALUWIDTH-1:0] ( .CO(alucy[ALUWIDTH:1]),    .CI(alucy[ALUWIDTH-1:0]), .I1(QQ), .I0(A));
    assign A31 = A[ALUWIDTH-1];
+
+//   genvar                 j;
+//   assign alucy[0] = alu_carryin;
+//   for ( j = 0; j < ALUWIDTH; j = j + 1 ) begin : blk1
+//      SB_LUT4 #(.LUT_INIT(16'h01b4)) a(.O(A[j]), .I3(s_alu[1]), .I2(Di[j]), .I1(s_alu[0]), .I0(ADR_O[j]));
+//      SB_LUT4 #(.LUT_INIT(16'hc369)) b(.O(B[j]), .I3(alucy[j]), .I2(QQ[j]), .I1(A[j]),.I0(s_alu[2]));
+//      SB_CARRY ca( .CO(alucy[j+1]),              .CI(alucy[j]), .I1(QQ[j]), .I0(A[j]));
+//   end
+//   assign A31 = A[ALUWIDTH-1];
 
    /* When we increment the low 32-bit of mtime, we have a carry into bit MTIMETAP only
     * when the output bit B[MTIMETAP] is set, bit the input bit A[MTIMETAP] was clear. 
