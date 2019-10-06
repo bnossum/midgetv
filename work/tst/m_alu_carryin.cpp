@@ -29,18 +29,16 @@ int main(int argc, char **argv) {
 
         tb->preprealucyin = 1;
         for ( inputvariables = 0; inputvariables < (1<<7); inputvariables++ ) {
-                tb->corerunning = (inputvariables>>6) & 1;
-                tb->sa12        = (inputvariables>>5) & 1;
-                tb->sa03        = (inputvariables>>4) & 1;
-                tb->sa02        = (inputvariables>>3) & 1;
-                tb->raluF       = (inputvariables>>2) & 1;
-                tb->FUNC7_5     = (inputvariables>>1) & 1;
-                tb->ADR_O       = (inputvariables>>0) & 1 ? 0x80000000u : 0;
+                tb->corerunning   = (inputvariables>>6) & 1;
+                tb->sa12          = (inputvariables>>5) & 1;
+                tb->s_alu_carryin = (inputvariables>>3) & 3;
+                tb->raluF         = (inputvariables>>2) & 1;
+                tb->FUNC7_5       = (inputvariables>>1) & 1;
+                tb->ADR_O         = (inputvariables>>0) & 1 ? 0x80000000u : 0;
                 
                 tb->eval();
 
-                //printf( "sa03=%d sa02=%d raluF=%d | prealucyin=%d alu_carryin=%d\n", tb->sa03, tb->sa02, tb->raluF, tb->prealucyin, tb->alu_carryin );
-                switch ( (tb->sa03<<1) | tb->sa02) {
+                switch ( tb->s_alu_carryin ) {
                 case 0b00 : assert( tb->alu_carryin == 0); break;
                 case 0b11 : assert( tb->alu_carryin == 1); break;
                 default :

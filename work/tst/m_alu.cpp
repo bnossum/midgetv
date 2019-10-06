@@ -31,11 +31,9 @@ int main(int argc, char **argv) {
                 /* Want to check all combinations of carry-in and
                  * ALU operations. I do not check mtime and 
                  * minstretofl constructions */
-                tb->sa04 = ( ctrl >>  0) & 1;
-                tb->sa05 = ( ctrl >>  1) & 1;
-                tb->sa06 = ( ctrl >>  2) & 1;
+                tb->s_alu = ctrl & 7;
                 cin      = ( ctrl >>  3) & 1;
-                aluop    = ctrl & 7;
+                aluop    = tb->s_alu;
                 tb->sa24 = 0; 
                 tb->sa25 = 0; 
                 tb->sa26 = 0; 

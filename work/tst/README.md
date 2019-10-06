@@ -4,7 +4,7 @@ This directory mostly contains source code used for Verilator test benches.
 In general, the test program is named as the module. That is, module
 `m_alu` (that resides in [`m_alu.v`](../code/m_alu.v) has testbenchh
 [`m_alu.cpp`](m_alu.cpp), and when compiled, give the executable
-`m_alu` in [this](../bin) directory.
+`m_alu.bin` in [this](../bin) directory.
 
 Many of the modules under test have parameters. Notably, most modules
 exists in a highlevel RTL and a lowlevel "iCE40-primitive"

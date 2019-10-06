@@ -362,12 +362,9 @@ module m_midgetv_core
    wire                 raluF;                  // From inst_condcode of m_condcode.v
    wire [7:0]           rinx;                   // From inst_ucode of m_ucode.v
    wire                 rzcy32;                 // From inst_immexp_zfind_q of m_immexp_zfind_q.v
+   wire [2:0]           s_alu;                  // From inst_ucode of m_ucode.v
+   wire [1:0]           s_alu_carryin;          // From inst_ucode of m_ucode.v
    wire                 sa00;                   // From inst_ucode of m_ucode.v
-   wire                 sa02;                   // From inst_ucode of m_ucode.v
-   wire                 sa03;                   // From inst_ucode of m_ucode.v
-   wire                 sa04;                   // From inst_ucode of m_ucode.v
-   wire                 sa05;                   // From inst_ucode of m_ucode.v
-   wire                 sa06;                   // From inst_ucode of m_ucode.v
    wire                 sa11;                   // From inst_ucode of m_ucode.v
    wire                 sa12;                   // From inst_ucode of m_ucode.v
    wire                 sa12_and_corerunning;   // From inst_alu_carryin of m_alu_carryin.v
@@ -508,7 +505,7 @@ module m_midgetv_core
    endfunction
    function [2:0] get_ALUOP;
       // verilator public
-      get_ALUOP = {sa06,sa05,sa04};
+      get_ALUOP = s_alu;
    endfunction
    function [0:0] get_corerunning;
       // verilator public
@@ -589,9 +586,8 @@ module m_midgetv_core
       .m_alu_carryin_killwarnings       (m_alu_carryin_killwarnings),
       // Inputs
       .raluF                            (raluF),
-      .sa03                             (sa03),
-      .sa02                             (sa02),
       .FUNC7_5                          (FUNC7_5),
+      .s_alu_carryin                    (s_alu_carryin[1:0]),
       .sa12                             (sa12),
       .corerunning                      (corerunning),
       .preprealucyin                    (preprealucyin),
@@ -615,9 +611,7 @@ module m_midgetv_core
       .ADR_O                            (ADR_O[ALUWIDTH-1:0]),
       .QQ                               (QQ[ALUWIDTH-1:0]),
       .alu_carryin                      (alu_carryin),
-      .sa06                             (sa06),
-      .sa05                             (sa05),
-      .sa04                             (sa04),
+      .s_alu                            (s_alu[2:0]),
       .sa27                             (sa27),
       .sa26                             (sa26),
       .sa25                             (sa25),
@@ -840,11 +834,8 @@ module m_midgetv_core
        (/*AUTOINST*/
         // Outputs
         .sa00                           (sa00),
-        .sa02                           (sa02),
-        .sa03                           (sa03),
-        .sa04                           (sa04),
-        .sa05                           (sa05),
-        .sa06                           (sa06),
+        .s_alu_carryin                  (s_alu_carryin[1:0]),
+        .s_alu                          (s_alu[2:0]),
         .sa11                           (sa11),
         .sa12                           (sa12),
         .sa14                           (sa14),

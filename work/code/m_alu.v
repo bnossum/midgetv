@@ -5,9 +5,7 @@
  * -----------------------------------------------------------------------------
  * The alu. Operations:
  * 
- * sa06
- * |sa05
- * ||sa04
+ * s_alu[2:0]
  * 000 : nearXOR  B = D^(~Q)   
  * 001 : PASSD    B = D
  * 010 : nearAND  B = D&(~Q)   
@@ -19,15 +17,15 @@
  * 
  * The ALU is constructed out of two columns of LUTs. 
  *      
- *                        | co                  sa05 
- *                       /y\                    |sa04               sa06  
- *         ___           |||     ___            ||  A               |   B       
- * Q    --|I0 | A sa06 --(((----|I0 | B         --  -               -   -       
- * sa04 --|I1 |----------+((----|I1 |--         00  Di              0   ~(A^QQ)  
- * Di   --|I2 |    QQ  ---(+----|I2 |           01  ~(Di^Q)         1   A^QQ^cin 
- * sa05 --|I3_|           +-----|I3_|           10  (~Di)&(~Q)       
- *                        |                     11  0       
- *                        cin       
+ *                                | co               s_alu[1] 
+ *                               /y\                 |s_alu[0]            s_alu[2]  
+ *             ___               |||     ___         ||  A            |   B       
+ * Q        --|I0 | A s_alu[2] --(((----|I0 | B      --  -            -   -       
+ * s_alu[0] --|I1 |--------------+((----|I1 |--      00  Di           0   ~(A^QQ)  
+ * Di       --|I2 |        QQ  ---(+----|I2 |        01  ~(Di^Q)      1   A^QQ^cin 
+ * s_alu[1] --|I3_|               +-----|I3_|        10  (~Di)&(~Q)    
+ *                                |                  11  0         
+ *                                cin       
  *   
  *  luta=0x01b4 lutb=0xc369
  * 
@@ -85,7 +83,7 @@ module m_alu
     input [ALUWIDTH-1:0]  ADR_O, //               Normally second operand to ALU
     input [ALUWIDTH-1:0]  QQ, //                  Alternate second operand to ALU
     input                 alu_carryin, //         Carry in to ALU
-    input                 sa06,sa05,sa04,//       Determines ALU operation
+    input [2:0]           s_alu,//                Determines ALU operation
     input                 sa27,sa26,sa25,sa24, // To decode Wttime and Wrinst
     output [ALUWIDTH-1:0] B, //                   ALU result
     output                A31, //                 A[31] == Di[31] during ADD, used in m_condcode.
@@ -113,9 +111,7 @@ module m_alu
          .ADR_O                         (ADR_O[ALUWIDTH-1:0]),
          .QQ                            (QQ[ALUWIDTH-1:0]),
          .alu_carryin                   (alu_carryin),
-         .sa06                          (sa06),
-         .sa05                          (sa05),
-         .sa04                          (sa04),
+         .s_alu                         (s_alu[2:0]),
          .sa27                          (sa27),
          .sa26                          (sa26),
          .sa25                          (sa25),
@@ -139,9 +135,7 @@ module m_alu
          .ADR_O                         (ADR_O[ALUWIDTH-1:0]),
          .QQ                            (QQ[ALUWIDTH-1:0]),
          .alu_carryin                   (alu_carryin),
-         .sa06                          (sa06),
-         .sa05                          (sa05),
-         .sa04                          (sa04),
+         .s_alu                         (s_alu[2:0]),
          .sa27                          (sa27),
          .sa26                          (sa26),
          .sa25                          (sa25),
@@ -163,7 +157,7 @@ module m_alu_highlevel
     input [ALUWIDTH-1:0]  ADR_O,
     input [ALUWIDTH-1:0]  QQ, 
     input                 alu_carryin,
-    input                 sa06,sa05,sa04,
+    input [2:0]           s_alu,
 /* verilator lint_off UNUSED */
     input                 sa27,sa26,sa25,sa24, 
 /* verilator lint_on UNUSED */ 
@@ -178,8 +172,8 @@ module m_alu_highlevel
    /* Model of the first row of LUTs. Also set A31 used instead of Di[31] 
     * in m_condcode so a chained LUT can be used. See m_condcode.
     */
-   always @(/*AS*/ADR_O or Di or sa04 or sa05) 
-     case ({sa05,sa04})
+   always @(/*AS*/ADR_O or Di or s_alu) 
+     case ({s_alu[1],s_alu[0]})
        2'b00 : A = Di;
        2'b01 : A = ~(Di^ADR_O);
        2'b10 : A = (~Di)&(~ADR_O);
@@ -190,9 +184,9 @@ module m_alu_highlevel
    /* Model second row of LUTs. The carry out is different in the highlevel
     * and the low-level code, but is equal when it counts - during ADD.
     */
-   assign {alu_carryout,B} = sa06 ? A+QQ+{{ALUWIDTH{1'b0}},alu_carryin} : {1'b0,~(A^QQ)};
+   assign {alu_carryout,B} = s_alu[2] ? A+QQ+{{ALUWIDTH{1'b0}},alu_carryin} : {1'b0,~(A^QQ)};
    //   always @(*)
-   //     if ( sa06 ) 
+   //     if ( s_alu[2] ) 
    //       {alu_carryout,B} = A+QQ+{{ALUWIDTH{1'b0}},alu_carryin};  
    //     else
    //       B = ~(A^QQ);
@@ -230,7 +224,7 @@ module m_alu_lowlevel
     input [ALUWIDTH-1:0]  ADR_O,
     input [ALUWIDTH-1:0]  QQ, 
     input                 alu_carryin, 
-    input                 sa06,sa05,sa04,
+    input [2:0]           s_alu,
 /* verilator lint_off UNUSED */
     input                 sa27,sa26,sa25,sa24,
 /* verilator lint_on UNUSED */ 
@@ -252,8 +246,8 @@ module m_alu_lowlevel
     */
    assign alucy[0] = alu_carryin;
    for ( j = 0; j < ALUWIDTH; j = j + 1 ) begin : blk1
-      SB_LUT4 #(.LUT_INIT(16'h01b4)) a(.O(A[j]), .I3(sa05), .I2(Di[j]), .I1(sa04), .I0(ADR_O[j]));
-      SB_LUT4 #(.LUT_INIT(16'hc369)) b(.O(B[j]), .I3(alucy[j]), .I2(QQ[j]), .I1(A[j]),.I0(sa06));
+      SB_LUT4 #(.LUT_INIT(16'h01b4)) a(.O(A[j]), .I3(s_alu[1]), .I2(Di[j]), .I1(s_alu[0]), .I0(ADR_O[j]));
+      SB_LUT4 #(.LUT_INIT(16'hc369)) b(.O(B[j]), .I3(alucy[j]), .I2(QQ[j]), .I1(A[j]),.I0(s_alu[2]));
       SB_CARRY ca( .CO(alucy[j+1]),              .CI(alucy[j]), .I1(QQ[j]), .I0(A[j]));
    end
    assign A31 = A[ALUWIDTH-1];
