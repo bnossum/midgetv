@@ -27,13 +27,13 @@ a corresponding interface, see `m_digilent.v`. Usage:
 This is chunk based. There are one header word, and two chunk types.
 
 |              |                                  |
-| ------------ | -------------------------------- |
-| Header word  | 0x01071f3f                       |
+| :----------- | :------------------------------- |
+| Header word  | `0x01071f3f`                     |
 | Data chunk:  | uint32_t loadadr                 |
 |              | uint32_t endloadadr              |
 |              | endloadadr-loadadr bytes of data |
-| ------------ | -------------------------------- |
-| Exec chunk   | 0x00000000                       |
+| :----------- | :------------------------------- |
+| Exec chunk   | `0x00000000`                     |
 |              | Startadr                         |
 
 The loaded program can be 0 to any number of data chunks,
@@ -44,25 +44,23 @@ little-endian. Granularity is byte-based.
 The most used scenario will perhaps be a file compiled for SRAM,
 starting execution at _start. In that case the file will be:
 
-|            |
-| ---------- |
-| 0x01071f3f |
-| 0x80000000 |
-| dataendadr |
-| [data]     |
-| 0x00000000 |
-| _start     |
+    0x01071f3f 
+    0x80000000 
+    dataendadr 
+    [data]     
+    0x00000000 
+    _start     
 
 For platforms with no SRAM:
 
-|            |
-| ---------- |
-| 0x01071f3f |
-| 0x00000100 |
-| dataendadr |
-| [data]     |
-| 0x00000000 |
-| _start     |
+               
+    ---------- 
+    0x01071f3f 
+    0x00000100 
+    dataendadr 
+    [data]     
+    0x00000000 
+    _start     
 
 ### Locations that can be loaded:
 
