@@ -65,7 +65,9 @@ See [here](work/tst) for the simulator code. Many small programs to
 test specific instructions in midgetv is [here](work/sw/first), and
 code to do the riscv compliance test suite is [here](work/sw/second).
 
-
+### How to compile
+A first time user need some instructions on how/what to compile. Presently this
+is not written, but a very short introduction is [here](doc/README.md).
 
 ### Semantic Versioning API specification
 1. Signal interface to module [`m_midgetv_core`](work/code/m_midgetv_core.v) is part of the API.
