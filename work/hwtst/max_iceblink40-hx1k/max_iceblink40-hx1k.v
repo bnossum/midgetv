@@ -10,6 +10,7 @@
 /*
  *  During synthesis I do not stomach to list all these files in the Makefile
  */
+`include "../../code/m_ice_shortcuts.v"
 `include "../../code/m_inputmux.v"
 `include "../../code/m_alu_carryin.v"
 `include "../../code/m_alu.v"
