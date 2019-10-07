@@ -88,7 +88,3 @@ is not written, but a very short introduction is [here](doc/README.md).
 - Microcoded support for unaligned ld/st
 - Support of integer multiplication and divide (will bloat the controller)
 - Table that show clockcycles used per instruction
-
-[//]: # I have 42-5 = 37 locations hit with unsupported instructions that I can perhaps use
-[//]: # I have  9 free locations
-[//]: # In total 46 locations. Perhaps enough for math? perhaps enough for unaligned ld/st? Certainly not both...
