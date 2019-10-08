@@ -5,7 +5,7 @@
  * -----------------------------------------------------------------------------
  * Constructs to try to get cleaner code
  */
-
+/* verilator lint_off DECLFILENAME */
 module bn_l4
   # ( parameter I = 16'h0 )
    (
