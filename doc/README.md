@@ -10,9 +10,8 @@ To program `blinky` we need to:
  - assemble blinky.S to blinky.bin
  - transform `blinky.bin` to a format that can be included easily in Verilog, 
    the result file is `ice40loaderprog.hv`, a file containing
-   `localparam`. This is done by an utility `midgetv_bin2ebr` which
-   must itself be compiled (the first time midgetv is used).   
- - Compile the verilog code, and
+   `localparam`. This is done by an utility `midgetv_bin2ebr`.  
+ - Compile the Verilog code, and
  - Upload the Verilog code.
 
 When this is the very first time any instance of midgetv is compiled,
