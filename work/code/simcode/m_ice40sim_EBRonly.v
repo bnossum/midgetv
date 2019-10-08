@@ -15,7 +15,7 @@ module m_ice40sim_EBRonly
       IWIDTH             = 32, 
       NO_CYCLECNT        = 1, 
       MTIMETAP           = 14, 
-      HIGHLEVEL          = 1,
+      HIGHLEVEL          = 0,
       LAZY_DECODE        = 0,
       DISREGARD_WB4_3_55 = 1
       )
