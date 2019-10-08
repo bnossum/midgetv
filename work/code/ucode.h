@@ -119,6 +119,9 @@
 
 #define xxxx  (((xx)<<2) | (xx))
 #define Oxxx  ((0b0000)   | ( ((xx)<<1) | (x)))
+#define OOIx  (0b0010ull | (x))
+#define OIIx  (0b0110ull | (x))
+#define IOIx  (0b1010ull | (x))
 
 #define OOOxx (0b00000ull | (xx))
 #define OOIxx (0b00100ull | (xx))     
@@ -140,13 +143,15 @@
  * The following is definition of fields of microcode
  */
 
-/* The ALU and cycle counter control
- */
-////                                    sa06
-////                     Cyclecnt etc   |sa05
-////                     sa17           ||sa04
-////                     |sa16          |||sa03
-////                     ||             ||||sa02
+/* The ALU and cycle counter control.
+ * Observation: s_alu[2] could be represented by a combination of 
+ *              s_alu[1:0] and s_alu_carryin to save one column in the
+ *              control table. Optimalization not done now.
+ *
+ *                       Cyclecnt etc   
+ *                       sa17           s_alu[2:0]
+ *                       |sa16          |||s_alu_carryin[1:0]
+ *                       ||             |||||         */
 #define A_nearXOR      ( IO << 10 ) | ( OOOxx << 1 )  // B = D^(~Q)                               
 #define A_passd        ( IO << 10 ) | ( OOIxx << 1 )  // D
 #define A_nearAND      ( IO << 10 ) | ( OIOxx << 1 )  // D&(~Q)   
@@ -163,6 +168,24 @@
 #define A_passq4       ( OO << 10 ) | ( IIIII << 1 )  // Let through (Q|3)+1
 #define A_passq_F      ( IO << 10 ) | ( IIIOI << 1 )  // Let through Q+flgF
 #define A_xx           ( xO << 10 ) | ( xxxxx << 1 )  // ALU is don't care
+
+// Possible optimalization:
+//#define A_nearXOR      ( IO << 10 ) | (  OOIx << 1 )  // B = D^(~Q)                               
+//#define A_passd        ( IO << 10 ) | (  OIIx << 1 )  // D
+//#define A_nearAND      ( IO << 10 ) | (  IOIx << 1 )  // D&(~Q)   
+//#define A_invq         ( IO << 10 ) | (  IIIO << 1 )  // ~Q
+//#define A_addDQ        ( IO << 10 ) | (  OOOO << 1 )  // D+Q
+//#define A_cycnt        ( II << 10 ) | (  OOOO << 1 )  // D+cyclecnt
+//#define A_add1         ( IO << 10 ) | (  OOII << 1 )  // D+Q+1
+//#define A_add3         ( OO << 10 ) | (  OOOO << 1 )  // D+(Q|3)+0
+//#define A_add4         ( OO << 10 ) | (  OOII << 1 )  // D+(Q|3)+1
+//#define A_shlq         ( IO << 10 ) | (  OIOO << 1 )  // B = (QQ<<1)|cin (with D=0xffffffff)      
+//#define A_nearOR       ( IO << 10 ) | (  IOOO << 1 )  // (~D)|Q
+//#define A_passq        ( IO << 10 ) | (  IIOO << 1 )  // Let through Q
+////#define A_passq1     ( IO << 10 ) | (  IIII << 1 )  // Let through Q+1                      
+//#define A_passq4       ( OO << 10 ) | (  IIII << 1 )  // Let through (Q|3)+1
+//#define A_passq_F      ( IO << 10 ) | (  IIOI << 1 )  // Let through Q+flgF
+//#define A_xx           ( xO << 10 ) | (  xxxx << 1 )  // ALU is don't care
 
 
 #define nxtSTB (I << 32) // sa42 : Possibly STB_O or sram_stb to be set high next cycle
