@@ -9,9 +9,19 @@
         // This is an indirect jump. Ideally the syntax should have been
         // "ij rd,ofs(rs1)" but I do not know how to make such a macro. Hence we have
         // "ij rdnr,ofs,rs1nr" instead. The motivation for the instruction is to
-        // be able to return to a 32-bit address stored in memory, "pc = mem[ofs+rs1]",
-        // this make CSR emulation code and MRET emulation code much more agile. 
-        // See "ucode.h" for details.
+        // be able to return to a 32-bit address stored in memory:
+        //     tmp = pc;
+        //     pc = mem[ofs+rs1];
+        //     rd = tmp;
+        // this make CSR emulation code and MRET emulation code much more agile.
+        // 31     20 19 15 14 12 11 7 6     0
+        // ofs[11:0]   rs1   000   nr 0001011
+        //
+        // Presently the microcode instruction does not do exactly as written above,
+        // but rather:
+        //     pc = mem[ofs+rs1];
+        //
+        //See "ucode.h" for details.
         // 
         .macro ij rdnr=0,ofs=0,rs1nr=0
         .word (((\ofs) & 0xfff)<<20) + (((\rs1nr) & 31)<<15) + (((\rdnr) & 31)<<7) + 0b0001011
