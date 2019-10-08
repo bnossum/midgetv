@@ -169,7 +169,7 @@
 #define A_passq_F      ( IO << 10 ) | ( IIIOI << 1 )  // Let through Q+flgF
 #define A_xx           ( xO << 10 ) | ( xxxxx << 1 )  // ALU is don't care
 
-// Possible optimalization:
+// Possible optimalization. s_alu[2] = fcn(s_alu[1:0],s_alu_carryin[1:0])
 //#define A_nearXOR      ( IO << 10 ) | (  OOIx << 1 )  // B = D^(~Q)                               
 //#define A_passd        ( IO << 10 ) | (  OIIx << 1 )  // D
 //#define A_nearAND      ( IO << 10 ) | (  IOIx << 1 )  // D&(~Q)   

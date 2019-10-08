@@ -126,9 +126,9 @@ module m_inputmux
             wire [31:0] MIP     = {14'h0,mrinstretip,mtimeincip,4'b0000,meip,3'h0,mtip,3'h0,msip,3'h0};
             wire [31:0] MIE     = {14'h0,mrinstretie,mtimeincie,4'b0000,meie,3'h0,mtie,3'h0,msie,3'h0};
             wire [31:0] MSTATUS = {14'h0,1'b0,       1'b0,      4'b0001,1'b1,3'h0,mpie,3'h0,mie, 3'h0};
-            /* verilator lint_off UNUSED */
+            /* v erilator lint_off UNUSED */
             reg         aaa;
-            /* verilator lint_on UNUSED */
+            /* v erilator lint_on UNUSED */
             reg [31:0]  defeatlattice_theio;
             
             always @(/*AS*/ADR_O or MIE or MIP or MSTATUS or extDAT_I) 
@@ -137,7 +137,7 @@ module m_inputmux
                 3'b001 : { aaa, defeatlattice_theio} = {1'b0, extDAT_I[31:0]};
                 3'b010 : { aaa, defeatlattice_theio} = {1'b0, extDAT_I[31:0]};
                 3'b011 : { aaa, defeatlattice_theio} = {1'b0, extDAT_I[31:0]};
-                3'b100 : { aaa, defeatlattice_theio} = {1'b1, MIP}; // Really free for another system reg
+                3'b100 : { aaa, defeatlattice_theio} = {1'b0, extDAT_I[31:0]};
                 3'b101 : { aaa, defeatlattice_theio} = {1'b1, MIP};
                 3'b110 : { aaa, defeatlattice_theio} = {1'b1, MIE};
                 3'b111 : { aaa, defeatlattice_theio} = {1'b1, MSTATUS};

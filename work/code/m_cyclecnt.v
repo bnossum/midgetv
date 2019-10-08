@@ -3,11 +3,11 @@
  * 2019. Copyright B. Nossum.
  * For licence, see LICENCE
  * -----------------------------------------------------------------------------
+ * 
  * A cycle counter with a 64-bit resolution is mandatory in most
- * implementations of RISC-V. I solve this by timing each
- * instructions, which is a maximum of 41 cycles. Between instructions
- * this binary counter is added to ttime, and the counter is reset to
- * 0b000001.
+ * implementations of RISC-V. I solve this by timing each instructions,
+ * which is a maximum of 41 cycles. Between instructions this binary
+ * counter is added to ttime, and the counter is reset to 0b000001.
  * 
  * The cycle counter is multiplexed with ADR_O used by input B of the
  * ALU during a cycle in OpCode fetch.
@@ -16,7 +16,8 @@
  * is also taken care of here (together with the carry input).
  * 
  * If the 6-bit counter overflows when the core is running, we exit to a 
- * trap with bus-error. 
+ * trap with bus-error. In case an instruction cache is added later on
+ * this counter must probably by extended.
  * 
  * With NO_CYCLECNT == 0
  * sa17
@@ -76,23 +77,16 @@ module m_cyclecnt
          if ( NO_CYCLECNT == 1 ) begin
             
             // =======================================================
-            // HIGLEVEL, NO CYCLECNT 
+            // HIGLEVEL, NO CYCLECNT
+            // No possibility to find a bus error.
+            // Note the flipflop "rcrun". Even if "start" is hardcoded
+            // to 1, midgetv will wait one cycle at startup, so that
+            // output from EBR is valid.
             // =======================================================
             assign QQ[5:2] = ADR_O[5:2];
-            //assign QQ[1:0] = sa16 ? 2'b01 : (sa17 ? ADR_O[1:0] : 2'h3 );
             assign QQ[1:0] = sa16 ? 2'b01 : (sa17 ? ADR_O[1:0] : (ADR_O[1:0] | 2'h3) );
-            
             assign m_cyclecnt_kill = clk;
-
-            /*
-             * No cycle counter, so no possibilities to find a bus error. 
-             */
             assign nobuserror  = 1'b1;
-                        
-            /*
-             * Wait 1 cycle (even if "start" is hardcoded to 1'b1),
-             * to get valid data out of EBRs
-             */
             reg rcrun;
             always @(posedge clk)
               rcrun <= rcrun | start;
@@ -102,6 +96,7 @@ module m_cyclecnt
             
             // =======================================================
             // HIGLEVEL, CYCLECNT
+            // We have a cycle counter.
             // =======================================================
             
             reg [5:0]   rccnt;

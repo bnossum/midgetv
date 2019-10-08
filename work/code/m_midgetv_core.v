@@ -243,12 +243,17 @@
 
 module m_midgetv_core
   # ( parameter 
-      SRAMADRWIDTH = 0,  EBRADRWIDTH =  8, IWIDTH =  8, NO_CYCLECNT = 1, MTIMETAP =  0, HIGHLEVEL = 0, LAZY_DECODE = 1, DISREGARD_WB4_3_55 = 1,// Minimal
-//    SRAMADRWIDTH = 16, EBRADRWIDTH =  8, IWIDTH = 32, NO_CYCLECNT = 0, MTIMETAP = 14, HIGHLEVEL = 0, LAZY_DECODE = 1, DISREGARD_WB4_3_55 = 0,// Conventional
-//    SRAMADRWIDTH = 17, EBRADRWIDTH = 11, IWIDTH = 32, NO_CYCLECNT = 0, MTIMETAP = 14, HIGHLEVEL = 0, LAZY_DECODE = 0, DISREGARD_WB4_3_55 = 0,// Maximal
-      MTIMETAP_LOWLIM = 14, // Only location where this value is really to be set 
-      NO_UCODEOPT = 0, //      Only set to 1 during debugging
-      DBGA = 0, //             Only set to 1 during debugging
+      SRAMADRWIDTH       =  0,  
+      EBRADRWIDTH        =  8, 
+      IWIDTH             =  8, 
+      NO_CYCLECNT        =  1, 
+      MTIMETAP           =  0, 
+      HIGHLEVEL          =  0, 
+      LAZY_DECODE        =  1, 
+      DISREGARD_WB4_3_55 =  1,
+      MTIMETAP_LOWLIM    = 14, // Only location where this value is really to be set 
+      NO_UCODEOPT        =  0, // Only set to 1 during debugging
+      DBGA               =  0, // Only set to 1 during debugging
       parameter [4095:0] prg00 = 4096'h0, // | 
       parameter [4095:0] prg01 = 4096'h0, // | Always specified by module
       parameter [4095:0] prg02 = 4096'h0, // | that instantiates m_midgetv_core
@@ -524,6 +529,7 @@ module m_midgetv_core
    /* -----------------------------------------------------------------------------
     * Datapath
     */
+//   localparam xHIGHLEVEL = 0;
    m_inputmux #(.HIGHLEVEL(       HIGHLEVEL       ), 
                 .IWIDTH(          IWIDTH          ), 
                 .SRAMADRWIDTH(    SRAMADRWIDTH    ), 
