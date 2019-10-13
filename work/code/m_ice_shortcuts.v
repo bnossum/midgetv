@@ -25,6 +25,16 @@ module bn_lcy4
    SB_CARRY y(.CO(co),              .CI(i3), .I1(i2), .I0(i1));
 endmodule
 
+module bn_lcy4_b
+  # ( parameter I = 16'h0 )
+   (
+    input  i0,i1,i2,i3,ci,
+    output o,co
+    );
+   SB_LUT4 #(.LUT_INIT(I)) l(.O(o), .I3(i3), .I2(i2), .I1(i1), .I0(i0));
+   SB_CARRY y(.CO(co),              .CI(ci), .I1(i2), .I0(i1));
+endmodule
+
 module bn_l4v
   # ( parameter I = 16'h0 )
    (

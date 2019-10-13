@@ -65,7 +65,7 @@ module m_ucodepc
    input [31:0] INSTR, //               Instruction to decode at OpCode fetch
    input [31:0] B, //                   B[1:0] to find alignment errors. B[31] to distinguish EBR/SRAM
    input        RST_I, //               NMI
-   input        nobuserror, //          Accessing empty region if low
+   input        buserror, //            Accessing empty region if high
    output [7:0] minx, //                Microcode PC
    output       ucodepc_killwarnings
    );
@@ -89,7 +89,7 @@ module m_ucodepc
    endfunction
    function [5:0] get_ucodepcinfo;
       // verilator public
-      get_ucodepcinfo = {~nobuserror,usedinx,qualint,illegal,maybranch,takebranch};
+      get_ucodepcinfo = {buserror,usedinx,qualint,illegal,maybranch,takebranch};
    endfunction
    function [7:0] get_dinx;
       // verilator public
@@ -275,7 +275,7 @@ module m_ucodepc
 
    assign minx[7:2] = (usedinx_or_RST_I ? (dinx[7:2] | {6{illegal_or_qualint_or_RST_I}}) : rinx[7:2]);
    assign minx[1]   = (usedinx_or_RST_I ? ( (dinx[1] | illegal_or_qualint) & ~RST_I) : rinx[1]);
-   assign minx[0]   = (~nobuserror | (usedinx_or_RST_I ? (illegal_or_qualint_or_RST_I ? qualint_or_RST_I : dinx[0]) : (maybranch ? takebranch : rinx[0])));   
+   assign minx[0]   = (buserror | (usedinx_or_RST_I ? (illegal_or_qualint_or_RST_I ? qualint_or_RST_I : dinx[0]) : (maybranch ? takebranch : rinx[0])));   
 
    assign ucodepc_killwarnings = INSTR[31] | &INSTR[29:15] | &INSTR[11:7] | &B | INSTR[1];
    

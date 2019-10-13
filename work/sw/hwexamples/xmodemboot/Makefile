@@ -29,7 +29,9 @@ $(OBJ)/%.o:%.S
 
 %.out:%.o
 	riscv32-unknown-elf-ld -TEBRlink.ld -nodefaultlibs -nostartfiles -o $@ \
-	$(OBJ)/xmodemboot_crt0.o $(OBJ)/xmodemboot_ab.o $< -M > $(OBJ)/$(*F).map
+	$(OBJ)/xmodemboot_crt0.o $< -M > $(OBJ)/$(*F).map
+
+# $(OBJ)/xmodemboot_ab.o
 
 %.bin:%.out
 	riscv32-unknown-elf-objcopy -Obinary $< $@ 
@@ -37,11 +39,13 @@ $(OBJ)/%.o:%.S
 %.lst:%.out
 	riscv32-unknown-elf-objdump -M numeric,no-aliases -D $< > $@
 
-$(OBJ)/xmodemboot.o: $(OBJ)/xmodemboot_crt0.o $(OBJ)/xmodemboot_ab.o
+$(OBJ)/xmodemboot.o: $(OBJ)/xmodemboot_crt0.o
+
+# $(OBJ)/xmodemboot_ab.o
 
 clean:
 	rm -f $(OBJ)/xmodemboot_crt0.o \
-	$(OBJ)/xmodemboot_ab.o \
 	$(OBJ)/xmodemboot.bin \
 	../../../hwtst/max_upduino2/ice40loaderprog.hv
 
+#	$(OBJ)/xmodemboot_ab.o \

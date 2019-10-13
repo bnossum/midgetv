@@ -308,7 +308,6 @@ module m_midgetv_core
 //   wire                 alu_killwarnings;       // From inst_alu of m_alu.v
    wire                 m_alu_carryin_killwarnings;// From inst_alu_carryin of m_alu_carryin.v
    wire                 m_condcode_killwarnings;// From inst_condcode of m_condcode.v
-   wire                 m_cyclecnt_kill;        // From inst_cyclecnt of m_cyclecnt.v
    wire                 m_immexp_zfind_q_killwarnings;// From inst_immexp_zfind_q of m_immexp_zfind_q.v
    wire                 m_inputmux_killwarnings;// From inst_inputmux of m_inputmux.v
    wire                 m_progressctrl_killwarnings;// From inst_progressctrl of m_progressctrl.v
@@ -318,6 +317,8 @@ module m_midgetv_core
    wire                 m_wai_killwarning;      // From inst_wai of m_wai.v
    wire                 ucode_killwarnings;     // From inst_ucode of m_ucode.v
    wire                 ucodepc_killwarnings;   // From inst_ucodepc of m_ucodepc.v
+   wire                 buserror;               // From inst_cyclecnt of m_cyclecnt.v
+   wire [6:0]           dbg_rccnt;              // From inst_cyclecnt of m_cyclecnt.v
    /* verilator lint_on UNUSED */
    /*AUTOWIRE*/
    // Beginning of automatic wires (for undeclared instantiated-module outputs)
@@ -359,7 +360,6 @@ module m_midgetv_core
    wire                 next_STB_O;             // From inst_progressctrl of m_progressctrl.v
    wire                 next_readvalue_unknown; // From inst_ebr of m_ebr.v
    wire                 next_sram_stb;          // From inst_progressctrl of m_progressctrl.v
-   wire                 nobuserror;             // From inst_cyclecnt of m_cyclecnt.v
    wire                 preprealucyin;          // From inst_shiftcounter of m_shiftcounter.v
    wire                 progress_ucode;         // From inst_progressctrl of m_progressctrl.v
    wire                 qACK;                   // From inst_progressctrl of m_progressctrl.v
@@ -574,15 +574,15 @@ module m_midgetv_core
       // Outputs
       .QQ                               (QQ[31:0]),
       .corerunning                      (corerunning),
-      .nobuserror                       (nobuserror),
-      .m_cyclecnt_kill                  (m_cyclecnt_kill),
+      .buserror                         (buserror),
+      .dbg_rccnt                        (dbg_rccnt[5:0]),
       // Inputs
       .clk                              (clk),
-      .sa17                             (sa17),
-      .sa16                             (sa16),
-      .ADR_O                            (ADR_O[31:0]),
       .start                            (start),
-      .r_issh0_not                      (r_issh0_not));
+      .sa16                             (sa16),
+      .sa17                             (sa17),
+      .STB_O                            (STB_O),
+      .ADR_O                            (ADR_O[31:0]));
 
    m_alu_carryin #(.HIGHLEVEL(HIGHLEVEL))
    inst_alu_carryin
@@ -790,7 +790,6 @@ module m_midgetv_core
    /* -----------------------------------------------------------------------------
     * Control path
     */
-   
    m_progressctrl #(.HIGHLEVEL(          HIGHLEVEL          ),
                     .DISREGARD_WB4_3_55( DISREGARD_WB4_3_55 ),
                     .NO_CYCLECNT(        NO_CYCLECNT        ),
@@ -835,7 +834,7 @@ module m_midgetv_core
       .lastshift                        (lastshift),
       .r_issh0_not                      (r_issh0_not),
       .B                                (B[31:0]),
-      .nobuserror                       (nobuserror));
+      .buserror                         (buserror));
    
    m_ucode #(.NO_UCODEOPT(NO_UCODEOPT))
      inst_ucode
@@ -900,7 +899,7 @@ module m_midgetv_core
         .INSTR                          (INSTR[31:0]),
         .B                              (B[31:0]),
         .RST_I                          (RST_I),
-        .nobuserror                     (nobuserror));
+        .buserror                       (buserror));
    
    /* Interrupts in midgetv is implemented in an "all or nothing" fashion.
     * If MTIMETAP < MTIMETAP_LOWLIM, we have a minimal system, and no 
