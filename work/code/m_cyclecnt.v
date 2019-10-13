@@ -4,6 +4,14 @@
  * For licence, see LICENCE
  * -----------------------------------------------------------------------------
  *
+ * This module:
+ * ------------
+ * o Construction to modify an alu input so that +3 and +4 can be realized easily
+ * o Construction to hold execution of midgetv for the first cycle 
+ * o Optionally support for the cycle counter, and by extension mtime
+ * o Optionally support for detection of bus-error
+ * 
+ * 
  *  
  * A cycle counter with a 64-bit resolution is mandatory in most
  * implementations of RISC-V. I solve this by timing each instructions,
@@ -57,11 +65,11 @@
  * 
  * 
  * Sizes:
- * HIGHLEVEL == 1, NO_CYCLECNT == 0, Lattice LSE  : 25
- * HIGHLEVEL == 1, NO_CYCLECNT == 0, Synplify Pro : 22
- * HIGHLEVEL == 1, NO_CYCLECNT == 1, Lattice LSE  :  2
+ * HIGHLEVEL == 1, NO_CYCLECNT == 0, Lattice LSE  : 22
+ * HIGHLEVEL == 1, NO_CYCLECNT == 0, Synplify Pro : 24
+ * HIGHLEVEL == 1, NO_CYCLECNT == 1, Lattice LSE  :  3
  * HIGHLEVEL == 1, NO_CYCLECNT == 1, Synplify Pro :  3
- * HIGHLEVEL == 0, NO_CYCLECNT == 0               : 16
+ * HIGHLEVEL == 0, NO_CYCLECNT == 0               : 14
  * HIGHLEVEL == 0, NO_CYCLECNT == 1               :  3
  * 
  * Parameters:
@@ -77,7 +85,7 @@
  * 
  */
 module m_cyclecnt
-  # ( parameter HIGHLEVEL = 0, NO_CYCLECNT = 0 )
+  # ( parameter HIGHLEVEL = 1, NO_CYCLECNT = 0 )
   ( 
     input         clk,
     input         start,
