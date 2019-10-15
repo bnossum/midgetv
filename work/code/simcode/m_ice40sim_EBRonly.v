@@ -6,8 +6,6 @@
  * This plays the role of a testbench together with verilator.
  */
 
-
-
 module m_ice40sim_EBRonly
   # ( parameter
       SRAMADRWIDTH       = 0,  
@@ -32,12 +30,15 @@ module m_ice40sim_EBRonly
    wire                 CYC_O;                  // From inst_midgetv_core of m_midgetv_core.v
    wire [31:0]          dbga;                   // From inst_midgetv_core of m_midgetv_core.v
    wire                 corerunning;            // From inst_midgetv_core of m_midgetv_core.v
+   wire [31:0]          regsimplewbone;         // From inst_wishbonereg of m_wishbonereg.v
    /* verilator lint_on UNUSED */
    
    /*AUTOWIRE*/
    // Beginning of automatic wires (for undeclared instantiated-module outputs)
-   wire                 ACK_I;                  // From inst_wishbonereg of m_wishbonereg.v
-   wire [31:0]          DAT_I;                  // From inst_wishbonereg of m_wishbonereg.v
+   wire                 ACK_I_dyn_wbone;        // From inst_dyn_wishbonereg of m_dyn_wishbonereg.v
+   wire                 ACK_I_simple_wbone;     // From inst_wishbonereg of m_wishbonereg.v
+   wire [31:0]          DAT_I_dyn_wbone;        // From inst_dyn_wishbonereg of m_dyn_wishbonereg.v
+   wire [31:0]          DAT_I_simple_wbone;     // From inst_wishbonereg of m_wishbonereg.v
    wire [31:0]          DAT_O;                  // From inst_midgetv_core of m_midgetv_core.v
    wire [3:0]           SEL_O;                  // From inst_midgetv_core of m_midgetv_core.v
    wire                 STB_O;                  // From inst_midgetv_core of m_midgetv_core.v
@@ -104,21 +105,48 @@ module m_ice40sim_EBRonly
       .meip                             (meip),
       .start                            (start));
 
+   wire                 ACK_I = ACK_I_simple_wbone | ACK_I_dyn_wbone;
+   wire [31:0]          DAT_I = ACK_I_simple_wbone ? DAT_I_simple_wbone : DAT_I_dyn_wbone;
+   
    // Address decode of wishbone register: 0b01100xxx_xxxxxxxx_xxxxxxxx_xxxxx1xx
+   // and dynamic wishbone register:       0b01100xxx_xxxxxxxx_xxxxxxxx_xxx1xxxx
    // Because we have STB_O I do not have to decode ADR_O[31:30]
-   wire                 STB_I = STB_O & ADR_O[29] & ~ADR_O[28] & ~ADR_O[27] & ADR_O[2];
+   wire                 STB_I_simple_wbone = STB_O & ADR_O[29] & ~ADR_O[28] & ~ADR_O[27] & ADR_O[2];
+   wire                 STB_I_dyn_wbone    = STB_O & ADR_O[29] & ~ADR_O[28] & ~ADR_O[27] & ADR_O[4];
+
    m_wishbonereg inst_wishbonereg
      (// Outputs
-      .ACK_O                            (ACK_I),
-      .DAT_O                            (DAT_I[31:0]),
+      .ACK_O                            (ACK_I_simple_wbone),
+      .DAT_O                            (DAT_I_simple_wbone[31:0]),
       // Inputs
       .WE_I                             (WE_O),
       .SEL_I                            (SEL_O[3:0]),
       .DAT_I                            (DAT_O[31:0]),
+      .STB_I                            (STB_I_simple_wbone),
+      /*AUTOINST*/
+      // Outputs
+      .regsimplewbone                   (regsimplewbone[31:0]),
+      // Inputs
+      .CLK_I                            (CLK_I));
+
+   // Dynamic wishbone register: 0b01100xxx_xxxxxxxx_xxxxxxxx_xxxx1xxx
+   m_dyn_wishbonereg inst_dyn_wishbonereg
+     (// Outputs
+      .ACK_O                            (ACK_I_dyn_wbone),
+      .DAT_O                            (DAT_I_dyn_wbone[31:0]),
+      // Inputs
+      .DAT_I                            (DAT_O[31:0]),
+      .STB_I                            (STB_I_dyn_wbone),
+      .WE_I                             (WE_O),
+      .SEL_I                            (SEL_O[3:0]),
+      .writelatency                     (regsimplewbone[5:0]),
+      .readlatency                      (regsimplewbone[13:8]),
       /*AUTOINST*/
       // Inputs
-      .CLK_I                            (CLK_I),
-      .STB_I                            (STB_I));
+      .CLK_I                            (CLK_I));
+
+   assign ACK_I = ACK_I_simple_wbone | ACK_I_dyn_wbone;
+   
 endmodule   
       
 // Local Variables:

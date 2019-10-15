@@ -11,66 +11,46 @@
  * o Optionally support for the cycle counter, and by extension mtime
  * o Optionally support for detection of bus-error
  * 
- * 
- *  
- * A cycle counter with a 64-bit resolution is mandatory in most
- * implementations of RISC-V. I solve this by timing each instructions,
- * in a 6-bit counter rcnt. Duing OpCode fetch this counter is added to ttime, 
- * the counter is reset to 0b000001. Register ttime contains the low 32 bits of 
- * the cycle counter. rcnt is multiplexed with ADR_O used by input QQ of the
- * ALU during a cycle in OpCode fetch.
+ * We must be able to let the ALU increment by 3 or 4.
+ * This is among other used when PC is incremented.
  *
- * We must be able to let the ALU increment by 3 or 4, also 
- * taken care of here. This is among other used when PC is incremented.
- * 
+ * A cycle counter with a 64-bit resolution is mandatory in most
+ * implementations of RISC-V. I solve this by timing each instruction
+ * in a 6-bit counter rcnt. Duing OpCode fetch this counter is added
+ * to ttime, the counter is reset to 0b000001. Register ttime contains
+ * the low 32 bits of the cycle counter. rcnt is multiplexed with
+ * ADR_O used by input QQ of the ALU during a cycle in OpCode fetch.
+ *
  * This module also determines if midgetv is up and running. 
  * -  If we have no cyclecounter, corerunning goes high one cycle after
  *    input signal "start is asserted.  
  * -  If we have a cyclecounter, start is used as an enable for the counter, and
  *    must be high 64 consequtive cycles to let midgetv free. This should be
- *    handy if the clock of midgetv comes from a PLL or (as is the case of
- *    iceblink40-hx1k boards) an unstable clock.
+ *    handy if the clock of midgetv comes from a PLL or an unstable clock (as 
+ *    is the case of iceblink40-hx1k boards).
  * 
- * If the 6-bit counter rcnt reaches 32 after the core is running, and STB_O
+ * If the 6-bit counter rcnt reaches 48 after the core is running, and STB_O
  * is set, we exit to a trap with bus-error. This  will happen if an IO device 
  * does not answer in a reasonable number of cycles. 
- * So how many cycles of IO before a bus-error happens? These are rough numbers:
- * - LW/LH(U)/LB(U)     : 48 -2       = 46
- * - SW                 : 48 -2       = 46
- * - SH aligned         : 48 -2 -5-0  = 41
- * - SH unaligned       : 48 -2 -5-16 = 25
- * - SB to lsb adr 0b00 : 48 -2 -5-0  = 41
- * - SB to lsb adr 0b01 : 48 -2 -5-8  = 33
- * - SB to lsb adr 0b10 : 48 -2 -5-16 = 25
- * - SB to lsb adr 0b11 : 48 -2 -5-24 = 17
+ * So how many cycles of IO before a bus-error happens? These are results from
+ * simulation program t190.s, run in SRAM:
  * 
+ * - LW/LH(U)/LB(U)     : 43
+ * - SW                 : 43
+ * - SH aligned         : 39
+ * - SH unaligned       : 24
+ * - SB to lsb adr 0b00 : 39
+ * - SB to lsb adr 0b01 : 32
+ * - SB to lsb adr 0b10 : 24
+ * - SB to lsb adr 0b11 : 16
  * 
- * To save a few LUTs, rcnt is optonal - NO_CYCLECNT == 1:
- * sa17
- * |sa16 QQ[5:0]
- * 0x    {ADR_O[5:2],2'b11}   To implement +3 and +4
- * x1    {ADR_O[5:1],start}   rcnt degenerateds to instruction counter.
- * 1x    ADR_O[5:0]           Let through ADR_O
- * 
- * I believe most implementations will pay the price of 11 LUTs to 
- * get the cycle counter. With NO_CYCLECNT == 0:
- * 
- * sa17                      Resets counter to 1
- * |sa16 QQ[5:0]             |
- * ----- -------             -
- * 00    {ADR_O[5:2],2'b11}  0  To implement +3 and +4
- * x1    rccnt               1  Muxing in rcnt
- * 10    ADR_O[5:0]          0  Let through ADR_O
- * 
- * 
- * 
- * Sizes:
- * HIGHLEVEL == 1, NO_CYCLECNT == 0, Lattice LSE  : 22
- * HIGHLEVEL == 1, NO_CYCLECNT == 0, Synplify Pro : 24
- * HIGHLEVEL == 1, NO_CYCLECNT == 1, Lattice LSE  :  3
- * HIGHLEVEL == 1, NO_CYCLECNT == 1, Synplify Pro :  3
- * HIGHLEVEL == 0, NO_CYCLECNT == 0               : 14
- * HIGHLEVEL == 0, NO_CYCLECNT == 1               :  3
+ * Sizes in SB_LUTs:
+ * HIGHLEVEL
+ * | NO_CYCLECNT
+ * 1 0 Lattice LSE/Synplify Pro  : 22/24
+ * 1 1 Lattice LSE/Synplify Pro  : 3
+ * 0 0                           : 14
+ * 0 1                           : 3
  * 
  * Parameters:
  * -----------
@@ -79,10 +59,21 @@
  * 1 : RTL description
  * 0 : Low-level primitives
  * 
- * NO_CYCLECOUNT
+ * NO_CYCLECOUNT 
  * -------------
- * As described above
- * 
+ * 1 : To save a few LUTs, rcnt is optional
+ *     sa17
+ *     |sa16 QQ[1:0]
+ *     0x    2'b11             To implement +3 and +4
+ *     x1    {ADR_O[1],start}  rcnt degenerates to instruction counter.
+ *     1x    ADR_O[1:0]        Let through ADR_O
+ * 0 : rcnt is implemented
+ *     sa17                      
+ *     |sa16 QQ[5:0]             
+ *     ----- -------             
+ *     00    {ADR_O[5:2],2'b11}  To implement +3 and +4
+ *     x1    rccnt               Muxing in rcnt, reset counter.
+ *     10    ADR_O[5:0]          Let through ADR_O
  */
 module m_cyclecnt
   # ( parameter HIGHLEVEL = 1, NO_CYCLECNT = 0 )
@@ -239,7 +230,7 @@ module m_cyclecnt
              *           |                                             |
              *           1                                             1
              *
-             * Note subtility in lut of ccnt[0]. The very first cycle sa16 is unknown. We want to 
+             * Note subtility in LUT/CARRY of ccnt[0]. The very first cycle sa16 is unknown. We want to 
              * kill the carry chain or else rcrun will go high prematurely.
              *
              */

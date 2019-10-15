@@ -1,4 +1,8 @@
-/* 
+/* -----------------------------------------------------------------------------
+ * Part of midgetv
+ * 2019. Copyright B. Nossum.
+ * For licence, see LICENCE
+ * -----------------------------------------------------------------------------
  * A simple wishbone 32 bit slave port with 8 bit granularity
  * 
  * WISHBONE DATASHEET
@@ -86,23 +90,24 @@ module m_wishbonereg
       parameter CHECK_RULE_3_55 = 0
       )
    (
-    input         CLK_I,
-    input [31:0]  DAT_I,
-    input         STB_I,
-    input         WE_I,
-    input [3:0]   SEL_I,
-    output [31:0] DAT_O,
-    output        ACK_O
+    input             CLK_I,
+    input [31:0]      DAT_I,
+    input             STB_I,
+    input             WE_I,
+    input [3:0]       SEL_I,
+    output [31:0]     DAT_O,
+    output            ACK_O,
+    output reg [31:0] regsimplewbone
     );
    
-   wire [3:0]     ce;
-   reg [31:0]     r;
+   wire [3:0]         ce;
+   reg [31:0]         regsimplewbone;
 /* verilator lint_off UNUSED */
    wire           readack,writeack;
 /* verilator lint_on UNUSED */
    
    initial begin
-      r = INITVAL;
+      regsimplewbone = INITVAL;
    end
    
    assign ce[0] = SEL_I[0] & STB_I & WE_I;
@@ -111,10 +116,10 @@ module m_wishbonereg
    assign ce[3] = SEL_I[3] & STB_I & WE_I;
    
    always @(posedge CLK_I) begin
-      if ( ce[0] ) r[ 7: 0] <= DAT_I[ 7: 0];
-      if ( ce[1] ) r[15: 8] <= DAT_I[15: 8];
-      if ( ce[2] ) r[23:16] <= DAT_I[23:16];
-      if ( ce[3] ) r[31:24] <= DAT_I[31:24];
+      if ( ce[0] ) regsimplewbone[ 7: 0] <= DAT_I[ 7: 0];
+      if ( ce[1] ) regsimplewbone[15: 8] <= DAT_I[15: 8];
+      if ( ce[2] ) regsimplewbone[23:16] <= DAT_I[23:16];
+      if ( ce[3] ) regsimplewbone[31:24] <= DAT_I[31:24];
    end
    
    generate
@@ -172,7 +177,7 @@ module m_wishbonereg
       end
    endgenerate
    
-   assign DAT_O = ACK_O ? r : 32'hd0d0d0d0;
+   assign DAT_O = ACK_O ? regsimplewbone : 32'hd0d0d0d0;
 endmodule
 `endif
 
