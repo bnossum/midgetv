@@ -227,9 +227,14 @@ EntryCSR:                               //0x108 Microcode branches to here when 
 #define __read_minstreth    0x000000fc
 
         // =============================================================================
-        // During simulation a whishbone register is at a defined address.
-//efine SLOWREGADR     0x60000004
-//efine NOSUCHREG_ADR  0x60000008
+        // During simulation some registers are at defined addresses
+        // 
 #define NOSUCHREG_ADR  0x60000000
 #define LEDREG         0x60000004
 #define UARTREG        0x60000008
+#define DYNWISHREG     0x60000010
+
+#define IOREGION       0x60000000
+#define WISHREGOFS           0x04
+#define DYNWISHREGOFS        0x10
+        

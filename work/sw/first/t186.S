@@ -76,7 +76,7 @@ CheckOffendingJALR:
          * is lost. Hence there is no way to return to an executiong program.
          * The main problem for midgetv is that the link register is already 
          * overwritten, so continuation is not possible. To rectify this is
-         * deemed to exposive.
+         * deemed to expensive.
          */
         bne     x2,x3,2f                // Check mcause == 1
         lw      x3,%lo(__mtval)(x0)
