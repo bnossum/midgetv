@@ -80,8 +80,8 @@ void sim_with_cyclecnt( void ) {
         uint32_t ADR_O;
 
         tb->STB_O = 0;
-        // Start must be high for 64 consequtive cycles to release the core.
-        for ( k = 0; k < 65; k++ ) {
+        // Start must be high for 128 consequtive cycles to release the core.
+        for ( k = 0; k < 65+64; k++ ) {
                 //fprintf( stderr, "\nk=%2.2x:", k );
                 for ( i = 0; i < k; i++ ) {
                         if ( i == 0 ) {
@@ -91,7 +91,7 @@ void sim_with_cyclecnt( void ) {
                         }
                         toggleclockandeval(tb);
                         //fprintf( stderr, "%d", tb->corerunning );
-                        if ( i < 64 ) {
+                        if ( i < 64+64 ) {
                                 if ( tb->corerunning != 0 ) {
                                         fprintf( stderr, "k=%d i=%d running?\n", k, i );
                                         exit(3);
@@ -104,20 +104,25 @@ void sim_with_cyclecnt( void ) {
         }
 
         // From now the state of start does not matter for tb->corerunning
-        for ( i = 0; i < 100; i++ ) {
+        for ( i = 0; i < 300; i++ ) {
                 tb->start = random() & 1;
                 toggleclockandeval(tb);
                 assert( tb->corerunning == 1 );
         }
+        // But the state of start matter for the counting value.
+        tb->start = 1;
 
         tb->STB_O = 1;
         /* Setting sa16 should lead to rccnt == 1
          * When counting we should periodically see buserror when STB_O is set
          */
-        for ( k = 0; k < 400; k++ ) {
+        for ( k = 0; k < 600; k++ ) {
                 tb->sa16 = 1;
                 toggleclockandeval(tb);
                 assert( tb->corerunning == 1 );
+                if ( ! (tb->dbg_rccnt == 1) ) {
+                        printf( "tb->dbg_rccnt = %d\n", tb->dbg_rccnt );
+                }
                 assert( tb->dbg_rccnt == 1 );
                 tb->sa16 = 0;
                 for ( i = 0; i < k; i++ ) {
@@ -130,9 +135,9 @@ void sim_with_cyclecnt( void ) {
                         
                         toggleclockandeval(tb);
                         assert( tb->corerunning == 1 );
-                        assert( tb->dbg_rccnt == ((i + 2) & 63) );
+                        assert( tb->dbg_rccnt == ((i + 2) & 127) );
                         //fprintf( stderr, "i=%#x, dbg_rccnt=%#x buserror=%d\n", i, tb->dbg_rccnt, tb->buserror );
-                        if ( ((i+2) & 63) == 48 ) {
+                        if ( ((i+2) & 127) == 48 ) {
                                 assert( tb->buserror == 1 );
                         } else {
                                 assert( tb->buserror == 0 );
@@ -144,7 +149,7 @@ void sim_with_cyclecnt( void ) {
          */
         for ( ADR_O = 0; ADR_O < 400; ADR_O++ ) {
                 tb->ADR_O = ADR_O;
-                for ( k = 0; k < 400; k++ ) {
+                for ( k = 0; k < 600; k++ ) {
                         tb->sa17 = 0;
                         tb->sa16 = 1;
                         toggleclockandeval(tb);

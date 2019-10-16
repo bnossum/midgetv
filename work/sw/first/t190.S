@@ -39,19 +39,19 @@ _start:
         la      x1,StartTrap
         sw      x1,%lo(__mtvec)(x0)   
         li      x3,IOREGION
-        
+
         #
         # Test lw from an input register with steadily increasing read latency
         #
         li      x1,0x2900               // 
-        li      x5,0x2b00               // What last written to DYNWISHREG
+        li      x5,0x2b00               // What last written to DYNWISHREG        
         la      x6,Err_Test_LW          // Where to continue in case of unexpected result
         la      x7,Test_LH              // Where to continue after expected exception
 Test_LW:   
         sw      x1,WISHREGOFS(x3)       // Set read/write latency of dynamic wishbone register
         lw      x4,DYNWISHREGOFS(x3)    // Read dynamic wishbine register. This is the instruction that is tested
         addi    x1,x1,0x100
-        j       Test_LW
+        j       Test_LW                 // Loop until exception occurs
 
 Test_LH:
         #
@@ -61,6 +61,7 @@ Test_LH:
 Test_LH_Loop:   
         li      x1,0x2900               // Latency start value
         li      x5,0x2b00               // What last written to DYNWISHREG
+        
         la      x6,Err_Test_LH          // Where to continue in case of unexpected exception
         la      x7,InTest_LH            // Where to continue after expected exception
 Test_LH2:   
@@ -214,7 +215,7 @@ Test_SB10:
         #
         # Test sb, address ending in 0b10, to an output register with steadily increasing write latency
         #
-        li      x1,0x14
+        li      x1,0x16
         li      x5,0x18                 // What last written to DYNWISHREG
         la      x6,Err_Test_SB10        // Where to continue in case of unexpected result
         la      x7,Test_SB11            // Where to continue after expected exception
@@ -228,7 +229,7 @@ Test_SB11:
         #
         # Test sb, address ending in 0b11, to an output register with steadily increasing write latency
         #
-        li      x1,0xc
+        li      x1,0xe
         li      x5,0x10                 // What last written to DYNWISHREG
         la      x6,Err_Test_SB11        // Where to continue in case of unexpected result
         la      x7,AllTestsDone         // Where to continue after expected exception

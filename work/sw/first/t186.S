@@ -71,19 +71,33 @@ CheckOffendingSB:
 CheckOffendingJALR:
         /* midgetv has no Physical Memory Protection.
          * It still offer some support for detection of execution in I/O regions.
-         * On access to unresponsive memory, we set mcause = 1, mtval =
-         * offending address, but mepc is not correct, and the link register
-         * is lost. Hence there is no way to return to an executiong program.
+         * On access to unresponsive memory, we set mcause = 1, 
+         * mtval = offending address, but:
+         *    o mepc is not correct
+         *      mepc should have been OffendingJALR but it is 0x6000000        
+         *    o the link register is lost.
+         *      x30 should have been 0 but it is OffendingJALR+4
+         * Hence there is no way to return to an executing program.
+         *
          * The main problem for midgetv is that the link register is already 
          * overwritten, so continuation is not possible. To rectify this is
-         * deemed to expensive.
+         * deemed to expensive. I would have to:
+         *   o Avoid writing the return address rrr to TRG until the operand fetch
+         *     has succeeded
+         *   o Update mepc with rrr-4 in case of bus-error.
+         * The way to do this happen would be to make a special OpCode fetch
+         * sequence, or to radically change the OpCode fetch sequence. But then
+         * should also consider JAL into illegal regions, and conditional branch
+         * into illegal regions, and also "falling over the edge" from the last
+         * possible EBR address into IO region while executing sequentially.
+         * This will not be done.
          */
         bne     x2,x3,2f                // Check mcause == 1
         lw      x3,%lo(__mtval)(x0)
         bne     x1,x3,3f                // Check mtval, should be NOSUCHREG_ADR
         simend // <---------------------// End of simulation
         
-        simerr 66
+
         
 Common: 
         bne     x2,x3,2f                // Check mcause, 5 or 7 depending on test

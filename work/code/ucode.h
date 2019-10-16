@@ -561,7 +561,7 @@
 //             In first cycle, must use A_passq because alignment is                                                                                             
 //             determined from output of B. */                                                                                                                   
 #define _JAL_0(x) x,       "JAL    J-imm is in q. Branch on alignfault",            isr_none     | A_passq   | Wnn   | Rpc       | Qhld | sr_h  | wordaligned    | n(JAL_1)      
-#define _JAL_1    JAL_1,   "       Target adr to jj",                               isr_none     | A_addDQ   | Wyy   | Rpc       | Qz   | sr_h  | u_cont         | n(JAL_2)     
+#define _JAL_1    JAL_1,   "       Target adr to yy",                               isr_none     | A_addDQ   | Wyy   | Rpc       | Qz   | sr_h  | u_cont         | n(JAL_2)     
 #define _JAL_2    JAL_2,   "       Return address to TRG",                          isr_none     | A_add4    | WTRG  | Ryy       | Qx   | sr_h  | u_cont         | n(JAL_3)   /* [qq] JAL_2 must be at even ucodeadr */
 #define _JAL_3    JAL_3,   "       PC+imm/trap entrypt to PC. OpFetch",             nxtSTB       | A_passd   | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch)   /* Goes to either Fetch or eFetch */
 //                                                                                                                                                               

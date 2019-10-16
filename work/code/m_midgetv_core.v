@@ -88,28 +88,33 @@
  * see Wishbone B.4 data sheet for m_midgetv_core below.
  * 
  * input:RST_I. 
- * RST_I is a mandatory input for Wishbone. On the core it acts like a NMI.
- * 
- * Even though the granularity of the Wishbone interface is 
- * 8-bit, all read operations happen as 32-bit operations. SEL_O == 4'b1111.
- * Selection of (signed/unsigned) byte and (signed/unsigned) hword is done
- * internally in midgetv. For write operations, the granularity is 8-bit, 
- * and the SEL_O[3:0] signals have meaning. I am unsure whether
- * the lack of a true byte/hword read affects the conformity to the
- * Wishbone specification.
+ * RST_I is a mandatory Wishbone input. On the core it acts like a NMI.
+ *
+ * Even though the granularity of the Wishbone interface is 8-bit, all
+ * read operations happen as 32-bit operations. SEL_O == 4'b1111.
+ * Selection of (signed/unsigned) byte and (signed/unsigned) hword is
+ * done internally in midgetv. For write operations, the granularity
+ * is 8-bit, and the SEL_O[3:0] signals have meaning. 
  * 
  * input:start
  * ------------------  
  * From power-on reset, it may be adventageous to delay startup of
  * midgetv until clocks are stable, etc. The start input signal is
  * included for this purpose. If midgetv does not include any cycle 
- * counter, this signal determines if the core is running directly, 
- * once start is high it should stay high.
+ * counter, this signal determines if the core is to be started.
  * If a cycle counter is implemented, start must be high for 64
- * consequtive cycles before midgetv is started. In this later case
- * it is allowable to let start go low at a later time, it will not
- * affect midgetv.
- * midgetv does not have any hardware reset input.
+ * consequtive cycles before midgetv is started. 
+ * 
+ * Once midgetv is started, the signal start has a different meaning:
+ *  o If midgetv has no cycle counter, 'start' enable/disable an
+ *    retired instruction counter.
+ *  o If midgetv has a cycle counter, 'start' enable/disable the
+ *    cycle counter.
+ * It is suggested that once 'start' is set high, it should remain high.
+ * 
+ * midgetv does not have any hardware reset input. This is because
+ * the state of midgetv resides in initialized EBR. Once midgetv is
+ * started the only way to get back to initial state is a power cycle.
  * 
  * input:meip
  * ----------
@@ -143,23 +148,21 @@
  * When interrupts are included, IWIDTH should be 32.
  * Legal values: From 1 to 32.
  * 
- * 
  * NO_CYCLECNT
  * -----------
  * 0 : Cycle counter available
  * 1 : No cycle counter.
  * 
  * Normally midgetv support a 32-bit cycle counter (the low 32 bits of
- * mcycle). To save 12 LUTs, it can be suppressed, If
- * suppressed, one still have a 32 bit counter, that works as a
- * retired instruction counter. Legal values: 0 or 1.
+ * mcycle). To save 11 LUTs, it can be suppressed. If suppressed, one
+ * still have a 32 bit counter, that works as a retired instruction
+ * counter. Legal values: 0 or 1.
  * 
  * MTIMETAP_LOWLIM
  * ---------------
  * A constant, but I propagate as a parameter because it is likely to
  * be changed once I know the maximum number of cycles needed to do
  * *any* CSR instruction.
- * 
  *  
  * MTIMETAP
  * -------
@@ -201,7 +204,7 @@
  * 
  * NO_UCODEOPT
  * --------
- * 0: Use 2EBRs + ~20 LUTs for control, recommended.
+ * 0: Use 2 EBRs + ~20 LUTs for control, recommended.
  * 1: Use 3 EBRs for control. 
  * 
  * EBRADRWIDTH
@@ -305,7 +308,6 @@ module m_midgetv_core
    
    
    /* verilator lint_off UNUSED */
-//   wire                 alu_killwarnings;       // From inst_alu of m_alu.v
    wire                 m_alu_carryin_killwarnings;// From inst_alu_carryin of m_alu_carryin.v
    wire                 m_condcode_killwarnings;// From inst_condcode of m_condcode.v
    wire                 m_immexp_zfind_q_killwarnings;// From inst_immexp_zfind_q of m_immexp_zfind_q.v
@@ -575,7 +577,7 @@ module m_midgetv_core
       .QQ                               (QQ[31:0]),
       .corerunning                      (corerunning),
       .buserror                         (buserror),
-      .dbg_rccnt                        (dbg_rccnt[5:0]),
+      .dbg_rccnt                        (dbg_rccnt[6:0]),
       // Inputs
       .clk                              (clk),
       .start                            (start),
@@ -707,7 +709,7 @@ module m_midgetv_core
     * Control path / Data path interface
     */
    
-   // Internal read and write addresses
+   // Internal read addresses
    m_rai #(.HIGHLEVEL(HIGHLEVEL), .EBRADRWIDTH(EBRADRWIDTH))
    inst_rai
      (/*AUTOINST*/
@@ -729,6 +731,7 @@ module m_midgetv_core
       .STB_O                            (STB_O),
       .sram_stb                         (sram_stb));
 
+   // Internal write addresses
    m_wai #(.HIGHLEVEL(HIGHLEVEL), .EBRADRWIDTH(EBRADRWIDTH))
    inst_wai
      (/*AUTOINST*/
@@ -1013,8 +1016,6 @@ module m_midgetv_core
       end
    endgenerate
 endmodule
-
-
 
 // Local Variables:
 // verilog-library-directories:("."  )

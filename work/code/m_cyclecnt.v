@@ -6,8 +6,10 @@
  *
  * This module:
  * ------------
- * o Construction to modify an alu input so that +3 and +4 can be realized easily
- * o Construction to hold execution of midgetv for the first cycle 
+ * o Construction to modify an alu input so that +3 and +4 can be 
+ *   realized easily
+ * o Construction to hold execution of midgetv for (at least) the 
+ *   first cycle 
  * o Optionally support for the cycle counter, and by extension mtime
  * o Optionally support for detection of bus-error
  * 
@@ -16,40 +18,60 @@
  *
  * A cycle counter with a 64-bit resolution is mandatory in most
  * implementations of RISC-V. I solve this by timing each instruction
- * in a 6-bit counter rcnt. Duing OpCode fetch this counter is added
- * to ttime, the counter is reset to 0b000001. Register ttime contains
- * the low 32 bits of the cycle counter. rcnt is multiplexed with
- * ADR_O used by input QQ of the ALU during a cycle in OpCode fetch.
+ * in a 7-bit counter rcnt. Duing OpCode fetch this counter is added
+ * to ttime, the counter is reset to 1. Register ttime contains the
+ * low 32 bits of the cycle counter. rcnt is multiplexed with ADR_O
+ * used by input QQ of the ALU during a cycle in OpCode fetch.  The
+ * slowest "native" instruction is "shl rd,rs,31", shift operations by
+ * 31. These instructions require 41 clock cycles. A consequence is
+ * that the cycle counter must be 6 bits so no cycle count is
+ * lost. However, when a load or store accesses slow i/o I got into a
+ * problem. The fastest store byte instruction "sb x19,3(x22)" for
+ * example, require 37 instructions with a zero-latency output
+ * register. Let me specify that any "sb" should work with a register
+ * with a 16 cycle latency, and set the limit on the cycle count
+ * "bus-error cutoff" accordingly. In itself this is not a problem, I
+ * require around 54 cycles in total < 64. But a problem arises when I
+ * consider the "lh" instruction. With bus-error cutoff as above, a
+ * "lh" instruction may need 73 cycles > 64. Hence I increase the
+ * width of the cycle counter to 7.  Finally: Midgetv may be used with
+ * slow program memory. I do not distinguish between latency additions
+ * from memory or from i/o. With the present solution, I at most allow
+ * 16 cycles latency for both the operand fetch, and the data fetch.
  *
  * This module also determines if midgetv is up and running. 
- * -  If we have no cyclecounter, corerunning goes high one cycle after
- *    input signal "start is asserted.  
- * -  If we have a cyclecounter, start is used as an enable for the counter, and
- *    must be high 64 consequtive cycles to let midgetv free. This should be
- *    handy if the clock of midgetv comes from a PLL or an unstable clock (as 
- *    is the case of iceblink40-hx1k boards).
+ * -  If we have no cyclecounter, corerunning goes high one cycle 
+ *    after input signal 'start' is asserted.  
+ * -  If we have a cyclecounter, 'start' is used as an enable for the 
+ *    counter, and must be high 128 consequtive cycles to let midgetv 
+ *    free. This should be handy if the clock of midgetv comes from a 
+ *    PLL or an unstable clock (as is the case of iceblink40-hx1k 
+ *    boards).
+ *
+ * If the 7-bit counter rcnt reaches 48 after the core is running, and
+ * STB_O is set, we exit to a trap with bus-error. This will happen if
+ * an IO device does not answer in a reasonable number of cycles. So
+ * how many cycles of IO before a bus-error happens? These are results
+ * from simulation program t190.s, run in SRAM. The numbers assume a
+ * program executing from SRAM with a 1-cycle read latency for OpCode
+ * fetch.
+ *                        Max latency for
+ *   Instruction          successfull instruction
+ * - LW/LH(U)/LB(U)     : 42
+ * - SW                 : 42
+ * - SH to lsb adr 0b00 : 38
+ * - SH to lsb adr 0b10 : 23
+ * - SB to lsb adr 0b00 : 38
+ * - SB to lsb adr 0b01 : 31
+ * - SB to lsb adr 0b10 : 23
+ * - SB to lsb adr 0b11 : 15
  * 
- * If the 6-bit counter rcnt reaches 48 after the core is running, and STB_O
- * is set, we exit to a trap with bus-error. This  will happen if an IO device 
- * does not answer in a reasonable number of cycles. 
- * So how many cycles of IO before a bus-error happens? These are results from
- * simulation program t190.s, run in SRAM:
- * 
- * - LW/LH(U)/LB(U)     : 43
- * - SW                 : 43
- * - SH aligned         : 39
- * - SH unaligned       : 24
- * - SB to lsb adr 0b00 : 39
- * - SB to lsb adr 0b01 : 32
- * - SB to lsb adr 0b10 : 24
- * - SB to lsb adr 0b11 : 16
- * 
- * Sizes in SB_LUTs:
+ * Size of this module in SB_LUTs:
  * HIGHLEVEL
  * | NO_CYCLECNT
- * 1 0 Lattice LSE/Synplify Pro  : 22/24
+ * 1 0 Lattice LSE/Synplify Pro  : 24/27
  * 1 1 Lattice LSE/Synplify Pro  : 3
- * 0 0                           : 14
+ * 0 0                           : 16
  * 0 1                           : 3
  * 
  * Parameters:
@@ -61,22 +83,22 @@
  * 
  * NO_CYCLECOUNT 
  * -------------
- * 1 : To save a few LUTs, rcnt is optional
+ * 1 : To save 13 LUTs, rcnt is optional
  *     sa17
  *     |sa16 QQ[1:0]
- *     0x    2'b11             To implement +3 and +4
- *     x1    {ADR_O[1],start}  rcnt degenerates to instruction counter.
- *     1x    ADR_O[1:0]        Let through ADR_O
+ *     0x    2'b11               To implement +3 and +4
+ *     x1    {ADR_O[1],start}    rcnt degenerates to instruction counter.
+ *     1x    ADR_O[1:0]          Let through ADR_O
  * 0 : rcnt is implemented
  *     sa17                      
- *     |sa16 QQ[5:0]             
+ *     |sa16 QQ[6:0]             
  *     ----- -------             
- *     00    {ADR_O[5:2],2'b11}  To implement +3 and +4
+ *     00    {ADR_O[6:2],2'b11}  To implement +3 and +4
  *     x1    rccnt               Muxing in rcnt, reset counter.
- *     10    ADR_O[5:0]          Let through ADR_O
+ *     10    ADR_O[6:0]          Let through ADR_O
  */
 module m_cyclecnt
-  # ( parameter HIGHLEVEL = 1, NO_CYCLECNT = 0 )
+  # ( parameter HIGHLEVEL = 0, NO_CYCLECNT = 0 )
   ( 
     input         clk,
     input         start,
@@ -89,7 +111,7 @@ module m_cyclecnt
     output [31:0] QQ, 
     output        corerunning,
     output        buserror, 
-    output [5:0]  dbg_rccnt
+    output [6:0]  dbg_rccnt
     );
    
    generate
@@ -114,13 +136,13 @@ module m_cyclecnt
             always @(posedge clk)
               rcrun <= cmbrcrun;
             assign corerunning = rcrun;
-            assign dbg_rccnt = {5'b0,STB_O};
+            assign dbg_rccnt = {6'b0,STB_O};
             
          end else begin
             
             // =======================================================
             // HIGLEVEL, CYCLECNT
-            // When start has been asserted 64 consequtive cycles, 
+            // When start has been asserted 128 consequtive cycles, 
             // rcrun is set, the core is running. Even if start is
             // deasserted later on, the core continues to run. However,
             // the cycle counter will only count if start is high.
@@ -130,20 +152,21 @@ module m_cyclecnt
             // set one cycle.
             // =======================================================
 
-            reg [5:0]   rccnt;
+            reg [6:0]   rccnt;
             reg         rbuserror;
-            wire [6:0]  ccnt = start ? (sa16 ? 1 : rccnt + 1) : 0;
-            wire        cmbbuserror = (rccnt == 6'b101111) & STB_O;
-            
-            assign cmbrcrun    = ccnt[6] | rcrun;
+            wire [7:0]  ccnt = start ? (sa16 ? 1 : rccnt + 1) : 0;
+//            wire        cmbbuserror = (rccnt == 6'b101111) & STB_O;
+            wire        cmbbuserror = (rccnt[5:0] == 6'b101111) & STB_O;
+
+            assign cmbrcrun    = ccnt[7] | rcrun;
             
             always @(posedge clk) begin
-               rccnt[5:0] <= ccnt[5:0];
+               rccnt[6:0] <= ccnt[6:0];
                rcrun      <= cmbrcrun;
                rbuserror  <= cmbbuserror;
             end
             
-            assign QQ[5:0] = sa16 ? rccnt : (sa17 ? ADR_O[5:0] : {ADR_O[5:2],2'h3} );
+            assign QQ[6:0] = sa16 ? rccnt : (sa17 ? ADR_O[6:0] : {ADR_O[6:2],2'h3} );
             assign buserror = rbuserror;
             assign corerunning = rcrun;
             assign dbg_rccnt = rccnt;
@@ -157,7 +180,7 @@ module m_cyclecnt
             // LOWLEVEL, NO CYCLECNT
             // =======================================================
             wire cmb_rcrun;
-            assign QQ[5:2] = ADR_O[5:2];
+            assign QQ[6:2] = ADR_O[6:2];
             SB_LUT4 #(.LUT_INIT(16'habab)) qqmux1(.O(QQ[1]),.I3(1'b0),.I2(sa16), .I1(sa17), .I0(ADR_O[1])); 
             SB_LUT4 #(.LUT_INIT(16'haacf)) qqmux0(.O(QQ[0]),.I3(sa16),.I2(sa17), .I1(ADR_O[0]), .I0(start)); 
             SB_LUT4 #(.LUT_INIT(16'heeee)) cmb_rcrun_l(.O(cmb_rcrun), .I3(1'b0), .I2(1'b0), .I1(corerunning), .I0(start));
@@ -177,6 +200,13 @@ module m_cyclecnt
              *         -----|I1 |-cmb_rcrun---|  |-- corerunning
              * corerunning -|I2 |             >__|      
              *           +--|I3_|                      
+             *           |ccntcy[7]
+             *          /y\
+             *          |||  ___                                           ___         
+             * start   -(((-|I0 |              __             ADR_O[6] ---|I0 |           
+             * rcnt[5] -((+-|I1 |-ccnt[6]-----|  |-- rcnt[5] -------------|I1 |- QQ[6] 
+             *    sa16 -+(--|I2 |             >__|                  sa16 -|I2 |        
+             *           +--|I3_|                                        -|I3_|        
              *           |ccntcy[5]
              *          /y\
              *          |||  ___                                           ___         
@@ -235,24 +265,24 @@ module m_cyclecnt
              *
              */
             
-            wire [5:0] ccnt,rccnt;
+            wire [6:0] ccnt,rccnt;
             /* verilator lint_off UNOPTFLAT */
-            wire [5:0] ccntcy;
+            wire [6:0] ccntcy;
             wire [3:0] qqcy;
             /* verilator lint_on UNOPTFLAT */
             wire       cmb_rcrun,cmbbuserror;
             
             bn_lcy4_b #(.I(16'haa22)) l_ccntlsb(     .o(ccnt[0]),   .co(ccntcy[0]),   .ci(1'b1),        .i3(sa16),        .i2(1'b0),  .i1(rccnt[0]),   .i0(start));
-            bn_lcy4_b #(.I(16'h0208)) l_ccnt [4:0] ( .o(ccnt[5:1]), .co(ccntcy[5:1]), .ci(ccntcy[4:0]), .i3(ccntcy[4:0]), .i2(sa16),  .i1(rccnt[5:1]), .i0(start));
-            bn_l4     #(.I(16'hfff0)) l_rcrun      ( .o(cmb_rcrun), .i3(ccntcy[5]), .i2(corerunning), .i1(1'b0), .i0(1'b0));
-            SB_DFF r_rcntlsb [5:0] ( .Q(rccnt),       .C(clk), .D(ccnt));
+            bn_lcy4_b #(.I(16'h0208)) l_ccnt [5:0] ( .o(ccnt[6:1]), .co(ccntcy[6:1]), .ci(ccntcy[5:0]), .i3(ccntcy[5:0]), .i2(sa16),  .i1(rccnt[6:1]), .i0(start));
+            bn_l4     #(.I(16'hfff0)) l_rcrun      ( .o(cmb_rcrun), .i3(ccntcy[6]), .i2(corerunning), .i1(1'b0), .i0(1'b0));
+            SB_DFF r_rcntlsb [6:0] ( .Q(rccnt),       .C(clk), .D(ccnt));
             SB_DFF r_rcrun         ( .Q(corerunning), .C(clk), .D(cmb_rcrun));
 
             bn_lcy4_b #(.I(16'hcacf)) c_qq_10 [1:0] (.o(QQ[1:0]), .co(qqcy[1:0]), .ci({qqcy[0],1'b1}), .i3(sa17), .i2(sa16), .i1(rccnt[1:0]), .i0(ADR_O[1:0]) );
             bn_lcy4_b #(.I(16'hcaca)) c_qq_32 [1:0] (.o(QQ[3:2]), .co(qqcy[3:2]), .ci(qqcy[2:1]),      .i3(1'b0), .i2(sa16), .i1(rccnt[3:2]), .i0(ADR_O[3:2]) );
             bn_l4 #(.I(16'hc000)) c_buserror( .o(cmbbuserror), .i3(qqcy[3]), .i2(rccnt[5]), .i1(STB_O), .i0(1'b0));
             SB_DFF r_buserror( .Q(buserror), .C(clk), .D(cmbbuserror));
-            bn_l4 #(.I(16'hcaca)) c_qq_54 [1:0] (.o(QQ[5:4]), .i3(1'b0), .i2(sa16), .i1(rccnt[5:4]), .i0(ADR_O[5:4]));
+            bn_l4 #(.I(16'hcaca)) c_qq_64 [2:0] (.o(QQ[6:4]), .i3(1'b0), .i2(sa16), .i1(rccnt[6:4]), .i0(ADR_O[6:4]));
             
             assign dbg_rccnt = rccnt;
             
@@ -260,5 +290,5 @@ module m_cyclecnt
       end
    endgenerate
    
-   assign QQ[31:6] = ADR_O[31:6];
+   assign QQ[31:7] = ADR_O[31:7];
 endmodule
