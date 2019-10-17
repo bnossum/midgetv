@@ -43,8 +43,8 @@ _start:
         #
         # Test lw from an input register with steadily increasing read latency
         #
-        li      x1,0x2900               // 
-        li      x5,0x2b00               // What last written to DYNWISHREG        
+        li      x1,0x3a00               // 
+        li      x5,0x3b00               // What last written to DYNWISHREG        
         la      x6,Err_Test_LW          // Where to continue in case of unexpected result
         la      x7,Test_LH              // Where to continue after expected exception
 Test_LW:   
@@ -59,8 +59,8 @@ Test_LH:
         #
         li      x8,2                    // Byte offset
 Test_LH_Loop:   
-        li      x1,0x2900               // Latency start value
-        li      x5,0x2b00               // What last written to DYNWISHREG
+        li      x1,0x3a00               // Latency start value
+        li      x5,0x3b00               // What last written to DYNWISHREG
         
         la      x6,Err_Test_LH          // Where to continue in case of unexpected exception
         la      x7,InTest_LH            // Where to continue after expected exception
@@ -81,8 +81,8 @@ Test_LHU:
         #
         li      x8,2                    // Byte offset
 Test_LHU_Loop:   
-        li      x1,0x2900               // Latency start value
-        li      x5,0x2b00               // What last written to DYNWISHREG
+        li      x1,0x3a00               // Latency start value
+        li      x5,0x3b00               // What last written to DYNWISHREG
         la      x6,Err_Test_LHU         // Where to continue in case of unexpected exception
         la      x7,InTest_LHU           // Where to continue after expected exception
 Test_LHU2:   
@@ -104,8 +104,8 @@ Test_LB:
         #
         li      x8,3                    // Byte offset
 Test_LB_Loop:   
-        li      x1,0x2900               // Latency start value
-        li      x5,0x2b00               // What last written to DYNWISHREG
+        li      x1,0x3a00               // Latency start value
+        li      x5,0x3b00               // What last written to DYNWISHREG
         la      x6,Err_Test_LB          // Where to continue in case of unexpected exception
         la      x7,InTest_LB            // Where to continue after expected exception
 Test_LB2:   
@@ -125,8 +125,8 @@ Test_LBU:
         #
         li      x8,3                    // Byte offset
 Test_LBU_Loop:   
-        li      x1,0x2900               // Latency start value
-        li      x5,0x2b00               // What last written to DYNWISHREG
+        li      x1,0x3a00               // Latency start value
+        li      x5,0x3b00               // What last written to DYNWISHREG
         la      x6,Err_Test_LBU         // Where to continue in case of unexpected exception
         la      x7,InTest_LBU           // Where to continue after expected exception
 Test_LBU2:   
@@ -145,8 +145,8 @@ Test_SW:
         #
         # Test sw to an output register with steadily increasing write latency
         #
-        li      x1,0x28
-        li      x5,0x2b                 // What last written to DYNWISHREG
+        li      x1,0x38
+        li      x5,0x3b                 // What last written to DYNWISHREG
         la      x6,Err_Test_SW          // Where to continue in case of unexpected result
         la      x7,Test_SHe             // Where to continue after expected exception
 Test_SW2:   
@@ -159,8 +159,8 @@ Test_SHe:
         #
         # Test sh, even address, to an output register with steadily increasing write latency
         #
-        li      x1,0x24
-        li      x5,0x27                 // What last written to DYNWISHREG
+        li      x1,0x34
+        li      x5,0x37                 // What last written to DYNWISHREG
         la      x6,Err_Test_SHe         // Where to continue in case of unexpected result
         la      x7,Test_SHo             // Where to continue after expected exception
 Test_SHe2:   
@@ -173,8 +173,8 @@ Test_SHo:
         #
         # Test sh, odd address, to an output register with steadily increasing write latency
         #
-        li      x1,0x14
-        li      x5,0x18                 // What last written to DYNWISHREG
+        li      x1,0x27
+        li      x5,0x28                 // What last written to DYNWISHREG
         la      x6,Err_Test_SHo         // Where to continue in case of unexpected result
         la      x7,Test_SB00            // Where to continue after expected exception
 Test_SHo2:   
@@ -187,8 +187,8 @@ Test_SB00:
         #
         # Test sb, address ending in 0b00, to an output register with steadily increasing write latency
         #
-        li      x1,0x24
-        li      x5,0x27                 // What last written to DYNWISHREG
+        li      x1,0x36
+        li      x5,0x37                 // What last written to DYNWISHREG
         la      x6,Err_Test_SB00        // Where to continue in case of unexpected result
         la      x7,Test_SB01            // Where to continue after expected exception
 Test_SB00_2:   
@@ -201,8 +201,8 @@ Test_SB01:
         #
         # Test sb, address ending in 0b01, to an output register with steadily increasing write latency
         #
-        li      x1,0x1c
-        li      x5,0x20                 // What last written to DYNWISHREG
+        li      x1,0x2e
+        li      x5,0x30                 // What last written to DYNWISHREG
         la      x6,Err_Test_SB01        // Where to continue in case of unexpected result
         la      x7,Test_SB10            // Where to continue after expected exception
 Test_SB01_2:   
@@ -215,8 +215,8 @@ Test_SB10:
         #
         # Test sb, address ending in 0b10, to an output register with steadily increasing write latency
         #
-        li      x1,0x16
-        li      x5,0x18                 // What last written to DYNWISHREG
+        li      x1,0x26
+        li      x5,0x28                 // What last written to DYNWISHREG
         la      x6,Err_Test_SB10        // Where to continue in case of unexpected result
         la      x7,Test_SB11            // Where to continue after expected exception
 Test_SB10_2:   
@@ -229,8 +229,8 @@ Test_SB11:
         #
         # Test sb, address ending in 0b11, to an output register with steadily increasing write latency
         #
-        li      x1,0xe
-        li      x5,0x10                 // What last written to DYNWISHREG
+        li      x1,0x1e
+        li      x5,0x20                 // What last written to DYNWISHREG
         la      x6,Err_Test_SB11        // Where to continue in case of unexpected result
         la      x7,AllTestsDone         // Where to continue after expected exception
 Test_SB11_2:   
