@@ -1,6 +1,5 @@
 work/obj_dir/*
 work/nobackup_cold_store/*
-work/bin/*
 
 work/hwtst/iceblink40-hx1k/.sconsign.dblite
 work/hwtst/iceblink40-hx1k/hardware.asc

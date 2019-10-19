@@ -201,7 +201,7 @@ EntryCSR:                               //0x108 Microcode branches to here when 
 
         // The following locations are used to trigger side-effects when used as write address.
 #define __write_mtime       0x200020e0 // Clears mtimeincip
-#define __write_minstreth   0x200040fc // Clears minstrethincip
+#define __write_minstreth   0x200040ec // Clears minstrethincip
 #define __write_mtimecmp    0x200800f8 // Clears mtip
 #define __write_mtimecmph   0x200800fc // Also clears mtip
 
@@ -224,7 +224,7 @@ EntryCSR:                               //0x108 Microcode branches to here when 
 #define __read_mstatus      0x78000000   // 000000000000 0            0           0001  1    000  mpie 000 mie  000  MSTATUS 
 
         // minstreth lives in software, in EBR ram.
-#define __read_minstreth    0x000000fc
+#define __read_minstreth    0x000000ec
 
         // =============================================================================
         // During simulation some registers are at defined addresses

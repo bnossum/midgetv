@@ -1,0 +1,14 @@
+rm iceblinkcom
+rm m_alu.bin
+rm m_alu_carryin.bin
+rm m_cyclecnt.bin
+rm m_ice40sim_EBRonly.bin
+rm m_ice40sim_SRAM.bin
+rm midgetv_bin2ebr
+rm midgetv_genucode
+rm midgetv_indirectEBR
+rm m_shiftcounter.bin
+rm m_ucodepc.bin
+rm simeratosthenes
+rm simmorse
+rm ucodeinitval.hv
