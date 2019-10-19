@@ -26,7 +26,7 @@ module m_progressctrl
     input        sa14, //           Needed to deactivate WE_O
     input        sa30, //           Special case, strobe for "SW" must respect word alignment
     input        lastshift, //      To halt progress of microcode etc
-    input        r_issh0_not, //    To halt progress of microcode etc
+    input        rlastshift, //    To halt progress of microcode etc
     input [31:0] B, //              Do we access SRAM or I/O? Only B[31] used but due to Verilator...
     input        buserror, //       When we have bus error we must have forward progress in ucode
     output [3:0] SEL_O, //          Byte selects for SRAM and outputs
@@ -258,14 +258,15 @@ module m_progressctrl
       if ( SRAMADRWIDTH != 0 ) begin
          if ( enaQ_HIGHLEVEL ) begin
             assign enaQ            = (sa15 | sa32) & ~lastshift    & ~(STB_O | sram_stb);
-            assign progress_ucode = ((~sa33 | lastshift | ~r_issh0_not) & ~(STB_O | sram_stb)) | buserror;
+            assign progress_ucode = ((~sa33 | lastshift | rlastshift) & ~(STB_O | sram_stb)) | buserror;
          end else begin
             wire h3,hcy;
-//            assign h1 = ~sa33 | lastshift | ~r_issh0_not;
+//            assign h1 = ~sa33 | lastshift | rlastshift;
 //            assign progress_ucode = (h1 & ~(STB_O | sram_stb)) | buserror;
 //            assign hcy = STB_O | sram_stb;
 //            assign enaQ = (sa15 | sa32) & ~lastshift & ~hcy;
-            SB_LUT4 #(.LUT_INIT(16'hdfdf)) l_h3(.O(h3), .I3(1'b0), .I2(sa33), .I1(lastshift), .I0(r_issh0_not));
+//se next line SB_LUT4 #(.LUT_INIT(16'hdfdf)) l_h3(.O(h3), .I3(1'b0), .I2(sa33), .I1(lastshift), .I0(r_issh0_not));
+            SB_LUT4 #(.LUT_INIT(16'hefef)) l_h3(.O(h3), .I3(1'b0), .I2(sa33), .I1(lastshift), .I0(rlastshift));
             SB_LUT4 #(.LUT_INIT(16'hff02)) l_progress_ucode(.O(progress_ucode), .I3(buserror), .I2(STB_O), .I1(sram_stb), .I0(h3));
             SB_CARRY l_hcy(.CO(hcy), .CI(1'b1), .I1(STB_O), .I0(sram_stb));
             SB_LUT4 #(.LUT_INIT(16'h000e)) l_enaQ(.O(enaQ), .I3(hcy), .I2(lastshift), .I1(sa15), .I0(sa32));
@@ -273,13 +274,14 @@ module m_progressctrl
       end else begin
          if ( enaQ_HIGHLEVEL ) begin
             assign enaQ            = (sa15 | sa32) & ~lastshift   & ~STB_O;
-            assign progress_ucode = ((~sa33 | lastshift | ~r_issh0_not) & ~STB_O) | buserror;
+            assign progress_ucode = ((~sa33 | lastshift | rlastshift) & ~STB_O) | buserror;
          end else begin
 //            assign enaQ            = (sa15 | sa32) & ~lastshift   & ~STB_O;
-//            assign progress_ucode = ((~sa33 | lastshift | ~r_issh0_not) & ~STB_O) | buserror;
+//            assign progress_ucode = ((~sa33 | lastshift | rlastshift) & ~STB_O) | buserror;
             wire g1;
             SB_LUT4 #(.LUT_INIT(16'h000e)) l_enaQ(.O(enaQ), .I3(STB_O), .I2(lastshift), .I1(sa15), .I0(sa32));
-            SB_LUT4 #(.LUT_INIT(16'h00f7)) l_g1(.O(g1), .I3(STB_O), .I2(lastshift), .I1(sa33), .I0(r_issh0_not)); 
+//see next line            SB_LUT4 #(.LUT_INIT(16'h00f7)) l_g1(.O(g1), .I3(STB_O), .I2(lastshift), .I1(sa33), .I0(r_issh0_not));
+            SB_LUT4 #(.LUT_INIT(16'h00fb)) l_g1(.O(g1), .I3(STB_O), .I2(lastshift), .I1(sa33), .I0(rlastshift)); 
             SB_LUT4 #(.LUT_INIT(16'heeee)) I_progress_ucode(.O(progress_ucode), .I3(1'b0), .I2(1'b0), .I1(buserror), .I0(g1));
          end
       end
@@ -290,15 +292,16 @@ module m_progressctrl
          /* Internal write enable to EBR, mostly active, but not active when:
           *     sa41 == 1         Wnn, Wbp, Whp, Sets up SEL_O
           *     WE_O              We write to SRAM or I/O
-          *     r_issh0_not == 0  Shift right, but inhibit because we want shift 0 
+          *     rlastshift == 1   Shift right, but inhibit because we want shift 0 
           * 
           * To avoid a potential write the very first active cycle, we qualify write with corerunning.
           * Work. Check if this is really needed.
           */
-         wire avoid_iwe = sa41 | WE_O | ~r_issh0_not;
+         wire avoid_iwe = sa41 | WE_O | rlastshift;
          assign iwe = ~avoid_iwe & corerunning;
       end else begin
-            SB_LUT4 #(.LUT_INIT(16'h0200)) l_iwe(.O(iwe), .I3(corerunning), .I2(sa41), .I1(WE_O), .I0(r_issh0_not));         
+//see next line            SB_LUT4 #(.LUT_INIT(16'h0200)) l_iwe(.O(iwe), .I3(corerunning), .I2(sa41), .I1(WE_O), .I0(r_issh0_not));
+         SB_LUT4 #(.LUT_INIT(16'h0100)) l_iwe(.O(iwe), .I3(corerunning), .I2(sa41), .I1(WE_O), .I0(rlastshift));         
       end
    endgenerate
 

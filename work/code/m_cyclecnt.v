@@ -37,7 +37,7 @@
  * width of the cycle counter to 7.  Finally: Midgetv may be used with
  * slow program memory. I do not distinguish between latency additions
  * from memory or from i/o. With the present solution, I at most allow
- * 16 cycles latency for both the operand fetch, and the data fetch.
+ * 31 cycles latency for both the operand fetch, and the data fetch.
  *
  * This module also determines if midgetv is up and running. 
  * -  If we have no cyclecounter, corerunning goes high one cycle 
@@ -48,7 +48,7 @@
  *    PLL or an unstable clock (as is the case of iceblink40-hx1k 
  *    boards).
  *
- * If the 7-bit counter rcnt reaches 48 after the core is running, and
+ * If the 7-bit counter rcnt reaches 64 when the core is running, and
  * STB_O is set, we exit to a trap with bus-error. This will happen if
  * an IO device does not answer in a reasonable number of cycles. So
  * how many cycles of IO before a bus-error happens? These are results
@@ -57,14 +57,14 @@
  * fetch.
  *                        Max latency for
  *   Instruction          successfull instruction
- * - LW/LH(U)/LB(U)     : 42
- * - SW                 : 42
- * - SH to lsb adr 0b00 : 38
- * - SH to lsb adr 0b10 : 23
- * - SB to lsb adr 0b00 : 38
- * - SB to lsb adr 0b01 : 31
- * - SB to lsb adr 0b10 : 23
- * - SB to lsb adr 0b11 : 15
+ * - LW/LH(U)/LB(U)     : 58
+ * - SW                 : 58
+ * - SH to lsb adr 0b00 : 54
+ * - SH to lsb adr 0b10 : 39
+ * - SB to lsb adr 0b00 : 54
+ * - SB to lsb adr 0b01 : 47
+ * - SB to lsb adr 0b10 : 39
+ * - SB to lsb adr 0b11 : 31
  * 
  * Size of this module in SB_LUTs:
  * HIGHLEVEL
@@ -98,7 +98,7 @@
  *     10    ADR_O[6:0]          Let through ADR_O
  */
 module m_cyclecnt
-  # ( parameter HIGHLEVEL = 0, NO_CYCLECNT = 0 )
+  # ( parameter HIGHLEVEL = 1, NO_CYCLECNT = 0 )
   ( 
     input         clk,
     input         start,

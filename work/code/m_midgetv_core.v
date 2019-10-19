@@ -321,6 +321,9 @@ module m_midgetv_core
    wire                 ucodepc_killwarnings;   // From inst_ucodepc of m_ucodepc.v
    wire                 buserror;               // From inst_cyclecnt of m_cyclecnt.v
    wire [6:0]           dbg_rccnt;              // From inst_cyclecnt of m_cyclecnt.v
+`ifdef verilator
+   wire [4:0]           dbg_rshcnt;             // From inst_shiftcounter of m_shiftcounter.v
+`endif
    /* verilator lint_on UNUSED */
    /*AUTOWIRE*/
    // Beginning of automatic wires (for undeclared instantiated-module outputs)
@@ -367,9 +370,9 @@ module m_midgetv_core
    wire                 qACK;                   // From inst_progressctrl of m_progressctrl.v
    wire                 qualint;                // From inst_status_and_interrupts of m_status_and_interrupts.v
    wire [31:0]          rDee;                   // From inst_inputmux of m_inputmux.v
-   wire                 r_issh0_not;            // From inst_shiftcounter of m_shiftcounter.v
    wire                 raluF;                  // From inst_condcode of m_condcode.v
    wire [7:0]           rinx;                   // From inst_ucode of m_ucode.v
+   wire                 rlastshift;             // From inst_shiftcounter of m_shiftcounter.v
    wire                 rzcy32;                 // From inst_immexp_zfind_q of m_immexp_zfind_q.v
    wire [2:0]           s_alu;                  // From inst_ucode of m_ucode.v
    wire [1:0]           s_alu_carryin;          // From inst_ucode of m_ucode.v
@@ -474,7 +477,7 @@ module m_midgetv_core
    endfunction
    function [3:0] get_progress_ucode_etc;
       // verilator public
-      get_progress_ucode_etc = {progress_ucode,~r_issh0_not, sa33, lastshift };
+      get_progress_ucode_etc = {progress_ucode,rlastshift, sa33, lastshift };
    endfunction
    function [0:0] get_iwe;
       // verilator public
@@ -519,6 +522,10 @@ module m_midgetv_core
    function [0:0] get_corerunning;
       // verilator public
       get_corerunning = corerunning;
+   endfunction
+   function [4:0] get_shiftcnt;
+      // verilator public
+      get_shiftcnt = dbg_rshcnt;
    endfunction
 `endif
 
@@ -778,10 +785,14 @@ module m_midgetv_core
 
    m_shiftcounter #(.HIGHLEVEL(HIGHLEVEL))
      inst_shiftcounter
-       (/*AUTOINST*/
+       (// Outputs
+`ifdef verilator
+        .dbg_rshcnt                     (dbg_rshcnt[4:0]),
+`endif
+        /*AUTOINST*/
         // Outputs
         .lastshift                      (lastshift),
-        .r_issh0_not                    (r_issh0_not),
+        .rlastshift                     (rlastshift),
         .preprealucyin                  (preprealucyin),
         // Inputs
         .clk                            (clk),
@@ -835,7 +846,7 @@ module m_midgetv_core
       .sa14                             (sa14),
       .sa30                             (sa30),
       .lastshift                        (lastshift),
-      .r_issh0_not                      (r_issh0_not),
+      .rlastshift                       (rlastshift),
       .B                                (B[31:0]),
       .buserror                         (buserror));
    
