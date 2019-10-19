@@ -376,14 +376,13 @@ module m_midgetv_core
    wire                 rzcy32;                 // From inst_immexp_zfind_q of m_immexp_zfind_q.v
    wire [2:0]           s_alu;                  // From inst_ucode of m_ucode.v
    wire [1:0]           s_alu_carryin;          // From inst_ucode of m_ucode.v
+   wire [1:0]           s_cyclecnt_sel;         // From inst_ucode of m_ucode.v
    wire                 sa00;                   // From inst_ucode of m_ucode.v
    wire                 sa11;                   // From inst_ucode of m_ucode.v
    wire                 sa12;                   // From inst_ucode of m_ucode.v
    wire                 sa12_and_corerunning;   // From inst_alu_carryin of m_alu_carryin.v
    wire                 sa14;                   // From inst_ucode of m_ucode.v
    wire                 sa15;                   // From inst_ucode of m_ucode.v
-   wire                 sa16;                   // From inst_ucode of m_ucode.v
-   wire                 sa17;                   // From inst_ucode of m_ucode.v
    wire                 sa18;                   // From inst_ucode of m_ucode.v
    wire                 sa19;                   // From inst_ucode of m_ucode.v
    wire                 sa20;                   // From inst_ucode of m_ucode.v
@@ -588,8 +587,7 @@ module m_midgetv_core
       // Inputs
       .clk                              (clk),
       .start                            (start),
-      .sa16                             (sa16),
-      .sa17                             (sa17),
+      .s_cyclecnt_sel                   (s_cyclecnt_sel[1:0]),
       .STB_O                            (STB_O),
       .ADR_O                            (ADR_O[31:0]));
 
@@ -857,12 +855,11 @@ module m_midgetv_core
         .sa00                           (sa00),
         .s_alu_carryin                  (s_alu_carryin[1:0]),
         .s_alu                          (s_alu[2:0]),
+        .s_cyclecnt_sel                 (s_cyclecnt_sel[1:0]),
         .sa11                           (sa11),
         .sa12                           (sa12),
         .sa14                           (sa14),
         .sa15                           (sa15),
-        .sa16                           (sa16),
-        .sa17                           (sa17),
         .sa18                           (sa18),
         .sa19                           (sa19),
         .sa20                           (sa20),

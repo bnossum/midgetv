@@ -84,26 +84,27 @@
  * NO_CYCLECOUNT 
  * -------------
  * 1 : To save 13 LUTs, rcnt is optional
- *     sa17
- *     |sa16 QQ[1:0]
+ *     s_cyclecnt_sel
+ *     ||    QQ[1:0]
  *     0x    2'b11               To implement +3 and +4
  *     x1    {ADR_O[1],start}    rcnt degenerates to instruction counter.
  *     1x    ADR_O[1:0]          Let through ADR_O
  * 0 : rcnt is implemented
- *     sa17                      
- *     |sa16 QQ[6:0]             
+ *     s_cyclecnt_sel
+ *     ||    QQ[6:0]             
  *     ----- -------             
  *     00    {ADR_O[6:2],2'b11}  To implement +3 and +4
  *     x1    rccnt               Muxing in rcnt, reset counter.
  *     10    ADR_O[6:0]          Let through ADR_O
  */
 module m_cyclecnt
-  # ( parameter HIGHLEVEL = 1, NO_CYCLECNT = 0 )
+  # ( parameter HIGHLEVEL = 0, NO_CYCLECNT = 0 )
   ( 
     input         clk,
     input         start,
-    input         sa16,
-    input         sa17,
+    input [1:0]   s_cyclecnt_sel,
+//    input         sa16,
+//    input         sa17,
 /* verilator lint_off UNUSED */
     input         STB_O,
 /* verilator lint_on UNUSED */
@@ -130,7 +131,7 @@ module m_cyclecnt
             // No possibility to find a bus error.
             // =======================================================
             assign QQ[6:2] = ADR_O[6:2];
-            assign QQ[1:0] = sa16 ? {ADR_O[1],start} : (sa17 ? ADR_O[1:0] : 2'h3 );
+            assign QQ[1:0] = s_cyclecnt_sel[0] ? {ADR_O[1],start} : (s_cyclecnt_sel[1] ? ADR_O[1:0] : 2'h3 );
             assign buserror = 1'b0;
             assign cmbrcrun = rcrun | start;
             always @(posedge clk)
@@ -154,8 +155,7 @@ module m_cyclecnt
 
             reg [6:0]   rccnt;
             reg         rbuserror;
-            wire [7:0]  ccnt = start ? (sa16 ? 1 : rccnt + 1) : 0;
-//            wire        cmbbuserror = (rccnt[5:0] == 6'b101111) & STB_O;
+            wire [7:0]  ccnt = start ? (s_cyclecnt_sel[0] ? 1 : rccnt + 1) : 0;
             wire        cmbbuserror = (rccnt[5:0] == 6'b111111) & STB_O;
             assign cmbrcrun    = ccnt[7] | rcrun;
             
@@ -165,7 +165,7 @@ module m_cyclecnt
                rbuserror  <= cmbbuserror;
             end
             
-            assign QQ[6:0] = sa16 ? rccnt : (sa17 ? ADR_O[6:0] : {ADR_O[6:2],2'h3} );
+            assign QQ[6:0] = s_cyclecnt_sel[0] ? rccnt : (s_cyclecnt_sel[1] ? ADR_O[6:0] : {ADR_O[6:2],2'h3} );
             assign buserror = rbuserror;
             assign corerunning = rcrun;
             assign dbg_rccnt = rccnt;
@@ -180,8 +180,8 @@ module m_cyclecnt
             // =======================================================
             wire cmb_rcrun;
             assign QQ[6:2] = ADR_O[6:2];
-            SB_LUT4 #(.LUT_INIT(16'habab)) qqmux1(.O(QQ[1]),.I3(1'b0),.I2(sa16), .I1(sa17), .I0(ADR_O[1])); 
-            SB_LUT4 #(.LUT_INIT(16'haacf)) qqmux0(.O(QQ[0]),.I3(sa16),.I2(sa17), .I1(ADR_O[0]), .I0(start)); 
+            SB_LUT4 #(.LUT_INIT(16'habab)) qqmux1(.O(QQ[1]),.I3(1'b0),.I2(s_cyclecnt_sel[0]), .I1(s_cyclecnt_sel[1]), .I0(ADR_O[1])); 
+            SB_LUT4 #(.LUT_INIT(16'haacf)) qqmux0(.O(QQ[0]),.I3(s_cyclecnt_sel[0]),.I2(s_cyclecnt_sel[1]), .I1(ADR_O[0]), .I0(start)); 
             SB_LUT4 #(.LUT_INIT(16'heeee)) cmb_rcrun_l(.O(cmb_rcrun), .I3(1'b0), .I2(1'b0), .I1(corerunning), .I0(start));
             SB_DFF rcrun(.Q(corerunning), .C(clk), .D(cmb_rcrun));
 
@@ -194,71 +194,71 @@ module m_cyclecnt
             // LOWLEVEL, CYCLECNT
             // =======================================================
             
-            /*               ___                  
-             *         -----|I0 |               __  
-             *         -----|I1 |-cmb_rcrun----|  |-- corerunning
-             * corerunning -|I2 |              >__|      
-             *           +--|I3_|                      
-             *           |ccntcy[7]
-             *          /y\
-             *          |||  ___                                            ___         
-             * start   -(((-|I0 |               __             ADR_O[6] ---|I0 |           
-             * rcnt[6] -((+-|I1 |-ccnt[6]------|  |-- rcnt[6] -------------|I1 |- QQ[6] 
-             *    sa16 -+(--|I2 |              >__|                  sa16 -|I2 |        
-             *           +--|I3_|                                         -|I3_|        
-             *           |ccntcy[6]
-             *          /y\                                 
-             *          |||  ___                              
-             * STB_O   -(((-|I0 |               __             
-             *     1   -((+-|I1 |-cmb_buserror-|  |-- buserror
-             *     0   -+(--|I2 |              >__|           
-             *           +--|I3_|                            
-             *           |ccntcy[5]
-             *          /y\
-             *          |||  ___                                            ___         
-             * start   -(((-|I0 |               __             ADR_O[5] ---|I0 |           
-             * rcnt[5] -((+-|I1 |-ccnt[5]------|  |-- rcnt[5] -------------|I1 |- QQ[5] 
-             *    sa16 -+(--|I2 |              >__|                  sa16 -|I2 |        
-             *           +--|I3_|                                         -|I3_|        
-             *           |ccntcy[4]                         
-             *          /y\                                 
-             *          |||  ___                                            ___         
-             * start   -(((-|I0 |               __             ADR_O[4] ---|I0 |        
-             * rcnt[4] -((+-|I1 |-ccnt[4]------|  |-- rcnt[4] -------------|I1 |- QQ[4] 
-             *    sa16 -+(--|I2 |              >__|                  sa16 -|I2 |        
-             *           +--|I3_|                                         -|I3_|        
-             *           |ccntcy[3]                         
-             *          /y\                                            
-             *          |||  ___                                            ___         
-             * start   -(((-|I0 |               __           ADR_O[3] -----|I0 |        
-             * rcnt[3] -((+-|I1 |-ccnt[3]------|  |-- rcnt[3] -------------|I1 |- QQ[3] 
-             *    sa16 -+(--|I2 |              >__|              sa16 -----|I2 |        
-             *           +--|I3_|                                         -|I3_|        
-             *           |ccntcy[2]                                    
-             *          /y\                                            
-             *          |||  ___                                            ___         
-             * start   -(((-|I0 |               __           ADR_O[2] -----|I0 |        
-             * rcnt[2] -((+-|I1 |-ccnt[2]------|  |-- rcnt[2] -------------|I1 |- QQ[2] 
-             *    sa16 -+(--|I2 |              >__|              sa16 -----|I2 |        
-             *           +--|I3_|                                         -|I3_|        
-             *           |ccntcy[1]                                    
-             *          /y\                                            
-             *          |||  ___                                            ___         
-             * start   -(((-|I0 |               __           ADR_O[1] -----|I0 |        
-             * rcnt[1] -((+-|I1 |-ccnt[1]------|  |-- rcnt[1] -------------|I1 |- QQ[1] 
-             *    sa16 -+(--|I2 |              >__|              sa16 -----|I2 |        
-             *           +--|I3_|                                sa17 -----|I3_|        
-             *           |ccntcy[0]                                    
-             *          /y\                                            
-             *          |||  ___                                            ___  
-             * start   -(((-|I0 |               __           ADR_O[0] -----|I0 | 
-             * rcnt[0] -((+-|I1 |-ccnt[0]------|  |-- rcnt[0] -------------|I1 |- QQ[0]
-             *       0 -+(--|I2 |              >__|              sa16 -----|I2 | 
-             *    sa16 --(--|I3_|                                sa17 -----|I3_|        
-             *           |                                             
-             *           1                                             
+            /*                         ___                  
+             *                   -----|I0 |               __  
+             *                   -----|I1 |-cmb_rcrun----|  |-- corerunning
+             *           corerunning -|I2 |              >__|      
+             *                     +--|I3_|                      
+             *                     |ccntcy[7]
+             *                    /y\
+             *                    |||  ___                                            ___         
+             *           start   -(((-|I0 |               __             ADR_O[6] ---|I0 |           
+             *           rcnt[6] -((+-|I1 |-ccnt[6]------|  |-- rcnt[6] -------------|I1 |- QQ[6] 
+             * s_cyclecnt_sel[0] -+(--|I2 |              >__|     s_cyclecnt_sel[0] -|I2 |        
+             *                     +--|I3_|                                         -|I3_|        
+             *                     |ccntcy[6]
+             *                    /y\                                 
+             *                    |||  ___                              
+             *           STB_O   -(((-|I0 |               __             
+             *               1   -((+-|I1 |-cmb_buserror-|  |-- buserror
+             *               0   -+(--|I2 |              >__|           
+             *                     +--|I3_|                            
+             *                     |ccntcy[5]
+             *                    /y\
+             *                    |||  ___                                            ___         
+             *           start   -(((-|I0 |               __             ADR_O[5] ---|I0 |           
+             *           rcnt[5] -((+-|I1 |-ccnt[5]------|  |-- rcnt[5] -------------|I1 |- QQ[5] 
+             * s_cyclecnt_sel[0] -+(--|I2 |              >__|     s_cyclecnt_sel[0] -|I2 |        
+             *                     +--|I3_|                                         -|I3_|        
+             *                     |ccntcy[4]                         
+             *                    /y\                                 
+             *                    |||  ___                                            ___         
+             *           start   -(((-|I0 |               __             ADR_O[4] ---|I0 |        
+             *           rcnt[4] -((+-|I1 |-ccnt[4]------|  |-- rcnt[4] -------------|I1 |- QQ[4] 
+             * s_cyclecnt_sel[0] -+(--|I2 |              >__|     s_cyclecnt_sel[0] -|I2 |        
+             *                     +--|I3_|                                         -|I3_|        
+             *                     |ccntcy[3]                         
+             *                    /y\                                            
+             *                    |||  ___                                            ___         
+             *           start   -(((-|I0 |               __           ADR_O[3] -----|I0 |        
+             *           rcnt[3] -((+-|I1 |-ccnt[3]------|  |-- rcnt[3] -------------|I1 |- QQ[3] 
+             * s_cyclecnt_sel[0] -+(--|I2 |              >__| s_cyclecnt_sel[0] -----|I2 |        
+             *                     +--|I3_|                                         -|I3_|        
+             *                     |ccntcy[2]                                    
+             *                    /y\                                            
+             *                    |||  ___                                            ___         
+             *           start   -(((-|I0 |               __           ADR_O[2] -----|I0 |        
+             *           rcnt[2] -((+-|I1 |-ccnt[2]------|  |-- rcnt[2] -------------|I1 |- QQ[2] 
+             * s_cyclecnt_sel[0] -+(--|I2 |              >__| s_cyclecnt_sel[0] -----|I2 |        
+             *                     +--|I3_|                                         -|I3_|        
+             *                     |ccntcy[1]                                    
+             *                    /y\                                            
+             *                    |||  ___                                            ___         
+             *           start   -(((-|I0 |               __           ADR_O[1] -----|I0 |        
+             *           rcnt[1] -((+-|I1 |-ccnt[1]------|  |-- rcnt[1] -------------|I1 |- QQ[1] 
+             * s_cyclecnt_sel[0] -+(--|I2 |              >__| s_cyclecnt_sel[0] -----|I2 |        
+             *                     +--|I3_|                   s_cyclecnt_sel[1] -----|I3_|        
+             *                     |ccntcy[0]                                    
+             *                    /y\                                            
+             *                    |||  ___                                            ___  
+             *           start   -(((-|I0 |               __           ADR_O[0] -----|I0 | 
+             *           rcnt[0] -((+-|I1 |-ccnt[0]------|  |-- rcnt[0] -------------|I1 |- QQ[0]
+             *                 0 -+(--|I2 |              >__| s_cyclecnt_sel[0] -----|I2 | 
+             * s_cyclecnt_sel[0] --(--|I3_|                   s_cyclecnt_sel[1] -----|I3_|        
+             *                     |                                             
+             *                     1                                             
              *
-             * Note subtility in LUT/CARRY of ccnt[0]. The very first cycle sa16 is unknown. We want to 
+             * Note subtility in LUT/CARRY of ccnt[0]. The very first cycle s_cyclecnt_sel[0] is unknown. We want to 
              * kill the carry chain or else rcrun will go high prematurely.
              *
              */
@@ -269,17 +269,17 @@ module m_cyclecnt
             /* verilator lint_on UNOPTFLAT */
             wire       cmb_rcrun,cmbbuserror;
             
-            bn_lcy4_b #(.I(16'haa22)) l_ccntlsb(     .o(ccnt[0]),    .co(ccntcy[0]),   .ci(1'b1),        .i3(sa16),        .i2(1'b0),  .i1(rccnt[0]),   .i0(start));
-            bn_lcy4_b #(.I(16'h0208)) l_ccnt [4:0] ( .o(ccnt[5:1]),  .co(ccntcy[5:1]), .ci(ccntcy[4:0]), .i3(ccntcy[4:0]), .i2(sa16),  .i1(rccnt[5:1]), .i0(start));
-            bn_lcy4_b #(.I(16'haa00)) l_buserror(    .o(cmbbuserror),.co(ccntcy[6]),   .ci(ccntcy[5]),   .i3(ccntcy[5]),   .i2(1'b0),  .i1(1'b1),       .i0(STB_O));
-            bn_lcy4_b #(.I(16'h0208)) l_ccnt6(       .o(ccnt[6]),    .co(ccntcy[7]),   .ci(ccntcy[6]),   .i3(ccntcy[6]),   .i2(sa16),  .i1(rccnt[6]),   .i0(start));
+            bn_lcy4_b #(.I(16'haa22)) l_ccntlsb(     .o(ccnt[0]),    .co(ccntcy[0]),   .ci(1'b1),        .i3(s_cyclecnt_sel[0]), .i2(1'b0),              .i1(rccnt[0]),   .i0(start));
+            bn_lcy4_b #(.I(16'h0208)) l_ccnt [4:0] ( .o(ccnt[5:1]),  .co(ccntcy[5:1]), .ci(ccntcy[4:0]), .i3(ccntcy[4:0]),      .i2(s_cyclecnt_sel[0]),  .i1(rccnt[5:1]), .i0(start));
+            bn_lcy4_b #(.I(16'haa00)) l_buserror(    .o(cmbbuserror),.co(ccntcy[6]),   .ci(ccntcy[5]),   .i3(ccntcy[5]),        .i2(1'b0),               .i1(1'b1),       .i0(STB_O));
+            bn_lcy4_b #(.I(16'h0208)) l_ccnt6(       .o(ccnt[6]),    .co(ccntcy[7]),   .ci(ccntcy[6]),   .i3(ccntcy[6]),        .i2(s_cyclecnt_sel[0]),  .i1(rccnt[6]),   .i0(start));
             bn_l4     #(.I(16'hfff0)) l_rcrun      ( .o(cmb_rcrun),  .i3(ccntcy[7]), .i2(corerunning), .i1(1'b0), .i0(1'b0));
             SB_DFF r_rcntlsb [6:0] ( .Q(rccnt),       .C(clk), .D(ccnt));
             SB_DFF r_buserror(       .Q(buserror),    .C(clk), .D(cmbbuserror));
             SB_DFF r_rcrun         ( .Q(corerunning), .C(clk), .D(cmb_rcrun));
 
-            bn_l4 #(.I(16'hcacf)) c_qq_10 [1:0] (.o(QQ[1:0]), .i3(sa17), .i2(sa16), .i1(rccnt[1:0]), .i0(ADR_O[1:0]) );
-            bn_l4 #(.I(16'hcaca)) c_qq_62 [4:0] (.o(QQ[6:2]), .i3(1'b0), .i2(sa16), .i1(rccnt[6:2]), .i0(ADR_O[6:2]) );
+            bn_l4 #(.I(16'hcacf)) c_qq_10 [1:0] (.o(QQ[1:0]), .i3(s_cyclecnt_sel[1]), .i2(s_cyclecnt_sel[0]), .i1(rccnt[1:0]), .i0(ADR_O[1:0]) );
+            bn_l4 #(.I(16'hcaca)) c_qq_62 [4:0] (.o(QQ[6:2]), .i3(1'b0), .i2(s_cyclecnt_sel[0]), .i1(rccnt[6:2]), .i0(ADR_O[6:2]) );
             assign dbg_rccnt = rccnt;
             
          end
