@@ -3,7 +3,7 @@
  * 2019. Copyright B. Nossum.
  * For licence, see LICENCE
  * -----------------------------------------------------------------------------
- * Immediate operand expander, zero-finder, and working register Q.
+ * Immediate operand expander, zero-finder, and working register ADR_O.
  * The high level code seems to work, but is some 60 LUTs larger than 
  * the low level code of 49 LUTs.
  */
@@ -21,7 +21,6 @@ module m_immexp_zfind_q
    /* verilator lint_on UNUSED */
     output        rzcy32, //      When 0, ADR_O==32'h0 
     output [31:0] ADR_O, //         Register used in many places, also I/O address
-//    output [2:0]  dbg_itype,//    During debugging
     output        m_immexp_zfind_q_killwarnings
     );
    assign m_immexp_zfind_q_killwarnings = &INSTR[1:0];
@@ -115,7 +114,6 @@ module m_immexp_zfind_q
              6'b100010 : instrty = 3'b101;  //  Custom "ij"
              default :   instrty = 3'b000;  //  illegal                                
            endcase
-//         assign dbg_itype = instrty;
          
          always @(/*AS*/B or INSTR or instrty)
            casez (instrty)
@@ -130,10 +128,6 @@ module m_immexp_zfind_q
            endcase
          assign BisnotZero = B != 32'h0; // Note: This is NOT 100% eqivalent to the low level version, where we get it out of a carry chain.
 
-//         assign funct7_ne_0x00000 = B[31] | |B[29:25];
-//         assign rs1_funct3_rd_ne_00000_000_00000 = |B[19:7];
-                                     
-         
          always @(posedge clk) begin
             if ( enaQ ) begin
                if ( sa14 | ~corerunning ) begin
@@ -177,7 +171,6 @@ module m_immexp_zfind_q
          SB_LUT4 # (.LUT_INIT(16'h0a2b)) L_1605(.O(sa13),.I3(sa09),.I2(sa08),.I1(sa07),.I0(INSTR[31]));                    
          SB_LUT4 # (.LUT_INIT(16'h0a2f)) L_1606(.O(sa13b),.I3(sa09),.I2(sa08),.I1(sa07),.I0(INSTR[31]));          
          
-//         assign dbg_itype = { sa09,sa08,sa07};
 /*                                                          
  * Immediate expansion is combined with zero-detect of the ALU result.
  * Drawing is not 100% correct, but give the idea.
