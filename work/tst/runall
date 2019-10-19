@@ -1,0 +1,6 @@
+echo "../bin/m_alu_carryin.bin ";     ../bin/m_alu_carryin.bin
+echo "../bin/m_alu.bin         ";     ../bin/m_alu.bin
+echo "../bin/m_cyclecnt.bin    ";     ../bin/m_cyclecnt.bin
+echo "../bin/m_shiftcounter.bin";     ../bin/m_shiftcounter.bin
+echo "../bin/m_ucodepc.bin     ";     ../bin/m_ucodepc.bin          
+
