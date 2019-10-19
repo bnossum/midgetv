@@ -391,6 +391,7 @@ void simprintf( uint32_t cy, Vm_ice40sim_EBRonly *tb ) {
         g_info.Di             = STARTOFHIER->get_Di();
         g_info.aluop          = STARTOFHIER->get_ALUOP();
         g_info.corerunning    = STARTOFHIER->get_corerunning();
+        g_info.shiftcount     = STARTOFHIER->get_shiftcnt();
         common_simprintf( &g_info, cy );
 }
 

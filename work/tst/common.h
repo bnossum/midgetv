@@ -40,6 +40,7 @@
 #define INFO_dbg_stb_ack     0x100000
 #define INFO_ucodedbg        0x200000
 #define INFO_dissassembly    0x400000
+#define INFO_shiftcount      0x800000
 
 #define DEFAULT_UCODETEXTLEN 55
 
@@ -74,6 +75,7 @@ typedef struct {
         int aluop;
         int dbg_stb_ack;
         int corerunning;
+        int shiftcount;
 } INFOCHUNK;
 
 

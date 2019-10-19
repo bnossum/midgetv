@@ -129,15 +129,15 @@ void sim_with_cyclecnt( void ) {
 
                         /* I do not model the IO read/write logic here,
                          * so simply assume we are in an IO read/write that is aborted
-                         * after 63 cycles
+                         * after 126 cycles
                          */
-                        tb->STB_O = tb->dbg_rccnt > 62 ? 0 : 1;
+                        tb->STB_O = tb->dbg_rccnt > 126 ? 0 : 1;
                         
                         toggleclockandeval(tb);
                         assert( tb->corerunning == 1 );
                         assert( tb->dbg_rccnt == ((i + 2) & 127) );
-                        //fprintf( stderr, "i=%#x, dbg_rccnt=%#x buserror=%d\n", i, tb->dbg_rccnt, tb->buserror );
-                        if ( ((i+2) & 127) == 48 ) {
+                        //fprintf( stdout, "i=%#x, dbg_rccnt=%#x buserror=%d\n", i, tb->dbg_rccnt, tb->buserror );
+                        if ( ((i+2) & 127) == 64 ) {
                                 assert( tb->buserror == 1 );
                         } else {
                                 assert( tb->buserror == 0 );

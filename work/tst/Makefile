@@ -15,11 +15,11 @@ VERILATORFLAGS = -Wall -v m_ice_shortcuts.v -I$(VERILOGDIR) -I$(VERILOGDIR)/simc
 
 #
 #MY = m_inputmux m_immexp_zfind_q m_rai m_wai \
-#	m_bmask_emask m_condcode m_shiftcounter \
+#	m_bmask_emask m_condcode 
 
 
 MY = m_ice40sim_EBRonly m_ice40sim_SRAM \
-	m_alu_carryin m_alu m_cyclecnt 
+	m_alu_carryin m_alu m_cyclecnt m_shiftcounter 
 
 #m_ice40sim_SRAM4_EBR16  \
 #	m_ucodepc m_alu

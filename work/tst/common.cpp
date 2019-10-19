@@ -626,6 +626,25 @@ int p_stb_ack( int lnr, int stb_ack ) {
 }
 
 /////////////////////////////////////////////////////////////////////////////
+int p_shiftcount( int lnr, int cnt ) {
+        int n;
+
+        if ( (lnr & 0x1c) == 0 ) {
+                switch ( lnr & 3 )  {
+                case 0 :n = printf( "shi" ); break;
+                case 1 :n = printf( "ft " ); break;
+                case 2 :n = printf( "|| " ); break;
+                case 3 :n = printf( "|| " ); break;
+                        break;
+                }
+        } else {
+                n = printf( "%2.2x ", cnt );
+        }
+        return n;                        
+}
+
+
+/////////////////////////////////////////////////////////////////////////////
 int p_inexplicable( int lnr, int inexplicable ) {
         int n;
 
@@ -649,7 +668,7 @@ int p_inexplicable( int lnr, int inexplicable ) {
         }
         return n;                        
 }
-        
+
 /////////////////////////////////////////////////////////////////////////////
 int p_aluop( int lnr, int v ) {
         int n = 0;
@@ -748,6 +767,7 @@ TOP:
         if ( p->CONF & INFO_get_inexplcable) p_inexplicable( lnr, p->inexplicable );
         if ( p->CONF & INFO_interruptinfo  ) p_interruptinfo( lnr, p->interruptinfo );
 
+        if ( p->CONF & INFO_shiftcount     ) p_shiftcount( lnr, p->shiftcount );
         static int klugeminx;
 //        if ( p->progress_ucpde )
                 klugeminx = p->minx;
