@@ -49,6 +49,9 @@ least effort you need:
 - A toolchain for FPGA compilation and upload, for example:
   - iCEcube2 from Lattice
   - A toolchain based on the very impressive icestorm project, such as: yosys/arachne-pnr/icepack
+  The size of midgetv as stated in the start of this README is found using LSE syntethis from Lattice. 
+  yosys/arachne-pnr give considerable larger images (but my toolchain is old). For the time being I
+  will not look into this.
 
 All my work is done under Linux.
 
