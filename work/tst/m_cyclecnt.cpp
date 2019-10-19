@@ -10,7 +10,7 @@ void sim_with_no_cyclecnt( void ) {
 	Vm_cyclecnt *tb = new Vm_cyclecnt;	
         int i;
         uint32_t ADR_O;
-        int s_cyclecnt_sel;
+        int s_cyclecnt;
         
         // As long as start is low:
         // QQ[] is don't care.
@@ -33,8 +33,8 @@ void sim_with_no_cyclecnt( void ) {
         tb->eval();
         assert( tb->corerunning == 0 );
         
-        for ( s_cyclecnt_sel = 0; s_cyclecnt_sel < 4; s_cyclecnt_sel++) {
-                tb->s_cyclecnt_sel = s_cyclecnt_sel;
+        for ( s_cyclecnt = 0; s_cyclecnt < 4; s_cyclecnt++) {
+                tb->s_cyclecnt = s_cyclecnt;
                 for ( ADR_O = 0; ADR_O < 0x40; ADR_O++ ) {
                         tb->ADR_O = ADR_O;
                         for ( i = 0; i < 2; i++ ) {
@@ -43,7 +43,7 @@ void sim_with_no_cyclecnt( void ) {
                         }
                         assert( tb->corerunning == 1 );
                         assert( tb->buserror == 0 );
-                        switch ( s_cyclecnt_sel ) {
+                        switch ( s_cyclecnt ) {
                         case 0b00 : assert( tb->QQ == (ADR_O | 3) ); break;
                         case 0b01 :
                         case 0b11 : assert( tb->QQ == (ADR_O | 1) ); break;
@@ -108,18 +108,18 @@ void sim_with_cyclecnt( void ) {
         tb->start = 1;
 
         tb->STB_O = 1;
-        /* Setting s_cyclecnt_sel[0] should lead to rccnt == 1
+        /* Setting s_cyclecnt[0] should lead to rccnt == 1
          * When counting we should periodically see buserror when STB_O is set
          */
         for ( k = 0; k < 600; k++ ) {
-                tb->s_cyclecnt_sel |= 1;
+                tb->s_cyclecnt |= 1;
                 toggleclockandeval(tb);
                 assert( tb->corerunning == 1 );
                 if ( ! (tb->dbg_rccnt == 1) ) {
                         printf( "tb->dbg_rccnt = %d\n", tb->dbg_rccnt );
                 }
                 assert( tb->dbg_rccnt == 1 );
-                tb->s_cyclecnt_sel &= ~1u;
+                tb->s_cyclecnt &= ~1u;
                 for ( i = 0; i < k; i++ ) {
 
                         /* I do not model the IO read/write logic here,
@@ -145,18 +145,18 @@ void sim_with_cyclecnt( void ) {
         for ( ADR_O = 0; ADR_O < 400; ADR_O++ ) {
                 tb->ADR_O = ADR_O;
                 for ( k = 0; k < 600; k++ ) {
-                        tb->s_cyclecnt_sel = 1;
+                        tb->s_cyclecnt = 1;
                         toggleclockandeval(tb);
                         assert( (tb->QQ & 63) == tb->dbg_rccnt );
-                        tb->s_cyclecnt_sel |= 2;
+                        tb->s_cyclecnt |= 2;
                         tb->eval();
                         assert( (tb->QQ & 63) == tb->dbg_rccnt );
-                        tb->s_cyclecnt_sel &= ~1u;
+                        tb->s_cyclecnt &= ~1u;
                         for ( i = 0; i < k; i++ ) {
-                                tb->s_cyclecnt_sel &= ~2u;
+                                tb->s_cyclecnt &= ~2u;
                                 toggleclockandeval(tb);
                                 assert( tb->QQ == (ADR_O | 3) );
-                                tb->s_cyclecnt_sel |= 2u; 
+                                tb->s_cyclecnt |= 2u; 
                                 tb->eval();
                                 assert( tb->QQ == ADR_O );
                         }

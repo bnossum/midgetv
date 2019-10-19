@@ -376,8 +376,8 @@ module m_midgetv_core
    wire                 rzcy32;                 // From inst_immexp_zfind_q of m_immexp_zfind_q.v
    wire [2:0]           s_alu;                  // From inst_ucode of m_ucode.v
    wire [1:0]           s_alu_carryin;          // From inst_ucode of m_ucode.v
-   wire [1:0]           s_cyclecnt_sel;         // From inst_ucode of m_ucode.v
-   wire [1:0]           s_shiftsel;             // From inst_ucode of m_ucode.v
+   wire [1:0]           s_cyclecnt;             // From inst_ucode of m_ucode.v
+   wire [1:0]           s_shift;                // From inst_ucode of m_ucode.v
    wire                 sa00;                   // From inst_ucode of m_ucode.v
    wire                 sa11;                   // From inst_ucode of m_ucode.v
    wire                 sa12;                   // From inst_ucode of m_ucode.v
@@ -586,7 +586,7 @@ module m_midgetv_core
       // Inputs
       .clk                              (clk),
       .start                            (start),
-      .s_cyclecnt_sel                   (s_cyclecnt_sel[1:0]),
+      .s_cyclecnt                       (s_cyclecnt[1:0]),
       .STB_O                            (STB_O),
       .ADR_O                            (ADR_O[31:0]));
 
@@ -793,7 +793,7 @@ module m_midgetv_core
         .preprealucyin                  (preprealucyin),
         // Inputs
         .clk                            (clk),
-        .s_shiftsel                     (s_shiftsel[1:0]),
+        .s_shift                        (s_shift[1:0]),
         .B                              (B[4:0]));
    
    
@@ -853,8 +853,8 @@ module m_midgetv_core
         .sa00                           (sa00),
         .s_alu_carryin                  (s_alu_carryin[1:0]),
         .s_alu                          (s_alu[2:0]),
-        .s_shiftsel                     (s_shiftsel[1:0]),
-        .s_cyclecnt_sel                 (s_cyclecnt_sel[1:0]),
+        .s_shift                        (s_shift[1:0]),
+        .s_cyclecnt                     (s_cyclecnt[1:0]),
         .sa11                           (sa11),
         .sa12                           (sa12),
         .sa14                           (sa14),

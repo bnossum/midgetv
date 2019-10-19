@@ -16,8 +16,8 @@ module m_ucode
     output       sa00, // sa02,sa03,sa04,sa05,sa06,
     output [1:0] s_alu_carryin,
     output [2:0] s_alu,
-    output [1:0] s_shiftsel,
-    output [1:0] s_cyclecnt_sel,
+    output [1:0] s_shift,
+    output [1:0] s_cyclecnt,
     output       sa11,sa12, sa14,sa15,
     output       sa20,sa21,sa22,sa23,sa24,sa25,sa26,sa27,sa28,sa29,
     output       sa30, sa32,sa33,sa34, sa37,sa38,sa39,
@@ -59,10 +59,10 @@ module m_ucode
    endgenerate
    
    assign sa00 = d[ 0];
-   assign s_alu_carryin  = d[2:1]; //        Carry in select
-   assign s_alu          = d[5:3]; //        Alu operation
-   assign s_cyclecnt_sel = d[11:10]; //      rcount mix, +3/+4 mux
-   assign s_shiftsel     = {d[12],d[13]}; // Shift counter selection.
+   assign s_alu_carryin = d[2:1]; //        Carry in select
+   assign s_alu         = d[5:3]; //        Alu operation
+   assign s_cyclecnt    = d[11:10]; //      rcount mix, +3/+4 mux
+   assign s_shift       = {d[12],d[13]}; // Shift counter selection.
    
    
    assign sa11 = d[22]; // Immediate expand exactly when we use dinx.
