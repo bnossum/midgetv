@@ -10,7 +10,7 @@ void sim_with_no_cyclecnt( void ) {
 	Vm_cyclecnt *tb = new Vm_cyclecnt;	
         int i;
         uint32_t ADR_O;
-        int sa16,sa17;
+        int s_cyclecnt_sel;
         
         // As long as start is low:
         // QQ[] is don't care.
@@ -23,7 +23,7 @@ void sim_with_no_cyclecnt( void ) {
                 assert( tb->corerunning == 0 );
                 assert( tb->buserror == 0 );
         }
-
+        
         // Just to hammer it home - the core is only running after 
         // a clock transition low high after tb->start is high
         tb->start = 1;
@@ -33,35 +33,30 @@ void sim_with_no_cyclecnt( void ) {
         tb->eval();
         assert( tb->corerunning == 0 );
         
-        for ( sa17 = 0; sa17 < 2; sa17++ ) {
-                tb->sa17 = sa17;
-                for ( sa16 = 0; sa16 < 2; sa16++ ) {
-                        tb->sa16 = sa16;
-                        for ( ADR_O = 0; ADR_O < 0x40; ADR_O++ ) {
-                                tb->ADR_O = ADR_O;
-                                for ( i = 0; i < 2; i++ ) {
-                                        tb->clk = i & 1;
-                                        tb->eval();
-                                }
-                                assert( tb->corerunning == 1 );
-                                assert( tb->buserror == 0 );
-                                switch ( sa17*2+sa16 ) {
-                                case 0b00 : assert( tb->QQ == (ADR_O | 3) ); break;
-                                case 0b01 :
-                                case 0b11 : assert( tb->QQ == (ADR_O | 1) ); break;
-                                case 0b10 :
-                                        if ( ( tb->QQ == ADR_O ) == 0 ) {
-                                                printf( "Can't believe I can miss out here: "
-                                                        "tb-QQ=%d ADR_O=%d\n", tb->QQ, ADR_O );
-                                        }
-                                        assert( tb->QQ == ADR_O );
-                                        break;
-                                }
+        for ( s_cyclecnt_sel = 0; s_cyclecnt_sel < 4; s_cyclecnt_sel++) {
+                tb->s_cyclecnt_sel = s_cyclecnt_sel;
+                for ( ADR_O = 0; ADR_O < 0x40; ADR_O++ ) {
+                        tb->ADR_O = ADR_O;
+                        for ( i = 0; i < 2; i++ ) {
+                                tb->clk = i & 1;
+                                tb->eval();
                         }
-
+                        assert( tb->corerunning == 1 );
+                        assert( tb->buserror == 0 );
+                        switch ( s_cyclecnt_sel ) {
+                        case 0b00 : assert( tb->QQ == (ADR_O | 3) ); break;
+                        case 0b01 :
+                        case 0b11 : assert( tb->QQ == (ADR_O | 1) ); break;
+                        case 0b10 :
+                                if ( ( tb->QQ == ADR_O ) == 0 ) {
+                                        printf( "Can't believe I can miss out here: "
+                                                "tb-QQ=%d ADR_O=%d\n", tb->QQ, ADR_O );
+                                }
+                                assert( tb->QQ == ADR_O );
+                                break;
+                        }
                 }
         }
-        
 }
         
         
@@ -113,18 +108,18 @@ void sim_with_cyclecnt( void ) {
         tb->start = 1;
 
         tb->STB_O = 1;
-        /* Setting sa16 should lead to rccnt == 1
+        /* Setting s_cyclecnt_sel[0] should lead to rccnt == 1
          * When counting we should periodically see buserror when STB_O is set
          */
         for ( k = 0; k < 600; k++ ) {
-                tb->sa16 = 1;
+                tb->s_cyclecnt_sel |= 1;
                 toggleclockandeval(tb);
                 assert( tb->corerunning == 1 );
                 if ( ! (tb->dbg_rccnt == 1) ) {
                         printf( "tb->dbg_rccnt = %d\n", tb->dbg_rccnt );
                 }
                 assert( tb->dbg_rccnt == 1 );
-                tb->sa16 = 0;
+                tb->s_cyclecnt_sel &= ~1u;
                 for ( i = 0; i < k; i++ ) {
 
                         /* I do not model the IO read/write logic here,
@@ -150,19 +145,18 @@ void sim_with_cyclecnt( void ) {
         for ( ADR_O = 0; ADR_O < 400; ADR_O++ ) {
                 tb->ADR_O = ADR_O;
                 for ( k = 0; k < 600; k++ ) {
-                        tb->sa17 = 0;
-                        tb->sa16 = 1;
+                        tb->s_cyclecnt_sel = 1;
                         toggleclockandeval(tb);
                         assert( (tb->QQ & 63) == tb->dbg_rccnt );
-                        tb->sa17 = 1;
+                        tb->s_cyclecnt_sel |= 2;
                         tb->eval();
                         assert( (tb->QQ & 63) == tb->dbg_rccnt );
-                        tb->sa16 = 0;
+                        tb->s_cyclecnt_sel &= ~1u;
                         for ( i = 0; i < k; i++ ) {
-                                tb->sa17 = 0;
+                                tb->s_cyclecnt_sel &= ~2u;
                                 toggleclockandeval(tb);
                                 assert( tb->QQ == (ADR_O | 3) );
-                                tb->sa17 = 1;
+                                tb->s_cyclecnt_sel |= 2u; 
                                 tb->eval();
                                 assert( tb->QQ == ADR_O );
                         }
@@ -183,53 +177,5 @@ int main(int argc, char **argv) {
         } else {
                 sim_with_cyclecnt();
         }
-#if 0        
-        int sa16,sa17;
-        unsigned int ADR_O;
-        int facit_cyclecnt = 0;
-        int idle_some_cycles;
-        
-        for ( ADR_O = 0; ADR_O < 256; ADR_O++ ) {
-                for ( sa16 = 0; sa16 < 2; sa16++ ) {
-                        for ( sa17 = 0; sa17 < 2; sa17++ ) {
-                                for ( idle_some_cycles = 0; idle_some_cycles < 4; idle_some_cycles++ ) {
-                                        tb->ADR_O = ADR_O;
-                                        tb->sa16 = sa16;
-                                        tb->sa17 = sa17;
-                                        
-                                        // Ensure combinatorical before rising clock has settled
-                                        tb->clk = 0;
-                                        tb->eval();
-                                        
-                                        
-
-                                        switch ( sa17*2 + sa16 ) {
-                                        case 0b00 : assert( tb->QQ == (ADR_O | 3) ); break;
-                                        case 0b01 :
-                                        case 0b11 :
-                                                if ( idle_some_cycles == 0 ) {
-                                                        //printf( "facit=%x QQ=%x\n", (ADR_O & 0xc0)  | facit_cyclecnt, tb->QQ );
-                                                        assert( tb->QQ == ( (ADR_O & 0xc0) | facit_cyclecnt) ); break;
-                                                }
-                                                break;
-                                        case 0b10 : assert( tb->QQ == ADR_O ); break;
-                                        }
-                                        
-                                        if ( sa16 )
-                                                facit_cyclecnt = 0;
-
-                                        // Rising clock, evaluate
-                                        tb->clk = 1;
-                                        tb->eval();
-                                        facit_cyclecnt++;
-                                        //  // Probably not needed, combinatorics after clock low
-                                        //  tb->clk = 0;                                
-                                        //  tb->eval();
-                                        
-                                }
-                        }
-                }
-        }
-#endif
         exit(EXIT_SUCCESS);
 }

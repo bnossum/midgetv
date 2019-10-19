@@ -9,17 +9,15 @@ int main(int argc, char **argv) {
 	// Create an instance of our module under test
 	Vm_shiftcounter *tb = new Vm_shiftcounter;
 
-        int sa18, sa19, B;
+        int s_shiftsel, B;
         int i;
         int facit_rshcnt = 0,cmbsh = 0;
         int facit_lastshift;
         int k,klim;
         
         for ( i = 0; i < 4; i++ ) {
-                sa18 = (i>>1) & 1;
-                sa19 = (i>>0) & 1;
-                tb->sa18 = sa18;
-                tb->sa19 = sa19; 
+                s_shiftsel = i;
+                tb->s_shiftsel = i;
 
                 for ( B = 0; B < 32; B++ ) {
                         tb->B = B;
@@ -33,7 +31,7 @@ int main(int argc, char **argv) {
                                 case 2 : cmbsh = (facit_rshcnt + 0x1f) & 63; break;
                                 case 3 : break;
                                 }
-                                facit_lastshift = sa18 & ((cmbsh & 0x20)==0);
+                                facit_lastshift = ((s_shiftsel>>1)&1) & ((cmbsh & 0x20)==0);
                                 facit_rshcnt = cmbsh & 31; // After clkflank
                                 
                                 //printf( "sa18=%d sa19=%d B=%2x facit_lastshift=%d tb->lastshift=%d ",sa18, sa19, B, facit_lastshift, tb->lastshift );
