@@ -1,8 +1,8 @@
 ### Documentation
 
-Alas! Next to Empty. I plan to write some more prose-like on the
-architecture of midgetv, For now, here is an extremely incomplete list
-of things to do to program `blinky` to an iceboard40-hx1k.
+I plan to write some more prose-like on the architecture of midgetv,
+For now, here is a short description of how to program `blinky` to an
+iceboard40-hx1k.
 
 ### First time programming in "13 easy steps"
 

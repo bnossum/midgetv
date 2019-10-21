@@ -140,9 +140,8 @@ module m_ucodepc
           should only be valid when funct7 == 7'b00000000. 
           Likewise, srai, sub, and sra should only be valid when 
           funct7 == 7'b0100000. 
-          
-          checkfunct7
-          | funct7_5_dontcare
+                                                            checkfunct7
+                                                            | funct7_5_dontcare
           funct7  rs2   rs1 funct3 rd opcode   Instruction  | |
           0000000 shamt rs1 001,   rd 00100xx  slli         1 0
           0x00000 shamt rs1 101,   rd 00100xx  srli/srai    1 1                                     

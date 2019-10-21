@@ -25,7 +25,7 @@ This note is a checklist of things I should do before packaging a new release.
      Build `hardware.bin` and upload to `upduino2` board.
  11. `cd work/sw/dynhw/dynblinky; make`
      Build dynamic blinky program.
- 12. `cd work/obj_dir`; cat dynblinky.bin > /dev/ttyUSB0`
+ 12. `cd work/obj_dir; cat dynblinky.bin > /dev/ttyUSB0`
      Upload dynamic blinky program to `upduino2` board    
  13. `sudo ../bin/iceblinkcom < dynblinky.bin`
      Upload dynamic blinky program to `iceblink40-hx1k` board    

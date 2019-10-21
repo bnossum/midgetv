@@ -71,12 +71,16 @@ int main(int argc, char **argv) {
         uint32_t INSTR;
 
         /* The crudest way to check the OpCodes would be to iterate over
-           32 bits, testing from 0x00000000 to 0xffffffff. This is what I do.
+           32 bits, testing from 0x00000000 to 0xffffffff. This is nearly what I do.
+           I skip testing of any number ending in 0b00, 0b01 and 0b10. This is
+           mainly to bring down test time. 
+           It would be very strange indeed if I break the code that say compressed
+           instructions are illegal.
         */
-        fprintf( stderr, "Runtime around 7 minutes on a Lenovo x230.\n" );
+        fprintf( stderr, "Runtime around 80 seconds on a Lenovo x230.\n" );
         
         int dbg = 2;
-        INSTR = 0;
+        INSTR = 3;
         do {
                 tb->INSTR = INSTR;
                 tb->eval();
@@ -130,8 +134,8 @@ int main(int argc, char **argv) {
                 } else {
                         ferr( "Que?\n" );
                 }
-                INSTR++;
-        } while ( INSTR != 0);
+                INSTR += 4;
+        } while ( INSTR != 3);
         
 
         

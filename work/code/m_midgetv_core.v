@@ -102,7 +102,7 @@
  * midgetv until clocks are stable, etc. The start input signal is
  * included for this purpose. If midgetv does not include any cycle 
  * counter, this signal determines if the core is to be started.
- * If a cycle counter is implemented, start must be high for 64
+ * If a cycle counter is implemented, start must be high for 128
  * consequtive cycles before midgetv is started. 
  * 
  * Once midgetv is started, the signal start has a different meaning:

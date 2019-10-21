@@ -6,7 +6,7 @@ Midgetv is non-pipelined and microcoded - it trades speed for
 size. The smallest possibly useful implementation requires around 256
 SB_LUT4s and 4 EBRs. The smallest implementation that successfully
 executes all programs in the rv32i test suite in simulation is 271
-SB_LUT4s and 6 EBRs. Currently, the largest implementation require
+SB_LUT4s and 6 EBRs. Currently, the largest implementation requires
 around 411 SB_LUT4s, 18 EBRs and 4 SPRAMS. Typical clock frequencies
 (worst case conditions):
  - ICE40HX1K: 65 MHz
@@ -85,7 +85,6 @@ is not written, but a very short introduction is [here](doc/README.md).
 - Test on nested interrupts/exceptions
 - Support of compressed instructions (will bloat the controller)
 - Cleanup on code
-- Better documentation
 - Better linker scripts
 - Proper `crt0.S`
 - Microcoded support for unaligned ld/st

@@ -36,8 +36,8 @@
 
 /* Only define one of these:
  */
-//`define INVESTIGATE_SMALLEST 1
-`define INVESTIGATE_LARGEST 1
+`define INVESTIGATE_SMALLEST 1
+//`define INVESTIGATE_LARGEST 1
 //`define GET_NICE_SYMBOL 1
 
 module mytop
@@ -80,7 +80,7 @@ module mytop
 `include "ice40loaderprog.hv"
 
 `ifdef INVESTIGATE_SMALLEST
-   localparam IWIDTH             = 8;
+   localparam IWIDTH             = 1;
    localparam SRAMADRWIDTH       = 0;
    localparam FORCEEBRADRWIDTH   = 8;
    localparam NO_CYCLECNT        = 1;
