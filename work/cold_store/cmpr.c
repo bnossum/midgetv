@@ -1,6 +1,9 @@
 /* A compressing utility for ice40 images.
+   Compile:
+   gcc -o cmpr cmpr.c
+
    Use:
-   cmpr < fpgaimage.bin > tmp.c
+   ./cmpr < fpgaimage.bin > tmp.c
 
    For testing:
    gcc -DDECOMPRESSTEST=1 tmp.c
@@ -9,8 +12,7 @@
 
 
    A binary image is transformed to a static array of bytes,
-   and a function to acces the image.
-   For more info see cmpr_base.c
+   and a function to access the image. For more info see cmpr_base.c
 
    The idea is simple, run-length encode occurences of 0x00.
 
@@ -47,18 +49,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
-
-
-
-
 /////////////////////////////////////////////////////////////////////////////
-// These only for statistics in comment at end
 int nrin = 0;
 int nrout = 0;
-
-
-
 
 /////////////////////////////////////////////////////////////////////////////
 void putbyte( const int c ) {
@@ -69,9 +62,9 @@ void putbyte( const int c ) {
 /////////////////////////////////////////////////////////////////////////////
 void putnrzeros( int nrzeros ) {
         while (1) {
-                if ( nrzeros < 256 ) {
+                if ( nrzeros <= 255 ) {
                         putbyte( nrzeros );
-                        return;
+                        break;
                 } 
                 putbyte( 255 );
                 putbyte( 0 );
@@ -82,7 +75,6 @@ void putnrzeros( int nrzeros ) {
 /////////////////////////////////////////////////////////////////////////////
 int main( void ) {   
         int c,nrzeros = 0;
-
         
         printf( "#include <stdint.h>\n"
                 "#include <stdio.h>\n"
@@ -95,7 +87,6 @@ int main( void ) {
                                 nrzeros++;
                                 continue;
                         } else {
-                                /* End of run of zeros */
                                 putnrzeros(nrzeros);
                                 nrzeros = 0;
                         }
@@ -113,8 +104,8 @@ int main( void ) {
         printf( "/* Compressed to :  %5.2lf%%\n", 100.0*(nrout+0.5)/nrin );
         printf( " * In            : %7d\n", nrin );
         printf( " * Out           : %7d\n", nrout );
-        printf( " */\n\n" );
-        printf( "int getfromcompressed(int *i, int *nrzeros) {\n"
+        printf( " */\n\n" 
+                "int getfromcompressed(int *i, int *nrzeros) {\n"
                 "        int c = 0;\n\n"
                 "        if ( *nrzeros ) {\n"
                 "                --*nrzeros;\n"
