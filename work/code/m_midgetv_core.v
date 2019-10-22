@@ -324,6 +324,7 @@ module m_midgetv_core
 `ifdef verilator
    wire [4:0]           dbg_rshcnt;             // From inst_shiftcounter of m_shiftcounter.v
 `endif
+wire                 sa12_and_corerunning;   // From inst_alu_carryin of m_alu_carryin.v
    /* verilator lint_on UNUSED */
    /*AUTOWIRE*/
    // Beginning of automatic wires (for undeclared instantiated-module outputs)
@@ -381,7 +382,6 @@ module m_midgetv_core
    wire                 sa00;                   // From inst_ucode of m_ucode.v
    wire                 sa11;                   // From inst_ucode of m_ucode.v
    wire                 sa12;                   // From inst_ucode of m_ucode.v
-   wire                 sa12_and_corerunning;   // From inst_alu_carryin of m_alu_carryin.v
    wire                 sa14;                   // From inst_ucode of m_ucode.v
    wire                 sa15;                   // From inst_ucode of m_ucode.v
    wire                 sa20;                   // From inst_ucode of m_ucode.v
@@ -536,7 +536,7 @@ module m_midgetv_core
    /* -----------------------------------------------------------------------------
     * Datapath
     */
-//   localparam xHIGHLEVEL = 0;
+//   localparam xHIGHLEVEL = 1;
    m_inputmux #(.HIGHLEVEL(       HIGHLEVEL       ), 
                 .IWIDTH(          IWIDTH          ), 
                 .SRAMADRWIDTH(    SRAMADRWIDTH    ), 
@@ -572,7 +572,8 @@ module m_midgetv_core
       .mtip                             (mtip),
       .mtimeincip                       (mtimeincip),
       .meip                             (meip),
-      .qACK                             (qACK));
+      .qACK                             (qACK),
+      .corerunning                      (corerunning));
 
    m_cyclecnt #(.HIGHLEVEL(   HIGHLEVEL   ), 
                 .NO_CYCLECNT( NO_CYCLECNT ))
@@ -754,15 +755,15 @@ module m_midgetv_core
      inst_opreg
        (/*AUTOINST*/
         // Outputs
+        .INSTR                          (INSTR[31:0]),
         .TRG                            (TRG[4:0]),
         .SRC1                           (SRC1[4:0]),
         .SRC2                           (SRC2[4:0]),
         .FUNC3                          (FUNC3[2:0]),
         .FUNC7_5                        (FUNC7_5),
-        .INSTR                          (INSTR[31:0]),
         // Inputs
         .clk                            (clk),
-        .sa12_and_corerunning           (sa12_and_corerunning),
+        .sa12                           (sa12),
         .Di                             (Di[31:0]));
 
    m_condcode #(.HIGHLEVEL(HIGHLEVEL)) 

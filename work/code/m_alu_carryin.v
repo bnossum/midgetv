@@ -3,6 +3,7 @@
  * 2019. Copyright B. Nossum.
  * For licence, see LICENCE
  * -----------------------------------------------------------------------------
+ * 
  * The alu carry input. It must be selectable. raluF is used by slt(u), slti(u)
  * instructions. alu_carryin must be put on the carry chain.
  * 
@@ -59,6 +60,31 @@
  *                    |shcy[4]
  * 
  */
+
+//Think I can remove sa12_and_corerunning and use this lut to something else. Reason and how to:
+//  sa12 is used as enable for sampling of OpC. Qualifying with corerunning is to avoid update that changes TRG before a valid fetch.
+//  If sa12 is unknown, OpC may be sampled from Di. Di is dependent on sa00mod. We can:
+//    always @(posedge clk)
+//      sa00mod <=  qACK | sram_ack | sa00 | ~corerunning;
+//  Then
+//    Di = (DAT_O & rDee) | (~DAT_O & shADR_O)
+//  DAT_O is unknown the first cycle, but we can do the following:
+//  rDee comes from a register, and can be qualified by corerunning so stay zero when ~corerunning.
+//  shADR_O essentially comes from ADR_O, a register, that is zero when ~corerunning. Msb of shADR_O
+//  is sra_msb, zero during startup. 
+//
+//  Hence: Di == 0 before corerunning.
+//
+//  Hence: OpC is not changed at startup while corerunning is low.
+//
+//  Hence: I can remove sa12_and_corerunning.
+//
+//  Summary of changes to make:
+//    Remove sa12_and_corerunning
+//    Qualify rDee with CE = corerunning
+//    Modify LUT in front of sa00mod to give the equation above.
+  
+
 module m_alu_carryin  # ( parameter HIGHLEVEL = 0 )   
    (
     input        raluF,FUNC7_5,
@@ -92,7 +118,8 @@ module m_alu_carryin  # ( parameter HIGHLEVEL = 0 )
       end else begin
          
          wire prealucyin;
-         bn_lcy4v_b #(.I(16'haa00))  la(.o(sa12_and_corerunning),.co(prealucyin),  .ci(preprealucyin), .i({sa12,1'b0,raluF,corerunning}));
+//         bn_lcy4v_b #(.I(16'haa00))  la(.o(sa12_and_corerunning),.co(prealucyin),  .ci(preprealucyin), .i({sa12,1'b0,raluF,corerunning}));
+         bn_lcy4v_b #(.I(16'haa00))  la(.o(sa12_and_corerunning),.co(prealucyin),  .ci(1'b1), .i({sa12,1'b0,raluF,corerunning}));
          bn_lcy4v_b #(.I(16'haa00))  lb(.o(sra_msb),             .co(alu_carryin), .ci(prealucyin),    .i({FUNC7_5,s_alu_carryin,ADR_O[31]}));
 
       end

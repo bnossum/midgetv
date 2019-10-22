@@ -19,21 +19,21 @@
  * 
  * Microcode program counter
  * 
- * usedinx_or_RST_I-------------------------+
+ * usedinx_or_RST_I_notcorerunning ---------+
  *                                ____      |
  * dinx[7:2] --------------------| or |     |
  * illegal_or_qualint_or_RST_I --|____|----|1\
  *                                         |  |--- minx[7:2]
  * rinx[7:2] ------------------------------|0/
  * 
- * usedinx_or_RST_I-------------------------+
+ * usedinx_or_RST_I_notcorerunning ---------+
  *                       ____               |
  * dinx[1] -------------| or |   ___        |
  * illegal_or_qualint_--|____|--| & |------|1\
  * RST_I-----------------------o|___|      |  |--- minx[1]
  * rinx[1] --------------------------------|0/
  * 
- * usedinx_or_RST_I ------------------------+
+ * usedinx_or_RST_I_notcorerunning ---------+
  *                                          |
  * illegal_or_qualint_or_RST_I --+          |
  * qualint_or_RST_I ------------|1\         |
@@ -270,11 +270,11 @@ module m_ucodepc
                        (Adr1Mustbe0 & B[1]) |                
                        (use_brcond & is_brcond) |
                        (sa32 & ~sa15 & B[31] );
-   wire             usedinx_or_RST_I = usedinx | RST_I | ~corerunning;
+   wire             usedinx_or_RST_I_notcorerunning = usedinx | RST_I | ~corerunning;
 
-   assign minx[7:2] = (usedinx_or_RST_I ? (dinx[7:2] | {6{illegal_or_qualint_or_RST_I}}) : rinx[7:2]);
-   assign minx[1]   = (usedinx_or_RST_I ? ( (dinx[1] | illegal_or_qualint) & ~RST_I) : rinx[1]);
-   assign minx[0]   = (buserror | (usedinx_or_RST_I ? (illegal_or_qualint_or_RST_I ? qualint_or_RST_I : dinx[0]) : (maybranch ? takebranch : rinx[0])));   
+   assign minx[7:2] = (usedinx_or_RST_I_notcorerunning ? (dinx[7:2] | {6{illegal_or_qualint_or_RST_I}}) : rinx[7:2]);
+   assign minx[1]   = (usedinx_or_RST_I_notcorerunning ? ( (dinx[1] | illegal_or_qualint) & ~RST_I) : rinx[1]);
+   assign minx[0]   = (buserror | (usedinx_or_RST_I_notcorerunning ? (illegal_or_qualint_or_RST_I ? qualint_or_RST_I : dinx[0]) : (maybranch ? takebranch : rinx[0])));   
 
    assign ucodepc_killwarnings = INSTR[31] | &INSTR[29:15] | &INSTR[11:7] | &B | INSTR[1];
    

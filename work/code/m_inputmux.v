@@ -51,7 +51,8 @@ module m_inputmux
     input              mtimeincip, //  Machine Time Increment Interrupt Pending in MIP
     input              meip, //        Machine External Interrupt Pending in MIP
     input              qACK, //        Qualified acknowledge, usually (ACK_I | sysregack)
-
+    input              corerunning, //
+    
     output             sysregack, //   Read/Write acknowledge from MIP/MIE/MSTATUS
     output [31:0]      Di, //          Data out of mux
     output [31:0]      rDee, //        Output for debugging purposes
@@ -76,7 +77,7 @@ module m_inputmux
          
          reg sa00mod;
          always @(posedge clk)
-           sa00mod <=  qACK | sram_ack | sa00;
+           sa00mod <=  qACK | sram_ack | sa00 | ~corerunning;
          assign Di = sa00mod ? (DAT_O & rDee[31:0] | ~DAT_O & shADR_O) : DAT_O;
 
       end else begin
@@ -88,7 +89,7 @@ module m_inputmux
          genvar j;
          wire   cmb_sa00mod;
          wire   sa00mod;
-         SB_LUT4 #(.LUT_INIT(16'hfefe)) inst_presa00mod( .O(cmb_sa00mod), .I3(1'b0), .I2(sram_ack), .I1(qACK), .I0(sa00));
+         SB_LUT4 #(.LUT_INIT(16'hfeff)) inst_presa00mod( .O(cmb_sa00mod), .I3(corerunning), .I2(sram_ack), .I1(qACK), .I0(sa00)); 
          SB_DFF sa00mod_r( .Q(sa00mod), .C(clk), .D(cmb_sa00mod));
          for ( j = 0; j < 32; j = j + 1 ) begin
             SB_LUT4 #(.LUT_INIT(16'hcaf0)) cmb(.O(Di[j]),.I3(sa00mod),.I2(DAT_O[j]),.I1(rDee[j]),.I0(shADR_O[j]));
@@ -257,7 +258,8 @@ module m_inputmux
          if ( HIGHLEVEL ) begin 
             reg [IWIDTH-1:0] r;
             always @(posedge clk)
-              r <= theio[IWIDTH-1:0];
+              if ( corerunning )
+                r <= theio[IWIDTH-1:0];
             if ( IWIDTH == 32 )
               assign rDee = r;
             else
@@ -268,7 +270,7 @@ module m_inputmux
             for ( kkk = 0; kkk < 32; kkk = kkk + 1 ) begin
                if ( kkk < IWIDTH ) begin
                   SB_LUT4 #(.LUT_INIT(16'haaaa)) vanity_cmb( .O(vanity[kkk]), .I3(1'b0), .I2(1'b0), .I1(1'b0), .I0(theio[kkk]));
-                  SB_DFF vanity_r( .Q(rDee[kkk]), .C(clk), .D(vanity[kkk]));
+                  SB_DFFE vanity_r( .Q(rDee[kkk]), .C(clk), .E(corerunning), .D(vanity[kkk])); 
                end else begin
                   assign rDee[kkk] = 1'b0;
                end
@@ -285,7 +287,8 @@ module m_inputmux
             
             reg [31:0] r;
             always @(posedge clk)
-              r <= STB_O ? theio : Dsram;
+              if ( corerunning )
+                r <= STB_O ? theio : Dsram;
             assign rDee = r;
 
          end else begin
@@ -296,7 +299,7 @@ module m_inputmux
             
             genvar jj;
             for ( jj = 0; jj < 32; jj = jj + 1 ) begin
-               SB_DFF holdinput( .Q(rDee[jj]), .C(clk), .D(theio[jj]) );
+               SB_DFFE holdinput( .Q(rDee[jj]), .C(clk), .E(corerunning), .D(theio[jj]) ); 
             end
             
          end

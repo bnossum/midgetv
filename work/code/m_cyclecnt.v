@@ -103,8 +103,6 @@ module m_cyclecnt
     input         clk,
     input         start,
     input [1:0]   s_cyclecnt,
-//    input         sa16,
-//    input         sa17,
 /* verilator lint_off UNUSED */
     input         STB_O,
 /* verilator lint_on UNUSED */
