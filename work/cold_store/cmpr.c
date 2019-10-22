@@ -1,10 +1,10 @@
 /* Sketch of a compressing utility for ice40 images
-   The idea is simple, runlength encode occurences of 0x00.
+   The idea is simple, run-length encode occurences of 0x00.
 
    Compression algorithm
    ======================
    1. Read a byte a. 
-      If EOF go to 5
+      If a == EOF go to 5
       output a
       If a != 0, go to 1.
       If a == 0, set nrzero = 1, go to 2.
