@@ -260,9 +260,10 @@ uint64_t inpow2( int a, ... ) {
 
 /////////////////////////////////////////////////////////////////////////////
 TBL ctbl;
-void make_compressed_table( TBL *tblp,       // Original
+// Give back untouched columns out. Here the bonus columns are included
+uint64_t make_compressed_table( TBL *tblp,       // Original
                             uint64_t replaces[],
-                            uint64_t direct, // Bitmask of untouched columns
+                            uint64_t direct, // Bitmask of untouched columns - in.
                             int bonus,//        Can squeeze in a number of columns due to vacancies
                             int rounds, //      Each round need LUTSIZE index bits
                             int nrebr,//        Will always be 2. Limited effort to make this general
@@ -273,7 +274,8 @@ void make_compressed_table( TBL *tblp,       // Original
         int buggerall = 0;
         int k,j;
         int i;
-
+        uint64_t direct_out = direct;
+        
         if ( nrebr != 2 || lutsize != 4)
                 ferr( "Revise code\n" );
         
@@ -285,8 +287,19 @@ void make_compressed_table( TBL *tblp,       // Original
                                 ctbl.a[k] |=  (((tblp->a[k] >> j) & 1) << jj);
                                 ctbl.v[k] |=  (((tblp->v[k] >> j) & 1) << jj);
                                 jj++;
-                                if ( ((direct >> j) & 1) == 0  )
+                                if ( ((direct >> j) & 1) == 0  ) {
+                                        /* A bonus column. So now we call the column direct, and must
+                                         * remove it from the replace specification. 
+                                         */
                                         bb--;
+                                        direct_out |= (1uLL<<j);
+                                        for ( i = 0; i < rounds; i++ ) {
+                                                if ( (replaces[i] >> j) & 1 ) {
+                                                        replaces[i] ^= (1uLL << j);
+                                                        break;
+                                                }
+                                        }
+                                }
                         }
                 }
                 if ( jj != nrebr*16 - rounds*LUTSIZE )
@@ -337,12 +350,13 @@ void make_compressed_table( TBL *tblp,       // Original
 
                 }
         }
+        return direct_out;
 }
 
 /////////////////////////////////////////////////////////////////////////////
 void printf_result(
         uint64_t replaces[],
-        int rounds, int nrebr, int lutsize, uint64_t direct, int bonus,
+        int rounds, int nrebr, int lutsize, uint64_t direct,
         uint32_t lutval[20][NREQATIONS]
         ) {
         int k,j;
@@ -463,28 +477,20 @@ void printf_result(
 
         // Assign columns that remain in table. 'x' goes to '0'.
         int jj = 0;
-        int bb = bonus;
         for ( j = 0; j < NREQATIONS; j++ ) {
-                if ( ( (direct >> j) & 1 ) || bb ) {
+                if ( (direct >> j) & 1 ) {
                         printf( "   assign d[%d] = indir[%d];\n", j, jj );
                         jj++;
-                        if ( ((direct >> j) & 1) == 0  )
-                                bb--;
                 }
         }
 
         int kluge = 32 - rounds*lutsize;
         int i;
-        bb = bonus;
         for ( i = 0; i < rounds; i++ ) {
                 fprintf( fo, "   // replaces = " ); FVECTORPRI( fo, (uint32_t *)&replaces[i], NRCOLUMNS ); fprintf( fo, "\n" );
                 for ( j = 0; j < NREQATIONS; j++ ) {
                         if ( (replaces[i] >> j) & 1) {
-                                if ( bb ) {
-                                        bb--;
-                                        continue;
-                                }
-                                printf( "   SB_LUT4 #(.LUT_INIT(16'h%4.4x)) cmb_d%2.2d(.O(d[%2d]),.I3(indir[%d]),.I2(indir[%d]),.I1(indir[%d]),.I0(indir[%d]));\n",
+                                printf( "   SB_LUT4 #(.LUT_INIT(16'h%4.4x)) cmb_d%2.2d(.O(d[%d]),.I3(indir[%d]),.I2(indir[%d]),.I1(indir[%d]),.I0(indir[%d]));\n",
                                         lutval[i][j], j, j, kluge+3, kluge+2, kluge+1, kluge+0 );
                         }
                 }
@@ -515,7 +521,7 @@ int main( void ) {
         uint64_t reservedcolumns = 0;
         
         removecolumns = 0;//inpow2( 6, 7, 10, 22, 27, 29, 30, 33, -1 ); // Result out of investigate14. Can represent these columns by combinations
-        reservedcolumns = inpow2( 0, -1); // Column should be represented directly         
+        reservedcolumns = inpow2( 10, -1); // Column should be represented directly         
         // reservedcolumns = inpow2( 1,2,3,4,-1);
                                                         
         int nrremoved = __builtin_popcountll(removecolumns);
@@ -588,8 +594,9 @@ int main( void ) {
                 fprintf( fo, " */\n\n" );
 
                 uint32_t lutval[20][NREQATIONS];
-                make_compressed_table(tblp,replaces,ccc,underutilization,rounds,NREBR,LUTSIZE, indirinx, lutval );
-                printf_result(replaces, rounds,NREBR,LUTSIZE,ccc,underutilization,lutval);
+                uint64_t direct_out;
+                direct_out = make_compressed_table(tblp,replaces,ccc,underutilization,rounds,NREBR,LUTSIZE, indirinx, lutval );
+                printf_result(replaces, rounds,NREBR,LUTSIZE, direct_out, lutval);
         }
         return 0;
 }

@@ -5,7 +5,7 @@
 # -----------------------------------------------------------------------------
 
 TRG := ../bin/midgetv_bin2ebr ../bin/midgetv_genucode  ../bin/midgetv_indirectEBR \
-	../bin/iceblinkcom ../bin/atest ../bin/tablefold
+	../bin/iceblinkcom ../bin/atest 
 
 # ../bin/midgetv_tablefold ../bin/midgetv_ucode_linepermutate
 
@@ -26,8 +26,8 @@ all:$(TRG)
 ../bin/midgetv_ucode_linepermutate:midgetv_ucode_linepermutate.c bnvector.c 
 	gcc -O3 -Wall -Wextra -Dnakedfname=../code/ucode.h -o $@ $^ 
 
-../bin/midgetv_tablefold:midgetv_tablefold.c ../code/ucode.h
-	gcc -Wall -Wextra -O3 -Dnakedfname=../code/ucode.h -o $@ $< 
+#../bin/midgetv_tablefold:midgetv_tablefold.c ../code/ucode.h
+#	gcc -Wall -Wextra -O3 -Dnakedfname=../code/ucode.h -o $@ $< 
 
 ../bin/atest:atest.c bnvector.c 
 	gcc -O3 -Wall -Wextra -Dnakedfname=../code/ucode.h -o $@ $^ 
