@@ -362,7 +362,8 @@ int process( TBL *tpin, uint64_t maskedcolumns, int level ) {
          * Try this for all columns that has not been used allready.
          * Retain the lowest number of lines we find (ma).
          */
-        for ( j = 0; j < NRCOLUMNS; j++ ) {
+//        for ( j = 0; j < NRCOLUMNS; j++ ) {
+        for ( j = NRCOLUMNS-1; j >= 0; j-- ) {
                 if ( (maskedcolumns >> j) & 1 ) 
                         continue;                
                 a = nrdistinctlines( &outtp, indirinx, usedindexes, tp, maskedcolumns | (1uLL<<j));
@@ -375,7 +376,8 @@ int process( TBL *tpin, uint64_t maskedcolumns, int level ) {
         /* For each of the columns that lead to a table with only ma lines:
          * 
          */
-        for ( j = 0; j < NRCOLUMNS; j++ ) {
+//        for ( j = 0; j < NRCOLUMNS; j++ ) {
+        for ( j = NRCOLUMNS-1; j >= 0; j-- ) {
                 if ( (maskedcolumns >> j) & 1 ) 
                         continue;
                 if ( lines_if_col_removed[j] > ma ) 
@@ -414,7 +416,8 @@ int process( TBL *tpin, uint64_t maskedcolumns, int level ) {
         /* Cut off. I assume that the first 10 columns that are replaced would be
          * replaced anyway. So if we are back at level < 10 with a solution we are done.
          */
-        if ( level <= 10 )
+//        if ( level <= 10 )
+        if ( level <= 0 )
                 return g_best_so_far;
         else
                 return 0;
@@ -688,8 +691,7 @@ int main( void ) {
 //        fprintf( fo, "/* Using LUTSIZE=%d. Using %d EBR%s Initial table has  %d columns\n", LUTSIZE, NREBR, NREBR == 1 ? "." : "s.", NRCOLUMNS );
 
         
-        uint64_t maskedcolumns = 1; // Critical signal sa00 is not to be part of optimalization
-//        uint64_t maskedcolumns = 0b000000001001111010010100000000010010000111;
+        uint64_t maskedcolumns = inpow2(10,-1);
         
         fprintf( fo, " * Reserved:" );
         FVECTORPRI( fo, (uint32_t *)&maskedcolumns, NRCOLUMNS );
