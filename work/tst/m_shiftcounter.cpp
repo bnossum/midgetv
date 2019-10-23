@@ -44,7 +44,6 @@ int main(int argc, char **argv) {
                                 tb->eval();
                                 //printf( "facit_rshcnt = %2.2x dbg_rshcnt = %2.2x\n", facit_rshcnt, tb->dbg_rshcnt );
                                 
-                                assert( tb->rlastshift == facit_lastshift );
                                 assert( tb->dbg_rshcnt == facit_rshcnt );
                         }
                 }

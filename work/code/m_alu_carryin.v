@@ -7,57 +7,25 @@
  * The alu carry input. It must be selectable. raluF is used by slt(u), slti(u)
  * instructions. alu_carryin must be put on the carry chain.
  * 
- * Free resources here give sra_msb and sa12_and_corerunning.
+ * Free resources here give sra_msb and rlastshift
  * Size of module : 2 SB_LUT4s
  * 
  *                                          
- *                    | alu_carryin                      s_alu_carryin[1]           
- *                   /y\     ___                         |s_alu_carryin[0]          
- * ADR_O[31] --------(((----|I0 |                        ||  prealucyin 
- * s_alu_carryin[0] -+((----|I1 |-- sra_msb              00  0          
- * s_alu_carryin[1] --(+----|I2 |                        01  raluF     
- * FUNC7_5 -----------(-----|I3_|                        10  raluF
- *                    | prealucyin                       11  1
- *                   /y\     ___                             
- * corerunning ------(((----|I0 |-- sa12_and_corerunning FUNC7_5 sra_msb
- * raluF ------------+||    |I1 |                        0       0      
- * GND ---------------(+    |I2 |                        1       Q[31]  
- * sa12 --------------(-----|I3_|
+ *                    | alu_carryin           s_alu_carryin[1]       FUNC7_5 
+ *                   /y\     ___              |s_alu_carryin[0]      |Q[31]    
+ * ADR_O[31] --------(((----|I0 |             ||  prealucyin         ||      sra_msb    
+ * s_alu_carryin[0] -+((----|I1 |-- sra_msb   00  0                  00      0      
+ * s_alu_carryin[1] --(+----|I2 |             01  raluF              01      0
+ * FUNC7_5 -----------(-----|I3_|             10  raluF              10      0
+ *                    | prealucyin            11  1                  11      1
+ *                   /y\     ___                     __        
+ * lastshift   ------(((----|I0 |-- lastshift_dup --|  |-- rlastshift
+ * raluF ------------+||    |I1 |                   |  | 
+ * GND ---------------(+    |I2 |                   >__|    
+ *                    |     |I3_|
  *                    |
  *                    VCC
  * 
- * Experimentation show that iCECube2 inserts a through-carry higher in the
- * ALU carry chain, probably because of router congestion? This is avoided 
- * by the following arrangement, where I gain a LUT otherwise unused. The 
- * effectively 3-input LUT is used for an equation that has a good slack, 
- * Wai[7]. Rather than to move Wai[7] here, I do the opposite, and get 
- * preprealucyin from m_wai. The experiment was not a success, for unknown 
- * reasons. But by making preprealucyin out of the 5-bit shiftcounter instead, 
- * I succeded.
- * 
- *                                          
- *                    | alu_carryin                          s_alu_carryin[1]           
- *                   /y\     ___                             |s_alu_carryin[0]          
- * ADR_O[31] --------(((----|I0 |                            ||  prealucyin 
- * s_alu_carryin[0] -+((----|I1 |-- sra_msb                  00  0          
- * s_alu_carryin[1] --(+----|I2 |                            01  raluF     
- * FUNC7_5 -----------(-----|I3_|                            10  raluF
- *                    | prealucyin                           11  1
- *                   /y\     ___                                 
- * corerunning ------(((----|I0 |-- sa12_and_corerunning     FUNC7_5 sra_msb
- * raluF ------------+||    |I1 |                            0       0      
- * GND ---------------(+    |I2 |                            1       Q[31]  
- * sa12 --------------(-----|I3_|
- *                    |
- *                    | preprealucyin == VCC
- *                    |
- *                    |         +-------- lastshift = ~shcy[4] & sa18. The cycle we are loading the counter is not the last shift..
- *                   /y\  ___   |  ___  
- *             sa18 -(((-|I0 |  | |I0 | ~lastshift     __                
- *              vcc -+(( |I1 |--+-|I1-|---------------|  |-- r_issh0_not
- *              vcc --(+ |I2 |    |I2 |               |  |               
- *                    +--|I3_|    |I3_|               >__|               
- *                    |shcy[4]
  * 
  */
 
@@ -89,13 +57,10 @@ module m_alu_carryin  # ( parameter HIGHLEVEL = 0 )
    (
     input        raluF,FUNC7_5,
     input [1:0]  s_alu_carryin,
-    input        sa12,corerunning,
-    /* verilator lint_off UNUSED */
-    input        preprealucyin,
-    /* verilator lint_on UNUSED */
+    input        clk,lastshift,
     input [31:0] ADR_O,
     output       alu_carryin,sra_msb,
-    output       sa12_and_corerunning,
+    output       rlastshift,
     output       m_alu_carryin_killwarnings
     );
    
@@ -112,16 +77,18 @@ module m_alu_carryin  # ( parameter HIGHLEVEL = 0 )
            endcase
          always @(/*AS*/ADR_O or FUNC7_5) 
            r_sra_msb = FUNC7_5 ? ADR_O[31] : 1'b0;
-         assign sa12_and_corerunning = sa12 & corerunning;
          assign sra_msb = r_sra_msb;
          assign alu_carryin = r_alu_carryin;
+         reg rrlastshift;
+         always @(posedge clk)
+           rrlastshift <= lastshift;
+         assign rlastshift = rrlastshift;
       end else begin
          
-         wire prealucyin;
-//         bn_lcy4v_b #(.I(16'haa00))  la(.o(sa12_and_corerunning),.co(prealucyin),  .ci(preprealucyin), .i({sa12,1'b0,raluF,corerunning}));
-         bn_lcy4v_b #(.I(16'haa00))  la(.o(sa12_and_corerunning),.co(prealucyin),  .ci(1'b1), .i({sa12,1'b0,raluF,corerunning}));
-         bn_lcy4v_b #(.I(16'haa00))  lb(.o(sra_msb),             .co(alu_carryin), .ci(prealucyin),    .i({FUNC7_5,s_alu_carryin,ADR_O[31]}));
-
+         wire prealucyin,dup_lastshift;
+         bn_lcy4v_b #(.I(16'haaaa))  la(.o(dup_lastshift),.co(prealucyin),  .ci(1'b1),          .i({1'b0,1'b0,raluF,lastshift}));
+         bn_lcy4v_b #(.I(16'haa00))  lb(.o(sra_msb),      .co(alu_carryin), .ci(prealucyin),    .i({FUNC7_5,s_alu_carryin,ADR_O[31]}));
+         SB_DFF reglastshift( .Q(rlastshift), .C(clk), .D(dup_lastshift));
       end
       
    endgenerate

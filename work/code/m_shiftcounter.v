@@ -32,9 +32,7 @@ module m_shiftcounter
     input [1:0]  s_shift, //     Operation
     input [4:0]  B, //            For initial value
     output       lastshift, //    Counter decrements to zero
-    output       rlastshift, //   ..one cycle later 
-    output [4:0] dbg_rshcnt, //   
-    output       preprealucyin // Always 1, saves one LUT in the ALU.
+    output [4:0] dbg_rshcnt  //   
     );
    
    generate
@@ -54,25 +52,21 @@ module m_shiftcounter
          end
 
          assign lastshift = ~shcnt[5] & s_shift[1];
-         always @(posedge clk) begin
-            rr_lastshift <= lastshift;
-            rshcnt <= shcnt[4:0];
-         end
-         assign rlastshift = rr_lastshift;
-         assign preprealucyin = 1'b1;
+         always @(posedge clk) 
+           rshcnt <= shcnt[4:0];
          assign dbg_rshcnt = rshcnt[4:0];
       end else begin
 
 
          /*
-          *                      | preprealucyin == VCC
-          *                      |
-          *                      |         +-------- lastshift = ~shcy[4] & s_shift[1]. The cycle we are loading the counter is not the last shift.
-          *                     /y\  ___   |  ___  
-          *         s_shift[1] -(((-|I0 |  | |I0 | ~lastshift     __                
-          *                vcc -+(( |I1 |--+-|I1-|---------------|  |-- r_issh0_not
-          *                vcc --(+ |I2 |    |I2 |               |  |               
-          *                      +--|I3_|    |I3_|               >__|               
+          *                       
+          *                      
+          *                                
+          *                          ___    
+          *         s_shift[1] -----|I0 |   
+          *                vcc ---- |I1 |---------- lastshift = ~shcy[4] & s_shift[1]. The cycle we are loading the counter is not the last shift.
+          *                vcc ---- |I2 |    
+          *                      +--|I3_|    
           *                      |shcy[4]
           *                     /y\  ___
           *          d[3] ------(((-|I0 |     __
@@ -142,15 +136,9 @@ module m_shiftcounter
 
          bn_lcy4_b #(.I(16'h9382)) cmb_shcnt0        (.o(shcnt[0]),   .co(shcy[0]),  .ci(1'b1), .i3(B[0]),      .i2(rshcnt[0]),   .i1(s_shift[0]), .i0(s_shift[1]));
          bn_lcy4   #(.I(16'he22e)) cmb_shcnt41 [3:0] (.o(shcnt[4:1]), .co(shcy[4:1]),           .i3(shcy[3:0]), .i2(rshcnt[4:1]), .i1(s_shift[1]), .i0(d[3:0]));
-         bn_lcy4   #(.I(16'h00aa)) cmb_lastshift     (.o(lastshift),  .co(preprealucyin),       .i3(shcy[4]),   .i2(1'b1),        .i1(1'b1),          .i0(s_shift[1]));
+         bn_l4   #(.I(16'h00aa)) cmb_lastshift     (.o(lastshift),  .i3(shcy[4]),   .i2(1'b1),        .i1(1'b1),          .i0(s_shift[1]));
 
-         // An unfortunate through lut
-         wire       lastshift_dup;
-         bn_l4 #(.I(16'hff00)) cmb_unfortunate( .o(lastshift_dup), .i3(lastshift), .i2(1'b0), .i1(1'b0), .i0(1'b0));
-
-         SB_DFF issh0_reg( .Q(rlastshift), .C(clk), .D(lastshift_dup));
          SB_DFF reg_shcnt40 [4:0] ( .Q(rshcnt[4:0]), .C(clk), .D(shcnt[4:0]));
-
          assign dbg_rshcnt = rshcnt[4:0];
       end
    endgenerate

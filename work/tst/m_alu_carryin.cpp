@@ -27,15 +27,16 @@ int main(int argc, char **argv) {
 	// Run through all inputs combinations, then done.
         int inputvariables;
 
-        tb->preprealucyin = 1;
-        for ( inputvariables = 0; inputvariables < (1<<7); inputvariables++ ) {
-                tb->corerunning   = (inputvariables>>6) & 1;
-                tb->sa12          = (inputvariables>>5) & 1;
+        for ( inputvariables = 0; inputvariables < (1<<6); inputvariables++ ) {
+                tb->lastshift     = (inputvariables>>5) & 1;
                 tb->s_alu_carryin = (inputvariables>>3) & 3;
                 tb->raluF         = (inputvariables>>2) & 1;
                 tb->FUNC7_5       = (inputvariables>>1) & 1;
                 tb->ADR_O         = (inputvariables>>0) & 1 ? 0x80000000u : 0;
-                
+
+                tb->clk = 0;
+                tb->eval();
+                tb->clk = 1;
                 tb->eval();
 
                 switch ( tb->s_alu_carryin ) {
@@ -56,7 +57,7 @@ int main(int argc, char **argv) {
                         assert( tb->sra_msb == (tb->ADR_O>>31) );
                 }
 
-                assert( tb->sa12_and_corerunning == (tb->sa12 & tb->corerunning) );
+                assert( tb->rlastshift == tb->lastshift );
                                 
 	} 
         exit(EXIT_SUCCESS);

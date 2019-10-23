@@ -366,14 +366,13 @@ wire                 sa12_and_corerunning;   // From inst_alu_carryin of m_alu_c
    wire                 next_STB_O;             // From inst_progressctrl of m_progressctrl.v
    wire                 next_readvalue_unknown; // From inst_ebr of m_ebr.v
    wire                 next_sram_stb;          // From inst_progressctrl of m_progressctrl.v
-   wire                 preprealucyin;          // From inst_shiftcounter of m_shiftcounter.v
    wire                 progress_ucode;         // From inst_progressctrl of m_progressctrl.v
    wire                 qACK;                   // From inst_progressctrl of m_progressctrl.v
    wire                 qualint;                // From inst_status_and_interrupts of m_status_and_interrupts.v
    wire [31:0]          rDee;                   // From inst_inputmux of m_inputmux.v
    wire                 raluF;                  // From inst_condcode of m_condcode.v
    wire [7:0]           rinx;                   // From inst_ucode of m_ucode.v
-   wire                 rlastshift;             // From inst_shiftcounter of m_shiftcounter.v
+   wire                 rlastshift;             // From inst_alu_carryin of m_alu_carryin.v
    wire                 rzcy32;                 // From inst_immexp_zfind_q of m_immexp_zfind_q.v
    wire [2:0]           s_alu;                  // From inst_ucode of m_ucode.v
    wire [1:0]           s_alu_carryin;          // From inst_ucode of m_ucode.v
@@ -597,15 +596,14 @@ wire                 sa12_and_corerunning;   // From inst_alu_carryin of m_alu_c
       // Outputs
       .alu_carryin                      (alu_carryin),
       .sra_msb                          (sra_msb),
-      .sa12_and_corerunning             (sa12_and_corerunning),
+      .rlastshift                       (rlastshift),
       .m_alu_carryin_killwarnings       (m_alu_carryin_killwarnings),
       // Inputs
       .raluF                            (raluF),
       .FUNC7_5                          (FUNC7_5),
       .s_alu_carryin                    (s_alu_carryin[1:0]),
-      .sa12                             (sa12),
-      .corerunning                      (corerunning),
-      .preprealucyin                    (preprealucyin),
+      .clk                              (clk),
+      .lastshift                        (lastshift),
       .ADR_O                            (ADR_O[31:0]));
 
    m_alu #(.HIGHLEVEL(       HIGHLEVEL       ), 
@@ -790,8 +788,6 @@ wire                 sa12_and_corerunning;   // From inst_alu_carryin of m_alu_c
         /*AUTOINST*/
         // Outputs
         .lastshift                      (lastshift),
-        .rlastshift                     (rlastshift),
-        .preprealucyin                  (preprealucyin),
         // Inputs
         .clk                            (clk),
         .s_shift                        (s_shift[1:0]),
