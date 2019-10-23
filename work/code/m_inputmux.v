@@ -77,8 +77,8 @@ module m_inputmux
          
          reg sa00mod;
          always @(posedge clk)
-           sa00mod <=  qACK | sram_ack | sa00 | ~corerunning;
-         assign Di = sa00mod ? (DAT_O & rDee[31:0] | ~DAT_O & shADR_O) : DAT_O;
+           sa00mod <=  ~(qACK | sram_ack | sa00 | ~corerunning);
+         assign Di = sa00mod ? DAT_O : (DAT_O & rDee | ~DAT_O & shADR_O);
 
       end else begin
 
@@ -89,10 +89,10 @@ module m_inputmux
          genvar j;
          wire   cmb_sa00mod;
          wire   sa00mod;
-         SB_LUT4 #(.LUT_INIT(16'hfeff)) inst_presa00mod( .O(cmb_sa00mod), .I3(corerunning), .I2(sram_ack), .I1(qACK), .I0(sa00)); 
+         SB_LUT4 #(.LUT_INIT(16'h0100)) inst_presa00mod( .O(cmb_sa00mod), .I3(corerunning), .I2(sram_ack), .I1(qACK), .I0(sa00)); 
          SB_DFF sa00mod_r( .Q(sa00mod), .C(clk), .D(cmb_sa00mod));
          for ( j = 0; j < 32; j = j + 1 ) begin
-            SB_LUT4 #(.LUT_INIT(16'hcaf0)) cmb(.O(Di[j]),.I3(sa00mod),.I2(DAT_O[j]),.I1(rDee[j]),.I0(shADR_O[j]));
+            SB_LUT4 #(.LUT_INIT(16'hf0ca)) cmb(.O(Di[j]),.I3(sa00mod),.I2(DAT_O[j]),.I1(rDee[j]),.I0(shADR_O[j]));
          end
          
       end
