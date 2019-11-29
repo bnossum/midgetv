@@ -8,23 +8,23 @@
  * s_alu[2:0]
  * 000 : nearXOR  B = D^(~Q)   
  * 001 : PASSD    B = D
- * 010 : nearAND  B = D&(~Q)   
- * 011 : INVQ     B = ~Q       
+ * 010 : INVQ     B = ~Q       
+ * 011 : nearAND  B = D&(~Q)   
  * 100 : ADD      B = D+Q+cin  
  * 101 : SHLQ     B = (Q<<1)|cin (with D=0xffffffff) 
- * 110 : nearIOR  B = (~D)|Q     (with cin==0)     
- * 111 : PASSQ    B = Q+cin
+ * 110 : PASSQ    B = Q+cin
+ * 111 : nearIOR  B = (~D)|Q     (with cin==0)     
  * 
  * The ALU is constructed out of two columns of LUTs. 
  *      
  *                                | co               s_alu[1] 
- *                               /y\                 |s_alu[0]            s_alu[2]  
+ *                               /y\                 |s_alu[0]        s_alu[2]  
  *             ___               |||     ___         ||  A            |   B       
  * Q        --|I0 | A s_alu[2] --(((----|I0 | B      --  -            -   -       
  * s_alu[0] --|I1 |--------------+((----|I1 |--      00  Di           0   ~(A^QQ)  
  * Di       --|I2 |        QQ  ---(+----|I2 |        01  ~(Di^Q)      1   A^QQ^cin 
- * s_alu[1] --|I3_|               +-----|I3_|        10  (~Di)&(~Q)    
- *                                |                  11  0         
+ * s_alu[1] --|I3_|               +-----|I3_|        10  0         
+ *                                |                  11  (~Di)&(~Q)    
  *                                cin       
  *   
  *  luta=0x01b4 lutb=0xc369
@@ -176,8 +176,8 @@ module m_alu_highlevel
      case ({s_alu[1],s_alu[0]})
        2'b00 : A = Di;
        2'b01 : A = ~(Di^ADR_O);
-       2'b10 : A = (~Di)&(~ADR_O);
-       2'b11 : A = 0;
+       2'b10 : A = 0;
+       2'b11 : A = (~Di)&(~ADR_O);
      endcase
    assign A31 = A[ALUWIDTH-1];
    
@@ -239,7 +239,7 @@ module m_alu_lowlevel
    /* This is the alu proper
     */
    assign alucy[0] = alu_carryin;
-   bn_l4 #(.I(16'h01b4)) a [ALUWIDTH-1:0] (.o(A), .i3(s_alu[1]), .i2(Di), .i1(s_alu[0]), .i0(ADR_O));
+   bn_l4 #(.I(16'h04b4)) a [ALUWIDTH-1:0] (.o(A), .i3(s_alu[1]), .i2(Di), .i1(s_alu[0]), .i0(ADR_O));
    bn_lcy4 #(.I(16'hc369)) b [ALUWIDTH-1:0] (.o(B), .co(alucy[ALUWIDTH:1]), .i3(alucy[ALUWIDTH-1:0]), .i2(QQ), .i1(A),.i0(s_alu[2]));
    assign A31 = A[ALUWIDTH-1];
 
