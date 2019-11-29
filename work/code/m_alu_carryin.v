@@ -31,16 +31,11 @@
 
 module m_alu_carryin  # ( parameter HIGHLEVEL = 0 )   
    (
-    input        raluF,FUNC7_5,
+    input        clk, lastshift, raluF, FUNC7_5, ADR_O_31,
     input [1:0]  s_alu_carryin,
-    input        clk,lastshift,
-    input [31:0] ADR_O,
-    output       alu_carryin,sra_msb,
-    output       rlastshift,
-    output       m_alu_carryin_killwarnings
+    output       alu_carryin, sra_msb, rlastshift
     );
    
-   assign m_alu_carryin_killwarnings = &ADR_O;
    generate
       if ( HIGHLEVEL != 0 ) begin
          reg r_alu_carryin, r_sra_msb;
@@ -51,8 +46,8 @@ module m_alu_carryin  # ( parameter HIGHLEVEL = 0 )
              2'b10 : r_alu_carryin = raluF;
              2'b11 : r_alu_carryin = 1'b1;
            endcase
-         always @(/*AS*/ADR_O or FUNC7_5) 
-           r_sra_msb = FUNC7_5 ? ADR_O[31] : 1'b0;
+         always @(/*AS*/ADR_O_31 or FUNC7_5) 
+           r_sra_msb = FUNC7_5 ? ADR_O_31 : 1'b0;
          assign sra_msb = r_sra_msb;
          assign alu_carryin = r_alu_carryin;
          reg rrlastshift;
@@ -62,8 +57,8 @@ module m_alu_carryin  # ( parameter HIGHLEVEL = 0 )
       end else begin
          
          wire prealucyin,dup_lastshift;
-         bn_lcy4v_b #(.I(16'haaaa))  la(.o(dup_lastshift),.co(prealucyin),  .ci(1'b1),          .i({1'b0,1'b0,raluF,lastshift}));
-         bn_lcy4v_b #(.I(16'haa00))  lb(.o(sra_msb),      .co(alu_carryin), .ci(prealucyin),    .i({FUNC7_5,s_alu_carryin,ADR_O[31]}));
+         bn_lcy4v_b #(.I(16'haaaa)) la(.o(dup_lastshift), .co(prealucyin),  .ci(1'b1),       .i({1'b0,1'b0,raluF,lastshift}));
+         bn_lcy4v_b #(.I(16'haa00)) lb(.o(sra_msb),       .co(alu_carryin), .ci(prealucyin), .i({FUNC7_5,s_alu_carryin,ADR_O_31}));
          SB_DFF reglastshift( .Q(rlastshift), .C(clk), .D(dup_lastshift));
       end
       
