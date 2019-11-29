@@ -72,15 +72,24 @@ int main(int argc, char **argv) {
 
         /* The crudest way to check the OpCodes would be to iterate over
            32 bits, testing from 0x00000000 to 0xffffffff. This is nearly what I do.
-           I skip testing of any number ending in 0b00, 0b01 and 0b10. This is
-           mainly to bring down test time. 
-           It would be very strange indeed if I break the code that say compressed
-           instructions are illegal.
+           I skip testing of any number ending in 0b00, 0b01 and 0b10. 
         */
         fprintf( stderr, "Runtime around 80 seconds on a Lenovo x230.\n" );
+        fprintf( stderr, "Note: If midgetv is compiled without support for MULDIV, the following 9 error messages are expected:\n"
+                 "\"0x0d should be hit 0x8000 times, but is hit 0x0 times\"\n" 
+                 "\"0x2d should be hit 0x8000 times, but is hit 0x0 times\"\n" 
+                 "\"0x4d should be hit 0x8000 times, but is hit 0x0 times\"\n" 
+                 "\"0x6d should be hit 0x8000 times, but is hit 0x0 times\"\n" 
+                 "\"0x8d should be hit 0x8000 times, but is hit 0x0 times\"\n" 
+                 "\"0xad should be hit 0x8000 times, but is hit 0x0 times\"\n" 
+                 "\"0xcd should be hit 0x8000 times, but is hit 0x0 times\"\n" 
+                 "\"0xed should be hit 0x8000 times, but is hit 0x0 times\"\n"
+                 "\"0xfe: 2af96000 hits ( 2af56000 expected)\"\n"
+                );
         
-        int dbg = 2;
-        INSTR = 3;
+        int dbg = 0;
+        int nmi_messageseen = 0;
+        INSTR = 3;        
         do {
                 tb->INSTR = INSTR;
                 tb->eval();
@@ -90,7 +99,13 @@ int main(int argc, char **argv) {
                 
                 if ( reachability[minx] == 0 ) {
                         if ( pocketdissass( 1, 0, INSTR ) != -1 ) {
-                                ferr( "Reached index should be inaccessible, but is reached with an instruction that should be decoded\n" );
+                                if ( dbg ) {
+                                        printf( " Pocket dissasembly say: " );
+                                        pocketdissass( 0, 0, INSTR );
+                                        printf( "Reached index 0x%x should be inaccessible, but is reached with an instruction that should be decoded\n", minx );
+                                        if ( dbg > 1 )
+                                                ferr( "Aborts\n" );
+                                }
                         }
                         if ( !suspend[minx] ) {
                                 if ( dbg ) {
@@ -112,13 +127,9 @@ int main(int argc, char **argv) {
                            We have one common entry point for 
                                ECALL
                                EBREAK  
-                               ECALL
                                (U/S/M)RET
                                WFI
                                other unsupported in same minor encoding
-                        */
-                        /* Change to 
-                           if ( (instr[minx] & mask[minx]) != (INSTR & localmask) ) {
                         */
                         if ( (instr[minx] & mask[minx]) != (INSTR & mask[minx]) ) {
                                 if ( dbg ) {
@@ -131,8 +142,12 @@ int main(int argc, char **argv) {
                                 }
                         }
                         // printf( "%8.8x 0x%.2x\n", INSTR, minx );
+                } else if ( reachability[minx] == 3 ) {
+                        if ( nmi_messageseen == 0 )
+                                printf( "Hit location reserved for int/nmi\n" );
+                        nmi_messageseen = 1;
                 } else {
-                        ferr( "Que?\n" );
+                        ferr( "Que? reachability[%d]=%d \n", minx, reachability[minx] );
                 }
                 INSTR += 4;
         } while ( INSTR != 3);
@@ -147,7 +162,7 @@ int main(int argc, char **argv) {
                          * not an entry point.
                          */
                         if ( hit[i] ) {
-                                printf( "0x%.2x should be unreachable from decode, but is hit %d times\n", i, hit[i] );
+                                printf( "0x%.2x should be unreachable from decode, but is hit 0x%x times\n", i, hit[i] );
                         }
                         break;
                 case 1 :
@@ -165,6 +180,8 @@ int main(int argc, char **argv) {
                          */
                         if ( hit[i] == 0 ) {
                                 printf( "0x%.2x reserved for illegal OpCode, but is infact never hit\n", i );
+                        } if ( hit[i] != mask[i] ) {
+                                printf( "0x%.2x: %x hits ( %x expected)\n", i, hit[i], mask[i] );
                         }
                         break;
                 case 3 :
@@ -181,4 +198,40 @@ int main(int argc, char **argv) {
         exit(EXIT_SUCCESS);
 }
 
-
+/*
+0x0c should be hit 0x8000 times, but is hit 0x100000 times
+0x0d should be hit 0x8000 times, but is hit 0x100000 times
+0x0e should be hit 0x8000 times, but is hit 0x100000 times
+0x0f should be hit 0x1000000 times, but is hit 0x1100000 times
+0x1c should be hit 0x1000 times, but is hit 0x400000 times
+0x24 should be hit 0x8000 times, but is hit 0x400000 times
+0x2c should be hit 0x8000 times, but is hit 0x100000 times
+0x2d should be hit 0x8000 times, but is hit 0x100000 times
+0x2e should be unreachable from decode, but is hit 1048576 times
+0x2f should be hit 0x1000000 times, but is hit 0x1100000 times
+0x4c should be hit 0x8000 times, but is hit 0x100000 times
+0x4d should be hit 0x8000 times, but is hit 0x100000 times
+0x4e should be unreachable from decode, but is hit 1048576 times
+0x4f should be unreachable from decode, but is hit 1048576 times
+0x6c should be hit 0x8000 times, but is hit 0x100000 times
+0x6d should be hit 0x8000 times, but is hit 0x100000 times
+0x6e should be unreachable from decode, but is hit 1048576 times
+0x6f should be unreachable from decode, but is hit 1048576 times
+0x8c should be hit 0x8000 times, but is hit 0x100000 times
+0x8d should be hit 0x8000 times, but is hit 0x100000 times
+0x8e should be unreachable from decode, but is hit 1048576 times
+0x8f should be unreachable from decode, but is hit 1048576 times
+0xa4 should be hit 0x10000 times, but is hit 0x400000 times
+0xac should be hit 0x8000 times, but is hit 0x100000 times
+0xad should be hit 0x8000 times, but is hit 0x100000 times
+0xae should be hit 0x8000 times, but is hit 0x100000 times
+0xaf should be unreachable from decode, but is hit 1048576 times
+0xcc should be hit 0x8000 times, but is hit 0x100000 times
+0xcd should be hit 0x8000 times, but is hit 0x100000 times
+0xce should be unreachable from decode, but is hit 1048576 times
+0xcf should be unreachable from decode, but is hit 1048576 times
+0xec should be hit 0x8000 times, but is hit 0x100000 times
+0xed should be hit 0x8000 times, but is hit 0x100000 times
+0xee should be unreachable from decode, but is hit 1048576 times
+0xef should be unreachable from decode, but is hit 1048576 times
+*/

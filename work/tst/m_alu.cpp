@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
                 tb->sa26 = 0; 
                 tb->sa27 = 0; 
                 
-                cin = ( aluop == 6 ) ? 0 : cin;
+                cin = ( aluop == 7 ) ? 0 : cin;
                 tb->alu_carryin = cin;
                 
                 for ( ADR_O = 0; ADR_O < 256; ADR_O++ ) {
@@ -55,12 +55,12 @@ int main(int argc, char **argv) {
                                 switch ( aluop ) {
                                 case 0 : tmpB = Di^(~ADR_O); break;
                                 case 1 : tmpB = Di; break;
-                                case 2 : tmpB = Di & (~ADR_O); break;
-                                case 3 : tmpB = ~ADR_O; break;
+                                case 2 : tmpB = ~ADR_O; break;
+                                case 3 : tmpB = Di & (~ADR_O); break;
                                 case 4 : tmpB = Di + ADR_O + cin; break;
                                 case 5 : tmpB = ADR_O + ADR_O + cin; break; 
-                                case 6 : tmpB = ~Di | ADR_O; break;
-                                case 7 : tmpB = ADR_O + cin; break;
+                                case 6 : tmpB = ADR_O + cin; break;
+                                case 7 : tmpB = ~Di | ADR_O; break;
                                 default : ferr( "Que?\n" );
                                 }
                                 facit_co = (tmpB >> 8) & 1;
@@ -69,7 +69,8 @@ int main(int argc, char **argv) {
                                 tb->eval(); // The works.
 
                                 if ( tb->B != facit_B )
-                                        ferr( "Error\n" );
+                                        ferr( "Error. ctrl=%x aluop=%d Di=%x ADR_O=%d facit_B = %x tb->B = %x\n",
+                                              ctrl, aluop, Di, ADR_O, facit_B, tb->B );
 
                                 if ( aluop == 4 ) {
                                         if ( tb->alu_carryout != facit_co ) {

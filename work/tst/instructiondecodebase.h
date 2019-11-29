@@ -86,6 +86,16 @@ C( 'C', csr,                  rs1,   011,   rd,          1110011, csrrc   )
 C( 'C', csr,                  zimm,  101,   rd,          1110011, csrrwi  ) 
 C( 'C', csr,                  zimm,  110,   rd,          1110011, csrrsi  ) 
 C( 'C', csr,                  zimm,  111,   rd,          1110011, csrrci  ) 
+
+R( 'R', 0000001,       rs2,   rs1,   000,   rd,          0110011, mul     )
+R( 'R', 0000001,       rs2,   rs1,   001,   rd,          0110011, mulh    )
+R( 'R', 0000001,       rs2,   rs1,   010,   rd,          0110011, mulhsu  )
+R( 'R', 0000001,       rs2,   rs1,   011,   rd,          0110011, mulhu   )
+R( 'R', 0000001,       rs2,   rs1,   100,   rd,          0110011, div     )
+R( 'R', 0000001,       rs2,   rs1,   101,   rd,          0110011, divu    )
+R( 'R', 0000001,       rs2,   rs1,   110,   rd,          0110011, rem     )
+R( 'R', 0000001,       rs2,   rs1,   111,   rd,          0110011, remu    )
+
 #undef R                                                                  
 #undef r                                                                  
 #undef I                                                                  

@@ -68,7 +68,7 @@ void userguide( void ) {
 #define STR(x) STRX(x)
 #define CATX(a,b) a ## b
 #define CAT(a,b) CATX(a,b)
-#define NRINSTR 51
+#define NRINSTR (51+8)
 const char *instrtxt[NRINSTR+1] = {
 #define R(ty,funct7,rs2,rs1,funct3,rd,opcode,txt) STR(txt),
 #define r(ty,a,b,c,rs1,funct3,rd,opcode,txt)      STR(txt),
@@ -106,6 +106,7 @@ typedef enum {
 int pocketdissass( int silent, uint32_t pc, uint32_t I ) {
         int bit30   = (I >> 30) & 1;
         int bit2928 = (I >> 28) & 3;
+        int bit25   = (I >> 25) & 1;
         int f7      = (I >> 25) & 127;
         int bit2220 = (I >> 20) & 7;
         int f3      = (I >> 12) & 7;
@@ -162,41 +163,55 @@ int pocketdissass( int silent, uint32_t pc, uint32_t I ) {
                 case 0b111 : inx = e_andi;  break;
                 }
                 break;
-        case 0b0110011 : 
-                switch( f3 ) { 
-                case 0b000 :
-                        inx = bit30 ? e_sub : e_add;
-                        sloppy = ( f7 != 0 && f7 != 64 );
-                        break; 
-                case 0b001 :
-                        inx = e_sll;
-                        sloppy = ( f7 != 0 );
-                        break; 
-                case 0b010 :
-                        inx = e_slt;
-                        sloppy = ( f7 != 0 );
-                        break; 
-                case 0b011 :
-                        inx = e_sltu;
-                        sloppy = ( f7 != 0 );
-                        break; 
-                case 0b100 :
-                        inx = e_xor;
-                        sloppy = ( f7 != 0 );
-                        break; 
-                case 0b101 :
-                        inx = bit30 ? e_sra : e_srl;
-                        sloppy = ( f7 != 0 && f7 != 64 );
-                        break; 
-                case 0b110 :
-                        inx = e_or;
-                        sloppy = ( f7 != 0 );
-                        break; 
-                case 0b111 :
-                        inx = e_and;
-                        sloppy = ( f7 != 0 );
-                        break; 
-                }     
+        case 0b0110011 :
+                if ( bit25 ) {
+                        sloppy = ( f7 != 1 );
+                        switch( f3 ) {
+                        case 0b000 : inx = e_mul;    break;
+                        case 0b001 : inx = e_mulh;   break;
+                        case 0b010 : inx = e_mulhsu; break;
+                        case 0b011 : inx = e_mulhu;  break;
+                        case 0b100 : inx = e_div;    break;
+                        case 0b101 : inx = e_divu;   break;
+                        case 0b110 : inx = e_rem;    break;
+                        case 0b111 : inx = e_remu;   break;                                
+                        }
+                } else {
+                        switch( f3 ) { 
+                        case 0b000 :
+                                inx = bit30 ? e_sub : e_add;
+                                sloppy = ( f7 != 0 && f7 != 64 );
+                                break; 
+                        case 0b001 :
+                                inx = e_sll;
+                                sloppy = ( f7 != 0 );
+                                break; 
+                        case 0b010 :
+                                inx = e_slt;
+                                sloppy = ( f7 != 0 );
+                                break; 
+                        case 0b011 :
+                                inx = e_sltu;
+                                sloppy = ( f7 != 0 );
+                                break; 
+                        case 0b100 :
+                                inx = e_xor;
+                                sloppy = ( f7 != 0 );
+                                break; 
+                        case 0b101 :
+                                inx = bit30 ? e_sra : e_srl;
+                                sloppy = ( f7 != 0 && f7 != 64 );
+                                break; 
+                        case 0b110 :
+                                inx = e_or;
+                                sloppy = ( f7 != 0 );
+                                break; 
+                        case 0b111 :
+                                inx = e_and;
+                                sloppy = ( f7 != 0 );
+                                break; 
+                        }
+                }
                 break;        
         case 0b0001111 : 
                 switch( f3 ) {

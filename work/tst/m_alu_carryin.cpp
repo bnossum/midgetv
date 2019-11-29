@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
                 tb->s_alu_carryin = (inputvariables>>3) & 3;
                 tb->raluF         = (inputvariables>>2) & 1;
                 tb->FUNC7_5       = (inputvariables>>1) & 1;
-                tb->ADR_O         = (inputvariables>>0) & 1 ? 0x80000000u : 0;
+                tb->ADR_O_31      = (inputvariables>>0) & 1 ? 0x80000000u : 0;
 
                 tb->clk = 0;
                 tb->eval();
@@ -54,7 +54,7 @@ int main(int argc, char **argv) {
                 if ( tb->FUNC7_5 == 0 ) {
                         assert( tb->sra_msb == 0 );
                 } else {
-                        assert( tb->sra_msb == (tb->ADR_O>>31) );
+                        assert( tb->sra_msb == (tb->ADR_O_31) );
                 }
 
                 assert( tb->rlastshift == tb->lastshift );
