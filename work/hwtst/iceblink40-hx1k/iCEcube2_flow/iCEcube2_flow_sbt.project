@@ -1,6 +1,6 @@
 [Project]
 ProjectVersion=2.0
-Version=Lattice Semiconductor Corporation iCEcube - Release: 2017.08.27940 - Build Date: Sep 12 2017 08:41:24
+Version=Lattice Semiconductor Corporation iCEcube - Release: 2017.01.27914 - Build Date: Jan 13 2017 02:48:34
 ProjectName=iCEcube2_flow
 Vendor=SiliconBlue
 Synthesis=lse
@@ -71,7 +71,7 @@ PlacerEffortLevel=std
 PlacerAutoLutCascade=no
 PlacerAutoRamCascade=no
 PlacerPowerDriven=no
-PlacerAreaDriven=no
+PlacerAreaDriven=yes
 RouteWithTimingDriven=yes
 RouteWithPinPermutation=yes
 BitmapSPIFlashMode=yes

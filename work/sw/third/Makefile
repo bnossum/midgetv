@@ -14,37 +14,16 @@
 # because timing is different for instructions in SRAM and
 # EBR.
 #
-# Usefull to find how all simulations starts, first
-# remove the -s (silent flag) from simulation, then:
-# make clean; make | grep "^0000... " > first_instr.txt
 #
 
-TARGETSEBR  := t101 t102 t103 t104 t105 t106 t107 t108 t109 \
-	t110 t111 t112 t113 t114 t115 t116 t117 t118 t119 \
-	t120 t121 t122 t123 t124 t125 t126 t127 t128 t129 \
-	t130 t131 t132 t133 t134 t135 t136 t137 t138 t139 \
-	t140 t141 t142 t143 t144 t145 t146 t147 t148 t149 \
-	t150 t151 t152 t153 t154 \
-	t160 t161 t162 t163 t164 t165 t166 t167      t169 \
-	t170 t171 t172 t173 t174 t175 t176 t177 t178 t179 \
-	t180 t181 t182 t183 t184 t185 t186 t187 t188 t189 \
-	t190 
+TARGETSEBR  := \
+	t301
 
+TARGETSSRAM := \
+	t301
 
-TARGETSSRAM := t101 t102 t103 t104 t105 t106 t107 t108 t109 \
-	t110 t111 t112 t113 t114 t115 t116 t117 t118 t119 \
-	t120 t121 t122 t123 t124 t125 t126 t127 t128 t129 \
-	t130 t131 t132 t133 t134 t135 t136 t137 t138 t139 \
-	t140 t141 t142 t143 t144 t145 t146 t147 t148 t149 \
-	t150 t151 t152 t153 t154 \
-	t160 t161 t162 t163 t164 t165 t166 t167 t168 t169 \
-	t170 t171 t172 t173 t174 t175 t176 t177 t178 t179 \
-	t180 t181 t182 t183 t184 t185 t186 t187 t188 t189 \
-	t190 \
-	t201 t202 t203 
-
-OBJDIREBR := ../../obj_dir/first
-OBJDIRSRAM := ../../obj_dir/sfirst
+OBJDIREBR := ../../obj_dir/third
+OBJDIRSRAM := ../../obj_dir/sthird
 
 # .SECONDARY:
 
@@ -78,7 +57,7 @@ all: ../../obj_dir/results.txt $(BINTARGETSEBR) $(BINTARGETSSRAM) \
 # Specify only rv32i instructions to be used.
 # Bare metal.
 # Some include file locations
-GCCFLAGS = -mabi=ilp32 -march=rv32i -nodefaultlibs -nostartfiles -I ../inc/ -I ./
+GCCFLAGS = -mabi=ilp32 -march=rv32im -nodefaultlibs -nostartfiles -I ../inc/ -I ./
 
 # When linking, flags to make map file.
 LDFLAGS = -nodefaultlibs -nostartfiles --discard-none --cref -Map $@.map

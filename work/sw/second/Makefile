@@ -40,7 +40,7 @@ BINTARGETSSRAM := $(foreach i,$(TARGETSSRAM),$(OBJDIRSRAM)/$(i).bin)
 LSTTARGETSSRAM := $(foreach i,$(TARGETSSRAM),$(OBJDIRSRAM)/$(i).lst)
 RESULTSSRAM    := $(foreach i,$(TARGETSSRAM),$(OBJDIRSRAM)/$(i).result.txt)
 
-all: $(BINTARGETSEBR) $(BINTARGETSSRAM)
+all: $(BINTARGETSEBR) $(BINTARGETSSRAM) $(LSTTARGETSEBR)
 
 
 # When compiling

@@ -7,6 +7,12 @@
  * At least for me, the clock of iceblink40-hx1k is not stable at startup
  * when set to run at 33 MHz. Hence I always use a 64 cycle startup timer,
  * parameter NO_CYCLECNT == 0.
+ * 
+ * Size when LAZY_DECODE == 2 : 266 LUTs. Decode cost :  0
+ * Size when LAZY_DECODE == 1 : 269 LUTs  Decode cost :  3
+ * Size when LAZY_DECODE == 0 : 282 LUTs  Decode cost : 16
+ * 
+ * Combination LAZY_DECODE == 2 and MULDIV give fatal error in iCECube2
  */
 
 /*
@@ -49,8 +55,9 @@ module top
       NO_CYCLECNT        = 0, 
       MTIMETAP           = 0, 
       HIGHLEVEL          = 0,
-      LAZY_DECODE        = 2,
-      DISREGARD_WB4_3_55 = 1
+      LAZY_DECODE        = 1,
+      DISREGARD_WB4_3_55 = 1,
+      MULDIV             = 1
       )
    (
     input      CLK_I,
@@ -119,6 +126,7 @@ module top
        .HIGHLEVEL          ( HIGHLEVEL          ),
        .LAZY_DECODE        ( LAZY_DECODE        ),
        .DISREGARD_WB4_3_55 ( DISREGARD_WB4_3_55 ),
+       .MULDIV             ( MULDIV             ),
        .prg00(prg00),       .prg01(prg01),       .prg02(prg02),       .prg03(prg03),
        .prg04(prg04),       .prg05(prg05),       .prg06(prg06),       .prg07(prg07),
        .prg08(prg08),       .prg09(prg09),       .prg0A(prg0A),       .prg0B(prg0B),
