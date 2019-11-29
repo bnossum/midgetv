@@ -79,6 +79,70 @@
                        |                |- dbga[31:0]
                        +----------------+
 
+   Simplified datapath when MUL/DIV                                                                           
+   ================================
+ 
+Data input               __                                      +------------- shcy[4]           
+DAT_I[31:0] ------------|or|-|\   ___  rDee                      |                                
++-----------------------|__| | |-|   |-+                        /y\                               
+|       _______________  +---|/  |   | |                        :::  __   ___                     
+|      |SRAM ..x32     | |       >___| |                   +----(((-|  | >   |  rshiftcnt[4:0]    
+|      |===============| |             |                   |   -((+-|  |-|   |-+                  
+|      | DATAOUT[31:0] |-+             |                   |  +-+(--|  | |CE | |                  
+|  +---|DATAIN[31:0]   |               |                   |  |  +--|__| |R__| |                  
+|  | +-|ADR[14:0]      |               |                   |  |  |             |                  
+|  | | | 64 or 128 KiB |               |                   |  |  0             |                  
+|  | | >_______________|               |                   |  +----------------+                  
+|  | |                                 |                   |                                      
+|  | |  +------------------------------+        _______    |                                      
+|  | |  |                ___                   |Immed- |   |                                      
+|  | |  |            +--|D Q|------------------|iate   |---(-+          +------ is_bcond          
+|  | |  |            |  |   |  6- 0 OPCODE     |expand |   | |          |                         
+|  | |  |            |  |   | 11- 7 TRG        |_______|   | |      __  |  __                     
+|  | |  |            |  |   | 14-12 FUNC3   +--------------(-)-----|  |-+-|  |- raluF             
+|  | |  |            |  |   | 19-15 SRC1    |              | |  +--|__|   >__|                    
+|  | |  |            |  |CE | 24-20 SRC2    | fC           | |  | fZ                              
+|  | |  |            |  >___| 31-25 FUNC7  /y\             | | /y\                                
+|  | |  |rDee        |   ___________       :::  _______    | | :::  __     ___                    
+|  | |  +------|\ Di | -| Di        | A   -(((-|~(A^QQ)| B | +-(((-|  | F >   |     I/O address   
+|  | +-ADR_Od2-| |---+--| ~(Di^Q)   |------((+-|A^QQ^ci|-+-+---((+-|  |---|D Q|-+-- ADR_O[31:0]   
+|  +-(---------|/   +---| (~Di)&(~Q)|    +-+(--|       | |    -+(--|  |   |CE | |                 
+|  | | DAT_O        |  -|_0_________|    |  +--|_______| |    --+--|__|   |R__| |                 
+|  | |              |                    |  |ci          |      |       .       |                 
+|  | +--------------+--------------|\ QQ |  |            |      0               |                 
+|  | |    __      __               | |---+  |            |      zero-           |                 
+|  | | +-|+1|----| Q|-+- ccnt[5:0]-|/       0/1/raluF    |      find            |                 
+|  | | | |__|    >__| |                                  |                      |                 
+|  | | +--------------+                                  |                      |                 
+|  | |                                                   |                      |                 
+|  | +---------------------------------------------------(----------------------+                 
+|  |                                                     |                                        
+|  +-----------------------------------------------------(--------------------+                   
+|                                                        |    ____________    |                   
+|       jj        --|0000\                               |   |EBR ..x32   |   |                   
+|       rinst     --|0001 |                              |   |============|   |     data output   
+|       pc        --|0010 |                      B[31:0] |   | RDATA[31:0]|-+-+---- DAT_O[31:0]   
+|       ttime     --|0011 | Rai                          +---|WDATA[31:0] | |                     
+|       rInternISR--|0100 |----------------------------------|RADR[h-2:0] | |                     
+|       rFFFFFF7F --|0101 |   ADR_O[h:2]-|00xx\  Wai         |            | |            ________ 
+|       r000000FF --|0110 |   TRG[4:0] --|01xx |-------------|WADR[h-2:0] | +-- DAT_O --|Mul/Div |
+|       r0000FFFF --|0111 |   jj       --|1000 |             |            |     A>>1  --|Logic   |-+
+|       rFFFF7FFF --|1000 |   rinst    --|1001 |             | 1, 2, 4    |     A<<1  --|and     | |
+|       mtvec     --|1001 |   pc       --|1010 |             > or 8 KiB   |     raluF --|Register| |
+|       r00000000 --|1010 |   ttime    --|1011 |             >____________|  ADR_O[0] --|________| |
+|       rFFFFFFFF --|1011 |   yy       --|1100 |                                                   |
+|       yy        --|1100 |   mecp     --|1101 |                                                   |
+|       B[h:2]   ---|1101 |   mcause   --|1110 |                                                   |
+|       SRC2[4:0] --|1110 |   mtval    --|1111/                                                    |
+|       SRC1[4:0] --|1111/                                                                         |
++--------------------------------------------------------------------------------------------------+
+ 
+ ADR_Od2 
+ ------------------------
+ {1'b0,      ADR_O[31:1]} when SRL(I)
+ {ADR_O[31], ADR_O[31:1]} when SRA(I) and ucodeMULH
+ {~raluF,    ADR_O[31:1]} when ucodeMULHU
+ 
        
  * ----------------------------------------------------------------------------
  * m_midgetv_core signal description
@@ -254,6 +318,7 @@ module m_midgetv_core
       HIGHLEVEL          =  0, 
       LAZY_DECODE        =  1, 
       DISREGARD_WB4_3_55 =  1,
+      MULDIV             =  1, // Include multiply/divide instructions
       MTIMETAP_LOWLIM    = 14, // Only location where this value is really to be set 
       NO_UCODEOPT        =  0, // Only set to 1 during debugging
       DBGA               =  0, // Only set to 1 during debugging
@@ -308,8 +373,6 @@ module m_midgetv_core
    
    
    /* verilator lint_off UNUSED */
-   wire                 m_alu_carryin_killwarnings;// From inst_alu_carryin of m_alu_carryin.v
-   wire                 m_condcode_killwarnings;// From inst_condcode of m_condcode.v
    wire                 m_immexp_zfind_q_killwarnings;// From inst_immexp_zfind_q of m_immexp_zfind_q.v
    wire                 m_inputmux_killwarnings;// From inst_inputmux of m_inputmux.v
    wire                 m_progressctrl_killwarnings;// From inst_progressctrl of m_progressctrl.v
@@ -333,7 +396,7 @@ wire                 sa12_and_corerunning;   // From inst_alu_carryin of m_alu_c
    wire [31:0]          Di;                     // From inst_inputmux of m_inputmux.v
    wire [31:0]          Dsram;                  // From inst_ram of m_ram.v
    wire [2:0]           FUNC3;                  // From inst_opreg of m_opreg.v
-   wire                 FUNC7_5;                // From inst_opreg of m_opreg.v
+   wire [6:0]           FUNC7;                  // From inst_opreg of m_opreg.v
    wire [31:0]          INSTR;                  // From inst_opreg of m_opreg.v
    wire [31:0]          QQ;                     // From inst_cyclecnt of m_cyclecnt.v
    wire [EBRADRWIDTH-1:0] Rai;                  // From inst_rai of m_rai.v
@@ -530,7 +593,7 @@ wire                 sa12_and_corerunning;   // From inst_alu_carryin of m_alu_c
     * in use in certain configurations. I can not find any
     * better way to disable warnings than the following:
     */
-   assign midgetv_core_killwarnings = sa38 & sa39 | meip;
+   assign midgetv_core_killwarnings = sa38 & sa39 | meip | FUNC7[6] | &FUNC7[4:0];
 
    /* -----------------------------------------------------------------------------
     * Datapath
@@ -592,19 +655,18 @@ wire                 sa12_and_corerunning;   // From inst_alu_carryin of m_alu_c
 
    m_alu_carryin #(.HIGHLEVEL(HIGHLEVEL))
    inst_alu_carryin
-     (/*AUTOINST*/
+     (.ADR_O_31                         (ADR_O[31]),
+      .FUNC7_5                          (FUNC7[5]),
+      /*AUTOINST*/
       // Outputs
       .alu_carryin                      (alu_carryin),
       .sra_msb                          (sra_msb),
       .rlastshift                       (rlastshift),
-      .m_alu_carryin_killwarnings       (m_alu_carryin_killwarnings),
       // Inputs
-      .raluF                            (raluF),
-      .FUNC7_5                          (FUNC7_5),
-      .s_alu_carryin                    (s_alu_carryin[1:0]),
       .clk                              (clk),
       .lastshift                        (lastshift),
-      .ADR_O                            (ADR_O[31:0]));
+      .raluF                            (raluF),
+      .s_alu_carryin                    (s_alu_carryin[1:0]));
 
    m_alu #(.HIGHLEVEL(       HIGHLEVEL       ), 
            .ALUWIDTH(        ALUWIDTH        ),
@@ -758,25 +820,26 @@ wire                 sa12_and_corerunning;   // From inst_alu_carryin of m_alu_c
         .SRC1                           (SRC1[4:0]),
         .SRC2                           (SRC2[4:0]),
         .FUNC3                          (FUNC3[2:0]),
-        .FUNC7_5                        (FUNC7_5),
+        .FUNC7                          (FUNC7[6:0]),
         // Inputs
         .clk                            (clk),
         .sa12                           (sa12),
         .Di                             (Di[31:0]));
 
-   m_condcode #(.HIGHLEVEL(HIGHLEVEL)) 
+   m_condcode #(.HIGHLEVEL(HIGHLEVEL), .MULDIV(MULDIV) ) 
      inst_condcode
-       (/*AUTOINST*/
+       (// Inputs
+        .INSTR6                         (INSTR[6]),
+        .QQ31                           (QQ[31]),
+        /*AUTOINST*/
         // Outputs
         .raluF                          (raluF),
         .is_brcond                      (is_brcond),
-        .m_condcode_killwarnings        (m_condcode_killwarnings),
         // Inputs
         .clk                            (clk),
         .alu_carryout                   (alu_carryout),
         .FUNC3                          (FUNC3[2:0]),
         .A31                            (A31),
-        .QQ                             (QQ[31:0]),
         .rzcy32                         (rzcy32));
 
    m_shiftcounter #(.HIGHLEVEL(HIGHLEVEL))
@@ -884,7 +947,7 @@ wire                 sa12_and_corerunning;   // From inst_alu_carryin of m_alu_c
         .minx                           (minx[7:0]),
         .progress_ucode                 (progress_ucode));
 
-   m_ucodepc #(.LAZY_DECODE(LAZY_DECODE))
+   m_ucodepc #(.LAZY_DECODE(LAZY_DECODE), .MULDIV(MULDIV))
      inst_ucodepc
        (/*AUTOINST*/
         // Outputs
