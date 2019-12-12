@@ -11,11 +11,14 @@ _start:
         slti    x2,x1,25        # x2 == 1 because -22 < 25
         bne     x2,x3,1f        # 
         slti    x2,x1,2         # x2 == 1 because (-22 < 2) 
-        bne     x2,x3,1f        #
+        bne     x2,x3,2f        #
         slti    x2,x1,-22       # x2 == 0 because ( -22 < -22) false
-        bne     x2,x0,1f
+        bne     x2,x0,3f
         slti    x2,x1,-222      # x2 == 0 because ( -22 < -222) false
-        bne     x2,x0,1f
+        bne     x2,x0,4f
         simend
 1:      simerr  1
+2:      simerr  2
+3:      simerr  3
+4:      simerr  4
         

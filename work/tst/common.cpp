@@ -510,6 +510,22 @@ int p_sel( int lnr, int sel ) {
         }
         return n;
 }
+
+/////////////////////////////////////////////////////////////////////////////
+int p_raluF( int lnr, int raluF ) {
+        int n;
+        if ( (lnr & 0x1c) == 0 ) {
+                switch ( lnr & 3 )  {
+                case 0 :n = printf( "  " ); break;
+                case 1 :n = printf( "Cy" ); break;
+                case 2 :n = printf( "| " ); break;
+                case 3 :n = printf( "| " ); break;
+                }
+        } else {
+                n = printf( "%d ", raluF & 1);
+        }
+        return n;
+}
         
 /////////////////////////////////////////////////////////////////////////////
 int p_ioa( int lnr, uint32_t ioa, int enaQ, int clearQ ) {
@@ -547,7 +563,7 @@ int p_ioa( int lnr, uint32_t ioa, int enaQ, int clearQ ) {
 
 
 /////////////////////////////////////////////////////////////////////////////
-int p_B( int lnr, uint32_t B ) {
+int p_Bxx( int lnr, uint32_t B ) {
         int n;
         if ( (lnr & 0x1c) == 0 ) {
                 switch ( lnr & 3 )  {
@@ -699,12 +715,12 @@ int p_aluop( int lnr, int v ) {
                 switch ( v ) {
                 case 0b000 : n = printf( "nearXOR " ); break;
                 case 0b001 : n = printf( "passD   " ); break;
-                case 0b010 : n = printf( "nearAND " ); break;
-                case 0b011 : n = printf( "INVQ    " ); break;
+                case 0b010 : n = printf( "INVQ    " ); break;
+                case 0b011 : n = printf( "nearAND " ); break;
                 case 0b100 : n = printf( "ADD     " ); break;
                 case 0b101 : n = printf( "SHLQ    " ); break;
-                case 0b110 : n = printf( "nearIOR " ); break;
-                case 0b111 : n = printf( "passQ   " ); break;
+                case 0b110 : n = printf( "passQ   " ); break;
+                case 0b111 : n = printf( "nearIOR " ); break;
                 }
         }
         return n;                        
@@ -774,7 +790,9 @@ TOP:
         if ( p->CONF & INFO_DAT_O          ) p_generic32u( lnr, "DAT_O___ ", p->DAT_O );
         if ( p->CONF & INFO_Di             ) p_generic32u( lnr, "Di[31:0] ", p->Di );
         if ( p->CONF & INFO_ADR_O          ) p_ioa( lnr, p->ADR_O, p->enaQ, p->clearQ );
+        if ( p->CONF & INFO_A              ) p_generic32u( lnr, "M[31:0]_ ", p->M );
         if ( p->CONF & INFO_ALUOP          ) p_aluop( lnr, p->aluop );
+        if ( p->CONF & INFO_RALUF          ) p_raluF( lnr, p->raluF );
         if ( p->CONF & INFO_B              ) p_generic32u( lnr, "B[31:0]_ ", p->B );
         if ( p->CONF & INFO_dbg_stb_ack    ) p_dbg_stb_ack( lnr, p->dbg_stb_ack );
         if ( p->CONF & INFO_stb_ack        ) p_stb_ack( lnr, p->stb_ack );

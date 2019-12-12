@@ -17,8 +17,6 @@
 #define STR(x) STRX(x)
 #define fname STR(nakedfname)
 
-// Number of equations. Here I do not count the 8-bit next address
-#define NREQATIONS 34
 
 /* The specification is in ucode.h.
  */
@@ -27,6 +25,10 @@ typedef enum {
 #include fname
         _LEND
 } LABELS;
+
+// Number of equations from specification file. Here I do not count the 8-bit next address.
+#define NREQATIONS MIDGETV_UCODE_NREQ
+
 
 char *labeltext[256] = {
 #define X(label,txt,def,reachability,mask,instr,nrhit) STR(label),
@@ -39,13 +41,13 @@ char *ucodestr[256] = {
 };
 
 uint64_t ucode0[256] = {
-#define x 0b0
+#define x 0b0ull
 #define X(label,txt,def,reachability,mask,instr,nrhit) def,
 #include fname
 };
 
 uint64_t ucode1[256] = {
-#define x 0b1
+#define x 0b1ull
 #define X(label,txt,def,reachability,mask,instr,nrhit) def,
 #include fname
 };

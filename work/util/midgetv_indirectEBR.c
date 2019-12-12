@@ -68,14 +68,14 @@ typedef enum {
 // This table is essentially the data to be selected from the 8-bit
 // index
 uint64_t ucode0[256] = {
-#define x 0b0
+#define x 0b0ull
 #define X(label,txt,def,reachability,mask,instr,nrhit) def,
 #include fname
 };
 
 // Some of the items in the table are don't care
 uint64_t ucode1[256] = {
-#define x 0b1
+#define x 0b1ull
 #define X(label,txt,def,reachability,mask,instr,nrhit) def,
 #include fname
 };

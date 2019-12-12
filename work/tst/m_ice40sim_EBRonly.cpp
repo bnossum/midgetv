@@ -1,4 +1,4 @@
-/* -----------------------------------------------------------------------------
+ /* -----------------------------------------------------------------------------
  * Part of midgetv
  * 2019. Copyright B. Nossum.
  * For licence, see LICENCE
@@ -385,103 +385,18 @@ void simprintf( uint32_t cy, Vm_ice40sim_EBRonly *tb ) {
         g_info.clearQ         = STARTOFHIER->get_clearQ();
         g_info.wai            = STARTOFHIER->get_Wai();
         g_info.iwe            = STARTOFHIER->get_iwe();
-        g_info.theio          = STARTOFHIER->get_theio();
+//        g_info.theio          = STARTOFHIER->get_theio(); Does no longer exist 
         g_info.rDee           = STARTOFHIER->get_rDee();
         g_info.DAT_O          = STARTOFHIER->get_DAT_O();
         g_info.Di             = STARTOFHIER->get_Di();
         g_info.aluop          = STARTOFHIER->get_ALUOP();
         g_info.corerunning    = STARTOFHIER->get_corerunning();
         g_info.shiftcount     = STARTOFHIER->get_shiftcnt();
+//        g_info.M              = STARTOFHIER->get_M();
+//        g_info.raluF          = STARTOFHIER->get_raluF();
         common_simprintf( &g_info, cy );
 }
 
-#if 0
-        
-        if ( (cy & 31) == 0 ) {
-                printf( "                                                   SRAM_IO_rack,EBR_rack writeSRAM,writeIO                                        dinx[7:0] shct progress_ucode,r_issh0,sa33,lastshift\n" );
-                printf( "            minx                                                 sa00 || ||      SRAM_wack,IO_wack                 enaQ             rzcy32%s  || |||| enaQ,lastshift,sa32,sa15,rack\n","\\\\" );
-                printf( "     ttime    || ucode             FUNC7  FUNC3 OPCODE     Rai[x:0] | || || mask || Wai[x:0]                       |rQ          alucy_out| || || |||| |||||\n" );
-                printf( "  cy |||||||| || [31:0]   I[31:0]  || rs2 rs1 | Rd  || PC[31:0] ||| | || || |||| || ||| DAT_O[..] rDee[..] Di[31:0] || IOA[31:0]B[31:0]  || || || |||| |||||\n" );
-        }
-
-        minx = STARTOFHIER->get_minx();
-        I = STARTOFHIER->get_I();
-        
-//        printf( "%4.4x ", cy );
-        printf( "%8.8x ", getebr(tb, regttime ) );
-//        printf( "%2.2x ", minx );
-//        printf( "%8.8" PRIx64 " ", STARTOFHIER->inst_ucode->get_sa() & 0x1FFFffff);
-//        printf( "%8.8x ", I  );
-//        printfdecodeinstr( I );
-        uint32_t pc = getebr(tb, regPC);
-        printf( "%8.8x ", pc );
-        printf( "%3.3x ", STARTOFHIER->get_Rai() );
-        printf( "%d %d%d ",
-                (int)(STARTOFHIER->get_sa() & 1),
-                STARTOFHIER->get_SRAM_IO_rack(),
-                STARTOFHIER->inst_the_rack->get_EBRreadack() );
-
-        printf( "%d%d ",
-                STARTOFHIER->get_sram_we(),
-                STARTOFHIER->get_writeIO() );
-
-        int e = STARTOFHIER->get_emask();
-        printf( "%d%d%d%d ", ((e>>3)&1),((e>>2)&1),((e>>1)&1),((e>>0)&1) );
-        
-        printf( ".%d ",
-//                STARTOFHIER->get_sram_we(),
-                STARTOFHIER->get_IO_wack() );
-
-        
-        
-        if ( STARTOFHIER->get_iwe() ) {
-                printf( "%3.3x ", STARTOFHIER->get_Wai() );
-        } else {
-                printf( "    " );
-        }
-
-        
-        printf( "%8.8x ", STARTOFHIER->get_DAT_O() );
-        printf( "%8.8x ", STARTOFHIER->inst_inputmux->get_rDee() );
-        printf( "%8.8x ", STARTOFHIER->get_Di() );
-
-        printf( "%d%d ", STARTOFHIER->get_enaQ(),
-                (int)(STARTOFHIER->inst_ucode->get_sa() >> 8) & 1 );
-        
-        printf( "%8.8x ", STARTOFHIER->get_IOA() );
-        printf( "%8.8x ", STARTOFHIER->get_B() );
-        printf( "%d",     STARTOFHIER->get_alu_carryout() );
-        printf( "%d ",    STARTOFHIER->get_rzcy32() );
-        printf( "%2.2x ", STARTOFHIER->inst_ucodepc->get_dinx() );
-        //printf( "%x ",    STARTOFHIER->inst_ucodepc->get_branchvariables() );
-        printf( "%2.2x ", STARTOFHIER->inst_shiftcounter->get_shiftcnt() );
-        int a = STARTOFHIER->get_progress_ucode_etc();
-        printf( "%d%d%d%d ", ((a>>3)&1),((a>>2)&1),((a>>1)&1),((a>>0)&1) );
-        int progress_ucpde = (a>>3) & 1;
-        
-//        printf( "%8.8x ", STARTOFHIER->get_QQ() );
-//        printf( "%8.8x ", getebr(tb, regttime) );
-
-        uint32_t b = STARTOFHIER->inst_other->get_enaQ_packet();
-        printf( "%d%d%d%d%d ", ((b>>4) & 1),((b>>3) & 1),((b>>2) & 1),((b>>1) & 1),((b>>0) & 1) );
-
-//        uint32_t sra_msb = STARTOFHIER->get_sra_msb();
-//        uint32_t FUNC7_5 = STARTOFHIER->get_FUNC7_5();
-//        printf( "sra_msb=%d FUNC7_5 = %d ", sra_msb, FUNC7_5 );
-
-        
-        static int klugeminx;
-
-        if ( progress_ucpde )
-                klugeminx = minx;
-        printf( "%-55s", ucodetxt[klugeminx] );
-
-        if ( STARTOFHIER->inst_ucodepc->get_usedinx() )
-                pocketdissass( pc, I );
-        
-        printf( "\n" );
-}        
-#endif                
 
 
 /////////////////////////////////////////////////////////////////////////////

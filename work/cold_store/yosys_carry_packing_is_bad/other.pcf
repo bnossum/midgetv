@@ -1,0 +1,12 @@
+#
+# Fake placement for a compilation
+#
+set_io --warn-no-port PIN[1] 1
+set_io --warn-no-port PIN[2] 2
+set_io --warn-no-port PIN[3] 3
+set_io --warn-no-port PIN[4] 4
+set_io --warn-no-port PIN[5] 12
+set_io --warn-no-port PIN_24 7
+set_io --warn-no-port PIN_22 8
+set_io --warn-no-port PIN_13 9
+set_io --warn-no-port CLK    10

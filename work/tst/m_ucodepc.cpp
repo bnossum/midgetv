@@ -60,7 +60,7 @@ int main(int argc, char **argv) {
         tb->is_brcond   = 0;
         tb->rinx        = 0;
         
-        tb->sa28  = 1; // Usedinx. This is OpCode fetch
+//        tb->usedinx  = 1; // Usedinx. This is OpCode fetch
         tb->sa29  = 0; // Adr0Mustbe0
         tb->sa30  = 0; // Adr1Mustbe0
         tb->sa37  = 0; // use_brcond

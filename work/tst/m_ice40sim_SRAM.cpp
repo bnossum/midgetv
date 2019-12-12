@@ -399,13 +399,14 @@ void simprintf( uint32_t cy, Vm_ice40sim_SRAM *tb ) {
         g_info.clearQ         = STARTOFHIER->get_clearQ();
         g_info.wai            = STARTOFHIER->get_Wai();
         g_info.iwe            = STARTOFHIER->get_iwe();
-        g_info.theio          = STARTOFHIER->get_theio();
+//        g_info.theio          = STARTOFHIER->get_theio(); Now removed  
         g_info.Dsram          = STARTOFHIER->get_Dsram();
         g_info.rDee           = STARTOFHIER->get_rDee();
         g_info.DAT_O          = STARTOFHIER->get_DAT_O();
         g_info.Di             = STARTOFHIER->get_Di();
         g_info.aluop          = STARTOFHIER->get_ALUOP();
         g_info.corerunning    = STARTOFHIER->get_corerunning();
+//        g_info.M              = STARTOFHIER->get_M();
         common_simprintf( &g_info, cy );
 }
 

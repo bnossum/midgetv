@@ -17,10 +17,11 @@
 #
 
 TARGETSEBR  := \
-	t301
+	t301 t302 t303 t304 t305 t306 t307
 
-TARGETSSRAM := \
-	t301
+TARGETSSRAM := 
+
+# t301 t302 t303 t304
 
 OBJDIREBR := ../../obj_dir/third
 OBJDIRSRAM := ../../obj_dir/sthird
@@ -47,10 +48,10 @@ LSTTARGETSSRAM := $(foreach i,$(TARGETSSRAM),$(OBJDIRSRAM)/$(i).lst)
 RESULTSSRAM    := $(foreach i,$(TARGETSSRAM),$(OBJDIRSRAM)/$(i).result.txt)
 
 
-all: ../../obj_dir/results.txt $(BINTARGETSEBR) $(BINTARGETSSRAM) \
+all: ../../obj_dir/results3.txt $(BINTARGETSEBR) $(BINTARGETSSRAM) \
 	$(LSTTARGETSEBR) $(LSTTARGETSSRAM) 
 
-../../obj_dir/results.txt: $(RESULTSEBR) $(RESULTSSRAM)
+../../obj_dir/results3.txt: $(RESULTSEBR) $(RESULTSSRAM)
 	cat $(RESULTSEBR) $(RESULTSSRAM) > $@
 
 # When compiling
@@ -104,7 +105,7 @@ $(OBJDIRSRAM):
 	mkdir -p $(OBJDIRSRAM)
 
 clean: 
-	rm ../../obj_dir/results.txt $(LSTTARGETSEBR) $(LSTTARGETSSRAM) \
+	rm ../../obj_dir/results3.txt $(LSTTARGETSEBR) $(LSTTARGETSSRAM) \
 	$(RESULTSEBR) $(RESULTSSRAM) \
 	$(OBJDIREBR)/*bin $(OBJDIRSRAM)/*bin \
 	$(OBJDIREBR)/*out.map 

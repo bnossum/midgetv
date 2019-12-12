@@ -51,11 +51,13 @@ OBJDIRSRAM := ../../obj_dir/sfirst
 #
 # Midget with no SRAM, 8k EBR, etc.
 # 
+#MIDGETVICE40EBR = ../../tmp/m_ice40sim_EBRonly.bin
 MIDGETVICE40EBR = ../../bin/m_ice40sim_EBRonly.bin
 
 #
 # Midget with 64k sram, 1k EBR, etc
 #
+#MIDGETVICE40SRAM = ../../tmp/m_ice40sim_SRAM.bin
 MIDGETVICE40SRAM = ../../bin/m_ice40sim_SRAM.bin
 
 
