@@ -77,23 +77,23 @@
  * we only need to decode on INSTR[6] in addition to FUNC3
  * 
  * INSTR[6]                  pre_cmb_aluF
- * | FUNC3 Opcodes           | cmb_aluF (register in raluF)                      is_brcond      
- * 0 000   MUL                 x                                                 ~rzcy32        
- * 0 001   MULH                x                                                 rzcy32         
- * 0 010   MULHSU SLT  SLTI  0  (Di[31]&QQ[31]) | ((Di[31]^QQ[31])&~alu_carryout  x              
- * 0 011   MULHU  SLTU SLTUI 1 ~alu_carryout                                     x              
- * 0 100   DIV               1 ~alu_carryout                                     x
- * 0 101   DIVU              1 ~alu_carryout                                     x
- * 0 110   REM               1 ~alu_carryout                                     raluF          
- * 0 111   REMU              1 ~alu_carryout                                     ~raluF         
- * 1 000   BEQ                 x                                                 ~rzcy32        
- * 1 001   BNE                 x                                                 rzcy32         
- * 1 010   x                   x                                                 x
- * 1 011   x                   x                                                 x
- * 1 100   BLT               0 (Di[31]&QQ[31]) | ((Di[31]^QQ[31])&~alu_carryout  raluF          
- * 1 101   BGE               0 (Di[31]&QQ[31]) | ((Di[31]^QQ[31])&~alu_carryout  ~raluF         
- * 1 110   BLTU              1 ~alu_carryout                                     raluF          
- * 1 111   BGEU              1 ~alu_carryout                                     ~raluF         
+ * | FUNC3 Opcodes           | cmb_aluF (register in raluF)                       is_brcond      
+ * 0 000   MUL                 x                                                  ~rzcy32        
+ * 0 001   MULH                x                                                  rzcy32         
+ * 0 010   MULHSU SLT  SLTI  0  (Di[31]&QQ[31]) | ((Di[31]^QQ[31])&~alu_carryout)  x              
+ * 0 011   MULHU  SLTU SLTUI 1 ~alu_carryout                                      x              
+ * 0 100   DIV               1 ~alu_carryout                                      x
+ * 0 101   DIVU              1 ~alu_carryout                                      x
+ * 0 110   REM               1 ~alu_carryout                                      raluF          
+ * 0 111   REMU              1 ~alu_carryout                                      ~raluF         
+ * 1 000   BEQ                 x                                                  ~rzcy32        
+ * 1 001   BNE                 x                                                  rzcy32         
+ * 1 010   x                   x                                                  x
+ * 1 011   x                   x                                                  x
+ * 1 100   BLT               0 (Di[31]&QQ[31]) | ((Di[31]^QQ[31])&~alu_carryout)  raluF          
+ * 1 101   BGE               0 (Di[31]&QQ[31]) | ((Di[31]^QQ[31])&~alu_carryout)  ~raluF         
+ * 1 110   BLTU              1 ~alu_carryout                                      raluF          
+ * 1 111   BGEU              1 ~alu_carryout                                      ~raluF         
  * 
  * 
  */
