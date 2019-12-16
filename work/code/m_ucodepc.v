@@ -54,7 +54,7 @@
  *                2 : Near minimal decode of riscv instructions. Not recommended
  */
 module m_ucodepc
-  # ( parameter LAZY_DECODE = 1, MULDIV = 1 )
+  # ( parameter LAZY_DECODE = 0, MULDIV = 1 )
   (
    input        corerunning, //         Control startup
    input [7:0]  rinx, //                From ucode
