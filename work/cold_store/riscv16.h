@@ -153,7 +153,8 @@ r15 = x7
   10001dddtttsss01        sll   rd,rt,rs     (a)  
   10001dddtttsss10        srl   rd,rt,rs     (a)  
   10001dddtttsss11        sra   rd,rt,rs     (a)
-  10010xxxxxxxxxxx
+  10010ttddssxxxxx        pfxa  in front of (a). Extends register specifications.
+  10010ttddkkkkkkk        in front of (k)        Extends register specification and constant.
   10011dddtttkkkkk        addi  rd,rt,k      (k)  
   10100dddtttkkkkk        xori  rd,rt,k      (k)  
   10101dddtttkkkkk        ori   rd,rt,k      (k)  
@@ -178,7 +179,6 @@ r15 = x7
   0100Kdddkkkkkkkk        jal   rd,k         (k)
   0101dkkkkkkkkkkk        auipc in front of (k). Extend constant. PC also added. s == 1
   011tdkkkkkkkkkkk        pfxk  in front of (k). Extends constant, extend register spec.
-  011tds.........0        pfxf  in front of (a). Extends register spec
   
           mul                                           
           mulh                                
