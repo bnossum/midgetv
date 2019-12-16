@@ -2,12 +2,14 @@
 #include "Vhumansized_muldiv.h"
 #include "verilated.h"
 
-#define W 8     // *Must* match definition in humansized_muldiv.v
+#define W 4     // *Must* match definition in humansized_muldiv.v
 #define STEP 1  // Set higher if W big (>12)
 
 #define ferr(...) exit(fprintf(stdout,"%s:%d:",__FILE__,__LINE__)+fprintf(stdout,__VA_ARGS__))
 #define PRI(...) 
 //#define PRI(...) printf( __VA_ARGS__ )
+
+int g_dbg_decimal = 1;
 
 
 #define WMASK ((1ll<<(W))-1)
@@ -33,6 +35,15 @@ enum {
 };
 
 
+/////////////////////////////////////////////////////////////////////////////
+const char *opstr[5] =
+{
+        "MULHU  ",
+        "MULHSU ",
+        "MULH   ",
+        "DIVU   ",
+        "DIV    ",
+};
 
 
 
@@ -87,22 +98,15 @@ void test_div( Vhumansized_muldiv *tb, int operation, const char *msg ) {
 
         for ( aa = 0; aa <= WMASK; aa += STEP ) {
                 //fprintf( stderr, "." );
-                if ( operation == OP_DIVU ) {
-                        a = aa;
-                } else {
-                        a = theabs(aa);
-                }
+                a = ( operation == OP_DIVU ) ? aa : theabs(aa);
                 
                 for ( bb = 0; bb <= WMASK; bb += STEP ) {
 
                         //
                         // Setting up
                         //
-                        if ( operation == OP_DIVU ) {
-                                b = bb;
-                        } else {
-                                b = theabs(bb);
-                        }
+                        b = ( operation == OP_DIVU ) ? bb :theabs(bb);
+
                         uint32_t invb = b^WMASK;                        
                         initregs( tb, a );
 
@@ -136,11 +140,7 @@ void test_div( Vhumansized_muldiv *tb, int operation, const char *msg ) {
                         //
                         switch ( operation ) {
                         case OP_DIVU  :
-                                if ( b == 0 ) {
-                                        facitA = WMASK;
-                                } else {
-                                        facitA = aa/bb;
-                                }
+                                facitA = ( b == 0 ) ? WMASK : aa/bb;
                                 facit_MOD = a - b * facitA;
                                 facit_MOD &= WMASK;
                                 break;
@@ -176,6 +176,53 @@ void test_div( Vhumansized_muldiv *tb, int operation, const char *msg ) {
                                 PRI( "facitA = 0x%x\n", facitA );
                                 ferr( "calcM = 0x%d, facit_MOD=0x%x\n", calcM, facit_MOD );                                
                         }
+
+
+                        // Display for the smallest good case:
+                        if ( W == 4 ) {
+                                int j;
+                                if ( a == 0 && b == 0 ) {
+                                        printf( "%s", opstr[operation] );
+                                        for ( j = 0; j < 16; j++ ) {
+                                                if ( g_dbg_decimal ) {
+                                                        if ( operation == OP_DIVU ) {
+                                                                printf( "  %3d ", j );
+                                                        } else {
+                                                                printf( "  %3d ", (int)sext(4,j) );
+                                                        }
+                                                } else {
+                                                        printf( " 0x%x  ", j );
+                                                }
+                                        }                                        
+                                        printf( "\n------" );
+                                        for ( j = 0; j < 16; j++ ) 
+                                                printf( "------" );
+                                        printf( "\n" );
+                                }
+                                if ( b == 0 ) {
+                                        if ( g_dbg_decimal ) {
+                                                if ( operation == OP_DIVU ) {
+                                                        printf( " %3d | ", (int) aa );
+                                                } else {
+                                                        printf( " %3d | ", (int)sext(4,aa) );
+                                                }
+                                        } else {
+                                                printf( "0x%x | ", (int) aa );
+                                        }
+                                }
+                                if ( g_dbg_decimal ) {
+                                        if ( operation == OP_DIVU ) {
+                                                printf( "%2d.%2d ", (int) facitA, (int) facit_MOD);
+                                        } else {
+                                                printf( "%2d.%2d ", (int)sext(4,facitA), (int)sext(4,facit_MOD) );
+                                        }
+                                } else {
+                                        printf( "  %1.1x.%1.1x ", (int) facitA, (int) facit_MOD);
+                                }
+                                if ( bb == 15 )
+                                        printf( "\n" );
+                        }
+                        
                 }
         }
         printf( "%s", msg );
@@ -259,6 +306,51 @@ void test_mul( Vhumansized_muldiv *tb, int operation, const char *msg ) {
                                 PRI( "a=0x%x b=0x%x  PM=0x%x facit=0x%x\n", a, b, tb->PM, facit );
                                 ferr( "Error\n" );
                         }
+
+                        // Display for the smallest good case:
+                        if ( W == 4 ) {
+                                int j;
+                                if ( a == 0 && b == 0 ) {
+                                        printf( "%s", opstr[operation] );
+                                        for ( j = 0; j < 16; j++ ) {
+                                                if ( g_dbg_decimal ) {
+                                                        if ( operation == OP_MULHU ) {
+                                                                printf( "  %3d ", j );
+                                                        } else {
+                                                                printf( "  %3d ", (int)sext(4,j) );
+                                                        }
+                                                } else {
+                                                        printf( " 0x%x  ", j );
+                                                }
+                                        }                                        
+                                        printf( "\n------" );
+                                        for ( j = 0; j < 16; j++ ) 
+                                                printf( "------" );
+                                        printf( "\n" );
+                                }
+                                if ( b == 0 ) {
+                                        if ( g_dbg_decimal ) {
+                                                if ( operation != OP_MULH ) {
+                                                        printf( " %3d | ", (int) a );
+                                                } else {
+                                                        printf( " %3d | ", (int)sext(4,a) );
+                                                }
+                                        } else {
+                                                printf( "0x%x | ", (int) a );
+                                        }
+                                }
+                                if ( g_dbg_decimal ) {
+                                        if ( operation == OP_MULHU ) {
+                                                printf( " %4d ", (int) facit);
+                                        } else {
+                                                printf( " %4d ", (int)sext(8,facit));
+                                        }
+                                } else {
+                                        printf( " 0x%2.2x ", (int) facit);
+                                }
+                                if ( b == 15 )
+                                        printf( "\n" );
+                        }
                 }
         }
         printf( "%s", msg );
@@ -273,9 +365,9 @@ int main(int argc, char **argv) {
 
         printf( "Calculate for W = %d\n", W );
         test_mul(tb, OP_MULHU,  "MUL u * u OK\n" );
-        test_mul(tb, OP_MULHSU, "MUL u * s OK\n" );
-        test_mul(tb, OP_MULH,   "MUL s * s OK\n" );
-        test_div(tb, OP_DIVU,   "DIV u/u and REM u/u OK\n" );
+        test_mul(tb, OP_MULHSU, "MULHSU u * s OK\n" );
+        test_mul(tb, OP_MULH,   "MULH s * s OK\n" );
+        test_div(tb, OP_DIVU,   "DIVU u/u and REM u/u OK\n" );
         test_div(tb, OP_DIV,    "DIV s/s and REM s/s OK\n" );
         
         exit(EXIT_SUCCESS);

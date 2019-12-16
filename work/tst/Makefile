@@ -23,7 +23,8 @@ VERILATORFLAGS = -Wall -v m_ice_shortcuts.v $(VERILATORINCLUDES) -Mdir $(OBJDIR)
 
 MY = m_ice40sim_EBRonly m_ice40sim_SRAM \
 	m_ucodepc \
-	m_alu_carryin m_alu m_cyclecnt m_shiftcounter 
+	m_alu_carryin m_alu m_cyclecnt m_shiftcounter \
+	humansized_muldiv
 
 #m_ice40sim_SRAM4_EBR16  \
 #	m_ucodepc m_alu

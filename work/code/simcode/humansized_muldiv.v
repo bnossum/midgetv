@@ -5,7 +5,7 @@
 /* verilator lint_off DECLFILENAME */
 /* verilator lint_off WIDTH */
 module humansized_muldiv
-  # ( parameter W = 8,
+  # ( parameter W = 4,
       HIGHLEVEL = 1
       )
    (

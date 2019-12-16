@@ -12,3 +12,5 @@ rm m_ucodepc.bin
 rm simeratosthenes
 rm simmorse
 rm ucodeinitval.hv
+rm midgetv_prepare_defines
+rm humansized_muldiv.bin

@@ -13,8 +13,8 @@ IPGeneration=false
 
 [iCEcube2_flow_Implmnt]
 DeviceFamily=iCE40
-Device=HX1K
-DevicePackage=VQ100
+Device=LP8K
+DevicePackage=CM121
 DevicePower=
 NetlistFile=iCEcube2_flow_Implmnt/iCEcube2_flow.edf
 AdditionalEDIFFile=
@@ -36,7 +36,7 @@ TypicalCustomTemperature=25
 WorstCustomTemperature=85
 BestCustomTemperature=0
 IOBankVoltages=topBank,2.5 bottomBank,2.5 leftBank,2.5 rightBank,2.5
-derValue=0.701346
+derValue=1.03369
 TimingPathNumberStick=0
 
 [lse options]
