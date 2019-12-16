@@ -64,6 +64,16 @@ NO_CYCLECNT_eq_0_RINST_SRAM:
         simerr 16
 
 NO_CYCLECNT_eq_0_NO_RINST_SRAM:
+        // We have a cycle counter
+        // We have no instruction counter
+        //
+        // addi : 4 + 2 (SRAM OpCode read)
+        // lw   : 5 + 2 (SRAM OpCode read) + 0 (data in EBR)
+        // fudge: 1
+        //
+        //            nop    nop   lw   fudge
+        addi   x1,x21,(4+2)+(4+2)+(5+2)+1
+        beq     x1,x23,Success
         simerr 13
 
 NO_CYCLECNT_eq_0_NO_RINST_EBR:

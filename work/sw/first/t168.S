@@ -62,6 +62,12 @@ InternalISR:
 #endif
         .section .text
 _start:
+        // Check that we have minstret
+        lw      x10,%lo(__read_minstreth)(x0)
+        lw      x11,%lo(__read_minstreth)(x0)
+        addi    x10,x10,1
+        bne     x10,x11,Done
+        
         li      x31,0xbabe
         la      x1,StartTrap            // Initiate mtvec
         sw      x1,%lo(__mtvec)(x0)
@@ -86,6 +92,7 @@ L:      lw      x10,%lo(__read_minstreth)(x0)
         lw      x1,0(x1)
         andi    x1,x1,0x80
         beq     x1,x0,8f
+Done:   
         simend
 
 8:      simerr  8

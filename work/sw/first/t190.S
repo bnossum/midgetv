@@ -36,6 +36,18 @@ _start:
         add     x1,x1,1
         beq     x1,x2,NO_CYCLECNT_eq_1
         
+
+        // Do we have a retired instruction counter?
+        // If so, the limit we reach before bus-error changes with 1
+        li      x21,0x100               // Compensate limit
+        li      x22,0x1                 // Compensate limit
+        lw      x11,%lo(__rinst)(x0)
+        lw      x12,%lo(__rinst)(x0)
+        beq     x11,x12,has_no_rinst
+        li      x21,0
+        li      x22,0
+has_no_rinst:   
+        
         la      x1,StartTrap
         sw      x1,%lo(__mtvec)(x0)   
         li      x3,IOREGION
@@ -44,7 +56,8 @@ _start:
         # Test lw from an input register with steadily increasing read latency
         #
         li      x1,0x3a00               // 
-        li      x5,0x3b00               // What last written to DYNWISHREG        
+        li      x5,0x3b00               // What last written to DYNWISHREG
+        add     x5,x5,x21
         la      x6,Err_Test_LW          // Where to continue in case of unexpected result
         la      x7,Test_LH              // Where to continue after expected exception
 Test_LW:   
@@ -61,7 +74,7 @@ Test_LH:
 Test_LH_Loop:   
         li      x1,0x3a00               // Latency start value
         li      x5,0x3b00               // What last written to DYNWISHREG
-        
+        add     x5,x5,x21        
         la      x6,Err_Test_LH          // Where to continue in case of unexpected exception
         la      x7,InTest_LH            // Where to continue after expected exception
 Test_LH2:   
@@ -83,6 +96,7 @@ Test_LHU:
 Test_LHU_Loop:   
         li      x1,0x3a00               // Latency start value
         li      x5,0x3b00               // What last written to DYNWISHREG
+        add     x5,x5,x21
         la      x6,Err_Test_LHU         // Where to continue in case of unexpected exception
         la      x7,InTest_LHU           // Where to continue after expected exception
 Test_LHU2:   
@@ -106,6 +120,7 @@ Test_LB:
 Test_LB_Loop:   
         li      x1,0x3a00               // Latency start value
         li      x5,0x3b00               // What last written to DYNWISHREG
+        add     x5,x5,x21
         la      x6,Err_Test_LB          // Where to continue in case of unexpected exception
         la      x7,InTest_LB            // Where to continue after expected exception
 Test_LB2:   
@@ -127,6 +142,7 @@ Test_LBU:
 Test_LBU_Loop:   
         li      x1,0x3a00               // Latency start value
         li      x5,0x3b00               // What last written to DYNWISHREG
+        add     x5,x5,x21
         la      x6,Err_Test_LBU         // Where to continue in case of unexpected exception
         la      x7,InTest_LBU           // Where to continue after expected exception
 Test_LBU2:   
@@ -147,6 +163,7 @@ Test_SW:
         #
         li      x1,0x38
         li      x5,0x3b                 // What last written to DYNWISHREG
+        add     x5,x5,x22
         la      x6,Err_Test_SW          // Where to continue in case of unexpected result
         la      x7,Test_SHe             // Where to continue after expected exception
 Test_SW2:   
@@ -161,6 +178,7 @@ Test_SHe:
         #
         li      x1,0x34
         li      x5,0x37                 // What last written to DYNWISHREG
+        add     x5,x5,x22
         la      x6,Err_Test_SHe         // Where to continue in case of unexpected result
         la      x7,Test_SHo             // Where to continue after expected exception
 Test_SHe2:   
@@ -175,6 +193,7 @@ Test_SHo:
         #
         li      x1,0x27
         li      x5,0x28                 // What last written to DYNWISHREG
+        add     x5,x5,x22
         la      x6,Err_Test_SHo         // Where to continue in case of unexpected result
         la      x7,Test_SB00            // Where to continue after expected exception
 Test_SHo2:   
@@ -189,6 +208,7 @@ Test_SB00:
         #
         li      x1,0x36
         li      x5,0x37                 // What last written to DYNWISHREG
+        add     x5,x5,x22
         la      x6,Err_Test_SB00        // Where to continue in case of unexpected result
         la      x7,Test_SB01            // Where to continue after expected exception
 Test_SB00_2:   
@@ -203,6 +223,7 @@ Test_SB01:
         #
         li      x1,0x2e
         li      x5,0x30                 // What last written to DYNWISHREG
+        add     x5,x5,x22
         la      x6,Err_Test_SB01        // Where to continue in case of unexpected result
         la      x7,Test_SB10            // Where to continue after expected exception
 Test_SB01_2:   
@@ -217,6 +238,7 @@ Test_SB10:
         #
         li      x1,0x26
         li      x5,0x28                 // What last written to DYNWISHREG
+        add     x5,x5,x22
         la      x6,Err_Test_SB10        // Where to continue in case of unexpected result
         la      x7,Test_SB11            // Where to continue after expected exception
 Test_SB10_2:   
@@ -231,6 +253,7 @@ Test_SB11:
         #
         li      x1,0x1e
         li      x5,0x20                 // What last written to DYNWISHREG
+        add     x5,x5,x22
         la      x6,Err_Test_SB11        // Where to continue in case of unexpected result
         la      x7,AllTestsDone         // Where to continue after expected exception
 Test_SB11_2:   

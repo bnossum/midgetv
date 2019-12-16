@@ -113,7 +113,7 @@ $(OBJDIREBR)/%.result.txt: $(OBJDIREBR)/%.bin
 	$(MIDGETVICE40EBR) -c 0x1000 -s  -l $@ -i $<
 
 $(OBJDIRSRAM)/%.result.txt: $(OBJDIRSRAM)/%.bin
-	$(MIDGETVICE40SRAM) -c 0x2000 -s  -l $@ -i $<
+	$(MIDGETVICE40SRAM) -c 0x2300 -s  -l $@ -i $<
 
 
 $(BINTARGETSEBR): | $(OBJDIREBR)
