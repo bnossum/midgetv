@@ -54,7 +54,6 @@ module top
       IWIDTH             = 1, 
       NO_CYCLECNT        = 0, 
       MTIMETAP           = 0, 
-      HIGHLEVEL          = 0,
       LAZY_DECODE        = 2,
       DISREGARD_WB4_3_55 = 1,
       MULDIV             = 0
@@ -108,8 +107,17 @@ module top
 
 
    /* The program to include is usually specified in a Makefile. It is 
-      irrelevant during simulation, because then the simulator write 
-      the program to simulate.
+    * irrelevant during simulation, because then the simulator write 
+    * the program to simulate.
+    *
+    * Below, note that the HIGHLEVEL parameter is not specified.
+    * We go with the selection of m_midgetv_core.
+    *                        LP8K   HX1K  UP5K
+    * HIGHLEVEL   SB_LUTS    FRQ    FRQ   FRQ
+    * 0           266        50     71    33
+    *                               74         Medium placement effort
+    *                               71         High placement effort
+    * 1           428        41     ?     27
     */
 `ifndef defaulticeprog 
  `define defaulticeprog "ice40loaderprog.hv" 
@@ -123,7 +131,6 @@ module top
        .IWIDTH             ( IWIDTH             ),
        .NO_CYCLECNT        ( NO_CYCLECNT        ),
        .MTIMETAP           ( MTIMETAP           ),
-       .HIGHLEVEL          ( HIGHLEVEL          ),
        .LAZY_DECODE        ( LAZY_DECODE        ),
        .DISREGARD_WB4_3_55 ( DISREGARD_WB4_3_55 ),
        .MULDIV             ( MULDIV             ),
