@@ -18,6 +18,8 @@
         # If midgetv is compiled with LAZY_DECODE == 0 we should have no illegal
         # instructions. If LAZY_DECODE == 1 we should have 13 illegal instructions.
         #
+        # This program should be amended when MULDIV is implemented
+        #
         # =============================================================================
 #include "midgetv.inc"
         .globl _start
