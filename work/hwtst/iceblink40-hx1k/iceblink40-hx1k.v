@@ -55,9 +55,9 @@ module top
       NO_CYCLECNT        = 0, 
       MTIMETAP           = 0, 
       HIGHLEVEL          = 0,
-      LAZY_DECODE        = 1,
+      LAZY_DECODE        = 2,
       DISREGARD_WB4_3_55 = 1,
-      MULDIV             = 1
+      MULDIV             = 0
       )
    (
     input      CLK_I,
