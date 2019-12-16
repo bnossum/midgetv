@@ -16,7 +16,7 @@ module m_3ebr
    output [47:0] d
    );
    
-`include "../bin/ucodeinitval.hv"
+`include "../generated/ucodeinitval.hv"
 
    generate
       if ( EXPERIMENT_AVOID_EBR != 1 ) begin

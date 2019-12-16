@@ -7,39 +7,41 @@
 #       rather than 3.
 #
 
-GEN_CODE_DIR := ../bin
-OBJ_DIR := ../obj_dir
+GEN_DIR := ../generated
+BIN_DIR := ../bin
 
-TRG := $(GEN_CODE_DIR)/ucodeinitval.hv ../obj_dir/m_2ebr.v
+TRG := $(GEN_DIR)/ucodeinitval.hv $(GEN_DIR)/m_2ebr.v $(GEN_DIR)/midgetv_ucodeoptions.hv
 
 all: $(TRG)
 
-$(OBJ_DIR)/m_2ebr.v:../bin/midgetv_indirectEBR ../code/ucode.h
-	../bin/midgetv_indirectEBR > $@
+$(GEN_DIR)/m_2ebr.v:$(BIN_DIR)/midgetv_indirectEBR ../code/ucode.h
+	$(BIN_DIR)/midgetv_indirectEBR > $@
 # 
 #
 # Not the most elegant - before making verilog localparams the utility must be
 # compiled. This rule is duplicated in the Makefile of the utilities.
 #
-../bin/midgetv_genucode:../util/midgetv_genucode.c ../code/ucode.h
+$(BIN_DIR)/midgetv_genucode:../util/midgetv_genucode.c ../code/ucode.h $(GEN_DIR)/midgetv_ucodeoptions.hv
 	gcc -Wall -Wextra -Dnakedfname=../code/ucode.h -o $@ $< 
 
-../bin/midgetv_indirectEBR:../util/midgetv_indirectEBR.c ../util/bnvector.c ../code/ucode.h
+$(BIN_DIR)/midgetv_indirectEBR:../util/midgetv_indirectEBR.c ../util/bnvector.c ../code/ucode.h $(GEN_DIR)/midgetv_ucodeoptions.hv
 	gcc -O3 -Wall -Wextra -Dnakedfname=../code/ucode.h -o $@ $< ../util/bnvector.c 
 
+$(GEN_DIR)/midgetv_ucodeoptions.hv: midgetv_ucodeoptions.h
+	$(BIN_DIR)/midgetv_prepare_defines < $< > $@ 
 
-$(GEN_CODE_DIR)/ucodeinitval.hv: ../bin/midgetv_genucode 
-	../bin/midgetv_genucode > $@
+$(GEN_DIR)/ucodeinitval.hv: $(BIN_DIR)/midgetv_genucode 
+	$(BIN_DIR)/midgetv_genucode > $@
 
-$(GEN_CODE_DIR)/ucodeinitval.hv: | $(GEN_CODE_DIR)
+$(GEN_DIR)/ucodeinitval.hv: | $(GEN_DIR)
 
-$(GEN_CODE_DIR):
-	mkdir -p $(GEN_CODE_DIR)
+$(GEN_DIR)/m_2ebr.v: | $(GEN_DIR)
 
-$(OBJ_DIR)/m_2ebr.v: | $(OBJ_DIR)
+$(GEN_DIR)/midgetv_ucodeoptions.hv: | $(GEN_DIR)
 
-$(OBJ_DIR):
-	mkdir -p $(OBJ_DIR)
+$(GEN_DIR):
+	mkdir -p $(GEN_DIR)
+
 
 clean:
 	rm $(TRG)

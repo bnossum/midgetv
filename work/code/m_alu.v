@@ -70,6 +70,8 @@
 
 module m_alu
   # ( parameter HIGHLEVEL = 0,
+      ucodeopt_HAS_MINSTRET = 0,
+      ucodeopt_HAS_EBR_MINSTRET = 0,
       MTIMETAP = 0,
 `ifdef verilator      
       ALUWIDTH = 8,
@@ -94,9 +96,11 @@ module m_alu
 
    if ( HIGHLEVEL ) begin
       m_alu_highlevel #
-        (.ALUWIDTH(        ALUWIDTH        ),
-         .MTIMETAP(        MTIMETAP        ),
-         .MTIMETAP_LOWLIM( MTIMETAP_LOWLIM )
+        (.ALUWIDTH(                  ALUWIDTH        ),
+         .ucodeopt_HAS_MINSTRET(     ucodeopt_HAS_MINSTRET     ),
+         .ucodeopt_HAS_EBR_MINSTRET( ucodeopt_HAS_EBR_MINSTRET ),
+         .MTIMETAP(                  MTIMETAP        ),
+         .MTIMETAP_LOWLIM(           MTIMETAP_LOWLIM )
          )
       inst
         (/*AUTOINST*/
@@ -119,6 +123,8 @@ module m_alu
    end else begin
       m_alu_lowlevel #
         (.ALUWIDTH(        ALUWIDTH        ),
+         .ucodeopt_HAS_MINSTRET(     ucodeopt_HAS_MINSTRET     ),
+         .ucodeopt_HAS_EBR_MINSTRET( ucodeopt_HAS_EBR_MINSTRET ),
          .MTIMETAP(        MTIMETAP        ),
          .MTIMETAP_LOWLIM( MTIMETAP_LOWLIM )
          )
@@ -149,6 +155,8 @@ endmodule
  */
 module m_alu_highlevel
   # ( parameter MTIMETAP = 0,
+      ucodeopt_HAS_MINSTRET = 0,
+      ucodeopt_HAS_EBR_MINSTRET = 0,
       ALUWIDTH = 8,
       MTIMETAP_LOWLIM = 32
       )
@@ -199,7 +207,9 @@ module m_alu_highlevel
    
    /* For retired instructions interrupt
     */
-   if (MTIMETAP < MTIMETAP_LOWLIM ) begin
+   if ( (MTIMETAP < MTIMETAP_LOWLIM) ||
+        (ucodeopt_HAS_MINSTRET == 0 && ucodeopt_HAS_EBR_MINSTRET == 0)        
+        )  begin
       assign alu_minstretofl = 1'b0; 
    end else begin
       wire isWrinst = {sa27,sa26,sa25,sa24} == 4'b1001;
@@ -211,6 +221,8 @@ endmodule
  */
 module m_alu_lowlevel
   # ( parameter MTIMETAP = 0,
+      ucodeopt_HAS_MINSTRET = 0,
+      ucodeopt_HAS_EBR_MINSTRET = 0,
       ALUWIDTH = 8,
       MTIMETAP_LOWLIM = 32
       )
@@ -261,7 +273,9 @@ module m_alu_lowlevel
     * See issue #13.
     */
    wire propcy;
-   if (MTIMETAP < MTIMETAP_LOWLIM  ) begin
+   if ( (MTIMETAP < MTIMETAP_LOWLIM) ||
+        (ucodeopt_HAS_MINSTRET == 0 && ucodeopt_HAS_EBR_MINSTRET == 0) 
+        ) begin
       assign propcy = alucy[ALUWIDTH];
       assign alu_minstretofl = 1'b0; // Keep Verilator happy
    end else begin

@@ -308,8 +308,11 @@ DAT_I[31:0] ------------|or|-|\   ___  rDee                      |
  *                                  RST_I         RST_I
  */
 
+`include "../generated/midgetv_ucodeoptions.hv"
 module m_midgetv_core
   # ( parameter 
+      ucodeopt_HAS_MINSTRET       = `ucodeopt_HAS_MINSTRET,
+      ucodeopt_HAS_EBR_MINSTRET   = `ucodeopt_HAS_EBR_MINSTRET,
       SRAMADRWIDTH       =  0,  
       EBRADRWIDTH        =  8, 
       IWIDTH             =  8, 
@@ -669,6 +672,8 @@ wire                 sa12_and_corerunning;   // From inst_alu_carryin of m_alu_c
       .s_alu_carryin                    (s_alu_carryin[1:0]));
 
    m_alu #(.HIGHLEVEL(       HIGHLEVEL       ), 
+           .ucodeopt_HAS_MINSTRET(     ucodeopt_HAS_MINSTRET     ),
+           .ucodeopt_HAS_EBR_MINSTRET( ucodeopt_HAS_EBR_MINSTRET ),
            .ALUWIDTH(        ALUWIDTH        ),
            .MTIMETAP(        MTIMETAP        ),
            .MTIMETAP_LOWLIM( MTIMETAP_LOWLIM )
@@ -975,7 +980,11 @@ wire                 sa12_and_corerunning;   // From inst_alu_carryin of m_alu_c
     */
    generate
       if ( MTIMETAP >= MTIMETAP_LOWLIM ) begin
-         m_status_and_interrupts  #(.HIGHLEVEL(HIGHLEVEL))
+         m_status_and_interrupts  
+           #(.HIGHLEVEL(HIGHLEVEL),
+             .ucodeopt_HAS_MINSTRET(     ucodeopt_HAS_MINSTRET     ),
+             .ucodeopt_HAS_EBR_MINSTRET( ucodeopt_HAS_EBR_MINSTRET )
+             )
          inst_status_and_interrupts
            (/*AUTOINST*/
             // Outputs

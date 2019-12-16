@@ -148,7 +148,10 @@
  * 
  */
 module m_status_and_interrupts
-  # ( parameter HIGHLEVEL = 1 )
+  # ( parameter HIGHLEVEL = 1,
+      ucodeopt_HAS_MINSTRET = 0,
+      ucodeopt_HAS_EBR_MINSTRET = 0      
+      )
    (
     /* verilator lint_off UNUSED */
     input        clk,
@@ -204,11 +207,17 @@ module m_status_and_interrupts
          /* minstrethip is set when the retired instruction counter overflows in 32 bits.
           * When user code write minstreth, minstretip is cleared
           */
-         reg        r_minstrethip;
-         wire       write_to_minstreth = ctrlreg_we & ADR_O[14];
-         wire       cmb_minstrethip = (alu_minstretofl | r_minstrethip ) & ~write_to_minstreth;
-         always @(posedge clk)         
-           r_minstrethip <= cmb_minstrethip;
+         wire       the_r_minstrethip;
+         if ( ucodeopt_HAS_EBR_MINSTRET || ucodeopt_HAS_EBR_MINSTRET ) begin
+            reg        r_minstrethip;
+            wire       write_to_minstreth = ctrlreg_we & ADR_O[14];
+            wire       cmb_minstrethip = (alu_minstretofl | r_minstrethip ) & ~write_to_minstreth;
+            always @(posedge clk)         
+              r_minstrethip <= cmb_minstrethip;
+            assign the_r_minstrethip = r_minstrethip;
+         end else begin
+            assign the_r_minstrethip = 1'b0;
+         end
          
          /* MTIP is set under software control, this should only be used
           * by the internal interrupt routine that increments {mtimeh,mtime}. 
@@ -333,7 +342,7 @@ module m_status_and_interrupts
           */
          // In register mip
          // -----------------------------------------
-         assign mrinstretip = r_minstrethip;
+         assign mrinstretip = the_r_minstrethip;
          assign mtimeincip  = r_mtimeincip;
          //     meip          comes from the outside
          assign mtip        = r_mtip;
@@ -375,9 +384,14 @@ module m_status_and_interrupts
 //         wire       cmb_minstrethip = (alu_minstretofl | r_minstrethip ) & ~write_to_minstreth;
 //         always @(posedge clk)         
 //           r_minstrethip <= cmb_minstrethip;
-         wire cmb_minstrethip,r_minstrethip;
-         SB_LUT4 #(.LUT_INIT(16'h0eee)) minstrethip_l( .O(cmb_minstrethip), .I3(ctrlreg_we), .I2(ADR_O[14]), .I1(r_minstrethip), .I0(alu_minstretofl));         
-         SB_DFF minstrethip_reg( .Q(r_minstrethip), .C(clk), .D(cmb_minstrethip) );
+         wire r_minstrethip;
+         if ( ucodeopt_HAS_EBR_MINSTRET || ucodeopt_HAS_EBR_MINSTRET ) begin
+            wire cmb_minstrethip;
+            SB_LUT4 #(.LUT_INIT(16'h0eee)) minstrethip_l( .O(cmb_minstrethip), .I3(ctrlreg_we), .I2(ADR_O[14]), .I1(r_minstrethip), .I0(alu_minstretofl));         
+            SB_DFF minstrethip_reg( .Q(r_minstrethip), .C(clk), .D(cmb_minstrethip) );
+         end else begin
+            assign r_minstrethip = 1'b0;
+         end
          
          /* MTIP is set under software control, this should only be used
           * by the internal interrupt routine that increments {mtimeh,mtime}. 

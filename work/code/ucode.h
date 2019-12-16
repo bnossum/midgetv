@@ -6,32 +6,9 @@
  * The microcode of midgetv.
  */
 
-/* According to riscv-spec-v2.2.pdf: In RV32 it is mandatory to maintain the 
- * 64-bit performance counters RDCYCLE, RDINSTRET. RDTIME is also mandatory. 
- * In midgetv, this is solved the following way:
- * mcycle is always present. 
- * mcycleh is incremented via an internal interrupt
- * mtime and mtimeh are maintained by an internal interrupt triggered by a 
- *   (selectable) prescale of mcycle. 
- * minstret is supported if the macros below evaluate true.
- * minstreth is incremented via an internal interrupt.
- *
- * When minstret is supported, each and every instructions use one more
- * cycle. I foresee that we can have these choices:
- *   HAS_MINSTRET
- *   |HAS_EBR_MINSTRET
- *   00  Do not count instructions
- *   01  Illegal
- *   10  Only count instructions executing from SRAM
- *   11  Count all instructions.
- *
- * However, the most tested configureation is with MINSTRET included.
- *
- */
-#define HAS_MINSTRET     1
-#define HAS_EBR_MINSTRET 1
+#include "midgetv_ucodeoptions.h"
 #if HAS_MINSTRET == 0 && HAS_EBR_MINSTRET == 1
-#error Can not do this, see above comment
+#error Can not do this, see comment in "midgetv_ucodeoptions.h"
 #endif
 
 /* Some analysis of microcode is done easier by
