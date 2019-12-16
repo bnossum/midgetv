@@ -328,7 +328,7 @@
 //efine _LDAF_3   LDAF_3,  "       PC to mepc",                                     
 //efine _JAL_3    JAL_3,   "       PC+imm/trap entrypt to PC. OpFetch",             
 
-#if HAS_MINSTRET == 0 && HAS_EBR_MINSTRET == 0
+#if   ucodeopt_HAS_MINSTRET == 0 && ucodeopt_HAS_EBR_MINSTRET == 0
 #define _StdIncPc StdIncPc," Fr00  IncPC, OpFetch",                                 nxtSTB       | A_add4    | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch)     // [1] Must be at even ucode adr. Goes to either Fetch or eFetch. 
 #define _Fetch    Fetch ,  " Fr00  Read and latch instruction",                     isr_none     | A_passd   | Wnn   | rttime    | Qz   | sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR
 #define _Fetch2   Fetch2,  " Fr00  Update ttime. Update I. Q=immediate. Use dinx",  isr_none     | A_cycnt   | Wttime| RS1       | Qudec| sr_h  | use_dinx                      
@@ -336,7 +336,7 @@
 #define _eFetch2  eFetch2, " Fr00  Not in use",                                     unx
 #define _eFetch3  eFetch3, " Fr00  Not in use",                                     unx
 
-#elif HAS_MINSTRET == 1 && HAS_EBR_MINSTRET == 0
+#elif ucodeopt_HAS_MINSTRET == 1 && ucodeopt_HAS_EBR_MINSTRET == 0
 #define _StdIncPc StdIncPc," Fr10  IncPC, OpFetch",                                 nxtSTB       | A_add4    | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch)     // [1] Must be at even ucode adr. Goes to either Fetch or eFetch. 
 #define _Fetch    Fetch ,  " Fr10  Read and latch instruction",                     isr_none     | A_passd   | Wnn   | rttime    | Qz   | sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR
 #define _Fetch2   Fetch2,  " Fr10  Update ttime. Update I. Q=immediate. Use dinx",  isr_none     | A_cycnt   | Wttime| RS1       | Qudec| sr_h  | use_dinx                      
@@ -344,7 +344,7 @@
 #define _eFetch2  eFetch2, " Fr10  Update ttime",                                   isr_none     | A_cycnt   | Wttime| Rrinst    | Qz   | sr_h  | u_cont         | n(eFetch3 )
 #define _eFetch3  eFetch3, " Fr10  Update minstret, Q=immediate. Use dinx",         isr_none     | A_add1    | Wrinst| RS1       | Qudec| sr_h  | use_dinx
 
-#elif HAS_MINSTRET == 1 && HAS_EBR_MINSTRET == 1
+#elif ucodeopt_HAS_MINSTRET == 1 && ucodeopt_HAS_EBR_MINSTRET == 1
 #define _StdIncPc StdIncPc," Fr11  IncPC, OpFetch",                                 nxtSTB       | A_add4    | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch   )  // [1] Must be at even ucode adr. Goes to either Fetch or eFetch. 
 #define _Fetch    Fetch ,  " Fr11  Read and latch instruction",                     isr_none     | A_passd   | Wnn   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR
 #define _Fetch2   Fetch2,  " Fr11  Update ttime. Update I. Q=immediate. Use dinx",  isr_none     | A_cycnt   | Wttime| Rrinst    | Qz   | sr_h  | u_cont         | n(eFetch3 )  // [5] Must be at even ucode adr. 
@@ -615,7 +615,17 @@
 //efine _MULH_2   MULH_2, "        Rest cycle",                                     isr_none     | A_xx      | Wnn   | Rjj       | Qz   | sr_h  | u_cont         | n(MULHSU_2) /* Must be even ucode adr */
 //efine _MULH_2b  MULH_2, "        Q = ~RS1",                                       isr_none     | A_nearXOR | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(MULH_3)   /* Must follow MULH_2 */  
 //efine _MULH_3   MULH_3, "        Store -rs1 to Rjj when rs2<0",                   isr_none     | A_add1    | Wjj   | r_xx      | Qx   | sr_h  | u_cont         | n(MULH_2)
-
+#if ucodeopt_MULDIV
+#else
+#define _MUL_0      _ILL_0(MUL_0)
+#define _MULH_0     _ILL_0(MULH_0)
+#define _MULHSU_0   _ILL_0(MULHSU_0)
+#define _MULHU_0    _ILL_0(MULHU_0)
+#define _DIV_0      _ILL_0(DIV_0)
+#define _DIVU_0     _ILL_0(DIVU_0)
+#define _REM_0      _ILL_0(REM_0)
+#define _REMU_0     _ILL_0(REMU_0)
+#endif
 
 
 
@@ -917,7 +927,7 @@
 /* 0a */Y( 1,     0 , _SB_0(_L0a)        , 1, 0x0000707f, 0x00000023, (1<<22)/2  ) // SB 2/2                  
 /* 0b */Y( 0,     0 , _LB_6              , 0, 0xffffffff, 0x00000000, 0          )                            
 /* 0c */Y( 1,     0 , _ADD_0             , 1, 0xfe00707f, 0x00000033, (1<<15)    ) // ADD                     
-/* 0d */Y( 1,     0 , _FENCE(MUL)        , 1, 0xfe00707f, 0x02000033, (1<<15)    ) // entrypoint for mul 
+/* 0d */Y( 1,     0 , _MUL_0             , 1, 0xfe00707f, 0x02000033, (1<<15)    ) // entrypoint for mul 
 /* 0e */Y( 1,     0 , _SUB_0             , 1, 0xfe00707f, 0x40000033, (1<<15)    ) // SUB                     
 /* 0f */Y( 1,     0 , _LUI_0(_L0f)       , 1, 0x0000007f, 0x00000037, (1<<25)/2  ) // LUI 1/2                 
 /* 10 */Y( 0,     0 , _SUB_1             , 0, 0xffffffff, 0x00000000, 0          ) //                         
@@ -949,7 +959,7 @@
 /* 2a */Y( 1,     0 , _SH_0(_L2a)        , 1, 0x0000707f, 0x00001023, (1<<22)/2  ) // SH 2/2                  
 /* 2b */Y( 0,     0 , _SLTIX_1           , 0, 0xffffffff, 0x00000000, 0          ) //                         
 /* 2c */Y( 1,     0 , _SLL_0             , 1, 0xfe00707f, 0x00001033, (1<<15)    ) // SLL                     
-/* 2d */Y( 1,     0 , _FENCE(MULU)       , 1, 0xfe00707f, 0x02001033, (1<<15)    ) // entrypoint for mulu                
+/* 2d */Y( 1,     0 , _MULH_0            , 1, 0xfe00707f, 0x02001033, (1<<15)    ) // entrypoint for mulh                
 /* 2e */Y( 0,     0 , _EBRKWFI2          , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1 
 /* 2f */Y( 1,     0 , _LUI_0(_L2f)       , 1, 0x0000007f, 0x00000037, (1<<25)/2  ) // LUI 2/2                 
 /* 30 */Y( 0,     0 , _SLTIX_2           , 0, 0xffffffff, 0x00000000, 0          ) //                         
@@ -981,7 +991,7 @@
 /* 4a */Y( 1,     0 , _SW_0(_L4a)        , 1, 0x0000707f, 0x00002023, (1<<22)/2  ) // SW 2/2
 /* 4b */Y( 0,     0 , _CSRRW_2           , 0, 0xffffffff, 0x00000000, 0          )
 /* 4c */Y( 1,     0 , _SLT_0             , 1, 0xfe00707f, 0x00002033, (1<<15)    ) // SLT
-/* 4d */Y( 1,     0 , _FENCE(MULSU)      , 1, 0xfe00707f, 0x02002033, (1<<15)    ) // entrypoint for mulhsu
+/* 4d */Y( 1,     0 , _MULHSU_0          , 1, 0xfe00707f, 0x02002033, (1<<15)    ) // entrypoint for mulhsu
 /* 4e */Y( 0,  0x07 , _eILL0b            , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1
 /* 4f */Y( 0,  0x07 , _MRET_8            , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1
 /* 50 */Y( 0,  0x03 , _LW_1              , 0, 0xffffffff, 0x00000000, 0          ) 
@@ -1013,7 +1023,7 @@
 /* 6a */Y( ILLV,  0 , _ILL_0(_L6a)       , 2, 0x00200000, 0x00000000, 0          ) // illegal
 /* 6b */Y( 0,     0 , _SB_4              , 0, 0xffffffff, 0x00000000, 0          )
 /* 6c */Y( 1,     0 , _SLTU_0            , 1, 0xfe00707f, 0x00003033, (1<<15)    ) // SLTU
-/* 6d */Y( 1,     0 , _FENCE(MULHU)      , 1, 0xfe00707f, 0x02003033, (1<<15)    ) // entrypoint for mulhu
+/* 6d */Y( 1,     0 , _MULHU_0           , 1, 0xfe00707f, 0x02003033, (1<<15)    ) // entrypoint for mulhu
 /* 6e */Y( 0,     0 , _LHU_3             , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1
 /* 6f */Y( 0,     0 , _MRET_6            , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1
 /* 70 */Y( 0,  0x09 , _LHU_2             , 0, 0xffffffff, 0x00000000, 0          )
@@ -1045,7 +1055,7 @@
 /* 8a */Y( ILLV,  0 , _ILL_0(_L8a)       , 2, 0x00200000, 0x00000000, 0          ) // illegal
 /* 8b */Y( 0,     0 , _ILL_5             , 0, 0xffffffff, 0x00000000, 0          ) // illegal
 /* 8c */Y( 1,     0 , _XOR_0             , 1, 0xfe00707f, 0x00004033, (1<<15)    ) // XOR
-/* 8d */Y( 1,     0 , _FENCE(DIV)        , 1, 0xfe00707f, 0x02004033, (1<<15)    ) // entrypoint for div
+/* 8d */Y( 1,     0 , _DIV_0             , 1, 0xfe00707f, 0x02004033, (1<<15)    ) // entrypoint for div
 /* 8e */Y( 0,     0 , _ILL_3             , 0, 0xffffffff, 0x00000000, 0          ) // illegal
 /* 8f */Y( 0,     0 , _aF_SW_3           , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1
 /* 90 */Y( 0,     0 , _NMI_2             , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1
@@ -1077,7 +1087,7 @@
 /* aa */Y( ILLV,  0 , _ILL_0(_Laa)       , 2, 0x00200000, 0x00000000, 0          ) // illegal
 /* ab */Y( 0,     0 , _EBREAK_2          , 0, 0xffffffff, 0x00000000, 0          )
 /* ac */Y( 1,     0 , _SRx_0(_Lac)       , 1, 0xfe00707f, 0x00005033, (1<<15)    ) // SRL
-/* ad */Y( 1,     0 , _FENCE(DIVU)       , 1, 0xfe00707f, 0x02005033, (1<<15)    ) // entrypoint for divu
+/* ad */Y( 1,     0 , _DIVU_0            , 1, 0xfe00707f, 0x02005033, (1<<15)    ) // entrypoint for divu
 /* ae */Y( 1,     0 , _SRx_0(_Lae)       , 1, 0xfe00707f, 0x40005033, (1<<15)    ) // SRA
 /* af */Y( 0,     0 , _MRET_4            , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1
 /* b0 */Y( 0,     0 , _CSRRW_3           , 0, 0xffffffff, 0x00000000, 0          )
@@ -1109,7 +1119,7 @@
 /* ca */Y( ILLV,  0 , _ILL_0(_Lca)       , 2, 0x00200000, 0x00000000, 0          ) // illegal
 /* cb */Y( 0,     0 , _QINT_2            , 0, 0xffffffff, 0x00000000, 0          )
 /* cc */Y( 1,     0 , _OR_0              , 1, 0xfe00707f, 0x00006033, (1<<15)    ) // OR
-/* cd */Y( 1,     0 , _FENCE(REM)        , 1, 0xfe00707f, 0x02006033, (1<<15)    ) // entrypoint for rem
+/* cd */Y( 1,     0 , _REM_0             , 1, 0xfe00707f, 0x02006033, (1<<15)    ) // entrypoint for rem
 /* ce */Y( 0,     0 , _ECALL_5           , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1
 /* cf */Y( 0,     0 , _MRET_7            , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1
 /* d0 */Y( 0,  0x0f , _ECALL_1           , 0, 0xffffffff, 0x00000000, 0          )
@@ -1141,7 +1151,7 @@
 /* ea */Y( ILLV,  0 , _ILL_0(_Lea)       , 2, 0x00200000, 0x00000000, 0          ) // illegal
 /* eb */Y( 0,     0 , _LH_3              , 0, 0xffffffff, 0x00000000, 0          )
 /* ec */Y( 1,     0 , _AND_0             , 1, 0xfe00707f, 0x00007033, (1<<15)    ) // AND
-/* ed */Y( 1,     0 , _FENCE(REMU)       , 1, 0xfe00707f, 0x02007033, (1<<15)    ) // entrypoint for "remu"
+/* ed */Y( 1,     0 , _REMU_0            , 1, 0xfe00707f, 0x02007033, (1<<15)    ) // entrypoint for "remu"
 /* ee */Y( 0,  0x13 , _eILL0a            , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1
 /* ef */Y( 0,  0x13 , _WFI_5             , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1
 /* f0 */Y( 0,  0x15 , _LBU_2             , 0, 0xffffffff, 0x00000000, 0          ) 

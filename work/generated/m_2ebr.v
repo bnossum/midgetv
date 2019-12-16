@@ -97,7 +97,7 @@ module m_2ebr
     * 0a _L0a     SB_1     0 2 010110100100111010101000| SB     Store byte. wjj=wradr=RS1+Simm
     * 0b LB_6     StdIncPc 3 3 111001100010001010111000|        WTRG=(D^0x80)+0xFFFFFF7F+1=(D^0x80)-0x80
     * 0c ADD_0    ADDI_0   3 2 000001001000111010100010| ADD    add     Addition Q = RS1
-    * 0d MUL      StdIncPc 3 2 1110011010000010x011xxx0| f      Prepare read PC (FENCE)
+    * 0d MUL_0    ILLe     3 2 111111101000xxxxx00xxxx0| Illegal instruction seen
     * 0e SUB_0    SUB_1    3 2 0001000010001110x011xxx0| SUB    Subtraction
     * 0f _L0f     StdIncPc 3 2 111001100010001010111100| LUI    q = imm20
     * 10 SUB_1    LB_6     3 2 000010111000111110100000|        Q = ~RS2
@@ -129,7 +129,7 @@ module m_2ebr
     * 2a _L2a     SH_1     9 2 100101100100111010101000| SH     Store halfword. jjw=wradr=RS1+Simm
     * 2b SLTIX_1  SLTIX_2  3 3 001100001000xxxx10111000|        RS1 - imm / RS1 - RS2
     * 2c SLL_0    SLL_1    3 2 0011111010001110x00xxxx0| SLL    Shift left
-    * 2d MULU     StdIncPc 3 2 1110011010000010x011xxx0| f      Prepare read PC (FENCE)
+    * 2d MULH_0   ILLe     3 2 111111101000xxxxx00xxxx0| Illegal instruction seen
     * 2e EBRKWFI2 EBREAK_1 4 2 111101110100011010110100| EBREAK/WFI2 Select EBREAK or WFI
     * 2f _L2f     StdIncPc 3 2 111001100010001010111100| LUI    q = imm20
     * 30 SLTIX_2  StdIncPc 3 6 111001100010001010111100|        Registered ALU flag to rd
@@ -161,7 +161,7 @@ module m_2ebr
     * 4a _L4a     SW_1     7 8 011001101000111010101000| SW     Store word. Q=wradr=RS1+Simm
     * 4b CSRRW_2  CSRRW_3  a 9 1011000000011010100x0010|        Write PC to 0x100 start Prep emulation entrypt
     * 4c SLT_0    SLTX_1   3 2 0011000110001110x011xxx0| SLT    Set less than (signed)
-    * 4d MULSU    StdIncPc 3 2 1110011010000010x011xxx0| f      Prepare read PC (FENCE)
+    * 4d MULHSU_0 ILLe     3 2 111111101000xxxxx00xxxx0| Illegal instruction seen
     * 4e eILL0b   ILLe     3 2 111111101000xxxxx00xxxx0| Illegal instruction seen
     * 4f MRET_8   StdIncPc 3 3 111001101000101010101000|        Prep +4
     * 50 LW_1     StdIncPc c a 111001100010101110110010|        Read until d=mem[(rs1+ofs) & ~3u]
@@ -193,7 +193,7 @@ module m_2ebr
     * 6a _L6a     ILLe     3 2 111111101000xxxxx00xxxx0| Illegal instruction seen
     * 6b SB_4     SB_5     a 8 011110101000110010100010|        Address back to Q. Prepare get item to write
     * 6c SLTU_0   SLTX_1   3 2 0011000110001110x011xxx0| SLTU   Set less than (unsigned)
-    * 6d MULHU    StdIncPc 3 2 1110011010000010x011xxx0| f      Prepare read PC (FENCE)
+    * 6d MULHU_0  ILLe     3 2 111111101000xxxxx00xxxx0| Illegal instruction seen
     * 6e LHU_3    ANDI_1   3 2 000110101000011110100100|        Invert q. Prepare read mask
     * 6f MRET_6   MRET_7   3 3 110011111000xxxx10101000|        ~302 + origImm + 1 for branch decision
     * 70 LHU_2    LHU_3    b 7 011011101000101010100011|        Repeat shr until shreg = 0 (0, 8 or 16 times)
@@ -225,7 +225,7 @@ module m_2ebr
     * 8a _L8a     ILLe     3 2 111111101000xxxxx00xxxx0| Illegal instruction seen
     * 8b ILL_5    JAL_3    d c 0011010001101001100x1000|        Store 2 to mcause
     * 8c XOR_0    XOR_1    3 2 0010100110001111x011xxx0| XOR    xor
-    * 8d DIV      StdIncPc 3 2 1110011010000010x011xxx0| f      Prepare read PC (FENCE)
+    * 8d DIV_0    ILLe     3 2 111111101000xxxxx00xxxx0| Illegal instruction seen
     * 8e ILL_3    ILL_4    a 2 100010010111101010111100|        Store illegal instruction to mtval
     * 8f aF_SW_3  LDAF_3   d 9 1001001001100010000x1000|        Store 7 to mcause
     * 90 NMI_2    JAL_3    d 9 001101000111010010111100|        mtval = 0.
@@ -257,7 +257,7 @@ module m_2ebr
     * aa _Laa     ILLe     3 2 111111101000xxxxx00xxxx0| Illegal instruction seen
     * ab EBREAK_2 EBREAK_3 3 2 101110100111101010110010|        pc to mepc
     * ac _Lac     SRx_1    3 2 0011111110001110x00xxxx0| SRx    Shift Right (both SRL and SRA)
-    * ad DIVU     StdIncPc 3 2 1110011010000010x011xxx0| f      Prepare read PC (FENCE)
+    * ad DIVU_0   ILLe     3 2 111111101000xxxxx00xxxx0| Illegal instruction seen
     * ae _Lae     SRx_1    3 2 0011111110001110x00xxxx0| SRx    Shift Right (both SRL and SRA)
     * af MRET_4   MRET_5   3 3 110001011000xxxx10101000|        0x202 + 0xff + 1 = 0x302
     * b0 CSRRW_3  StdIncPc 3 3 111001101000101000101000|        Prep emulation entrypt 0x108, here Q to 0x104
@@ -289,7 +289,7 @@ module m_2ebr
     * ca _Lca     ILLe     3 2 111111101000xxxxx00xxxx0| Illegal instruction seen
     * cb QINT_2   StdIncPc d 9 111001100111010010111100|        mtval = 0.
     * cc OR_0     OR_1     3 2 0010011010001111x011xxx0| OR     or
-    * cd REM      StdIncPc 3 2 1110011010000010x011xxx0| f      Prepare read PC (FENCE)
+    * cd REM_0    ILLe     3 2 111111101000xxxxx00xxxx0| Illegal instruction seen
     * ce ECALL_5  ECALL_6  3 3 101010011000101000101000|        Q = 8
     * cf MRET_7   MRET_8   4 2 0100111110000110x011xxx0|        Prepare emulation entry point 0x104
     * d0 ECALL_1  ECALL_2  3 3 001101111000001010101000| ECALL  Verify Imm==0x000
@@ -321,7 +321,7 @@ module m_2ebr
     * ea _Lea     ILLe     3 2 111111101000xxxxx00xxxx0| Illegal instruction seen
     * eb LH_3     LH_4     3 2 010101101000011110100100|        q = ~mem[rs1+ofs]
     * ec AND_0    AND_1    3 2 0001000110001111x011xxx0| AND    And 
-    * ed REMU     StdIncPc 3 2 1110011010000010x011xxx0| f      Prepare read PC (FENCE)
+    * ed REMU_0   ILLe     3 2 111111101000xxxxx00xxxx0| Illegal instruction seen
     * ee eILL0a   ILLe     3 2 111111101000xxxxx00xxxx0| Illegal instruction seen
     * ef WFI_5    Fetch    5 5 110111100100110100001000|        IncPC, OpFetch
     * f0 LBU_2    LBU_3    b 7 011100101000101010100011|        Repeat shr until shreg = 0 (0, 8 or 16 times)
@@ -341,37 +341,37 @@ module m_2ebr
     * fe ILLe     ILL_1    3 2 0100011010000010x011xxx0| Illegal
     * ff QINT_0   QINT_1   3 2 1100011110000010x011xxx0| INT    Get current PC
     */
-   localparam u0_0 = 256'h22bc8e3082308ea222b84ea885a04ea885a686a4820022b882308da88ba38da8;
+   localparam u0_0 = 256'h22bc8e3080008ea222b84ea885a04ea885a686a4820022b882308da88ba38da8;
    localparam u0_1 = 256'h6abc8a2822be8b8c828c22b64ab86ebc4da84d0c8ca282a88fa000008ea08fa0;
-   localparam u0_2 = 256'h22bc46b482308e0080b84ea88ea04ea880a84eb082008f8c8230800022b06da8;
+   localparam u0_2 = 256'h22bc46b480008e0080b84ea88ea04ea880a84eb082008f8c8230800022b06da8;
    localparam u0_3 = 256'h8f828f822aa346bc828c2aa380006ebc70b22baa2ba24d82728862b88fa022bc;
-   localparam u0_4 = 256'h8aa8800082308e301a828ea862a88ea88ba27da28aa88fa48000800080a88da8;
+   localparam u0_4 = 256'h8aa8800080008e301a828ea862a88ea88ba27da28aa88fa48000800080a88da8;
    localparam u0_5 = 256'h7a8c8ba36baa46bc828c6ba28000800088a088a67abc8aa37a8c8ba37a8c2bb2;
-   localparam u0_6 = 256'h80a887a482308e308ca2800080bc8000728c1e8282308fa48000800062b68000;
+   localparam u0_6 = 256'h80a887a480008e308ca2800080bc8000728c1e8282308fa48000800062b68000;
    localparam u0_7 = 256'h7a8270b2698246bc828c0c82800080007a8882a082008bb27cb286a47abc8aa3;
-   localparam u0_8 = 256'h62087abc82308f30698880008aa880007c822c088ba38fa4800080007a828da8;
+   localparam u0_8 = 256'h62087abc80008f30698880008aa880007c822c088ba38fa4800080007a828da8;
    localparam u0_9 = 256'h1c829ca280bc800000006baa80006ebc728c6ba2698a8b287bb27982620874bc;
-   localparam u0_A = 256'h80a88e0082308e007ab280006908800080a88b8c86a88f8c800080008a286da8;
+   localparam u0_A = 256'h80a88e0080008e007ab280006908800080a88b8c86a88f8c800080008a286da8;
    localparam u0_B = 256'h8ba28ba24d8645bc0000690880006ebc8c286638663882a866b8663866388a28;
-   localparam u0_C = 256'h86308a2882308f3074bc80008628800070b27da680a44fb4800080006abc8000;
+   localparam u0_C = 256'h86308a2880008f3074bc80008628800070b27da680a44fb4800080006abc8000;
    localparam u0_D = 256'h8bb283b27abc45bc62888a3080006ebc7abc8000000062887abc8aa346bc82a8;
-   localparam u0_E = 256'h4d08800082308f3087a480008c2880007abc4d088a288fa48000800080a28000;
+   localparam u0_E = 256'h4d08800080008f3087a480008c2880007abc4d088a288fa48000800080a28000;
    localparam u0_F = 256'h82308230823045bc00008aa880006ebc72bc80287abc5fe8800082307abc8aa3;
-   localparam u1_0 = 256'h32e6321032e6320433e6025a320b025a32093207320432e632e622be11d20001;
+   localparam u1_0 = 256'h32e6321032fe320433e6025a320b025a32093207320432e632e622be11d20001;
    localparam u1_1 = 256'h32b733d432e682a6723232e632413213607455de42163315321404de321a320b;
-   localparam u1_2 = 256'h32e642f732e6323e3330929632219296321d32273204043532e632fe32e69052;
+   localparam u1_2 = 256'h32e642f732fe323e3330929632219296321d32273204043532e632fe32e69052;
    localparam u1_3 = 256'h043a0435b70332497232b43d32fe321342d73703343650dea2813286322b36e6;
-   localparam u1_4 = 256'h33e632fe32e63231a9b07866334b7866c28e30473365322b32fe32fe33617050;
+   localparam u1_4 = 256'h33e632fe32fe3231a9b07866334b7866c28e30473365322b32fe32fe33617050;
    localparam u1_5 = 256'ha2da1170376932b17232345d32fe32fe320b3257a21eb7eba2da1154a2dacae6;
-   localparam u1_6 = 256'h33cf321a32e63231a87a32fe326b32fea293a2f242ef322b32fe32fe728632fe;
+   localparam u1_6 = 256'h33cf321a32fe3231a87a32fe326b32fea293a2f242ef322b32fe32fe728632fe;
    localparam u1_7 = 256'ha27d3290d93432b27232a2f232fe32fe337d32773273cbf4a276321aa21eb76e;
-   localparam u1_8 = 256'hd992a28932e63229dc3432fe338b32fe327f333411f0322132fe32fe327d0085;
+   localparam u1_8 = 256'hd992a28932fe3229dc3432fe338b32fe327f333411f0322132fe32fe327d0085;
    localparam u1_9 = 256'h32f2389f329e32fe04de379d32fe3213a293349ad934339532943234dc92d934;
-   localparam u1_A = 256'h33c5323f32e6323f32ba32fed93432fe322e72d033af043a32fe32fe33ce905e;
+   localparam u1_A = 256'h33c5323f32fe323f32ba32fed93432fe322e72d033af043a32fe32fe33ce905e;
    localparam u1_B = 256'hc2c1c21f50de32b304ded93432fe321332bd33b432b4334b33b433b432b433e6;
-   localparam u1_C = 256'h424f33a932e63226d9e632fe32a532fe32cb3047326f32e132fe32fe32e932fe;
+   localparam u1_C = 256'h424f33a932fe3226d9e632fe32a532fe32cb3047326f32e132fe32fe32e932fe;
    localparam u1_D = 256'hcbf43df4a2e532b5a392329132fe3213a2a132fe04dedc92a21eb70632c93337;
-   localparam u1_E = 256'h55de32fe32e63211325632fe32c632fea21e55de338f321a32fe32fe321d32fe;
+   localparam u1_E = 256'h55de32fe32fe3211325632fe32c632fea21e55de338f321a32fe32fe321d32fe;
    localparam u1_F = 256'h32c73246327e32b604de334532fe3213a2ab33faa2dbae0032dd32e6a21eb772;
    wire [31:0]   indir;
 `ifdef verilator

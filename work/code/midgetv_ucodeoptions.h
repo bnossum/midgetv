@@ -32,3 +32,4 @@
 #define ucodeopt_HAS_MINSTRET     0
 #define ucodeopt_HAS_EBR_MINSTRET 0
 
+#define ucodeopt_MULDIV 0
