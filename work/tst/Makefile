@@ -14,7 +14,7 @@ GCCFLAGS = -O3 -I $(OBJDIR) -I/usr/share/verilator/include -I/usr/share/verilato
 
 VERILATORINCLUDES = -I$(VERILOGDIR) -I$(VERILOGDIR)/simcode -I$(SB_SIMMOD)  -I$(GEN)
 
-VERILATORFLAGS = -Wall -v m_ice_shortcuts.v $(VERILATORINCLUDES) -Mdir $(OBJDIR) -cc --x-assign 1
+VERILATORFLAGS = -Wall -v m_ice_shortcuts.v $(VERILATORINCLUDES) -Mdir $(OBJDIR) -cc --x-assign 1 
 
 #
 #MY = m_inputmux m_immexp_zfind_q m_rai m_wai \
@@ -24,7 +24,7 @@ VERILATORFLAGS = -Wall -v m_ice_shortcuts.v $(VERILATORINCLUDES) -Mdir $(OBJDIR)
 MY = m_ice40sim_EBRonly m_ice40sim_SRAM \
 	m_ucodepc \
 	m_alu_carryin m_alu m_cyclecnt m_shiftcounter \
-	humansized_muldiv
+	humansized_muldiv old_humansized_muldiv
 
 #m_ice40sim_SRAM4_EBR16  \
 #	m_ucodepc m_alu

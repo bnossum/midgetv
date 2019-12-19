@@ -4,7 +4,7 @@ Version=Lattice Semiconductor Corporation iCEcube - Release: 2017.08.27940 - Bui
 ProjectName=iCEcube2_flow
 Vendor=SiliconBlue
 Synthesis=lse
-ProjectVFiles=../iceblink40-hx1k.v=work
+ProjectVFiles=../iceblink40-hx1k.v
 ProjectCFiles=
 CurImplementation=iCEcube2_flow_Implmnt
 Implementations=iCEcube2_flow_Implmnt
@@ -67,7 +67,7 @@ VHDL2008=False
 VerilogIncludeSearchPath=
 
 [tool options]
-PlacerEffortLevel=std
+PlacerEffortLevel=mid
 PlacerAutoLutCascade=no
 PlacerAutoRamCascade=no
 PlacerPowerDriven=no
