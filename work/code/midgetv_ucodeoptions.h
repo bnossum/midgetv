@@ -29,7 +29,7 @@
  * However, the most tested configureation is with MINSTRET included.
  *
  */
-#define ucodeopt_HAS_MINSTRET     0
-#define ucodeopt_HAS_EBR_MINSTRET 0
+#define ucodeopt_HAS_MINSTRET     1
+#define ucodeopt_HAS_EBR_MINSTRET 1
 
 #define ucodeopt_MULDIV 0

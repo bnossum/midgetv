@@ -29,6 +29,8 @@ module m_progressctrl
     input        rlastshift, //    To halt progress of microcode etc
     input [31:0] B, //              Do we access SRAM or I/O? Only B[31] used but due to Verilator...
     input        buserror, //       When we have bus error we must have forward progress in ucode
+//    input        alu_carryout,
+
     output [3:0] SEL_O, //          Byte selects for SRAM and outputs
     output [3:0] bmask, //          SEL_O is unfortunately also needed in an active low version for EBR
                                    
@@ -279,7 +281,10 @@ module m_progressctrl
 //            assign enaQ            = (sa15 | sa32) & ~lastshift   & ~STB_O;
 //            assign progress_ucode = ((~sa33 | lastshift | rlastshift) & ~STB_O) | buserror;
             wire g1;
-            SB_LUT4 #(.LUT_INIT(16'h000e)) l_enaQ(.O(enaQ), .I3(STB_O), .I2(lastshift), .I1(sa15), .I0(sa32));
+            
+            SB_LUT4 #(.LUT_INIT(16'h000e)) l_enaQ(.O(enaQ), .I3(STB_O), .I2(lastshift), .I1(sa15), .I0(sa32)); //correct
+//            SB_LUT4 #(.LUT_INIT(16'h000e)) l_enaQ(.O(enaQ), .I3(STB_O), .I2(lastshift), .I1(sa15), .I0(alu_carryout)); // test
+
 //see next line            SB_LUT4 #(.LUT_INIT(16'h00f7)) l_g1(.O(g1), .I3(STB_O), .I2(lastshift), .I1(sa33), .I0(r_issh0_not));
             SB_LUT4 #(.LUT_INIT(16'h00fb)) l_g1(.O(g1), .I3(STB_O), .I2(lastshift), .I1(sa33), .I0(rlastshift)); 
             SB_LUT4 #(.LUT_INIT(16'heeee)) I_progress_ucode(.O(progress_ucode), .I3(1'b0), .I2(1'b0), .I1(buserror), .I0(g1));

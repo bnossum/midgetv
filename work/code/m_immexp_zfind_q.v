@@ -8,20 +8,20 @@
  * the low level code of 49 LUTs.
  */
 module m_immexp_zfind_q
-  # ( parameter HIGHLEVEL = 0 )
+  # ( parameter HIGHLEVEL = 0, ALUWIDTH = 32 )
    (
-    input [31:0]  B, //           Output from ALU
-    input         clk, //         System clock
-    input         sa11, //        True when immediate expand
-    input         sa14, //        If high, clear Q. (enaQ must also be high)
-    input         corerunning, // When not running, keep Q clear.
-    input         enaQ, //        Update Q
+    input [ALUWIDTH-1:0]  B, //           Output from ALU
+    input                 clk, //         System clock
+    input                 sa11, //        True when immediate expand
+    input                 sa14, //        If high, clear Q. (enaQ must also be high)
+    input                 corerunning, // When not running, keep Q clear.
+    input                 enaQ, //        Update Q
    /* verilator lint_off UNUSED */
-    input [31:0]  INSTR, //       Using input [31:2] INSTRUCTION makes verilator fail in lowlevel
+    input [31:0]          INSTR, //       Using input [31:2] INSTRUCTION makes verilator fail in lowlevel
    /* verilator lint_on UNUSED */
-    output        rzcy32, //      When 0, ADR_O==32'h0 
-    output [31:0] ADR_O, //         Register used in many places, also I/O address
-    output        m_immexp_zfind_q_killwarnings
+    output                rzcy32, //      When 0, ADR_O==32'h0 
+    output [ALUWIDTH-1:0] ADR_O, //         Register used in many places, also I/O address
+    output                m_immexp_zfind_q_killwarnings
     );
    assign m_immexp_zfind_q_killwarnings = &INSTR[1:0];
    
@@ -93,10 +93,13 @@ module m_immexp_zfind_q
          // HIGLEVEL
          // =======================================================
          
-         reg [31:0] F,r_ADR_O;
-         reg [2:0]  instrty;
-         reg        r_rzcy32;
-         wire       BisnotZero;
+         reg [ALUWIDTH-1:0] r_ADR_O;
+         /* verilator lint_off UNUSED */
+         reg [31:0] F;
+         /* verilator lint_on UNUSED */
+         reg [2:0]          instrty;
+         reg                r_rzcy32;
+         wire               BisnotZero;
          
          always @(/*AS*/INSTR or sa11)
            casez ({sa11,INSTR[6:2]})
@@ -122,19 +125,19 @@ module m_immexp_zfind_q
              3'b010 : F = {{20{INSTR[31]}},INSTR[7],INSTR[30:25],INSTR[11:8],1'b0};   // B-type
              3'b100 : F = {{21{INSTR[31]}},INSTR[30:25],INSTR[11:8],INSTR[7]};        // S-type
              3'b101 : F = {{21{INSTR[31]}},INSTR[30:25],INSTR[24:20]};                // I-type
-             3'b111 : F = B; // No immediate expansion
+             3'b111 : F[ALUWIDTH-1:0] = B; // No immediate expansion
 //           default :F = 32'h?;  // This line makes verilator fail -- why?
              default :F = 32'hdeadbabe; 
            endcase
-         assign BisnotZero = B != 32'h0; // Note: This is NOT 100% eqivalent to the low level version, where we get it out of a carry chain.
+         assign BisnotZero = B != 0; // Note: This is NOT 100% eqivalent to the low level version, where we get it out of a carry chain.
 
          always @(posedge clk) begin
             if ( enaQ ) begin
                if ( sa14 | ~corerunning ) begin
-                  r_ADR_O <= 32'h0;
+                  r_ADR_O <= {ALUWIDTH{1'b0}};
                   r_rzcy32 <= 1'b0;
                end else begin
-                  r_ADR_O <= F;
+                  r_ADR_O <= F[ALUWIDTH-1:0];
                   r_rzcy32 <= BisnotZero;
                end
             end

@@ -1,3 +1,4 @@
+// Work. Need to add code dependency to pack lastshift as shown in diagram [a]
 /* -----------------------------------------------------------------------------
  * Part of midgetv
  * 2019. Copyright B. Nossum.
@@ -26,34 +27,81 @@
  *                    |
  *                    VCC
  * 
+ * Minor changes after MULDIV implemented:
+ * raluF only need to be put on the carry chain for SLT[I][U], all other situations are don't care
+ * It is not evident, but from ucode.h we see that ADR_O == 0 when raluF is indeed used. This
+ * mean we can squeze in this solution:
  * 
+ * diagram [a]                                         
+ *                    | alu_carryin           
+ *                   /y\     ___              
+ * lastshift --------(((----|I0 |                    __                         
+ * s_alu_carryin[0] -+||    |I1 |-- lastshift_dup --|  |-- rlastshift 
+ * s_alu_carryin[1] --(+    |I2 |                   |  |                        
+ *                    |     |I3_|                   >__|                        
+ *                    | prealucyin            
+ *                   /y\     ___    
+ * FUNC7_0 ----------(((----|I0 |-- sra_msb   
+ * raluF ------------+((----|I1 |   
+ * ADR_O[31]----------(+----|I2 |   
+ * FUNC7_5 -----------(-----|I3_|
+ *                    |
+ *                    VCC
+ * 
+ * FUNC7_5
+ * |FUNC7_0  
+ * ||         sra_msb
+ * 00         0
+ * 01         raluF
+ * 10         ADR_O_31
+ * 11         ADR_O_31
+ * 
+ * ADR_O[31]
+ * |s_alu_carryin[1] 
+ * ||s_alu_carryin[0]
+ * |||  prealucyin   
+ * x00  0            
+ * 001  raluF        
+ * 010  raluF        
+ * 101  1 (not used)
+ * 110  1 (not used)
+ * x11  1            
  */
 
-module m_alu_carryin  # ( parameter HIGHLEVEL = 0 )   
+module m_alu_carryin  # ( parameter HIGHLEVEL = 1, MULDIV = 1 )   
    (
-    input        clk, lastshift, raluF, FUNC7_5, ADR_O_31,
+    input        clk, lastshift, raluF, FUNC7_5, FUNC7_0, ADR_O_31,
     input [1:0]  s_alu_carryin,
     output       alu_carryin, sra_msb, rlastshift
     );
    
    generate
       if ( HIGHLEVEL != 0 ) begin
-         reg r_alu_carryin, r_sra_msb;
-         always @(/*AS*/raluF or s_alu_carryin) 
-           case ( s_alu_carryin )
-             2'b00 : r_alu_carryin = 1'b0;
-             2'b01 : r_alu_carryin = raluF;
-             2'b10 : r_alu_carryin = raluF;
-             2'b11 : r_alu_carryin = 1'b1;
-           endcase
-         always @(/*AS*/ADR_O_31 or FUNC7_5) 
-           r_sra_msb = FUNC7_5 ? ADR_O_31 : 1'b0;
-         assign sra_msb = r_sra_msb;
-         assign alu_carryin = r_alu_carryin;
          reg rrlastshift;
          always @(posedge clk)
            rrlastshift <= lastshift;
          assign rlastshift = rrlastshift;
+
+         if ( MULDIV == 0 ) begin
+            // Will be removed
+            reg r_alu_carryin, r_sra_msb;
+            always @(/*AS*/raluF or s_alu_carryin) 
+              case ( s_alu_carryin )
+                2'b00 : r_alu_carryin = 1'b0;
+                2'b01 : r_alu_carryin = raluF;
+                2'b10 : r_alu_carryin = raluF;
+                2'b11 : r_alu_carryin = 1'b1;
+              endcase
+            always @(/*AS*/ADR_O_31 or FUNC7_5) 
+              r_sra_msb = FUNC7_5 ? ADR_O_31 : 1'b0;
+            assign sra_msb = r_sra_msb;
+            assign alu_carryin = r_alu_carryin;
+         end else begin
+            wire prealucyin;
+            assign sra_msb = FUNC7_5 ? ADR_O_31 : (FUNC7_0 ? raluF : 0);
+            assign prealucyin = raluF | ADR_O_31;
+            assign alu_carryin = &s_alu_carryin | (s_alu_carryin[1] & prealucyin) | (s_alu_carryin[0] & prealucyin);
+         end
       end else begin
          
          wire prealucyin,dup_lastshift;

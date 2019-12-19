@@ -601,7 +601,7 @@ wire                 sa12_and_corerunning;   // From inst_alu_carryin of m_alu_c
    /* -----------------------------------------------------------------------------
     * Datapath
     */
-//   localparam xHIGHLEVEL = 1;
+   localparam xHIGHLEVEL = 1;
    m_inputmux #(.HIGHLEVEL(       HIGHLEVEL       ), 
                 .IWIDTH(          IWIDTH          ), 
                 .SRAMADRWIDTH(    SRAMADRWIDTH    ), 
@@ -656,10 +656,11 @@ wire                 sa12_and_corerunning;   // From inst_alu_carryin of m_alu_c
       .STB_O                            (STB_O),
       .ADR_O                            (ADR_O[31:0]));
 
-   m_alu_carryin #(.HIGHLEVEL(HIGHLEVEL))
+   m_alu_carryin #(.HIGHLEVEL(xHIGHLEVEL))
    inst_alu_carryin
      (.ADR_O_31                         (ADR_O[31]),
       .FUNC7_5                          (FUNC7[5]),
+      .FUNC7_0                          (FUNC7[0]),
       /*AUTOINST*/
       // Outputs
       .alu_carryin                      (alu_carryin),
@@ -702,10 +703,10 @@ wire                 sa12_and_corerunning;   // From inst_alu_carryin of m_alu_c
        (/*AUTOINST*/
         // Outputs
         .rzcy32                         (rzcy32),
-        .ADR_O                          (ADR_O[31:0]),
+        .ADR_O                          (ADR_O[ALUWIDTH-1:0]),
         .m_immexp_zfind_q_killwarnings  (m_immexp_zfind_q_killwarnings),
         // Inputs
-        .B                              (B[31:0]),
+        .B                              (B[ALUWIDTH-1:0]),
         .clk                            (clk),
         .sa11                           (sa11),
         .sa14                           (sa14),

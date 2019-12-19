@@ -17,14 +17,14 @@
  * 
  * The ALU is constructed out of two columns of LUTs. 
  *      
- *                                | co               s_alu[1] 
- *                               /y\                 |s_alu[0]        s_alu[2]  
- *             ___               |||     ___         ||  A            |   B       
- * Q        --|I0 | A s_alu[2] --(((----|I0 | B      --  -            -   -       
- * s_alu[0] --|I1 |--------------+((----|I1 |--      00  Di           0   ~(A^QQ)  
- * Di       --|I2 |        QQ  ---(+----|I2 |        01  ~(Di^Q)      1   A^QQ^cin 
- * s_alu[1] --|I3_|               +-----|I3_|        10  0         
- *                                |                  11  (~Di)&(~Q)    
+ *                                | co                            s_alu[1]         
+ *                               /y\               s_alu[2]       |s_alu[0]        
+ *             ___               |||     ___       |   B          ||  A            
+ * Q        --|I0 | A s_alu[2] --(((----|I0 | B    -   -          --  -            
+ * s_alu[0] --|I1 |--------------+((----|I1 |--    0   ~(A^QQ)    00  Di           
+ * Di       --|I2 |        QQ  ---(+----|I2 |      1   A^QQ^cin   01  ~(Di^Q)      
+ * s_alu[1] --|I3_|               +-----|I3_|                     10  0         
+ *                                |                               11  (~Di)&(~Q)    
  *                                cin       
  *   
  *  luta=0x01b4 lutb=0xc369
@@ -88,7 +88,7 @@ module m_alu
     input [2:0]           s_alu,//                Determines ALU operation
     input                 sa27,sa26,sa25,sa24, // To decode Wttime and Wrinst
     output [ALUWIDTH-1:0] B, //                   ALU result
-    output                A31, //                 A[31] == Di[31] during ADD, used in m_condcode.
+    output                A31, //                 A[31] == Di[31] during ADD, used in m_condcode. fitte. Rename Amsb
     output                alu_carryout, //        ALU carry out
     output                alu_tapout, //          Used to trigger interrupt for mtime increment/mcycle update
     output                alu_minstretofl //      Used to trigger interrupt for retired instructions
@@ -202,7 +202,7 @@ module m_alu_highlevel
    end else begin
       wire isWttime;
       assign isWttime = {sa27,sa26,sa25,sa24} == 4'b1011;      
-      assign alu_tapout = (A[MTIMETAP]^B[MTIMETAP]) & isWttime;
+      assign alu_tapout = (~A[MTIMETAP] & B[MTIMETAP]) & isWttime;
    end
    
    /* For retired instructions interrupt
@@ -256,7 +256,7 @@ module m_alu_lowlevel
    assign A31 = A[ALUWIDTH-1];
 
    /* When we increment the low 32-bit of mtime, we have a carry into bit MTIMETAP only
-    * when the output bit B[MTIMETAP] is set, bit the input bit A[MTIMETAP] was clear. 
+    * when the output bit B[MTIMETAP] is set, but the input bit A[MTIMETAP] was clear. 
     */
    if ( MTIMETAP < MTIMETAP_LOWLIM || MTIMETAP > ALUWIDTH ) begin
       assign alu_tapout = 1'b0;
