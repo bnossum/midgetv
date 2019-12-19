@@ -376,7 +376,23 @@ void printf_result(
         
         
         // First make extensive comment
-        printf( "   /*\n" );
+        for ( int t = rounds-1; t > 0; t-- ) {
+                printf( "   %c*                      ", t == rounds-1 ? '/' : ' ' );
+                for ( k = rounds-1; k > t; k-- ) 
+                        printf( "| " );
+                printf( "indirect_index %d\n", t );
+        }
+
+        printf( "    * inx         next     " );
+        for ( int t = 0; t < rounds-1; t ++ )
+                printf( "| " );
+        printf( "indirect index 0\n" );
+        
+        printf( "    * || ucode    ucode    " );
+        for ( int t = 0; t < rounds; t ++ )
+                printf( "| " );
+        printf( "direct representation\n" );
+        
         for ( k = 0; k < 256; k++ ) {
 //        for ( k = 0; k < 25; k++ ) {
                 printf( "    * %2.2x ", k );
