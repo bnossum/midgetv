@@ -16,7 +16,7 @@ module m_ice40sim_EBRonly
       HIGHLEVEL          = 0,
       LAZY_DECODE        = 0,
       DISREGARD_WB4_3_55 = 1,
-      MULDIV             = 1
+      MULDIV             = 1 //
       )
    (
     input CLK_I, // Toggled from verilator

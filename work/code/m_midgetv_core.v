@@ -834,7 +834,7 @@ module m_midgetv_core
         .sa12                           (sa12),
         .Di                             (Di[31:0]));
 
-   m_condcode #(.HIGHLEVEL(HIGHLEVEL), .MULDIV(1) ) 
+   m_condcode #(.HIGHLEVEL(HIGHLEVEL), .MULDIV(MULDIV) ) 
      inst_condcode
        (// Inputs
         .ceM                            (1'b0), // fitte
