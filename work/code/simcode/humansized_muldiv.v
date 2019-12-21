@@ -5,44 +5,39 @@
 /* verilator lint_off DECLFILENAME */
 /* verilator lint_off WIDTH */
 module humansized_muldiv
-  # ( parameter ALUWIDTH = 4,
+  # ( parameter ALUWIDTH = 8,
       HIGHLEVEL = 0
       )
    (
     input                   clk,
+    // These inputs occurs in midgetv even without MULDIV
+    input [ALUWIDTH-1:0]    DAT_O, // From EBR
+    input [ALUWIDTH-1:0]    DAT_I, // External input, not used here
+    input [ALUWIDTH-1:0]    Dsram, // RAM input, not used here
+    input [31:0]            INSTR,
     input                   STB_O_or_ReadM,
     input                   sa00mod,
     input [2:0]             s_alu,
     input [1:0]             s_alu_carryin,
+    input                   use_dinx,
+    input                   sa14, // loadMn
 
-    input                   enm,
-    input                   loadMn,
-    input                   clrm,
-   /* verilator lint_off UNUSED */
-    input                   en,
-    input [4:0]             op,
-   /* verilator lint_on UNUSED */
-
-    input [ALUWIDTH-1:0]    DAT_O, // From EBR
-    input [ALUWIDTH-1:0]    DAT_I, // External input, not used here
-    input [ALUWIDTH-1:0]    Dsram, // RAM input, not used here
-
+    input                   ceM, //   CE for M register. Also used by m_condcode
+    input                   clrM, //  R for M register. Also used to flag unsigned subtraction in DIV/DIVU/REM/REMU
+    
     output [ALUWIDTH-1:0]   ADR_O, 
     output reg              rF, 
     output [ALUWIDTH-1:0]   M,
     output [2*ALUWIDTH-1:0] QM,
-    output                  dummy
+    output [1:0]            divdbg
     );
-   wire                     cmb_rF;
-   wire                     cmb_rF2;
-   wire                     isadd;
+   wire                     newop = clrM;
+   
    wire                     cond_holdq;
-   wire                     Pmsb;
-   wire                     Dmsb;
    wire [ALUWIDTH-1:0]      B;
    
-   wire [1:0]               shifttype  = op[2:1];
-   wire [1:0]               addtype    = op[4:3];
+   /* verilator lint_off UNUSED */
+   /* verilator lint_on UNUSED */
    reg [ ALUWIDTH-1:0]      rDee;
    wire [ALUWIDTH-1:0]      shrQ;
    wire [ALUWIDTH-1:0]      Di;
@@ -53,13 +48,14 @@ module humansized_muldiv
    wire [1:0]               mod_s_alu_carryin;   
    wire                     raluF;
 
-   assign dummy = op[0];
    /* verilator lint_off UNUSED */
    /*AUTOWIRE*/
    // Beginning of automatic wires (for undeclared instantiated-module outputs)
    wire                 A31;                    // From alu of m_alu.v
    wire                 alu_minstretofl;        // From alu of m_alu.v
    wire                 alu_tapout;             // From alu of m_alu.v
+   wire                 is_brcond;              // From cnd of m_condcode.v
+   wire                 m_condcode_killwarnings;// From cnd of m_condcode.v
    wire                 m_immexp_zfind_q_killwarnings;// From immexp_zfind_q of m_immexp_zfind_q.v
    wire                 rlastshift;             // From inst_alu_carryin of m_alu_carryin.v
    wire                 rzcy32;                 // From immexp_zfind_q of m_immexp_zfind_q.v
@@ -71,21 +67,38 @@ module humansized_muldiv
     * First some constructions that must be there, but that are
     * irrelevant to what I try to acheive.
     */
+   
    assign QQ = ADR_O;
    always @(posedge clk)
      rDee <= STB_O_or_ReadM ? (DAT_I | M) : Dsram;
    assign Di = sa00mod ? DAT_O : (DAT_O & rDee) | (~DAT_O & shrQ);
-   assign shrQ = { sra_msb, ADR_O[ALUWIDTH-1:1]};
+   assign shrQ = {sra_msb, ADR_O[ALUWIDTH-1:1]};
    assign QM = {ADR_O,M};
    
-   /*
-    * The following is to be absorbed into a variant of m_condcode.
-    */
+   wire                 cmb_rF2;
+   assign mod_s_alu_1 = (s_alu == 3'b100 && newop == 1'b0) ? ~M[0] : s_alu[1];
    
-   assign mod_s_alu_1 = (s_alu == 3'b100 && addtype[1] == 1'b0) ? ~M[0] : s_alu[1];
+/* May replace modules with explicit code for investigation
+ */
+
+//`define WHAT_THE_CONDCODE_DOES              1
+//`define WHAT_THE_ALU_CARRYIN_DOES           1
+//`define WHAT_THE_IMMEXP_ZFIND_Q_DOES        1
+//`define WHAT_THE_ALU_DOES                   1
+//`define WHAT_THE_BIDIRECTIONAL_SHIFTER_DOES 1   
+
+
+`ifdef WHAT_THE_CONDCODE_DOES
+   wire                 cmb_rF;
+   wire                 isadd;
+   wire                 Pmsb;
+   wire                 Dmsb;
+   wire [1:0]           shifttype;
+   
+   assign shifttype  = op[2:1];
    assign isadd = {s_alu[2],mod_s_alu_1,s_alu[0]} == 3'b100;
    
-   assign Pmsb  = addtype[1] ? rF   : (addtype[0] ? rF         : 1'b0);
+   assign Pmsb  = addtype[1] ? rF   : (addtype[0] ? rF                : 1'b0);
    assign Dmsb  = addtype[1] ? 1'b1 : (addtype[0] ? DAT_O[ALUWIDTH-1] : 1'b0);
    
    
@@ -100,15 +113,33 @@ module humansized_muldiv
    
    always @(posedge clk)
      if ( ~cond_holdq ) 
-       rF <= loadMn ?  cmb_rF2 : 1'b0;
-   
-/* May replace modules with explicit code for investigation
- */   
-//`define WHAT_THE_ALU_CARRYIN_DOES           1
-//`define WHAT_THE_IMMEXP_ZFIND_Q_DOES        1
-//`define WHAT_THE_ALU_DOES                   1
-//`define WHAT_THE_BIDIRECTIONAL_SHIFTER_DOES 1   
+       rF <= use_dinx ?  1'b0 : cmb_rF2;
 
+   assign divdbg = {rF,cmb_rF2};
+`else
+   m_condcode #(.HIGHLEVEL(1), .MULDIV(1)) cnd
+     (// Inputs
+      .QQ31                             (QQ[ALUWIDTH-1]),
+      // Outputs
+      .raluF                            (rF),
+      /*AUTOINST*/
+      // Outputs
+      .is_brcond                        (is_brcond),
+      .cmb_rF2                          (cmb_rF2),
+      .m_condcode_killwarnings          (m_condcode_killwarnings),
+      // Inputs
+      .clk                              (clk),
+      .alu_carryout                     (alu_carryout),
+      .INSTR                            (INSTR[31:0]),
+      .A31                              (A31),
+      .use_dinx                         (use_dinx),
+      .cond_holdq                       (cond_holdq),
+      .ceM                              (ceM),
+      .rzcy32                           (rzcy32));
+
+   assign divdbg = {rF,cmb_rF2};
+`endif
+   
 `ifdef WHAT_THE_ALU_CARRYIN_DOES
    // Alu op changed from ADD to PASSQ must kill carry in
    assign mod_s_alu_carryin = (mod_s_alu_1 ^ s_alu[1]) ? 0 : s_alu_carryin;
@@ -168,7 +199,7 @@ module humansized_muldiv
     * Compiles to 267 SB_LUTs and 69.96 MHz. So it has an impact, but is no show-stopper. At Medium placement effort
     * I still reach 74.96 MHz. Restoring Division is the algorithm we will pursue.
     */
-   assign cond_holdq = ~alu_carryout & addtype[1];
+   assign cond_holdq = ~alu_carryout & newop;
    
    /*
     * The rest is constructions that are unchanged - but
@@ -179,13 +210,11 @@ module humansized_muldiv
    reg [ALUWIDTH-1:0]       rADR_O;
    always @(posedge clk)
      if ( ~cond_holdq ) 
-       rADR_O  <= loadMn ? B : 1'b0;
+       rADR_O  <= sa14 ? B : 1'b0;
    assign ADR_O = rADR_O;
 `else
    wire                     sa11 = 1'b0,corerunning = 1'b1;
-   wire [31:0]              INSTR = 32'h0;
    wire                     sa14,enaQ;
-   assign sa14 = ~loadMn;
    assign enaQ = ~cond_holdq;
    // m_immexp_zfind_q must be HIGHLEVEL, ALUWIDTH is fixed to 32 bits in LOWLEVEL
    m_immexp_zfind_q #( .HIGHLEVEL(1), .ALUWIDTH(ALUWIDTH) ) immexp_zfind_q
@@ -244,33 +273,30 @@ module humansized_muldiv
    wire [ALUWIDTH-1:0]      cmbM;
    assign shrM = { ADR_O[0],M[ALUWIDTH-1:1]};
    assign shlM = { M[ALUWIDTH-2:0],1'b0};   
-   assign cmbM = loadMn ? (DAT_O & shlM) | (~DAT_O & shrM ) : DAT_O;
+   assign cmbM = sa14 ? (DAT_O & shlM) | (~DAT_O & shrM ) : DAT_O;
    
    always @(posedge clk)
-     if ( enm )
-       M[ALUWIDTH-1:1] <= clrm ? 0 : cmbM[ALUWIDTH-1:1];
+     if ( ceM )
+       M[ALUWIDTH-1:1] <= clrM ? 0 : cmbM[ALUWIDTH-1:1];
    
    always @(posedge clk)
-     if ( enm | addtype[1]  )
-       M[0] <= clrm ? 0 : ~addtype[1]&cmbM[0] | addtype[1]&~cmb_rF2;    
+     if ( ceM | addtype[1]  )
+       M[0] <= clrM ? 0 : ~addtype[1]&cmbM[0] | addtype[1]&~cmb_rF2;    
 `else
    /* Bidirectional shift register
     */
-   wire                     ceM = enm;
-   wire                     clrM = clrm;
-   wire                     addtype_1 = addtype[1];
    wire                     ADR_O0 = ADR_O[0];
    
    m_shlr #( .ALUWIDTH(ALUWIDTH) ) shlr
-     (/*AUTOINST*/
+     (// Inputs
+      .loadMn                           (sa14),
+      /*AUTOINST*/
       // Outputs
       .M                                (M[ALUWIDTH-1:0]),
       // Inputs
       .clk                              (clk),
-      .loadMn                           (loadMn),
       .ceM                              (ceM),
       .clrM                             (clrM),
-      .addtype_1                        (addtype_1),
       .cmb_rF2                          (cmb_rF2),
       .ADR_O0                           (ADR_O0),
       .DAT_O                            (DAT_O[ALUWIDTH-1:0]));

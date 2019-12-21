@@ -67,7 +67,7 @@ module m_ucode
    
    assign sa11 = d[22]; // Immediate expand exactly when we use dinx.
    assign sa12 = d[ 7]; // u_io_i_latch
-   assign sa14 = d[ 8]; // Reset Q
+   assign sa14 = d[ 8]; // nReset Q
    assign sa15 = d[ 9]; // Part of enable to Q
    assign sa20 = d[14];
    assign sa21 = d[15];

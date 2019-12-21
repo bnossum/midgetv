@@ -205,20 +205,49 @@
 ////                                                                 
 ////                Shift right  Part of enable to Q (sa32)     
 ////                |            |             Part of enable to Q (sa15)
-/////               |            |             |Reset Q (sa14)
+/////               |            |             |nReset Q (sa14)
 ////                |            |             ||
-#define Qu        ( O << 0 ) |  (O << 25 ) | ( IO << 8)  // 0010 Q = B
-#define Qeu       ( O << 0 ) |  (I << 25 ) | ( OO << 8)  // Nearly Qu, but a variant to distinguish SRAM operand fetch
-#define Qs        ( O << 0 ) |  (I << 25 ) | ( IO << 8)  // 0110 If rack==0, Q hold. If rack==1, sample B
-#define Qshr      ( I << 0 ) |  (O << 25 ) | ( IO << 8)  // 0010 Q == (msbshr<<31) | (Q>>1)
-#define Qz        ( O << 0 ) |  (O << 25 ) | ( II << 8)  // 0011 Q = 0
-#define Qcndz     ( O << 0 ) |  (I << 25 ) | ( II << 8)  // 0101 Q = 0 if rack==1
-//#define QzCYZ   ( O << 0 ) |  (O << 25 ) | ( II << 8)  // 0011 Q = 0, s11 must be high for zero-find. Todo - check that this is the case, delete
-#define Qzh       ( O << 0 ) |  (O << 25 ) | ( II << 8)  // 0xx1 Q = 0 or Q hold (assumes it was zero beforehand). Changed to Q = 0
-#define Qudec     ( O << 0 ) |  (O << 25 ) | ( IO << 8)  // 1010 Q = decoded immediate
-#define Qhld      ( O << 0 ) |  (O << 25 ) | ( Ox << 8)  // x001 Q unchanged
+#define Qu        ( O << 0 ) |  (O << 25 ) | ( II << 8)  // 0010 Q = B
+#define Qeu       ( O << 0 ) |  (I << 25 ) | ( OI << 8)  // Nearly Qu, but a variant to distinguish SRAM operand fetch
+#define Qs        ( O << 0 ) |  (I << 25 ) | ( II << 8)  // 0110 If rack==0, Q hold. If rack==1, sample B
+#define Qshr      ( I << 0 ) |  (O << 25 ) | ( II << 8)  // 0010 Q == (msbshr<<31) | (Q>>1)
+#define Qz        ( O << 0 ) |  (O << 25 ) | ( IO << 8)  // 0011 Q = 0
+#define Qcndz     ( O << 0 ) |  (I << 25 ) | ( IO << 8)  // 0101 Q = 0 if rack==1
+//#define QzCYZ   ( O << 0 ) |  (O << 25 ) | ( IO << 8)  // 0011 Q = 0, s11 must be high for zero-find. Todo - check that this is the case, delete
+#define Qzh       ( O << 0 ) |  (O << 25 ) | ( IO << 8)  // 0xx1 Q = 0 or Q hold (assumes it was zero beforehand). Changed to Q = 0
+#define Qudec     ( O << 0 ) |  (O << 25 ) | ( II << 8)  // 1010 Q = decoded immediate
+#define Qhld      ( O << 0 ) |  (O << 25 ) | ( OI << 8)  // x001 Q unchanged. sa14 must be 1 here. Don't understand why it is not don't care
 #define Qx        ( O << 0 ) |  (O << 25 ) | ( Ox << 8)  // xxxx Q don't care
 #define psa00     ( I << 0 )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ///* The shift counter
 //*/
 ////               ss

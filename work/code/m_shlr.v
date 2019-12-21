@@ -41,16 +41,12 @@ module m_shlr
     input                 clk,
     input                 loadMn, //    Initiating
     input                 ceM, //       Need to hold register certain cycles
-    input                 clrM, //      Register must be clared to allow DAT_I to midgetv
-
-    input                 addtype_1, // TMP to determine lsb during unsigned subtraction in DIV
-    input                 cmb_rF2, //   Ibid.
-    
+    input                 clrM, //      Register must be clared to allow DAT_I to midgetv. Also used to determine lsb during unsigned subtraction in DIV
+    input                 cmb_rF2, //   Used to determine lsb during unsigned subtraction in DIV    
     input                 ADR_O0, //    During MULx we shift right. This is msb
     input [ALUWIDTH-1:0]  DAT_O, //     To initiate shift register
     output [ALUWIDTH-1:0] M  //         Eventually holds low 32 bits of MULT or quotient of DIV
     );
-
    
    generate
       if ( HIGHLEVEL ) begin
@@ -66,9 +62,9 @@ module m_shlr
          assign shrM0 = M[1];
          assign shift_realcmbMlsb = loadMn ? (DAT_O[0] & shlM0) | (~DAT_O[0] & shrM0) : DAT_O[0];
          assign add_realcmbMlsb = ~cmb_rF2;
-         assign realcmbMlsb = (addtype_1 & add_realcmbMlsb) | (~addtype_1 & shift_realcmbMlsb);
-         assign ceMlsb  =  ceM | addtype_1;
-         assign cmbMlsb = ceMlsb ? (clrM ? 0 : realcmbMlsb) : rM[0];
+         assign realcmbMlsb = (clrM & add_realcmbMlsb) | (~clrM & shift_realcmbMlsb);
+         assign ceMlsb  =  ceM | clrM;
+         assign cmbMlsb = ceMlsb ? realcmbMlsb : rM[0];
                          
          always @(posedge clk)
            if ( ceM ) 

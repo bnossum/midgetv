@@ -10,7 +10,7 @@ VERILOGDIR = ../code
 GEN=../generated
 SB_SIMMOD = ../code/sb_sim_rtl
 
-GCCFLAGS = -O3 -I $(OBJDIR) -I/usr/share/verilator/include -I/usr/share/verilator/include/vltstd -Wall
+GCCFLAGS = -O3 -I $(OBJDIR) -I/usr/share/verilator/include -I/usr/share/verilator/include/vltstd -Wall 
 
 VERILATORINCLUDES = -I$(VERILOGDIR) -I$(VERILOGDIR)/simcode -I$(SB_SIMMOD)  -I$(GEN)
 

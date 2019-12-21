@@ -390,15 +390,17 @@ module m_midgetv_core
 `ifdef verilator
    wire [4:0]           dbg_rshcnt;             // From inst_shiftcounter of m_shiftcounter.v
 `endif
-wire                 sa12_and_corerunning;   // From inst_alu_carryin of m_alu_carryin.v
-   /* verilator lint_on UNUSED */
+   wire                 sa12_and_corerunning;   // From inst_alu_carryin of m_alu_carryin.v
+   wire [2:0]           FUNC3;                  // From inst_opreg of m_opreg.v
+   wire                 m_condcode_killwarnings;// From inst_condcode of m_condcode.v
+   wire                 cmb_rF2;                // From inst_condcode of m_condcode.v
+      /* verilator lint_on UNUSED */
    /*AUTOWIRE*/
    // Beginning of automatic wires (for undeclared instantiated-module outputs)
    wire                 A31;                    // From inst_alu of m_alu.v
    wire [ALUWIDTH-1:0]  B;                      // From inst_alu of m_alu.v
    wire [31:0]          Di;                     // From inst_inputmux of m_inputmux.v
    wire [31:0]          Dsram;                  // From inst_ram of m_ram.v
-   wire [2:0]           FUNC3;                  // From inst_opreg of m_opreg.v
    wire [6:0]           FUNC7;                  // From inst_opreg of m_opreg.v
    wire [31:0]          INSTR;                  // From inst_opreg of m_opreg.v
    wire [31:0]          QQ;                     // From inst_cyclecnt of m_cyclecnt.v
@@ -832,19 +834,23 @@ wire                 sa12_and_corerunning;   // From inst_alu_carryin of m_alu_c
         .sa12                           (sa12),
         .Di                             (Di[31:0]));
 
-   m_condcode #(.HIGHLEVEL(HIGHLEVEL), .MULDIV(MULDIV) ) 
+   m_condcode #(.HIGHLEVEL(HIGHLEVEL), .MULDIV(1) ) 
      inst_condcode
        (// Inputs
-        .INSTR6                         (INSTR[6]),
+        .ceM                            (1'b0), // fitte
+        .use_dinx                       (1'b0), // fitte
+        .cond_holdq                     (1'b0), // fitte
         .QQ31                           (QQ[31]),
         /*AUTOINST*/
         // Outputs
         .raluF                          (raluF),
         .is_brcond                      (is_brcond),
+        .cmb_rF2                        (cmb_rF2),
+        .m_condcode_killwarnings        (m_condcode_killwarnings),
         // Inputs
         .clk                            (clk),
         .alu_carryout                   (alu_carryout),
-        .FUNC3                          (FUNC3[2:0]),
+        .INSTR                          (INSTR[31:0]),
         .A31                            (A31),
         .rzcy32                         (rzcy32));
 

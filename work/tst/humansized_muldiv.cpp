@@ -2,8 +2,8 @@
 #include "Vhumansized_muldiv.h"
 #include "verilated.h"
 
-#define W 4     // *Must* match definition in humansized_muldiv.v W==12 -> 30min execution time
-#define STEP 1  // Set higher if W big (>12)
+#define W 8     // *Must* match definition in humansized_muldiv.v W==12 -> 30min execution time
+//#define STEP 1  // Set higher if W big (>12)
 
 #define ferr(...) exit(fprintf(stdout,"%s:%d:",__FILE__,__LINE__)+fprintf(stdout,__VA_ARGS__))
 #define PRI(...) 
@@ -11,21 +11,12 @@
 //#define PRI(...) printf( __VA_ARGS__ )
 //#define PRI2(...) printf( __VA_ARGS__ )
 
+// How to display results for tiny case W = 4
 int g_dbg_decimal = 1;
-int g_tables = 1;
+int g_tables = 0;
 
 #define WMASK ((1<<(W))-1)
-//                        addtype
-//                        ||shifttype
-//                        ||||loadMn  
-//                        |||||      
-#define OP_LOAD         0b00000      
-#define OP_UNSIGNED_ADD 0b00001      
-#define OP_SLL          0b00111      
-#define OP_SIGNED_ADD   0b01001      
-#define OP_SRL          0b00011      
-#define OP_SRA          0b00101      
-#define OP_UNSIGNED_SUB 0b10001      
+
 
 #define sext(n,v) ((((uint32_t)v)^(1u<<(n-1)))-(1u<<(n-1)))
 //#define QMMASK ((1u << (2*W))-1)
@@ -35,11 +26,11 @@ int g_tables = 1;
 #define theabs(v) (( v & (1<<(W-1)) ) ? (((v^WMASK)+1)&WMASK) : v)
 
 enum {
-        OP_MULHU,             //      addop = OP_UNSIGNED_ADD; shiftop = OP_SRL; 
-        OP_MULHSU,            //      addop = OP_SIGNED_ADD;   shiftop = OP_SRA; 
-        OP_MULH,              //      addop = OP_SIGNED_ADD;   shiftop = OP_SRA; 
-        OP_DIVU,              //      addop = OP_UNSIGNED_SUB; shiftop = OP_SLL; 
-        OP_DIV                //      addop = OP_UNSIGNED_SUB; shiftop = OP_SLL; 
+        OP_MULHU,  
+        OP_MULHSU, 
+        OP_MULH,   
+        OP_DIVU,   
+        OP_DIV     
 };
 
 
@@ -65,86 +56,82 @@ void toggleclock( Vhumansized_muldiv *tb ) {
 
 /////////////////////////////////////////////////////////////////////////////
 void initregs( Vhumansized_muldiv *tb, int a) {
-        tb->op    = OP_LOAD;
-        tb->en    = 1;
-        tb->loadMn= 0;
-        tb->enm   = 1;
-        tb->clrm  = 0;
+        tb->use_dinx = 1;
+        tb->sa14  = 0;
+        tb->ceM   = 1;
+        tb->clrM  = 0;
         tb->DAT_O = a;
         tb->s_alu_carryin = 0;
         toggleclock(tb);
 }
 
 /////////////////////////////////////////////////////////////////////////////
-void addcycle( Vhumansized_muldiv *tb, int op, int b, int ci) {
+void addcycle( Vhumansized_muldiv *tb, int b, int ci, uint32_t INSTR) {
 
         PRI2( "addop=%x ", op );
-        tb->en    = 1;
-        tb->loadMn= 1;
-        tb->enm   = 0;
-        tb->clrm  = 0;
+        tb->use_dinx = 0;
+        tb->sa14  = 1;
+        tb->ceM   = 0;
+        tb->clrM  = 0;
         tb->sa00mod = 1;
         tb->s_alu = 0b100; // ADD, may be changed to PASSQ
         tb->DAT_O = b;
-        tb->op = op;
-//        tb->set_ci_1 = ci;
         tb->s_alu_carryin = ci ? 0b11 : 0b00;
+        tb->INSTR = INSTR;
         toggleclock(tb);
         //PRI2( "isadd=%d cmb_rF = %d cmb_rF2 = %d ", tb->isadd, tb->cmb_rF, tb->cmb_rF2 );
 }
 
 /////////////////////////////////////////////////////////////////////////////
-void shiftcycle( Vhumansized_muldiv *tb, int op) {
-        tb->en    = 1;
-        tb->loadMn= 1;
-        tb->enm   = 1;
-        tb->clrm  = 0;
+void shiftcycle( Vhumansized_muldiv *tb, uint32_t INSTR) {
+        tb->use_dinx = 0;
+        tb->sa14  = 1;
+        tb->ceM   = 1;
+        tb->clrM  = 0;
         tb->s_alu = 0b001; // PASSD
         tb->s_alu_carryin = 0;
         tb->sa00mod = 0;
         tb->DAT_O = 0;
-        tb->op = op;
+        tb->INSTR = INSTR;
         toggleclock(tb);
 }
 
 /////////////////////////////////////////////////////////////////////////////
 void divaddcycle( Vhumansized_muldiv *tb, int b) {
 
-        int op = OP_UNSIGNED_SUB;
-
         PRI2( "addop=%x ", op );
-        tb->en    = 1;
-        tb->loadMn= 1;
-        tb->enm   = 0;
-        tb->clrm  = 0;
+        tb->INSTR = 0x02004033; // Dont distinguish between DIV/DIVU/REM/REMU
+        tb->use_dinx = 0;
+        tb->sa14  = 1;
+        tb->ceM   = 0;
+        tb->clrM  = 1; // Flag unsigned subtraction
         tb->sa00mod = 1;
         tb->s_alu = 0b100; // ADD
         tb->DAT_O = b;
-        tb->op = op;
         tb->s_alu_carryin = 0b11;
         tb->eval(); // Can remove
         //PRI2( "(in:%x+%x+%x  %d^%d^%d isadd=%d cmb_rF=%d cmb_rF2=%d conden=%d B=0x%x) ", tb->DAT_O, tb->Q, tb->acy & 1,tb->Dmsb, tb->Pmsb, (tb->acy>>W)&1, tb->isadd, tb->cmb_rF, tb->cmb_rF2, tb->conden, tb->B );
         toggleclock(tb);
         //PRI2( "isadd=%d cmb_rF = %d cmb_rF2 = %d conden = %d ", tb->isadd, tb->cmb_rF, tb->cmb_rF2, tb->conden );
         //PRI2( "(out:%x+%x+%x  %d^%d^%d) ", tb->DAT_O, tb->Q, tb->acy & 1,tb->Dmsb, tb->Pmsb, (tb->acy>>W)&1 );
-
+        PRI2( "divdbg = %x ", tb->divdbg );
 
 }
 
 /////////////////////////////////////////////////////////////////////////////
 void divshiftcycle( Vhumansized_muldiv *tb) {
-        int op = OP_SLL; 
 
-        tb->en    = 1;
-        tb->loadMn= 1;
-        tb->enm   = 1;
-        tb->clrm  = 0;
+        tb->INSTR = 0x02004044; // Dont distinguish between DIV/DIVU/REM/REMU
+        tb->use_dinx = 0;
+        tb->sa14  = 1;
+        tb->ceM   = 1;
+        tb->clrM  = 0;
         tb->s_alu = 0b101; // SHLQ
         tb->s_alu_carryin = 0b10; // Shift M[msb] into Q[0]
         tb->sa00mod = 1;
         tb->DAT_O = WMASK;
-        tb->op = op;
         toggleclock(tb);
+        PRI2( "divdbg = %x ", tb->divdbg );
 }
 
 //
@@ -155,24 +142,21 @@ void test_div( Vhumansized_muldiv *tb, int operation, const char *msg ) {
         int32_t aa,bb;
         int facit_MOD = 0;
         
-        for ( aa = 0; aa <= WMASK; aa += STEP ) {
-                //fprintf( stderr, "." );
-                a = ( operation == OP_DIVU ) ? aa : theabs(aa);
-                
-                for ( bb = 0; bb <= WMASK; bb += STEP ) {
+        for ( aa = 0; aa <= WMASK; aa++ ) {
+                for ( bb = 0; bb <= WMASK; bb++ ) {
 
                         //
                         // Setting up
                         //
-                        b = ( operation == OP_DIVU ) ? bb :theabs(bb);
-
+                        a = ( operation == OP_DIVU ) ? aa : theabs(aa);
+                        b = ( operation == OP_DIVU ) ? bb : theabs(bb);
                         uint32_t invb = b^WMASK;                        
                         initregs( tb, a );
 
                         //
                         // Main routine
                         //
-                        PRI( "LD  a=%3d b=%3d: rF,QM=%d,0x%4.4x\n", a, b, tb->rF, tb->QM );
+                        PRI( "LD  a=%3d b=%3d: rF,QM=%d,0x%4.4x %s\n", a, b, tb->rF, tb->QM, operation == OP_DIVU ? "DIVU" : "DIV" );
                         for ( i = 0; i < W; i++ ) {
                                 PRI( "i=%d a=%3d b=%3d: ", i, a, b );
                                 divshiftcycle(tb);
@@ -195,13 +179,43 @@ void test_div( Vhumansized_muldiv *tb, int operation, const char *msg ) {
                         }
 
                         //
+                        // Checking invariant
+                        //
+                        switch ( operation ) {
+                        case OP_DIV   :
+                                if ( (int)sext(W,bb) == -1 && (aa == (1<<(W-1))) )
+                                        break; // Special case. Division overflow
+                                if ( (int)sext(W,bb)*(int)sext(W,calcA) + (int)sext(W,calcM) != (int)sext(W,aa) ) {
+                                        printf( "Invariant failed. bb=%x=%d calcA=%x=%d calcM=%x=%d aa=%x=%d\n",
+                                                bb,(int)sext(W,bb),
+                                                calcA,(int)sext(W,calcA),
+                                                calcM,(int)sext(W,calcM),
+                                                aa,(int)sext(W,aa)
+                                                );
+                                        exit(4);
+                                }
+                                break;
+                        case OP_DIVU  :
+                                if ( bb*calcA + calcM != aa ) {
+                                        printf( "Invariant failed\n" );
+                                        exit(4);
+                                }
+                        }
+                                
+                        //
                         // Checking
                         //
                         switch ( operation ) {
                         case OP_DIVU  :
-                                facitA = ( b == 0 ) ? WMASK : aa/bb;
-                                facit_MOD = a - b * facitA;
-                                facit_MOD &= WMASK;
+                                // Facit to check against.
+                                if ( bb == 0 ) {
+                                        // Division by zero. Spec say: n/0 = largest unsigned number, remainder = n
+                                        facitA = WMASK;
+                                        facit_MOD = aa;
+                                } else {                                        
+                                        facitA = aa/bb;
+                                        facit_MOD = aa - bb * facitA;
+                                }
                                 break;
                         case OP_DIV :
                                 // Facit to check against.
@@ -217,7 +231,8 @@ void test_div( Vhumansized_muldiv *tb, int operation, const char *msg ) {
                                         facitA &= WMASK;
                                 } else {                                        
                                         facitA = (int)sext(W,aa)/(int)sext(W,bb);
-                                        facit_MOD = (aa - bb * facitA) & WMASK;
+//?                                        facit_MOD = (aa - bb * facitA) & WMASK;
+                                        facit_MOD = ((int)sext(W,aa) - ((int)(sext(W,bb) * facitA))) & WMASK;
                                         facitA &= WMASK;
                                 }
                                 break;
@@ -281,7 +296,8 @@ void test_div( Vhumansized_muldiv *tb, int operation, const char *msg ) {
                                 if ( bb == 15 )
                                         printf( "\n" );
                         }
-                        
+
+                        //if ( a == 0 && b == 1 ) exit(4); // fitte  
                 }
         }
         printf( "%s", msg );
@@ -292,18 +308,28 @@ void test_div( Vhumansized_muldiv *tb, int operation, const char *msg ) {
 /////////////////////////////////////////////////////////////////////////////
 void test_mul( Vhumansized_muldiv *tb, int operation, const char *msg ) {
         int32_t a,b,i,facit;
-        int shiftop,addop;
-        
+        uint32_t INSTR;
+//      3322 2222 2222 1111 1111 11   
+//      1098 7654 3210 9876 5432 1098 7654 3210
+//	0000 001. .... .... .011 .... .011 0011  0x02003033   mulhu   
+//	0000 001. .... .... .010 .... .011 0011  0x02002033   mulhsu  
+//	0000 001. .... .... .001 .... .011 0011  0x02001033   mulh    
+//      0000 001. .... .... .100 .... .011 0011  0x02004033   div
+//      0000 001. .... .... .101 .... .011 0011  0x02005033   divu
+//      0000 001. .... .... .110 .... .011 0011  0x02006033   rem
+//      0000 001. .... .... .111 .... .011 0011  0x02007033   remu
+//
+//
+//        
         switch ( operation ) {
-        case OP_MULHU :  addop = OP_UNSIGNED_ADD; shiftop = OP_SRL; break;
-        case OP_MULHSU : addop = OP_SIGNED_ADD;   shiftop = OP_SRA; break;
-        case OP_MULH   : addop = OP_SIGNED_ADD;   shiftop = OP_SRA; break;
+        case OP_MULHU :  INSTR = 0x02003033; break;
+        case OP_MULHSU : INSTR = 0x02002033; break;
+        case OP_MULH   : INSTR = 0x02001033; break;
         default : ferr( "QQ?\n" );
         }
 
-        for ( a = 0; a <= WMASK; a += STEP ) {
-                //fprintf( stderr, "." );
-                for ( b = 0; b <= WMASK; b += STEP ) {
+        for ( a = 0; a <= WMASK; a++ ) {
+                for ( b = 0; b <= WMASK; b++ ) {
 
                         //
                         // Set up
@@ -319,9 +345,9 @@ void test_mul( Vhumansized_muldiv *tb, int operation, const char *msg ) {
                         for ( i = 0; i < W-1; i++ ) {
                                 PRI( "i=%d a=%3d b=%3d: ", i, a, b );
                                 willadd = tb->QM & 1;
-                                addcycle(tb,addop,b,0);
+                                addcycle(tb,b,0,INSTR);
                                 PRI( "  %s:%d,0x%4.4x ", willadd ? "add " : "pass", tb->rF, tb->QM );
-                                shiftcycle(tb,shiftop);
+                                shiftcycle(tb,INSTR);
                                 PRI( "shift:%d,0x%4.4x \n", tb->rF, tb->QM );
                         }
                         switch ( operation ) {
@@ -329,17 +355,17 @@ void test_mul( Vhumansized_muldiv *tb, int operation, const char *msg ) {
                         case OP_MULHSU :
                                 PRI( "i=%d a=%3d b=%3d: ", i, a, b );
                                 willadd = tb->QM & 1;
-                                addcycle(tb,addop,b,0);
+                                addcycle(tb,b,0,INSTR);
                                 PRI( "  %s:%d,0x%4.4x ", willadd ? "add " : "pass", tb->rF, tb->QM );
-                                shiftcycle(tb,shiftop);
+                                shiftcycle(tb,INSTR);
                                 PRI( "shift:%d,0x%4.4x\n", tb->rF, tb->QM );
                                 break;
                         case OP_MULH :
                                 PRI( "i=%d a=%3d b=%3d::", i, a, b );
                                 willadd = tb->QM & 1;
-                                addcycle(tb,addop,invb,1);
+                                addcycle(tb,invb,1,INSTR);
                                 PRI( "  %s:%d,0x%4.4x ", willadd ? "add " : "pass", tb->rF, tb->QM );
-                                shiftcycle(tb,shiftop);
+                                shiftcycle(tb,INSTR);
                                 PRI( "shift:%d,0x%4.4x\n", tb->rF, tb->QM );
                                 break;
                         default : ferr( "Que?\n" );

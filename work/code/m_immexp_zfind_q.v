@@ -13,14 +13,14 @@ module m_immexp_zfind_q
     input [ALUWIDTH-1:0]  B, //           Output from ALU
     input                 clk, //         System clock
     input                 sa11, //        True when immediate expand
-    input                 sa14, //        If high, clear Q. (enaQ must also be high)
+    input                 sa14, //        If low, clear Q. (enaQ must also be high)
     input                 corerunning, // When not running, keep Q clear.
     input                 enaQ, //        Update Q
    /* verilator lint_off UNUSED */
-    input [31:0]          INSTR, //       Using input [31:2] INSTRUCTION makes verilator fail in lowlevel
+    input [31:0]          INSTR, //       
    /* verilator lint_on UNUSED */
     output                rzcy32, //      When 0, ADR_O==32'h0 
-    output [ALUWIDTH-1:0] ADR_O, //         Register used in many places, also I/O address
+    output [ALUWIDTH-1:0] ADR_O, //       Register used in many places, also I/O address
     output                m_immexp_zfind_q_killwarnings
     );
    assign m_immexp_zfind_q_killwarnings = &INSTR[1:0];
@@ -133,7 +133,7 @@ module m_immexp_zfind_q
 
          always @(posedge clk) begin
             if ( enaQ ) begin
-               if ( sa14 | ~corerunning ) begin
+               if ( ~sa14 | ~corerunning ) begin
                   r_ADR_O <= {ALUWIDTH{1'b0}};
                   r_rzcy32 <= 1'b0;
                end else begin
@@ -321,12 +321,14 @@ module m_immexp_zfind_q
          
          SB_LUT4 # ( .LUT_INIT(16'hff00)) cmb_zcy32(.O(BisnotZero), .I3(zcy32), .I2(1'b0), .I1(1'b0), .I0(1'b0));
 
-         wire           sa14_or_nCORERUNNING;
-         SB_LUT4 # ( .LUT_INIT(16'hbbbb)) cmb_sa14_or_nCORERUNNING( .O(sa14_or_nCORERUNNING), .I3(1'b0), .I2(1'b0), .I1(corerunning), .I0(sa14));
+//         SB_LUT4 # ( .LUT_INIT(16'hbbbb)) cmb_sa14_or_nCORERUNNING( .O(sa14_or_nCORERUNNING), .I3(1'b0), .I2(1'b0), .I1(corerunning), .I0(sa14));
+         wire           nsa14_or_nCORERUNNING;
+         SB_LUT4 # ( .LUT_INIT(16'h7777)) cmb_sa14_or_nCORERUNNING( .O(nsa14_or_nCORERUNNING), .I3(1'b0), .I2(1'b0), .I1(corerunning), .I0(sa14));
          for ( j = 0; j < 32; j = j + 1 ) begin : blk0
-            SB_DFFESR r(.Q(ADR_O[j]), .C(clk), .E(enaQ), .D(F[j]), .R(sa14_or_nCORERUNNING));
+            SB_DFFESR r(.Q(ADR_O[j]), .C(clk), .E(enaQ), .D(F[j]), .R(nsa14_or_nCORERUNNING));
          end
-         SB_DFFESR rNE0(.Q(rzcy32), .D(BisnotZero), .C(clk), .E(enaQ), .R(sa14));
+//         SB_DFFESR rNE0(.Q(rzcy32), .D(BisnotZero), .C(clk), .E(enaQ), .R(sa14));
+         SB_DFFESR rNE0(.Q(rzcy32), .D(BisnotZero), .C(clk), .E(enaQ), .R(nsa14_or_nCORERUNNING));
       end
       endgenerate
    

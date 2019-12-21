@@ -208,7 +208,7 @@ module m_progressctrl
          wire next_WE_O = (B[31] | B[30]) & ~badalignment;
          wire next_ctrlreg_we = (B[31:28] == 4'b0010) & ~badalignment;
          always @(posedge clk)
-           if ( (sa14 | RST_I | buserror) ) begin
+           if ( (~sa14 | RST_I | buserror) ) begin
               rWE_O       <= 1'b0;
               rctrlreg_we <= 1'b0;
            end else if ( sa43 & ~buserror ) begin
@@ -223,12 +223,13 @@ module m_progressctrl
          wire next_WE_O,next_ctrlreg_we;
          wire clearweregs,updateweregs,ioregion;
 //         assign ioregion = B[31:28] == 4'b0010;
-//         assign clearweregs = (sa14 | RST_I | buserror);
+//         assign clearweregs = (~sa14 | RST_I | buserror);
 //         assign next_WE_O       = ~clearweregs & ((B[31] | B[30])       & ~badalignment);
 //         assign next_ctrlreg_we = ~clearweregs & ( ioregion & ~badalignment);
 //         assign updateweregs = (sa43 & ~buserror) | clearweregs;
          SB_LUT4 #(.LUT_INIT(16'h0004)) l_ioregion(.O(ioregion), .I3(B[31]), .I2(B[30]), .I1(B[29]), .I0(B[28]));
-         SB_LUT4 #(.LUT_INIT(16'hfefe)) l_clearweregs(.O(clearweregs), .I3(1'b0), .I2(sa14), .I1(RST_I), .I0(buserror));
+//         SB_LUT4 #(.LUT_INIT(16'hfefe)) l_clearweregs(.O(clearweregs), .I3(1'b0), .I2(sa14), .I1(RST_I), .I0(buserror)); 
+         SB_LUT4 #(.LUT_INIT(16'h7f7f)) l_clearweregs(.O(clearweregs), .I3(1'b0), .I2(sa14), .I1(RST_I), .I0(buserror)); 
          SB_LUT4 #(.LUT_INIT(16'h000e)) l_next_WE_O(.O(next_WE_O), .I3(clearweregs), .I2(badalignment), .I1(B[31]), .I0(B[30]));
 
          SB_LUT4 #(.LUT_INIT(16'hf4f4)) I_updateweregs( .O(updateweregs), .I3(1'b0), .I2(clearweregs), .I1(sa43), .I0(buserror));
