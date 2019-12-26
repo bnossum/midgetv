@@ -1,4 +1,4 @@
-        # Check MUL
+        # Check DIVU
         #===========================================================
 #include "midgetv.inc"
         .globl _start
@@ -15,21 +15,11 @@ _start:
         la      x1,_trap_handler
         sw      x1,%lo(__mtvec)(x0)        
 
-        li      x4,0x00010000
-        li      x2,0xffff0000
-        li      x1,0x0000ffff
-        mul     x3,x1,x2        
-        bne     x3,x4,5f
-
-        li      x1,1
-        mul     x2,x1,x1
-        bne     x1,x2,1f
-        
-        li      x1,0x12345678
-        mul     x1,x1,x1
-        li      x2,0x1df4d840
-        bne     x1,x2,2f
-
+        li      x4,0x40
+        li      x1,0x80
+        li      x2,2
+        divu    x3,x1,x2
+        bne     x3,x4,1f
         simend
         
 1:      simerr  1

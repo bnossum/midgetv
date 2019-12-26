@@ -52,7 +52,7 @@ _start:
           
           RVTEST_IO_WRITE_STR(x31, "# Test number 1 - corner cases\n")
           // SIGNED RS1
-   
+
         //                                        rs1   rs2     
    	TEST_MULDIV(mulhsu, x17, x18, 0,          0x0,  0x0,        1)
    	TEST_MULDIV(mulhsu, x19, x20, 0,          0x0,  0x1,        2)
@@ -98,7 +98,7 @@ _start:
 	TEST_MULDIV(mulhsu, x8, x9, 0xffffffff, 0x80000000, 0x1, 22)
 	TEST_MULDIV(mulhsu, x11, x12, 0x80000000, 0x80000000, -0x1, 23)
 	TEST_MULDIV(mulhsu, x13, x14, 0xc0000000, 0x80000000, 0x7fffffff, 24)
- 	TEST_MULDIV(mulhsu, x15, x16, 0xc0000000, 0x80000000, 0x80000000, 25)
+	TEST_MULDIV(mulhsu, x15, x16, 0xc0000000, 0x80000000, 0x80000000, 25)
  
  	RVTEST_IO_WRITE_STR(x31, "Test End\n")
         simend
