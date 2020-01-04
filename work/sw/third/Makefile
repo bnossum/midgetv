@@ -20,9 +20,9 @@ TARGETSEBR  := \
 	t301 t302 t303 t304 t305 t306 t307 \
 	t308 t309 t310 t311 t312 t313
 
-TARGETSSRAM := 
-
-# t301 t302 t303 t304
+TARGETSSRAM := \
+	t301 t302 t303 t304 t305 t306 t307 \
+	t308 t309 t310 t311 t312 t313
 
 OBJDIREBR := ../../obj_dir/third
 OBJDIRSRAM := ../../obj_dir/sthird
@@ -56,7 +56,7 @@ all: ../../obj_dir/results3.txt $(BINTARGETSEBR) $(BINTARGETSSRAM) \
 	cat $(RESULTSEBR) $(RESULTSSRAM) > $@
 
 # When compiling
-# Specify only rv32i instructions to be used.
+# Specify only rv32im instructions to be used.
 # Bare metal.
 # Some include file locations
 GCCFLAGS = -mabi=ilp32 -march=rv32im -nodefaultlibs -nostartfiles -I ../inc/ -I ./
