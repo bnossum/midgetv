@@ -1,0 +1,7 @@
+.sconsign.dblite
+hardware.asc
+hardware.bin
+hardware.blif
+iCEcube2_flow/
+ice40loaderprog.hv
+
