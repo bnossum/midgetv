@@ -4,7 +4,7 @@ Version=Lattice Semiconductor Corporation iCEcube - Release: 2017.08.27940 - Bui
 ProjectName=iCEcube2_flow
 Vendor=SiliconBlue
 Synthesis=lse
-ProjectVFiles=../iceblink40-hx1k.v
+ProjectVFiles=../iceblink40-hx1k.v=work
 ProjectCFiles=
 CurImplementation=iCEcube2_flow_Implmnt
 Implementations=iCEcube2_flow_Implmnt
@@ -14,7 +14,7 @@ IPGeneration=false
 [iCEcube2_flow_Implmnt]
 DeviceFamily=iCE40
 Device=HX1K
-DevicePackage=CB132
+DevicePackage=VQ100
 DevicePower=
 NetlistFile=iCEcube2_flow_Implmnt/iCEcube2_flow.edf
 AdditionalEDIFFile=
@@ -67,7 +67,7 @@ VHDL2008=False
 VerilogIncludeSearchPath=
 
 [tool options]
-PlacerEffortLevel=mid
+PlacerEffortLevel=std
 PlacerAutoLutCascade=no
 PlacerAutoRamCascade=no
 PlacerPowerDriven=no

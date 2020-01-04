@@ -44,6 +44,7 @@
 `include "../../generated/m_2ebr.v"
 `include "../../code/m_ucodepc.v"
 `include "../../code/m_progressctrl.v"
+`include "../../code/m_shlr.v"
 `include "../../code/m_midgetv_core.v"
 
 
@@ -164,9 +165,9 @@ endmodule
       
 /* 
  * In general, this should be enough to load an image:
- *     python ../../../apio/apio clean
- *     python ../../../apio/apio build
- *     sudo python3 ../../../iceBurn/iCEburn.py -v -ew hardware.bin 
+ *     python ../../../../apio/apio clean
+ *     python ../../../../apio/apio build
+ *     sudo python3 ../../../../iceBurn/iCEburn.py -v -ew hardware.bin 
  * 
  * Other useful commands:
  * arachne-pnr -d 1k -P vq100 -p iceblink40-hx1k.pcf -o hardware.asc hardware.blif

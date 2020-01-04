@@ -131,7 +131,6 @@ _start:
         
         li      x1,NOSUCHREG_ADR
 
-        
 OffendingLW:    
         lw      x2,0(x1)
 
@@ -154,7 +153,7 @@ OffendingLBU:
         li      x10,5
 OffendingSW:
         sw      x2,0(x1)
-
+        
         li      x10,6
 OffendingSH:
         sh      x2,0(x1)
