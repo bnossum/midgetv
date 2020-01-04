@@ -43,7 +43,7 @@ typedef struct {
         volatile uint32_t       ex_rtmp;       
         const volatile uint32_t mtime;         // Write adr is different
         volatile uint32_t       mtimeh;        
-        uint32_t                freefornow_e8;
+        const uint32_t          bitrate;
         const volatile uint32_t minstreth;     // Write adr is different
         volatile uint32_t       mcycleh;       
         uint32_t                freefornow_f4;

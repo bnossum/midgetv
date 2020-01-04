@@ -5,18 +5,15 @@ midgetv_dump_compliance:
         la      s2,midgetv_compliance_data_end
         li      a1,0x60000004   // "USART"
 
-2:      add     s3,s1,12
-1:      lw      a0,(s3)
+2:      lw      a0,(s1)
         jal     dump_word
-        addi    s3,s3,-4
-        bge     s3,s1,1b
         li      a0,'\n'
         simputc 10
-        sw      a0,(a1)         // Write '\n' to USART
-        addi    s1,s1,16
+        sw      a0,(a1)
+        addi    s1,s1,4
         blt     s1,s2,2b
         simend
-
+        
         /////////////////////////////////////////////////////////////////////////////
 dump_word:
         li      t2,'9'

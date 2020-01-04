@@ -166,10 +166,24 @@ EntryCSR:                               //0x108 Microcode branches to here when 
         // exists.
         // 
         // 
-        // A few utility macros used during simulation:
+        // A few utility macros used during simulation.
         // --------------------------------------------
         // I use the hint "sltu x0,rs1,rs2" as follows:
         // sltu x0, x((simarg)>>5) & 31, x((simarg) & 31).
+        //
+        // In compliance check program I-RF_x0-01.S the instruction 'sltu x0,x1,x2' 
+        // appear. In program I-SLTU-01.S, the instruction "sltu x0,x16,x31" appear.
+        //
+        // 3322222222221111111111
+        // 10987654321098765432109876543210
+        // --------------------------------
+        // 00000000001000001011000000110011   sltu x0,x1,x2
+        // 00000001000011111011000000110011   sltu x0,x31,x16
+        //        yyyyyxxxxx
+        //        rs2  rs1
+        //
+        // is excluded from my interpretation of hints. This corresponds to 0x0020b033,
+        // and 0x010fb033 so simarg = 0x041 and 0x21f are illegal.
         //
         // 0x2ff-0x000  simerr     End simulation with an error code
         // 0x31f-0x300  simputc()  Report macro

@@ -15,6 +15,7 @@
         midgetv_compliance_data_begin:          \
 
 #define RV_COMPLIANCE_DATA_END                  \
+        .align 4;                               \
         midgetv_compliance_data_end:
 
 #endif
