@@ -76,9 +76,10 @@ int main(int argc, char **argv) {
         */
         fprintf( stderr, "Runtime around 80 seconds on a Lenovo x230.\n" );
         
-        int dbg = 10;
+        int dbg = 2;
         int nmi_messageseen = 0;
         INSTR = 3;        
+
         do {
                 tb->INSTR = INSTR;
                 tb->eval();
@@ -87,23 +88,17 @@ int main(int argc, char **argv) {
                 hit[minx]++;
                 
                 if ( reachability[minx] == 0 ) {
-                        if ( pocketdissass( 1, 0, INSTR ) != -1 ) {
-                                if ( dbg ) {
-                                        printf( " Pocket dissasembly say: " );
-                                        pocketdissass( 0, 0, INSTR );
-                                        printf( "Reached index 0x%x should be inaccessible, but is reached with an instruction that should be decoded\n", minx );
-                                        if ( dbg > 1 )
-                                                ferr( "Aborts\n" );
-                                }
-                        }
                         if ( !suspend[minx] ) {
+
+                                if ( pocketdissass( 1, 0, INSTR ) != -1 ) 
+                                        printf( "\nReached index 0x%x should be inaccessible, but is reached with an instruction that should be decoded\n", minx );
                                 if ( dbg ) {
-                                        printf( "Reached index that should be inaccessible\n" );
                                         printf( "A problem at base instruction 0x%8.8x\n", INSTR );
                                         printf( "Pocked dissasembly say: " );
                                         pocketdissass( 0, 0, INSTR );
                                         printf( "\nminx = 0x%2.2x\n", minx );
-                                        if ( dbg > 1)
+                                        
+                                        if ( dbg > 2 )
                                                 ferr( "Aborts\n" );
                                 }
                                 suspend[minx] = 1;

@@ -396,7 +396,7 @@ void simprintf( uint32_t cy, Vm_ice40sim_SRAM *tb ) {
         g_info.interruptinfo  = STARTOFHIER->genblk1__DOT__inst_status_and_interrupts->get_interruptinfo();
         g_info.sel_O          = STARTOFHIER->get_SEL_O();
         g_info.enaQ           = STARTOFHIER->get_enaQ();
-        g_info.clearQ         = STARTOFHIER->get_clearQ();
+        g_info.nclearQ        = STARTOFHIER->get_nclearQ();
         g_info.wai            = STARTOFHIER->get_Wai();
         g_info.iwe            = STARTOFHIER->get_iwe();
 //        g_info.theio          = STARTOFHIER->get_theio(); Now removed  
@@ -406,7 +406,9 @@ void simprintf( uint32_t cy, Vm_ice40sim_SRAM *tb ) {
         g_info.Di             = STARTOFHIER->get_Di();
         g_info.aluop          = STARTOFHIER->get_ALUOP();
         g_info.corerunning    = STARTOFHIER->get_corerunning();
-//        g_info.M              = STARTOFHIER->get_M();
+        g_info.shiftcount     = STARTOFHIER->get_shiftcnt();
+        g_info.M              = STARTOFHIER->get_M();
+        g_info.raluF          = STARTOFHIER->get_raluF();
         common_simprintf( &g_info, cy );
 }
 

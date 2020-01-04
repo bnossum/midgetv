@@ -2,14 +2,14 @@
 #include "Vhumansized_muldiv.h"
 #include "verilated.h"
 
-#define W 8     // *Must* match definition in humansized_muldiv.v W==12 -> 30min execution time
+#define W 4     // *Must* match definition in humansized_muldiv.v W==12 -> 30min execution time
 //#define STEP 1  // Set higher if W big (>12)
 
 #define ferr(...) exit(fprintf(stdout,"%s:%d:",__FILE__,__LINE__)+fprintf(stdout,__VA_ARGS__))
-#define PRI(...) 
-#define PRI2(...) 
-//#define PRI(...) printf( __VA_ARGS__ )
-//#define PRI2(...) printf( __VA_ARGS__ )
+//#define PRI(...) 
+//#define PRI2(...) 
+#define PRI(...) printf( __VA_ARGS__ )
+#define PRI2(...) printf( __VA_ARGS__ )
 
 // How to display results for tiny case W = 4
 int g_dbg_decimal = 1;
@@ -66,9 +66,8 @@ void initregs( Vhumansized_muldiv *tb, int a) {
 }
 
 /////////////////////////////////////////////////////////////////////////////
-void addcycle( Vhumansized_muldiv *tb, int b, int ci, uint32_t INSTR) {
+void muladdcycle( Vhumansized_muldiv *tb, int b, int ci, uint32_t INSTR) {
 
-        PRI2( "addop=%x ", op );
         tb->use_dinx = 0;
         tb->sa14  = 1;
         tb->ceM   = 0;
@@ -83,7 +82,7 @@ void addcycle( Vhumansized_muldiv *tb, int b, int ci, uint32_t INSTR) {
 }
 
 /////////////////////////////////////////////////////////////////////////////
-void shiftcycle( Vhumansized_muldiv *tb, uint32_t INSTR) {
+void mulshiftcycle( Vhumansized_muldiv *tb, uint32_t INSTR) {
         tb->use_dinx = 0;
         tb->sa14  = 1;
         tb->ceM   = 1;
@@ -99,7 +98,6 @@ void shiftcycle( Vhumansized_muldiv *tb, uint32_t INSTR) {
 /////////////////////////////////////////////////////////////////////////////
 void divaddcycle( Vhumansized_muldiv *tb, int b) {
 
-        PRI2( "addop=%x ", op );
         tb->INSTR = 0x02004033; // Dont distinguish between DIV/DIVU/REM/REMU
         tb->use_dinx = 0;
         tb->sa14  = 1;
@@ -297,7 +295,7 @@ void test_div( Vhumansized_muldiv *tb, int operation, const char *msg ) {
                                         printf( "\n" );
                         }
 
-                        //if ( a == 0 && b == 1 ) exit(4); // fitte  
+                        //if ( a == 0 && b == 0 ) exit(4); // fitte  
                 }
         }
         printf( "%s", msg );
@@ -320,7 +318,17 @@ void test_mul( Vhumansized_muldiv *tb, int operation, const char *msg ) {
 //      0000 001. .... .... .111 .... .011 0011  0x02007033   remu
 //
 //
-//        
+//
+
+//#define _MULHU_0  MULHU_0, "MULHU  Store rs1 to Ryy. Next read rs2. Q=0",           isr_none     | A_passd   | Wyy   | RS2       | Qz   | srDec | u_cont         | n(MULHU_1)
+//#define _MULHU_1  MULHU_1, "       rM<=RS2,  Rjj<=Q=0. next read RS1. shcnt--",     isr_none|MLD | A_passq   | Wjj   | RS1       | Qz   | sr_h  | u_cont         | n(MULHU_2)
+//#define _MULHU_2  MULHU_2, "       Q <= rM[0] ? Q+rs2 : Q. Prepare shr/sar",        isr_none|MMA | A_addDQ   | Wnn   | r00000000 | Qu   | srDec | u_cont | psa00 | n(MULHU_3) // Must be even ucode adr
+//#define _MULHU_3  MULHU_3, "       Shift Q and rM. Prepare read rs1",               isr_none|MSL | A_passd   | Wnn   | RS1       | Qu   | sr_h  | u_cont         | n(MULHU_2)
+//#define _MULHU_4  MULHU_4, "       Prepare read Ryy.",                              isr_none     | A_xx      | Wnn   | Ryy       | Qhld | sr_h  | u_cont         | n(MULHU_5) // Must follow MULHU_2
+//#define _MULHU_5  MULHU_5, "       Q <= rM[0] ? Q+Ryy : Q. Prepare read Rjj",       isr_none|MMA | A_addDQ   | Wnn   | Rjj       | Qu   | sr_h  | u_cont         | n(MULHU_6)
+//#define _MULHU_6  MULHU_6, "       Q <= rM[0] ? Q+Rjj : Q. Prepare last shift",     isr_none|MMA | A_addDQ   | Wnn   | r00000000 | Qu   | sr_h  | u_cont | psa00 | n(MULHU_7)
+//#define _MULHU_7  MULHU_7, "       Shift Q and rM, this is the multiply result.",   isr_none|MSL | A_passd   | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)
+        
         switch ( operation ) {
         case OP_MULHU :  INSTR = 0x02003033; break;
         case OP_MULHSU : INSTR = 0x02002033; break;
@@ -345,9 +353,9 @@ void test_mul( Vhumansized_muldiv *tb, int operation, const char *msg ) {
                         for ( i = 0; i < W-1; i++ ) {
                                 PRI( "i=%d a=%3d b=%3d: ", i, a, b );
                                 willadd = tb->QM & 1;
-                                addcycle(tb,b,0,INSTR);
+                                muladdcycle(tb,b,0,INSTR);
                                 PRI( "  %s:%d,0x%4.4x ", willadd ? "add " : "pass", tb->rF, tb->QM );
-                                shiftcycle(tb,INSTR);
+                                mulshiftcycle(tb,INSTR);
                                 PRI( "shift:%d,0x%4.4x \n", tb->rF, tb->QM );
                         }
                         switch ( operation ) {
@@ -355,17 +363,19 @@ void test_mul( Vhumansized_muldiv *tb, int operation, const char *msg ) {
                         case OP_MULHSU :
                                 PRI( "i=%d a=%3d b=%3d: ", i, a, b );
                                 willadd = tb->QM & 1;
-                                addcycle(tb,b,0,INSTR);
+                                muladdcycle(tb,0,0,INSTR);
+                                muladdcycle(tb,b,0,INSTR);
                                 PRI( "  %s:%d,0x%4.4x ", willadd ? "add " : "pass", tb->rF, tb->QM );
-                                shiftcycle(tb,INSTR);
+                                mulshiftcycle(tb,INSTR);
                                 PRI( "shift:%d,0x%4.4x\n", tb->rF, tb->QM );
                                 break;
                         case OP_MULH :
                                 PRI( "i=%d a=%3d b=%3d::", i, a, b );
                                 willadd = tb->QM & 1;
-                                addcycle(tb,invb,1,INSTR);
+                                muladdcycle(tb,invb,0,INSTR);
+                                muladdcycle(tb,   1,0,INSTR);
                                 PRI( "  %s:%d,0x%4.4x ", willadd ? "add " : "pass", tb->rF, tb->QM );
-                                shiftcycle(tb,INSTR);
+                                mulshiftcycle(tb,INSTR);
                                 PRI( "shift:%d,0x%4.4x\n", tb->rF, tb->QM );
                                 break;
                         default : ferr( "Que?\n" );

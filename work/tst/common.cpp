@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
  * Part of midgetv
- * 2019. Copyright B. Nossum.
+ * 2019-2020. Copyright B. Nossum.
  * For licence, see LICENCE
  * -----------------------------------------------------------------------------
  * This file needs a cleanup.
@@ -528,35 +528,35 @@ int p_raluF( int lnr, int raluF ) {
 }
         
 /////////////////////////////////////////////////////////////////////////////
-int p_ioa( int lnr, uint32_t ioa, int enaQ, int clearQ ) {
+int p_ioa( int lnr, uint32_t ioa, int enaQ, int nclearQ ) {
         int n;
         if ( (lnr & 0x1c) == 0 ) {
                 switch ( lnr & 3 )  {
-                case 0 :n = printf( "          " ); break;
-                case 1 :n = printf( "          " ); break;
-                case 2 :n = printf( "          " ); break;
-                case 3 :n = printf( "ADR_O___  " ); break;
+                case 0 :n = printf( "           " ); break;
+                case 1 :n = printf( "           " ); break;
+                case 2 :n = printf( "           " ); break;
+                case 3 :n = printf( "ADR_O___   " ); break;
                 }
         } else {
-                static int prev_enaQ;
-                static int prev_clearQ;
-                
-                if ( !prev_enaQ ) {
-                        n = printf( "%8.8xh ", ioa );
-                } else {
-                        if ( prev_clearQ ) {
-                                //if ( ioa != 0 )
-                                //        printf( "Internal\n");
-                                // Alas, above test fails when main loop of simulation say ST_HINT_SILENCE
-                                // So be it.
-                                n = printf( "=0 (clr)  " );
-                        } else {
-                                n = printf( "%8.8x  ", ioa );
-                        }
-                }
-                prev_enaQ = enaQ;    
-                prev_clearQ = clearQ;
-//                n = printf( "%8.8x ", ioa );
+//                static int prev_enaQ;
+//                static int prev_clearQ;
+//                
+//                if ( !prev_enaQ ) {
+//                        n = printf( "%8.8xh ", ioa );
+//                } else {
+//                        if ( prev_clearQ ) {
+//                                //if ( ioa != 0 )
+//                                //        printf( "Internal\n");
+//                                // Alas, above test fails when main loop of simulation say ST_HINT_SILENCE
+//                                // So be it.
+//                                n = printf( "=0 (clr)  " );
+//                        } else {
+//                                n = printf( "%8.8x  ", ioa );
+//                        }
+//                }
+//                prev_enaQ = enaQ;    
+//                prev_clearQ = clearQ;
+                n = printf( "%8.8x %c ", ioa, enaQ ? (nclearQ ? 'u' : 'z') : 'h' );
         }
         return n;                        
 }
@@ -789,8 +789,8 @@ TOP:
         if ( p->CONF & INFO_rDee           ) p_generic32u( lnr, "rDee____ ", p->rDee );
         if ( p->CONF & INFO_DAT_O          ) p_generic32u( lnr, "DAT_O___ ", p->DAT_O );
         if ( p->CONF & INFO_Di             ) p_generic32u( lnr, "Di[31:0] ", p->Di );
-        if ( p->CONF & INFO_ADR_O          ) p_ioa( lnr, p->ADR_O, p->enaQ, p->clearQ );
-        if ( p->CONF & INFO_A              ) p_generic32u( lnr, "M[31:0]_ ", p->M );
+        if ( p->CONF & INFO_ADR_O          ) p_ioa( lnr, p->ADR_O, p->enaQ, p->nclearQ );
+        if ( p->CONF & INFO_M              ) p_generic32u( lnr, "M[31:0]_ ", p->M );
         if ( p->CONF & INFO_ALUOP          ) p_aluop( lnr, p->aluop );
         if ( p->CONF & INFO_RALUF          ) p_raluF( lnr, p->raluF );
         if ( p->CONF & INFO_B              ) p_generic32u( lnr, "B[31:0]_ ", p->B );
@@ -832,10 +832,10 @@ TOP:
         if ( p->CONF & INFO_dissassembly ) {
                 if ( (lnr & 0x1c) == 0 ) {
                         switch ( lnr & 3 )  {
-                        case 0 : printf( "                     " ); break;
-                        case 1 : printf( "                     " ); break;
-                        case 2 : printf( "                     " ); break;
-                        case 3 : printf( "Assembler_instruction" ); break;
+                        case 0 : printf( "               " ); break;
+                        case 1 : printf( "               " ); break;
+                        case 2 : printf( "               " ); break;
+                        case 3 : printf( "Assembler_instr" ); break;
                         }
                 } else {
                         if ( p->usedinx )

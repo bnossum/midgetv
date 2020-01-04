@@ -41,7 +41,7 @@
 #define INFO_ucodedbg        0x0200000
 #define INFO_dissassembly    0x0400000
 #define INFO_shiftcount      0x0800000
-#define INFO_A               0x1000000
+#define INFO_M               0x1000000
 #define INFO_RALUF           0x2000000
 
 #define DEFAULT_UCODETEXTLEN 55
@@ -66,7 +66,7 @@ typedef struct {
         int sel_O;
         uint32_t B;
         int enaQ;
-        int clearQ;
+        int nclearQ;
         int wai;
         int iwe;
         uint32_t theio;
