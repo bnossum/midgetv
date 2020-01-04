@@ -208,7 +208,8 @@ uint64_t process( TBL *tp, uint64_t maskedcolumns ) {
         while ( (m  = nrdistinctlines( indirinx, usedindexes, tp, maskedcolumns )) > (1<<LUTSIZE)) {
                 ma = m;
                 fprintf( fo, " * " );
-                for ( j = NRCOLUMNS-1; j >= 0; j-- ) {
+//                for ( j = NRCOLUMNS-1; j >= 0; j-- ) {
+                for ( j = 0; j < NRCOLUMNS; j++ ) {
                         if ( maskedcolumns & (1uLL << j ) ) {
                                 if (originalremoved & (1uLL << j ) ) {
                                         fprintf( fo, "  x " );
