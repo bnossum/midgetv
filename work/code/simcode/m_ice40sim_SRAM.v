@@ -16,7 +16,8 @@ module m_ice40sim_SRAM
       MTIMETAP           = 14, 
       HIGHLEVEL          = 0,
       LAZY_DECODE        = 0,
-      DISREGARD_WB4_3_55 = 0
+      DISREGARD_WB4_3_55 = 0,
+      MULDIV             = 1
       )
    (
     input CLK_I, // Toggled from verilator
@@ -34,7 +35,8 @@ module m_ice40sim_SRAM
        .MTIMETAP           ( MTIMETAP            ),
        .HIGHLEVEL          ( HIGHLEVEL           ),
        .LAZY_DECODE        ( LAZY_DECODE         ),
-       .DISREGARD_WB4_3_55 ( DISREGARD_WB4_3_55  )
+       .DISREGARD_WB4_3_55 ( DISREGARD_WB4_3_55  ),
+       .MULDIV             ( MULDIV              )
        )
    inst_ice40sim_EBRonly
      (/*AUTOINST*/

@@ -125,25 +125,32 @@
  *              s_alu[1:0] and s_alu_carryin to save one column in the
  *              control table. Optimalization not done now.
  *
- *                       Cyclecnt etc   
- *                       sa17           s_alu[2:0]
- *                       |sa16          |||s_alu_carryin[1:0]
- *                       ||             |||||         */
-#define A_nearXOR      ( IO << 10 ) | ( OOOxx << 1 )  // B = D^(~Q)                               
-#define A_passd        ( IO << 10 ) | ( OOIxx << 1 )  // D
-#define A_invq         ( IO << 10 ) | ( OIOxx << 1 )  // ~Q
-#define A_nearAND      ( IO << 10 ) | ( OIIxx << 1 )  // D&(~Q)           
-#define A_addDQ        ( IO << 10 ) | ( IOOOO << 1 )  // D+Q
-#define A_cycnt        ( II << 10 ) | ( IOOOO << 1 )  // D+cyclecnt
-#define A_add1         ( IO << 10 ) | ( IOOII << 1 )  // D+Q+1
-#define A_add3         ( OO << 10 ) | ( IOOOO << 1 )  // D+(Q|3)+0
-#define A_add4         ( OO << 10 ) | ( IOOII << 1 )  // D+(Q|3)+1
-#define A_shlq         ( IO << 10 ) | ( IOIOO << 1 )  // B = (QQ<<1)|cin (with D=0xffffffff)
-#define A_nearOR       ( IO << 10 ) | ( IIIOO << 1 )  // (~D)|Q
-#define A_passq        ( IO << 10 ) | ( IIOOO << 1 )  // Let through Q
-#define A_passq4       ( OO << 10 ) | ( IIOII << 1 )  // Let through (Q|3)+1
-#define A_passq_F      ( IO << 10 ) | ( IIOOI << 1 )  // Let through Q+flgF
-#define A_xx           ( xO << 10 ) | ( xxxxx << 1 )  // ALU is don't care
+ *                               Cyclecnt etc   
+ *                               sa17           s_alu[2:0]
+ *                               |sa16          |||s_alu_carryin[1:0]
+ *                               ||             |||||         */
+#define A_nearXOR              ( IO << 10 ) | ( OOOxx << 1 )  // B = D^(~Q)                               
+#define A_iszero               ( IO << 10 ) | ( OOOII << 1 )  // Used in DIV to test for zero in a particular setting
+#define A_passd                ( IO << 10 ) | ( OOIxx << 1 )  // D
+#define A_invq                 ( IO << 10 ) | ( OIOxx << 1 )  // ~Q
+#define A_nearAND              ( IO << 10 ) | ( OIIxx << 1 )  // D&(~Q)           
+#define A_addDQ    (I<<34) |   ( IO << 10 ) | ( IOOOO << 1 )  // D+Q                                         
+#define A_addDQm   (O<<34) |   ( IO << 10 ) | ( IOOOO << 1 )  // D+Q  may be changed to a passQ              
+#define A_cycnt    (I<<34) |   ( II << 10 ) | ( IOOOO << 1 )  // D+cyclecnt                                  
+#define A_add1     (I<<34) |   ( IO << 10 ) | ( IOOII << 1 )  // D+Q+1
+#define A_add1b                ( IO << 10 ) | ( IOOII << 1 )  // D+Q+1
+#define A_usub     (I<<34) |   ( IO << 10 ) | ( IOOII << 1 )  // D+Q+1 (D previously inverted)
+#define A_add3     (I<<34) |   ( OO << 10 ) | ( IOOOO << 1 )  // D+(Q|3)+0                                   
+//#define A_add4     (I<<34) |   ( OO << 10 ) | ( IOOII << 1 )  // D+(Q|3)+1                                   
+#define A_add4     (II<<34) |   ( OO << 10 ) | ( IOOII << 1 )  // D+(Q|3)+1                                   
+// No luck#define A_add4                 ( OO << 10 ) | ( IOOII << 1 )  // D+(Q|3)+1                                   
+#define A_shlq                 ( IO << 10 ) | ( IOIOO << 1 )  // B = (QQ<<1)|cin (with D=0xffffffff)
+#define A_shlqdiv              ( IO << 10 ) | ( IOIIO << 1 )  // B = (QQ<<1)|M[0] (with D=0xffffffff)
+#define A_nearOR               ( IO << 10 ) | ( IIIOO << 1 )  // (~D)|Q
+#define A_passq                ( IO << 10 ) | ( IIOOO << 1 )  // Let through Q
+#define A_passq4               ( OO << 10 ) | ( IIOII << 1 )  // Let through (Q|3)+1
+#define A_passq_F              ( IO << 10 ) | ( IIOOI << 1 )  // Let through Q+flgF
+#define A_xx                   ( xO << 10 ) | ( xxxxx << 1 )  // ALU is don't care
 
 
 #define nxtSTB (I << 32) // sa42 : Possibly STB_O or sram_stb to be set high next cycle
@@ -247,12 +254,25 @@
 #define wordaligned   ( O << 6) | ( O << 26) | ( O << 7) | ( IIO << 22) // 
 #define hwordaligned  ( O << 6) | ( O << 26) | ( O << 7) | ( OIO << 22) // 
 
+
+
+        
 #define isr_none      ( OO << 28 ) // No trap or CSR entry or exit
 #define isr_use_ij    ( OI << 28 ) // inCSR = 0; ij bit 1 determines if we are to do MIE = MPIE; MPIE = 1.
 #define isr_intoCSR   ( IO << 28 ) // inCSR = 1;
 #define isr_intoTrap  ( II << 28 ) // MPIE = MIE; MIE = 0;
 
-#define MIDGETV_UCODE_NREQ 34 // Not including index
+/* 3 extra variables when MULDIV ? */
+
+#define MCLR               ( II << 34) // Transfer M to rDee, clearM
+//#define MCLR 0
+#define MLD                ( IO << 34) // ceM==1 clrM==0, sa14 == 0, so loads
+#define MSL                ( IO << 34) // ceM==1 clrM==0, sa14 == 1, so shifts
+#define CH                 ( OI << 34) // ceM==0 clrM==1 conditional hold
+#define CH13  ( I << 36)               // Branch on INSTR[13] to distinguish DIV[U] and MOD[U]
+#define bsign ( I << 36) | ( IO << 34) // Branch on sign of DAT_O[31]
+     
+#define MIDGETV_UCODE_NREQ 37 // Not including index
 /* Next ucode instruction to execute
  */
 #define n(x) (((uint64_t)x)<< MIDGETV_UCODE_NREQ )
@@ -374,8 +394,8 @@
 #define _LB_2     LB_2    ,"       Repeat shr until shreg == 0 (0,8,16,24 times)",  isr_none     | A_passd   | Wnn   | r00000000 | Qshr | srDec | u_shrep        | n(LB_3    )  // [gg] Must be even ucodeadr
 #define _LB_3     LB_3    ,"       q = ~mem[rs1+ofs]",                              isr_none     | A_invq    | Wnn   | r000000FF | Qu   | sr_h  | u_cont         | n(LB_4    )  
 #define _LB_4     LB_4    ,"       q = (uint8_t) mem[rs1+Iimm]",                    isr_none     | A_nearAND | Wnn   | rFFFFFF7F | Qu   | sr_h  | u_cont         | n(LB_5    )  
-#define _LB_5     LB_5    ,"       q = D^0xffffffff^q = D^0x80",                    isr_none     | A_nearXOR | Wnn   | rFFFFFF7F | Qu   | sr_h  | u_cont         | n(LB_6    )  
-#define _LB_6     LB_6    ,"       WTRG=(D^0x80)+0xFFFFFF7F+1=(D^0x80)-0x80",       isr_none     | A_add1    | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  
+#define _LB_5     LB_5    ,"       q = D^0xffffffff^q = D^0x80",                    isr_none     | A_nearXOR | Wnn   | rFFFFFF7F | Qu   | sr_h  | u_cont         | n(LB_6    )
+#define _LB_6     LB_6    ,"       WTRG=(D^0x80)+0xFFFFFF7F+1=(D^0x80)-0x80",       isr_none|MLD | A_add1    | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  // Must follow DIVU_5. Kluge to let add1 work in DIV instr
 //                                                                                                                                                               
 #define _aFaultd  aFaultd, " err   LB Load access fault. Faulting adr to mtval",    isr_none     | A_passq   | Wmtval| r00000000 | Qz   | sr_h  | u_cont         | n(aFault_1) // [[hh] Must follow [gg]
 //                                                                                                                                                               
@@ -439,7 +459,6 @@
 #define _condb_2  condb_2, "       ~RS2 in Q",                                      isr_none     | A_nearXOR | Wnn   | RS1       | Qu   | sr_h  | u_cont         | n(condb_3 )  
 #define _condb_3  condb_3, "       Calculate RS1+~RS2+1",                           isr_none     | A_add1    | Wnn   | Rpc       | Qu   | sr_h  | u_cont         | n(condb_4 )  
 #define _condb_4  condb_4, "       Branch on condition",                            isr_none     | A_passd   | Wnn   | Ryy       | Qu   | sr_h  | usebcond       | n(condb_5 )  
-
 #define _condb_5  condb_5, "       Branch not taken.",                              nxtSTB       | A_passq4  | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch   )  /* Must be placed at even ucode adr. Goes to either Fetch or eFetch     */
 #define _condb_5t condb_5t,"       Branch taken.",                                  nxtSTB       | A_addDQ   | Wpc   | Ralu      | Qu   | sr_h  | wordaligned    | n(BrOpFet )  /* Must be placed at the next ucode adr */
 
@@ -488,25 +507,14 @@
 #define _SLTIU_0  SLTIU_0, "SLTIU  Set less than immediate (unsigned)",             isr_none     | A_invq    | Wnn   | RS1       | Qu   | sr_h  | u_cont         | n(SLTIX_1)   
 #define _SLTIX_1  SLTIX_1, "       RS1 - imm / RS1 - RS2",                          isr_none     | A_add1    | Wnn   | r_xx      | Qz   | sr_h  | u_cont         | n(SLTIX_2)   
 #define _SLTIX_2  SLTIX_2, "       Registered ALU flag to rd",                      isr_none     | A_passq_F | WTRG  | Rpc       | Qzh  | sr_h  | u_cont         | n(StdIncPc)  
-//      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 isr_none     | A_add4    | Wpc   | Ralu      | Qu   | sr_h  | u_cont         | n(OpFetch )  etc
-//                                                                                                                                                               
+
 #define _SLTI_0   SLTI_0,  "SLTI   Set less than immediate (signed)",               isr_none     | A_invq    | Wnn   | RS1       | Qu   | sr_h  | u_cont         | n(SLTIX_1)   
-//efine _SLTIX_1  SLTIX_1, "       RS1 - imm / RS1 - RS2",                          isr_none     | A_add1    | Wnn   | r_xx      | Qz   | sr_h  | u_cont         | n(SLTIX_2)   
-//efine _SLTIX_2  SLTIX_2, "       Registered ALU flag to rd",                      isr_none     | A_passq_F | WTRG  | Rpc       | Qzh  | sr_h  | u_cont         | n(StdIncPc)  
-//      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 isr_none     | A_add4    | Wpc   | Ralu      | Qu   | sr_h  | u_cont         | n(OpFetch )  etc
-//                                                                                                                                                               
+
 #define _SLT_0    SLT_0,   "SLT    Set less than (signed)",                         isr_none     | A_xx      | Wnn   | RS2       | Qz   | sr_h  | u_cont         | n(SLTX_1)    
 #define _SLTX_1   SLTX_1,  "       ~rs2 to Q",                                      isr_none     | A_nearXOR | Wnn   | RS1       | Qu   | sr_h  | u_cont         | n(SLTIX_1)   
-//efine _SLTIX_1  SLTIX_1, "       RS1 - imm / RS1 - RS2",                          isr_none     | A_add1    | Wnn   | r_xx      | Qz   | sr_h  | u_cont         | n(SLTIX_2)   
-//efine _SLTIX_2  SLTIX_2, "       Registered ALU flag to rd",                      isr_none     | A_passq_F | WTRG  | Rpc       | Qzh  | sr_h  | u_cont         | n(StdIncPc)  
-//      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 isr_none     | A_add4    | Wpc   | Ralu      | Qu   | sr_h  | u_cont         | n(OpFetch )  etc
-//                                                                                                                                                               
+
 #define _SLTU_0   SLTU_0,  "SLTU   Set less than (unsigned)",                       isr_none     | A_xx      | Wnn   | RS2       | Qz   | sr_h  | u_cont         | n(SLTX_1)    
-//efine _SLTX_1   SLTX_1,  "       ~rs2 to Q",                                      isr_none     | A_nearXOR | Wnn   | RS1       | Qu   | sr_h  | u_cont         | n(SLTIX_1)   
-//efine _SLTIX_1  SLTIX_1, "       RS1 - imm / RS1 - RS2",                          isr_none     | A_add1    | Wnn   | r_xx      | Qz   | sr_h  | u_cont         | n(SLTIX_2)   
-//efine _SLTIX_2  SLTIX_2, "       Registered ALU flag to rd",                      isr_none     | A_passq_F | WTRG  | Rpc       | Qzh  | sr_h  | u_cont         | n(StdIncPc)  
-//      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 isr_none     | A_add4    | Wpc   | Ralu      | Qu   | sr_h  | u_cont         | n(OpFetch )  etc
-//
+
 // Have changed decode so I do not need 16 copies of _LUI_0, only 2
 #define _LUI_0(x) x,       "LUI    q = imm20",                                      isr_none     | A_passq   | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  
 //      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 isr_none     | A_add4    | Wpc   | Ralu      | Qu   | sr_h  | u_cont         | n(OpFetch )  etc
@@ -571,7 +579,7 @@
 //                                                                                                                                                               
 #define _SW_0(x)  x,       "SW     Store word. Q=wradr=RS1+Simm",                   nxtSTB |nxtWE| A_addDQ   | Wnn   | RS2       | Qu   | sr_h  | wordaligned    | n(SW_1)      
 #define _SW_1     SW_1,    "       Write d to a+k until accepted",                  isr_none     | A_passd   | WAQW  | RS2       | Qhld | sr_h  | u_io_o         | n(SW_2)      // [A] even ucode adr 
-#define _SW_2     SW_2,    "       Prepare read PC",                                isr_none     | A_xx      | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  // [C] even ucode adr 
+#define _SW_2     SW_2,    "       Prepare read PC",                                isr_none     | A_xx      | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  // [C] even ucode adr   
 //      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 
 //
 #define _aF_SW    aF_SW,   " err   SW/SH/SB access fault. Rest to set SEL_O=4'hf",  isr_none     | A_xx      | Wnn   | r_xx      | Qhld | sr_h  | u_cont         | n(aF_SW_1)   // [D] directly following [C]
@@ -597,37 +605,129 @@
 //      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 
 
 
-//efine _MUL_0    MUL_0,   "MUL    Store rs1 to rA. Clear Q. Prepare read rs2",     isr_none     | A_xx      | Wa    | RS2       | Qz   | sr_h  | u_cont         | n(MUL_1)
-//efine _MUL_1    MUL_1,   "       ALU = rA[0] ? Q+reg(RS2) : Q. Prepare shr",      isr_none     | A_mul     | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(MUL_2)
-//efine _MUL_2    MUL_2,   "       Shift Q and rA. Repeate 32 times",               isr_none     | A_passd   | Wnn   | RS2       | Qu   | srDec | u_loop         | n(MUL_3)
-//efine _MUL_3    MUL_3,   "       Grafted-on Input read to get rA",                isr_none     | A_passd   | WTRG  | rPC       | Qz   | sr_h  | u_cont         | n(StdIncPC)
-//
-//efine _MULHU_0  MULHU_0, "MULHU  Store rs1 to rA. Clear Q. Prepare read rs2",     isr_none     | A_xx      | Wa    | RS2       | Qz   | sr_h  | u_cont         | n(MULHU_1)
-//efine _MULHU_1  MULHU_1, "       ALU = rA[0] ? Q+reg(RS2) : Q. Prepare shr",      isr_none     | A_mul     | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(MULHU_2)
-//efine _MULHU_2  MULHU_2, "       Shift Q and rA. Repeate 32 times",               isr_none     | A_passd   | Wnn   | RS2       | Qshr | srDec | u_loop         | n(MULHU_3)
-//efine _MULHU_3  MULHU_3, "       Store Q to target register",                     isr_none     | A_passq   | WTRG  | rPC       | Qz   | sr_h  | u_cont         | n(StdIncPC)
-//
-//efine _MULHSU_0 MULHSU0,"MULHSU  Store rs1 to Rjj",                               isr_none     | A_passd   | Wjj   | RS2       | Qx   | sr_h  | u_cont         | n(MULHSU_1)
-//efine _MULHSU_1 MULHSU1,"        Store rs2 to rA",                                isr_none     | A_passd   | Wa    | Rjj       | Qz   | sr_h  | u_cont         | n(MULHSU_2)
-//efine _MULHSU_2 MULHSU2,"        ALU = rA[0] ? Q+Rjj : Q",                        isr_none     | A_mul     | Wnn   | r00000000 | Qu   | sr_h  | u_cont | psa0  | n(MULHSU_3) /* Must be even ucode adr */
-//efine _MULHSU_3 MULHSU3,"        Shift Q and rA arithmetic. Loop 32 times",       isr_none     | A_passd   | Wnn   | Rjj       | Qshra| srDec | u_loop         | n(MULHSU_2)
-//efine _MULHSU_4 MULHSU4,"        Store Q to target register",                     isr_none     | A_passq   | WTRG  | rPC       | qz   | sr_h  | u_cont         | n(StdIncPC) /* Must follow MULHSU2 (no typo)   */
-//
-//efine _MULH_0   MULH_0, "MULH    Store rs1 to Rjj",                               isr_none     | A_passd   | Wjj   | RS2       | Qx   | sr_h  | u_cont         | n(MULH_1)
-//efine _MULH_1   MULH_1, "        Store rs2 to rA and signrA=rs2[31]",             isr_none     | A_passd   | Wasa  | RS1       | Qz   | sr_h  | u_asign        | n(MULH_2)
-//efine _MULH_2   MULH_2, "        Rest cycle",                                     isr_none     | A_xx      | Wnn   | Rjj       | Qz   | sr_h  | u_cont         | n(MULHSU_2) /* Must be even ucode adr */
-//efine _MULH_2b  MULH_2, "        Q = ~RS1",                                       isr_none     | A_nearXOR | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(MULH_3)   /* Must follow MULH_2 */  
-//efine _MULH_3   MULH_3, "        Store -rs1 to Rjj when rs2<0",                   isr_none     | A_add1    | Wjj   | r_xx      | Qx   | sr_h  | u_cont         | n(MULH_2)
 #if ucodeopt_MULDIV
+
+#define _MULHU_0  MULHU_0, "MULHU  Store rs1 to Ryy. Next read rs2. Q=0, shcnt--",  isr_none     | A_passd   | Wyy   | RS2       | Qz   | srDec | u_cont         | n(MULHU_1)
+#define _MULHU_1  MULHU_1, "       rM<=RS2,  Rjj<=Q=0. next read RS1. ",            isr_none|MLD | A_passq   | Wjj   | RS1       | Qz   | sr_h  | u_cont         | n(MULHU_2)   // sa14 == 0 so this loads rM. Also clears rF
+#define _MULHU_2  MULHU_2, "       Q <= rM[0] ? Q+rs1 : Q. Prepare shr/sar",        isr_none     | A_addDQm  | Wnn   | r00000000 | Qu   | srDec | u_cont | psa00 | n(MULHU_3)   // (Must be even ucode adr). Either ADD or PASSQ
+#define _MULHU_3  MULHU_3, "       Shift Q and rM. Prepare read rs1",               isr_none|MSL | A_passd   | Wnn   | RS1       | Qu   | sr_h  | u_cont         | n(MULHU_2)   // xxxxxxxxxxxxxxxxxxxxxxxxxxxx document me. Loops
+#define _MULHU_4  MULHU_4, "       Prepare read Rjj.",                              isr_none     | A_nearXOR | Wnn   | Rjj       | Qhld | sr_h  | u_cont         | n(MULHU_5)   // Must follow MULHU_2
+#define _MULHU_5  MULHU_5, "       Q <= rM[0] ? Q+Rjj : Q. Prepare read Ryy",       isr_none     | A_addDQm  | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(MULHU_6)
+#define _MULHU_6  MULHU_6, "       Q <= rM[0] ? Q+Ryy : Q. Prepare last shr/sar",   isr_none     | A_addDQm  | Wnn   | r00000000 | Qu   | sr_h  | u_cont | psa00 | n(MULHU_7)
+#define _MULHU_7  MULHU_7, "       Last shift.",                                    isr_none|MSL | A_passd   | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)
+
+#define _MULHSU_0 MULHSU_0,"MULHSU Signed rs1 to Ryy, nxt rd rs2. Q=0, shcnt--",    isr_none     | A_passd   | Wyy   | RS2       | Qz   | srDec | u_cont         | n(MULHU_1)
+
+#define _MULH_0   MULH_0,  "MULH   Store rs1 to Q. Prep read 0, shcnt--",           isr_none     | A_passd   | Wnn   | r00000000 | Qu   | srDec | u_cont         | n(MULH_1)
+#define _MULH_1   MULH_1,  "       Store ~rs1 to Ryy. Prep construct 1.",           isr_none     | A_nearXOR | Wyy   | r00000000 | Qz   | sr_h  | u_cont         | n(MULH_2)
+#define _MULH_2   MULH_2,  "       Store 1 to Rjj. next read rs2, Q=0",             isr_none     | A_add1    | Wjj   | RS2       | Qzh  | sr_h  | u_cont         | n(MULH_3)
+#define _MULH_3   MULH_3,  "       rM<=RS2, Q = 0. next read RS1. Join.",           isr_none|MLD | A_xx      | Wnn   | RS1       | Qz   | sr_h  | u_cont         | n(MULHU_2)
+
+#define _MUL_0    MUL_0,   "MUL    Store rs1 tp rM. Next read rs2. Q clear",        isr_none|MLD | A_xx      | Wnn   | RS2       | Qz   | sr_h  | u_cont         | n(MUL_1)
+#define _MUL_1    MUL_1,   "       Q <= rM[0] ? Q+rs2 : Q. Prepare shr/sar",        isr_none     | A_addDQm  | Wnn   | r00000000 | Qu   | srDec | u_cont | psa00 | n(MUL_2)     // Must be even ucode adr
+#define _MUL_2    MUL_2,   "       Shift Q and rM. Prepare read rs2",               isr_none|MSL | A_passd   | Wnn   | RS2       | Qu   | sr_h  | u_cont         | n(MUL_1)     // Loops
+#define _MUL_3    MUL_3,   "       Transfer rM to rDee",                            isr_none|MCLR| A_xx      | Wnn   | rFFFFFFFF | Qz   | sr_h  | u_cont | psa00 | n(ANDI_1)    // Must follow MUL_1
+                                                                                                                                                                                
+#define _DIVU_0   DIVU_0,  "DIVU   Store rs1 to rM. Q=0. Prepare invert rs2",       isr_none|MLD | A_xx      | Wnn   | RS2       | Qz   | srDec | u_cont         | n(DIVU_1)    
+#define _DIVU_1   DIVU_1,  "       Store inverted rs2 to yy. Prepare shift",        isr_none     | A_nearXOR | Wyy   | rFFFFFFFF | Qzh  | sr_h  | u_cont         | n(DIVU_2)    
+#define _DIVU_2   DIVU_2,  "       Shift (Q,M) left. Prepare unsigned sub",         isr_none|MSL | A_shlqdiv | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(DIVU_3)    // loops because ceM set and rlastshift clear
+#define _DIVU_3   DIVU_3,  "       Conditionally subtract rs2. Update M[0]",        isr_none|CH  | A_usub    | Wnn   | rFFFFFFFF | Qu   | srDec | u_cont         | n(DIVU_2)    // Must be even ucode adr
+#define _DIVU_4   DIVU_4,  "       Last Cond. -rs2. Upd M[0]. Branch on INSTR[13]", isr_none|CH13| A_usub    | Wnn   | rFFFFFFFF | Qu   | sr_h  | u_cont         | n(DIVU_5)    // Must follow DIVU_3. 
+#define _DIVU_5   DIVU_5,  "       Transfer rM to rDee",                            isr_none|MCLR| A_xx      | Wnn   | rFFFFFFFF | Qz   | sr_h  | u_cont | psa00 | n(ANDI_1)    // Must be even ucode adr
+//efine _DIVU_6   DIVU_6,  "       Write Q to destination for REMU",                isr_none     | A_add1    | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  // Must follow DIVU_5  Is covered by _LB_6
+
+#define _REMU_0   REMU_0,  "REMU   Store dividend to rM. Prepare read divisor.Q=0", isr_none|MLD | A_xx      | Wnn   | RS2       | Qz   | srDec | u_cont         | n(DIVU_1)
+// 20 left?
+/* First make abs(RS1) (dividend) and 
+ * ~abs(RS1) (divisor), if RS1 >= 0, ~abs(RS1) == ~RS1
+ *                      if RS1 < 0,  ~abs(RS1) = ~(~RS1+1)
+ */
+#define _REM_0    REM_0,   "REM    Branch on sign dividend RS1",                    isr_none     | A_passd   | Wnn   | rFFFFFFFF | Qu   | srDec | u_cont | bsign | n(DIV_1)
+
+#define _DIV_0    DIV_0,   "DIV    Branch on sign dividend RS1",                    isr_none     | A_passd   | Wnn   | rFFFFFFFF | Qu   | srDec | u_cont | bsign | n(DIV_1)
+#define _DIV_1    DIV_1,   "       jj=abs(RS1). Next handle divisor",               isr_none     | A_nearXOR | Wjj   | RS2       | Qz   | sr_h  | u_cont         | n(DIV_3)     // Even ucode adr
+#define _DIV_2    DIV_2,   "       Dividend negative, make RS1-1",                  isr_none     | A_addDQ   | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(DIV_1)     // Must follow DIV_1
+#define _DIV_3    DIV_3,   "       Branch on sign divisor RS2",                     isr_none     | A_nearXOR | Wnn   | r00000000 | Qu   | sr_h  | u_cont | bsign | n(DIV_4)
+#define _DIV_4    DIV_4,   "       ~abs(divisor) to yy",                            isr_none     | A_passq   | Wyy   | Rjj       | Qz   | sr_h  | u_cont         | n(DIV_6)     // Even ucode adr
+#define _DIV_5    DIV_5,   "       Kluge to let add1 work in DIV instr",            isr_none|MLD | A_add1    | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(DIV_3)     // Must follow DIV_4
+#define _DIV_6    DIV_6,   "       Write M. Prepare shift",                         isr_none|MLD | A_xx      | Wnn   | rFFFFFFFF | Qz   | sr_h  | u_cont         | n(DIV_7)
+#define _DIV_7    DIV_7,   "       Shift (Q,M) left. Prepare unsigned sub",         isr_none|MSL | A_shlqdiv | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(DIV_8)     // loops because ceM set and rlastshift clear
+#define _DIV_8    DIV_8,   "       Conditionally subtract rs2. Update M[0]",        isr_none|CH  | A_usub    | Wnn   | rFFFFFFFF | Qu   | srDec | u_cont         | n(DIV_7)     // Must be even ucode adr
+#define _DIV_9    DIV_9,   "       Last Cond. -rs2. Upd M[0]. Branch on INSTR[13]", isr_none|CH13| A_usub    | Wnn   | rFFFFFFFF | Qu   | sr_h  | u_cont         | n(DIV_A)     // Must follow DIV_8. 
+
+/* rM == abs(rs1)/abs(rs2), must change sign if (RS1[31]^RS2[31]) && RS2 != 0 
+ * Q = abs(rs1) % abs(rs2), must cahnge sign if RS1 != 0
+*/
+#define _DIV_A    DIV_A,   "       Transfer rM to rDee",                            isr_none|MCLR| A_passd   | Wnn   | rFFFFFFFF | Qu   | sr_h  | u_cont | psa00 | n(DIV_C)     // Must be even ucode adr  PROBLEM M_CLR
+#define _DIV_B    DIV_B,   "       REM = Q to yy",                                  isr_none     | A_passq   | Wyy   | RS1       | Qz   | sr_h  | u_cont         | n(DIV_10)    // Must follow DIV_A
+                                                                                                                                                                                
+#define _DIV_C    DIV_C,   "       rM to yy. Q=ffffffff",                           isr_none     | A_passd   | Wyy   | RS2       | Qhld | sr_h  | u_cont         | n(DIV_e)     //
+#define _DIV_e    DIV_e,   "       Calc carry of RS2+0xFFFFFFFF",                   isr_none     | A_iszero  | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(DIV_D)     //
+#define _DIV_D    DIV_D,   "       Is RS2 == 0?",                                   isr_none     | A_passd   | Wnn   | RS2       | Qu   | sr_h  | usebcond       | n(DIV_E)     // Even ucode adr due to DIV_C
+#define _DIV_E    DIV_E,   "       RS2 != 0. Check signs",                          isr_none     | A_xx      | Wnn   | RS1       | Qx   | sr_h  | u_cont | bsign | n(DIV_10)    // Even ucode adr
+#define _DIV_F    DIV_F,   "       RS2 == 0, return 0xffffffff",                    isr_none     | A_passq   | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  // Must follow DIV_E
+
+#define _DIV_10   DIV_10,  "       RS2 > 0. Branch on sign of RS1",                 isr_none     | A_passd   | Wnn   | Ryy       | Qz   | sr_h  | u_cont | bsign | n(DIV_12)    // Even ucode adr
+#define _DIV_11   DIV_11,  "       RS2 < 0. Branch on sign of RS1",                 isr_none     | A_passd   | Wnn   | Ryy       | Qz   | sr_h  | u_cont | bsign | n(DIV_14)    // Must follow DIV_10
+
+#define _DIV_12   DIV_12,  "       RS2 > 0, RS1 >= 0, yy is true result",           isr_none     | A_passd   | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  // Even ucode adr
+#define _DIV_13   DIV_13,  "       RS2 > 0, RS1 < 0, change sign yy",               isr_none     | A_nearXOR | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(LB_6)      // DIVU_6 is the same as LB_6 // Must follow DIV_11
+
+#define _DIV_14   DIV_14,  "       RS2 < 0, RS1 >= 0, change sign yy",              isr_none     | A_nearXOR | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(LB_6)      // DIVU_6 is the same as LB_6 // Even ucode adr
+#define _DIV_15   DIV_15,  "       RS2 < 0, RS1 < 0, yy is true result",            isr_none     | A_passd   | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  // Must follow DIV_14   
+
+
 #else
-#define _MUL_0      _ILL_0(MUL_0)
-#define _MULH_0     _ILL_0(MULH_0)
-#define _MULHSU_0   _ILL_0(MULHSU_0)
-#define _MULHU_0    _ILL_0(MULHU_0)
-#define _DIV_0      _ILL_0(DIV_0)
-#define _DIVU_0     _ILL_0(DIVU_0)
-#define _REM_0      _ILL_0(REM_0)
-#define _REMU_0     _ILL_0(REMU_0)
+
+#define _MULHU_0  _ILL_0(MULHU_0  )
+#define _MULHU_1  _ILL_0(MULHU_1  )
+#define _MULHU_2  _ILL_0(MULHU_2  )
+#define _MULHU_3  _ILL_0(MULHU_3  )
+#define _MULHU_4  _ILL_0(MULHU_4  )
+#define _MULHU_5  _ILL_0(MULHU_5  )
+#define _MULHU_6  _ILL_0(MULHU_6  )
+#define _MULHU_7  _ILL_0(MULHU_7  )
+#define _MULHSU_0 _ILL_0(MULHSU_0 )
+#define _MULH_0   _ILL_0(MULH_0   )
+#define _MULH_1   _ILL_0(MULH_1   )
+#define _MULH_2   _ILL_0(MULH_2   )
+#define _MULH_3   _ILL_0(MULH_3   )
+#define _MUL_0    _ILL_0(MUL_0    )
+#define _MUL_1    _ILL_0(MUL_1    )
+#define _MUL_2    _ILL_0(MUL_2    )
+#define _MUL_3    _ILL_0(MUL_3    )
+#define _DIVU_0   _ILL_0(DIVU_0   )
+#define _DIVU_1   _ILL_0(DIVU_1   )
+#define _DIVU_2   _ILL_0(DIVU_2   )
+#define _DIVU_3   _ILL_0(DIVU_3   )
+#define _DIVU_4   _ILL_0(DIVU_4   )
+#define _DIVU_5   _ILL_0(DIVU_5   )
+#define _REMU_0   _ILL_0(REMU_0   )
+#define _REM_0    _ILL_0(REM_0    )
+#define _DIV_0    _ILL_0(DIV_0    )
+#define _DIV_1    _ILL_0(DIV_1    )
+#define _DIV_2    _ILL_0(DIV_2    )
+#define _DIV_3    _ILL_0(DIV_3    )
+#define _DIV_4    _ILL_0(DIV_4    )
+#define _DIV_5    _ILL_0(DIV_5    )
+#define _DIV_6    _ILL_0(DIV_6    )
+#define _DIV_7    _ILL_0(DIV_7    )
+#define _DIV_8    _ILL_0(DIV_8    )
+#define _DIV_9    _ILL_0(DIV_9    )
+#define _DIV_A    _ILL_0(DIV_A    )
+#define _DIV_B    _ILL_0(DIV_B    )
+#define _DIV_C    _ILL_0(DIV_C    )
+#define _DIV_e    _ILL_0(DIV_e    )
+#define _DIV_D    _ILL_0(DIV_D    )
+#define _DIV_E    _ILL_0(DIV_E    )
+#define _DIV_F    _ILL_0(DIV_F    )
+#define _DIV_10   _ILL_0(DIV_10   )
+#define _DIV_11   _ILL_0(DIV_11   )
+#define _DIV_12   _ILL_0(DIV_12   )
+#define _DIV_13   _ILL_0(DIV_13   )
+#define _DIV_14   _ILL_0(DIV_14   )
+#define _DIV_15   _ILL_0(DIV_15   )
+
 #endif
 
 
@@ -673,8 +773,8 @@
 #define _EBRKWFI1 EBRKWFI1,"EBREAK/WFI1 Prepare select EBREAK or WFI",              isr_none     | A_addDQ   | Wnn   | r_xx      | Qu   | sr_h  | u_cont         | n(EBRKWFI2) /* Must follow _ECAL_RET */
 #define _EBRKWFI2 EBRKWFI2,"EBREAK/WFI2 Select EBREAK or WFI",                      isr_none     | A_invq    | Wjj   | r000000FF | Qz   | sr_h  | usebcond       | n(EBREAK_1)
 #define _EBREAK_1 EBREAK_1,"EBREAK mepc = pc, store 0 to mtval",                    isr_none     | A_passq   | Wmtval| Rpc       | Qz   | sr_h  | u_cont         | n(EBREAK_2) /* Must be at odd ucode adr */
-#define _EBREAK_2 EBREAK_2,"       pc to mepc",                                     isr_none     | A_passd   | Wmepc | r00000000 | Qz   | sr_h  | u_cont         | n(EBREAK_3)  
-#define _EBREAK_3 EBREAK_3,"       mcause = 3",                                     isr_intoTrap | A_add3    | Wmcaus| rmtvec    | Qx   | sr_h  | u_cont         | n(JAL_3)
+#define _EBREAK_2 EBREAK_2,"       pc to mepc",                                     isr_none     | A_passd   | Wmepc | r00000000 | Qz   | sr_h  | u_cont         | n(ECALL_6)  
+//efine _ECALL_6  ECALL_6, "       mcause = 11",                                    isr_intoTrap | A_add3    | Wmcaus| rmtvec    | Qx   | sr_h  | u_cont         | n(JAL_3)
 //efine _JAL_3    JAL_3,   "       PC = trap entry point. OpFetch",                 
 
 #define _WFI_1    WFI_1,   "WFI    To check offset",                                isr_none     | A_add4    | Wnn   | Rjj       | Qu   | sr_h  | u_cont         | n(WFI_2   ) /* This preceeds EBREAK_1  */
@@ -709,7 +809,7 @@
 //      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 isr_none     | A_add4    | Wpc   | Ralu      | Qu   | sr_h  | u_cont         | n(OpFetch )  etc
 //                                                                                                                                                               
 #define _CSRRS_0  CSRRS_0, "CSRRS  Decoded CSR adr in jj",                          isr_none     | A_passq   | Wjj   | r000000FF | Qz   | sr_h  | u_cont         | n(CSRRS_1)   
-#define _CSRRS_1  CSRRS_1, "       CSRRS sentinel 0x00000102",                      isr_none     | A_add3    | Wyy   | r000000FF | Qz   | sr_h  | u_cont         | n(CSRRWI_2)
+#define _CSRRS_1  CSRRS_1, "       CSRRS sentinel 0x00000102 or 0xffffff82",        isr_none     | A_add3    | Wyy   | r000000FF | Qz   | sr_h  | u_cont         | n(CSRRWI_2)
 //efine _CSRRWI_2 CSRRWI_2,"       Prepare write current PC to 0x100",              isr_none     | A_add1    | Wnn   | Rpc       | Qu   | sr_h  | u_cont         | n(CSRRW_2)  
 //efine _CSRRW_2  CSRRW_2, "       Write PC to 0x100 start Prep emulation entrypt", isr_intoCSR  | A_passd   | WAQW  | r00000000 | Qhld | sr_h  | u_cont         | n(CSRRW_3)   
 //efine _CSRRW_3  CSRRW_3, "       Prep emulation entrypt 0x108, here Q to 0x104",  isr_none     | A_add4    | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(StdIncPc)
@@ -729,15 +829,15 @@
 //efine _CSRRW_3  CSRRW_3, "       Prep emulation entrypt 0x108, here Q to 0x104",  isr_none     | A_add4    | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(StdIncPc)
 //      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 isr_none     | A_add4    | Wpc   | Ralu      | Qu   | sr_h  | u_cont         | n(OpFetch )  etc
 //                                                                                                                                                               
-#define _CSRRSI_0 CSRRSI_0,"CSRRSI Decoded CSR adr in jj",                          isr_none     | A_passq   | Wjj   | rFFFFFF7F | Qz   | sr_h  | u_cont         | n(CSRRSI_1)  
-#define _CSRRSI_1 CSRRSI_1,"       CSRRSI sentinel 0xffffff82",                     isr_none     | A_add3    | Wyy   | r000000FF | Qz   | sr_h  | u_cont         | n(CSRRWI_2)   
+#define _CSRRSI_0 CSRRSI_0,"CSRRSI Decoded CSR adr in jj",                          isr_none     | A_passq   | Wjj   | rFFFFFF7F | Qz   | sr_h  | u_cont         | n(CSRRS_1)  
+//efine _CSRRS_1  CSRRS_1, "       CSRRS sentinel 0x00000102 or 0xffffff82",        isr_none     | A_add3    | Wyy   | r000000FF | Qz   | sr_h  | u_cont         | n(CSRRWI_2)
 //efine _CSRRWI_2 CSRRWI_2,"       Prepare write current PC to 0x100",              isr_none     | A_add1    | Wnn   | Rpc       | Qu   | sr_h  | u_cont         | n(CSRRW_2)  
 //efine _CSRRW_2  CSRRW_2, "       Write PC to 0x100 start Prep emulation entrypt", isr_intoCSR  | A_passd   | WAQW  | r00000000 | Qhld | sr_h  | u_cont         | n(CSRRW_3)   
 //efine _CSRRW_3  CSRRW_3, "       Prep emulation entrypt 0x108, here Q to 0x104",  isr_none     | A_add4    | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(StdIncPc)
 //      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 isr_none     | A_add4    | Wpc   | Ralu      | Qu   | sr_h  | u_cont         | n(OpFetch )  etc
 //                                                                                                                                                               
 #define _CSRRCI_0 CSRRCI_0,"CSRRCI Decoded CSR adr in jj",                          isr_none     | A_passq   | Wjj   | rFFFFFF7F | Qz   | sr_h  | u_cont         | n(CSRRCI_1)  
-#define _CSRRCI_1 CSRRCI_1,"       CSRRCI sentinel 0xffffff83",                     isr_none     | A_add4    | Wyy   | r000000FF | Qz   | sr_h  | u_cont         | n(CSRRWI_2)  
+#define _CSRRCI_1 CSRRCI_1,"       CSRRCI sentinel 0xffffff83",                     isr_none     | A_add4    | Wyy   | r000000FF | Qz   | sr_h  | u_cont         | n(CSRRWI_2)  // IMPROVE
 //efine _CSRRWI_2 CSRRWI_2,"       Prepare write current PC to 0x100",              isr_none     | A_add1    | Wnn   | Rpc       | Qu   | sr_h  | u_cont         | n(CSRRW_2)  
 //efine _CSRRW_2  CSRRW_2, "       Write PC to 0x100 start Prep emulation entrypt", isr_intoCSR  | A_passd   | WAQW  | r00000000 | Qhld | sr_h  | u_cont         | n(CSRRW_3)   
 //efine _CSRRW_3  CSRRW_3, "       Prep emulation entrypt 0x108, here Q to 0x104",  isr_none     | A_add4    | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(StdIncPc)
@@ -913,9 +1013,9 @@
  * times it should be hit.
  *
  */
-#define ILLV 1
-//         Fixed and
-//         spes   Paired                   reachability
+
+//         Fixed  Paired
+//         spes   spec                     reachability
 //ORIGTAB  |      |                        |    MASK        INSTR     HITNR       // ENTRYPOINT               This comment is important, used by midgetv_ucode_linepermutate to find this data.
 /* 00 */Y( 1,     0 , _LB_0              , 1, 0x0000707f, 0x00000003, (1<<22)    ) // LB                      
 /* 01 */Y( 0,     0 , _LB_1              , 0, 0xffffffff, 0x00000000, 0          )                            
@@ -928,7 +1028,7 @@
 /* 08 */Y( 1,     0 , _SB_0(_L08)        , 1, 0x0000707f, 0x00000023, (1<<22)/2  ) // SB 1/2                  
 /* 09 */Y( 0,     0 , _LB_5              , 0, 0xffffffff, 0x00000000, 0          ) //                         
 /* 0a */Y( 1,     0 , _SB_0(_L0a)        , 1, 0x0000707f, 0x00000023, (1<<22)/2  ) // SB 2/2                  
-/* 0b */Y( 0,     0 , _LB_6              , 0, 0xffffffff, 0x00000000, 0          )                            
+/* 0b */Y( 0,     0 , _JALR_2            , 0, 0xffffffff, 0x00000000, 0          )                            
 /* 0c */Y( 1,     0 , _ADD_0             , 1, 0xfe00707f, 0x00000033, (1<<15)    ) // ADD                     
 /* 0d */Y( 1,     0 , _MUL_0             , 1, 0xfe00707f, 0x02000033, (1<<15)    ) // entrypoint for mul 
 /* 0e */Y( 1,     0 , _SUB_0             , 1, 0xfe00707f, 0x40000033, (1<<15)    ) // SUB                     
@@ -951,7 +1051,7 @@
 /* 1f */Y( 0,     0 , _IJ_2              , 0, 0xffffffff, 0x00000000, 0          ) //                         
 /* 20 */Y( 1,     0 , _LH_0              , 1, 0x0000707f, 0x00001003, (1<<22)    ) // LH                      
 /* 21 */Y( 0,     0 , _XORI_1            , 0, 0xffffffff, 0x00000000, 0          ) //                         
-/* 22 */Y( ILLV,  0 , _ILL_0(_L22)       , 2, 0x00400000, 0x00000000, 0          ) // illegal                 
+/* 22 */Y( 0,     0 , _MULHU_6           , 2, 0x00400000, 0x00000000, 0          ) // illegal                 
 /* 23 */Y( 1,     0 , _FENCE(FENCEI)     , 1, 0x0000707f, 0x0000100f, (1<<22)    ) // FENCEI                  To lacy
 /* 24 */Y( 1,     0 , _SLLI_0            , 1, 0xfe00707f, 0x00001013, (1<<15)    ) // SLLI                    
 /* 25 */Y( 1,     0 , _AUIPC_0(_L25)     , 1, 0x0000007f, 0x00000017, (1<<25)/2  ) // AUIPC 2/2               
@@ -974,7 +1074,7 @@
 /* 36 */Y( 0,     0 , _SLLI_2            , 0, 0xffffffff, 0x00000000, 0          )
 /* 37 */Y( 0,     0 , _ECALL_2           , 0, 0xffffffff, 0x00000000, 0          )
 /* 38 */Y( 1,     0 , _BNE               , 1, 0x0000707f, 0x00001063, (1<<22)    ) // BNE
-/* 39 */Y( ILLV,  0 , _ILL_0(_L39)       , 2, 0x00400000, 0x00000000, 0          ) // illegal
+/* 39 */Y( 0,     0 , _MULHU_7           , 2, 0x00400000, 0x00000000, 0          ) // illegal
 /* 3a */Y( 0,     0 ,  _SRxI_1           , 0, 0xffffffff, 0x00000000, 0          )
 /* 3b */Y( 1,     0 , _JAL_0(_L3b)       , 1, 0x0000007f, 0x0000006f, (1<<25)/4  ) // JAL 2/4
 /* 3c */Y( 1,     0 , _CSRRW_0           , 1, 0x0000707f, 0x00001073, (1<<22)    ) // CSRRW
@@ -983,8 +1083,8 @@
 /* 3f */Y( 0,     0 , _SRx_1             , 0, 0xffffffff, 0x00000000, 0          )
 /* 40 */Y( 1,     0 , _LW_0              , 1, 0x0000707f, 0x00002003, (1<<22)    ) // LW
 /* 41 */Y( 0,     0 , _JALR_1            , 0, 0xffffffff, 0x00000000, 0          )
-/* 42 */Y( ILLV,  0 , _ILL_0(_L42)       , 2, 0x00400000, 0x00000000, 0          ) // illegal
-/* 43 */Y( ILLV,  0 , _ILL_0(_L43)       , 2, 0x00400000, 0x00000000, 0          ) // illegal
+/* 42 */Y( 0,  0x03 , _MULHU_2           , 2, 0x00400000, 0x00000000, 0          ) // illegal as entry
+/* 43 */Y( 0,  0x03 , _MULHU_4           , 2, 0x00400000, 0x00000000, 0          ) // illegal as entry
 /* 44 */Y( 1,     0 , _SLTI_0            , 1, 0x0000707f, 0x00002013, (1<<22)    ) // SLTI
 /* 45 */Y( 0,     0 , _WFI_3             , 0, 0xffffffff, 0x00000000, 0          ) // 
 /* 46 */Y( 0,     0 , _ILL_1             , 0, 0xffffffff, 0x00000000, 0          ) // illegal
@@ -995,50 +1095,50 @@
 /* 4b */Y( 0,     0 , _CSRRW_2           , 0, 0xffffffff, 0x00000000, 0          )
 /* 4c */Y( 1,     0 , _SLT_0             , 1, 0xfe00707f, 0x00002033, (1<<15)    ) // SLT
 /* 4d */Y( 1,     0 , _MULHSU_0          , 1, 0xfe00707f, 0x02002033, (1<<15)    ) // entrypoint for mulhsu
-/* 4e */Y( 0,  0x07 , _eILL0b            , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1
-/* 4f */Y( 0,  0x07 , _MRET_8            , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1
-/* 50 */Y( 0,  0x03 , _LW_1              , 0, 0xffffffff, 0x00000000, 0          ) 
-/* 51 */Y( 0,  0x03 , _LDAF(LDAF_LW)     , 0, 0xffffffff, 0x00000000, 0          )
-/* 52 */Y( 0,  0x04 , _LH_1              , 0, 0xffffffff, 0x00000000, 0          )
-/* 53 */Y( 0,  0x04 , _LDAF(LDAF_LH)     , 0, 0xffffffff, 0x00000000, 0          )
-/* 54 */Y( 0,  0x05 , _LH_2              , 0, 0xffffffff, 0x00000000, 0          )
-/* 55 */Y( 0,  0x05 , _aFaultb           , 0, 0xffffffff, 0x00000000, 0          )
+/* 4e */Y( 0,  0x04 , _eILL0b            , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1
+/* 4f */Y( 0,  0x04 , _MRET_8            , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1
+/* 50 */Y( 0,  0x05 , _LW_1              , 0, 0xffffffff, 0x00000000, 0          ) 
+/* 51 */Y( 0,  0x05 , _LDAF(LDAF_LW)     , 0, 0xffffffff, 0x00000000, 0          )
+/* 52 */Y( 0,  0x06 , _LH_1              , 0, 0xffffffff, 0x00000000, 0          )
+/* 53 */Y( 0,  0x06 , _LDAF(LDAF_LH)     , 0, 0xffffffff, 0x00000000, 0          )
+/* 54 */Y( 0,  0x07 , _LH_2              , 0, 0xffffffff, 0x00000000, 0          )
+/* 55 */Y( 0,  0x07 , _aFaultb           , 0, 0xffffffff, 0x00000000, 0          )
 /* 56 */Y( 0,     0 , _LH_4              , 0, 0xffffffff, 0x00000000, 0          )
 /* 57 */Y( 0,     0 , _LH_5              , 0, 0xffffffff, 0x00000000, 0          )
-/* 58 */Y( ILLV,  0 , _ILL_0(_L58)       , 2, 0x00400000, 0x00000000, 0          ) // illegal
-/* 59 */Y( ILLV,  0 , _ILL_0(_L59)       , 2, 0x00400000, 0x00000000, 0          ) // illegal
+/* 58 */Y( 0,  0x08 , _DIV_A             , 2, 0x00400000, 0x00000000, 0          ) // illegal
+/* 59 */Y( 0,  0x08 , _DIV_B             , 2, 0x00400000, 0x00000000, 0          ) // illegal
 /* 5a */Y( 0,     0 , _SB_1              , 0, 0xffffffff, 0x00000000, 0          )
 /* 5b */Y( 1,     0 , _JAL_0(_L5b)       , 1, 0x0000007f, 0x0000006f, (1<<25)/4  ) // JAL 3/4
 /* 5c */Y( 1,     0 , _CSRRS_0           , 1, 0x0000707f, 0x00002073, (1<<22)    ) // CSRRS
 /* 5d */Y( 0,     0 , _SB_2              , 0, 0xffffffff, 0x00000000, 0          )
-/* 5e */Y( 0,  0x06 , _LHU_1             , 0, 0xffffffff, 0x00000000, 0          )
-/* 5f */Y( 0,  0x06 , _LDAF(LDAF_LHU)    , 0, 0xffffffff, 0x00000000, 0          )
-/* 60 */Y( ILLV,  0 , _ILL_0(_L60)       , 2, 0x00400000, 0x00000000, 0          ) // illegal
-/* 61 */Y( 0,     0 , _JALR_2            , 0, 0xffffffff, 0x00000000, 0          )
-/* 62 */Y( ILLV,  0 , _ILL_0(_L62)       , 2, 0x00400000, 0x00000000, 0          ) // illegal
-/* 63 */Y( ILLV,  0 , _ILL_0(_L63)       , 2, 0x00400000, 0x00000000, 0          ) // illegal
+/* 5e */Y( 0,  0x09 , _LHU_1             , 0, 0xffffffff, 0x00000000, 0          )
+/* 5f */Y( 0,  0x09 , _LDAF(LDAF_LHU)    , 0, 0xffffffff, 0x00000000, 0          )
+/* 60 */Y( 0,  0x0a , _DIV_14            , 2, 0x00400000, 0x00000000, 0          ) // illegal
+/* 61 */Y( 0,  0x0a , _DIV_15            , 0, 0xffffffff, 0x00000000, 0          )
+/* 62 */Y( 0,  0x0b , _DIV_8             , 2, 0x00400000, 0x00000000, 0          ) // illegal
+/* 63 */Y( 0,  0x0b , _DIV_9             , 2, 0x00400000, 0x00000000, 0          ) // illegal
 /* 64 */Y( 1,     0 , _SLTIU_0           , 1, 0x0000707f, 0x00003013, (1<<22)    ) // SLTIU
 /* 65 */Y( 0,     0 , _WFI_4             , 0, 0xffffffff, 0x00000000, 0          ) 
-/* 66 */Y( 0,  0x08 , _SW_1              , 0, 0xffffffff, 0x00000000, 0          ) 
-/* 67 */Y( 0,  0x08 , _SW_E1(SWE)        , 0, 0xffffffff, 0x00000000, 0          )
-/* 68 */Y( ILLV,  0 , _ILL_0(_L68)       , 2, 0x00200000, 0x00000000, 0          ) // illegal
-/* 69 */Y( 0,     0 , _SB_3              , 0, 0xffffffff, 0x00000000, 0          )
-/* 6a */Y( ILLV,  0 , _ILL_0(_L6a)       , 2, 0x00200000, 0x00000000, 0          ) // illegal
+/* 66 */Y( 0,  0x0c , _SW_1              , 0, 0xffffffff, 0x00000000, 0          ) 
+/* 67 */Y( 0,  0x0c , _SW_E1(SWE)        , 0, 0xffffffff, 0x00000000, 0          )
+/* 68 */Y( 0,     0 , _DIV_12            , 2, 0x00200000, 0x00000000, 0          ) // illegal
+/* 69 */Y( 0,     0 , _DIV_13            , 0, 0xffffffff, 0x00000000, 0          ) 
+/* 6a */Y( 0,     0 , _SB_3              , 2, 0x00200000, 0x00000000, 0          ) // illegal
 /* 6b */Y( 0,     0 , _SB_4              , 0, 0xffffffff, 0x00000000, 0          )
 /* 6c */Y( 1,     0 , _SLTU_0            , 1, 0xfe00707f, 0x00003033, (1<<15)    ) // SLTU
 /* 6d */Y( 1,     0 , _MULHU_0           , 1, 0xfe00707f, 0x02003033, (1<<15)    ) // entrypoint for mulhu
 /* 6e */Y( 0,     0 , _LHU_3             , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1
 /* 6f */Y( 0,     0 , _MRET_6            , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1
-/* 70 */Y( 0,  0x09 , _LHU_2             , 0, 0xffffffff, 0x00000000, 0          )
-/* 71 */Y( 0,  0x09 , _aFaultc           , 0, 0xffffffff, 0x00000000, 0          )
+/* 70 */Y( 0,  0x0d , _LHU_2             , 0, 0xffffffff, 0x00000000, 0          )
+/* 71 */Y( 0,  0x0d , _aFaultc           , 0, 0xffffffff, 0x00000000, 0          )
 /* 72 */Y( 0,     0 , _LBU_3             , 0, 0xffffffff, 0x00000000, 0          )
 /* 73 */Y( 0,     0 , _BAERR_1           , 0, 0xffffffff, 0x00000000, 0          )
-/* 74 */Y( 0,  0x0a , _BrOpFet           , 0, 0xffffffff, 0x00000000, 0          )
-/* 75 */Y( 0,  0x0a , _BAlignEr          , 0, 0xffffffff, 0x00000000, 0          )
+/* 74 */Y( 0,  0x0e , _BrOpFet           , 0, 0xffffffff, 0x00000000, 0          )
+/* 75 */Y( 0,  0x0e , _BAlignEr          , 0, 0xffffffff, 0x00000000, 0          )
 /* 76 */Y( 0,     0 , _BAERR_2           , 0, 0xffffffff, 0x00000000, 0          )
 /* 77 */Y( 0,     0 , _BAERR_3           , 0, 0xffffffff, 0x00000000, 0          )
-/* 78 */Y( ILLV,  0 , _ILL_0(_L78)       , 2, 0x00400000, 0x00000000, 0          ) // illegal
-/* 79 */Y( ILLV,  0 , _ILL_0(_L79)       , 2, 0x00400000, 0x00000000, 0          ) // illegal
+/* 78 */Y( 0,  0x0f , _DIV_4             , 2, 0x00400000, 0x00000000, 0          ) // illegal
+/* 79 */Y( 0,  0x0f , _DIV_5             , 2, 0x00400000, 0x00000000, 0          ) // illegal
 /* 7a */Y( 0,     0 , _SB_5              , 0, 0xffffffff, 0x00000000, 0          )
 /* 7b */Y( 1,     0 , _JAL_0(_L7b)       , 1, 0x0000007f, 0x0000006f, (1<<25)/4  ) // JAL 4/4
 /* 7c */Y( 1,     0 , _CSRRC_0           , 1, 0x0000707f, 0x00003073, (1<<22)    ) // CSRRC
@@ -1047,47 +1147,47 @@
 /* 7f */Y( 0,     0 , _JALRE2            , 0, 0xffffffff, 0x00000000, 0          )
 /* 80 */Y( 1,     0 , _LBU_0             , 1, 0x0000707f, 0x00004003, (1<<22)    ) // LBU
 /* 81 */Y( 0,     0 , _JAERR_2           , 0, 0xffffffff, 0x00000000, 0          )
-/* 82 */Y( ILLV,  0 , _ILL_0(_L82)       , 2, 0x00400000, 0x00000000, 0          ) // illegal
-/* 83 */Y( ILLV,  0 , _ILL_0(_L83)       , 2, 0x00400000, 0x00000000, 0          ) // illegal
+/* 82 */Y( 0,  0x10 , _DIV_1             , 2, 0x00400000, 0x00000000, 0          ) // illegal
+/* 83 */Y( 0,  0x10 , _DIV_2             , 2, 0x00400000, 0x00000000, 0          ) // illegal
 /* 84 */Y( 1,     0 , _XORI_0            , 1, 0x0000707f, 0x00004013, (1<<22)    ) // XORI
 /* 85 */Y( 0,     0 , _LBU_1             , 0, 0xffffffff, 0x00000000, 0          )
-/* 86 */Y( 0,  0x0b , _JAL_2             , 0, 0xffffffff, 0x00000000, 0          )
-/* 87 */Y( 0,  0x0b , _JALRE1            , 0, 0xffffffff, 0x00000000, 0          )
-/* 88 */Y( ILLV,  0 , _ILL_0(_L88)       , 2, 0x00200000, 0x00000000, 0          ) // illegal
-/* 89 */Y( 0,     0 , _ILL_4             , 0, 0xffffffff, 0x00000000, 0          ) // illegal
-/* 8a */Y( ILLV,  0 , _ILL_0(_L8a)       , 2, 0x00200000, 0x00000000, 0          ) // illegal
-/* 8b */Y( 0,     0 , _ILL_5             , 0, 0xffffffff, 0x00000000, 0          ) // illegal
+/* 86 */Y( 0,  0x11 , _JAL_2             , 0, 0xffffffff, 0x00000000, 0          )
+/* 87 */Y( 0,  0x11 , _JALRE1            , 0, 0xffffffff, 0x00000000, 0          )
+/* 88 */Y( 0,  0x12 , _DIV_E             , 2, 0x00200000, 0x00000000, 0          ) // illegal
+/* 89 */Y( 0,  0x12 , _DIV_F             , 0, 0xffffffff, 0x00000000, 0          )
+/* 8a */Y( 0,     0 , _ILL_4             , 2, 0x00200000, 0x00000000, 0          ) // illegal
+/* 8b */Y( 0,     0 , _ILL_5             , 0, 0xffffffff, 0x00000000, 0          ) 
 /* 8c */Y( 1,     0 , _XOR_0             , 1, 0xfe00707f, 0x00004033, (1<<15)    ) // XOR
 /* 8d */Y( 1,     0 , _DIV_0             , 1, 0xfe00707f, 0x02004033, (1<<15)    ) // entrypoint for div
-/* 8e */Y( 0,     0 , _ILL_3             , 0, 0xffffffff, 0x00000000, 0          ) // illegal
-/* 8f */Y( 0,     0 , _aF_SW_3           , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1
+/* 8e */Y( 0,     0 , _aF_SW_3           , 0, 0xffffffff, 0x00000000, 0          ) // illegal. Must be even ucode adr due to use of add4
+/* 8f */Y( 0,     0 , _ILL_3             , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1
 /* 90 */Y( 0,     0 , _NMI_2             , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1
 /* 91 */Y( 0,     0 , _LDAF_2            , 0, 0xffffffff, 0x00000000, 0          )
 /* 92 */Y( 0,     0 , _LDAF_3            , 0, 0xffffffff, 0x00000000, 0          )
 /* 93 */Y( 0,     0 , _SW_E2             , 0, 0xffffffff, 0x00000000, 0          )
-/* 94 */Y( 0,     0 , _SW_E3             , 0, 0xffffffff, 0x00000000, 0          )
-/* 95 */Y( 0,     0 , _SW_E4             , 0, 0xffffffff, 0x00000000, 0          )
-/* 96 */Y( 0,  0x0c , _SH_1              , 0, 0xffffffff, 0x00000000, 0          )
-/* 97 */Y( 0,  0x0c , _SW_E1(SWH)        , 0, 0xffffffff, 0x00000000, 0          )
+/* 94 */Y( 0,     0 , _SW_E4             , 0, 0xffffffff, 0x00000000, 0          ) // Must be even ucode adr due to use of add4 in SW_E3
+/* 95 */Y( 0,     0 , _SW_E3             , 0, 0xffffffff, 0x00000000, 0          )
+/* 96 */Y( 0,  0x13 , _SH_1              , 0, 0xffffffff, 0x00000000, 0          )
+/* 97 */Y( 0,  0x13 , _SW_E1(SWH)        , 0, 0xffffffff, 0x00000000, 0          )
 /* 98 */Y( 1,     0 , _BLT               , 1, 0x0000707f, 0x00004063, (1<<22)    ) // BLT
-/* 99 */Y( ILLV,  0 , _ILL_0(_L99)       , 2, 0x00400000, 0x00000000, 0          ) // illegal
+/* 99 */Y( 0,     0 , _ILL_0(_L99)       , 2, 0x00400000, 0x00000000, 0          ) // illegal
 /* 9a */Y( 0,     0 , _SH_2              , 0, 0xffffffff, 0x00000000, 0          )
-/* 9b */Y( 0,     0 , _L9b,"q:9b", unx   , 0, 0xffffffff, 0x00000000, 0          )
-/* 9c */Y( ILLV,  0 , _ILL_0(_L9c)       , 2, 0x00001000, 0x00000000, 0          ) // illegal
-/* 9d */Y( 0,     0 , _SH_3              , 0, 0xffffffff, 0x00000000, 0          )
+/* 9b */Y( 0,     0 , _MULHU_1           , 0, 0xffffffff, 0x00000000, 0          )
+/* 9c */Y( 0,  0x14 , _DIV_10            , 2, 0x00001000, 0x00000000, 0          ) // illegal
+/* 9d */Y( 0,  0x14 , _DIV_11            , 0, 0xffffffff, 0x00000000, 0          )
 /* 9e */Y( 0,     0 , _SH_4              , 0, 0xffffffff, 0x00000000, 0          )
 /* 9f */Y( 0,     0 , _SH_5              , 0, 0xffffffff, 0x00000000, 0          )
 /* a0 */Y( 1,     0 , _LHU_0             , 1, 0x0000707f, 0x00005003, (1<<22)    ) // LHU
 /* a1 */Y( 0,     0 , _ECALL_4           , 0, 0xffffffff, 0x00000000, 0          )
-/* a2 */Y( ILLV,  0 , _ILL_0(_La2)       , 2, 0x00400000, 0x00000000, 0          ) // illegal
-/* a3 */Y( ILLV,  0 , _ILL_0(_La3)       , 2, 0x00400000, 0x00000000, 0          ) // illegal
+/* a2 */Y( 0,  0x15 , _DIVU_5            , 2, 0x00400000, 0x00000000, 0          ) // illegal
+/* a3 */Y( 0,  0x15 , _LB_6              , 2, 0x00400000, 0x00000000, 0          ) // illegal
 /* a4 */Y( 1,     0 , _SRxI_0            , 1, 0xbe00707f, 0x00005013, (1<<15)*2  ) // SRLI/SRAI
 /* a5 */Y( 0,     0 , _MRET_3            , 0, 0xffffffff, 0x00000000, 0          )
-/* a6 */Y( 0,  0x0d , _ECAL_RET          , 0, 0xffffffff, 0x00000000, 0          )
-/* a7 */Y( 0,  0x0d , _EBRKWFI1          , 0, 0xffffffff, 0x00000000, 0          )
-/* a8 */Y( ILLV,  0 , _ILL_0(_La8)       , 2, 0x00200000, 0x00000000, 0          ) // illegal
-/* a9 */Y( 0,     0 , _ECALL_6           , 0, 0xffffffff, 0x00000000, 0          )
-/* aa */Y( ILLV,  0 , _ILL_0(_Laa)       , 2, 0x00200000, 0x00000000, 0          ) // illegal
+/* a6 */Y( 0,  0x16 , _ECAL_RET          , 0, 0xffffffff, 0x00000000, 0          )
+/* a7 */Y( 0,  0x16 , _EBRKWFI1          , 0, 0xffffffff, 0x00000000, 0          )
+/* a8 */Y( 0   ,  0 , _DIV_3             , 2, 0x00200000, 0x00000000, 0          ) // (illegal) Must be even ucode adr
+/* a9 */Y( 0,     0 , _DIV_6             , 0, 0xffffffff, 0x00000000, 0          )
+/* aa */Y( 0,     0 , _ECALL_6           , 2, 0x00200000, 0x00000000, 0          ) // (illegal) Must be even ucode adr for unknown reason
 /* ab */Y( 0,     0 , _EBREAK_2          , 0, 0xffffffff, 0x00000000, 0          )
 /* ac */Y( 1,     0 , _SRx_0(_Lac)       , 1, 0xfe00707f, 0x00005033, (1<<15)    ) // SRL
 /* ad */Y( 1,     0 , _DIVU_0            , 1, 0xfe00707f, 0x02005033, (1<<15)    ) // entrypoint for divu
@@ -1098,77 +1198,77 @@
 /* b2 */Y( 0,     0 , _CSRRC_1           , 0, 0xffffffff, 0x00000000, 0          )
 /* b3 */Y( 0,     0 , _CSRRWI_1          , 0, 0xffffffff, 0x00000000, 0          )
 /* b4 */Y( 0,     0 , _CSRRWI_2          , 0, 0xffffffff, 0x00000000, 0          )
-/* b5 */Y( 0,     0 , _CSRRSI_1          , 0, 0xffffffff, 0x00000000, 0          )
+/* b5 */Y( 0,     0 , _SH_3              , 0, 0xffffffff, 0x00000000, 0          ) // fitte
 /* b6 */Y( 0,     0 , _CSRRCI_1          , 0, 0xffffffff, 0x00000000, 0          )
 /* b7 */Y( 0,     0 , _IJ_3              , 0, 0xffffffff, 0x00000000, 0          )
 /* b8 */Y( 1,     0 , _BGE               , 1, 0x0000707f, 0x00005063, (1<<22)    ) // BGE
-/* b9 */Y( ILLV,  0 , _ILL_0(_Lb9)       , 2, 0x00400000, 0x00000000, 0          ) // illegal
-/* ba */Y( 0,     0 , _EBREAK_3          , 0, 0xffffffff, 0x00000000, 0          )
-/* bb */Y( 0,     0 , _Lbb,"q:bb", unx   , 0, 0xffffffff, 0x00000000, 0          )
+/* b9 */Y( 0,     0 , _DIV_e             , 2, 0x00400000, 0x00000000, 0          ) // illegal
+/* ba */Y( 0,     0 , _DIV_C             , 0, 0xffffffff, 0x00000000, 0          ) // Must be even ucode adr for unknown reason. Must find owut this. Probably because MCLR was used prev cycle.
+/* bb */Y( 0,     0 , _MULHU_3           , 0, 0xffffffff, 0x00000000, 0          )
 /* bc */Y( 1,     0 , _CSRRWI_0          , 1, 0x0000707f, 0x00005073, (1<<22)    ) // CSRRWI
 /* bd */Y( 0,     0 , _IJ_4              , 0, 0xffffffff, 0x00000000, 0          )
-/* be */Y( 0,  0x0e , _IJ_1              , 0, 0xffffffff, 0x00000000, 0          )
-/* bf */Y( 0,  0x0e , _IJT_1             , 0, 0xffffffff, 0x00000000, 0          )
-/* c0 */Y( ILLV,  0 , _ILL_0(_Lc0)       , 2, 0x00400000, 0x00000000, 0          ) // illegal
+/* be */Y( 0,  0x17 , _IJ_1              , 0, 0xffffffff, 0x00000000, 0          )
+/* bf */Y( 0,  0x17 , _IJT_1             , 0, 0xffffffff, 0x00000000, 0          )
+/* c0 */Y( 0,     0 , _DIV_D             , 2, 0x00400000, 0x00000000, 0          ) // illegal  Mu
 /* c1 */Y( 0,     0 , _IJT_2             , 0, 0xffffffff, 0x00000000, 0          )
-/* c2 */Y( ILLV,  0 , _ILL_0(_Lc2)       , 2, 0x00400000, 0x00000000, 0          ) // illegal
-/* c3 */Y( ILLV,  0 , _ILL_0(_Lc3)       , 2, 0x00400000, 0x00000000, 0          ) // illegal
+/* c2 */Y( 0,  0x18 , _DIVU_3            , 2, 0x00400000, 0x00000000, 0          ) // illegal
+/* c3 */Y( 0,  0x18,  _DIVU_4            , 2, 0x00400000, 0x00000000, 0          ) // illegal
 /* c4 */Y( 1,     0 , _ORI_0             , 1, 0x0000707f, 0x00006013, (1<<22)    ) // ORI
 /* c5 */Y( 0,     0 , _MRET_5            , 0, 0xffffffff, 0x00000000, 0          )
 /* c6 */Y( 0,     0 , _IJT_4             , 0, 0xffffffff, 0x00000000, 0          )
 /* c7 */Y( 0,     0 , _QINT_1            , 0, 0xffffffff, 0x00000000, 0          )
-/* c8 */Y( ILLV,  0 , _ILL_0(_Lc8)       , 2, 0x00200000, 0x00000000, 0          ) // illegal
+/* c8 */Y( 9,     0 , _DIV_7             , 2, 0x00200000, 0x00000000, 0          ) // illegal. Must be even ucode adr
 /* c9 */Y( 0,     0 , _MRET_2            , 0, 0xffffffff, 0x00000000, 0          )
-/* ca */Y( ILLV,  0 , _ILL_0(_Lca)       , 2, 0x00200000, 0x00000000, 0          ) // illegal
+/* ca */Y( 0,     0 , _DIVU_2            , 2, 0x00200000, 0x00000000, 0          ) // illegal
 /* cb */Y( 0,     0 , _QINT_2            , 0, 0xffffffff, 0x00000000, 0          )
 /* cc */Y( 1,     0 , _OR_0              , 1, 0xfe00707f, 0x00006033, (1<<15)    ) // OR
 /* cd */Y( 1,     0 , _REM_0             , 1, 0xfe00707f, 0x02006033, (1<<15)    ) // entrypoint for rem
 /* ce */Y( 0,     0 , _ECALL_5           , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1
 /* cf */Y( 0,     0 , _MRET_7            , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1
-/* d0 */Y( 0,  0x0f , _ECALL_1           , 0, 0xffffffff, 0x00000000, 0          )
-/* d1 */Y( 0,  0x0f , _MRET_1            , 0, 0xffffffff, 0x00000000, 0          )
-/* d2 */Y( 0,  0x10 , _LB_2              , 0, 0xffffffff, 0x00000000, 0          )
-/* d3 */Y( 0,  0x10 , _aFaultd           , 0, 0xffffffff, 0x00000000, 0          )
+/* d0 */Y( 0,  0x19 , _ECALL_1           , 0, 0xffffffff, 0x00000000, 0          )
+/* d1 */Y( 0,  0x19 , _MRET_1            , 0, 0xffffffff, 0x00000000, 0          )
+/* d2 */Y( 0,  0x1a , _LB_2              , 0, 0xffffffff, 0x00000000, 0          )
+/* d3 */Y( 0,  0x1a , _aFaultd           , 0, 0xffffffff, 0x00000000, 0          )
 /* d4 */Y( 0,     0 , _aFault_2          , 0, 0xffffffff, 0x00000000, 0          )
 /* d5 */Y( 0,     0 , _eFetch2           , 0, 0xffffffff, 0x00000000, 0          )
-/* d6 */Y( 0,  0x14 , _eILL0c            , 0, 0xffffffff, 0x00000000, 0          )  
-/* d7 */Y( 0,  0x14 , _ECALL_3           , 0, 0xffffffff, 0x00000000, 0          )
+/* d6 */Y( 0,  0x1b , _eILL0c            , 0, 0xffffffff, 0x00000000, 0          )  
+/* d7 */Y( 0,  0x1b , _ECALL_3           , 0, 0xffffffff, 0x00000000, 0          )
 /* d8 */Y( 1,     0 , _BLTU              , 1, 0x0000707f, 0x00006063, (1<<22)    ) // BLTU
-/* d9 */Y( ILLV,  0 , _ILL_0(_Ld9)       , 2, 0x00400000, 0x00000000, 0          ) // illegal
+/* d9 */Y( 0,     0 , _MULH_3            , 2, 0x00400000, 0x00000000, 0          ) // illegal
 /* da */Y( 0,     0 , _LDAF_a            , 0, 0xffffffff, 0x00000000, 0          )
 /* db */Y( 0,     0 , _jFault_1          , 0, 0xffffffff, 0x00000000, 0          )
 /* dc */Y( 1,     0 , _CSRRSI_0          , 1, 0x0000707f, 0x00006073, (1<<22)    ) // CSRRSI
 /* dd */Y( 0,     0 , _aF_SW_1           , 0, 0xffffffff, 0x00000000, 0          )
-/* de */Y( 0,  0x11 , _Fetch             , 0, 0xffffffff, 0x00000000, 0          ) 
-/* df */Y( 0,  0x11 , _eFetch            , 0, 0xffffffff, 0x00000000, 0          ) 
-/* e0 */Y( ILLV,  0 , _ILL_0(_Le0)       , 2, 0x00400000, 0x00000000, 0          ) // illegal
+/* de */Y( 0,  0x1c , _Fetch             , 0, 0xffffffff, 0x00000000, 0          ) 
+/* df */Y( 0,  0x1c , _eFetch            , 0, 0xffffffff, 0x00000000, 0          ) 
+/* e0 */Y( 0,     0 , _DIVU_1            , 2, 0x00400000, 0x00000000, 0          ) // illegal
 /* e1 */Y( 0,     0 , _ORI_1             , 0, 0xffffffff, 0x00000000, 0          )
-/* e2 */Y( ILLV,  0 , _ILL_0(_Le2)       , 2, 0x00400000, 0x00000000, 0          ) // illegal
-/* e3 */Y( ILLV,  0 , _ILL_0(_Le3)       , 2, 0x00400000, 0x00000000, 0          ) // illegal
+/* e2 */Y( 0,  0x1d , _MUL_1             , 2, 0x00400000, 0x00000000, 0          ) // illegal
+/* e3 */Y( 0,  0x1d , _MUL_3             , 2, 0x00400000, 0x00000000, 0          ) // illegal
 /* e4 */Y( 1,     0 , _ANDI_0            , 1, 0x0000707f, 0x00007013, (1<<22)    ) // ANDI
 /* e5 */Y( 0,     0 , _aF_SW_2           , 0, 0xffffffff, 0x00000000, 0          )
-/* e6 */Y( 0,  0x12 , _StdIncPc          , 0, 0xffffffff, 0x00000000, 0          )
-/* e7 */Y( 0,  0x12 , _aFault            , 0, 0xffffffff, 0x00000000, 0          )
-/* e8 */Y( ILLV,  0 , _ILL_0(_Le8)       , 2, 0x00200000, 0x00000000, 0          ) // illegal
+/* e6 */Y( 0,  0x1e , _StdIncPc          , 0, 0xffffffff, 0x00000000, 0          )
+/* e7 */Y( 0,  0x1e , _aFault            , 0, 0xffffffff, 0x00000000, 0          )
+/* e8 */Y( 0,     0 , _MUL_2             , 2, 0x00200000, 0x00000000, 0          ) // illegal
 /* e9 */Y( 0,     0 , _IJT_3             , 0, 0xffffffff, 0x00000000, 0          )
-/* ea */Y( ILLV,  0 , _ILL_0(_Lea)       , 2, 0x00200000, 0x00000000, 0          ) // illegal
+/* ea */Y( 0,     0 , _MULHU_5           , 2, 0x00200000, 0x00000000, 0          ) //(illegal) 
 /* eb */Y( 0,     0 , _LH_3              , 0, 0xffffffff, 0x00000000, 0          )
 /* ec */Y( 1,     0 , _AND_0             , 1, 0xfe00707f, 0x00007033, (1<<15)    ) // AND
 /* ed */Y( 1,     0 , _REMU_0            , 1, 0xfe00707f, 0x02007033, (1<<15)    ) // entrypoint for "remu"
-/* ee */Y( 0,  0x13 , _eILL0a            , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1
-/* ef */Y( 0,  0x13 , _WFI_5             , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1
-/* f0 */Y( 0,  0x15 , _LBU_2             , 0, 0xffffffff, 0x00000000, 0          ) 
-/* f1 */Y( 0,  0x15 , _aFaulte           , 0, 0xffffffff, 0x00000000, 0          )
-/* f2 */Y( 0,  0x16 , _SW_2              , 0, 0xffffffff, 0x00000000, 0          )
-/* f3 */Y( 0,  0x16 , _aF_SW             , 0, 0xffffffff, 0x00000000, 0          ) 
+/* ee */Y( 0,  0x1f , _eILL0a            , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1
+/* ef */Y( 0,  0x1f , _WFI_5             , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1
+/* f0 */Y( 0,  0x20 , _LBU_2             , 0, 0xffffffff, 0x00000000, 0          ) 
+/* f1 */Y( 0,  0x20 , _aFaulte           , 0, 0xffffffff, 0x00000000, 0          )
+/* f2 */Y( 0,  0x21 , _SW_2              , 0, 0xffffffff, 0x00000000, 0          )
+/* f3 */Y( 0,  0x21 , _aF_SW             , 0, 0xffffffff, 0x00000000, 0          ) 
 /* f4 */Y( 0,     0 , _Fetch2            , 0, 0xffffffff, 0x00000000, 0          )
 /* f5 */Y( 0,     0 , _jFault            , 0, 0xffffffff, 0x00000000, 0          )
-/* f6 */Y( 0,  0x17 , _WFI_1             , 0, 0xffffffff, 0x00000000, 0          )
-/* f7 */Y( 0,  0x17 , _EBREAK_1          , 0, 0xffffffff, 0x00000000, 0          ) 
+/* f6 */Y( 0,  0x22 , _WFI_1             , 0, 0xffffffff, 0x00000000, 0          )
+/* f7 */Y( 0,  0x22 , _EBREAK_1          , 0, 0xffffffff, 0x00000000, 0          ) 
 /* f8 */Y( 1,     0 , _BGEU              , 1, 0x0000707f, 0x00007063, (1<<22)    ) // BGEU
-/* f9 */Y( ILLV,  0 , _ILL_0(_Lf9)       , 2, 0x00400000, 0x00000000, 0          ) // illegal
+/* f9 */Y( 0,     0 , _MULH_2            , 2, 0x00400000, 0x00000000, 0          ) // illegal
 /* fa */Y( 0,     0 , _WFI_2             , 0, 0xffffffff, 0x00000000, 0          )
-/* fb */Y( 0,     0 , _Lfb,"q:fb", unx   , 0, 0xffffffff, 0x00000000, 0          )
+/* fb */Y( 0,     0 , _MULH_1            , 0, 0xffffffff, 0x00000000, 0          )
 /* fc */Y( 1,     0 , _CSRRCI_0          , 1, 0x0000707f, 0x00007073, (1<<22)    ) // CSRRCI
 /* fd */Y( 1,     0 , _NMI_0             , 3, 0xffffffff, 0x00000000, 0          ) // Reserved for NMI
 /* fe */Y( 1,     0 , _ILLe              , 2, 0x2af56000, 0x00000000, 0          ) // illegal

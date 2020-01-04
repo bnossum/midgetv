@@ -6,7 +6,7 @@
  * This module is actually several smallish modules in one.
  */
 module m_progressctrl
-  #( parameter HIGHLEVEL = 0, SRAMADRWIDTH = 0, 
+  #( parameter HIGHLEVEL = 0, SRAMADRWIDTH = 0, MULDIV  = 1,
      NO_CYCLECNT = 0, MTIMETAP = 0, MTIMETAP_LOWLIM = 32, DISREGARD_WB4_3_55 = 0) 
    (
     input        clk, //            System clock
@@ -29,8 +29,14 @@ module m_progressctrl
     input        rlastshift, //    To halt progress of microcode etc
     input [31:0] B, //              Do we access SRAM or I/O? Only B[31] used but due to Verilator...
     input        buserror, //       When we have bus error we must have forward progress in ucode
-//    input        alu_carryout,
-
+    /* verilator lint_off UNUSED */
+    input        alu_carryout, //   For DIV
+    input        clrM, //           For DIV
+    input        ceM, //            For DIV
+    input        isDIVREM, //
+    input        lastshiftoverride,// Update Q even if lastshift is true in MULx instructions
+    /* verilator lint_on UNUSED */
+    
     output [3:0] SEL_O, //          Byte selects for SRAM and outputs
     output [3:0] bmask, //          SEL_O is unfortunately also needed in an active low version for EBR
                                    
@@ -44,6 +50,7 @@ module m_progressctrl
     output       qACK, //           Qualified acknowledge, usually (ACK_I | sysregack)
     output       next_STB_O, //     Output for debugging
     output       next_sram_stb, //  Output for debugging
+    output       cond_holdq, //     During divide.
     output       m_progressctrl_killwarnings // Dummy
    );
 
@@ -260,7 +267,14 @@ module m_progressctrl
    generate
       if ( SRAMADRWIDTH != 0 ) begin
          if ( enaQ_HIGHLEVEL ) begin
-            assign enaQ            = (sa15 | sa32) & ~lastshift    & ~(STB_O | sram_stb);
+            if ( MULDIV == 0 ) begin
+               assign cond_holdq = 0;
+               assign enaQ = (sa15 | sa32) & ~lastshift & ~(STB_O | sram_stb);
+            end else begin
+               wire mod_lastshift = lastshift & ~lastshiftoverride;
+               assign cond_holdq = ~alu_carryout & clrM & ~ceM & isDIVREM;
+               assign enaQ = ((sa15 | sa32) & ~mod_lastshift & ~(STB_O | sram_stb)) & ~cond_holdq;
+            end
             assign progress_ucode = ((~sa33 | lastshift | rlastshift) & ~(STB_O | sram_stb)) | buserror;
          end else begin
             wire h3,hcy;
@@ -276,7 +290,14 @@ module m_progressctrl
          end
       end else begin
          if ( enaQ_HIGHLEVEL ) begin
-            assign enaQ            = (sa15 | sa32) & ~lastshift   & ~STB_O;
+            if ( MULDIV == 0 ) begin
+               assign cond_holdq = 0;
+               assign enaQ = (sa15 | sa32) & ~lastshift & ~STB_O;
+            end else begin
+               wire mod_lastshift = lastshift & ~lastshiftoverride;
+               assign cond_holdq = ~alu_carryout & clrM & ~ceM & isDIVREM;
+               assign enaQ = ((sa15 | sa32) & ~mod_lastshift & ~STB_O) & ~cond_holdq;
+            end
             assign progress_ucode = ((~sa33 | lastshift | rlastshift) & ~STB_O) | buserror;
          end else begin
 //            assign enaQ            = (sa15 | sa32) & ~lastshift   & ~STB_O;
@@ -410,7 +431,7 @@ module m_progressctrl
    endfunction
 `endif
  
-   assign m_progressctrl_killwarnings = &B[31:2] | sram_ack | clrregs ;
+   assign m_progressctrl_killwarnings = &B[31:2] | sram_ack | clrregs | isDIVREM | clrM | ceM | alu_carryout;
 endmodule
 
 

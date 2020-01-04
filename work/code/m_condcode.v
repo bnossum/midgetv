@@ -16,11 +16,16 @@ module m_condcode # ( parameter HIGHLEVEL = 0, MULDIV = 0 )
     input        use_dinx,
     input        cond_holdq, // fitte, is this needed
     input        ceM, //          Enable bidirectional shiftreg used to distinguish mult/div add/shift cycles
+    input [2:0]  s_alu, // fitte,
+//    input        Di31, // fitte
+    input        sa14, // When rM is loaded, rF is cleared
     /* Verilator lint_on UNUSED */
     input        rzcy32, //       Registered zero-detect from m_immexp_zfind_q
     output       raluF, //        Registered aluF for use by SLT(I)/SLTU(I)
     output       is_brcond, //    Combinatorical for BEQ/BNE/BLT(U)/BGE(U)
+    /* Verilator lint_off UNDRIVEN */
     output       cmb_rF2,
+    /* Verilator lint_on UNDRIVEN */
     output       m_condcode_killwarnings
     );
    
@@ -55,6 +60,11 @@ module m_condcode # ( parameter HIGHLEVEL = 0, MULDIV = 0 )
            endcase   
          assign is_brcond = tmp_is_brcond;
          assign m_condcode_killwarnings = &INSTR[31:15] | &INSTR[11:0];
+
+         assign cmb_rF2 = 0;
+         
+      end else begin
+         
 /*
  *   When MULDIV == 0
  *                     0 : use (~alu_carryout&(A31^QQ[31])) | (A31&QQ[31])
@@ -80,8 +90,8 @@ module m_condcode # ( parameter HIGHLEVEL = 0, MULDIV = 0 )
  *    feed[0] ----------|I0 |                _  |           ___
  *    feed[1] ----------|I1 |--  cmb_aluF --| |-+----------|I0 |-------- is_brcond
  *    feed[2] ----------|I2 |               >_|  rzcy32 ---|I1 |
- *                 +----|I3_|                    FUNC3[0] -|I2 |
- *                 |                             FUNC3[2] -|I3_|
+ *                 +----|I3_|                             -|I2 |
+ *                 |                                      -|I3_|
  *                /y\    ___
  *    addtype[1] -(((---|I0 |
  *             1 -+||   |I1 |--  cond_holdq = ~alu_carryout & addtype[1];
@@ -163,11 +173,10 @@ module m_condcode # ( parameter HIGHLEVEL = 0, MULDIV = 0 )
  * 
  */
 
-      end else begin
          reg [2:0] feed;
          reg       tmp_rF;
          wire      rF;
-         wire      cmb_aluF;
+         reg       cmb_aluF;
          reg       tmp_is_brcond;
          
          always @(/*AS*/A31 or INSTR or QQ31 or ceM or rF or use_dinx)                                  
@@ -184,7 +193,7 @@ module m_condcode # ( parameter HIGHLEVEL = 0, MULDIV = 0 )
              8'b 0_1_101_1?? : feed = { 1'b0,  1'b0     , QQ31     }; //  DIV[U]/REM[U]      Shift left
              8'b 1_?_???_??? : feed = { 1'b0,  1'b0     , 1'b0     }; //  clear at dinx
                                                  
-             8'b 0_?_?00_011 : feed = { 1'b0,  1'b1     , 1'b1     }; //  SLTUI            
+             8'b 0_?_?00_011 : feed = { 1'b0,  1'b1     , 1'b1     }; //  SLTIU            
              8'b 0_?_001_011 : feed = { 1'b0,  1'b1     , 1'b1     }; //  SLTU             
              8'b 0_?_?11_11? : feed = { 1'b0,  1'b1     , 1'b1     }; //  BLTU/BGEU        
 
@@ -199,9 +208,28 @@ module m_condcode # ( parameter HIGHLEVEL = 0, MULDIV = 0 )
              8'b 0_?_?11_101 : feed = { 1'b1,  A31&QQ31 , A31^QQ31}; //  BGE
              default :       feed = 3'b000; // Think I see a bug in Verilator. This fails if I say feed = 3'b???
            endcase
-         assign cmb_aluF = feed[2] ? (feed[1] | (feed[0]&~alu_carryout)) : 
-                           (feed[1] ? feed[0]^alu_carryout : feed[0]);
-
+         reg       basic;
+         always @(/*AS*/alu_carryout or feed)
+           casez (feed)
+             3'b000 : basic = 1'b0;
+             3'b001 : basic = 1'b1;
+             3'b010 : basic = alu_carryout;
+             3'b011 : basic = ~alu_carryout;
+             3'b100 : basic = 1'b0;
+             3'b101 : basic = ~alu_carryout;
+             3'b11? : basic = 1'b1;
+           endcase                             
+         
+         always @(/*AS*/basic or rF or s_alu or sa14)
+           casez ({sa14,s_alu})
+             4'b1000 : cmb_aluF = rF;    // A_nearXOR
+             4'b00?? : cmb_aluF = 0;     // Q clear.
+             4'b0100 : cmb_aluF = basic; // Q clear, used by SLTxx
+             4'b0101 : cmb_aluF = 0;     // Q clear.
+             4'b011? : cmb_aluF = 0;
+             default : cmb_aluF = basic;
+           endcase
+         
          always @(posedge clk)
            if ( ~cond_holdq )
              tmp_rF <= cmb_aluF;
@@ -209,14 +237,12 @@ module m_condcode # ( parameter HIGHLEVEL = 0, MULDIV = 0 )
          assign cmb_rF2 = cmb_aluF;
 
          always @(/*AS*/INSTR or rF or rzcy32)
-           case (INSTR[14:12])
-             3'b000 : tmp_is_brcond = ~rzcy32;
-             3'b001 : tmp_is_brcond = rzcy32;
-             3'b100 : tmp_is_brcond = rF ;
-             3'b101 : tmp_is_brcond = ~rF;
+           casez ({INSTR[6],INSTR[14],INSTR[12]})
+             3'b0?? : tmp_is_brcond = ~rzcy32;
+             3'b100 : tmp_is_brcond = ~rzcy32;
+             3'b101 : tmp_is_brcond = rzcy32;
              3'b110 : tmp_is_brcond = rF ;
              3'b111 : tmp_is_brcond = ~rF;
-             default :tmp_is_brcond = 1'b0;
            endcase   
          assign is_brcond = tmp_is_brcond;
          assign raluF = rF;

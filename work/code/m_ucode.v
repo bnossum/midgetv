@@ -22,6 +22,9 @@ module m_ucode
     output       sa20,sa21,sa22,sa23,sa24,sa25,sa26,sa27,sa28,sa29,
     output       sa30, sa32,sa33,sa34, sa37,sa38,sa39,
     output       sa40,sa41,sa42,sa43,
+    output       clrM,
+    output       ceM,
+    output       potentialMODbranch,
     output [7:0] rinx,
     output       ucode_killwarnings
     );
@@ -90,8 +93,11 @@ module m_ucode
    assign sa41 = d[31]; // Latch SEL signals etc
    assign sa42 = d[32]; // Possibly activate STB_O or sram_stb
    assign sa43 = d[33]; // Possibly activate WE_O next cycle
-   assign rinx = d[41:34];
-   assign ucode_killwarnings = d[39];
+   assign clrM = d[34]; // R for M register. Also used to flag unsigned subtraction in DIV/DIVU/REM/REMU
+   assign ceM  = d[35]; // CE for M register. Also used by m_condcode
+   assign potentialMODbranch = d[36]; // Distinguish DIV or MOD
+   assign rinx = d[44:37];
+   assign ucode_killwarnings = d[39]; // ???
 endmodule
 
 // Local Variables:

@@ -35,6 +35,7 @@ module m_shlr
 `else
       ALUWIDTH = 32,
 `endif
+      MULDIV = 1,
       HIGHLEVEL = 1
       )
    (
@@ -50,30 +51,34 @@ module m_shlr
    
    generate
       if ( HIGHLEVEL ) begin
-         reg [ALUWIDTH-1:0]  rM;
-         wire [ALUWIDTH-2:0] cmbMmost,shlMmost,shrMmost;
-         wire                shlM0,shrM0,shift_realcmbMlsb,add_realcmbMlsb,realcmbMlsb,ceMlsb,cmbMlsb;
-         
-         assign shlMmost = rM[ALUWIDTH-2:0];
-         assign shrMmost = {ADR_O0,rM[ALUWIDTH-1:2]};
-         assign cmbMmost = loadMn ? (DAT_O[ALUWIDTH-1:1]&shlMmost) | (~DAT_O[ALUWIDTH-1:1]&shrMmost) : DAT_O[ALUWIDTH-1:1];
-
-         assign shlM0 = 1'b0;
-         assign shrM0 = M[1];
-         assign shift_realcmbMlsb = loadMn ? (DAT_O[0] & shlM0) | (~DAT_O[0] & shrM0) : DAT_O[0];
-         assign add_realcmbMlsb = ~cmb_rF2;
-         assign realcmbMlsb = (clrM & add_realcmbMlsb) | (~clrM & shift_realcmbMlsb);
-         assign ceMlsb  =  ceM | clrM;
-         assign cmbMlsb = ceMlsb ? realcmbMlsb : rM[0];
-                         
-         always @(posedge clk)
-           if ( ceM ) 
-             rM[ALUWIDTH-1:1] <= clrM ? 0 : cmbMmost;
-
-         always @(posedge clk)
-           rM[0] <= cmbMlsb;
-         
-         assign M = rM;
+         if ( MULDIV == 0 ) begin
+            assign M = 0;
+         end else begin
+            reg [ALUWIDTH-1:0]  rM;
+            wire [ALUWIDTH-2:0] cmbMmost,shlMmost,shrMmost;
+            wire                shlM0,shrM0,shift_realcmbMlsb,add_realcmbMlsb,realcmbMlsb,ceMlsb,cmbMlsb;
+            
+            assign shlMmost = rM[ALUWIDTH-2:0];
+            assign shrMmost = {ADR_O0,rM[ALUWIDTH-1:2]};
+            assign cmbMmost = loadMn ? (DAT_O[ALUWIDTH-1:1]&shlMmost) | (~DAT_O[ALUWIDTH-1:1]&shrMmost) : DAT_O[ALUWIDTH-1:1];
+            
+            assign shlM0 = 1'b0;
+            assign shrM0 = M[1];
+            assign shift_realcmbMlsb = loadMn ? (DAT_O[0] & shlM0) | (~DAT_O[0] & shrM0) : DAT_O[0];
+            assign add_realcmbMlsb = ~cmb_rF2;
+            assign realcmbMlsb = (clrM & add_realcmbMlsb) | (~clrM & shift_realcmbMlsb);
+            assign ceMlsb  =  ceM | clrM;
+            assign cmbMlsb = ceMlsb ? realcmbMlsb : rM[0];
+            
+            always @(posedge clk)
+              if ( ceM ) 
+                rM[ALUWIDTH-1:1] <= clrM ? 0 : cmbMmost;
+            
+            always @(posedge clk)
+              rM[0] <= cmbMlsb;
+            
+            assign M = rM;
+         end
       end
    endgenerate
    

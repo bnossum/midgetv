@@ -64,8 +64,13 @@ module m_ucodepc
    input        is_brcond, //           Branch condition
    input [31:0] INSTR, //               Instruction to decode at OpCode fetch
    input [31:0] B, //                   B[1:0] to find alignment errors. B[31] to distinguish EBR/SRAM
+   input [31:0] DAT_O, //               DAT_O[31] to find sign of variable
    input        RST_I, //               NMI
    input        buserror, //            Accessing empty region if high
+   input        ceM, //                 Uses shift-loop or loads or clears bidirectional shift register
+   input        rlastshift, //          Together with ceM, last shift in shift-loop
+   input        potentialMODbranch, //  Distinguish between DIV[U] and MOD[U]. Together with ceM, branch on sign DAT_O[31]
+   
    output [7:0] minx, //                Microcode PC
    output       ucodepc_killwarnings
    );
@@ -101,7 +106,7 @@ module m_ucodepc
    wire         main_illegal;
    
    assign usedinx   = sa28;
-   assign maybranch = Adr0Mustbe0 | Adr1Mustbe0 | use_brcond | (sa32 & ~sa15);
+   assign maybranch = Adr0Mustbe0 | Adr1Mustbe0 | use_brcond | (sa32 & ~sa15) | ceM;
 
    /* Slight mangling of INSTRUCTION to an index.
 
@@ -258,8 +263,6 @@ module m_ucodepc
             // With multiplication and division
             // =======================================================
             /*  
-                                                              
-                                                              
                                                               Check funct[31],[29:26]
                                                               | i30dontcare
                                                               | | i25dontcare
@@ -356,19 +359,27 @@ module m_ucodepc
    
    
    /* takebranch. Microcode must diverge when we have an alignment error,
-    * a taken branch, or an opcode fetch when we read from SRAM
+    * a taken branch, or an opcode fetch when we read from SRAM, or the
+    * last shift in a MUL/DIV shift loop.
     *                     _              ____
     * Adr0Mustbe0 -------|&|------------|    |--- takebranch
     * B[0] --------------|_|  +---------| or |
     *                     _   | +-------|    |
-    * Adr1Mustbe0 -------|&|--+ | +-----|____|
-    * B[1] --------------|_|    | |
-    *                     _     | |
-    * use_brcond --------|&|----+ |
-    * is_brcond ---------|_|      |
-    *                     _       |
-    * read_instr --------|&|------+
-    * B[31] -------------|_|
+    * Adr1Mustbe0 -------|&|--+ | +-----|    |
+    * B[1] --------------|_|    | | +---|____|
+    *                     _     | | |
+    * use_brcond --------|&|----+ | |
+    * is_brcond ---------|_|      | |
+    *                     _       | |
+    * read_instr --------|&|------+ |
+    * B[31] -------------|_|        |
+    *                     _         |
+    * ceM ---------------|&|--------+
+    *               __  +|_|
+    * rlastshift --|or|-+
+    * isDIVbr  ----|__|
+    * 
+    * #define CH13 (( OI << 34) | sr_h) // ceM==0 clrM==1 conditional hlod, and branch on INSTR[15]. Last inch?
     */
    wire             qualint_or_RST_I = qualint | RST_I;
    wire             illegal_or_qualint = (illegal | qualint);
@@ -377,13 +388,16 @@ module m_ucodepc
                        (Adr0Mustbe0 & B[0]) |
                        (Adr1Mustbe0 & B[1]) |                
                        (use_brcond & is_brcond) |
-                       (sa32 & ~sa15 & B[31] );
+                       (sa32 & ~sa15 & B[31] ) |
+                       (ceM & rlastshift );                       
    wire             usedinx_or_RST_I_notcorerunning = usedinx | RST_I | ~corerunning;
 
    assign minx[7:2] = (usedinx_or_RST_I_notcorerunning ? (dinx[7:2] | {6{illegal_or_qualint_or_RST_I}}) : rinx[7:2]);
    assign minx[1]   = (usedinx_or_RST_I_notcorerunning ? ( (dinx[1] | illegal_or_qualint) & ~RST_I) : rinx[1]);
-   assign minx[0]   = (buserror | (usedinx_or_RST_I_notcorerunning ? (illegal_or_qualint_or_RST_I ? qualint_or_RST_I : dinx[0]) : (maybranch ? takebranch : rinx[0])));   
+   wire mostofminx0 = (buserror | (usedinx_or_RST_I_notcorerunning ? (illegal_or_qualint_or_RST_I ? qualint_or_RST_I : dinx[0]) : (maybranch ? takebranch : rinx[0])));   
+   wire doMODbranch_or_signbranch = potentialMODbranch & ( (INSTR[13] & ~ceM) | (DAT_O[31] & ceM) );
+   assign minx[0]   = mostofminx0 | doMODbranch_or_signbranch;
 
-   assign ucodepc_killwarnings = INSTR[31] | &INSTR[29:15] | &INSTR[11:7] | &B | INSTR[1];
+   assign ucodepc_killwarnings = INSTR[31] | &INSTR[29:15] | &INSTR[11:7] | &B | INSTR[1] | &DAT_O[31:0];
    
 endmodule

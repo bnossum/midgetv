@@ -22,7 +22,9 @@
  * 
  */
 module m_inputmux
-  # ( parameter HIGHLEVEL = 0, // 
+  # ( parameter HIGHLEVEL = 0, //
+      MULDIV = 1,
+      DAT_I_ZERO_WHEN_INACTIVE = 0,
       IWIDTH = 8,  //             Can in principle be from 1 to 32. Usually 8, 16 or 32.
       SRAMADRWIDTH = 0, //        ice40hx1k and similar has no SRAM
       MTIMETAP = 0, //            Governs inclusion of registers
@@ -52,6 +54,10 @@ module m_inputmux
     input              meip, //        Machine External Interrupt Pending in MIP
     input              qACK, //        Qualified acknowledge, usually (ACK_I | sysregack)
     input              corerunning, //
+    /* verilator lint_off UNUSED */
+    input [31:0]       M, //           When MUL/DIV
+    input              ReadM,
+    /* verilator lint_on UNUSED */
     
     output             sysregack, //   Read/Write acknowledge from MIP/MIE/MSTATUS
     output [31:0]      Di, //          Data out of mux
@@ -248,22 +254,21 @@ module m_inputmux
          // No SRAM
          // =======================================================
            
-         /* Inevitably we will have through LUTs here. Without 
-          * taking great liberties with the whishbone interface it 
-          * is not easy to put these LUT's to use. Because I search 
-          * for and eliminates constructs named *THRU* I make a
-          * low level construct to hide these in lowlevel code.
-          */
 
-         if ( HIGHLEVEL ) begin 
+         if ( HIGHLEVEL ) begin
+            // Must refine this
             reg [IWIDTH-1:0] r;
+            wire [31:0]      eio;
+            if ( IWIDTH == 32 )
+              assign eio = theio[31:0];
+            else
+              assign eio = {zeros[31:IWIDTH],theio[IWIDTH-1:0]};
+            
             always @(posedge clk)
               if ( corerunning )
-                r <= theio[IWIDTH-1:0];
-            if ( IWIDTH == 32 )
-              assign rDee = r;
-            else
-              assign rDee = {zeros[31:IWIDTH],r};
+                r <= STB_O ? eio : M;
+            assign rDee = r;
+
          end else begin
             genvar kkk;
             wire [IWIDTH-1:0] vanity;
@@ -286,9 +291,23 @@ module m_inputmux
             // =======================================================
             
             reg [31:0] r;
+            wire [31:0] cmb;
+            if ( MULDIV == 0 ) begin
+               assign cmb = STB_O ? theio : Dsram;
+            end else begin
+               wire STB_O_or_ReadM;
+               wire [31:0] theio_or_M;
+               assign STB_O_or_ReadM = STB_O | ReadM;
+               if ( DAT_I_ZERO_WHEN_INACTIVE ) begin
+                  assign theio_or_M = theio | M;
+               end else begin
+                  assign theio_or_M = ReadM ? M : theio;
+               end
+               assign cmb = STB_O_or_ReadM ? theio_or_M : Dsram;
+            end
             always @(posedge clk)
               if ( corerunning )
-                r <= STB_O ? theio : Dsram;
+                r <= cmb;
             assign rDee = r;
 
          end else begin
@@ -307,10 +326,11 @@ module m_inputmux
       end
    endgenerate
    
-   // To keep Verilator happy
+   // To keep Verilator and SimplifyPro happy
    assign m_inputmux_killwarnings = ADR_O[0] | mie | mpie | meie | mrinstretie | 
                                     msie | mtie | mtimeincie | mrinstretip | 
                                     mtimeincip | msip | mtip |
-                                    &zeros | meip | &Dsram | STB_O;
+                                    &zeros | meip | &Dsram | STB_O |
+                                    &M;
    
 endmodule

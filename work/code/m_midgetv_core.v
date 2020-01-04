@@ -390,10 +390,10 @@ module m_midgetv_core
 `ifdef verilator
    wire [4:0]           dbg_rshcnt;             // From inst_shiftcounter of m_shiftcounter.v
 `endif
-   wire                 sa12_and_corerunning;   // From inst_alu_carryin of m_alu_carryin.v
    wire [2:0]           FUNC3;                  // From inst_opreg of m_opreg.v
    wire                 m_condcode_killwarnings;// From inst_condcode of m_condcode.v
    wire                 cmb_rF2;                // From inst_condcode of m_condcode.v
+   wire [ALUWIDTH-1:0]  M;                      // From inst_shlr of m_shlr.v // fitte
       /* verilator lint_on UNUSED */
    /*AUTOWIRE*/
    // Beginning of automatic wires (for undeclared instantiated-module outputs)
@@ -414,6 +414,9 @@ module m_midgetv_core
    wire                 alu_minstretofl;        // From inst_alu of m_alu.v
    wire                 alu_tapout;             // From inst_alu of m_alu.v
    wire [3:0]           bmask;                  // From inst_progressctrl of m_progressctrl.v
+   wire                 ceM;                    // From inst_ucode of m_ucode.v
+   wire                 clrM;                   // From inst_ucode of m_ucode.v
+   wire                 cond_holdq;             // From inst_progressctrl of m_progressctrl.v
    wire                 ctrlreg_we;             // From inst_progressctrl of m_progressctrl.v
    wire                 enaQ;                   // From inst_progressctrl of m_progressctrl.v
    wire                 is_brcond;              // From inst_condcode of m_condcode.v
@@ -434,6 +437,7 @@ module m_midgetv_core
    wire                 next_STB_O;             // From inst_progressctrl of m_progressctrl.v
    wire                 next_readvalue_unknown; // From inst_ebr of m_ebr.v
    wire                 next_sram_stb;          // From inst_progressctrl of m_progressctrl.v
+   wire                 potentialMODbranch;     // From inst_ucode of m_ucode.v
    wire                 progress_ucode;         // From inst_progressctrl of m_progressctrl.v
    wire                 qACK;                   // From inst_progressctrl of m_progressctrl.v
    wire                 qualint;                // From inst_status_and_interrupts of m_status_and_interrupts.v
@@ -552,9 +556,9 @@ module m_midgetv_core
       // verilator public
       get_enaQ = enaQ;
    endfunction
-   function [0:0] get_clearQ;
+   function [0:0] get_nclearQ;
       // verilator public
-      get_clearQ = sa14;
+      get_nclearQ = sa14;
    endfunction
    function [0:0] get_use_dinx;
      // verilator public
@@ -582,7 +586,7 @@ module m_midgetv_core
    endfunction
    function [2:0] get_ALUOP;
       // verilator public
-      get_ALUOP = s_alu;
+      get_ALUOP = {s_alu[2], mod_s_alu_1, s_alu[0]};
    endfunction
    function [0:0] get_corerunning;
       // verilator public
@@ -591,6 +595,14 @@ module m_midgetv_core
    function [4:0] get_shiftcnt;
       // verilator public
       get_shiftcnt = dbg_rshcnt;
+   endfunction
+   function [31:0] get_M;
+      // verilator public
+      get_M = M;
+   endfunction
+   function [0:0] get_raluF;
+      // verilator public
+      get_raluF = raluF;
    endfunction
 `endif
 
@@ -604,7 +616,8 @@ module m_midgetv_core
     * Datapath
     */
    localparam xHIGHLEVEL = 1;
-   m_inputmux #(.HIGHLEVEL(       HIGHLEVEL       ), 
+   wire                 ReadM = clrM & ceM; // fitte
+   m_inputmux #(.HIGHLEVEL(       xHIGHLEVEL       ), 
                 .IWIDTH(          IWIDTH          ), 
                 .SRAMADRWIDTH(    SRAMADRWIDTH    ), 
                 .MTIMETAP(        MTIMETAP        ),
@@ -640,7 +653,9 @@ module m_midgetv_core
       .mtimeincip                       (mtimeincip),
       .meip                             (meip),
       .qACK                             (qACK),
-      .corerunning                      (corerunning));
+      .corerunning                      (corerunning),
+      .M                                (M[31:0]),
+      .ReadM                            (ReadM));
 
    m_cyclecnt #(.HIGHLEVEL(   HIGHLEVEL   ), 
                 .NO_CYCLECNT( NO_CYCLECNT ))
@@ -658,11 +673,18 @@ module m_midgetv_core
       .STB_O                            (STB_O),
       .ADR_O                            (ADR_O[31:0]));
 
-   m_alu_carryin #(.HIGHLEVEL(xHIGHLEVEL))
+   wire [1:0]           mod_s_alu_carryin;
+   wire                 mod_raluF;
+   assign mod_s_alu_carryin = (mod_s_alu_1 ^ s_alu[1]) ? 2'b00 : s_alu_carryin;
+   assign mod_raluF  = s_alu_carryin[1] ? M[ALUWIDTH-1] : raluF;
+   m_alu_carryin #(.HIGHLEVEL(xHIGHLEVEL), .MULDIV(MULDIV))
    inst_alu_carryin
-     (.ADR_O_31                         (ADR_O[31]),
+     (// Inputs
+      .ADR_O_31                         (ADR_O[31]),
       .FUNC7_5                          (FUNC7[5]),
       .FUNC7_0                          (FUNC7[0]),
+      .raluF                            (mod_raluF),
+      .s_alu_carryin                    (mod_s_alu_carryin[1:0]),
       /*AUTOINST*/
       // Outputs
       .alu_carryin                      (alu_carryin),
@@ -670,10 +692,11 @@ module m_midgetv_core
       .rlastshift                       (rlastshift),
       // Inputs
       .clk                              (clk),
-      .lastshift                        (lastshift),
-      .raluF                            (raluF),
-      .s_alu_carryin                    (s_alu_carryin[1:0]));
+      .lastshift                        (lastshift));
 
+   wire                 mod_s_alu_1;
+   assign mod_s_alu_1 = (s_alu == 3'b100 && clrM == 1'b0) ? ~M[0] : s_alu[1];
+   
    m_alu #(.HIGHLEVEL(       HIGHLEVEL       ), 
            .ucodeopt_HAS_MINSTRET(     ucodeopt_HAS_MINSTRET     ),
            .ucodeopt_HAS_EBR_MINSTRET( ucodeopt_HAS_EBR_MINSTRET ),
@@ -682,7 +705,9 @@ module m_midgetv_core
            .MTIMETAP_LOWLIM( MTIMETAP_LOWLIM )
            )
    inst_alu
-     (/*AUTOINST*/
+     (// Inputs
+      .s_alu                            ({s_alu[2],mod_s_alu_1,s_alu[0]}),
+      /*AUTOINST*/
       // Outputs
       .B                                (B[ALUWIDTH-1:0]),
       .A31                              (A31),
@@ -694,7 +719,6 @@ module m_midgetv_core
       .ADR_O                            (ADR_O[ALUWIDTH-1:0]),
       .QQ                               (QQ[ALUWIDTH-1:0]),
       .alu_carryin                      (alu_carryin),
-      .s_alu                            (s_alu[2:0]),
       .sa27                             (sa27),
       .sa26                             (sa26),
       .sa25                             (sa25),
@@ -837,9 +861,9 @@ module m_midgetv_core
    m_condcode #(.HIGHLEVEL(HIGHLEVEL), .MULDIV(MULDIV) ) 
      inst_condcode
        (// Inputs
-        .ceM                            (1'b0), // fitte
-        .use_dinx                       (1'b0), // fitte
-        .cond_holdq                     (1'b0), // fitte
+        .s_alu                          ({s_alu[2],mod_s_alu_1,s_alu[0]}),
+        .use_dinx                       (sa28),
+//        .Di31                           (Di[31]),
         .QQ31                           (QQ[31]),
         /*AUTOINST*/
         // Outputs
@@ -852,6 +876,9 @@ module m_midgetv_core
         .alu_carryout                   (alu_carryout),
         .INSTR                          (INSTR[31:0]),
         .A31                            (A31),
+        .cond_holdq                     (cond_holdq),
+        .ceM                            (ceM),
+        .sa14                           (sa14),
         .rzcy32                         (rzcy32));
 
    m_shiftcounter #(.HIGHLEVEL(HIGHLEVEL))
@@ -872,14 +899,20 @@ module m_midgetv_core
    /* -----------------------------------------------------------------------------
     * Control path
     */
-   m_progressctrl #(.HIGHLEVEL(          HIGHLEVEL          ),
+   wire                 lastshiftoverride = INSTR[25] & (INSTR[6:2] == 5'b01100);     // MULDIV. Can probably be simplified further
+   wire                 isDIVREM = INSTR[25] & ( INSTR[6:2] == 5'b01100) & INSTR[14]; // Can probably be simplified further
+   m_progressctrl #(.HIGHLEVEL(          xHIGHLEVEL          ),
+                    .MULDIV(             MULDIV             ),
                     .DISREGARD_WB4_3_55( DISREGARD_WB4_3_55 ),
                     .NO_CYCLECNT(        NO_CYCLECNT        ),
                     .MTIMETAP(           MTIMETAP           ),
                     .SRAMADRWIDTH(       SRAMADRWIDTH       ),
                     .MTIMETAP_LOWLIM(    MTIMETAP_LOWLIM    )) 
    inst_progressctrl
-     (/*AUTOINST*/
+     (// Inputs      
+      .alu_carryout                     (alu_carryout),
+      .clrM                             (clrM),
+      /*AUTOINST*/
       // Outputs
       .SEL_O                            (SEL_O[3:0]),
       .bmask                            (bmask[3:0]),
@@ -893,6 +926,7 @@ module m_midgetv_core
       .qACK                             (qACK),
       .next_STB_O                       (next_STB_O),
       .next_sram_stb                    (next_sram_stb),
+      .cond_holdq                       (cond_holdq),
       .m_progressctrl_killwarnings      (m_progressctrl_killwarnings),
       // Inputs
       .clk                              (clk),
@@ -916,7 +950,10 @@ module m_midgetv_core
       .lastshift                        (lastshift),
       .rlastshift                       (rlastshift),
       .B                                (B[31:0]),
-      .buserror                         (buserror));
+      .buserror                         (buserror),
+      .ceM                              (ceM),
+      .isDIVREM                         (isDIVREM),
+      .lastshiftoverride                (lastshiftoverride));
    
    m_ucode #(.NO_UCODEOPT(NO_UCODEOPT))
      inst_ucode
@@ -952,6 +989,9 @@ module m_midgetv_core
         .sa41                           (sa41),
         .sa42                           (sa42),
         .sa43                           (sa43),
+        .clrM                           (clrM),
+        .ceM                            (ceM),
+        .potentialMODbranch             (potentialMODbranch),
         .rinx                           (rinx[7:0]),
         .ucode_killwarnings             (ucode_killwarnings),
         // Inputs
@@ -978,8 +1018,12 @@ module m_midgetv_core
         .is_brcond                      (is_brcond),
         .INSTR                          (INSTR[31:0]),
         .B                              (B[31:0]),
+        .DAT_O                          (DAT_O[31:0]),
         .RST_I                          (RST_I),
-        .buserror                       (buserror));
+        .buserror                       (buserror),
+        .ceM                            (ceM),
+        .rlastshift                     (rlastshift),
+        .potentialMODbranch             (potentialMODbranch));
    
    /* Interrupts in midgetv is implemented in an "all or nothing" fashion.
     * If MTIMETAP < MTIMETAP_LOWLIM, we have a minimal system, and no 
@@ -1040,6 +1084,24 @@ module m_midgetv_core
       end
    endgenerate
 
+   /* Multiply and Divide instructions are optionally supported
+    */
+   m_shlr #( .ALUWIDTH(32), .MULDIV(MULDIV) )
+     inst_shlr
+       (// Inputs
+        .loadMn     (sa14    ),
+        .ADR_O0     (ADR_O[0]),
+        /*AUTOINST*/
+        // Outputs
+        .M                              (M[ALUWIDTH-1:0]),
+        // Inputs
+        .clk                            (clk),
+        .ceM                            (ceM),
+        .clrM                           (clrM),
+        .cmb_rF2                        (cmb_rF2),
+        .DAT_O                          (DAT_O[ALUWIDTH-1:0]));
+   
+   
    generate
       if ( DBGA == 0 ) begin
          assign dbga = 32'b0;

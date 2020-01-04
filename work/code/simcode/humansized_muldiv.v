@@ -5,7 +5,7 @@
 /* verilator lint_off DECLFILENAME */
 /* verilator lint_off WIDTH */
 module humansized_muldiv
-  # ( parameter ALUWIDTH = 8,
+  # ( parameter ALUWIDTH = 4,
       HIGHLEVEL = 0
       )
    (
@@ -31,7 +31,6 @@ module humansized_muldiv
     output [2*ALUWIDTH-1:0] QM,
     output [1:0]            divdbg
     );
-   wire                     newop = clrM;
    
    wire                     cond_holdq;
    wire [ALUWIDTH-1:0]      B;
@@ -76,7 +75,7 @@ module humansized_muldiv
    assign QM = {ADR_O,M};
    
    wire                 cmb_rF2;
-   assign mod_s_alu_1 = (s_alu == 3'b100 && newop == 1'b0) ? ~M[0] : s_alu[1];
+   assign mod_s_alu_1 = (s_alu == 3'b100 && clrM == 1'b0) ? ~M[0] : s_alu[1];
    
 /* May replace modules with explicit code for investigation
  */
@@ -120,6 +119,8 @@ module humansized_muldiv
    m_condcode #(.HIGHLEVEL(1), .MULDIV(1)) cnd
      (// Inputs
       .QQ31                             (QQ[ALUWIDTH-1]),
+      .Di31( Di[ALUWIDTH-1] ),
+      .s_alu({s_alu[2],mod_s_alu_1,s_alu[0]}),
       // Outputs
       .raluF                            (rF),
       /*AUTOINST*/
@@ -135,6 +136,7 @@ module humansized_muldiv
       .use_dinx                         (use_dinx),
       .cond_holdq                       (cond_holdq),
       .ceM                              (ceM),
+      .sa14                             (sa14),
       .rzcy32                           (rzcy32));
 
    assign divdbg = {rF,cmb_rF2};
@@ -199,7 +201,7 @@ module humansized_muldiv
     * Compiles to 267 SB_LUTs and 69.96 MHz. So it has an impact, but is no show-stopper. At Medium placement effort
     * I still reach 74.96 MHz. Restoring Division is the algorithm we will pursue.
     */
-   assign cond_holdq = ~alu_carryout & newop;
+   assign cond_holdq = ~alu_carryout & clrM;
    
    /*
     * The rest is constructions that are unchanged - but

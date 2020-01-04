@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
  * Part of midgetv
- * 2019. Copyright B. Nossum.
+ * 2019-2020. Copyright B. Nossum.
  * For licence, see LICENCE
  * -----------------------------------------------------------------------------
  * These are toplevel defines that affects the microcode.
@@ -28,8 +28,13 @@
  *
  * However, the most tested configureation is with MINSTRET included.
  *
+ * Midgetv can optionally include instructions MUL, MULH, MULHSU, MULHU,
+ * DIV, DIVU, REM and REMU. I assume midgetv will be used in control
+ * applications where these instructions are rare. But sometimes it is not
+ * easy to get away from the occational multiplication or divisions. In the
+ * spirit of midgetv, the focus is on implementation size.
  */
 #define ucodeopt_HAS_MINSTRET     1
 #define ucodeopt_HAS_EBR_MINSTRET 1
 
-#define ucodeopt_MULDIV 0
+#define ucodeopt_MULDIV           1
