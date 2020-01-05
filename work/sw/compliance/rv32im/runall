@@ -1,0 +1,26 @@
+../../../bin/m_ice40sim_EBRonly.bin -c 0xf000 -s -i  ../../../obj_dir/rv32im/wDIV.bin                  > ../../../obj_dir/rv32im/DIV.simulator_output 
+../../../bin/m_ice40sim_EBRonly.bin -c 0xf000 -s -i  ../../../obj_dir/rv32im/wDIVU.bin                 > ../../../obj_dir/rv32im/DIVU.simulator_output 
+../../../bin/m_ice40sim_EBRonly.bin -c 0xf000 -s -i  ../../../obj_dir/rv32im/wMULH.bin                 > ../../../obj_dir/rv32im/MULH.simulator_output 
+../../../bin/m_ice40sim_EBRonly.bin -c 0xf000 -s -i  ../../../obj_dir/rv32im/wMULHSU.bin               > ../../../obj_dir/rv32im/MULHSU.simulator_output 
+../../../bin/m_ice40sim_EBRonly.bin -c 0xf000 -s -i  ../../../obj_dir/rv32im/wMULHU.bin                > ../../../obj_dir/rv32im/MULHU.simulator_output 
+../../../bin/m_ice40sim_EBRonly.bin -c 0xf000 -s -i  ../../../obj_dir/rv32im/wMUL.bin                  > ../../../obj_dir/rv32im/MUL.simulator_output 
+../../../bin/m_ice40sim_EBRonly.bin -c 0xf000 -s -i  ../../../obj_dir/rv32im/wREM.bin                  > ../../../obj_dir/rv32im/REM.simulator_output 
+../../../bin/m_ice40sim_EBRonly.bin -c 0xf000 -s -i  ../../../obj_dir/rv32im/wREMU.bin                 > ../../../obj_dir/rv32im/REMU.simulator_output 
+#
+../../../bin/m_ice40sim_SRAM.bin -c 0xf000 -s -i  ../../../obj_dir/srv32im/wDIV.bin                 > ../../../obj_dir/srv32im/DIV.simulator_output 
+../../../bin/m_ice40sim_SRAM.bin -c 0xf000 -s -i  ../../../obj_dir/srv32im/wDIVU.bin                > ../../../obj_dir/srv32im/DIVU.simulator_output 
+../../../bin/m_ice40sim_SRAM.bin -c 0xf000 -s -i  ../../../obj_dir/srv32im/wMULH.bin                > ../../../obj_dir/srv32im/MULH.simulator_output 
+../../../bin/m_ice40sim_SRAM.bin -c 0xf000 -s -i  ../../../obj_dir/srv32im/wMULHSU.bin              > ../../../obj_dir/srv32im/MULHSU.simulator_output 
+../../../bin/m_ice40sim_SRAM.bin -c 0xf000 -s -i  ../../../obj_dir/srv32im/wMULHU.bin               > ../../../obj_dir/srv32im/MULHU.simulator_output 
+../../../bin/m_ice40sim_SRAM.bin -c 0xf000 -s -i  ../../../obj_dir/srv32im/wMUL.bin                 > ../../../obj_dir/srv32im/MUL.simulator_output 
+../../../bin/m_ice40sim_SRAM.bin -c 0xf000 -s -i  ../../../obj_dir/srv32im/wREM.bin                 > ../../../obj_dir/srv32im/REM.simulator_output 
+../../../bin/m_ice40sim_SRAM.bin -c 0xf000 -s -i  ../../../obj_dir/srv32im/wREMU.bin                > ../../../obj_dir/srv32im/REMU.simulator_output 
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,21 @@
+#
+# TODO. Clarify where the compliance test suit should be located relative to midgetv
+#
+echo "DIV             "; diff -b ../../../obj_dir/rv32im/DIV.simulator_output     ../../../../../riscv-compliance/riscv-test-suite/rv32im/references/DIV.reference_output
+echo "DIVU            "; diff -b ../../../obj_dir/rv32im/DIVU.simulator_output    ../../../../../riscv-compliance/riscv-test-suite/rv32im/references/DIVU.reference_output
+echo "MULH            "; diff -b ../../../obj_dir/rv32im/MULH.simulator_output    ../../../../../riscv-compliance/riscv-test-suite/rv32im/references/MULH.reference_output
+echo "MULHSU          "; diff -b ../../../obj_dir/rv32im/MULHSU.simulator_output  ../../../../../riscv-compliance/riscv-test-suite/rv32im/references/MULHSU.reference_output
+echo "MULHU           "; diff -b ../../../obj_dir/rv32im/MULHU.simulator_output   ../../../../../riscv-compliance/riscv-test-suite/rv32im/references/MULHU.reference_output
+echo "MUL             "; diff -b ../../../obj_dir/rv32im/MUL.simulator_output     ../../../../../riscv-compliance/riscv-test-suite/rv32im/references/MUL.reference_output
+echo "REM             "; diff -b ../../../obj_dir/rv32im/REM.simulator_output     ../../../../../riscv-compliance/riscv-test-suite/rv32im/references/REM.reference_output
+echo "REMU            "; diff -b ../../../obj_dir/rv32im/REMU.simulator_output    ../../../../../riscv-compliance/riscv-test-suite/rv32im/references/REMU.reference_output
+#
+echo "(sram) DIV      "; diff -b ../../../obj_dir/srv32im/DIV.simulator_output     ../../../../../riscv-compliance/riscv-test-suite/rv32im/references/DIV.reference_output
+echo "(sram) DIVU     "; diff -b ../../../obj_dir/srv32im/DIVU.simulator_output    ../../../../../riscv-compliance/riscv-test-suite/rv32im/references/DIVU.reference_output
+echo "(sram) MULH     "; diff -b ../../../obj_dir/srv32im/MULH.simulator_output    ../../../../../riscv-compliance/riscv-test-suite/rv32im/references/MULH.reference_output
+echo "(sram) MULHSU   "; diff -b ../../../obj_dir/srv32im/MULHSU.simulator_output  ../../../../../riscv-compliance/riscv-test-suite/rv32im/references/MULHSU.reference_output
+echo "(sram) MULHU    "; diff -b ../../../obj_dir/srv32im/MULHU.simulator_output   ../../../../../riscv-compliance/riscv-test-suite/rv32im/references/MULHU.reference_output
+echo "(sram) MUL      "; diff -b ../../../obj_dir/srv32im/MUL.simulator_output     ../../../../../riscv-compliance/riscv-test-suite/rv32im/references/MUL.reference_output
+echo "(sram) REM      "; diff -b ../../../obj_dir/srv32im/REM.simulator_output     ../../../../../riscv-compliance/riscv-test-suite/rv32im/references/REM.reference_output
+echo "(sram) REMU     "; diff -b ../../../obj_dir/srv32im/REMU.simulator_output    ../../../../../riscv-compliance/riscv-test-suite/rv32im/references/REMU.reference_output
+
