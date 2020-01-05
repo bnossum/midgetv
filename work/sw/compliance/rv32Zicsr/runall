@@ -1,0 +1,13 @@
+../../../bin/m_ice40sim_EBRonly.bin -c 0x8000 -s -s -i  ../../../obj_dir/rv32Zicsr/wI-CSRRC-01.bin                    > ../../../obj_dir/rv32Zicsr/I-CSRRC-01.simulator_output 
+../../../bin/m_ice40sim_EBRonly.bin -c 0x8000 -s -s -i  ../../../obj_dir/rv32Zicsr/wI-CSRRCI-01.bin                   > ../../../obj_dir/rv32Zicsr/I-CSRRCI-01.simulator_output 
+../../../bin/m_ice40sim_EBRonly.bin -c 0x8000 -s -s -i  ../../../obj_dir/rv32Zicsr/wI-CSRRS-01.bin                    > ../../../obj_dir/rv32Zicsr/I-CSRRS-01.simulator_output 
+../../../bin/m_ice40sim_EBRonly.bin -c 0x8000 -s -s -i  ../../../obj_dir/rv32Zicsr/wI-CSRRSI-01.bin                   > ../../../obj_dir/rv32Zicsr/I-CSRRSI-01.simulator_output 
+../../../bin/m_ice40sim_EBRonly.bin -c 0x8000 -s -s -i  ../../../obj_dir/rv32Zicsr/wI-CSRRW-01.bin                    > ../../../obj_dir/rv32Zicsr/I-CSRRW-01.simulator_output 
+../../../bin/m_ice40sim_EBRonly.bin -c 0x8000 -s -s -i  ../../../obj_dir/rv32Zicsr/wI-CSRRWI-01.bin                   > ../../../obj_dir/rv32Zicsr/I-CSRRWI-01.simulator_output 
+#
+../../../bin/m_ice40sim_SRAM.bin    -c 0xc000 -s -s -i  ../../../obj_dir/srv32Zicsr/wI-CSRRC-01.bin                    > ../../../obj_dir/srv32Zicsr/I-CSRRC-01.simulator_output 
+../../../bin/m_ice40sim_SRAM.bin    -c 0xc000 -s -s -i  ../../../obj_dir/srv32Zicsr/wI-CSRRCI-01.bin                   > ../../../obj_dir/srv32Zicsr/I-CSRRCI-01.simulator_output 
+../../../bin/m_ice40sim_SRAM.bin    -c 0xc000 -s -s -i  ../../../obj_dir/srv32Zicsr/wI-CSRRS-01.bin                    > ../../../obj_dir/srv32Zicsr/I-CSRRS-01.simulator_output 
+../../../bin/m_ice40sim_SRAM.bin    -c 0xc000 -s -s -i  ../../../obj_dir/srv32Zicsr/wI-CSRRSI-01.bin                   > ../../../obj_dir/srv32Zicsr/I-CSRRSI-01.simulator_output 
+../../../bin/m_ice40sim_SRAM.bin    -c 0xc000 -s -s -i  ../../../obj_dir/srv32Zicsr/wI-CSRRW-01.bin                    > ../../../obj_dir/srv32Zicsr/I-CSRRW-01.simulator_output 
+../../../bin/m_ice40sim_SRAM.bin    -c 0xc000 -s -s -i  ../../../obj_dir/srv32Zicsr/wI-CSRRWI-01.bin                   > ../../../obj_dir/srv32Zicsr/I-CSRRWI-01.simulator_output 

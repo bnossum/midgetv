@@ -1,0 +1,6 @@
+#
+# TODO. Clarify where the compliance test suit should be located relative to midgetv
+#
+echo "I-FENCE.I-01         "; diff -b ../../../obj_dir/rv32Zifencei/I-FENCE.I-01.simulator_output           ../../../../../riscv-compliance/riscv-test-suite/rv32Zifencei/references/I-FENCE.I-01.reference_output
+#
+echo "(sram) I-FENCE.I-01         "; diff -b ../../../obj_dir/srv32Zifencei/I-FENCE.I-01.simulator_output           ../../../../../riscv-compliance/riscv-test-suite/rv32Zifencei/references/I-FENCE.I-01.reference_output

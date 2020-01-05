@@ -1,0 +1,3 @@
+../../../bin/m_ice40sim_EBRonly.bin -c 0x8000 -s -s -i  ../../../obj_dir/rv32Zifencei/wI-FENCE.I-01.bin                  > ../../../obj_dir/rv32Zifencei/I-FENCE.I-01.simulator_output 
+#
+../../../bin/m_ice40sim_SRAM.bin    -c 0xc000 -s -s -i  ../../../obj_dir/srv32Zifencei/wI-FENCE.I-01.bin                  > ../../../obj_dir/srv32Zifencei/I-FENCE.I-01.simulator_output 

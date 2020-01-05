@@ -1,0 +1,17 @@
+#
+# TODO. Clarify where the compliance test suit should be located relative to midgetv
+#
+echo "I-CSRRC-01           "; diff -b ../../../obj_dir/rv32Zicsr/I-CSRRC-01.simulator_output             ../../../../../riscv-compliance/riscv-test-suite/rv32Zicsr/references/I-CSRRC-01.reference_output
+echo "I-CSRRCI-01          "; diff -b ../../../obj_dir/rv32Zicsr/I-CSRRCI-01.simulator_output            ../../../../../riscv-compliance/riscv-test-suite/rv32Zicsr/references/I-CSRRCI-01.reference_output
+echo "I-CSRRS-01           "; diff -b ../../../obj_dir/rv32Zicsr/I-CSRRS-01.simulator_output             ../../../../../riscv-compliance/riscv-test-suite/rv32Zicsr/references/I-CSRRS-01.reference_output
+echo "I-CSRRSI-01          "; diff -b ../../../obj_dir/rv32Zicsr/I-CSRRSI-01.simulator_output            ../../../../../riscv-compliance/riscv-test-suite/rv32Zicsr/references/I-CSRRSI-01.reference_output
+echo "I-CSRRW-01           "; diff -b ../../../obj_dir/rv32Zicsr/I-CSRRW-01.simulator_output             ../../../../../riscv-compliance/riscv-test-suite/rv32Zicsr/references/I-CSRRW-01.reference_output
+echo "I-CSRRWI-01          "; diff -b ../../../obj_dir/rv32Zicsr/I-CSRRWI-01.simulator_output            ../../../../../riscv-compliance/riscv-test-suite/rv32Zicsr/references/I-CSRRWI-01.reference_output
+#
+echo "(sram) I-CSRRC-01    "; diff -b ../../../obj_dir/srv32Zicsr/I-CSRRC-01.simulator_output             ../../../../../riscv-compliance/riscv-test-suite/rv32Zicsr/references/I-CSRRC-01.reference_output
+echo "(sram) I-CSRRCI-01   "; diff -b ../../../obj_dir/srv32Zicsr/I-CSRRCI-01.simulator_output            ../../../../../riscv-compliance/riscv-test-suite/rv32Zicsr/references/I-CSRRCI-01.reference_output
+echo "(sram) I-CSRRS-01    "; diff -b ../../../obj_dir/srv32Zicsr/I-CSRRS-01.simulator_output             ../../../../../riscv-compliance/riscv-test-suite/rv32Zicsr/references/I-CSRRS-01.reference_output
+echo "(sram) I-CSRRSI-01   "; diff -b ../../../obj_dir/srv32Zicsr/I-CSRRSI-01.simulator_output            ../../../../../riscv-compliance/riscv-test-suite/rv32Zicsr/references/I-CSRRSI-01.reference_output
+echo "(sram) I-CSRRW-01    "; diff -b ../../../obj_dir/srv32Zicsr/I-CSRRW-01.simulator_output             ../../../../../riscv-compliance/riscv-test-suite/rv32Zicsr/references/I-CSRRW-01.reference_output
+echo "(sram) I-CSRRWI-01   "; diff -b ../../../obj_dir/srv32Zicsr/I-CSRRWI-01.simulator_output            ../../../../../riscv-compliance/riscv-test-suite/rv32Zicsr/references/I-CSRRWI-01.reference_output
+
