@@ -38,6 +38,7 @@
 `include "../../code/m_progressctrl.v"
 `include "../../code/m_shlr.v"
 `include "../../code/m_midgetv_core.v"
+`include "../../code/m_mimux.v"
 
 
 module top
@@ -46,7 +47,7 @@ module top
       FORCEEBRADRWIDTH   = 11, 
       IWIDTH             = 32, 
       NO_CYCLECNT        = 0, 
-      MTIMETAP           = 16, 
+      MTIMETAP           = 0,//16, 
       HIGHLEVEL          = 0,
       LAZY_DECODE        = 0,
       DISREGARD_WB4_3_55 = 0,
