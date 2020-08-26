@@ -1,3 +1,4 @@
+tmp/
 work/obj_dir/*
 work/nobackup_cold_store/*
 
@@ -56,3 +57,5 @@ work/hwtst/max_iceblink40-hx1k/iCEcube2_flow/*
 
 work/hwtst/for_size_estimate/ice40loaderprog.hv
 work/hwtst/for_size_estimate/t1/*
+
+work/sw/dhrystone
