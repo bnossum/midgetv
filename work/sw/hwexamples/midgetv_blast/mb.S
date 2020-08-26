@@ -14,6 +14,11 @@
         // The strategy to let the loader live in memory usually reserved for registers 
         // is inspired by the fact that riscv does not specify any startup value for 
         // registers, so all programs should (must!) assume registers are unknown.
+        //
+        // It seems to be fairy common to use a 12 MHz clock in the boards I have seen.
+        // For a 12 MHz clock, this loader will just barely work at 115200 bps.
+        // It is recommended to have above 150 clock cycles per bit, so the highest
+        // recommended bitrate with a 12 MHz clock is 57600. (12000000/57600 ~= 208).
         // =============================================================================
 #define IOREGION 0x60000000
 #define LEDOFS  4
@@ -40,6 +45,7 @@
         .word 4*4 			//  x4  regE     	ep
         .word 0 			//  x5  r9bit    	9*Bitrate                            
         .word 0 			//  x6  regP     	(uint8_t) ep | 0x100                 
+//        .word 0x80000003		//  x7  regW     	9*rBitrate + rBitrate/2 - 14. Initval used at _start:         
         .word 0x80000003		//  x7  regW     	9*rBitrate + rBitrate/2 - 14. Initval used at _start:         
         .word 4 			//  x8  regB     	0x100                         Initval used for loop at _start
         .word IOREGION  		//  x9  regIO    	0x60000000
@@ -51,7 +57,7 @@ getblk: lw      regB,UARTOFS(regIO)     // x13    //   |
         bne     regB,x0,getblk          // x14    //   |     Wait for startbit
         sw      x0,%lo(__mcycle)(x0)    // x15    //   |     Timebase when to sample
         addi    regT,regT,1             // x16    //   |     Increment store index here to save time at [a]
-        srli    regW,rBitrate,1         // x17    //   |     w = g_bitrate/2                                                 //      lw      regW,%lo(__rNMI_IIV)(x0)// x17    //   |     w = g_bitrate/2 - 14 (-14 compensates late clear of __mcycle)
+        srli    regW,rBitrate,1         // x17    //   |     w = g_bitrate/2
 2:      add     regW,regW,rBitrate      // x18    //   | |   Next sample time
         or      regP,regP,regB          // x19    //   | |   Previous read bit into shift register
         srli    regP,regP,1             // x20    //   | |   Shiftreg shifted
@@ -163,43 +169,33 @@ ABL:    lw      regP,UARTOFS(regIO)     //         while ( UART->D )
         add     rBitrate,rBitrate,r9bit //         ab = ab + (atend - atstart)
         j       ABL                     // }
 LastLoop:
-        sb      x0,LEDOFS(regIO)        // Turn of green and red led. Source for blue led is still ~uartrx
         lw      regP,UARTOFS(regIO)     // while ( UART->D == 0)
         beq     regP,x0,LastLoop        //      ;
         lw      r9bit,%lo(__mcycle)(x0) // atend  = SYSEBR->mcycle;
+        sb      x0,LEDOFS(regIO)        // Turn of green and red led. Source for blue led is still ~uartrx
         add     rBitrate,rBitrate,r9bit // ab = ab + (atend - atstart)
         srli    rBitrate,rBitrate,5     // rBitrate = (4*autobaud+16)/32 
-        addi    rBitrate,rBitrate,-5    //            - 5; // [b]
+        addi    rBitrate,rBitrate,-6    // Fudge [b], see below.
         slli    r9bit,rBitrate,3        //
         add     r9bit,r9bit,rBitrate    //
         sw      rBitrate,%lo(__bitrate)(x0)
-        j       getblk                  
+        j       getblk                         
 
         /*
-
-        Have removed -14 at init load regW.
-        Redo test.
-        
-
-         * At 12 MHz, bitrate 115200, this routine is marginal.
-         * The fudgefactor at [b] is really needed - I don't know why
-         *
-         * Short investigation:
-         * FUDGE
-         *     0  Failed 3/3
-         *    -2  Failed 3/3
-         *    -3  Works 3/3
-         *    -4  Works. Tested many > 50 times
-         *    -6  Works 3/3
-         *    -8  Works 3/3
-         *    -9  Failed 3/6
-         *   -10  Failed 3/3
-         *   -12  Failed 3/3
-         *   -16  Failed 3/3
-         *
-         * Hence I select the fudge factor -5.
-
-        Have removed -14 at init load regW.
-        Redo test.
-        
+         * At 12 MHz, bitrate 115200, loading is really MARGINAL.
+         * We shorten the bit time with a fudgefactor. See [b]. For lower bitrates,
+         * this adjustment is of no consequence.
+         * 
+         * FUDGE  Successes/Trails Result
+         * -3     0/3              Fails
+         * -4     3/3              ?      Subsequent program does not seem to be loaded correctly
+         * -5     3/3              Ok
+         * -6     3/3              Ok
+         * -10    3/3              Ok
+         * -11    1/3              Fails
+         * -12    0/3              Fails
+         * -15    0/1              Fails
+         * Nominally, a bit time is 12000000/115200 = 104 = 0x68 clock cycles.
+         * This translates into very few instructions in this implementation.
+         * 
          */

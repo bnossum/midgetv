@@ -12,12 +12,16 @@ CFLAGS = -mabi=ilp32 -march=rv32i -nodefaultlibs -nostartfiles -Os -Wall -Wextra
 
 all: $(OBJ)/autobaud.lst \
 	../../../hwtst/upduino2/ice40loaderprog.hv \
-	../../../hwtst/max_upduino2/ice40loaderprog.hv 
+	../../../hwtst/max_upduino2/ice40loaderprog.hv \
+	../../../hwtst/icebreaker/ice40loaderprog.hv 
 
 ../../../hwtst/upduino2/ice40loaderprog.hv: $(OBJ)/autobaud.bin 
 	../../../bin/midgetv_bin2ebr -i $< -o $@
 
 ../../../hwtst/max_upduino2/ice40loaderprog.hv: $(OBJ)/autobaud.bin 
+	../../../bin/midgetv_bin2ebr -i $< -o $@
+
+../../../hwtst/icebreaker/ice40loaderprog.hv: $(OBJ)/autobaud.bin 
 	../../../bin/midgetv_bin2ebr -i $< -o $@
 
 $(OBJ)/autobaud.o: | $(OBJ)/autobaud_crt0.o 

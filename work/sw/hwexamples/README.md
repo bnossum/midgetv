@@ -19,4 +19,4 @@ Different small programs to test midgetv. All of these programs are to be compil
 | max_iceblink40-hx1k | y | y | y | n | n | n
 | upduino2            | y | y | y | y | n | y
 | max_upduino2        | y | y | y | y | y | y
-
+| icebreaker          | y | y | y | y | n | y
