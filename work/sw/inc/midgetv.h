@@ -17,41 +17,41 @@
 typedef struct {
         //const uint32_t        x0;    see comment above
         //volatile uint32_t     x[31]; see comment above.
-        volatile uint32_t       jj;
-        volatile uint32_t       rinst;
-        const volatile uint32_t pc;
-        volatile uint32_t       mcycle;
-        uint32_t                rNMI_IIV;
-        const uint32_t          cteffffff7f;    
-        const uint32_t          cte000000ff;    
-        const uint32_t          cte0000ffff;    
-        const uint32_t          cteffff7fff;    
-        uint32_t                mtvec;        
-        const uint32_t          cte00000000;    
-        const uint32_t          cteffffffff;    
-        volatile uint32_t       yy;           
-        volatile uint32_t       mepc;
-        volatile uint32_t       mcause;       
-        volatile uint32_t       mtval;        
-        volatile uint32_t       mscratch;     
-        volatile uint32_t       misa;         
-        volatile uint32_t       ex_dup_x0;     
-        volatile uint32_t       ex_rCSRadr;    
-        volatile uint32_t       ex_rCSRty;     
-        volatile uint32_t       ex_rrs1;       
-        volatile uint32_t       ex_rrd;        
-        volatile uint32_t       ex_rtmp;       
-        const volatile uint32_t mtime;         // Write adr is different
-        volatile uint32_t       mtimeh;        
-        const uint32_t          bitrate;
-        const volatile uint32_t minstreth;     // Write adr is different
-        volatile uint32_t       mcycleh;       
-        uint32_t                freefornow_f4;
-        const volatile uint32_t mtimecmp;      // Write adr is different
-        const volatile uint32_t mtimecmph;     // Write adr is different
-        volatile uint32_t       CSRretadr;     // 
-        void (*Entry_xRET)(void);    
-        void (*Entry_CSR )(void);    
+        volatile uint32_t       jj;            // 080   
+        volatile uint32_t       rinst;         // 084
+        const volatile uint32_t pc;            // 088
+        volatile uint32_t       mcycle;        // 08c
+        uint32_t                rNMI_IIV;      // 090
+        const uint32_t          cteffffff7f;   // 094
+        const uint32_t          cte000000ff;   // 098
+        const uint32_t          cte0000ffff;   // 09c
+        const uint32_t          cteffff7fff;   // 0a0
+        uint32_t                mtvec;         // 0a4
+        const uint32_t          cte00000000;   // 0a8
+        const uint32_t          cteffffffff;   // 0ac
+        volatile uint32_t       yy;            // 0b0
+        volatile uint32_t       mepc;          // 0b4
+        volatile uint32_t       mcause;        // 0b8
+        volatile uint32_t       mtval;         // 0bc
+        volatile uint32_t       mscratch;      // 0c0
+        volatile uint32_t       misa;          // 0c4
+        volatile uint32_t       ex_dup_x0;     // 0c8
+        volatile uint32_t       ex_rCSRadr;    // 0cc
+        volatile uint32_t       ex_rCSRty;     // 0d0
+        volatile uint32_t       ex_rrs1;       // 0d4
+        volatile uint32_t       ex_rrd;        // 0d8
+        volatile uint32_t       ex_rtmp;       // 0dc
+        const volatile uint32_t mtime;         // 0e0    // Write adr is different
+        volatile uint32_t       mtimeh;        // 0e4    
+        const uint32_t          bitrate;       // 0e8    
+        const volatile uint32_t minstreth;     // 0ec    // Write adr is different
+        volatile uint32_t       mcycleh;       // 0f0    
+        uint32_t                freefornow_f4; // 0f4    
+        const volatile uint32_t mtimecmp;      // 0f8    // Write adr is different
+        const volatile uint32_t mtimecmph;     // 0fc    // Write adr is different
+        volatile uint32_t       CSRretadr;     // 100    // 
+        void (*Entry_xRET)(void);    //           104
+        void (*Entry_CSR )(void);    //           108
 } SYSEBR_TypeDef;
 
 /* A note to self:
