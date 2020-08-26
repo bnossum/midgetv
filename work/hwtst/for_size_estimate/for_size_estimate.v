@@ -3,7 +3,7 @@
  * 2019. Copyright B. Nossum.
  * For licence, see LICENCE
  * -----------------------------------------------------------------------------
- * Risc-v in a iCE40UP5K. 
+ * Risc-v in a iCE40UP5K or ICE40HX1K. 
  * This file only to get an estimate of the size of the core.
  */
 
@@ -29,15 +29,16 @@
 `include "../../code/m_status_and_interrupts.v"
 `include "../../code/m_ucode.v" 
 `include "../../code/m_3ebr.v"
-`include "../../obj_dir/m_2ebr.v"
+`include "../../generated/m_2ebr.v"
 `include "../../code/m_ucodepc.v"
 `include "../../code/m_progressctrl.v"
+`include "../../code/m_shlr.v"
 `include "../../code/m_midgetv_core.v"
 
 /* Only define one of these:
  */
-`define INVESTIGATE_SMALLEST 1
-//`define INVESTIGATE_LARGEST 1
+//`define INVESTIGATE_SMALLEST 1
+`define INVESTIGATE_LARGEST 1
 //`define GET_NICE_SYMBOL 1
 
 module mytop
