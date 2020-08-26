@@ -20,7 +20,11 @@ void near_putchar( int c ) {
 
 /////////////////////////////////////////////////////////////////////////////
 int near_getchar_TO( uint32_t tolim ) {
+        uint32_t w = SYSEBR->bitrate/2;
+        int b = 0;
+        int n = 1;
         volatile uint32_t to = 0;
+
         while ( UART->D == 0 )
                 ; // Possibly in previous transaction, I cheat on frame bit.
 
@@ -30,10 +34,6 @@ int near_getchar_TO( uint32_t tolim ) {
                         return -1;
         }
                 
-        uint32_t w = SYSEBR->bitrate/2;
-        int b = 0;
-        int n = 1;
-
         do {
                 w += SYSEBR->bitrate;
                 while ( SYSEBR->mcycle < w )
@@ -128,24 +128,29 @@ void dumpEBR( void ) {
 // -----------------------------------------------------------------------------
 int main( void ) {
         int i = 0;
+        int j;
+        
+        LED->D = 4;
+        LED->D = 7;
 
         near_getchar();
-        near_puts( "Welcome to midgetv on an icebreaker board\n\r"
+        near_puts( "Visitor: Welcome to midgetv on an icebreaker board\n\r"
                    "There is not much this test program can do\n\r"
-                   "Commands: (D)ump start of EBR. (L)x write leds\n\r");
+                   "Commands: (D)ump start of EBR. (L)x write leds\n\r"
+                   "Bitratevalue: "
+                );
+        clumsyhexprint( SYSEBR->bitrate );
+        near_puts( "\r\n" );
         while (1) {
-                //LED->D = ++i & 2;
-                //cywait(0x10000);
-                //LED->D = 0;
-                //cywait(0x40000);
                 i = near_getchar();
-                if ( i == 'D' ) {
+                j = i | 0x40; // downcase
+                if ( j == 'd' ) {
                         dumpEBR();
-                } else if ( i == 'L' ) {
+                } else if ( j == 'l' ) {
                         LED->D = near_getchar();
                 } else {
                         near_putchar( i );
-                        near_puts( "?\r\n" );
+                        //near_puts( "?\r\n" );
                 }
         }
 }
