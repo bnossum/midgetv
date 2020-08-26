@@ -95,6 +95,7 @@ module m_ucode
    assign sa43 = d[33]; // Possibly activate WE_O next cycle
    assign clrM = d[34]; // R for M register. Also used to flag unsigned subtraction in DIV/DIVU/REM/REMU
    assign ceM  = d[35]; // CE for M register. Also used by m_condcode
+
    assign potentialMODbranch = d[36]; // Distinguish DIV or MOD
    assign rinx = d[44:37];
    assign ucode_killwarnings = d[39]; // ???
