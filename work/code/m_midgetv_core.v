@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
  * Part of midgetv
- * 2019. Copyright B. Nossum.
+ * 2020-2019. Copyright B. Nossum.
  * For licence, see LICENCE
  * ----------------------------------------------------------------------------
  
@@ -266,6 +266,20 @@ DAT_I[31:0] ------------|or|-|\   ___  rDee                      |
  * 0: Obey rule 3.55 of Wishbone B.3, recommended.
  * 1: Ignore rule 3.55. This should save one! LUT. 
  * 
+ * DAT_I_ZERO_WHEN_INACTIVE
+ * ------------------------
+ * Wishbone B.3 does not mandate any default value for
+ * DAT_O[] of connected devices when these are not active.
+ * Indeed, for most examples in Wishbone B.3, DAT_O[] hold
+ * some value when not active. However, with a suitable
+ * SYSCON unit, we may easily have that the mux of all DAT_O[]
+ * from devices (used as DAT_I[] to this module) is indeed 0
+ * when inactive. If so is the case, we may save 32 SB_LUTs
+ * in the input mux in some cases.
+ *
+ * 0: DAT_I[] unknown when not active
+ * 1: DAT_I[] == 0 when not active. 
+ * 
  * NO_UCODEOPT
  * --------
  * 0: Use 2 EBRs + ~20 LUTs for control, recommended.
@@ -321,7 +335,8 @@ module m_midgetv_core
       HIGHLEVEL          =  0, 
       LAZY_DECODE        =  1, 
       DISREGARD_WB4_3_55 =  1,
-      MULDIV             =  1, // Include multiply/divide instructions
+      DAT_I_ZERO_WHEN_INACTIVE = 0,
+      MULDIV             =  0, // Include multiply/divide instructions
       MTIMETAP_LOWLIM    = 14, // Only location where this value is really to be set 
       NO_UCODEOPT        =  0, // Only set to 1 during debugging
       DBGA               =  0, // Only set to 1 during debugging
@@ -393,16 +408,16 @@ module m_midgetv_core
    wire [2:0]           FUNC3;                  // From inst_opreg of m_opreg.v
    wire                 m_condcode_killwarnings;// From inst_condcode of m_condcode.v
    wire                 cmb_rF2;                // From inst_condcode of m_condcode.v
-   wire [ALUWIDTH-1:0]  M;                      // From inst_shlr of m_shlr.v // fitte
       /* verilator lint_on UNUSED */
    /*AUTOWIRE*/
    // Beginning of automatic wires (for undeclared instantiated-module outputs)
    wire                 A31;                    // From inst_alu of m_alu.v
    wire [ALUWIDTH-1:0]  B;                      // From inst_alu of m_alu.v
-   wire [31:0]          Di;                     // From inst_inputmux of m_inputmux.v
+   wire [31:0]          Di;                     // From inst_mimux of m_mimux.v
    wire [31:0]          Dsram;                  // From inst_ram of m_ram.v
    wire [6:0]           FUNC7;                  // From inst_opreg of m_opreg.v
    wire [31:0]          INSTR;                  // From inst_opreg of m_opreg.v
+   wire [ALUWIDTH-1:0]  MULDIVREG;              // From inst_shlr of m_shlr.v
    wire [31:0]          QQ;                     // From inst_cyclecnt of m_cyclecnt.v
    wire [EBRADRWIDTH-1:0] Rai;                  // From inst_rai of m_rai.v
    wire [4:0]           SRC1;                   // From inst_opreg of m_opreg.v
@@ -598,7 +613,7 @@ module m_midgetv_core
    endfunction
    function [31:0] get_M;
       // verilator public
-      get_M = M;
+      get_M = MULDIVREG;
    endfunction
    function [0:0] get_raluF;
       // verilator public
@@ -616,30 +631,28 @@ module m_midgetv_core
     * Datapath
     */
    localparam xHIGHLEVEL = 1;
-   wire                 ReadM = clrM & ceM; // fitte
-   m_inputmux #(.HIGHLEVEL(       xHIGHLEVEL       ), 
-                .IWIDTH(          IWIDTH          ), 
-                .SRAMADRWIDTH(    SRAMADRWIDTH    ), 
-                .MTIMETAP(        MTIMETAP        ),
-                .MTIMETAP_LOWLIM( MTIMETAP_LOWLIM )) 
+   
+   m_inputmux #(.HIGHLEVEL(                HIGHLEVEL                ),
+                .DAT_I_ZERO_WHEN_INACTIVE( DAT_I_ZERO_WHEN_INACTIVE ),
+                .IWIDTH(                   IWIDTH                   ), 
+                .SRAMADRWIDTH(             SRAMADRWIDTH             ), 
+                .MTIMETAP(                 MTIMETAP                 ),
+                .MTIMETAP_LOWLIM(          MTIMETAP_LOWLIM          )) 
    inst_inputmux
      (/*AUTOINST*/
       // Outputs
       .sysregack                        (sysregack),
-      .Di                               (Di[31:0]),
       .rDee                             (rDee[31:0]),
       .theio                            (theio[31:0]),
-      .m_inputmux_killwarnings          (m_inputmux_killwarnings),
       // Inputs
       .clk                              (clk),
-      .DAT_O                            (DAT_O[31:0]),
-      .DAT_I                            (DAT_I[IWIDTH-1:0]),
-      .Dsram                            (Dsram[31:0]),
-      .ADR_O                            (ADR_O[31:0]),
-      .sra_msb                          (sra_msb),
-      .sa00                             (sa00),
+      .corerunning                      (corerunning),
       .STB_O                            (STB_O),
-      .sram_ack                         (sram_ack),
+      .MULDIVREG                        (MULDIVREG[31:0]),
+      .Dsram                            (Dsram[31:0]),
+      .clrM                             (clrM),
+      .ceM                              (ceM),
+      .ADR_O                            (ADR_O[31:0]),
       .mie                              (mie),
       .mpie                             (mpie),
       .meie                             (meie),
@@ -652,10 +665,24 @@ module m_midgetv_core
       .mtip                             (mtip),
       .mtimeincip                       (mtimeincip),
       .meip                             (meip),
+      .DAT_I                            (DAT_I[IWIDTH-1:0]));
+
+   m_mimux #(.HIGHLEVEL(HIGHLEVEL))
+   inst_mimux
+     (/*AUTOINST*/
+      // Outputs
+      .Di                               (Di[31:0]),
+      // Inputs
+      .clk                              (clk),
+      .sra_msb                          (sra_msb),
+      .sa00                             (sa00),
+      .sram_ack                         (sram_ack),
       .qACK                             (qACK),
       .corerunning                      (corerunning),
-      .M                                (M[31:0]),
-      .ReadM                            (ReadM));
+      .ADR_O                            (ADR_O[31:0]),
+      .DAT_O                            (DAT_O[31:0]),
+      .rDee                             (rDee[31:0]));
+
 
    m_cyclecnt #(.HIGHLEVEL(   HIGHLEVEL   ), 
                 .NO_CYCLECNT( NO_CYCLECNT ))
@@ -676,7 +703,7 @@ module m_midgetv_core
    wire [1:0]           mod_s_alu_carryin;
    wire                 mod_raluF;
    assign mod_s_alu_carryin = (mod_s_alu_1 ^ s_alu[1]) ? 2'b00 : s_alu_carryin;
-   assign mod_raluF  = s_alu_carryin[1] ? M[ALUWIDTH-1] : raluF;
+   assign mod_raluF  = s_alu_carryin[1] ? MULDIVREG[ALUWIDTH-1] : raluF;
    m_alu_carryin #(.HIGHLEVEL(xHIGHLEVEL), .MULDIV(MULDIV))
    inst_alu_carryin
      (// Inputs
@@ -695,7 +722,7 @@ module m_midgetv_core
       .lastshift                        (lastshift));
 
    wire                 mod_s_alu_1;
-   assign mod_s_alu_1 = (s_alu == 3'b100 && clrM == 1'b0) ? ~M[0] : s_alu[1];
+   assign mod_s_alu_1 = (s_alu == 3'b100 && clrM == 1'b0) ? ~MULDIVREG[0] : s_alu[1];
    
    m_alu #(.HIGHLEVEL(       HIGHLEVEL       ), 
            .ucodeopt_HAS_MINSTRET(     ucodeopt_HAS_MINSTRET     ),
@@ -1093,7 +1120,7 @@ module m_midgetv_core
         .ADR_O0     (ADR_O[0]),
         /*AUTOINST*/
         // Outputs
-        .M                              (M[ALUWIDTH-1:0]),
+        .MULDIVREG                      (MULDIVREG[ALUWIDTH-1:0]),
         // Inputs
         .clk                            (clk),
         .ceM                            (ceM),

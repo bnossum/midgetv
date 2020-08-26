@@ -46,13 +46,13 @@ module m_shlr
     input                 cmb_rF2, //   Used to determine lsb during unsigned subtraction in DIV    
     input                 ADR_O0, //    During MULx we shift right. This is msb
     input [ALUWIDTH-1:0]  DAT_O, //     To initiate shift register
-    output [ALUWIDTH-1:0] M  //         Eventually holds low 32 bits of MULT or quotient of DIV
+    output [ALUWIDTH-1:0] MULDIVREG  // Eventually holds low 32 bits of MULT or quotient of DIV
     );
    
    generate
       if ( HIGHLEVEL ) begin
          if ( MULDIV == 0 ) begin
-            assign M = 0;
+            assign MULDIVREG = 0;
          end else begin
             reg [ALUWIDTH-1:0]  rM;
             wire [ALUWIDTH-2:0] cmbMmost,shlMmost,shrMmost;
@@ -63,7 +63,7 @@ module m_shlr
             assign cmbMmost = loadMn ? (DAT_O[ALUWIDTH-1:1]&shlMmost) | (~DAT_O[ALUWIDTH-1:1]&shrMmost) : DAT_O[ALUWIDTH-1:1];
             
             assign shlM0 = 1'b0;
-            assign shrM0 = M[1];
+            assign shrM0 = MULDIVREG[1];
             assign shift_realcmbMlsb = loadMn ? (DAT_O[0] & shlM0) | (~DAT_O[0] & shrM0) : DAT_O[0];
             assign add_realcmbMlsb = ~cmb_rF2;
             assign realcmbMlsb = (clrM & add_realcmbMlsb) | (~clrM & shift_realcmbMlsb);
@@ -77,7 +77,7 @@ module m_shlr
             always @(posedge clk)
               rM[0] <= cmbMlsb;
             
-            assign M = rM;
+            assign MULDIVREG = rM;
          end
       end
    endgenerate
