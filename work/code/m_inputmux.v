@@ -8,38 +8,37 @@
  *   o a data input port
  *   o 32 bit output from the internal EBR ram (DAT_O)
  *   o A rightshifted ADR_O
+ *   o register M for MUL/DIV instructions
  * 
- * The only difference between the DIN and SRAM input is that the
- * width of SRAM is fixed to 32 bits. Midgetv can execute
- * instructions read from a 32-bit DIN port.
- *  
- * The module can be compiled with no SRAM support. 
- * Size in LUTs:
- * SRAMADRWIDTH 
- * |    IWIDTH      Size in LUTs
- * 0    iwidth      33 + iwidth
- * !=0  x           65
+ * There are many choices for the input mux. Not all are thoroghly tested. 
+ * Common for all implementations is the last part. 
+ * 
  * 
  */
+
+
+/* verilator lint_off DECLFILENAME */
+
+
 module m_inputmux
-  # ( parameter HIGHLEVEL = 0, //
-      MULDIV = 1,
-      DAT_I_ZERO_WHEN_INACTIVE = 0,
-      IWIDTH = 8,  //             Can in principle be from 1 to 32. Usually 8, 16 or 32.
-      SRAMADRWIDTH = 0, //        ice40hx1k and similar has no SRAM
-      MTIMETAP = 0, //            Governs inclusion of registers
-      MTIMETAP_LOWLIM = 32 //     Really a constant
+  # ( parameter HIGHLEVEL = 1, //      Presently not in use
+      MULDIV = 0, //                   With MUL/DIV instructions?
+      DAT_I_ZERO_WHEN_INACTIVE = 1, // With "wellbehaved" Wishbone input we may save 32 LUTs in certain situations
+      IWIDTH = 32,  //                 Can in principle be from 1 to 32. Usually 8, 16 or 32.
+      SRAMADRWIDTH = 0, //             External memory. Usually SRAM in iCE40UP
+      MTIMETAP = 0, //                 Include system registers if MTIMETAP >= MTIMETAP_LOWLIM
+      MTIMETAP_LOWLIM = 32 //          Really a constant
       )
    (
-    input              clk,
-    input [31:0]       DAT_O, //       Output from EBR is input to mux
-    input [IWIDTH-1:0] DAT_I, //       External input
+    input              clk, //         System clock
+    input              corerunning, // Only update registers after core is started
+    /* verilator lint_off UNUSED */
+    input              STB_O, //       Selecte between SRAM and IO, must also lead to  ack when systemregisters written
+    input [31:0]       MULDIVREG, //   MUL/DIV result register
     input [31:0]       Dsram, //       SRAM input
-    input [31:0]       ADR_O, //       For address decoding 
-    input              sra_msb, //     Msb to use when rightshifing ADR_O
-    input              sa00, //        Main select signal
-    input              STB_O, //       Selecte between SRAM and IO, must also give ack when systemregisters written
-    input              sram_ack, //    Used to select data from SRAM/input devices
+    input              clrM, //        To determine if MULDIVREG is to be read
+    input              ceM, //         To determine if MULDIVREG is to be read
+    input [31:0]       ADR_O, //       For select between system registers
     input              mie, //         Machine Interrupt enable in MSTATUS
     input              mpie, //        Machine Previous Interrupt enable in MSTATUS
     input              meie, //        Machine External Interrupt Enable in MIE
@@ -52,285 +51,378 @@ module m_inputmux
     input              mtip,//         Machine Timer Interrupt Pending in MIP
     input              mtimeincip, //  Machine Time Increment Interrupt Pending in MIP
     input              meip, //        Machine External Interrupt Pending in MIP
-    input              qACK, //        Qualified acknowledge, usually (ACK_I | sysregack)
-    input              corerunning, //
-    /* verilator lint_off UNUSED */
-    input [31:0]       M, //           When MUL/DIV
-    input              ReadM,
     /* verilator lint_on UNUSED */
+    input [IWIDTH-1:0] DAT_I, //       External input
     
     output             sysregack, //   Read/Write acknowledge from MIP/MIE/MSTATUS
-    output [31:0]      Di, //          Data out of mux
-    output [31:0]      rDee, //        Output for debugging purposes
-    output [31:0]      theio, //       Output for debugging purposes
-    output             m_inputmux_killwarnings // No need to connect
+    output [31:0]      rDee, //        Output used by mimux
+    output [31:0]      theio //        Output for debugging purposes
+//    output             m_inputmux_killwarnings
     );
-   wire [31:0]         shADR_O = {sra_msb,ADR_O[31:1]};
 
-   // =======================================================
-   // Last part
-   // ---------
-   // This is the last part of the input mux. The reason I put it first
-   // is because there are placement constraints specified here, and
-   // the "genblk" part of code out of Lattice IceCobe should not jump
-   // around.
+   localparam pHASSYSREGS = MTIMETAP >= MTIMETAP_LOWLIM ? 4 : 0;
+   localparam pHASSRAM = SRAMADRWIDTH != 0              ? 2 : 0;
+   localparam INPUTMUXTYPE = pHASSYSREGS | pHASSRAM | MULDIV;
+
+   /* verilator lint_off UNUSED */
+   wire [32:0]         zeros = 33'b0;
+   wire [32:0]         erDee;
+   wire [32:0]         edati = {zeros[32:IWIDTH],DAT_I[IWIDTH-1:0]};
+   /* verilator lint_on UNUSED */ 
+
    generate
-      if ( HIGHLEVEL ) begin
-
-         // =======================================================
-         // HIGLEVEL
-         // =======================================================
-         
-         reg sa00mod;
-         always @(posedge clk)
-           sa00mod <=  ~(qACK | sram_ack | sa00 | ~corerunning);
-         assign Di = sa00mod ? DAT_O : (DAT_O & rDee | ~DAT_O & shADR_O);
-
-      end else begin
-
-         // =======================================================
-         // LOWLEVEL
-         // =======================================================
-         
-         genvar j;
-         wire   cmb_sa00mod;
-         wire   sa00mod;
-         SB_LUT4 #(.LUT_INIT(16'h0100)) inst_presa00mod( .O(cmb_sa00mod), .I3(corerunning), .I2(sram_ack), .I1(qACK), .I0(sa00)); 
-         SB_DFF sa00mod_r( .Q(sa00mod), .C(clk), .D(cmb_sa00mod));
-         for ( j = 0; j < 32; j = j + 1 ) begin
-            SB_LUT4 #(.LUT_INIT(16'hf0ca)) cmb(.O(Di[j]),.I3(sa00mod),.I2(DAT_O[j]),.I1(rDee[j]),.I0(shADR_O[j]));
-         end
-         
-      end
-   endgenerate
-   
-   generate
-      wire [32:0]      zeros = 33'h0;
-
-      if ( MTIMETAP < MTIMETAP_LOWLIM ) begin
-         
-         // =======================================================
-         // No system registers
-         // =======================================================
-            
-         if ( IWIDTH == 32 )
-           assign theio = DAT_I[IWIDTH-1:0];
-         else
-           assign theio = {zeros[31:IWIDTH],DAT_I};
-         assign sysregack = 1'b0;
-      end else begin         
-         /* Has DAT_I and registers MIP, MIE and MSTATUS 
+      if ( INPUTMUXTYPE == 0 ) begin
+         /* Simplest and smallest case. No SRAM, no system registers, no multiplier
+          *
+          *               __   
+          * DAT_I -------|  |- rDee
+          *              >  |  
+          * corerunning -E__|  
+          * 
+          * Total size: 33+IWIDTH SB_LUT4
           */
-
-         if ( HIGHLEVEL ) begin
-
-            // =======================================================
-            // Has system registers, HIGLEVEL
-            // =======================================================
-            
-            wire [32:0] extDAT_I = {zeros[32:IWIDTH],DAT_I};
-            //                     32-18 17          16         15-12   11   10-8 7    6-4  3    2-0 
-            wire [31:0] MIP     = {14'h0,mrinstretip,mtimeincip,4'b0000,meip,3'h0,mtip,3'h0,msip,3'h0};
-            wire [31:0] MIE     = {14'h0,mrinstretie,mtimeincie,4'b0000,meie,3'h0,mtie,3'h0,msie,3'h0};
-            wire [31:0] MSTATUS = {14'h0,1'b0,       1'b0,      4'b0001,1'b1,3'h0,mpie,3'h0,mie, 3'h0};
-            /* v erilator lint_off UNUSED */
-            reg         aaa;
-            /* v erilator lint_on UNUSED */
-            reg [31:0]  defeatlattice_theio;
-            
-            always @(/*AS*/ADR_O or MIE or MIP or MSTATUS or extDAT_I) 
-              case ( ADR_O[29:27] )
-                3'b000 : { aaa, defeatlattice_theio} = {1'b0, extDAT_I[31:0]};
-                3'b001 : { aaa, defeatlattice_theio} = {1'b0, extDAT_I[31:0]};
-                3'b010 : { aaa, defeatlattice_theio} = {1'b0, extDAT_I[31:0]};
-                3'b011 : { aaa, defeatlattice_theio} = {1'b0, extDAT_I[31:0]};
-                3'b100 : { aaa, defeatlattice_theio} = {1'b0, extDAT_I[31:0]};
-                3'b101 : { aaa, defeatlattice_theio} = {1'b1, MIP};
-                3'b110 : { aaa, defeatlattice_theio} = {1'b1, MIE};
-                3'b111 : { aaa, defeatlattice_theio} = {1'b1, MSTATUS};
-              endcase
-            assign theio = defeatlattice_theio;
-            assign sysregack = aaa & STB_O;
-
-         end else begin
-
-            // =======================================================
-            // Has system register, LOWLEVEL
-            // =======================================================
-            
-            SB_LUT4 #(.LUT_INIT(16'he000)) l_sysregack(   .O(sysregack),   .I3(STB_O), .I2(ADR_O[29]), .I1(ADR_O[28]), .I0(ADR_O[27]) ); // 
-            genvar k;
-            for ( k = 0; k < 32; k = k + 1 ) begin
-               if ( k == 3 ) begin
-//                  wire k3a = (~ADR_O[28] & ~ADR_O[27] & DAT_I[3] ) | (~ADR_O[28] & ADR_O[27] & msip );
-//                  wire k3b = ( ADR_O[28] & ~ADR_O[27] & msie     ) | ( ADR_O[28] & ADR_O[27] & mie  );
-//                  assign theio[3] = (~STB_O & Dsram[3]) | (STB_O & (k3a | k3b));
-                  wire k3a,k3b;
-                  SB_LUT4 #(.LUT_INIT(16'h00ac)) l_k3a( .O(k3a), .I3(ADR_O[28]), .I2(ADR_O[27]), .I1(DAT_I[3]), .I0(msip));
-                  SB_LUT4 #(.LUT_INIT(16'hac00)) l_k3b( .O(k3b), .I3(ADR_O[28]), .I2(ADR_O[27]), .I1(msie),     .I0(mie));
-                  SB_LUT4 #(.LUT_INIT(16'hfcaa)) l_theio3( .O(theio[3]), .I3(STB_O), .I2(k3a), .I1(k3b), .I0(Dsram[3]));                  
-               end else if ( k == 7 ) begin
-//                  wire k7a = (~ADR_O[28] & ~ADR_O[27] & DAT_I[7] ) | (~ADR_O[28] & ADR_O[27] & mtip );
-//                  wire k7b = ( ADR_O[28] & ~ADR_O[27] & mtie     ) | ( ADR_O[28] & ADR_O[27] & mpie );
-//                  assign theio[7] = (~STB_O & Dsram[7]) | (STB_O & (k7a | k7b));
-                  wire k7a,k7b;
-                  SB_LUT4 #(.LUT_INIT(16'h00ac)) l_k7a( .O(k7a), .I3(ADR_O[28]), .I2(ADR_O[27]), .I1(DAT_I[7]), .I0(mtip));
-                  SB_LUT4 #(.LUT_INIT(16'hac00)) l_k7b( .O(k7b), .I3(ADR_O[28]), .I2(ADR_O[27]), .I1(mtie),     .I0(mpie));
-                  SB_LUT4 #(.LUT_INIT(16'hfcaa)) l_theio7( .O(theio[7]), .I3(STB_O), .I2(k7a), .I1(k7b), .I0(Dsram[7]));                  
-               end else if ( k == 11 ) begin
-//                  wire k11a = (~ADR_O[28] & ~ADR_O[27] & DAT_I[11] ) | (~ADR_O[28] & ADR_O[27] & meip );
-//                  wire k11b = ( ADR_O[28] & ~ADR_O[27] & meie      ) | ( ADR_O[28] & ADR_O[27] & 1'b1 );
-//                  assign theio[11] = (~STB_O & Dsram[11]) | (STB_O & (k11a | k11b));
-                  wire k11a,k11b;
-                  SB_LUT4 #(.LUT_INIT(16'h00ac)) l_k11a( .O(k11a), .I3(ADR_O[28]), .I2(ADR_O[27]), .I1(DAT_I[11]), .I0(meip));
-                  SB_LUT4 #(.LUT_INIT(16'hac00)) l_k11b( .O(k11b), .I3(ADR_O[28]), .I2(ADR_O[27]), .I1(meie),      .I0(1'b1));
-                  SB_LUT4 #(.LUT_INIT(16'hfcaa)) l_theio11( .O(theio[11]), .I3(STB_O), .I2(k11a), .I1(k11b), .I0(Dsram[11]));                  
-               end else if ( k == 12 ) begin
-//                  wire k12 = (~ADR_O[28] & ~ADR_O[27] & DAT_I[12] ) | (ADR_O[28] & ADR_O[27]) ;
-//                  assign theio[12] = (~STB_O & Dsram[12]) | (STB_O & k12);
-                  wire k12;
-                  SB_LUT4 #(.LUT_INIT(16'hc2c2)) l_k12( .O(k12), .I3(1'b0), .I2(ADR_O[28]), .I1(ADR_O[27]), .I0(DAT_I[12]));
-                  SB_LUT4 #(.LUT_INIT(16'hcaca)) l_theio12( .O(theio[12]), .I3(1'b0), .I2(STB_O), .I1(k12), .I0(Dsram[12]));                  
-               end else if ( k == 16 ) begin
-//                  wire k16a = (~ADR_O[28] & ~ADR_O[27] & DAT_I[16]  ) | (~ADR_O[28] & ADR_O[27] & mtimeincip );
-//                  wire k16b = ( ADR_O[28] & ~ADR_O[27] & mtimeincie );
-//                  assign theio[16] = (~STB_O & Dsram[16]) | (STB_O & (k16a | k16b));
-                  wire k16a,k16b;
-                  SB_LUT4 #(.LUT_INIT(16'h00ac)) l_k16a( .O(k16a), .I3(ADR_O[28]), .I2(ADR_O[27]), .I1(DAT_I[16]), .I0(mtimeincip));
-                  SB_LUT4 #(.LUT_INIT(16'hac00)) l_k16b( .O(k16b), .I3(ADR_O[28]), .I2(ADR_O[27]), .I1(mtimeincie),.I0(1'b0));
-                  SB_LUT4 #(.LUT_INIT(16'hfcaa)) l_theio16( .O(theio[16]), .I3(STB_O), .I2(k16a), .I1(k16b), .I0(Dsram[16]));                  
-               end else if ( k == 17 ) begin
-                  /* STB_O
-                   * |ADR_O[28:27]
-                   * 0xx  Dsram[17]
-                   * 100  DAT_I[17]
-                   * 101  mrinstretip
-                   * 110  mrinstretie
-                   * 111  1'b0
-                   * 
-                   * ADR_O[28:27]
-                   * ||  luta         lutb
-                   * 00  DAT_I[17]    0
-                   * 01  mrinstretip  0
-                   * 10  0            mrinstretie
-                   * 11  0            0
-                   * 
-                   * STB_O lutc
-                   * 0     Dsram[17]
-                   * 1     luta | lutb
-                   * 
-                   */
-//                  wire k17a = (~ADR_O[28] & ~ADR_O[27] & DAT_I[17]  ) | (~ADR_O[28] & ADR_O[27] & mrinstretip);
-//                  wire k17b = ( ADR_O[28] & ~ADR_O[27] & mrinstretie);
-//                  assign theio[17] = (~STB_O & Dsram[17]) | (STB_O & (k17a | k17b));
-                  wire k17a,k17b;
-                  SB_LUT4 #(.LUT_INIT(16'h00ac)) l_k17a( .O(k17a), .I3(ADR_O[28]), .I2(ADR_O[27]), .I1(DAT_I[17]), .I0(mrinstretip));
-                  SB_LUT4 #(.LUT_INIT(16'hac00)) l_k17b( .O(k17b), .I3(ADR_O[28]), .I2(ADR_O[27]), .I1(mrinstretie),.I0(1'b0));
-                  SB_LUT4 #(.LUT_INIT(16'hfcaa)) l_theio17( .O(theio[17]), .I3(STB_O), .I2(k17a), .I1(k17b), .I0(Dsram[17]));                  
-               end else begin
-                  /*            
-                   * For most bits:
-                   * STB_O ----------------+ 
-                   *                __     |
-                   * ADR_O[30] ---o| &|    |     
-                   * DAT_I[x] -----|__|---|1\    __
-                   *                      |  |--|  |-- rDee[x]
-                   * Dsram[x] ------------|0/   >__|
-                   * 
-                   */
-                  wire adrok; // = ADR_O[30:27] == 4'b1100 )
-                  SB_LUT4 #(.LUT_INIT(16'h1000)) l_adrok( .O(adrok), .I3(ADR_O[30]), .I2(ADR_O[29]),   .I1(ADR_O[28]), .I0(ADR_O[27]));
-                  SB_LUT4 #(.LUT_INIT(16'hc0aa)) l_mux( .O(theio[k]), .I3(STB_O), .I2(adrok),   .I1(DAT_I[k]), .I0(Dsram[k]));
-               end
-            end // for-loop
-         end // HIGHLEVEL
-      end // MTIMETAP
-   endgenerate
-
-   generate
-      if ( SRAMADRWIDTH == 0 ) begin
-
-         // =======================================================
-         // No SRAM
-         // =======================================================
-           
-
-         if ( HIGHLEVEL ) begin
-            // Must refine this
-            reg [IWIDTH-1:0] r;
-            wire [31:0]      eio;
-            if ( IWIDTH == 32 )
-              assign eio = theio[31:0];
-            else
-              assign eio = {zeros[31:IWIDTH],theio[IWIDTH-1:0]};
-            
-            always @(posedge clk)
-              if ( corerunning )
-                r <= STB_O ? eio : M;
-            assign rDee = r;
-
-         end else begin
-            genvar kkk;
-            wire [IWIDTH-1:0] vanity;
-            for ( kkk = 0; kkk < 32; kkk = kkk + 1 ) begin
-               if ( kkk < IWIDTH ) begin
-                  SB_LUT4 #(.LUT_INIT(16'haaaa)) vanity_cmb( .O(vanity[kkk]), .I3(1'b0), .I2(1'b0), .I1(1'b0), .I0(theio[kkk]));
-                  SB_DFFE vanity_r( .Q(rDee[kkk]), .C(clk), .E(corerunning), .D(vanity[kkk])); 
-               end else begin
-                  assign rDee[kkk] = 1'b0;
-               end
-            end
-         end
+         reg [IWIDTH-1:0] ireg;
          
-      end else begin
-
-         if ( HIGHLEVEL ) begin
-
-            // =======================================================
-            // SRAM, HIGHLEVEL
-            // =======================================================
-            
-            reg [31:0] r;
-            wire [31:0] cmb;
-            if ( MULDIV == 0 ) begin
-               assign cmb = STB_O ? theio : Dsram;
-            end else begin
-               wire STB_O_or_ReadM;
-               wire [31:0] theio_or_M;
-               assign STB_O_or_ReadM = STB_O | ReadM;
-               if ( DAT_I_ZERO_WHEN_INACTIVE ) begin
-                  assign theio_or_M = theio | M;
-               end else begin
-                  assign theio_or_M = ReadM ? M : theio;
-               end
-               assign cmb = STB_O_or_ReadM ? theio_or_M : Dsram;
-            end
-            always @(posedge clk)
-              if ( corerunning )
-                r <= cmb;
-            assign rDee = r;
-
-         end else begin
-
-            // =======================================================
-            // SRAM, LOWLEVEL
-            // =======================================================
-            
-            genvar jj;
-            for ( jj = 0; jj < 32; jj = jj + 1 ) begin
-               SB_DFFE holdinput( .Q(rDee[jj]), .C(clk), .E(corerunning), .D(theio[jj]) ); 
-            end
-            
+         always @(posedge clk)
+           if ( corerunning )
+             ireg <= DAT_I;
+         assign erDee = {zeros[32:IWIDTH],ireg};
+         assign sysregack = 0;
+         assign theio = DAT_I;
+         
+      end else if ( INPUTMUXTYPE == 1 ) begin
+         /* Multiplier present
+          *
+          * STB_O ------------+               
+          * DAT_I -----------|1\         __   
+          *                  |  |- a ---|  |- rDee
+          * MULDIVREG -------|0/        >  |  
+          *                corerunning -E__|  
+          * 
+          * Total size: 65 SB_LUT4
+          */
+         
+         wire [31:0] a;
+         reg [31:0]  ireg;
+         assign a = STB_O ? edati[31:0] : MULDIVREG;
+         always @(posedge clk)
+           if ( corerunning )
+             ireg <= a;
+         assign erDee = {zeros[32:IWIDTH],ireg};
+         assign sysregack = 0;
+         assign theio = a;
+         
+    end else if ( INPUTMUXTYPE == 2 ) begin
+       /* SRAM present
+        *
+        * STB_O ------------+               
+        * DAT_I -----------|1\         __   
+        *                  |  |- a ---|  |- rDee
+        * Dsram     -------|0/        >  |  
+        *                corerunning -E__|  
+        * 
+        * Total size: 65 SB_LUT4
+        */
+       wire [31:0] a;
+       reg [31:0]  ireg;
+       assign a = STB_O ? edati[31:0] : Dsram;
+       always @(posedge clk)
+         if ( corerunning )
+           ireg <= a;
+       assign erDee = {zeros[32:IWIDTH],ireg};
+       assign sysregack = 0;
+       assign theio = a;
+       
+    end else if ( INPUTMUXTYPE == 3 ) begin
+       
+       if ( DAT_I_ZERO_WHEN_INACTIVE ) begin
+          /* SRAM and multiplier both present.
+           * When DAT_I is inactive, it is zero. Note that this depends on the 
+           * external INTERCON module.
+           *
+           * STB_O_or_readM ---+               
+           *             __    |
+           * DAT_I -----|or|--|1\         __   
+           * MULDIVREG -|__|  |  |- a ---|  |- rDee
+           * Dsram     -------|0/        >  |  
+           *                corerunning -E__|  
+           * 
+           * Total size: 66 SB_LUT4
+           */
+          wire STB_O_or_ReadM = STB_O | (clrM & ceM);
+          
+          wire [31:0] a;
+          reg [31:0]  ireg;
+          assign a = STB_O_or_ReadM ? (edati[31:0] | MULDIVREG) : Dsram;
+          always @(posedge clk)
+            if ( corerunning )
+              ireg <= a;
+          assign erDee = {zeros[32:IWIDTH],ireg};
+          assign sysregack = 0;
+          assign theio = a;
+       end else begin
+          /* SRAM and multiplier both present.
+           * When DAT_I is inactive, we know nothing about the value of DAT_I,
+           * so we must use additional resources.
+           *
+           * STB_O_or_readM ------+               
+           * STB_O ------+        |
+           * DAT_I     -|1\       | 
+           *            |  |- b -|1\         __   
+           * MULDIVREG -|0/      |  |- a ---|  |- rDee
+           * Dsram     ----------|0/        >  |  
+           *                   corerunning -E__|  
+           * 
+           * Total size: IWIDTH+66 SB_LUT4
+           */
+          wire STB_O_or_ReadM = STB_O | (clrM & ceM);
+          
+          wire [31:0] a;
+          wire [31:0] b;
+          reg [31:0]  ireg;
+          assign b = STB_O ? edati[31:0] : MULDIVREG;
+          assign a = STB_O_or_ReadM ? b : Dsram;
+          always @(posedge clk)
+            if ( corerunning )
+              ireg <= a;
+          assign erDee = {zeros[32:IWIDTH],ireg};
+          assign sysregack = 0;
+          assign theio = a;
+       end
+    end else if ( INPUTMUXTYPE == 4 ) begin
+       /* System registers, but no sram nor multipliers.
+        * This case is very unlikely
+        */
+       reg [31:0] a;
+       reg        tmpsysregack;
+       reg [31:0] ireg;
+ 
+       always @(/*AS*/STB_O or edati or sysregack) begin
+          a[2:0]   = sysregack ?  3'b0 : STB_O ?   edati[2:0] :  3'b0;
+          a[6:4]   = sysregack ?  3'b0 : STB_O ?   edati[6:4] :  3'b0;
+          a[10:8]  = sysregack ?  3'b0 : STB_O ?  edati[10:8] :  3'b0;
+          a[15:12] = sysregack ?  4'b0 : STB_O ? edati[15:12] :  4'b0;
+          a[31:18] = sysregack ? 14'b0 : STB_O ? edati[31:18] : 14'b0;
+       end
+       
+       always @(/*AS*/ADR_O or STB_O or edati or meie or meip or mie
+                or mpie or mrinstretie or mrinstretip or msie or msip
+                or mtie or mtimeincie or mtimeincip or mtip) 
+         casez ( {STB_O,ADR_O[29:27]} )
+           4'b0??? : {tmpsysregack,a[17:16],a[11],a[7],a[3]} = {1'b0,2'b00,1'b0,1'b0,1'b0};
+           4'b10?? : {tmpsysregack,a[17:16],a[11],a[7],a[3]} = {1'b0,edati[17:16],edati[11],edati[7],edati[3]};
+           4'b1100 : {tmpsysregack,a[17:16],a[11],a[7],a[3]} = {1'b0,edati[17:16],edati[11],edati[7],edati[3]}; // Don't care better?
+           4'b1101 : {tmpsysregack,a[17:16],a[11],a[7],a[3]} = {1'b1,mrinstretip,mtimeincip,meip,mtip,msip}; // MIP
+           4'b1110 : {tmpsysregack,a[17:16],a[11],a[7],a[3]} = {1'b1,mrinstretie,mtimeincie,meie,mtie,msie}; // MIE
+           4'b1111 : {tmpsysregack,a[17:16],a[11],a[7],a[3]} = {1'b1,2'b00,                 1'b1,mpie,mie }; // MSTATUS
+         endcase
+                                                         
+       always @(posedge clk)
+         if ( corerunning ) begin
+            ireg[2:0]   <= sysregack ?  3'b0  : a[2:0];
+            ireg[3]     <= a[3];       
+            ireg[6:4]   <= sysregack ?  3'b0  : a[6:4];
+            ireg[7]     <= a[7];       
+            ireg[10:8]  <= sysregack ?  3'b0  : a[10:8];
+            ireg[11]    <= a[11];      
+            ireg[15:12] <= sysregack ?  4'b0  : a[15:12];
+            ireg[17:16] <= a[17:16];   
+            ireg[31:18] <= sysregack ? 14'b0  : a[31:18];
          end
-            
-      end
+       assign erDee = {zeros[32:IWIDTH],ireg};
+       assign sysregack = tmpsysregack;
+       assign theio = a;
+       
+    end else if ( INPUTMUXTYPE == 5 ) begin
+       NotYetDone Work5();
+    end else if ( INPUTMUXTYPE == 6 ) begin
+       NotYetDone Work6();
+    end else if ( INPUTMUXTYPE == 7 ) begin
+       NotYetDone Work7();
+    end else begin
+       NotYetDone WorkWTF();
+    end
+      
    endgenerate
-   
-   // To keep Verilator and SimplifyPro happy
-   assign m_inputmux_killwarnings = ADR_O[0] | mie | mpie | meie | mrinstretie | 
-                                    msie | mtie | mtimeincie | mrinstretip | 
-                                    mtimeincip | msip | mtip |
-                                    &zeros | meip | &Dsram | STB_O |
-                                    &M;
-   
+   assign rDee = erDee[31:0];
 endmodule
+
+
+//    end else if ( INPUTMUXTYPE == 5 ) begin
+//       /* System registers, but no sram.
+//        * This case is very unlikely
+//        */
+//       SystemRegisters_NoSRAM_not_covered Work();
+//       
+//    end else if ( INPUTMUXTYPE == 6 ) begin
+//       /* System registers and sram. No multiplier. Most bits:
+//        * 
+//        * 
+//        * STB_O ------------+       
+//        * DAT_I -----------|1\               __     
+//        *                  |  |------- a ---|  |- rDee
+//        * Dsram     -------|0/              >  |                      
+//        *                      corerunning -E  |                      
+//        *                      sysregack  --R__|               
+//        * Total size: 81 SB_LUTS
+//        */
+//       wire [32:0] edati = {zeros[32:IWIDTH],DAT_I[IWIDTH-1:0]};
+//       reg [31:0] a;
+//       reg        tmpsysregack;
+//       reg [31:0] ireg;
+// 
+//       always @(/*AS*/Dsram or STB_O or edati or sysregack) begin
+//          a[2:0]   = sysregack ?  3'b0 : STB_O ?   edati[2:0] :   Dsram[2:0];
+//          a[6:4]   = sysregack ?  3'b0 : STB_O ?   edati[6:4] :   Dsram[6:4];
+//          a[10:8]  = sysregack ?  3'b0 : STB_O ?  edati[10:8] :  Dsram[10:8];
+//          a[15:12] = sysregack ?  3'b0 : STB_O ? edati[15:12] : Dsram[15:12];
+//          a[31:18] = sysregack ? 14'b0 : STB_O ? edati[31:18] : Dsram[31:18];
+//       end
+//       
+//       always @(/*AS*/ADR_O or Dsram or STB_O or edati or meie or meip
+//                or mie or mpie or mrinstretie or mrinstretip or msie
+//                or msip or mtie or mtimeincie or mtimeincip or mtip) 
+//         casez ( {STB_O,ADR_O[29:27]} )
+//           4'b0??? : {tmpsysregack,a[17:16],a[11],a[7],a[3]} = {1'b0,Dsram[17:16],Dsram[11],Dsram[7],Dsram[3]};
+//           4'b10?? : {tmpsysregack,a[17:16],a[11],a[7],a[3]} = {1'b0,edati[17:16],edati[11],edati[7],edati[3]};
+//           4'b1100 : {tmpsysregack,a[17:16],a[11],a[7],a[3]} = {1'b0,edati[17:16],edati[11],edati[7],edati[3]}; // Don't care better?
+//           4'b1101 : {tmpsysregack,a[17:16],a[11],a[7],a[3]} = {1'b1,mrinstretip,mtimeincip,meip,mtip,msip}; // MIP
+//           4'b1110 : {tmpsysregack,a[17:16],a[11],a[7],a[3]} = {1'b1,mrinstretie,mtimeincie,meie,mtie,msie}; // MIE
+//           4'b1111 : {tmpsysregack,a[17:16],a[11],a[7],a[3]} = {1'b1,2'b00,                 1'b1,mpie,mie }; // MSTATUS
+//         endcase
+//                                                         
+//       always @(posedge clk)
+//         if ( corerunning ) begin
+//            ireg[2:0]   <= sysregack ? 3'b0  : a[2:0];
+//            ireg[3]     <= a[3];
+//            ireg[6:4]   <= sysregack ? 3'b0  : a[6:4];
+//            ireg[7]     <= a[7];
+//            ireg[10:8]  <= sysregack ? 3'b0  : a[10:8];
+//            ireg[11]    <= a[11];
+//            ireg[15:12] <= sysregack ? 3'b0  : a[15:12];
+//            ireg[17:16] <= a[17:16];
+//            ireg[31:18] <= sysregack ? 3'b0  : a[31:18];
+//         end
+//       assign erDee = {zeros[32:IWIDTH],ireg};
+//       assign sysregack = tmpsysregack;
+//       assign theio = a;
+//       
+//    end else if ( INPUTMUXTYPE == 7 ) begin
+//       if ( DAT_I_ZERO_WHEN_INACTIVE ) begin
+//          /* System registers, SRAM and multiplier all present.
+//           * When DAT_I is inactive, it is zero. Note that this depends on the 
+//           * external INTERCON module. Most bits are identical to a previous case:
+//           *
+//           * STB_O_or_readM ---+               
+//           *             __    |
+//           * DAT_I -----|or|--|1\         __   
+//           * MULDIVREG -|__|  |  |- a ---|  |- rDee
+//           * Dsram     -------|0/        >  |  
+//           *                corerunning -E  |                      
+//           *                sysregack  --R__|               
+//           *       
+//           * Total size: 102 SB_LUT4
+//           */
+//          wire STB_O_or_ReadM = STB_O | (clrM & ceM);
+//          wire [32:0] edati = {zeros[32:IWIDTH],DAT_I[IWIDTH-1:0]};
+//          reg [31:0]  a;
+//          reg         tmpsysregack;
+//          reg [31:0]  ireg;
+//          
+//          always @(/*AS*/Dsram or MULDIVREG or STB_O_or_ReadM or edati
+//                   or sysregack) begin
+//             a[2:0]   = sysregack ?  3'b0 : STB_O_or_ReadM ? (  edati[2:0] |   MULDIVREG[2:0]) :   Dsram[2:0];
+//             a[6:4]   = sysregack ?  3'b0 : STB_O_or_ReadM ? (  edati[6:4] |   MULDIVREG[6:4]) :   Dsram[6:4];
+//             a[10:8]  = sysregack ?  3'b0 : STB_O_or_ReadM ? ( edati[10:8] |  MULDIVREG[10:8]) :  Dsram[10:8];
+//             a[15:12] = sysregack ?  3'b0 : STB_O_or_ReadM ? (edati[15:12] | MULDIVREG[15:12]) : Dsram[15:12];
+//             a[31:18] = sysregack ? 14'b0 : STB_O_or_ReadM ? (edati[31:18] | MULDIVREG[31:18]) : Dsram[31:18];
+//          end
+//          
+//          always @(/*AS*/ADR_O or Dsram or MULDIVREG or STB_O_or_ReadM
+//                   or edati or meie or meip or mie or mpie
+//                   or mrinstretie or mrinstretip or msie or msip
+//                   or mtie or mtimeincie or mtimeincip or mtip) 
+//            casez ( {STB_O_or_ReadM,ADR_O[29:27]} )
+//              4'b0??? : {tmpsysregack,a[17:16],a[11],a[7],a[3]} = {1'b0,Dsram[17:16],Dsram[11],Dsram[7],Dsram[3]};
+//              4'b10?? : {tmpsysregack,a[17:16],a[11],a[7],a[3]} = {1'b0,{edati[17:16]|MULDIVREG[17:16]},{edati[11]|MULDIVREG[11]},{edati[7]|MULDIVREG[7]},{edati[3]|MULDIVREG[3]}};
+//              4'b1100 : {tmpsysregack,a[17:16],a[11],a[7],a[3]} = {1'b0,{edati[17:16]|MULDIVREG[17:16]},{edati[11]|MULDIVREG[11]},{edati[7]|MULDIVREG[7]},{edati[3]|MULDIVREG[3]}}; // Don't care better?
+//              4'b1101 : {tmpsysregack,a[17:16],a[11],a[7],a[3]} = {1'b1,mrinstretip,mtimeincip,meip,mtip,msip}; // MIP
+//              4'b1110 : {tmpsysregack,a[17:16],a[11],a[7],a[3]} = {1'b1,mrinstretie,mtimeincie,meie,mtie,msie}; // MIE
+//              4'b1111 : {tmpsysregack,a[17:16],a[11],a[7],a[3]} = {1'b1,2'b00,                 1'b1,mpie,mie }; // MSTATUS
+//            endcase
+//          
+//          always @(posedge clk)
+//            if ( corerunning ) begin
+//               ireg[2:0]   <= sysregack ? 3'b0  : a[2:0];
+//               ireg[3]     <= a[3];
+//               ireg[6:4]   <= sysregack ? 3'b0  : a[6:4];
+//               ireg[7]     <= a[7];
+//               ireg[10:8]  <= sysregack ? 3'b0  : a[10:8];
+//               ireg[11]    <= a[11];
+//               ireg[15:12] <= sysregack ? 3'b0  : a[15:12];
+//               ireg[17:16] <= a[17:16];
+//               ireg[31:18] <= sysregack ? 3'b0  : a[31:18];
+//            end
+//          assign erDee = {zeros[32:IWIDTH],ireg};
+//          assign sysregack = tmpsysregack;
+//          assign theio = a;
+// 
+//       end else begin
+//          /* System registers, SRAM and multiplier all present.
+//           * When DAT_I is inactive, we know nothing about the value of DAT_I,
+//           * so we must use additional resources. Most bits can be implemented like this:
+//           *
+//           * STB_O_or_readM ------+               
+//           * STB_O ------+        |
+//           * DAT_I     -|1\       |                ___          __            
+//           *            |  |- b -|1\  sysregack -o| & |-- a ---|  |- rDee           
+//           * MULDIVREG -|0/      |  |-------------|___|        >  |           
+//           * Dsram     ----------|0/              corerunning -E__|  
+//           *                   
+//           * Total size around: IWIDTH+81 SB_LUT4 ???
+//           */
+//          wire STB_O_or_ReadM = STB_O | (clrM & ceM);
+//          wire [32:0] edati = {zeros[32:IWIDTH],DAT_I[IWIDTH-1:0]};
+//          reg [31:0]  a;
+//          reg         tmpsysregack;
+//          reg [31:0]  ireg;
+//          
+//          always @(/*AS*/Dsram or MULDIVREG or STB_O or STB_O_or_ReadM
+//                   or edati) begin
+//             a[2:0]   = sysregack ?  3'b0 : STB_O_or_ReadM ? (STB_O ?   edati[2:0] :   MULDIVREG[2:0]) :   Dsram[2:0];
+//             a[6:4]   = sysregack ?  3'b0 : STB_O_or_ReadM ? (STB_O ?   edati[6:4] :   MULDIVREG[6:4]) :   Dsram[6:4];
+//             a[10:8]  = sysregack ?  3'b0 : STB_O_or_ReadM ? (STB_O ?  edati[10:8] :  MULDIVREG[10:8]) :  Dsram[10:8];
+//             a[15:12] = sysregack ?  3'b0 : STB_O_or_ReadM ? (STB_O ? edati[15:12] : MULDIVREG[15:12]) : Dsram[15:12];
+//             a[31:18] = sysregack ? 14'b0 : STB_O_or_ReadM ? (STB_O ? edati[31:18] : MULDIVREG[31:18]) : Dsram[31:18];
+//          end
+//          
+//          always @(/*AS*/ADR_O or Dsram or MULDIVREG or STB_O
+//                   or STB_O_or_ReadM or edati or meie or meip or mie
+//                   or mpie or mrinstretie or mrinstretip or msie
+//                   or msip or mtie or mtimeincie or mtimeincip or mtip) 
+//            casez ( {STB_O_or_ReadM,ADR_O[29:27]} )
+//              4'b0??? : {tmpsysregack,a[17:16],a[11],a[7],a[3]} = {1'b0,Dsram[17:16],Dsram[11],Dsram[7],Dsram[3]};
+//              4'b10?? : {tmpsysregack,a[17:16],a[11],a[7],a[3]} 
+//                = {1'b0,{STB_O ? edati[17:16] : MULDIVREG[17:16]},{STB_O ? edati[11] : MULDIVREG[11]},{STB_O ? edati[7] : MULDIVREG[7]},{STB_O ? edati[3] : MULDIVREG[3]}};
+//              4'b1100 : {tmpsysregack,a[17:16],a[11],a[7],a[3]} 
+//                = {1'b0,{STB_O ? edati[17:16] : MULDIVREG[17:16]},{STB_O ? edati[11] : MULDIVREG[11]},{STB_O ? edati[7] : MULDIVREG[7]},{STB_O ? edati[3] : MULDIVREG[3]}}; // Don't care better?
+//              4'b1101 : {tmpsysregack,a[17:16],a[11],a[7],a[3]} = {1'b1,mrinstretip,mtimeincip,meip,mtip,msip}; // MIP
+//              4'b1110 : {tmpsysregack,a[17:16],a[11],a[7],a[3]} = {1'b1,mrinstretie,mtimeincie,meie,mtie,msie}; // MIE
+//              4'b1111 : {tmpsysregack,a[17:16],a[11],a[7],a[3]} = {1'b1,2'b00,                 1'b1,mpie,mie }; // MSTATUS
+//            endcase
+//          
+//          always @(posedge clk)
+//            if ( corerunning )
+//              ireg <= a;
+//          assign erDee = {zeros[32:IWIDTH],ireg};
+//          assign sysregack = tmpsysregack;
+//          assign theio = a;
+// 
+//       end
+//       
+//    end else begin
+//       InternalError Work();
+//    end
+//    
+// //   assign m_inputmux_killwarnings = ADR_O[0];
+
