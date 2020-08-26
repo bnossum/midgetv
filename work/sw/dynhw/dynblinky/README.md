@@ -1,8 +1,8 @@
 ### User guide
 
 ##### Common to all files
-* `make` in directory [`midgetvblast`](./../hwexamples/midgetv_blast) to get the loader program compiled to `ice50loaderprog.hv`.
-* Compile and upload to `upduino2` board. You will probably use the priject in [directory](../../../hwtst/max_upduino2/).
+* `make` in directory [`midgetvblast`](./../hwexamples/midgetv_blast) to get the loader program compiled to `ice40loaderprog.hv`.
+* Compile and upload to `upduino2` board. You will probably use the project in [directory](../../../hwtst/max_upduino2/).
   Midgetv is now ready to load an image from the bit-bang UART.
 
 ##### For dynblinky
