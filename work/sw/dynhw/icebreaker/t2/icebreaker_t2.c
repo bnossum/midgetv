@@ -32,6 +32,10 @@ int fputc( int c, FILE *stream __attribute__((unused)) ) {
 
 /////////////////////////////////////////////////////////////////////////////
 int getchar_TO( uint32_t tolim ) {
+        uint32_t w = SYSEBR->bitrate/2;
+        int b = 0;
+        int n = 1;
+
         volatile uint32_t to = 0;
         while ( UART->D == 0 )
                 ; // Possibly in previous transaction, I cheat on frame bit.
@@ -42,10 +46,6 @@ int getchar_TO( uint32_t tolim ) {
                         return -1;
         }
                 
-        uint32_t w = SYSEBR->bitrate/2;
-        int b = 0;
-        int n = 1;
-
         do {
                 w += SYSEBR->bitrate;
                 while ( SYSEBR->mcycle < w )
@@ -148,6 +148,7 @@ int run_compliance_tests( void ) {
 int main( void ) {
         int i = 0;
 
+        LED->D = 7;
         getchar();
         bn_puts( "Welcome to midgetv on an icebreaker board\n\r"
                    "There is not much this test program can do\n\r"
@@ -170,4 +171,3 @@ int main( void ) {
                 }
         }
 }
-
