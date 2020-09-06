@@ -1,6 +1,6 @@
 ![picture of midgetv](doc/m_midgetv_core.png)
                        
-## midgetv
+## midgetv -- specifically for ice40* FPGAs
    
 Midgetv is non-pipelined and microcoded - it trades speed for
 size. The smallest possibly useful implementation requires around 256
