@@ -59,7 +59,7 @@ $(OBJ)/%.o:%.S
 	riscv32-unknown-elf-objcopy -Obinary $< $@ 
 
 %.lst:%.out
-	riscv32-unknown-elf-objdump -M numeric,no-aliases -D $< > $@
+	riscv32-unknown-elf-objdump --full-contents -M numeric,no-aliases -D $< > $@
 
 # $(OBJ)/midgetv_blast.o: $(OBJ)/crt0.o $(OBJ)/ab.o
 

@@ -45,7 +45,6 @@
         .word 4*4 			//  x4  regE     	ep
         .word 0 			//  x5  r9bit    	9*Bitrate                            
         .word 0 			//  x6  regP     	(uint8_t) ep | 0x100                 
-//        .word 0x80000003		//  x7  regW     	9*rBitrate + rBitrate/2 - 14. Initval used at _start:         
         .word 0x80000003		//  x7  regW     	9*rBitrate + rBitrate/2 - 14. Initval used at _start:         
         .word 4 			//  x8  regB     	0x100                         Initval used for loop at _start
         .word IOREGION  		//  x9  regIO    	0x60000000
