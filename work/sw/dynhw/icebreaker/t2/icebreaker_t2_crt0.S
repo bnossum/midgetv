@@ -38,9 +38,16 @@ InternalISR:
         
         # =============================================================================
 _start:
+        /* Because this test program loads CSR code from 0xb4, the bitrate found by midget_blast
+         * stored at 0xe8 is overwritten. But the bitrate is also found in register x10.
+         * Patch it back to location 0xe8
+         */
+        sw      x10,0xe8(x0)
+        
         la      x1,StartTrap            // Initiate mtvec
         sw      x1,%lo(__mtvec)(x0)
         la      x1,NMI                  // Set up the internal ISR handle
         sw      x1,%lo(__rNMI_IIV)(x0)
+        li      x2,0xfffffffc           // Set up stack pointer
         j       main
 

@@ -17,7 +17,7 @@ CFLAGS = -mabi=ilp32 -march=rv32i -nodefaultlibs -nostartfiles -Os -Wall -Wextra
 all: $(OBJ)/icebreaker_t2.bin $(OBJ)/icebreaker_t2.lst 
 
 
-$(OBJ)/icebreaker_t2.o: | $(OBJ)/icebreaker_t2_crt0.o $(OBJ)/icebreaker_compliance.o 
+$(OBJ)/icebreaker_t2.o: | $(OBJ)/icebreaker_t2_crt0.o $(OBJ)/icebreaker_compliance.o $(OBJ)/icebreaker_t2_minimal_csr.o
 
 
 #$(OBJ)/%.o:%.c 
@@ -35,15 +35,16 @@ $(OBJ)/%.o:%.S
 	riscv32-unknown-elf-gcc -c $(CFLAGS) -o $@ $<
 
 %.out:%.o
-	riscv32-unknown-elf-ld -TDYNSRAMlink.ld -nodefaultlibs -nostartfiles -o $@ $(OBJ)/icebreaker_t2_crt0.o $(OBJ)/icebreaker_compliance.o $< -M > $(OBJ)/$(*F).map
+	riscv32-unknown-elf-ld -TDYNSRAMlink.ld -nodefaultlibs -nostartfiles -o $@ $(OBJ)/icebreaker_t2_crt0.o $(OBJ)/icebreaker_compliance.o $(OBJ)/icebreaker_t2_minimal_csr.o $< -M > $(OBJ)/$(*F).map
 
 
 %.bin:%.out
 	riscv32-unknown-elf-objcopy -Obinary $< $@ 
 
 %.lst:%.out
-	riscv32-unknown-elf-objdump -M numeric,no-aliases -D $< > $@
+	riscv32-unknown-elf-objdump --full-contents -M numeric,no-aliases -D $< > $@
 
 clean:
 	rm -f $(OBJ)/icebreaker_t2.bin $(OBJ)/icebreaker_t2.lst $(OBJ)/icebreaker_t2.o $(OBJ)/icebreaker_t2_crt0.o \
-	$(OBJ)/icebreaker_t2.s $(OBJ)/icebreaker_t2.S $(OBJ)/icebreaker_t2_crt0.slst $(OBJ)/icebreaker_t2.map $(OBJ)/icebreaker_t2.out
+	$(OBJ)/icebreaker_t2.s $(OBJ)/icebreaker_t2.S $(OBJ)/icebreaker_t2_crt0.slst $(OBJ)/icebreaker_t2.map $(OBJ)/icebreaker_t2.out \
+	$(OBJ)/icebreaker_compliance.o  $(OBJ)/icebreaker_t2_minimal_csr.o

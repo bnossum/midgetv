@@ -2,6 +2,8 @@
 #include <stdint.h>
 #include "midgetv.h"
 
+int icebreaker_rv32i( void );
+
 /////////////////////////////////////////////////////////////////////////////
 // Dummy stream
 #define stdout (void *)4
@@ -75,11 +77,42 @@ int fputs( const char *s, FILE *stream __attribute__((unused)) ) {
         }
         return i;
 }
+
+
+/////////////////////////////////////////////////////////////////////////////
 int puts( const char *s) {
         int i = fputs( s, stdout);
-        return i + fputs( "\n", stdout );
+        return i+fputs( "\r", stdout );
 }
-#define bn_puts(s) fputs(s,stdout)
+
+/////////////////////////////////////////////////////////////////////////////
+//void bn_asm_putchar_c( int c ) {
+//        uint32_t n;
+//        c = (c | 0x100) << 1;
+//        c &= 0x3ff;
+//        
+//        n = SYSEBR->mcycle;
+//        if ( n + 16*SYSEBR->bitrate < n ) {
+//                // Wraparound will occur in this character. Busy-wait
+//                do {
+//                        ;
+//                } while ( (n = SYSEBR->mcycle) > 100);
+//        }
+//        while ( c ) {
+//                n += SYSEBR->bitrate;
+//                UART->D = c;
+//                c >>= 1;
+//                while ( SYSEBR->mcycle < n )
+//                        ;
+//        }
+//}
+//void bn_asm_puts_c( char *s) {
+//        while ( *s ) {
+//                bn_asm_putchar_c( *s );
+//                s++;
+//        }
+//        bn_asm_putchar_c( '\r' );
+//}
 
 /////////////////////////////////////////////////////////////////////////////
 int isprint( int c ) {
@@ -108,7 +141,7 @@ void dump( uint32_t *p, uint32_t len ) {
         uint8_t *q;
         
         do {
-                bn_puts( "\r\n" );
+                puts( "\r\n" );
                 clumsyhexprint( (uint32_t)p );
                 fputs( " | ", stdout );
 
@@ -130,7 +163,7 @@ void dump( uint32_t *p, uint32_t len ) {
                         
 
         } while ( p != e );
-        bn_puts( "\r\n" );
+        puts( "\r\n" );
 }
 
 // -----------------------------------------------------------------------------
@@ -145,29 +178,45 @@ int run_compliance_tests( void ) {
 }
 
 // -----------------------------------------------------------------------------
+void blinkforever( void );
+void blinkforever_in_c( void ) {
+        volatile int vi;
+#define BLINKTIME 0x10000
+        while (1) {
+                LED->D = 0;
+                for ( vi = 0; vi < BLINKTIME; vi++ )
+                        ;
+                LED->D = 1;
+                for ( vi = 0; vi < BLINKTIME; vi++ )
+                        ;
+        }
+}
+
+// -----------------------------------------------------------------------------
 int main( void ) {
         int i = 0;
+        int j;
 
+        //SYSEBR->bitrate = 0xcb;
         LED->D = 7;
         getchar();
-        bn_puts( "Welcome to midgetv on an icebreaker board\n\r"
-                   "There is not much this test program can do\n\r"
-                   "Commands: (D)ump start of EBR. (L)x write leds, (R)un compliance tests\n\r");
+        puts( "Welcome to midgetv on an icebreaker board\n\r"
+              "There is not much this test program can do\n\r"
+              "Commands: (D)ump start of EBR. (L)x write leds, (R)un compliance tests\n\r");
         while (1) {
-                //LED->D = ++i & 2;
-                //cywait(0x10000);
-                //LED->D = 0;
-                //cywait(0x40000);
                 i = getchar();
-                if ( i == 'D' ) {
+                j = i | 0x40;
+                if ( j == 'd' ) {
                         dumpEBR();
-                } else if ( i == 'L' ) {
+                } else if ( j == 'l' ) {
                         LED->D = getchar();
-                } else if ( i == 'R' ) {
+                } else if ( j == 'r' ) {
                         run_compliance_tests();
+                } else if ( j == 'b' ) {
+                        blinkforever();
                 } else {
                         putchar( i );
-                        bn_puts( "?\r\n" );
+                        puts( "?\r\n" );
                 }
         }
 }

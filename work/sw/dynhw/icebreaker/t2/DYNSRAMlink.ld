@@ -1,6 +1,5 @@
 /* I can't really pretend to understand link scrips even though I 
  * have used them for years.
-*   hdr (RWX) : ORIGIN = 0x000000f4, LENGTH = 12
  */
 OUTPUT_ARCH( "riscv" )
 ENTRY( _start )
@@ -10,15 +9,25 @@ MEMORY
   hdr : ORIGIN = 0, LENGTH = 12
   rom : ORIGIN = 12, LENGTH = 128K
   sram (RWX): ORIGIN = 0xfffe0000, LENGTH = 128K
+  csrcode (RWX): ORIGIN = 0xb4, LENGTH = 4k
 }
 
 SECTIONS
 {
-  .header : {
+  .id_and_header1 : {
     LONG(0x01071f3f)
+    LONG(0x000000b4)
+    LONG(_ebrloadend)
+  } >hdr
+  .thecsrcode : {
+    *(.magicconstants)
+    *(.magicconstants.string)
+    _ebrloadend = .;
+  } >csrcode AT >rom
+  .header2 : {
     LONG(0xfffe0000)
     LONG(_payloadend)
-  } >hdr
+  } >csrcode AT >rom
   .thesram : {
     *(.srodata*)
     *(.rodata*)   
