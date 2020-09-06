@@ -13,7 +13,6 @@
  * There are many choices for the input mux. Not all are thoroghly tested. 
  * Common for all implementations is the last part. 
  * 
- * 
  */
 
 
@@ -30,9 +29,9 @@ module m_inputmux
       MTIMETAP_LOWLIM = 32 //          Really a constant
       )
    (
+    /* verilator lint_off UNUSED */
     input              clk, //         System clock
     input              corerunning, // Only update registers after core is started
-    /* verilator lint_off UNUSED */
     input              STB_O, //       Selecte between SRAM and IO, must also lead to  ack when systemregisters written
     input [31:0]       MULDIVREG, //   MUL/DIV result register
     input [31:0]       Dsram, //       SRAM input
@@ -54,9 +53,11 @@ module m_inputmux
     /* verilator lint_on UNUSED */
     input [IWIDTH-1:0] DAT_I, //       External input
     
+    /* verilator lint_off UNDRIVEN */
     output             sysregack, //   Read/Write acknowledge from MIP/MIE/MSTATUS
     output [31:0]      rDee, //        Output used by mimux
     output [31:0]      theio //        Output for debugging purposes
+    /* verilator lint_on UNDRIVEN */
 //    output             m_inputmux_killwarnings
     );
 
@@ -65,14 +66,16 @@ module m_inputmux
    localparam INPUTMUXTYPE = pHASSYSREGS | pHASSRAM | MULDIV;
 
    /* verilator lint_off UNUSED */
+    /* verilator lint_off UNDRIVEN */
    wire [32:0]         zeros = 33'b0;
    wire [32:0]         erDee;
    wire [32:0]         edati = {zeros[32:IWIDTH],DAT_I[IWIDTH-1:0]};
+    /* verilator lint_on UNDRIVEN */
    /* verilator lint_on UNUSED */ 
 
    generate
       if ( INPUTMUXTYPE == 0 ) begin
-         /* Simplest and smallest case. No SRAM, no system registers, no multiplier
+         /* Simplest and smallest case. No SRAM, no system registers, no multiplier.
           *
           *               __   
           * DAT_I -------|  |- rDee
@@ -91,7 +94,7 @@ module m_inputmux
          assign theio = DAT_I;
          
       end else if ( INPUTMUXTYPE == 1 ) begin
-         /* Multiplier present
+         /* Multiplier present. No SRAM, mo system registers.
           *
           * STB_O ------------+               
           * DAT_I -----------|1\         __   
@@ -113,7 +116,7 @@ module m_inputmux
          assign theio = a;
          
     end else if ( INPUTMUXTYPE == 2 ) begin
-       /* SRAM present
+       /* SRAM present. No multiplier, no system registers
         *
         * STB_O ------------+               
         * DAT_I -----------|1\         __   
@@ -136,7 +139,7 @@ module m_inputmux
     end else if ( INPUTMUXTYPE == 3 ) begin
        
        if ( DAT_I_ZERO_WHEN_INACTIVE ) begin
-          /* SRAM and multiplier both present.
+          /* SRAM and multiplier both present. No system registers.
            * When DAT_I is inactive, it is zero. Note that this depends on the 
            * external INTERCON module.
            *
@@ -161,7 +164,7 @@ module m_inputmux
           assign sysregack = 0;
           assign theio = a;
        end else begin
-          /* SRAM and multiplier both present.
+          /* SRAM and multiplier both present. No system registers.
            * When DAT_I is inactive, we know nothing about the value of DAT_I,
            * so we must use additional resources.
            *
@@ -191,17 +194,23 @@ module m_inputmux
        end
     end else if ( INPUTMUXTYPE == 4 ) begin
        /* System registers, but no sram nor multipliers.
-        * This case is very unlikely
         */
        reg [31:0] a;
        reg        tmpsysregack;
        reg [31:0] ireg;
  
+       /* Many bits implemented as this:
+        * sysregack -----+
+        * STB_O ----+    |    _          __
+        * DAT_I   -|1\   +--o| |-- a ---|  |- rDee
+        *          |  |------|_|        >  |
+        *     0   -|0/     corerunning -E__|
+        */
        always @(/*AS*/STB_O or edati or sysregack) begin
           a[2:0]   = sysregack ?  3'b0 : STB_O ?   edati[2:0] :  3'b0;
           a[6:4]   = sysregack ?  3'b0 : STB_O ?   edati[6:4] :  3'b0;
           a[10:8]  = sysregack ?  3'b0 : STB_O ?  edati[10:8] :  3'b0;
-          a[15:12] = sysregack ?  4'b0 : STB_O ? edati[15:12] :  4'b0;
+          a[15:13] = sysregack ?  3'b0 : STB_O ? edati[15:13] :  3'b0;
           a[31:18] = sysregack ? 14'b0 : STB_O ? edati[31:18] : 14'b0;
        end
        
@@ -209,38 +218,221 @@ module m_inputmux
                 or mpie or mrinstretie or mrinstretip or msie or msip
                 or mtie or mtimeincie or mtimeincip or mtip) 
          casez ( {STB_O,ADR_O[29:27]} )
-           4'b0??? : {tmpsysregack,a[17:16],a[11],a[7],a[3]} = {1'b0,2'b00,1'b0,1'b0,1'b0};
-           4'b10?? : {tmpsysregack,a[17:16],a[11],a[7],a[3]} = {1'b0,edati[17:16],edati[11],edati[7],edati[3]};
-           4'b1100 : {tmpsysregack,a[17:16],a[11],a[7],a[3]} = {1'b0,edati[17:16],edati[11],edati[7],edati[3]}; // Don't care better?
-           4'b1101 : {tmpsysregack,a[17:16],a[11],a[7],a[3]} = {1'b1,mrinstretip,mtimeincip,meip,mtip,msip}; // MIP
-           4'b1110 : {tmpsysregack,a[17:16],a[11],a[7],a[3]} = {1'b1,mrinstretie,mtimeincie,meie,mtie,msie}; // MIE
-           4'b1111 : {tmpsysregack,a[17:16],a[11],a[7],a[3]} = {1'b1,2'b00,                 1'b1,mpie,mie }; // MSTATUS
+           4'b0??? : {tmpsysregack,a[17:16],a[12:11],a[7],a[3]} = {1'b0,2'b00,                 1'b0,1'b0,1'b0,1'b0};
+           4'b10?? : {tmpsysregack,a[17:16],a[12:11],a[7],a[3]} = {1'b0,edati[17:16],          edati[12:11],edati[7],edati[3]};
+           4'b1100 : {tmpsysregack,a[17:16],a[12:11],a[7],a[3]} = {1'b0,edati[17:16],          edati[12:11],edati[7],edati[3]}; // Don't care better?
+           4'b1101 : {tmpsysregack,a[17:16],a[12:11],a[7],a[3]} = {1'b1,mrinstretip,mtimeincip,1'b0,meip,mtip,msip}; // MIP
+           4'b1110 : {tmpsysregack,a[17:16],a[12:11],a[7],a[3]} = {1'b1,mrinstretie,mtimeincie,1'b0,meie,mtie,msie}; // MIE
+           4'b1111 : {tmpsysregack,a[17:16],a[12:11],a[7],a[3]} = {1'b1,2'b00,                 1'b1,1'b1,mpie,mie }; // MSTATUS
          endcase
                                                          
        always @(posedge clk)
          if ( corerunning ) begin
-            ireg[2:0]   <= sysregack ?  3'b0  : a[2:0];
-            ireg[3]     <= a[3];       
-            ireg[6:4]   <= sysregack ?  3'b0  : a[6:4];
-            ireg[7]     <= a[7];       
-            ireg[10:8]  <= sysregack ?  3'b0  : a[10:8];
-            ireg[11]    <= a[11];      
-            ireg[15:12] <= sysregack ?  4'b0  : a[15:12];
-            ireg[17:16] <= a[17:16];   
-            ireg[31:18] <= sysregack ? 14'b0  : a[31:18];
+            ireg <= a;
          end
        assign erDee = {zeros[32:IWIDTH],ireg};
        assign sysregack = tmpsysregack;
        assign theio = a;
        
     end else if ( INPUTMUXTYPE == 5 ) begin
-       NotYetDone Work5();
+       /* Multiplier and system registers, but no sram.
+       /* Many bits implemented as this:
+        * sysregack -------+
+        * STB_O ------+    |    _          __
+        * DAT_I     -|1\   +--o| |-- a ---|  |- rDee
+        *            |  |------|_|        >  |
+        * MULDIVREG -|0/     corerunning -E__|
+        */
+       reg [31:0] a;
+       reg        tmpsysregack;
+       reg [31:0] ireg;
+ 
+       always @(/*AS*/MULDIVREG or STB_O or edati or sysregack) begin
+          a[2:0]   = sysregack ?  3'b0 : STB_O ?   edati[2:0] :   MULDIVREG[2:0];
+          a[6:4]   = sysregack ?  3'b0 : STB_O ?   edati[6:4] :   MULDIVREG[6:4];
+          a[10:8]  = sysregack ?  3'b0 : STB_O ?  edati[10:8] :  MULDIVREG[10:8];
+          a[15:13] = sysregack ?  3'b0 : STB_O ? edati[15:13] : MULDIVREG[15:13];
+          a[31:18] = sysregack ? 14'b0 : STB_O ? edati[31:18] : MULDIVREG[31:18];
+       end
+       always @(/*AS*/ADR_O or MULDIVREG or STB_O or edati or meie
+                or meip or mie or mpie or mrinstretie or mrinstretip
+                or msie or msip or mtie or mtimeincie or mtimeincip
+                or mtip) 
+         casez ( {STB_O,ADR_O[29:27]} )
+           4'b0??? : {tmpsysregack,a[17:16],a[12:11],a[7],a[3]} = {1'b0,MULDIVREG[17:16],MULDIVREG[12:11],MULDIVREG[7],MULDIVREG[3]};
+           4'b10?? : {tmpsysregack,a[17:16],a[12:11],a[7],a[3]} = {1'b0,edati[17:16],          edati[12:11],edati[7],edati[3]};
+           4'b1100 : {tmpsysregack,a[17:16],a[12:11],a[7],a[3]} = {1'b0,edati[17:16],          edati[12:11],edati[7],edati[3]}; // Don't care smaller?
+           4'b1101 : {tmpsysregack,a[17:16],a[12:11],a[7],a[3]} = {1'b1,mrinstretip,mtimeincip,1'b0,meip,mtip,msip}; // MIP
+           4'b1110 : {tmpsysregack,a[17:16],a[12:11],a[7],a[3]} = {1'b1,mrinstretie,mtimeincie,1'b0,meie,mtie,msie}; // MIE
+           4'b1111 : {tmpsysregack,a[17:16],a[12:11],a[7],a[3]} = {1'b1,2'b00,                 1'b1,1'b1,mpie,mie }; // MSTATUS
+         endcase
+                                                         
+       always @(posedge clk)
+         if ( corerunning ) begin
+            ireg <= a;
+         end
+       assign erDee = {zeros[32:IWIDTH],ireg};
+       assign sysregack = tmpsysregack;
+       assign theio = a;
+       
+       
+
     end else if ( INPUTMUXTYPE == 6 ) begin
-       NotYetDone Work6();
+       /* System registers and sram. No multiplier. Most bits:
+        * 
+        * 
+        * STB_O ------------+       
+        * DAT_I -----------|1\               __     
+        *                  |  |------- a ---|  |- rDee
+        * Dsram     -------|0/              >  |                      
+        *                      corerunning -E  |                      
+        *                      sysregack  --R__|               
+        * Total size: 81 SB_LUTS
+        */
+       reg [31:0] a;
+       reg        tmpsysregack;
+       reg [31:0] ireg;
+ 
+       always @(*) begin
+          a[2:0]   = sysregack ?  3'b0 : STB_O ?   edati[2:0] :   Dsram[2:0];
+          a[6:4]   = sysregack ?  3'b0 : STB_O ?   edati[6:4] :   Dsram[6:4];
+          a[10:8]  = sysregack ?  3'b0 : STB_O ?  edati[10:8] :  Dsram[10:8];
+          a[15:13] = sysregack ?  3'b0 : STB_O ? edati[15:13] : Dsram[15:13];
+          a[31:18] = sysregack ? 14'b0 : STB_O ? edati[31:18] : Dsram[31:18];
+       end
+       
+       always @(*) 
+         casez ( {STB_O,ADR_O[29:27]} )
+           4'b0??? : {tmpsysregack,a[17:16],a[12:11],a[7],a[3]} = {1'b0,Dsram[17:16],Dsram[12:11],Dsram[7],Dsram[3]};
+           4'b10?? : {tmpsysregack,a[17:16],a[12:11],a[7],a[3]} = {1'b0,edati[17:16],edati[12:11],edati[7],edati[3]};
+           4'b1100 : {tmpsysregack,a[17:16],a[12:11],a[7],a[3]} = {1'b0,edati[17:16],edati[12:11],edati[7],edati[3]}; // Don't care better?
+           4'b1101 : {tmpsysregack,a[17:16],a[12:11],a[7],a[3]} = {1'b1,mrinstretip,mtimeincip,1'b0,meip,mtip,msip}; // MIP
+           4'b1110 : {tmpsysregack,a[17:16],a[12:11],a[7],a[3]} = {1'b1,mrinstretie,mtimeincie,1'b0,meie,mtie,msie}; // MIE
+           4'b1111 : {tmpsysregack,a[17:16],a[12:11],a[7],a[3]} = {1'b1,2'b00,                 1'b1,1'b1,mpie,mie }; // MSTATUS
+         endcase
+                                                         
+       always @(posedge clk)
+         if ( corerunning ) begin
+            ireg <= a;
+         end
+       assign erDee = {zeros[32:IWIDTH],ireg};
+       assign sysregack = tmpsysregack;
+       assign theio = a;
+       
     end else if ( INPUTMUXTYPE == 7 ) begin
-       NotYetDone Work7();
+
+       if ( DAT_I_ZERO_WHEN_INACTIVE ) begin
+          /* SRAM, multiplier, and system registers. When DAT_I is inactive, it is zero.
+           * This depends on the external INTERCON module.
+           * Most bits:
+           *
+           * STB_O_or_readM ---+               
+           *             __    |
+           * DAT_I -----|or|--|1\         __   
+           * MULDIVREG -|__|  |  |- a ---|  |- rDee
+           * Dsram     -------|0/        >  |  
+           *                corerunning -E__|  
+           * 
+           */
+          reg [31:0] a;
+          reg        tmpsysregack;
+          reg [31:0] ireg;
+          wire       STB_O_or_ReadM = STB_O | (clrM & ceM);
+          wire [31:0] d_or_m = edati[31:0] | MULDIVREG;
+          
+          always @(/*AS*/Dsram or STB_O_or_ReadM or d_or_m
+                   or sysregack) begin
+             a[2:0]   = sysregack ?  3'b0 : STB_O_or_ReadM ?   d_or_m[2:0] :   Dsram[2:0];
+             a[6:4]   = sysregack ?  3'b0 : STB_O_or_ReadM ?   d_or_m[6:4] :   Dsram[6:4];
+             a[10:8]  = sysregack ?  3'b0 : STB_O_or_ReadM ?  d_or_m[10:8] :  Dsram[10:8];
+             a[15:13] = sysregack ?  3'b0 : STB_O_or_ReadM ? d_or_m[15:13] : Dsram[15:13];
+             a[31:18] = sysregack ? 14'b0 : STB_O_or_ReadM ? d_or_m[31:18] : Dsram[31:18];
+          end
+       
+       always @(/*AS*/ADR_O or Dsram or STB_O or d_or_m or meie
+                or meip or mie or mpie or mrinstretie or mrinstretip
+                or msie or msip or mtie or mtimeincie or mtimeincip
+                or mtip) 
+         casez ( {STB_O,ADR_O[29:27]} )
+           4'b0??? : {tmpsysregack,a[17:16],a[12:11],a[7],a[3]} = {1'b0,Dsram[17:16],  Dsram[12:11],Dsram[7],Dsram[3]};
+           4'b10?? : {tmpsysregack,a[17:16],a[12:11],a[7],a[3]} = {1'b0,d_or_m[17:16],d_or_m[12:11],d_or_m[7],d_or_m[3]};
+           4'b1100 : {tmpsysregack,a[17:16],a[12:11],a[7],a[3]} = {1'b0,d_or_m[17:16],d_or_m[12:11],d_or_m[7],d_or_m[3]}; // Don't care better?
+           4'b1101 : {tmpsysregack,a[17:16],a[12:11],a[7],a[3]} = {1'b1,mrinstretip,mtimeincip,1'b0,meip,mtip,msip}; // MIP
+           4'b1110 : {tmpsysregack,a[17:16],a[12:11],a[7],a[3]} = {1'b1,mrinstretie,mtimeincie,1'b0,meie,mtie,msie}; // MIE
+           4'b1111 : {tmpsysregack,a[17:16],a[12:11],a[7],a[3]} = {1'b1,2'b00,                 1'b1,1'b1,mpie,mie }; // MSTATUS
+         endcase
+          
+          always @(posedge clk)
+            if ( corerunning ) begin
+               ireg <= a;
+            end
+          assign erDee = {zeros[32:IWIDTH],ireg};
+          assign sysregack = tmpsysregack;
+          assign theio = a;
+          
+       end else begin
+          /* SRAM, multiplier, and system registers. When DAT_I is inactive, it is unknown.
+           * Most bits:
+           *
+           * STB_O_or_readM ------+               
+           * STB_O ------+        |
+           * DAT_I     -|1\       |       
+           *            |  |- b -|1\                 __                  
+           * MULDIVREG -|0/      |  |--------- a ---|  |- rDee     
+           * Dsram     ----------|0/                >  |       
+           *                           corerunning -E  |       
+           *                            sysregack --R__|
+           */
+          reg [31:0] a;
+          reg        tmpsysregack;
+          reg [31:0] ireg;
+          wire       STB_O_or_ReadM = STB_O | (clrM & ceM);
+
+          always @(/*AS*/DAT_I or Dsram or MULDIVREG or STB_O
+                   or STB_O_or_ReadM) begin
+             a[2:0]   = STB_O_or_ReadM ? (STB_O ?   DAT_I[2:0] :   MULDIVREG[2:0]) :   Dsram[2:0];
+             a[6:4]   = STB_O_or_ReadM ? (STB_O ?   DAT_I[6:4] :   MULDIVREG[6:4]) :   Dsram[6:4];
+             a[10:8]  = STB_O_or_ReadM ? (STB_O ?  DAT_I[10:8] :  MULDIVREG[10:8]) :  Dsram[10:8];
+             a[15:13] = STB_O_or_ReadM ? (STB_O ? DAT_I[15:13] : MULDIVREG[15:13]) : Dsram[15:13];
+             a[31:18] = STB_O_or_ReadM ? (STB_O ? DAT_I[31:18] : MULDIVREG[31:18]) : Dsram[31:18];
+          end
+          
+          always @(/*AS*/ADR_O or Dsram or MULDIVREG or STB_O
+                   or STB_O_or_ReadM or edati or meie or meip or mie
+                   or mpie or mrinstretie or mrinstretip or msie
+                   or msip or mtie or mtimeincie or mtimeincip or mtip) 
+            casez ( {STB_O_or_ReadM,STB_O,ADR_O[29:27]} )
+              5'b00??? : {tmpsysregack,a[17:16],a[12:11],a[7],a[3]} = {1'b0,Dsram[17:16],Dsram[12:11],Dsram[7],Dsram[3]};
+              5'b01??? : {tmpsysregack,a[17:16],a[12:11],a[7],a[3]} = {1'b0,edati[17:16],edati[12:11],edati[7],edati[3]}; // This is an impossible case. Don't care better?
+              5'b10??? : {tmpsysregack,a[17:16],a[12:11],a[7],a[3]} = {1'b0,MULDIVREG[17:16],MULDIVREG[12:11],MULDIVREG[7],MULDIVREG[3]};
+              5'b110?? : {tmpsysregack,a[17:16],a[12:11],a[7],a[3]} = {1'b0,edati[17:16],edati[12:11],edati[7],edati[3]};
+              5'b11100 : {tmpsysregack,a[17:16],a[12:11],a[7],a[3]} = {1'b0,edati[17:16],edati[12:11],edati[7],edati[3]}; // Don't care better?
+              5'b11101 : {tmpsysregack,a[17:16],a[12:11],a[7],a[3]} = {1'b1,mrinstretip,mtimeincip,1'b0,meip,mtip,msip}; // MIP
+              5'b11110 : {tmpsysregack,a[17:16],a[12:11],a[7],a[3]} = {1'b1,mrinstretie,mtimeincie,1'b0,meie,mtie,msie}; // MIE
+              5'b11111 : {tmpsysregack,a[17:16],a[12:11],a[7],a[3]} = {1'b1,2'b00,                 1'b1,1'b1,mpie,mie }; // MSTATUS
+            endcase
+          
+          always @(posedge clk)
+            if ( corerunning ) begin
+               ireg[2:0]   <= sysregack ? 3'b0  : a[2:0];
+               ireg[3]     <= a[3];
+               ireg[6:4]   <= sysregack ? 3'b0  : a[6:4];
+               ireg[7]     <= a[7];
+               ireg[10:8]  <= sysregack ? 3'b0  : a[10:8];
+               ireg[12:11] <= a[12:11];
+               ireg[15:13] <= sysregack ? 3'b0  : a[15:13];
+               ireg[17:16] <= a[17:16];
+               ireg[31:18] <= sysregack ? 14'b0  : a[31:18];
+            end
+          assign erDee = {zeros[32:IWIDTH],ireg};
+          assign sysregack = tmpsysregack;
+          assign theio = a;
+          
+
+       end
+       
     end else begin
-       NotYetDone WorkWTF();
+       NotYetDoneWTF WorkWTF();
     end
       
    endgenerate
@@ -248,65 +440,6 @@ module m_inputmux
 endmodule
 
 
-//    end else if ( INPUTMUXTYPE == 5 ) begin
-//       /* System registers, but no sram.
-//        * This case is very unlikely
-//        */
-//       SystemRegisters_NoSRAM_not_covered Work();
-//       
-//    end else if ( INPUTMUXTYPE == 6 ) begin
-//       /* System registers and sram. No multiplier. Most bits:
-//        * 
-//        * 
-//        * STB_O ------------+       
-//        * DAT_I -----------|1\               __     
-//        *                  |  |------- a ---|  |- rDee
-//        * Dsram     -------|0/              >  |                      
-//        *                      corerunning -E  |                      
-//        *                      sysregack  --R__|               
-//        * Total size: 81 SB_LUTS
-//        */
-//       wire [32:0] edati = {zeros[32:IWIDTH],DAT_I[IWIDTH-1:0]};
-//       reg [31:0] a;
-//       reg        tmpsysregack;
-//       reg [31:0] ireg;
-// 
-//       always @(/*AS*/Dsram or STB_O or edati or sysregack) begin
-//          a[2:0]   = sysregack ?  3'b0 : STB_O ?   edati[2:0] :   Dsram[2:0];
-//          a[6:4]   = sysregack ?  3'b0 : STB_O ?   edati[6:4] :   Dsram[6:4];
-//          a[10:8]  = sysregack ?  3'b0 : STB_O ?  edati[10:8] :  Dsram[10:8];
-//          a[15:12] = sysregack ?  3'b0 : STB_O ? edati[15:12] : Dsram[15:12];
-//          a[31:18] = sysregack ? 14'b0 : STB_O ? edati[31:18] : Dsram[31:18];
-//       end
-//       
-//       always @(/*AS*/ADR_O or Dsram or STB_O or edati or meie or meip
-//                or mie or mpie or mrinstretie or mrinstretip or msie
-//                or msip or mtie or mtimeincie or mtimeincip or mtip) 
-//         casez ( {STB_O,ADR_O[29:27]} )
-//           4'b0??? : {tmpsysregack,a[17:16],a[11],a[7],a[3]} = {1'b0,Dsram[17:16],Dsram[11],Dsram[7],Dsram[3]};
-//           4'b10?? : {tmpsysregack,a[17:16],a[11],a[7],a[3]} = {1'b0,edati[17:16],edati[11],edati[7],edati[3]};
-//           4'b1100 : {tmpsysregack,a[17:16],a[11],a[7],a[3]} = {1'b0,edati[17:16],edati[11],edati[7],edati[3]}; // Don't care better?
-//           4'b1101 : {tmpsysregack,a[17:16],a[11],a[7],a[3]} = {1'b1,mrinstretip,mtimeincip,meip,mtip,msip}; // MIP
-//           4'b1110 : {tmpsysregack,a[17:16],a[11],a[7],a[3]} = {1'b1,mrinstretie,mtimeincie,meie,mtie,msie}; // MIE
-//           4'b1111 : {tmpsysregack,a[17:16],a[11],a[7],a[3]} = {1'b1,2'b00,                 1'b1,mpie,mie }; // MSTATUS
-//         endcase
-//                                                         
-//       always @(posedge clk)
-//         if ( corerunning ) begin
-//            ireg[2:0]   <= sysregack ? 3'b0  : a[2:0];
-//            ireg[3]     <= a[3];
-//            ireg[6:4]   <= sysregack ? 3'b0  : a[6:4];
-//            ireg[7]     <= a[7];
-//            ireg[10:8]  <= sysregack ? 3'b0  : a[10:8];
-//            ireg[11]    <= a[11];
-//            ireg[15:12] <= sysregack ? 3'b0  : a[15:12];
-//            ireg[17:16] <= a[17:16];
-//            ireg[31:18] <= sysregack ? 3'b0  : a[31:18];
-//         end
-//       assign erDee = {zeros[32:IWIDTH],ireg};
-//       assign sysregack = tmpsysregack;
-//       assign theio = a;
-//       
 //    end else if ( INPUTMUXTYPE == 7 ) begin
 //       if ( DAT_I_ZERO_WHEN_INACTIVE ) begin
 //          /* System registers, SRAM and multiplier all present.

@@ -22,7 +22,9 @@ module m_mimux
     input         sram_ack, //    Used to select data from SRAM/input devices
     input         qACK, //        Qualified acknowledge, usually (ACK_I | sysregack)
     input         corerunning, // Needed at startup
+    /* verilator lint_off UNUSED */
     input [31:0]  ADR_O, //       For address decoding and right-shift
+    /* verilator lint_on UNUSED */
     input [31:0]  DAT_O, //       Output from EBR is input to mux
     input [31:0]  rDee, //        External input, SRAM, Multipler register
     output [31:0] Di  //          Data out of mux

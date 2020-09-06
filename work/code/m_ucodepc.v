@@ -329,7 +329,7 @@ module m_ucodepc
           */
          
          reg              illegal_a, illegal_b;
-         always @(/*AS*/INSTR)
+         always @(*)
            case ( INSTR[5:2] )
              4'b0000 : {illegal_b,illegal_a} = 2'b10;
              4'b0001 : {illegal_b,illegal_a} = 2'b11;

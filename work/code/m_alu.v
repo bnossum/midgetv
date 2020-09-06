@@ -180,7 +180,7 @@ module m_alu_highlevel
    /* Model of the first row of LUTs. Also set A31 used instead of Di[31] 
     * in m_condcode so a chained LUT can be used. See m_condcode.
     */
-   always @(/*AS*/ADR_O or Di or s_alu) 
+   always @(*) 
      case ({s_alu[1],s_alu[0]})
        2'b00 : A = Di;
        2'b01 : A = ~(Di^ADR_O);

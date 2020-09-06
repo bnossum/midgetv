@@ -88,14 +88,14 @@ module m_alu_carryin  # ( parameter HIGHLEVEL = 1, MULDIV = 1 )
          if ( MULDIV == 0 ) begin
             // Will be removed
             reg r_alu_carryin, r_sra_msb;
-            always @(/*AS*/raluF or s_alu_carryin) 
+            always @(*) 
               case ( s_alu_carryin )
                 2'b00 : r_alu_carryin = 1'b0;
                 2'b01 : r_alu_carryin = raluF;
                 2'b10 : r_alu_carryin = raluF;
                 2'b11 : r_alu_carryin = 1'b1;
               endcase
-            always @(/*AS*/ADR_O_31 or FUNC7_5) 
+            always @(*) 
               r_sra_msb = FUNC7_5 ? ADR_O_31 : 1'b0;
             assign sra_msb = r_sra_msb;
             assign alu_carryin = r_alu_carryin;

@@ -33,7 +33,7 @@ module m_condcode # ( parameter HIGHLEVEL = 0, MULDIV = 0 )
       if ( MULDIV == 0 ) begin
          reg       cmb_aluF,tmp_raluF,tmp_is_brcond;
          
-         always @(/*AS*/A31 or INSTR or QQ31 or alu_carryout)
+         always @(*)
            case (INSTR[14:12])
              3'b010 : cmb_aluF = ((A31^QQ31)&(~alu_carryout)) | (A31&QQ31);
              3'b011 : cmb_aluF = ~alu_carryout; 
@@ -48,7 +48,7 @@ module m_condcode # ( parameter HIGHLEVEL = 0, MULDIV = 0 )
            tmp_raluF <= cmb_aluF;
          assign raluF = tmp_raluF;
          
-         always @(/*AS*/INSTR or raluF or rzcy32)
+         always @(*)
            case (INSTR[14:12])
              3'b000 : tmp_is_brcond = ~rzcy32;
              3'b001 : tmp_is_brcond = rzcy32;
@@ -179,7 +179,7 @@ module m_condcode # ( parameter HIGHLEVEL = 0, MULDIV = 0 )
          reg       cmb_aluF;
          reg       tmp_is_brcond;
          
-         always @(/*AS*/A31 or INSTR or QQ31 or ceM or rF or use_dinx)                                  
+         always @(*)                                  
            casez ({use_dinx,ceM,INSTR[25],INSTR[6:5],INSTR[14:12]})
              //  use_dinx
              //  | ceM
@@ -209,7 +209,7 @@ module m_condcode # ( parameter HIGHLEVEL = 0, MULDIV = 0 )
              default :       feed = 3'b000; // Think I see a bug in Verilator. This fails if I say feed = 3'b???
            endcase
          reg       basic;
-         always @(/*AS*/alu_carryout or feed)
+         always @(*)
            casez (feed)
              3'b000 : basic = 1'b0;
              3'b001 : basic = 1'b1;
@@ -220,7 +220,7 @@ module m_condcode # ( parameter HIGHLEVEL = 0, MULDIV = 0 )
              3'b11? : basic = 1'b1;
            endcase                             
          
-         always @(/*AS*/basic or rF or s_alu or sa14)
+         always @(*)
            casez ({sa14,s_alu})
              4'b1000 : cmb_aluF = rF;    // A_nearXOR
              4'b00?? : cmb_aluF = 0;     // Q clear.
@@ -236,7 +236,7 @@ module m_condcode # ( parameter HIGHLEVEL = 0, MULDIV = 0 )
          assign rF = tmp_rF;
          assign cmb_rF2 = cmb_aluF;
 
-         always @(/*AS*/INSTR or rF or rzcy32)
+         always @(*)
            casez ({INSTR[6],INSTR[14],INSTR[12]})
              3'b0?? : tmp_is_brcond = ~rzcy32;
              3'b100 : tmp_is_brcond = ~rzcy32;

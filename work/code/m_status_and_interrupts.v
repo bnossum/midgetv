@@ -521,7 +521,7 @@ module m_status_and_interrupts
          wire cmb_incsr,rr_incsr;
          SB_LUT4 #(.LUT_INIT(16'h4f44)) incsr_l(  .O(cmb_incsr), .I3(sa39), .I2(sa38), .I1(rr_incsr), .I0(isr_use_ij));
          SB_DFF reg_incsr( .Q(rr_incsr), .C(clk), .D(cmb_incsr));
-         always @(/*AS*/rr_incsr)
+         always @(*)
            r_incsr = rr_incsr;
          /*                                               ___           __
           * mie -----------------------------------------|   |---------|  |-- qualint

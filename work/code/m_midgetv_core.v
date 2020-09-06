@@ -633,6 +633,7 @@ module m_midgetv_core
    localparam xHIGHLEVEL = 1;
    
    m_inputmux #(.HIGHLEVEL(                HIGHLEVEL                ),
+                .MULDIV(                   MULDIV                   ),
                 .DAT_I_ZERO_WHEN_INACTIVE( DAT_I_ZERO_WHEN_INACTIVE ),
                 .IWIDTH(                   IWIDTH                   ), 
                 .SRAMADRWIDTH(             SRAMADRWIDTH             ), 

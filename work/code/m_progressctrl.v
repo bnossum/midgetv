@@ -77,7 +77,7 @@ module m_progressctrl
          reg [3:0]     aSEL_O; // combinatorical
          reg [3:0]     rSEL_O;
          reg [3:0]     rbmask;
-         always @(/*AS*/what_sel_o) begin
+         always @(*) begin
             case ( what_sel_o )
               6'b0001_00 : aSEL_O = 4'b0011;
               6'b0001_10 : aSEL_O = 4'b1100;
@@ -388,7 +388,7 @@ module m_progressctrl
             reg AckM;
             reg nextAckM;
             reg rqACK;
-            always @(/*AS*/ACK_I or AckM or STB_O or sysregack) begin
+            always @(*) begin
                case ({AckM,sysregack,ACK_I,STB_O})
                  4'b0000 : {nextAckM, rqACK} = 2'b00;
                  4'b0001 : {nextAckM, rqACK} = 2'b00;

@@ -27,7 +27,7 @@ module humansized_muldiv
     
     output [ALUWIDTH-1:0]   ADR_O, 
     output reg              rF, 
-    output [ALUWIDTH-1:0]   M,
+    output [ALUWIDTH-1:0]   MULDIVREG,
     output [2*ALUWIDTH-1:0] QM,
     output [1:0]            divdbg
     );
@@ -69,22 +69,22 @@ module humansized_muldiv
    
    assign QQ = ADR_O;
    always @(posedge clk)
-     rDee <= STB_O_or_ReadM ? (DAT_I | M) : Dsram;
+     rDee <= STB_O_or_ReadM ? (DAT_I | MULDIVREG) : Dsram;
    assign Di = sa00mod ? DAT_O : (DAT_O & rDee) | (~DAT_O & shrQ);
    assign shrQ = {sra_msb, ADR_O[ALUWIDTH-1:1]};
-   assign QM = {ADR_O,M};
+   assign QM = {ADR_O,MULDIVREG};
    
    wire                 cmb_rF2;
-   assign mod_s_alu_1 = (s_alu == 3'b100 && clrM == 1'b0) ? ~M[0] : s_alu[1];
+   assign mod_s_alu_1 = (s_alu == 3'b100 && clrM == 1'b0) ? ~MULDIVREG[0] : s_alu[1];
    
 /* May replace modules with explicit code for investigation
  */
 
-//`define WHAT_THE_CONDCODE_DOES              1
+//`define WHAT_THE_CONDCODE_DOES              1 bitrot
 //`define WHAT_THE_ALU_CARRYIN_DOES           1
-//`define WHAT_THE_IMMEXP_ZFIND_Q_DOES        1
-//`define WHAT_THE_ALU_DOES                   1
-//`define WHAT_THE_BIDIRECTIONAL_SHIFTER_DOES 1   
+//`define WHAT_THE_IMMEXP_ZFIND_Q_DOES        1 bitrot
+//`define WHAT_THE_ALU_DOES                   1 bitrot
+//`define WHAT_THE_BIDIRECTIONAL_SHIFTER_DOES 1 bitrot
 
 
 `ifdef WHAT_THE_CONDCODE_DOES
@@ -119,7 +119,7 @@ module humansized_muldiv
    m_condcode #(.HIGHLEVEL(1), .MULDIV(1)) cnd
      (// Inputs
       .QQ31                             (QQ[ALUWIDTH-1]),
-      .Di31( Di[ALUWIDTH-1] ),
+//2020      .Di31( Di[ALUWIDTH-1] ),
       .s_alu({s_alu[2],mod_s_alu_1,s_alu[0]}),
       // Outputs
       .raluF                            (rF),
@@ -145,13 +145,13 @@ module humansized_muldiv
 `ifdef WHAT_THE_ALU_CARRYIN_DOES
    // Alu op changed from ADD to PASSQ must kill carry in
    assign mod_s_alu_carryin = (mod_s_alu_1 ^ s_alu[1]) ? 0 : s_alu_carryin;
-   assign raluF  = s_alu_carryin[1] ? M[ALUWIDTH-1] : rF;
-   assign alu_carryin = mod_s_alu_carryin[1] ? (mod_s_alu_carryin[0] ? 1 : M[ALUWIDTH-1]) : (mod_s_alu_carryin[0] ? raluF : 0);
+   assign raluF  = s_alu_carryin[1] ? MULDIVREG[ALUWIDTH-1] : rF;
+   assign alu_carryin = mod_s_alu_carryin[1] ? (mod_s_alu_carryin[0] ? 1 : MULDIVREG[ALUWIDTH-1]) : (mod_s_alu_carryin[0] ? raluF : 0);
    assign sra_msb = rF;
 `else
    wire                     lastshift=0,FUNC7_5=0,ADR_O_31=0,FUNC7_0 = 1;
    assign mod_s_alu_carryin = (mod_s_alu_1 ^ s_alu[1]) ? 0 : s_alu_carryin;
-   assign raluF  = s_alu_carryin[1] ? M[ALUWIDTH-1] : rF;
+   assign raluF  = s_alu_carryin[1] ? MULDIVREG[ALUWIDTH-1] : rF;
    
    m_alu_carryin #(.HIGHLEVEL(1), .MULDIV(1)) inst_alu_carryin
      (// Inputs
@@ -166,8 +166,8 @@ module humansized_muldiv
       .lastshift                        (lastshift),
       .raluF                            (raluF),
       .FUNC7_5                          (FUNC7_5),
-      .FUNC7_0                          (FUNC7_0),
-      .ADR_O_31                         (ADR_O_31));
+      .ADR_O_31                         (ADR_O_31),
+      .FUNC7_0                          (FUNC7_0));
 
    //assign new_sra_msb = FUNC7_5 ? ADR_O[ALUWIDTH-1] : FUNC7_0 ? raluF : 0;
 `endif
@@ -294,7 +294,7 @@ module humansized_muldiv
       .loadMn                           (sa14),
       /*AUTOINST*/
       // Outputs
-      .M                                (M[ALUWIDTH-1:0]),
+      .MULDIVREG                        (MULDIVREG[ALUWIDTH-1:0]),
       // Inputs
       .clk                              (clk),
       .ceM                              (ceM),
