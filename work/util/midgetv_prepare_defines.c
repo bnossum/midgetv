@@ -12,7 +12,7 @@
 int main( void ) {
         char linebuffer[MAXLINE];
         char *p;
-        printf( "// This file is generated with the simple utility \"midgetv_perpare_defines\"\n" );
+        printf( "// This file is generated with the simple utility \"midgetv_prepare_defines\"\n" );
         while ( fgets( linebuffer, MAXLINE, stdin ) ) {
                 if ( (p = strchr( linebuffer, '#')) != 0 )
                         *p = '`';

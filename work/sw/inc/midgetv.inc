@@ -96,10 +96,10 @@ _ex_rrd:        .word 4 		// 0xd8 |
 _ex_rtmp:       .word 5 		// 0xdc | 
 _mtime:         .word 0 		// 0xe0 Read/write from user code. Updated by internal interrupt
 _mtimeh:        .word 0 		// 0xe4 Read/write from user code. Updated by internal interrupt
-__freefornow_e8:.word 0                 // 0xe8 
+__freefornow_e8:.word 0                 // 0xe8 By convention used to store bitrate
 __minstreth:    .word 0 		// 0xec Read/write from user code. Updated by internal interrupt
 __mcycleh:      .word 0 		// 0xf0 Read/write from user code. Updated by internal interrupt
-__freefornow_f4:.word 0                 // 0xf4
+__freefornow_f4:.word 0                 // 0xf4 By convention used by compliance test code
 __mtimecmp:     .word 0xffffffff	// 0xf8 Read/write from user code. 
 __mtimecmph:    .word 0xffffffff	// 0xfc Read/write from user code. 
         .org 0x100  			//

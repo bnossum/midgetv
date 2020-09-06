@@ -21,9 +21,9 @@ VERILATORFLAGS = -Wall -v m_ice_shortcuts.v $(VERILATORINCLUDES) -Mdir $(OBJDIR)
 #	m_bmask_emask m_condcode 
 
 
-MY = m_tb_inputmux
+//MY = m_tb_inputmux
 
-fitteMY = m_ice40sim_EBRonly m_ice40sim_SRAM \
+MY = m_ice40sim_EBRonly m_ice40sim_SRAM \
 	m_ucodepc \
 	m_alu_carryin m_alu m_cyclecnt m_shiftcounter \
 	humansized_muldiv old_humansized_muldiv \
