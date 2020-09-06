@@ -28,11 +28,12 @@ privilege mode of midgetv is always *machine-mode*.
  -  [x] Complience with RV32I as per riscv-spec-v2.2.pdf
  -  [ ] Compliance with riscv-privileged-v1.10.pdf
  -  [ ] Support of "C" standard extension
- -  [ ] Support of "M" standard extension
+ -  [x] Support of "M" standard extension
 
 ### Overall results
-  - Tested on ICE40HX1K using a iceblink40-hx1k board
-  - Tested on ICE40UP5K using a UPDuino2 board
+  - Tested on ICE40HX1K using a `iceblink40-hx1k` board
+  - Tested on ICE40UP5K using a `UPDuino2` board, 
+  - Tested on ICE40UP5K using a `icebreaker` board, 
   - Passes the RISC-V rv32i compliance tests in simulation
 
 ### Software requirements
@@ -85,8 +86,5 @@ is not written, but a very short introduction is [here](doc/README.md).
 - Test on nested interrupts/exceptions
 - Support of compressed instructions (will bloat the controller)
 - Cleanup on code
-- Better linker scripts
-- Proper `crt0.S`
-- Microcoded support for unaligned ld/st
-- Support of integer multiplication and divide (will bloat the controller)
 - Table that show clockcycles used per instruction
+- Production of a monolithic source file to ease integration of `midgetv` into projects.
