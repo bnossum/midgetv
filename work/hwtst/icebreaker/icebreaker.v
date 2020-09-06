@@ -13,6 +13,7 @@
 
 `include "../../code/m_ice_shortcuts.v"
 `include "../../code/m_inputmux.v"
+`include "../../code/m_mimux.v"
 `include "../../code/m_alu_carryin.v"
 `include "../../code/m_alu.v"
 `include "../../code/m_immexp_zfind_q.v"
@@ -38,7 +39,6 @@
 `include "../../code/m_progressctrl.v"
 `include "../../code/m_shlr.v"
 `include "../../code/m_midgetv_core.v"
-`include "../../code/m_mimux.v"
 
 
 module top
@@ -51,7 +51,7 @@ module top
       HIGHLEVEL          = 0,
       LAZY_DECODE        = 0,
       DISREGARD_WB4_3_55 = 0,
-      MULDIV             = 0
+      MULDIV             = 1
       )
    (
     input  CLK,
@@ -174,6 +174,7 @@ module top
        .HIGHLEVEL          ( HIGHLEVEL          ),
        .LAZY_DECODE        ( LAZY_DECODE        ),
        .DISREGARD_WB4_3_55 ( DISREGARD_WB4_3_55 ),
+       .MULDIV             ( MULDIV             ),
        .prg00(prg00),       .prg01(prg01),       .prg02(prg02),       .prg03(prg03),
        .prg04(prg04),       .prg05(prg05),       .prg06(prg06),       .prg07(prg07),
        .prg08(prg08),       .prg09(prg09),       .prg0A(prg0A),       .prg0B(prg0B),

@@ -9,6 +9,7 @@
 
 `include "../../code/m_ice_shortcuts.v"
 `include "../../code/m_inputmux.v"
+`include "../../code/m_mimux.v"
 `include "../../code/m_alu_carryin.v"
 `include "../../code/m_alu.v"
 `include "../../code/m_immexp_zfind_q.v"
@@ -35,10 +36,11 @@
 `include "../../code/m_shlr.v"
 `include "../../code/m_midgetv_core.v"
 
+
 /* Only define one of these:
  */
-//`define INVESTIGATE_SMALLEST 1
-`define INVESTIGATE_LARGEST 1
+`define INVESTIGATE_SMALLEST 1
+//`define INVESTIGATE_LARGEST 1
 //`define GET_NICE_SYMBOL 1
 
 module mytop

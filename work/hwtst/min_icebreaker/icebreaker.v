@@ -11,8 +11,10 @@
  *  I do not stomach to list all these files in a Makefile
  */
 
+
 `include "../../code/m_ice_shortcuts.v"
 `include "../../code/m_inputmux.v"
+`include "../../code/m_mimux.v"
 `include "../../code/m_alu_carryin.v"
 `include "../../code/m_alu.v"
 `include "../../code/m_immexp_zfind_q.v"

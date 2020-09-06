@@ -8,6 +8,7 @@
 
 `include "../../code/m_ice_shortcuts.v"
 `include "../../code/m_inputmux.v"
+`include "../../code/m_mimux.v"
 `include "../../code/m_alu_carryin.v"
 `include "../../code/m_alu.v"
 `include "../../code/m_immexp_zfind_q.v"
@@ -28,10 +29,10 @@
 `include "../../code/m_status_and_interrupts.v"
 `include "../../code/m_ucode.v" 
 `include "../../code/m_3ebr.v"
-`include "../../obj_dir/m_2ebr.v"
+`include "../../generated/m_2ebr.v"
 `include "../../code/m_ucodepc.v"
 `include "../../code/m_progressctrl.v"
-//`include "../div/m_fm_xmit.v" can't work
+`include "../../code/m_shlr.v"
 `include "../../code/m_midgetv_core.v"
 
 
@@ -44,7 +45,8 @@ module mytop
       MTIMETAP           = 16, 
       HIGHLEVEL          = 0,
       LAZY_DECODE        = 0,
-      DISREGARD_WB4_3_55 = 0
+      DISREGARD_WB4_3_55 = 0,
+      MULDIV             = 1
       )
    (
     input  usartRX,
@@ -252,6 +254,7 @@ module mytop
        .HIGHLEVEL          ( HIGHLEVEL          ),
        .LAZY_DECODE        ( LAZY_DECODE        ),
        .DISREGARD_WB4_3_55 ( DISREGARD_WB4_3_55 ),
+       .MULDIV             ( MULDIV             ),
        .prg00(prg00),       .prg01(prg01),       .prg02(prg02),       .prg03(prg03),
        .prg04(prg04),       .prg05(prg05),       .prg06(prg06),       .prg07(prg07),
        .prg08(prg08),       .prg09(prg09),       .prg0A(prg0A),       .prg0B(prg0B),
@@ -346,9 +349,9 @@ endmodule
       
 /* 
  * In general, the fillowing should suffice for image generation and uploading:
- *     python ../../../apio/apio clean
- *     python ../../../apio/apio build
- *     sudo python ../../../apio/apio upload
+ *     python ../../../../apio/apio clean
+ *     python ../../../../apio/apio build
+ *     sudo python ../../../../apio/apio upload
  *
  * Another useful command:
  * /usr/local/bin/arachne-pnr -r -d 5k -P sg48 -o hardware.asc -p up5k.pcf hardware.blif

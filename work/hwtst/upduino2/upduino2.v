@@ -13,6 +13,7 @@
  */
 `include "../../code/m_ice_shortcuts.v"
 `include "../../code/m_inputmux.v"
+`include "../../code/m_mimux.v"
 `include "../../code/m_alu_carryin.v"
 `include "../../code/m_alu.v"
 `include "../../code/m_immexp_zfind_q.v"
@@ -33,9 +34,10 @@
 `include "../../code/m_status_and_interrupts.v"
 `include "../../code/m_ucode.v" 
 `include "../../code/m_3ebr.v"
-`include "../../obj_dir/m_2ebr.v"
+`include "../../generated/m_2ebr.v"
 `include "../../code/m_ucodepc.v"
 `include "../../code/m_progressctrl.v"
+`include "../../code/m_shlr.v"
 `include "../../code/m_midgetv_core.v"
 
 
@@ -230,9 +232,9 @@ endmodule
       
 /* 
  * In general, this should be enough to load an image:
- *     python ../../../apio/apio clean
- *     python ../../../apio/apio build
- *     sudo python ../../../apio/apio upload
+ *     python ../../../../apio/apio clean
+ *     python ../../../../apio/apio build
+ *     sudo python ../../../../apio/apio upload
  *
  * Another useful command:
  * /usr/local/bin/arachne-pnr -r -d 5k -P sg48 -o hardware.asc -p up5k.pcf hardware.blif

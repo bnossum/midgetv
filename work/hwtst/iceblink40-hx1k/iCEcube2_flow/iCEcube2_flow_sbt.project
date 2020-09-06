@@ -3,7 +3,7 @@ ProjectVersion=2.0
 Version=Lattice Semiconductor Corporation iCEcube - Release: 2017.08.27940 - Build Date: Sep 12 2017 08:41:24
 ProjectName=iCEcube2_flow
 Vendor=SiliconBlue
-Synthesis=lse
+Synthesis=synplify
 ProjectVFiles=../iceblink40-hx1k.v=work
 ProjectCFiles=
 CurImplementation=iCEcube2_flow_Implmnt
