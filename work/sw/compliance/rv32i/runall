@@ -13,7 +13,7 @@
 ../../../bin/m_ice40sim_EBRonly.bin -c 0x8000 -s -s -i  ../../../obj_dir/rv32i/wI-EBREAK-01.bin                   > ../../../obj_dir/rv32i/I-EBREAK-01.simulator_output 
 ../../../bin/m_ice40sim_EBRonly.bin -c 0x8000 -s -s -i  ../../../obj_dir/rv32i/wI-ECALL-01.bin                    > ../../../obj_dir/rv32i/I-ECALL-01.simulator_output 
 ../../../bin/m_ice40sim_EBRonly.bin -c 0x8000 -s -s -i  ../../../obj_dir/rv32i/wI-ENDIANESS-01.bin                > ../../../obj_dir/rv32i/I-ENDIANESS-01.simulator_output
-../../../bin/m_ice40sim_EBRonly.bin -c 0x8000 -s -s -i  ../../../obj_dir/rv32i/wI-IO.bin                          > ../../../obj_dir/rv32i/I-IO.simulator_output
+../../../bin/m_ice40sim_EBRonly.bin -c 0x8000 -s -s -i  ../../../obj_dir/rv32i/wI-IO-01.bin                       > ../../../obj_dir/rv32i/I-IO-01.simulator_output
 ../../../bin/m_ice40sim_EBRonly.bin -c 0x8000 -s -s -i  ../../../obj_dir/rv32i/wI-JAL-01.bin                      > ../../../obj_dir/rv32i/I-JAL-01.simulator_output
 ../../../bin/m_ice40sim_EBRonly.bin -c 0x8000 -s -s -i  ../../../obj_dir/rv32i/wI-JALR-01.bin                     > ../../../obj_dir/rv32i/I-JALR-01.simulator_output
 ../../../bin/m_ice40sim_EBRonly.bin -c 0x8000 -s -s -i  ../../../obj_dir/rv32i/wI-LB-01.bin                       > ../../../obj_dir/rv32i/I-LB-01.simulator_output
@@ -62,7 +62,7 @@
 ../../../bin/m_ice40sim_SRAM.bin    -c 0xc000 -s -s -i  ../../../obj_dir/srv32i/wI-EBREAK-01.bin                   > ../../../obj_dir/srv32i/I-EBREAK-01.simulator_output 
 ../../../bin/m_ice40sim_SRAM.bin    -c 0xc000 -s -s -i  ../../../obj_dir/srv32i/wI-ECALL-01.bin                    > ../../../obj_dir/srv32i/I-ECALL-01.simulator_output 
 ../../../bin/m_ice40sim_SRAM.bin    -c 0xc000 -s -s -i  ../../../obj_dir/srv32i/wI-ENDIANESS-01.bin                > ../../../obj_dir/srv32i/I-ENDIANESS-01.simulator_output
-../../../bin/m_ice40sim_SRAM.bin    -c 0xc000 -s -s -i  ../../../obj_dir/srv32i/wI-IO.bin                          > ../../../obj_dir/srv32i/I-IO.simulator_output
+../../../bin/m_ice40sim_SRAM.bin    -c 0xc000 -s -s -i  ../../../obj_dir/srv32i/wI-IO-01.bin                       > ../../../obj_dir/srv32i/I-IO-01.simulator_output
 ../../../bin/m_ice40sim_SRAM.bin    -c 0xc000 -s -s -i  ../../../obj_dir/srv32i/wI-JAL-01.bin                      > ../../../obj_dir/srv32i/I-JAL-01.simulator_output
 ../../../bin/m_ice40sim_SRAM.bin    -c 0xc000 -s -s -i  ../../../obj_dir/srv32i/wI-JALR-01.bin                     > ../../../obj_dir/srv32i/I-JALR-01.simulator_output
 ../../../bin/m_ice40sim_SRAM.bin    -c 0xc000 -s -s -i  ../../../obj_dir/srv32i/wI-LB-01.bin                       > ../../../obj_dir/srv32i/I-LB-01.simulator_output
