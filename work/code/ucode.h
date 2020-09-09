@@ -743,6 +743,9 @@
 //efine _SW_2     SW_2,    "       Prepare read PC",                                
 //      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 
 //                                                                                                                                                               
+// The following will be changed. Will write 0 into mtval because I will have problems
+// with correctly writing mtval with the illegal instruction when said instruction is
+// 16 bits (standard 'C' extension supported).
 #define _ILL_0(i) i,       "Illegal instruction seen",                              isr_none     | A_xx      | Wnn   | r_xx      | Qx   | sr_h  | u_cont         | n(ILLe )     
 #define _ILLe     ILLe,    "Illegal",                                               isr_none     | A_xx      | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(ILL_1)     
 #define _ILL_1    ILL_1,   "       Store PC to mepc and Q for read of instr",       nxtSTB       | A_passd   | Wmepc | Ralu      | Qu   | sr_h  | u_cont         | n(ILL_2)     
