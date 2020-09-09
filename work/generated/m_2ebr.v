@@ -3,7 +3,7 @@
  * 2019. Copyright B. Nossum.
  * For licence, see LICENCE
  * -----------------------------------------------------------------------------
- * Automatically generated from ../code/ucode.h by midgetv_indirectEBR.c.
+ * Automatically generated from ../code/ucode.h by ../util/midgetv_indirectEBR.c.
  * Do not edit
  */
 /* Using LUTSIZE=4. Using 2 EBRs. Initial table has  45 columns
