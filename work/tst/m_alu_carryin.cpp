@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
  * Part of midgetv
- * 2019. Copyright B. Nossum.
+ * 2019-2020. Copyright B. Nossum.
  * For licence, see LICENCE
  * -----------------------------------------------------------------------------
  * To exercise module m_alu_carryin.

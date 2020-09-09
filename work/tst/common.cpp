@@ -68,8 +68,9 @@ void userguide( void ) {
 #define STR(x) STRX(x)
 #define CATX(a,b) a ## b
 #define CAT(a,b) CATX(a,b)
-#define NRINSTR (51+8)
+#define NRINSTR (51+8+1)
 const char *instrtxt[NRINSTR+1] = {
+#define V(ty,funct7,rs2,rs1,funct3,rd,opcode,txt) STR(txt),
 #define R(ty,funct7,rs2,rs1,funct3,rd,opcode,txt) STR(txt),
 #define r(ty,a,b,c,rs1,funct3,rd,opcode,txt)      STR(txt),
 #define I(ty,imm,rs1,func3,rd,opcode,txt)         STR(txt),
@@ -81,6 +82,7 @@ const char *instrtxt[NRINSTR+1] = {
         "unknown"
 };
 const uint8_t instrty[NRINSTR+1] = {
+#define V(ty,funct7,rs2,rs1,funct3,rd,opcode,txt) ty,
 #define R(ty,funct7,rs2,rs1,funct3,rd,opcode,txt) ty,
 #define r(ty,a,b,c,rs1,funct3,rd,opcode,txt)      ty,
 #define I(ty,imm,rs1,func3,rd,opcode,txt)         ty,
@@ -92,6 +94,7 @@ const uint8_t instrty[NRINSTR+1] = {
         0xff
 };
 typedef enum {
+#define V(ty,funct7,rs2,rs1,funct3,rd,opcode,txt) e_ ## txt,
 #define R(ty,funct7,rs2,rs1,funct3,rd,opcode,txt) e_ ## txt,
 #define r(ty,a,b,c,rs1,funct3,rd,opcode,txt)      e_ ## txt,
 #define I(ty,imm,rs1,func3,rd,opcode,txt)         e_ ## txt,
@@ -276,7 +279,7 @@ int pocketdissass( int silent, uint32_t pc, uint32_t I ) {
 #define immL11_0J(x)  signext(12,(x>>20))
 #define immL11_5_4_0J(x) signext(12,( ((x>>25)<<5) | ((x>>7) & 31) ))
 #define _immB(x) (((x>>31)<<12) | (((x>>7)&1)<<11) | (((x>>25) & 63)<<5) | (((x>>8) & 15)<<1))
-#define _immJ(x) (((x>>31)<<20) | (((x>>12)&255)<<12) | (((x>>21)&1023)<<1))
+#define _immJ(x) ((((x>>31)&1)<<20) | (((x>>21)&1023)<<1) | (((x>>20)&1)<<11) | (((x>>12)&255)<<12))
 #define immB(x) signext(13,_immB(x))
 #define immJ(x) signext(21,_immJ(x))        
         if ( sloppy ) {

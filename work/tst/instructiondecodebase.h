@@ -96,6 +96,9 @@ R( 'R', 0000001,       rs2,   rs1,   101,   rd,          0110011, divu    )
 R( 'R', 0000001,       rs2,   rs1,   110,   rd,          0110011, rem     )
 R( 'R', 0000001,       rs2,   rs1,   111,   rd,          0110011, remu    )
 
+V( 'V', 0000000,       00000, 00000, 000,   00000,       0000000, defILLEGAL)
+
+#undef V
 #undef R                                                                  
 #undef r                                                                  
 #undef I                                                                  
