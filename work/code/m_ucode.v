@@ -25,6 +25,7 @@ module m_ucode
     output       clrM,
     output       ceM,
     output       potentialMODbranch,
+    output       ctrl_pcinc_by_2,
     output [7:0] rinx,
     output       ucode_killwarnings
     );
@@ -72,10 +73,10 @@ module m_ucode
    assign sa12 = d[ 7]; // u_io_i_latch
    assign sa14 = d[ 8]; // nReset Q
    assign sa15 = d[ 9]; // Part of enable to Q
-   assign sa20 = d[14];
-   assign sa21 = d[15];
-   assign sa22 = d[16];
-   assign sa23 = d[17];
+   assign sa20 = d[14]; // | Governs read address mux
+   assign sa21 = d[15]; // | Governs read address mux
+   assign sa22 = d[16]; // | Governs read address mux
+   assign sa23 = d[17]; // | Governs read address mux
    assign sa24 = d[18]; // | Governs write address mux
    assign sa25 = d[19]; // | 
    assign sa26 = d[20]; // |
@@ -97,7 +98,8 @@ module m_ucode
    assign ceM  = d[35]; // CE for M register. Also used by m_condcode
 
    assign potentialMODbranch = d[36]; // Distinguish DIV or MOD
-   assign rinx = d[44:37];
+   assign ctrl_pcinc_by_2 = d[37]; // May perhaps combine with another controleq?
+   assign rinx = d[45:38];
    assign ucode_killwarnings = d[39]; // ???
 endmodule
 
