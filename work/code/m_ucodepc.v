@@ -54,7 +54,7 @@
  *                2 : Near minimal decode of riscv instructions. Not recommended
  */
 module m_ucodepc
-  # ( parameter LAZY_DECODE = 0, MULDIV = 1 )
+  # ( parameter LAZY_DECODE = 0, MULDIV = 1, RVC = 0 )
   (
    input        corerunning, //         Control startup
    input [7:0]  rinx, //                From ucode
@@ -70,17 +70,21 @@ module m_ucodepc
    input        ceM, //                 Uses shift-loop or loads or clears bidirectional shift register
    input        rlastshift, //          Together with ceM, last shift in shift-loop
    input        potentialMODbranch, //  Distinguish between DIV[U] and MOD[U]. Together with ceM, branch on sign DAT_O[31]
-   
+/* verilator lint_off UNUSED */
+   input        pc1, //           For RVC
+   input        was_rvc_instr,
+/* verilator lint_on UNUSED */
    output [7:0] minx, //                Microcode PC
    output       ucodepc_killwarnings
    );
    wire [7:0]   dinx;
    wire         usedinx, maybranch, takebranch;
-   wire         Adr0Mustbe0 = sa29;
-   wire         Adr1Mustbe0 = sa30;
+   wire         Adr0Mustbe0;
+   wire         Adr1Mustbe0;
    wire         use_brcond  = sa37;
    /* verilator lint_off UNUSED */
    wire         illegal;
+   wire         RVC_or_aligned;
    /* verilator lint_on UNUSED */
                 
 `ifdef verilator
@@ -102,10 +106,22 @@ module m_ucodepc
    endfunction
 `endif
 
+   generate
+      if ( RVC == 0 ) begin
+         assign usedinx     = sa28;
+         assign Adr0Mustbe0 = sa29;
+         assign Adr1Mustbe0 = sa30;         
+      end else begin
+         assign RVC_or_aligned = ~pc1 | was_rvc_instr; 
+         assign usedinx     = sa28 & RVC_or_aligned;
+         assign Adr0Mustbe0 = sa29 & RVC_or_aligned;
+         assign Adr1Mustbe0 = sa30 & RVC_or_aligned;         
+      end
+   endgenerate
+   
    wire         illegal_funct7_or_illegal_rs1_rd;
    wire         main_illegal;
    
-   assign usedinx   = sa28;
    assign maybranch = Adr0Mustbe0 | Adr1Mustbe0 | use_brcond | (sa32 & ~sa15) | ceM;
 
    /* Slight mangling of INSTRUCTION to an index.
