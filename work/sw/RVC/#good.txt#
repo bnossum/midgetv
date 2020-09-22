@@ -1,0 +1,60 @@
+
+lui      x22,0x40800
+addi     x22,x22,256
+addi     x0,x0,1
+csrrw    
+sw       x1,204(x0)
+sw       x2,208(x0)
+sw       x3,212(x0)
+sw       x4,216(x0)
+sw       x5,220(x0)
+lw       x1,176(x0)
+lw       x2,256(x0)
+lbu      x2,x2,1
+andi     x2,x2,112
+addi     x2,x2,-64
+addi     x5,x0,4
+addi     x1,x1,-769
+beq      x1,x0,14a
+lbu      x1,x5,490
+lw       x3,256(x0)
+lh       x5,x3,0
+lh       x3,x3,2
+slli     x3,x3,16
+or       x3,x3,x5
+srli     x3,x3,5
+andi     x4,x3,124
+addi     x5,x0,20
+bltu     x5,x4,174
+addi     x4,x4,200
+srli     x3,x3,10
+andi     x3,x3,31
+bge      x2,x0,192
+slli     x3,x3,2
+bltu     x5,x3,18c
+lw       x3,0(x3)
+lw       x5,0(x1)
+andi     x2,x2,48
+addi     x2,x2,-32
+beq      x2,x0,1e2
+blt      x2,x0,1ac
+sw       x3,0(x1)
+sw       x5,0(x4)
+lw       x5,256(x0)
+addi     x5,x5,4
+sw       x5,256(x0)
+lw       x4,216(x0)
+lw       x3,212(x0)
+lw       x1,204(x0)
+lw       x2,208(x0)
+bne      x5,x0,1d8
+lw       x5,220(x0)
+
+Unsupported 
+jal      x0,260
+023b 32 80003930 000000 1b 0100006f 0 1 0 00000250 0080      00000000 00000001 00000000 00000000 00000010 h 00000001 passQ   0 00000010 1... ... ... .. 1111 0000000000 000 1f JAL_1          Target adr to yy                 
+023c 86 0030ba20 000000 1b 0100006f 0 1 0 00000250 0088 00b0 00000000 00000001 00000250 00000250 00000010 z 00000001 ADD     0 00000260 11.. ... ... .. 1111 0000000000 000 1f JAL_2          Return address to TRG            
+023d 34 00133026 000010 1b 0100006f 0 1 0 00000250 00b0 0080 00000000 00000001 00000250 00000250 00000000 h 00000001 ADD     0 00000252 1... ... ... .. 1111 0000000000 000 1f JAL_3          PC+imm/trap entrypt to PC. OpFetch              
+023e de 022b7908 000010 1b 0100006f 0 1 0 00000250 0260 0088 00000000 00000001 00000260 00000260 00000000 u 00000001 passD   0 00000260 11.. ... ... .. 1111 0000000000 000 1f Fetch    Fr00  Read and latch instruction       
+023f f4 0020fab0 000000 1b 0100006f 0 1 0 00000260 008c 0080 00000000 00000001 00003033 00003033 00000260 z 00000001 passQ   0 00000260 11.. ... ... .. 1111 0000000000 000 1f Fetch2   Fr00  Upd ttime, I. Q=imm Use dinx unless unaligned   
+../../obj_dir/RVC/t111.bin               success    69 instructions in    576 cycles, cpi =  7.42

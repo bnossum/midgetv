@@ -16,7 +16,7 @@
 #define _main
 #include "common.h"
 INFOCHUNK g_info = {
-        ~0u ^ (INFO_skip_first64 | INFO_get_inexplcable | INFO_Dsram ), // | INFO_I_fields
+        ~0u ^ (INFO_skip_first64 | INFO_get_inexplcable | INFO_Dsram | INFO_I_fields ),
         DEFAULT_UCODETEXTLEN,
 };
 
@@ -395,6 +395,9 @@ void simprintf( uint32_t cy, Vm_ice40sim_EBRonly *tb ) {
         g_info.shiftcount     = STARTOFHIER->get_shiftcnt();
         g_info.M              = STARTOFHIER->get_M();
         g_info.raluF          = STARTOFHIER->get_raluF();
+        g_info.pc1            = STARTOFHIER->get_pc1();
+        g_info.was_rvc_instr  = STARTOFHIER->inst_progressctrl->get_was_rvc_instr();
+        g_info.luh            = STARTOFHIER->get_luh();
         common_simprintf( &g_info, cy );
 }
 

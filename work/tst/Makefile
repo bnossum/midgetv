@@ -28,7 +28,7 @@ MY = m_ice40sim_EBRonly m_ice40sim_SRAM \
 	m_alu_carryin m_alu m_cyclecnt m_shiftcounter \
 	humansized_muldiv old_humansized_muldiv \
 	m_tb_inputmux \
-	m_decompress
+	m_RVC
 
 #m_ice40sim_SRAM4_EBR16  \
 #	m_ucodepc m_alu

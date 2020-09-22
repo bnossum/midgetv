@@ -42,5 +42,5 @@ _start:
         sw      x1,%lo(__mtvec)(x0)
         la      x1,NMI                  // Set up the internal ISR handle
         sw      x1,%lo(__rNMI_IIV)(x0)
-        j       main
+        tail    main
 

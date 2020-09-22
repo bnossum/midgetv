@@ -2,8 +2,8 @@
 #include "Vm_cyclecnt.h"
 #include "verilated.h"
 
-#define NO_CYCLECNT 0 // *Must* match definition in m_cyclecnt.v
-
+#define NO_CYCLECNT 1  // *Must* match definition in m_cyclecnt.v
+#define ucodeopt_RVC 1 // *Must* match definition in m_cyclecnt.v
 
 /////////////////////////////////////////////////////////////////////////////
 void sim_with_no_cyclecnt( void ) {
@@ -11,6 +11,7 @@ void sim_with_no_cyclecnt( void ) {
         int i;
         uint32_t ADR_O;
         int s_cyclecnt;
+        int pcinc_by_2;
         
         // As long as start is low:
         // QQ[] is don't care.
@@ -32,33 +33,41 @@ void sim_with_no_cyclecnt( void ) {
         tb->clk = 0;
         tb->eval();
         assert( tb->corerunning == 0 );
-        
-        for ( s_cyclecnt = 0; s_cyclecnt < 4; s_cyclecnt++) {
-                tb->s_cyclecnt = s_cyclecnt;
-                for ( ADR_O = 0; ADR_O < 0x40; ADR_O++ ) {
-                        tb->ADR_O = ADR_O;
-                        for ( i = 0; i < 2; i++ ) {
-                                tb->clk = i & 1;
-                                tb->eval();
-                        }
-                        assert( tb->corerunning == 1 );
-                        assert( tb->buserror == 0 );
-                        switch ( s_cyclecnt ) {
-                        case 0b00 : assert( tb->QQ == (ADR_O | 3) ); break;
-                        case 0b01 :
-                        case 0b11 : assert( tb->QQ == (ADR_O | 1) ); break;
-                        case 0b10 :
-                                if ( ( tb->QQ == ADR_O ) == 0 ) {
-                                        printf( "Can't believe I can miss out here: "
-                                                "tb-QQ=%d ADR_O=%d\n", tb->QQ, ADR_O );
+
+        for ( pcinc_by_2 = 0; pcinc_by_2 <= ucodeopt_RVC; pcinc_by_2++ ) {
+                for ( s_cyclecnt = 0; s_cyclecnt < 4; s_cyclecnt++) {
+                        tb->s_cyclecnt = s_cyclecnt;
+                        tb->pcinc_by_2  = pcinc_by_2;
+                        for ( ADR_O = 0; ADR_O < 0x40; ADR_O++ ) {
+                                tb->ADR_O = ADR_O;
+                                for ( i = 0; i < 2; i++ ) {
+                                        tb->clk = i & 1;
+                                        tb->eval();
                                 }
-                                assert( tb->QQ == ADR_O );
-                                break;
+                                assert( tb->corerunning == 1 );
+                                assert( tb->buserror == 0 );
+                                int incval = 1 + (pcinc_by_2 ? 0 : 2);
+                                switch ( s_cyclecnt ) {
+                                case 0b00 :
+                                        if ( ! (tb->QQ == ((ADR_O&~3u) | incval) ) ) 
+                                                printf( "Failed. tb->QQ == 0x%x, ADR_O = 0x%x, incval = 0x%x\n",
+                                                        tb->QQ, ADR_O, incval );
+                                        assert( tb->QQ == ((ADR_O&~3u) | incval) );
+                                        break;
+                                case 0b01 :
+                                case 0b11 : assert( tb->QQ == (ADR_O | 1) ); break;
+                                case 0b10 :
+                                        if ( ( tb->QQ == ADR_O ) == 0 ) {
+                                                printf( "Can't believe I can miss out here: "
+                                                        "tb-QQ=%d ADR_O=%d\n", tb->QQ, ADR_O );
+                                        }
+                                        assert( tb->QQ == ADR_O );
+                                        break;
+                                }
                         }
                 }
         }
 }
-        
         
 /////////////////////////////////////////////////////////////////////////////
 void toggleclockandeval( Vm_cyclecnt *tb ) {

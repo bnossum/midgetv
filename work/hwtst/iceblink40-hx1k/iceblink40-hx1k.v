@@ -58,7 +58,7 @@ module top
       MTIMETAP           = 0, 
       LAZY_DECODE        = 2,
       DISREGARD_WB4_3_55 = 1,
-      MULDIV             = 0
+      MULDIV             = 1
       )
    (
     input      CLK_I,

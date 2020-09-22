@@ -17,32 +17,35 @@
 #define ferr(...) exit(fprintf(stderr,"%s:%d:", __FILE__, __LINE__ )+fprintf(stderr,__VA_ARGS__))
 #define PR(...) if (g_verbose ) fprintf(stderr,__VA_ARGS__)
 
-#define INFO_skip_first64    0x0000001
-#define INFO_cy              0x0000002
-#define INFO_minx_ucode      0x0000004
-#define INFO_I               0x0000008
-#define INFO_I_fields        0x0000010
-#define INFO_pc              0x0000020
-#define INFO_rai             0x0000040
-#define INFO_ADR_O           0x0000080
-#define INFO_stb_ack         0x0000100
-#define INFO_get_inexplcable 0x0000200
-#define INFO_interruptinfo   0x0000400
-#define INFO_sel             0x0000800
-#define INFO_B               0x0001000
-#define INFO_wai             0x0002000
-#define INFO_DAT_O           0x0004000
-#define INFO_rDee            0x0008000
-#define INFO_theio           0x0010000
-#define INFO_Dsram           0x0020000
-#define INFO_Di              0x0040000
-#define INFO_ALUOP           0x0080000
-#define INFO_dbg_stb_ack     0x0100000
-#define INFO_ucodedbg        0x0200000
-#define INFO_dissassembly    0x0400000
-#define INFO_shiftcount      0x0800000
-#define INFO_M               0x1000000
-#define INFO_RALUF           0x2000000
+#define INFO_skip_first64    0x00000001
+#define INFO_cy              0x00000002
+#define INFO_minx_ucode      0x00000004
+#define INFO_I               0x00000008
+#define INFO_I_fields        0x00000010
+#define INFO_pc              0x00000020
+#define INFO_rai             0x00000040
+#define INFO_ADR_O           0x00000080
+#define INFO_stb_ack         0x00000100
+#define INFO_get_inexplcable 0x00000200
+#define INFO_interruptinfo   0x00000400
+#define INFO_sel             0x00000800
+#define INFO_B               0x00001000
+#define INFO_wai             0x00002000
+#define INFO_DAT_O           0x00004000
+#define INFO_rDee            0x00008000
+#define INFO_theio           0x00010000
+#define INFO_Dsram           0x00020000
+#define INFO_Di              0x00040000
+#define INFO_ALUOP           0x00080000
+#define INFO_dbg_stb_ack     0x00100000
+#define INFO_ucodedbg        0x00200000
+#define INFO_dissassembly    0x00400000
+#define INFO_shiftcount      0x00800000
+#define INFO_M               0x01000000
+#define INFO_RALUF           0x02000000
+#define INFO_pc1             0x04000000
+#define INFO_was_rvc_instr   0x08000000
+#define INFO_luh             0x10000000
 
 #define DEFAULT_UCODETEXTLEN 55
 
@@ -80,6 +83,9 @@ typedef struct {
         int shiftcount;
         uint32_t M;
         int raluF; // 1 bit
+        int pc1; // 1 bit
+        int was_rvc_instr; // 1 bit
+        int luh; // 1 bit
 } INFOCHUNK;
 
 

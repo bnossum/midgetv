@@ -54,16 +54,26 @@
         //        enlarged to cover more than Machine mode
         // 0x108  This is the entry points of the 6 CSR instructions.
         .org 0x108
-        // We have already decoded the CSR address and type in
-        // registers __yy and __jj. These registers are used by
-        // many microcode instructions, but not "sw" or "lw".
+        // We have already decoded the CSR address in register __yy
+        // This register is used by many microcode instructions, but 
+        // not "sw" or "lw".
         sw      rCSRadr,%lo(_ex_rCSRadr)(x0)    //
         sw      rCSRty,%lo(_ex_rCSRty)(x0)      // 
         sw      rrs1,%lo(_ex_rrs1)(x0)          //
         sw      rrd, %lo(_ex_rrd)(x0)           //
         sw      rtmp,%lo(_ex_rtmp)(x0)          //
-        lw      rCSRty,%lo(__yy)(x0)            // Get CSR type from the volatile __yy register
-        lw      rCSRadr,%lo(__jj)(x0)           // Get CSR address from the volatile __jj register
+        lw      rCSRadr,%lo(__yy)(x0)           // Get CSR address from the volatile __yy register
+        lw      rCSRty,%lo(CSRretadr)(x0)
+        lbu     rCSRty,1(rCSRty)                // Get bits [15:8] of the CSR instruction
+        
+        // CSRRW   0bx001xxxx   0xffffffd0  
+        // CSRRS   0bx010xxxx   0xffffffe0
+        // CSRRC   0bx011xxxx   0xfffffff0
+        // CSRRWI  0bx101xxxx   0x00000010
+        // CSRRSI  0bx110xxxx   0x00000020
+        // CSRRCI  0bx111xxxx   0x00000030
+        andi    rCSRty,rCSRty,0x70      // Isolate
+        addi    rCSRty,rCSRty,-0x40     // Msb used later on
         
         //
         // Translate riscv CSR address to midgetv address 
@@ -90,13 +100,23 @@
         // Here rtmp is an index from 0 to 5 inclusive
 Lmisa:
 Lmtvec: 
-        lbu     rCSRadr,%lo(mCSRADRTBL)(rtmp)
+//        lbu     rCSRadr,%lo(mCSRADRTBL)(rtmp)
+//        // Compliance code had trouble with the unsatisfactory line above. Replaces with longer:
+        la      rCSRadr,mCSRADRTBL
+kluge1: add     rtmp,rtmp,rCSRadr
+        lbu     rCSRadr,0(rtmp)
         
         //
         // Find rs1 and rd operand locations from the CSR instruction
         //
         lw      rrs1,%lo(CSRretadr)(x0) // Address of the CSR instruction
-        lw      rrs1,0(rrs1)            // Read the instruction
+
+        //        lw      rrs1,0(rrs1)            // Read the instruction It may be unaligned when RVC is implemented
+        lhu     rtmp,0(rrs1)
+        lhu     rrs1,2(rrs1)
+        slli    rrs1,rrs1,16
+        or      rrs1,rrs1,rtmp
+        
         srli    rrs1,rrs1,5             //
         andi    rrd,rrs1,(31<<2)        // rrd: rd as a memory adr. x1-x5 will be restored 
         li      rtmp,(5<<2)             // Constant also used later on
@@ -110,30 +130,29 @@ Lmtvec:
         // Instructions CSRRWI/CSRRSI/CSRRCI use
         // a constant, not a register.
         //
-        bltz    rCSRty,2f
+        bgez    rCSRty,2f
 
+        // CSRRW,CSRRS/CSRRC
         slli    rrs1,rrs1,2             // From register number to register memory address
         bgtu    rrs1,rtmp,1f            // Contents if registers x1-x5 was stored at entry of this code, 
         addi    rrs1,rrs1,%lo(_ex_dup_x0)//and must be fetched from the stack
-        sw      x0,%lo(_ex_dup_x0)(x0)  // A previous CSR instruction may have used _ex_dup_x0
+        sw      x0,%lo(_ex_dup_x0)(x0)  // A previous CSR instruction may have used _ex_dup_x0. Ensure 'x0' is read as 0
 1:      lw      rrs1,0(rrs1)            // The value to write to CSR
-
-        //   rCSRty 
-        //   ||       CSR instruction
-        // 0x00000100 CSRRW
-        // 0x00000102 CSRRS
-        // 0x00000103 CSRRC
-        // 0xffffff80 CSRRWI
-        // 0xffffff82 CSRRSI
-        // 0xffffff83 CSRRCI
-        //
+        
 2:
         lw      rtmp,0(rCSRadr)         // Get the old value of the CSR.
 
-        andi    rCSRty,rCSRty,3
-        beqz    rCSRty,DoCSRRW
-        andi    rCSRty,rCSRty,1
+        // CSRRW   0bx001xxxx   0xffffffd0   0x0000010  
+        // CSRRS   0bx010xxxx   0xffffffe0   0x0000020
+        // CSRRC   0bx011xxxx   0xfffffff0   0x0000030
+        // CSRRWI  0bx101xxxx   0x00000010   0x0000010
+        // CSRRSI  0bx110xxxx   0x00000020   0x0000020
+        // CSRRCI  0bx111xxxx   0x00000030   0x0000030
+
+        andi    rCSRty,rCSRty,0x30
+        addi    rCSRty,rCSRty,-0x20
         beqz    rCSRty,DoCSRS
+        bltz    rCSRty,DoCSRRW
         
         // -------------------------------------------------------
         // CSRRC or CSRRCI

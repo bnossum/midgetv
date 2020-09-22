@@ -763,6 +763,56 @@ int p_interruptinfo( int lnr, int interruptinfo ) {
 }
 
 /////////////////////////////////////////////////////////////////////////////
+int p_pc1( int lnr, int pc1 ) {
+        int n;
+        if ( (lnr & 0x1c) == 0 ) {
+                switch ( lnr & 3 )  {
+                case 0 :n = printf( "  " ); break;
+                case 1 :n = printf( "p " ); break;
+                case 2 :n = printf( "c " ); break;
+                case 3 :n = printf( "1 " ); break;
+                }
+        } else {
+                n = printf( "%d ", pc1 & 1);
+        }
+        return n;
+}
+/////////////////////////////////////////////////////////////////////////////
+int p_was_rvc_instr( int lnr, int onebit ) {
+        int n;
+        if ( (lnr & 0x1c) == 0 ) {
+                switch ( lnr & 3 )  {
+                case 0 :n = printf( "  " ); break;
+                case 1 :n = printf( "r " ); break;
+                case 2 :n = printf( "v " ); break;
+                case 3 :n = printf( "c " ); break;
+                }
+        } else {
+                n = printf( "%d ", onebit & 1);
+        }
+        return n;
+}
+        
+/////////////////////////////////////////////////////////////////////////////
+int p_luh( int lnr, int onebit ) {
+        int n;
+        if ( (lnr & 0x1c) == 0 ) {
+                switch ( lnr & 3 )  {
+                case 0 :n = printf( "  " ); break;
+                case 1 :n = printf( "l " ); break;
+                case 2 :n = printf( "u " ); break;
+                case 3 :n = printf( "h " ); break;
+                }
+        } else {
+                n = printf( "%d ", onebit & 1);
+        }
+        return n;
+}
+        
+
+
+
+/////////////////////////////////////////////////////////////////////////////
 void common_simprintf( INFOCHUNK * const p, uint32_t cy) {
         static int lnr;        
         const char *ucodetxt[256] = {
@@ -784,6 +834,9 @@ TOP:
         if ( p->CONF & INFO_ucodedbg       ) p_ucodepcdbg( lnr, p->dinx, p->ucodepcinfo );                
         if ( p->CONF & INFO_I              ) p_I( lnr, p->I );
         if ( p->CONF & INFO_I_fields       ) p_I_fields( lnr, p->I );
+        if ( p->CONF & INFO_pc1            ) p_pc1( lnr, p->pc1 );
+        if ( p->CONF & INFO_was_rvc_instr  ) p_was_rvc_instr( lnr, p->was_rvc_instr );
+        if ( p->CONF & INFO_luh            ) p_luh( lnr, p->luh );
         if ( p->CONF & INFO_pc             ) p_pc( lnr, p->pc );
         if ( p->CONF & INFO_rai            ) p_rai( lnr, p->rai );
         if ( p->CONF & INFO_wai            ) p_wai( lnr, p->wai, p->iwe );

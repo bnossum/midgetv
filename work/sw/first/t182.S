@@ -16,7 +16,7 @@ _start:
         // Set trap handler address
         la      x1,_trap_handler
         csrrw   x0,mtvec,x1
-        
+
         //
         // Access CSR register that should trap in M-mode
 FaultingInstr:  

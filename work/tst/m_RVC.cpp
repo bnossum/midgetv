@@ -7,7 +7,7 @@
  */
 
 #include <stdlib.h>
-#include "Vm_decompress.h"
+#include "Vm_RVC.h"
 #include "verilated.h"
 
 #define ferr(...) exit(fprintf(stdout,"%s:%d:", __FILE__, __LINE__ )+fprintf(stdout,__VA_ARGS__))
@@ -295,14 +295,13 @@ int extractreg( int c, int n) {
  * -1 instruction must be such that it triggers an unknown instruction when executed (for unsupported instructions such as C.FLD)
  * by the implementation
  */
-int facit( uint32_t *e, int c ) {
+int facit( uint32_t *e, uint16_t c ) {
         int imm,rs2,rs1,rd;
         int rv32imm,a;
-#define RS1MASK 0b111110000000
 
         //printf( "[%x]", c);
         if ( c == 0 ) {
-                *e = 0x00010411; // Special case mapping for the defined unsuported instruction
+                *e = 0x00010412; // Special case mapping for the defined unsuported instruction
                 return 1;
         }
         switch ( c & 3 ) {
@@ -416,7 +415,7 @@ int facit( uint32_t *e, int c ) {
                                 imm = immfind(c, 0, 2,3,4,5,6,12,-1);
                                 rd = extractreg(c, 7);
                                 *e = (imm<<20) | (rd<<15) | (0b111<<12) | (rd<<7) | 0b0010011;
-                                return (imm & 0b100000) ? 0 : 1;                                
+                                return 1;
                                 
                         case 0b01100 :
                                 // C.SUB expands into sub rd',rd',rs2'
@@ -559,43 +558,95 @@ int facit( uint32_t *e, int c ) {
         return 1;
 }
 
+
+/////////////////////////////////////////////////////////////////////////////
+void compressed_instruction_check( uint32_t e, uint32_t d ) {
+        int m;
+        uint32_t f;
+        int mustmatch;
+
+        /* When pinpointing errors, it may be adventageous to focus on certain bits 
+         */
+#define DBGMASK 0xffffffffu
+
+        mustmatch = facit(&f,d);
+        //printf( "{%x}", f);
+        if ( mustmatch == -1 ) {
+                if ( (e & 3) == 3 )
+                        ferr( "Something is wrong\n" );
+        } else if ( mustmatch == 1 && ((e&DBGMASK) != (f&DBGMASK)) ) {
+                printf( "inx=0x%2.2x Compressed=%4.4x ", ((d&3)<<3) | (d>>13),   d );
+                //printf( "%8.8x  ", tb->q0e );
+                printf( "Facit=%8.8x ", f );
+                pocketdissass( 0, 0, f );
+                                printf( "   Verilog gave: %8.8x  ", e );
+                                pocketdissass( 0, 0, e );
+                                printf( "    m = 0x%x\n", m );
+                                printf( "\n" );
+                                exit(3);
+        }
+}
+        
 /////////////////////////////////////////////////////////////////////////////
 int main(int argc, char **argv) {
 	// Initialize Verilators variables
 	Verilated::commandArgs(argc, argv);
 
 	// Create an instance of our module under test
-	Vm_decompress *tb = new Vm_decompress;
+	Vm_RVC *tb = new Vm_RVC;
 
-	// Check each and every compressed instruction
-        int c;
-        uint32_t e,f;
-        int mustmatch;
+        uint32_t Di; //  In
+        uint32_t Dii; // Out
 
-//        for ( c = 0; c < 0x10000; c++ ) {
-        for ( c = 0x9106; c < 0x10000; c++ ) {
-                if ( (c & 3) == 3 )
-                        continue;
 
-                mustmatch = facit(&f,c);
-                //printf( "{%x}", f);
-                tb->c = c;
+        /* First check expansion of all word aligned compressed instructions.
+         * If this is a normal instruction, we check that no expansion takes place.
+         * I only check up to 20 bits, the upper 14 bits of the result should be
+         * treated the same way in the code, 
+         */
+        tb->pc1 = 0;
+        tb->luh = 0;
+        for ( Di = 0; Di < 0x100000; Di++ ) {
+                tb->Di = Di;
                 tb->eval();
-                e = tb->e;
-                if ( mustmatch == -1 ) {
-                        if ( (e & 3) == 3 )
-                                ferr( "Something is wrong, an compressed instruction that is unsupported does not map"
-                                      " to an instruction that will lead to an unknown instruction exception\n" );
-                } else if ( mustmatch == 1 && e != f ) {
-                        printf( "Compressed=%4.4x ", c );
-                        //printf( "%8.8x  ", tb->q0e );
-                        printf( "Facit=%8.8x ", f );
-                        pocketdissass( 0, 0, f );
-                        printf( "   Verilog gave: %8.8x  ", e );
-                        pocketdissass( 0, 0, e );
-                        printf( "\n" );
-                        exit(4);
+                Dii = tb->Dii;
+                
+                if ( (Di & 3) != 3 ) {
+                        compressed_instruction_check(Dii,Di);
+                } else {
+                        if ( Dii != Di )
+                                ferr( "Something is wrong, word-aligned normal instruction did not get through\n" );
                 }
+        }
+
+        /* Check expansion from upper half-word. 
+         */
+        tb->pc1 = 1;
+        tb->luh = 0;
+        for ( Di = 0xffff0000; Di > 0xffff; Di -= 0x10000 ) {
+                tb->Di = Di;
+                tb->eval();
+                Dii = tb->Dii;
+
+                if ( (Di & 0x00030000) != 0x00030000 ) {
+                        compressed_instruction_check(Dii,Di>>16);
+                } else {
+                        if ( (Dii & 0xffff) != (Di>>16) )
+                                ferr( "Something is wrong, low 16 bits of 32-bits instruction did not get through right\n" );
+                                
+                }
+        }
+
+        /* Check pass-through of high halfword of 32-bit instruction */
+        tb->pc1 = 1;
+        tb->luh = 1;
+        for ( Di = 0; Di < 0x100000; Di++ ) {
+                tb->Di = Di;
+                tb->eval();
+                Dii = tb->Dii;
+
+                if ( (Dii>>16) != (Di & 0xffff) )
+                        ferr( "Something is wrong\n" );
         }
         exit(0);
 }
