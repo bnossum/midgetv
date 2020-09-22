@@ -27,14 +27,19 @@
  *   11  Count all instructions.
  *
  * However, the most tested configureation is with MINSTRET included.
- *
- * Midgetv can optionally include instructions MUL, MULH, MULHSU, MULHU,
+ */
+#define ucodeopt_HAS_MINSTRET     0
+#define ucodeopt_HAS_EBR_MINSTRET 0
+
+/* Midgetv can optionally include instructions MUL, MULH, MULHSU, MULHU,
  * DIV, DIVU, REM and REMU. I assume midgetv will be used in control
  * applications where these instructions are rare. But sometimes it is not
  * easy to get away from the occational multiplication or divisions. In the
  * spirit of midgetv, the focus is on implementation size.
  */
-#define ucodeopt_HAS_MINSTRET     1
-#define ucodeopt_HAS_EBR_MINSTRET 1
-
 #define ucodeopt_MULDIV           1
+
+/* Nudgetv can optionally include the “C” Standard Extension for
+ * Compressed Instructions, Version 2.0
+ */
+#define ucodeopt_RVC              1
