@@ -6,14 +6,14 @@
  *
  * This module:
  * ------------
- * o Construction to modify an alu input so that +3 and +4 can be 
+ * o Construction to modify an alu input so that +2, +3 and +4 can be 
  *   realized easily
  * o Construction to hold execution of midgetv for (at least) the 
  *   first cycle 
  * o Optionally support for the cycle counter, and by extension mtime
  * o Optionally support for detection of bus-error
  * 
- * We must be able to let the ALU increment by 3 or 4.
+ * We must be able to let the ALU increment by 2, 3 or 4.
  * This is among other used when PC is incremented.
  *
  * A cycle counter with a 64-bit resolution is mandatory in most
@@ -86,16 +86,16 @@
  * 1 : To save 13 LUTs, rcnt is optional
  *     s_cyclecnt
  *     ||    QQ[1:0]
- *     0x    2'b11               To implement +3 and +4
- *     x1    {ADR_O[1],start}    rcnt degenerates to instruction counter.
- *     1x    ADR_O[1:0]          Let through ADR_O
+ *     0x    {~pcinc_by_2,1'b1}   To implement +2, +3 (and +4 with the help of carry in)
+ *     x1    {ADR_O[1],start}     rcnt degenerates to instruction counter.
+ *     1x    ADR_O[1:0]           Let through ADR_O
  * 0 : rcnt is implemented
  *     s_cyclecnt
  *     ||    QQ[6:0]             
  *     ----- -------             
- *     00    {ADR_O[6:2],2'b11}  To implement +3 and +4
- *     x1    rccnt               Muxing in rcnt, reset counter.
- *     10    ADR_O[6:0]          Let through ADR_O
+ *     00    {ADR_O[6:2],{~pcinc_by_2,1'b1}}  To implement +2, +3, (and +4 with the help of carry in)
+ *     x1    rccnt                            Muxing in rcnt, reset counter.
+ *     10    ADR_O[6:0]                       Let through ADR_O
  */
 module m_cyclecnt
   # ( parameter HIGHLEVEL = 0, NO_CYCLECNT = 0 )
@@ -104,6 +104,8 @@ module m_cyclecnt
     input         start,
     input [1:0]   s_cyclecnt,
 /* verilator lint_off UNUSED */
+    input         pcinc_by_2, // pc is to be incremented by 2 rather than 4, if ctrl_pcinc_by_2 also true
+    input         ctrl_pcinc_by_2,
     input         STB_O,
 /* verilator lint_on UNUSED */
     input [31:0]  ADR_O,
@@ -118,6 +120,7 @@ module m_cyclecnt
       if ( HIGHLEVEL ) begin
          wire cmbrcrun /* synthesis syn_keep=1 */;
          reg  rcrun /* synthesis syn_keep=1 */;
+         wire final_pcinc_by_2 = pcinc_by_2 & ctrl_pcinc_by_2;
          
          if ( NO_CYCLECNT == 1 ) begin
             
@@ -128,8 +131,9 @@ module m_cyclecnt
             // control output from EBR is valid.
             // No possibility to find a bus error.
             // =======================================================
+
+            assign QQ[1:0] = s_cyclecnt[0] ? {ADR_O[1],start} : (s_cyclecnt[1] ? ADR_O[1:0] : {~final_pcinc_by_2,1'b1} );
             assign QQ[6:2] = ADR_O[6:2];
-            assign QQ[1:0] = s_cyclecnt[0] ? {ADR_O[1],start} : (s_cyclecnt[1] ? ADR_O[1:0] : 2'h3 );
             assign buserror = 1'b0;
             assign cmbrcrun = rcrun | start;
             always @(posedge clk)
@@ -163,7 +167,8 @@ module m_cyclecnt
                rbuserror  <= cmbbuserror;
             end
             
-            assign QQ[6:0] = s_cyclecnt[0] ? rccnt : (s_cyclecnt[1] ? ADR_O[6:0] : {ADR_O[6:2],2'h3} );
+//            assign QQ[6:0] = s_cyclecnt[0] ? rccnt : (s_cyclecnt[1] ? ADR_O[6:0] : {ADR_O[6:2],2'h3} );
+            assign QQ[6:0] = s_cyclecnt[0] ? rccnt : (s_cyclecnt[1] ? ADR_O[6:0] : {ADR_O[6:2],~final_pcinc_by_2,1'h1} );
             assign buserror = rbuserror;
             assign corerunning = rcrun;
             assign dbg_rccnt = rccnt;

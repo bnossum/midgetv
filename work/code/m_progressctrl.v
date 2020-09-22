@@ -7,7 +7,7 @@
  */
 module m_progressctrl
   #( parameter HIGHLEVEL = 0, SRAMADRWIDTH = 0, MULDIV  = 1,
-     NO_CYCLECNT = 0, MTIMETAP = 0, MTIMETAP_LOWLIM = 32, DISREGARD_WB4_3_55 = 0) 
+     NO_CYCLECNT = 0, MTIMETAP = 0, MTIMETAP_LOWLIM = 32, DISREGARD_WB4_3_55 = 0, RVC = 0) 
    (
     input        clk, //            System clock
     input        corerunning, //    Avoid writing of registers when we are not running
@@ -26,15 +26,23 @@ module m_progressctrl
     input        sa14, //           Needed to deactivate WE_O
     input        sa30, //           Special case, strobe for "SW" must respect word alignment
     input        lastshift, //      To halt progress of microcode etc
-    input        rlastshift, //    To halt progress of microcode etc
-    input [31:0] B, //              Do we access SRAM or I/O? Only B[31] used but due to Verilator...
+    input        rlastshift, //     To halt progress of microcode etc
+    input [31:0] B, //              Do we access SRAM or I/O? Also used when RVC included
     input        buserror, //       When we have bus error we must have forward progress in ucode
     /* verilator lint_off UNUSED */
+    input        sa12, //           Capturing the instruction
+    input [17:0] Di, //             To find out if an instruction is RVC
     input        alu_carryout, //   For DIV
     input        clrM, //           For DIV
     input        ceM, //            For DIV
     input        isDIVREM, //
     input        lastshiftoverride,// Update Q even if lastshift is true in MULx instructions
+    input        sa20, //           For RVC need to decode Wpc
+    input        sa21, //
+    input        sa22, //
+    input        sa23, //
+
+    //     
     /* verilator lint_on UNUSED */
     
     output [3:0] SEL_O, //          Byte selects for SRAM and outputs
@@ -51,6 +59,12 @@ module m_progressctrl
     output       next_STB_O, //     Output for debugging
     output       next_sram_stb, //  Output for debugging
     output       cond_holdq, //     During divide.
+
+    output       pcinc_by_2, //      True only when updating PC after a RVC instruction or in an unaligned 32-bit instruction
+    output reg   pc1, //             Mirror of pc[1] used when RVC instructions implemented
+    output reg   was_rvc_instr, //   To correctly chose ucodepc
+    output reg   luh, //             Load upper halfword of instruction
+    
     output       m_progressctrl_killwarnings // Dummy
    );
 
@@ -423,11 +437,57 @@ module m_progressctrl
       end
    endgenerate
 
+   generate
+      if ( RVC == 0 ) begin
+         assign pcinc_by_2 = 1'b0;
+         always @(*) begin
+            pc1 = 1'b0;
+            was_rvc_instr = 1'b0;
+            luh = 1'b0;
+         end
+      end else begin
+         wire          potential_rvc_instr = pc1 ? Di[17:16] != 3 : Di[1:0] != 3;
+         /* To correctly decode the RVC (and unaligned 32-bit wide instructions) we need access to pc[1] in
+          * a cycle where it is not normally available. It is mirrored to pc1.
+          */
+         always @(posedge clk) begin
+            if ( {sa27,sa26,sa25,sa24} == 4'b1010 ) begin// Wpc
+               pc1 <= B[1];
+            end
+         end
+         
+         /* When RVC instructions are implemented, PC must be incremented by 2 rather than 4 when a
+          * RVC instruction was seen. An RVC instruction is seen when the two lsb != 3 and the instruction
+          * is latched (sa12==1).
+          * PC will also be incremented with 2 when we have an unaligned 32-bit instruction. Because
+          * an unaligned 32-bit instruction is followed by either a 16-bit instruction, or yet another
+          * unaligned 32-bit instruction, we have was_rvc_instr <= potential_rvc_instr | luh, hece
+          * was_rvc_instr is a misnomer.
+          */
+         always @(posedge clk)
+           if (sa12 & progress_ucode)
+             was_rvc_instr <= potential_rvc_instr | luh;
+         assign pcinc_by_2 = was_rvc_instr | pc1;
+         
+         /* When pc is incremented from ...10 to ...00, and we did not see a rvc instruction,
+          * we need to load the upper half word of an unaligned 32-bit instruction
+          */
+         always @(posedge clk)
+           if (sa12 & progress_ucode)
+             luh <= pc1 & ~potential_rvc_instr;
+
+      end
+   endgenerate
+
    
 `ifdef verilator   
    function [6:0] get_dbg_stb_ack;
       // verilator public
       get_dbg_stb_ack = {progress_ucode, enaQ, WE_O, 1'b00, 1'b0, 1'b0, 1'b0 };
+   endfunction
+   function [0:0] get_was_rvc_instr;
+      // verilator public
+      get_was_rvc_instr = was_rvc_instr;
    endfunction
 `endif
  

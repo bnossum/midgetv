@@ -22,13 +22,19 @@
  * 
  * The very first cycle DAT_O is unknowm, it comes from EBR. However,
  * rDee == 0 and shADR_0 == 0, so Di is indeed 0.
+ * 
+ * The above must be restated after RVC is implemented
  */
 module m_opreg
-  # ( parameter HIGHLEVEL = 0 )
+  # ( parameter HIGHLEVEL = 0, RVC = 1)
   ( 
     input         clk,
     input         sa12,
-    input [31:0]  Di,
+    /* verilator lint_off UNUSED */
+    input         isvalid_instrlow,
+    input         isvalid_instrhigh,
+    /* verilator lint_on UNUSED */
+    input [31:0]  Dii,
     output [31:0] INSTR,
     output [4:0]  TRG,SRC1,SRC2,
     output [2:0]  FUNC3,
@@ -37,13 +43,24 @@ module m_opreg
    
    generate
       if ( HIGHLEVEL ) begin
+
          reg [31:0]     rINSTRUCTION;
-         always @(posedge clk) 
-           if ( sa12 ) 
-             rINSTRUCTION <= Di;
+         if ( RVC == 0 ) begin
+            always @(posedge clk) 
+              if ( sa12 ) 
+                rINSTRUCTION <= Dii;
+         end else begin
+            always @(posedge clk) begin
+               if ( isvalid_instrlow & sa12 )
+                 rINSTRUCTION[15:0] <= Dii[15:0];
+               if ( isvalid_instrhigh & sa12 )
+                 rINSTRUCTION[31:16] <= Dii[31:16];               
+            end
+         end
          assign INSTR = rINSTRUCTION;
+         
       end else begin
-         SB_DFFE OpC [31:0] (.Q(INSTR),.E(sa12),.C(clk),.D(Di));
+         SB_DFFE OpC [31:0] (.Q(INSTR),.E(sa12),.C(clk),.D(Dii));
       end
    endgenerate
    
