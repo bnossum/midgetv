@@ -1,0 +1,54 @@
+#
+# TODO. Clarify where the compliance test suit should be located relative to midgetv
+#
+echo "C-ADDI16SP        "; diff -b ../../../obj_dir/rv32imc/C-ADDI16SP.simulator_output ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-ADDI16SP.reference_output
+echo "C-ADDI4SPN        "; diff -b ../../../obj_dir/rv32imc/C-ADDI4SPN.simulator_output ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-ADDI4SPN.reference_output
+echo "C-ADDI            "; diff -b ../../../obj_dir/rv32imc/C-ADDI.simulator_output     ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-ADDI.reference_output
+echo "C-ADD             "; diff -b ../../../obj_dir/rv32imc/C-ADD.simulator_output      ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-ADD.reference_output
+echo "C-ANDI            "; diff -b ../../../obj_dir/rv32imc/C-ANDI.simulator_output     ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-ANDI.reference_output
+echo "C-AND             "; diff -b ../../../obj_dir/rv32imc/C-AND.simulator_output      ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-AND.reference_output
+echo "C-BEQZ            "; diff -b ../../../obj_dir/rv32imc/C-BEQZ.simulator_output     ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-BEQZ.reference_output
+echo "C-BNEZ            "; diff -b ../../../obj_dir/rv32imc/C-BNEZ.simulator_output     ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-BNEZ.reference_output
+echo "C-JALR            "; diff -b ../../../obj_dir/rv32imc/C-JALR.simulator_output     ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-JALR.reference_output
+echo "C-JAL             "; diff -b ../../../obj_dir/rv32imc/C-JAL.simulator_output      ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-JAL.reference_output
+echo "C-JR              "; diff -b ../../../obj_dir/rv32imc/C-JR.simulator_output       ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-JR.reference_output
+echo "C-J               "; diff -b ../../../obj_dir/rv32imc/C-J.simulator_output        ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-J.reference_output
+echo "C-LI              "; diff -b ../../../obj_dir/rv32imc/C-LI.simulator_output       ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-LI.reference_output
+echo "C-LUI             "; diff -b ../../../obj_dir/rv32imc/C-LUI.simulator_output      ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-LUI.reference_output
+echo "C-LW              "; diff -b ../../../obj_dir/rv32imc/C-LW.simulator_output       ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-LW.reference_output
+echo "C-LWSP            "; diff -b ../../../obj_dir/rv32imc/C-LWSP.simulator_output     ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-LWSP.reference_output
+echo "C-MV              "; diff -b ../../../obj_dir/rv32imc/C-MV.simulator_output       ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-MV.reference_output
+echo "C-OR              "; diff -b ../../../obj_dir/rv32imc/C-OR.simulator_output       ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-OR.reference_output
+echo "C-SLLI            "; diff -b ../../../obj_dir/rv32imc/C-SLLI.simulator_output     ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-SLLI.reference_output
+echo "C-SRAI            "; diff -b ../../../obj_dir/rv32imc/C-SRAI.simulator_output     ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-SRAI.reference_output
+echo "C-SRLI            "; diff -b ../../../obj_dir/rv32imc/C-SRLI.simulator_output     ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-SRLI.reference_output
+echo "C-SUB             "; diff -b ../../../obj_dir/rv32imc/C-SUB.simulator_output      ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-SUB.reference_output
+echo "C-SW              "; diff -b ../../../obj_dir/rv32imc/C-SW.simulator_output       ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-SW.reference_output
+echo "C-SWSP            "; diff -b ../../../obj_dir/rv32imc/C-SWSP.simulator_output     ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-SWSP.reference_output
+echo "C-XOR             "; diff -b ../../../obj_dir/rv32imc/C-XOR.simulator_output      ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-XOR.reference_output
+#
+echo "(sram) C-ADDI16SP "; diff -b ../../../obj_dir/srv32imc/C-ADDI16SP.simulator_output ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-ADDI16SP.reference_output
+echo "(sram) C-ADDI4SPN "; diff -b ../../../obj_dir/srv32imc/C-ADDI4SPN.simulator_output ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-ADDI4SPN.reference_output
+echo "(sram) C-ADDI     "; diff -b ../../../obj_dir/srv32imc/C-ADDI.simulator_output     ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-ADDI.reference_output
+echo "(sram) C-ADD      "; diff -b ../../../obj_dir/srv32imc/C-ADD.simulator_output      ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-ADD.reference_output
+echo "(sram) C-ANDI     "; diff -b ../../../obj_dir/srv32imc/C-ANDI.simulator_output     ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-ANDI.reference_output
+echo "(sram) C-AND      "; diff -b ../../../obj_dir/srv32imc/C-AND.simulator_output      ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-AND.reference_output
+echo "(sram) C-BEQZ     "; diff -b ../../../obj_dir/srv32imc/C-BEQZ.simulator_output     ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-BEQZ.reference_output
+echo "(sram) C-BNEZ     "; diff -b ../../../obj_dir/srv32imc/C-BNEZ.simulator_output     ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-BNEZ.reference_output
+echo "(sram) C-JALR     "; diff -b ../../../obj_dir/srv32imc/C-JALR.simulator_output     ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-JALR.reference_output
+echo "(sram) C-JAL      "; diff -b ../../../obj_dir/srv32imc/C-JAL.simulator_output      ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-JAL.reference_output
+echo "(sram) C-JR       "; diff -b ../../../obj_dir/srv32imc/C-JR.simulator_output       ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-JR.reference_output
+echo "(sram) C-J        "; diff -b ../../../obj_dir/srv32imc/C-J.simulator_output        ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-J.reference_output
+echo "(sram) C-LI       "; diff -b ../../../obj_dir/srv32imc/C-LI.simulator_output       ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-LI.reference_output
+echo "(sram) C-LUI      "; diff -b ../../../obj_dir/srv32imc/C-LUI.simulator_output      ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-LUI.reference_output
+echo "(sram) C-LW       "; diff -b ../../../obj_dir/srv32imc/C-LW.simulator_output       ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-LW.reference_output
+echo "(sram) C-LWSP     "; diff -b ../../../obj_dir/srv32imc/C-LWSP.simulator_output     ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-LWSP.reference_output
+echo "(sram) C-MV       "; diff -b ../../../obj_dir/srv32imc/C-MV.simulator_output       ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-MV.reference_output
+echo "(sram) C-OR       "; diff -b ../../../obj_dir/srv32imc/C-OR.simulator_output       ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-OR.reference_output
+echo "(sram) C-SLLI     "; diff -b ../../../obj_dir/srv32imc/C-SLLI.simulator_output     ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-SLLI.reference_output
+echo "(sram) C-SRAI     "; diff -b ../../../obj_dir/srv32imc/C-SRAI.simulator_output     ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-SRAI.reference_output
+echo "(sram) C-SRLI     "; diff -b ../../../obj_dir/srv32imc/C-SRLI.simulator_output     ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-SRLI.reference_output
+echo "(sram) C-SUB      "; diff -b ../../../obj_dir/srv32imc/C-SUB.simulator_output      ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-SUB.reference_output
+echo "(sram) C-SW       "; diff -b ../../../obj_dir/srv32imc/C-SW.simulator_output       ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-SW.reference_output
+echo "(sram) C-SWSP     "; diff -b ../../../obj_dir/srv32imc/C-SWSP.simulator_output     ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-SWSP.reference_output
+echo "(sram) C-XOR      "; diff -b ../../../obj_dir/srv32imc/C-XOR.simulator_output      ../../../../../riscv-compliance/riscv-test-suite/rv32imc/references/C-XOR.reference_output

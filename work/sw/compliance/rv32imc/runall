@@ -1,0 +1,51 @@
+../../../bin/m_ice40sim_EBRonly.bin -c 0xf0000 -s -s -i  ../../../obj_dir/rv32imc/wC-ADDI16SP.bin              > ../../../obj_dir/rv32imc/C-ADDI16SP.simulator_output 
+../../../bin/m_ice40sim_EBRonly.bin -c 0xf0000 -s -s -i  ../../../obj_dir/rv32imc/wC-ADDI4SPN.bin              > ../../../obj_dir/rv32imc/C-ADDI4SPN.simulator_output 
+../../../bin/m_ice40sim_EBRonly.bin -c 0xf0000 -s -s -i  ../../../obj_dir/rv32imc/wC-ADDI.bin                  > ../../../obj_dir/rv32imc/C-ADDI.simulator_output 
+../../../bin/m_ice40sim_EBRonly.bin -c 0xf0000 -s -s -i  ../../../obj_dir/rv32imc/wC-ADD.bin                   > ../../../obj_dir/rv32imc/C-ADD.simulator_output 
+../../../bin/m_ice40sim_EBRonly.bin -c 0xf0000 -s -s -i  ../../../obj_dir/rv32imc/wC-ANDI.bin                  > ../../../obj_dir/rv32imc/C-ANDI.simulator_output
+../../../bin/m_ice40sim_EBRonly.bin -c 0xf0000 -s -s -i  ../../../obj_dir/rv32imc/wC-AND.bin                   > ../../../obj_dir/rv32imc/C-AND.simulator_output  
+../../../bin/m_ice40sim_EBRonly.bin -c 0xf0000 -s -s -i  ../../../obj_dir/rv32imc/wC-BEQZ.bin                  > ../../../obj_dir/rv32imc/C-BEQZ.simulator_output 
+../../../bin/m_ice40sim_EBRonly.bin -c 0xf0000 -s -s -i  ../../../obj_dir/rv32imc/wC-BNEZ.bin                  > ../../../obj_dir/rv32imc/C-BNEZ.simulator_output 
+../../../bin/m_ice40sim_EBRonly.bin -c 0xf0000 -s -s -i  ../../../obj_dir/rv32imc/wC-JALR.bin                  > ../../../obj_dir/rv32imc/C-JALR.simulator_output 
+../../../bin/m_ice40sim_EBRonly.bin -c 0xf0000 -s -s -i  ../../../obj_dir/rv32imc/wC-JAL.bin                   > ../../../obj_dir/rv32imc/C-JAL.simulator_output  
+../../../bin/m_ice40sim_EBRonly.bin -c 0xf0000 -s -s -i  ../../../obj_dir/rv32imc/wC-JR.bin                    > ../../../obj_dir/rv32imc/C-JR.simulator_output   
+../../../bin/m_ice40sim_EBRonly.bin -c 0xf0000 -s -s -i  ../../../obj_dir/rv32imc/wC-J.bin                     > ../../../obj_dir/rv32imc/C-J.simulator_output    
+../../../bin/m_ice40sim_EBRonly.bin -c 0xf0000 -s -s -i  ../../../obj_dir/rv32imc/wC-LI.bin                    > ../../../obj_dir/rv32imc/C-LI.simulator_output   
+../../../bin/m_ice40sim_EBRonly.bin -c 0xf0000 -s -s -i  ../../../obj_dir/rv32imc/wC-LUI.bin                   > ../../../obj_dir/rv32imc/C-LUI.simulator_output  
+../../../bin/m_ice40sim_EBRonly.bin -c 0xf0000 -s -s -i  ../../../obj_dir/rv32imc/wC-LW.bin                    > ../../../obj_dir/rv32imc/C-LW.simulator_output   
+../../../bin/m_ice40sim_EBRonly.bin -c 0xf0000 -s -s -i  ../../../obj_dir/rv32imc/wC-LWSP.bin                  > ../../../obj_dir/rv32imc/C-LWSP.simulator_output 
+../../../bin/m_ice40sim_EBRonly.bin -c 0xf0000 -s -s -i  ../../../obj_dir/rv32imc/wC-MV.bin                    > ../../../obj_dir/rv32imc/C-MV.simulator_output   
+../../../bin/m_ice40sim_EBRonly.bin -c 0xf0000 -s -s -i  ../../../obj_dir/rv32imc/wC-OR.bin                    > ../../../obj_dir/rv32imc/C-OR.simulator_output   
+../../../bin/m_ice40sim_EBRonly.bin -c 0xf0000 -s -s -i  ../../../obj_dir/rv32imc/wC-SLLI.bin                  > ../../../obj_dir/rv32imc/C-SLLI.simulator_output 
+../../../bin/m_ice40sim_EBRonly.bin -c 0xf0000 -s -s -i  ../../../obj_dir/rv32imc/wC-SRAI.bin                  > ../../../obj_dir/rv32imc/C-SRAI.simulator_output 
+../../../bin/m_ice40sim_EBRonly.bin -c 0xf0000 -s -s -i  ../../../obj_dir/rv32imc/wC-SRLI.bin                  > ../../../obj_dir/rv32imc/C-SRLI.simulator_output 
+../../../bin/m_ice40sim_EBRonly.bin -c 0xf0000 -s -s -i  ../../../obj_dir/rv32imc/wC-SUB.bin                   > ../../../obj_dir/rv32imc/C-SUB.simulator_output  
+../../../bin/m_ice40sim_EBRonly.bin -c 0xf0000 -s -s -i  ../../../obj_dir/rv32imc/wC-SW.bin                    > ../../../obj_dir/rv32imc/C-SW.simulator_output   
+../../../bin/m_ice40sim_EBRonly.bin -c 0xf0000 -s -s -i  ../../../obj_dir/rv32imc/wC-SWSP.bin                  > ../../../obj_dir/rv32imc/C-SWSP.simulator_output 
+../../../bin/m_ice40sim_EBRonly.bin -c 0xf0000 -s -s -i  ../../../obj_dir/rv32imc/wC-XOR.bin                   > ../../../obj_dir/rv32imc/C-XOR.simulator_output  
+#
+../../../bin/m_ice40sim_SRAM.bin -c 0xf0000 -s -s -i  ../../../obj_dir/srv32imc/wC-ADDI16SP.bin              > ../../../obj_dir/srv32imc/C-ADDI16SP.simulator_output 
+../../../bin/m_ice40sim_SRAM.bin -c 0xf0000 -s -s -i  ../../../obj_dir/srv32imc/wC-ADDI4SPN.bin              > ../../../obj_dir/srv32imc/C-ADDI4SPN.simulator_output 
+../../../bin/m_ice40sim_SRAM.bin -c 0xf0000 -H 1 -s -s -i  ../../../obj_dir/srv32imc/wC-ADDI.bin                  > ../../../obj_dir/srv32imc/C-ADDI.simulator_output 
+../../../bin/m_ice40sim_SRAM.bin -c 0xf0000 -H 1 -s -s -i  ../../../obj_dir/srv32imc/wC-ADD.bin                   > ../../../obj_dir/srv32imc/C-ADD.simulator_output 
+../../../bin/m_ice40sim_SRAM.bin -c 0xf0000 -H 1 -s -s -i  ../../../obj_dir/srv32imc/wC-ANDI.bin                  > ../../../obj_dir/srv32imc/C-ANDI.simulator_output
+../../../bin/m_ice40sim_SRAM.bin -c 0xf0000 -H 1 -s -s -i  ../../../obj_dir/srv32imc/wC-AND.bin                   > ../../../obj_dir/srv32imc/C-AND.simulator_output  
+../../../bin/m_ice40sim_SRAM.bin -c 0xf0000 -s -s -i  ../../../obj_dir/srv32imc/wC-BEQZ.bin                  > ../../../obj_dir/srv32imc/C-BEQZ.simulator_output 
+../../../bin/m_ice40sim_SRAM.bin -c 0xf0000 -s -s -i  ../../../obj_dir/srv32imc/wC-BNEZ.bin                  > ../../../obj_dir/srv32imc/C-BNEZ.simulator_output 
+../../../bin/m_ice40sim_SRAM.bin -c 0xf0000 -H 1 -s -s -i  ../../../obj_dir/srv32imc/wC-JALR.bin                  > ../../../obj_dir/srv32imc/C-JALR.simulator_output 
+../../../bin/m_ice40sim_SRAM.bin -c 0xf0000 -s -s -i  ../../../obj_dir/srv32imc/wC-JAL.bin                   > ../../../obj_dir/srv32imc/C-JAL.simulator_output  
+../../../bin/m_ice40sim_SRAM.bin -c 0xf0000 -H 1 -s -s -i  ../../../obj_dir/srv32imc/wC-JR.bin                    > ../../../obj_dir/srv32imc/C-JR.simulator_output   
+../../../bin/m_ice40sim_SRAM.bin -c 0xf0000 -s -s -i  ../../../obj_dir/srv32imc/wC-J.bin                     > ../../../obj_dir/srv32imc/C-J.simulator_output    
+../../../bin/m_ice40sim_SRAM.bin -c 0xf0000 -H 1 -s -s -i  ../../../obj_dir/srv32imc/wC-LI.bin                    > ../../../obj_dir/srv32imc/C-LI.simulator_output   
+../../../bin/m_ice40sim_SRAM.bin -c 0xf0000 -H 1 -s -s -i  ../../../obj_dir/srv32imc/wC-LUI.bin                   > ../../../obj_dir/srv32imc/C-LUI.simulator_output  
+../../../bin/m_ice40sim_SRAM.bin -c 0xf0000 -s -s -i  ../../../obj_dir/srv32imc/wC-LW.bin                    > ../../../obj_dir/srv32imc/C-LW.simulator_output   
+../../../bin/m_ice40sim_SRAM.bin -c 0xf0000 -s -s -i  ../../../obj_dir/srv32imc/wC-LWSP.bin                  > ../../../obj_dir/srv32imc/C-LWSP.simulator_output 
+../../../bin/m_ice40sim_SRAM.bin -c 0xf0000 -H 1 -s -s -i  ../../../obj_dir/srv32imc/wC-MV.bin                    > ../../../obj_dir/srv32imc/C-MV.simulator_output   
+../../../bin/m_ice40sim_SRAM.bin -c 0xf0000 -H 1 -s -s -i  ../../../obj_dir/srv32imc/wC-OR.bin                    > ../../../obj_dir/srv32imc/C-OR.simulator_output   
+../../../bin/m_ice40sim_SRAM.bin -c 0xf0000 -H 1 -s -s -i  ../../../obj_dir/srv32imc/wC-SLLI.bin                  > ../../../obj_dir/srv32imc/C-SLLI.simulator_output 
+../../../bin/m_ice40sim_SRAM.bin -c 0xf0000 -H 1 -s -s -i  ../../../obj_dir/srv32imc/wC-SRAI.bin                  > ../../../obj_dir/srv32imc/C-SRAI.simulator_output 
+../../../bin/m_ice40sim_SRAM.bin -c 0xf0000 -H 1 -s -s -i  ../../../obj_dir/srv32imc/wC-SRLI.bin                  > ../../../obj_dir/srv32imc/C-SRLI.simulator_output 
+../../../bin/m_ice40sim_SRAM.bin -c 0xf0000 -H 1 -s -s -i  ../../../obj_dir/srv32imc/wC-SUB.bin                   > ../../../obj_dir/srv32imc/C-SUB.simulator_output  
+../../../bin/m_ice40sim_SRAM.bin -c 0xf0000 -s -s -i  ../../../obj_dir/srv32imc/wC-SW.bin                    > ../../../obj_dir/srv32imc/C-SW.simulator_output   
+../../../bin/m_ice40sim_SRAM.bin -c 0xf0000 -H 1 -s -s -i  ../../../obj_dir/srv32imc/wC-SWSP.bin                  > ../../../obj_dir/srv32imc/C-SWSP.simulator_output 
+../../../bin/m_ice40sim_SRAM.bin -c 0xf0000 -H 1 -s -s -i  ../../../obj_dir/srv32imc/wC-XOR.bin                   > ../../../obj_dir/srv32imc/C-XOR.simulator_output  
