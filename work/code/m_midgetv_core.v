@@ -165,7 +165,7 @@ DAT_I[31:0] ------------|or|-|\   ___  rDee                      |
 |  | |  |               |  Q|------------------|iate   |---(-+          +------ is_bcond          
 |  | |  |               |   |  6- 0 OPCODE     |expand |   | |          |                         
 |  | |  |   __________  |   | 11- 7 TRG        |_______|   | |      __  |  __                     
-|  | |  |  | De-      |-|D  | 14-12 FUNC3   +--------------(-)-----|  |-+-|  |- raluF             
+|  | |  |  | RVC De-  |-|D  | 14-12 FUNC3   +--------------(-)-----|  |-+-|  |- raluF             
 |  | |  |  | compress | |   | 19-15 SRC1    |              | |  +--|__|   >__|                    
 |  | |  |  |__________| |CE | 24-20 SRC2    | fC           | |  | fZ                              
 |  | |  |           |   >___| 31-25 FUNC7  /y\             | | /y\                                
@@ -393,16 +393,17 @@ module m_midgetv_core
   # ( parameter 
       ucodeopt_HAS_MINSTRET       = `ucodeopt_HAS_MINSTRET,
       ucodeopt_HAS_EBR_MINSTRET   = `ucodeopt_HAS_EBR_MINSTRET,
+      RVC                = `ucodeopt_RVC,
+      MULDIV             = `ucodeopt_MULDIV,
       SRAMADRWIDTH       =  0,  
       EBRADRWIDTH        =  8, 
       IWIDTH             =  8, 
-      NO_CYCLECNT        =  1, 
+      NO_CYCLECNT        =  0, 
       MTIMETAP           =  0, 
       HIGHLEVEL          =  0, 
       LAZY_DECODE        =  1, 
       DISREGARD_WB4_3_55 =  1,
       DAT_I_ZERO_WHEN_INACTIVE = 0,
-      MULDIV             =  0, // Include multiply/divide instructions
       MTIMETAP_LOWLIM    = 14, // Only location where this value is really to be set 
       NO_UCODEOPT        =  0, // Only set to 1 during debugging
       DBGA               =  0, // Only set to 1 during debugging
@@ -432,7 +433,7 @@ module m_midgetv_core
     output             CYC_O, //       We do not generate wait states. Observation 3.55 in wbspec_b4: CYC_O = STB_O
     output             STB_O, //       Qualifies ADR_O, DAT_O, SEL_O and WE_O.
     output             WE_O, //        Midgetv writes output to address ADR_O
-    output [31:0]      ADR_O, //       Address for I/O devices
+    output [31:0]      ADR_O, //       Address for I/O devices 
     output [31:0]      DAT_O, //       Data from midgetv to output devices
     output [3:0]       SEL_O, //       Byte mask for read/write. 
 
@@ -480,6 +481,7 @@ module m_midgetv_core
    wire                 A31;                    // From inst_alu of m_alu.v
    wire [ALUWIDTH-1:0]  B;                      // From inst_alu of m_alu.v
    wire [31:0]          Di;                     // From inst_mimux of m_mimux.v
+   wire [31:0]          Dii;                    // From inst_RVC of m_RVC.v
    wire [31:0]          Dsram;                  // From inst_ram of m_ram.v
    wire [6:0]           FUNC7;                  // From inst_opreg of m_opreg.v
    wire [31:0]          INSTR;                  // From inst_opreg of m_opreg.v
@@ -498,11 +500,15 @@ module m_midgetv_core
    wire                 ceM;                    // From inst_ucode of m_ucode.v
    wire                 clrM;                   // From inst_ucode of m_ucode.v
    wire                 cond_holdq;             // From inst_progressctrl of m_progressctrl.v
+   wire                 ctrl_pcinc_by_2;        // From inst_ucode of m_ucode.v
    wire                 ctrlreg_we;             // From inst_progressctrl of m_progressctrl.v
    wire                 enaQ;                   // From inst_progressctrl of m_progressctrl.v
    wire                 is_brcond;              // From inst_condcode of m_condcode.v
+   wire                 isvalid_instrhigh;      // From inst_RVC of m_RVC.v
+   wire                 isvalid_instrlow;       // From inst_RVC of m_RVC.v
    wire                 iwe;                    // From inst_progressctrl of m_progressctrl.v
    wire                 lastshift;              // From inst_shiftcounter of m_shiftcounter.v
+   wire                 luh;                    // From inst_progressctrl of m_progressctrl.v
    wire                 meie;                   // From inst_status_and_interrupts of m_status_and_interrupts.v
    wire                 mie;                    // From inst_status_and_interrupts of m_status_and_interrupts.v
    wire [7:0]           minx;                   // From inst_ucodepc of m_ucodepc.v
@@ -518,6 +524,8 @@ module m_midgetv_core
    wire                 next_STB_O;             // From inst_progressctrl of m_progressctrl.v
    wire                 next_readvalue_unknown; // From inst_ebr of m_ebr.v
    wire                 next_sram_stb;          // From inst_progressctrl of m_progressctrl.v
+   wire                 pc1;                    // From inst_progressctrl of m_progressctrl.v
+   wire                 pcinc_by_2;             // From inst_progressctrl of m_progressctrl.v
    wire                 potentialMODbranch;     // From inst_ucode of m_ucode.v
    wire                 progress_ucode;         // From inst_progressctrl of m_progressctrl.v
    wire                 qACK;                   // From inst_progressctrl of m_progressctrl.v
@@ -562,6 +570,7 @@ module m_midgetv_core
    wire                 sram_stb;               // From inst_progressctrl of m_progressctrl.v
    wire                 sysregack;              // From inst_inputmux of m_inputmux.v
    wire [31:0]          theio;                  // From inst_inputmux of m_inputmux.v
+   wire                 was_rvc_instr;          // From inst_progressctrl of m_progressctrl.v
    // End of automatics
 
 `ifdef verilator   
@@ -685,6 +694,14 @@ module m_midgetv_core
       // verilator public
       get_raluF = raluF;
    endfunction
+   function [0:0] get_pc1;
+      // verilator public
+      get_pc1 = pc1;
+   endfunction
+   function [0:0] get_luh;
+      // verilator public
+      get_luh = luh;
+   endfunction
 `endif
 
    /* Flexibility comes at a price. Some variables are not
@@ -751,7 +768,7 @@ module m_midgetv_core
       .rDee                             (rDee[31:0]));
 
 
-   m_cyclecnt #(.HIGHLEVEL(   HIGHLEVEL   ), 
+   m_cyclecnt #(.HIGHLEVEL(   xHIGHLEVEL   ), 
                 .NO_CYCLECNT( NO_CYCLECNT ))
    inst_cyclecnt
      (/*AUTOINST*/
@@ -764,6 +781,8 @@ module m_midgetv_core
       .clk                              (clk),
       .start                            (start),
       .s_cyclecnt                       (s_cyclecnt[1:0]),
+      .pcinc_by_2                       (pcinc_by_2),
+      .ctrl_pcinc_by_2                  (ctrl_pcinc_by_2),
       .STB_O                            (STB_O),
       .ADR_O                            (ADR_O[31:0]));
 
@@ -791,12 +810,12 @@ module m_midgetv_core
    wire                 mod_s_alu_1;
    assign mod_s_alu_1 = (s_alu == 3'b100 && clrM == 1'b0) ? ~MULDIVREG[0] : s_alu[1];
    
-   m_alu #(.HIGHLEVEL(       HIGHLEVEL       ), 
+   m_alu #(.HIGHLEVEL(                 HIGHLEVEL       ), 
            .ucodeopt_HAS_MINSTRET(     ucodeopt_HAS_MINSTRET     ),
            .ucodeopt_HAS_EBR_MINSTRET( ucodeopt_HAS_EBR_MINSTRET ),
-           .ALUWIDTH(        ALUWIDTH        ),
-           .MTIMETAP(        MTIMETAP        ),
-           .MTIMETAP_LOWLIM( MTIMETAP_LOWLIM )
+           .ALUWIDTH(                  ALUWIDTH        ),
+           .MTIMETAP(                  MTIMETAP        ),
+           .MTIMETAP_LOWLIM(           MTIMETAP_LOWLIM )
            )
    inst_alu
      (// Inputs
@@ -937,7 +956,19 @@ module m_midgetv_core
       .sa26                             (sa26),
       .sa27                             (sa27));
 
-   m_opreg #(.HIGHLEVEL(HIGHLEVEL))
+   m_RVC #(.RVC(RVC))
+   inst_RVC 
+     (/*AUTOINST*/
+      // Outputs
+      .Dii                              (Dii[31:0]),
+      .isvalid_instrlow                 (isvalid_instrlow),
+      .isvalid_instrhigh                (isvalid_instrhigh),
+      // Inputs
+      .Di                               (Di[31:0]),
+      .pc1                              (pc1),
+      .luh                              (luh));
+
+   m_opreg #(.HIGHLEVEL(xHIGHLEVEL), .RVC(RVC))
      inst_opreg
        (/*AUTOINST*/
         // Outputs
@@ -950,7 +981,9 @@ module m_midgetv_core
         // Inputs
         .clk                            (clk),
         .sa12                           (sa12),
-        .Di                             (Di[31:0]));
+        .isvalid_instrlow               (isvalid_instrlow),
+        .isvalid_instrhigh              (isvalid_instrhigh),
+        .Dii                            (Dii[31:0]));
 
    m_condcode #(.HIGHLEVEL(HIGHLEVEL), .MULDIV(MULDIV) ) 
      inst_condcode
@@ -996,6 +1029,7 @@ module m_midgetv_core
    wire                 lastshiftoverride = INSTR[25] & (INSTR[6:2] == 5'b01100);     // MULDIV. Can probably be simplified further
    wire                 isDIVREM = INSTR[25] & ( INSTR[6:2] == 5'b01100) & INSTR[14]; // Can probably be simplified further
    m_progressctrl #(.HIGHLEVEL(          xHIGHLEVEL          ),
+                    .RVC(                RVC                ),
                     .MULDIV(             MULDIV             ),
                     .DISREGARD_WB4_3_55( DISREGARD_WB4_3_55 ),
                     .NO_CYCLECNT(        NO_CYCLECNT        ),
@@ -1021,6 +1055,10 @@ module m_midgetv_core
       .next_STB_O                       (next_STB_O),
       .next_sram_stb                    (next_sram_stb),
       .cond_holdq                       (cond_holdq),
+      .pcinc_by_2                       (pcinc_by_2),
+      .pc1                              (pc1),
+      .was_rvc_instr                    (was_rvc_instr),
+      .luh                              (luh),
       .m_progressctrl_killwarnings      (m_progressctrl_killwarnings),
       // Inputs
       .clk                              (clk),
@@ -1045,9 +1083,15 @@ module m_midgetv_core
       .rlastshift                       (rlastshift),
       .B                                (B[31:0]),
       .buserror                         (buserror),
+      .sa12                             (sa12),
+      .Di                               (Di[17:0]),
       .ceM                              (ceM),
       .isDIVREM                         (isDIVREM),
-      .lastshiftoverride                (lastshiftoverride));
+      .lastshiftoverride                (lastshiftoverride),
+      .sa20                             (sa20),
+      .sa21                             (sa21),
+      .sa22                             (sa22),
+      .sa23                             (sa23));
    
    m_ucode #(.NO_UCODEOPT(NO_UCODEOPT))
      inst_ucode
@@ -1086,6 +1130,7 @@ module m_midgetv_core
         .clrM                           (clrM),
         .ceM                            (ceM),
         .potentialMODbranch             (potentialMODbranch),
+        .ctrl_pcinc_by_2                (ctrl_pcinc_by_2),
         .rinx                           (rinx[7:0]),
         .ucode_killwarnings             (ucode_killwarnings),
         // Inputs
@@ -1093,7 +1138,7 @@ module m_midgetv_core
         .minx                           (minx[7:0]),
         .progress_ucode                 (progress_ucode));
 
-   m_ucodepc #(.LAZY_DECODE(LAZY_DECODE), .MULDIV(MULDIV))
+   m_ucodepc #(.LAZY_DECODE(LAZY_DECODE), .MULDIV(MULDIV), .RVC(RVC))
      inst_ucodepc
        (/*AUTOINST*/
         // Outputs
@@ -1117,7 +1162,9 @@ module m_midgetv_core
         .buserror                       (buserror),
         .ceM                            (ceM),
         .rlastshift                     (rlastshift),
-        .potentialMODbranch             (potentialMODbranch));
+        .potentialMODbranch             (potentialMODbranch),
+        .pc1                            (pc1),
+        .was_rvc_instr                  (was_rvc_instr));
    
    /* Interrupts in midgetv is implemented in an "all or nothing" fashion.
     * If MTIMETAP < MTIMETAP_LOWLIM, we have a minimal system, and no 
@@ -1180,10 +1227,13 @@ module m_midgetv_core
 
    /* Multiply and Divide instructions are optionally supported
     */
+//   wire loadM =  ~sa14 | (~sa15 & sa14 & sa32); // For RVC
+//   wire loadMn = ~loadM;
    m_shlr #( .ALUWIDTH(32), .MULDIV(MULDIV) )
      inst_shlr
        (// Inputs
         .loadMn     (sa14    ),
+//        .loadMn     (loadMn),
         .ADR_O0     (ADR_O[0]),
         /*AUTOINST*/
         // Outputs
