@@ -788,18 +788,14 @@ module m_midgetv_core
       .STB_O                            (STB_O),
       .ADR_O                            (ADR_O[31:0]));
 
-   wire [1:0]           mod_s_alu_carryin;
-   wire                 mod_raluF;
-   assign mod_s_alu_carryin = (mod_s_alu_1 ^ s_alu[1]) ? 2'b00 : s_alu_carryin;
-   assign mod_raluF  = s_alu_carryin[1] ? MULDIVREG[ALUWIDTH-1] : raluF;
    m_alu_carryin #(.HIGHLEVEL(xHIGHLEVEL), .MULDIV(MULDIV))
    inst_alu_carryin
      (// Inputs
       .ADR_O_31                         (ADR_O[31]),
       .FUNC7_5                          (FUNC7[5]),
       .FUNC7_0                          (FUNC7[0]),
-      .raluF                            (mod_raluF),
-      .s_alu_carryin                    (mod_s_alu_carryin[1:0]),
+      .s_alu_1                          (s_alu[1]),
+      .muldivregmsb                     (MULDIVREG[ALUWIDTH-1]),
       /*AUTOINST*/
       // Outputs
       .alu_carryin                      (alu_carryin),
@@ -807,7 +803,10 @@ module m_midgetv_core
       .rlastshift                       (rlastshift),
       // Inputs
       .clk                              (clk),
-      .lastshift                        (lastshift));
+      .lastshift                        (lastshift),
+      .raluF                            (raluF),
+      .mod_s_alu_1                      (mod_s_alu_1),
+      .s_alu_carryin                    (s_alu_carryin[1:0]));
 
    wire                 mod_s_alu_1;
    assign mod_s_alu_1 = (s_alu == 3'b100 && clrM == 1'b0) ? ~MULDIVREG[0] : s_alu[1];
