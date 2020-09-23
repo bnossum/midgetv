@@ -10,9 +10,9 @@ But I still want to use the good work of riscv-compliance, and
 challenges the very limits of my understanding of Makefiles.
 
 In the following I assume `midgetv` has been compiled for
-`icebreaker`, see [here](../../hwtst/icebreaker). The program included
+`icebreaker`, see [here](../.hwtst/icebreaker). The program included
 with the processor should be
-[mb](../../sw/hwexamples/midgetv_blast/mb.S) (`mb.S` is an usart
+[mb](..//sw/hwexamples/midgetv_blast/mb.S) (`mb.S` is an usart
 loader program that allow upload and execution of a program on `midgetv`).
 
 
