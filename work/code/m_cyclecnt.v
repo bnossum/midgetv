@@ -186,6 +186,8 @@ module m_cyclecnt
             // =======================================================
             // LOWLEVEL, NO CYCLECNT
             // =======================================================
+            NOT_CURRENT this_case_not_implemented();
+            
             wire cmb_rcrun;
             assign QQ[6:2] = ADR_O[6:2];
             SB_LUT4 #(.LUT_INIT(16'habab)) qqmux1(.O(QQ[1]),.I3(1'b0),.I2(s_cyclecnt[0]), .I1(s_cyclecnt[1]), .I0(ADR_O[1])); 
