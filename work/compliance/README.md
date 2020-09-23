@@ -10,19 +10,19 @@ But I still want to use the good work of riscv-compliance, and
 In the following I assume `midgetv` has been compiled for
 `icebreaker`, see [here](../hwtst/icebreaker). The program included
 with the processor should be
-[mb](..//sw/hwexamples/midgetv_blast/mb.S) (`mb.S` is an usart
+[mb](..//sw/hwexamples/midgetv_blast/mb.S) (`mb.S` is an uart
 loader program that allow upload and execution of a program on `midgetv`).
 
 
-This is how I do it:
+### This is how I do it:
 
 * This directory holds a slight variation of the `Makefile` in
   `riscv-compliance`. 
   * `RISCV_COMPLIANCE_ROOTDIR` is added
   * `SUITEDIR` is added
-  * The rule for `verify` is sligtly changed.
+  * The rule for `verify` is slightly changed.
 
-* Directory `riscv-target` and subdirectories are organized as they
+* Directory `riscv-target` and sub-directories are organized as they
   would be if `midgetv` was indeed a part of `riscv-compliance`.
 
 * Do a `make VERBOSE=1` to see how everything fits together.
@@ -32,11 +32,13 @@ This is how I do it:
   must be excluded for rv32imc and rv32ic. 
 
 
-Inside the framework of the Makefiles, for each test program, the
-following happens:
+### How it works
 
-* cat I-ADD-01.elf.bin > /dev/ttyUSB1
-  * The `midgetv` in `icebraker` has a bit-bang usart, the program `mb`
+Inside the framework of the Makefiles, for each test program (for
+example `I-ADD-01.Sq), the following happens:
+
+* `cat I-ADD-01.elf.bin > /dev/ttyUSB1`
+  * `midgetv` in `icebraker` has a bit-bang uart, the program `mb`
     residing in `midgetv` is set up to load a new program.
   * I-ADD-01.elf.bin is processed to be in a form recognizable by by
     `mb` (see the link file).
@@ -46,17 +48,18 @@ following happens:
   * it records the response, which is the signature of the test
      program,
   * The response is finished with the text `Done`,
-  * The response is stored as the signature of the test program
+  * The response is stored as the signature of the test program.
   * After `midgetv` has emitted `Done`, it resets itself so it is
     ready to accept a new test program.
     
 * The makefile system proceeds to the next test.
 
-Presently there is a race condition in this. After `midgetv` has
+There is a race condition here. After `midgetv` has
 answered `Done`, it takes a certain time before it is ready to receive
-a new test program. So ideally the PC should hold for 1 second before
+a new test program. So ideally the PC should hold for a short time before
 it continues with the next program. As I have never seen any problems
-here, I leave the error as is.
+here, I leave this race condition unresolved for now.
+
 
 
   
