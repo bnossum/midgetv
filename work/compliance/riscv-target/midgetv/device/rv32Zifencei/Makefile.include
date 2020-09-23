@@ -1,0 +1,4 @@
+# For midgetv.
+include $(TARGETDIR)/$(RISCV_TARGET)/Makefile.generic.include
+
+
