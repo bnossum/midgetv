@@ -769,8 +769,9 @@ module m_midgetv_core
       .rDee                             (rDee[31:0]));
 
 
-   m_cyclecnt #(.HIGHLEVEL(   xHIGHLEVEL   ), 
-                .NO_CYCLECNT( NO_CYCLECNT ))
+   m_cyclecnt #(.HIGHLEVEL(   HIGHLEVEL   ), 
+                .NO_CYCLECNT( NO_CYCLECNT ),
+                .RVC(         RVC         ))
    inst_cyclecnt
      (/*AUTOINST*/
       // Outputs

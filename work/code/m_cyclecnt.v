@@ -98,7 +98,7 @@
  *     10    ADR_O[6:0]                       Let through ADR_O
  */
 module m_cyclecnt
-  # ( parameter HIGHLEVEL = 0, NO_CYCLECNT = 0 )
+  # ( parameter HIGHLEVEL = 0, NO_CYCLECNT = 0, RVC = 0 )
   ( 
     input         clk,
     input         start,
@@ -249,13 +249,16 @@ module m_cyclecnt
              *           rcnt[2] -((+-|I1 |-ccnt[2]------|  |-- rcnt[2] -------------|I1 |- QQ[2] 
              *     s_cyclecnt[0] -+(--|I2 |              >__|     s_cyclecnt[0] -----|I2 |        
              *                     +--|I3_|                                         -|I3_|        
-             *                     |ccntcy[1]                                    
-             *                    /y\                                            
-             *                    |||  ___                                            ___         
-             *           start   -(((-|I0 |               __           ADR_O[1] -----|I0 |        
-             *           rcnt[1] -((+-|I1 |-ccnt[1]------|  |-- rcnt[1] -------------|I1 |- QQ[1] 
-             *     s_cyclecnt[0] -+(--|I2 |              >__|     s_cyclecnt[0] -----|I2 |        
-             *                     +--|I3_|                       s_cyclecnt[1] -----|I3_|        
+             *                     |ccntcy[1]                                         ___         
+             *                     |                                   ADR_O[1] -----|I0 |        
+             *                     |                                 pcinc_by_2 -----|I1 |-+ hQQ1
+             *                     |                            ctrl_pcinc_by_2 -----|I2 | |       
+             *                    /y\                             s_cyclecnt[1] -----|I3_| |         
+             *                    |||  ___                                                 |  ___         
+             *           start   -(((-|I0 |               __                               +-|I0 |        
+             *           rcnt[1] -((+-|I1 |-ccnt[1]------|  |-- rcnt[1] ---------------------|I1 |- QQ[1] 
+             *     s_cyclecnt[0] -+(--|I2 |              >__|     s_cyclecnt[0] -------------|I2 |        
+             *                     +--|I3_|                       s_cyclecnt[1] -------------|I3_|        
              *                     |ccntcy[0]                                    
              *                    /y\                                            
              *                    |||  ___                                            ___  
@@ -286,7 +289,14 @@ module m_cyclecnt
             SB_DFF r_buserror(       .Q(buserror),    .C(clk), .D(cmbbuserror));
             SB_DFF r_rcrun         ( .Q(corerunning), .C(clk), .D(cmb_rcrun));
 
-            bn_l4 #(.I(16'hcacf)) c_qq_10 [1:0] (.o(QQ[1:0]), .i3(s_cyclecnt[1]), .i2(s_cyclecnt[0]), .i1(rccnt[1:0]), .i0(ADR_O[1:0]) );
+            if ( RVC == 0 ) begin
+               bn_l4 #(.I(16'hcacf)) c_qq_10 [1:0] (.o(QQ[1:0]), .i3(s_cyclecnt[1]), .i2(s_cyclecnt[0]), .i1(rccnt[1:0]), .i0(ADR_O[1:0]) );
+            end else begin
+               wire       hQQ1;
+               bn_l4 #(.I(16'haa3f)) l_hQQ1( .o(hQQ1),  .i3(s_cyclecnt[1]), .i2(ctrl_pcinc_by_2),.i1(pcinc_by_2), .i0(ADR_O[1]) );
+               bn_l4 #(.I(16'hcaca)) c_qq_1( .o(QQ[1]), .i3(1'b0),          .i2(s_cyclecnt[0]),  .i1(rccnt[1]),   .i0(hQQ1    ) );
+               bn_l4 #(.I(16'hcacf)) c_qq_0( .o(QQ[0]), .i3(s_cyclecnt[1]), .i2(s_cyclecnt[0]),  .i1(rccnt[0]),   .i0(ADR_O[0]) );
+            end
             bn_l4 #(.I(16'hcaca)) c_qq_62 [4:0] (.o(QQ[6:2]), .i3(1'b0), .i2(s_cyclecnt[0]), .i1(rccnt[6:2]), .i0(ADR_O[6:2]) );
             assign dbg_rccnt = rccnt;
             
