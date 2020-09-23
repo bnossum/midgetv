@@ -491,7 +491,7 @@ module m_progressctrl
    endfunction
 `endif
  
-   assign m_progressctrl_killwarnings = &B[31:2] | sram_ack | clrregs | isDIVREM | clrM | ceM | alu_carryout | &Di[15:2];
+   assign m_progressctrl_killwarnings = &B[31:2] | sram_ack | clrregs | isDIVREM | clrM | ceM | alu_carryout | &Di[17:0];
 endmodule
 
 

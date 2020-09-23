@@ -118,8 +118,13 @@ module m_cyclecnt
    generate
       
       if ( HIGHLEVEL ) begin
+         /* At a certain stage I had to put synthesis attributes on cmbrcriun and rcrun, I do not recall why.
+          * Anyway, Sept 2020, Synplify pro used to many SB_GB resources, Removing the attributes helped. Why?
+          * Probably because the SB_GB resources were eaten as I had used a very high fanout limit.
+          * Changing the limit to 100 solved the issue
+          */
          wire cmbrcrun /* synthesis syn_keep=1 */;
-         reg  rcrun /* synthesis syn_keep=1 */;
+         reg  rcrun /* synt  hesis syn_keep=1 */;
          wire final_pcinc_by_2 = pcinc_by_2 & ctrl_pcinc_by_2;
          
          if ( NO_CYCLECNT == 1 ) begin

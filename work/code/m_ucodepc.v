@@ -110,7 +110,8 @@ module m_ucodepc
       if ( RVC == 0 ) begin
          assign usedinx     = sa28;
          assign Adr0Mustbe0 = sa29;
-         assign Adr1Mustbe0 = sa30;         
+         assign Adr1Mustbe0 = sa30;
+         assign RVC_or_aligned = 1'b0; // Prevent warning in Synplify Pro
       end else begin
          assign RVC_or_aligned = ~pc1 | was_rvc_instr; 
          assign usedinx     = sa28 & RVC_or_aligned;
