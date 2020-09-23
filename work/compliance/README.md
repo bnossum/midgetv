@@ -4,15 +4,13 @@ First an explanation. I doubt the people behind
 https://github.com/riscv/riscv-compliance would be very happy if I
 merged `midgetv` compliance into their project. I could not guarantee
 to maintain it, and `midgetv` would only be annoying.
-
 But I still want to use the good work of riscv-compliance, and
-(obviously) be able to run the compliance tests on `midgetv`. This
-challenges the very limits of my understanding of Makefiles.
+(obviously) be able to run the compliance tests on `midgetv`. 
 
 In the following I assume `midgetv` has been compiled for
-`icebreaker`, see [here](../../hwtst/icebreaker). The program included
+`icebreaker`, see [here](../hwtst/icebreaker). The program included
 with the processor should be
-[mb](../../sw/hwexamples/midgetv_blast/mb.S) (`mb.S` is an usart
+[mb](..//sw/hwexamples/midgetv_blast/mb.S) (`mb.S` is an usart
 loader program that allow upload and execution of a program on `midgetv`).
 
 
