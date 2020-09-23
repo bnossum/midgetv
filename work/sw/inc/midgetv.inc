@@ -87,7 +87,8 @@ __mepc:         .word 0                 // 0xb4 10110100  0x2d For exception han
 __mcause:       .word 0                 // 0xb8 10111000  0x2e For exception handling
 __mtval:        .word 0                 // 0xbc 10111100  0x2f For exception handling
 __mscratch:     .word 0                 // 0xc0 Used by CSR code
-__misa:         .word 0x40800100        // 0xc4 Used by CSR code. RV32I base ISA, nonstd. ext. present, XLEN = 32.
+//__misa:       .word 0x40800100        // 0xc4 Used by CSR code. RV32I base ISA, nonstd. ext. present, XLEN = 32.
+__misa:         .word 0x40800105        // 0xc4 Used by CSR code. RV32I base ISA, nonstd. ext. present, XLEN = 32. RVC implemented
 _ex_dup_x0:     .word 0 		// 0xc8 | Used by CSR emulation. These
 _ex_rCSRadr:    .word 1 		// 0xcc | locations must be consequtive
 _ex_rCSRty:     .word 2 		// 0xd0 | 
@@ -104,7 +105,7 @@ __mtimecmp:     .word 0xffffffff	// 0xf8 Read/write from user code.
 __mtimecmph:    .word 0xffffffff	// 0xfc Read/write from user code. 
         .org 0x100  			//
 CSRretadr:      .word 0			//0x100 Microcode writes PC to CSRretadr when a CSR instruction is seen.
-Entry_xRET:     ij      0,0xb6,0        //0x104 Microcode branches to here when MRET/SRET/URET is seen
+Entry_xRET:     ij      0,0xb4,0        //0x104 Microcode branches to here when MRET/SRET/URET is seen
 EntryCSR:                               //0x108 Microcode branches to here when a CSR instruction is seen
 
 

@@ -79,14 +79,14 @@
         // Translate riscv CSR address to midgetv address 
         // for those few CSR registers this code defines.
         // We want:
-        // CSR adr  midgetv adr
-	// 0x301    0xc4 
-	// 0x305    0xa4 
-	// 0x340    0xc0 
-	// 0x341    0xb4 
-	// 0x342    0xb8 
-	// 0x343    0xbc 
-        // other    detect this case
+        // CSR name CSR adr  midgetv adr
+	// misa     0x301    0xc4 
+	// mtvec    0x305    0xa4 
+	// mscratch 0x340    0xc0 
+	// mepc     0x341    0xb4 
+	// mcause   0x342    0xb8 
+	// mtval    0x343    0xbc 
+        // other             detect this case
         //
         li      rtmp,4
         addi    rCSRadr,rCSRadr,-0x301

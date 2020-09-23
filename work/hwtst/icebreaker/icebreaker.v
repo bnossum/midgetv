@@ -44,13 +44,13 @@
 
 module top
   # ( parameter
-      SRAMADRWIDTH       = 17,
-      FORCEEBRADRWIDTH   = 11, 
+      SRAMADRWIDTH       = 16,
+      FORCEEBRADRWIDTH   = 9, 
       IWIDTH             = 32, 
       NO_CYCLECNT        = 0, 
       MTIMETAP           = 0,//16, 
       HIGHLEVEL          = 0,
-      LAZY_DECODE        = 1,
+      LAZY_DECODE        = 0,
       DISREGARD_WB4_3_55 = 0
       )
    (

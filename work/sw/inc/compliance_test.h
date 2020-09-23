@@ -2,11 +2,12 @@
 #define _COMPLIANCE_TEST_H
 
 #define RV_COMPLIANCE_HALT\
-        j midgetv_dump_compliance
-        
+        j midgetv_dump_compliance;
+
 #define RV_COMPLIANCE_RV32M       
 #define RV_COMPLIANCE_CODE_BEGIN                \
-        _midgetstart:
+        .global _midgetstart;                   \
+	_midgetstart:;
 
 #define RV_COMPLIANCE_CODE_END    
 
