@@ -176,7 +176,7 @@ module m_RVC # ( parameter RVC = 1)
          wire [15:0] uhw = (pc1 | luh) ? Di[15:0]  : Di[31:16];
 //         wire [15:0] uhw = (luh) ? Di[15:0]  : Di[31:16]; Probably all we need
 
-         always @(/*AS*/luh or pc1) begin
+         always @(/*AS*/Di or luh or pc1) begin
             isvalid_instrlow  = ~luh;
             isvalid_instrhigh = luh | ~pc1 | (Di[17:16] != 2'b11);
          end

@@ -459,7 +459,6 @@ module m_midgetv_core
    
    /* verilator lint_off UNUSED */
    wire                 m_immexp_zfind_q_killwarnings;// From inst_immexp_zfind_q of m_immexp_zfind_q.v
-   wire                 m_inputmux_killwarnings;// From inst_inputmux of m_inputmux.v
    wire                 m_progressctrl_killwarnings;// From inst_progressctrl of m_progressctrl.v
    wire                 m_rai_killwarning;      // From inst_rai of m_rai.v
    wire                 m_ram_killwarnings;     // From inst_ram of m_ram.v
@@ -467,6 +466,7 @@ module m_midgetv_core
    wire                 m_wai_killwarning;      // From inst_wai of m_wai.v
    wire                 ucode_killwarnings;     // From inst_ucode of m_ucode.v
    wire                 ucodepc_killwarnings;   // From inst_ucodepc of m_ucodepc.v
+   wire                 m_mimux_killwarnings;   // From inst_mimux of m_mimux.v
    wire                 buserror;               // From inst_cyclecnt of m_cyclecnt.v
    wire [6:0]           dbg_rccnt;              // From inst_cyclecnt of m_cyclecnt.v
 `ifdef verilator
@@ -756,6 +756,7 @@ module m_midgetv_core
      (/*AUTOINST*/
       // Outputs
       .Di                               (Di[31:0]),
+      .m_mimux_killwarnings             (m_mimux_killwarnings),
       // Inputs
       .clk                              (clk),
       .sra_msb                          (sra_msb),
