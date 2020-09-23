@@ -410,8 +410,7 @@
 #define _Fetch    Fetch ,  " Fr00  Read and latch instruction",                     isr_none     | A_passq   | Wjj   | rttime    | Qz   | sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR. Write copy of PC to jj
 #define _Fetch2   Fetch2,  " Fr00  Upd ttime, I. Q=imm Use dinx unless unaligned ", isr_none     | A_cycnt   | Wttime| RS1       | Qudec| sr_h  | use_dinx       | n(unalignd)  // [5] Must be at even ucode adr. At unaligned 32-bit instr goto unalignd, else done.
 #define _eFetch   eFetch,  " Fr00  rep Read until d=mem[(rs1+ofs) & ~3u]",          isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [4]] Must be at address after [3]. Fetch from SRAM
-#define _unalignd unalignd," Fr00  Unaligned pc, prep read high hword",             isr_none     | A_passq   | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(straddle)  // For unaligned 32-bit instr
-
+#define _unalignd unalignd," Fr00u Unaligned pc, prep read high hword",             isr_none     | A_passq   | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(straddle)  // For unaligned 32-bit instr
 #define _straddle straddle," Fr00u IncPC, OpFetch",                                 nxtSTB       | A_add2or4 | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetchu  )  // [1] Must be at even ucode adr. Goes to either Fetchu or eFetchu. 
 #define _Fetchu   Fetchu , " Fr00u Read and latch instruction",                     isr_none     | A_passq   | Wnn   | rttime    | Qz   | sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR. Write copy of PC to yy
 #define _eFetchu  eFetchu, " Fr00u rep Read until d=mem[(rs1+ofs) & ~3u]",          isr_none     | A_passq   | Wnn   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [4]] Must be at address after [3]. Fetch from SRAM
@@ -422,24 +421,51 @@
 #endif
 
 #elif ucodeopt_HAS_MINSTRET == 1 && ucodeopt_HAS_EBR_MINSTRET == 0
-not currently valid, no RVC
+
+#if ucodeopt_RVC == 0
 #define _StdIncPc StdIncPc," Fr10  IncPC, OpFetch",                                 nxtSTB       | A_add4    | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch)     // [1] Must be at even ucode adr. Goes to either Fetch or eFetch. 
 #define _Fetch    Fetch ,  " Fr10  Read and latch instruction",                     isr_none     | A_passd   | Wnn   | rttime    | Qz   | sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR
 #define _Fetch2   Fetch2,  " Fr10  Update ttime. Update I. Q=immediate. Use dinx",  isr_none     | A_cycnt   | Wttime| RS1       | Qudec| sr_h  | use_dinx                      // [5] Must be at even ucode adr. 
 #define _eFetch   eFetch,  " Fr10  rep Read until d=mem[(rs1+ofs) & ~3u]",          isr_none     | A_passd   | Wnn   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(eFetch2 )  // [4]] Must be at address after [3]
 #define _eFetch2  eFetch2, " Fr10  Update ttime",                                   isr_none     | A_cycnt   | Wttime| Rrinst    | Qz   | sr_h  | u_cont         | n(eFetch3 )
 #define _eFetch3  eFetch3, " Fr10  Update minstret, Q=immediate. Use dinx",         isr_none     | A_add1    | Wrinst| RS1       | Qudec| sr_h  | use_dinx
+#else
+#define _StdIncPc StdIncPc," Fr10  IncPC, OpFetch",                                 nxtSTB       | A_add2or4 | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch)     // [1] Must be at even ucode adr. Goes to either Fetch or eFetch. 
+#define _Fetch    Fetch ,  " Fr10  Read and latch instruction",                     isr_none     | A_passq   | Wjj   | rttime    | Qz   | sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR
+#define _Fetch2   Fetch2,  " Fr10  Update ttime. Update I. Q=immediate. Use dinx",  isr_none     | A_cycnt   | Wttime| RS1       | Qudec| sr_h  | use_dinx       | n(unalignd)  // [5] Must be at even ucode adr. At unaligned 32-bit instr goto unalignd, else done
+#define _eFetch   eFetch,  " Fr10  rep Read until d=mem[(rs1+ofs) & ~3u]",          isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(eFetch2 )  // [4]] Must be at address after [3]
+#define _eFetch2  eFetch2, " Fr10  Update ttime",                                   isr_none     | A_cycnt   | Wttime| Rrinst    | Qz   | sr_h  | u_cont         | n(eFetch3 )
+#define _eFetch3  eFetch3, " Fr10  Update minstret, Q=immediate. Use dinx",         isr_none     | A_add1    | Wrinst| RS1       | Qudec| sr_h  | use_dinx       | n(unalignd)  //  At unaligned 32-bit instr goto unalignd, else done
+
+#define _unalignd unalignd," Fr10u Unaligned pc, prep read high hword",             isr_none     | A_passq   | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(straddle)  // For unaligned 32-bit instr
+#define _straddle straddle," Fr10u IncPC, OpFetch",                                 nxtSTB       | A_add2or4 | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetchu  )  // [1] Must be at even ucode adr. Goes to either Fetchu or eFetchu. 
+#define _Fetchu   Fetchu , " Fr10u Read and latch instruction",                     isr_none     | A_passq   | Wnn   | rttime    | Qz   | sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR. Write copy of PC to yy
+#define _eFetchu  eFetchu, " Fr10u rep Read until d=mem[(rs1+ofs) & ~3u]",          isr_none     | A_passq   | Wnn   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [4]] Must be at address after [3]. Fetch from SRAM
+#endif
 
 #elif ucodeopt_HAS_MINSTRET == 1 && ucodeopt_HAS_EBR_MINSTRET == 1
-not currently valid, no RVC
+
+#if ucodeopt_RVC == 0
 #define _StdIncPc StdIncPc," Fr11  IncPC, OpFetch",                                 nxtSTB       | A_add4    | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch   )  // [1] Must be at even ucode adr. Goes to either Fetch or eFetch. 
-#define _Fetch    Fetch ,  " Fr11  Read and latch instruction",                     isr_none     | A_passd   | Wnn   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR
+#define _Fetch    Fetch ,  " Fr11  Read and latch instruction",                     isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR
 #define _Fetch2   Fetch2,  " Fr11  Update ttime. Update I. Q=immediate. Use dinx",  isr_none     | A_cycnt   | Wttime| Rrinst    | Qz   | sr_h  | u_cont         | n(eFetch3 )  // [5] Must be at even ucode adr. 
-#define _eFetch   eFetch,  " Fr11  rep Read until d=mem[(rs1+ofs) & ~3u]",          isr_none     | A_passd   | Wnn   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [4]] Must be at address after [3]. Fetch from SRAM
-#define _unalignd unalignd," Fr11  Unaligned pc, prep read high hword",             isr_none     | A_xx      | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  // For unaligned 32-bit instr
-#define _eFetch3  eFetch3, " Fr11  Write minstret. Update I. Q=immediate, use dinx",isr_none     | A_add1    | Wrinst| RS1       | Qudec| sr_h  | use_dinx       | n(unalignd)  // At unaligned 32-bit instr, goto unalignd, else done.
-#define _eFetch2 _unalignd
-// Work. Ensure Wrinst only have effect when address is aligned or a RVC is seen
+#define _eFetch   eFetch,  " Fr11  rep Read until d=mem[(rs1+ofs) & ~3u]",          isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [4]] Must be at address after [3]. Fetch from SRAM
+#define _eFetch2  eFetch2, " Fr11  Not in use",                                     unx
+#define _eFetch3  eFetch3, " Fr11  Write minstret. Update I. Q=immediate, use dinx",isr_none     | A_add1    | Wrinst| RS1       | Qudec| sr_h  | use_dinx
+#else
+#define _StdIncPc StdIncPc," Fr11  IncPC, OpFetch",                                 nxtSTB       | A_add2or4 | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch   )  // [1] Must be at even ucode adr. Goes to either Fetch or eFetch. 
+#define _Fetch    Fetch ,  " Fr11  Read and latch instruction",                     isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR
+#define _Fetch2   Fetch2,  " Fr11  Update ttime. Update I. Q=immediate. Use dinx",  isr_none     | A_cycnt   | Wttime| Rrinst    | Qz   | sr_h  | u_cont         | n(eFetch3 )  // [5] Must be at even ucode adr. 
+#define _eFetch   eFetch,  " Fr11  rep Read until d=mem[(rs1+ofs) & ~3u]",          isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [4]] Must be at address after [3]. Fetch from SRAM
+#define _eFetch2  _Fetch2u // Reused
+#define _Fetch2u  Fetch2u, " Fr11  Update ttime. Update I. Q=immediate. Use dinx",  isr_none     | A_cycnt   | Wttime| RS1       | Qudec| sr_h  | use_dinx                      //  
+#define _eFetch3  eFetch3, " Fr11  Write minstret. Update I. Q=immediate, use dinx",isr_none     | A_add1    | Wrinst| RS1       | Qudec| sr_h  | use_dinx       | n(unalignd)  // At unaligned 32-bit instr goto unalignd, else done
+
+#define _unalignd unalignd," Fr10u Unaligned pc, prep read high hword",             isr_none     | A_passq   | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(straddle)  // For unaligned 32-bit instr
+#define _straddle straddle," Fr10u IncPC, OpFetch",                                 nxtSTB       | A_add2or4 | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetchu  )  // [1] Must be at even ucode adr. Goes to either Fetchu or eFetchu. 
+#define _Fetchu   Fetchu , " Fr10u Read and latch instruction",                     isr_none     | A_passq   | Wnn   | rttime    | Qz   | sr_h  | u_io_i_latch   | n(Fetch2u )  // [3] Must be at even ucode adr. Fetch from EBR. Write copy of PC to yy
+#define _eFetchu  eFetchu, " Fr10u rep Read until d=mem[(rs1+ofs) & ~3u]",          isr_none     | A_passq   | Wnn   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2u )  // [4]] Must be at address after [3]. Fetch from SRAM
+#endif
 
 #else
 #error Que?
@@ -545,8 +571,8 @@ not currently valid, no RVC
 #define _BAERR_4  BAERR_4, "       Store 0 to mcause. Prep get trap entry pont",    isr_intoTrap | A_passd   | Wmcaus| rmtvec    | Qx   | sr_h  | u_cont         | n(JAL_3)   
 //efine _JAL_3    JAL_3,   "       PC = trap entry point. OpFetch",                 
 #else
-#define _BrOpFet  BrOpFet ,"      not used",                                        unx
-#define _BAlignEr BAlignEr,"      not used",                                        unx
+#define _BrOpFet  _unalignd // Reused
+#define _BAlignEr _straddle // Reused
 #define _BAERR_1  BAERR_1, "      not used",                                        unx
 #define _BAERR_2  _Fetchu   // Reused   | These two must be consequtive
 #define _BAERR_3  _eFetchu  // Reused   |
