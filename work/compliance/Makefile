@@ -13,10 +13,8 @@ comma:= ,
 space:= $(empty) $(empty)
 
 export RISCV_COMPLIANCE_ROOTDIR ?= ../../../riscv-compliance
-
 export RISCV_TARGET       ?= midgetv
 export RISCV_DEVICE       ?= rv32i
-#export RISCV_PREFIX       ?= riscv64-unknown-elf-
 export RISCV_PREFIX       ?= riscv32-unknown-elf-
 export RISCV_TARGET_FLAGS ?=
 export RISCV_ASSERT       ?= 0
@@ -100,7 +98,6 @@ clean:
 
 help:
 	@echo "eg, make"
-	@echo "BN: This help not updated"
 	@echo "RISCV_TARGET='riscvOVPsim|spike'"
 	@echo "RISCV_TARGET_FLAGS="
 	@echo "RISCV_DEVICE='rv32i|rv32im|...'"
