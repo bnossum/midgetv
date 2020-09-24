@@ -2,8 +2,8 @@
 #include "Vm_cyclecnt.h"
 #include "verilated.h"
 
-#define NO_CYCLECNT 1  // *Must* match definition in m_cyclecnt.v
-#define ucodeopt_RVC 1 // *Must* match definition in m_cyclecnt.v
+#define NO_CYCLECNT 0  // *Must* match definition in m_cyclecnt.v
+#define RVC         0  // *Must* match definition in m_cyclecnt.v
 
 /////////////////////////////////////////////////////////////////////////////
 void sim_with_no_cyclecnt( void ) {
@@ -34,7 +34,7 @@ void sim_with_no_cyclecnt( void ) {
         tb->eval();
         assert( tb->corerunning == 0 );
 
-        for ( pcinc_by_2 = 0; pcinc_by_2 <= ucodeopt_RVC; pcinc_by_2++ ) {
+        for ( pcinc_by_2 = 0; pcinc_by_2 <= RVC; pcinc_by_2++ ) {
                 for ( s_cyclecnt = 0; s_cyclecnt < 4; s_cyclecnt++) {
                         tb->s_cyclecnt = s_cyclecnt;
                         tb->pcinc_by_2  = pcinc_by_2;

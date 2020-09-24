@@ -85,7 +85,7 @@ module m_alu_carryin  # ( parameter HIGHLEVEL = 1, MULDIV = 1 )
          if ( MULDIV != 0 ) begin
                         
             wire [1:0] mod_s_alu_carryin;
-            wire       mod_raluF;
+            wire       mod_raluF; 
             assign mod_s_alu_carryin = (mod_s_alu_1 ^ s_alu_1) ? 2'b00 : s_alu_carryin;
             assign mod_raluF  = s_alu_carryin[1] ? muldivregmsb : raluF;
             

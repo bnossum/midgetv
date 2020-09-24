@@ -38,6 +38,7 @@
 `include "../../code/m_ucodepc.v"
 `include "../../code/m_progressctrl.v"
 `include "../../code/m_shlr.v"
+`include "../../code/m_RVC.v"
 `include "../../code/m_midgetv_core.v"
 
 `include "../div/m_digilent.v"

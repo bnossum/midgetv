@@ -47,6 +47,7 @@ be reasonable well debugged, so others can use it.
     also on ICE40UP5K using a `UPDuino2` board, 
 
 ### Future plans, in order of priority
+ - Consolidate. Increase coverage on module tests in directory /tst.
  - Production of a monolithic source file to ease integration of `midgetv` into projects.
  - Restructure the directory-tree - it is way to complex now.
  - Test on external interrupts, no work has been done here for a long time.

@@ -308,7 +308,7 @@ int main( void ) {
                  if ( a == 'L' ) {
                          len = xmodemReceive(loadadr);
                          near_getchar_TO(to10s); // Use as a delay
-                         SYSEBR->freefornow_e8 = len;
+                         //SYSEBR->freefornow_e8 = len;
                          if ( len > 0 ) {
                                  near_puts( "Received 0x" );
                          } else {

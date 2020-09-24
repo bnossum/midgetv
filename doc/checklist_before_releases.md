@@ -14,13 +14,13 @@ This note is a checklist of things I should do before packaging a new release.
      Regenerate simulation tools and test a number of modules
  6.  `cd work/sw/first; make; less ../../obj_dir/results.txt`
      Regenerate basic instruction tests, visual inspection of result
- 7. `cd work/sw/compliance;`
-     In each of `rv32i`,`rv32Zifencei`, `rv32Zicsr`, `rv32im` do
+ 7. `cd work/sw/simcompliance;`
+     In each of `rv32i`,`rv32Zifencei`, `rv32Zicsr`, `rv32im`, `rv32imc` do
      `make; ./runall; ./compareall | less`
      Regenerate conformance tests, visual inspection of result.
  8. `cd work/sw/hwexamples/midgetv_blast; make`
      Build `ice40loaderprog.hv` of "blast-code" for platforms
-     `max_iceblink40-hx1k` and `max_upduino2` and more
+     `iceblinker` and more
  9.  `cd work/hwtst/max_iceblink40-hx1k`
      Build `hardware.bin` and upload to `iceblink40-hx1k` board.
  10. `cd work/hwtst/max_upduino2`
@@ -35,7 +35,7 @@ This note is a checklist of things I should do before packaging a new release.
      Upload dynamic blinky program to `upduino2` board    
  15. `sudo ../bin/iceblinkcom < dynblinky.bin`
      Upload dynamic blinky program to `iceblink40-hx1k` board    
- 16. Go to riscv-complience project. Run compliance test on `icebreaker`-board
+ 16. `cd work/compliance`. Run compliance test on `icebreaker`-board
 
  
 When all of this is done without any failures, a new release will
