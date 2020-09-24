@@ -61,9 +61,9 @@ module m_progressctrl
     output       cond_holdq, //     During divide.
 
     output       pcinc_by_2, //      True only when updating PC after a RVC instruction or in an unaligned 32-bit instruction
-    output reg   pc1, //             Mirror of pc[1] used when RVC instructions implemented
-    output reg   was_rvc_instr, //   To correctly chose ucodepc
-    output reg   luh, //             Load upper halfword of instruction
+    output       pc1, //             Mirror of pc[1] used when RVC instructions implemented
+    output       was_rvc_instr, //   To correctly chose ucodepc
+    output       luh, //             Load upper halfword of instruction
     
     output       m_progressctrl_killwarnings // Dummy
    );
@@ -73,12 +73,14 @@ module m_progressctrl
    localparam stb_HIGHLEVEL    = HIGHLEVEL | 1; //  
    localparam we_HIGHLEVEL     = HIGHLEVEL | 1; //  229  230     -1 Note, if ACK_I = STB_O, Lattice simplifies, this give no good estimate on size
    //                                                               I still don't understand where synthesis can save a LUT.
-   localparam enaQ_HIGHLEVEL   = HIGHLEVEL | 0; //  363  361     2   when SRAMADRWIDTH != 0 NO_CYCLECNT = 0
+//Work on enaQ_HIGHLEVEL == 0   
+   localparam enaQ_HIGHLEVEL   = HIGHLEVEL | 1; //  363  361     2   when SRAMADRWIDTH != 0 NO_CYCLECNT = 0
    //                                               227  228     0   when SRAMADRWIDTH == 0 NO_CYCLECNT = 0
    //                                                    
    localparam iwe_HIGHLEVEL    = HIGHLEVEL | 0; //  361  361     0
    localparam qACK_HIGHLEVEL   = HIGHLEVEL | 0; //  229  229     0  when DISREGARD_WB4_3_55 == 1. 
    //                                           //  231  231     0  when DISREGARD_WB4_3_55 == 0. 
+   localparam RVC_HIGHLEVEL    = HIGHLEVEL | 0;
    
    /* during write to registers in output devices, 
     * writes to SRAM,  EBR, we need byte selects. 
@@ -440,42 +442,101 @@ module m_progressctrl
    generate
       if ( RVC == 0 ) begin
          assign pcinc_by_2 = 1'b0;
-         always @(*) begin
-            pc1 = 1'b0;
-            was_rvc_instr = 1'b0;
-            luh = 1'b0;
-         end
+         assign pc1 = 1'b0;
+         assign was_rvc_instr = 1'b0;
+         assign luh = 1'b0;
       end else begin
-         wire          potential_rvc_instr = pc1 ? Di[17:16] != 3 : Di[1:0] != 3;
-         /* To correctly decode the RVC (and unaligned 32-bit wide instructions) we need access to pc[1] in
-          * a cycle where it is not normally available. It is mirrored to pc1.
-          */
-         always @(posedge clk) begin
-            if ( {sa27,sa26,sa25,sa24} == 4'b1010 ) begin// Wpc
-               pc1 <= B[1];
-            end
-         end
-         
-         /* When RVC instructions are implemented, PC must be incremented by 2 rather than 4 when a
-          * RVC instruction was seen. An RVC instruction is seen when the two lsb != 3 and the instruction
-          * is latched (sa12==1).
-          * PC will also be incremented with 2 when we have an unaligned 32-bit instruction. Because
-          * an unaligned 32-bit instruction is followed by either a 16-bit instruction, or yet another
-          * unaligned 32-bit instruction, we have was_rvc_instr <= potential_rvc_instr | luh, hece
-          * was_rvc_instr is a misnomer.
-          */
-         always @(posedge clk)
-           if (sa12 & progress_ucode)
-             was_rvc_instr <= potential_rvc_instr | luh;
-         assign pcinc_by_2 = was_rvc_instr | pc1;
-         
-         /* When pc is incremented from ...10 to ...00, and we did not see a rvc instruction,
-          * we need to load the upper half word of an unaligned 32-bit instruction
-          */
-         always @(posedge clk)
-           if (sa12 & progress_ucode)
-             luh <= pc1 & ~potential_rvc_instr;
 
+         if ( RVC_HIGHLEVEL ) begin
+            
+            wire potential_rvc_instr = pc1 ? Di[17:16] != 3 : Di[1:0] != 3;
+            /* To correctly decode the RVC (and unaligned 32-bit wide instructions) we need access to pc[1] in
+             * a cycle where it is not normally available. It is mirrored to pc1.
+             */
+            reg  reg_pc1;
+            always @(posedge clk) begin
+               if ( {sa27,sa26,sa25,sa24} == 4'b1010 ) begin// Wpc
+                  reg_pc1 <= B[1];
+               end
+            end
+            assign pc1 = reg_pc1;
+            
+            /* When RVC instructions are implemented, PC must be incremented by 2 rather than 4 when a
+             * RVC instruction was seen. An RVC instruction is seen when the two lsb != 3 and the instruction
+             * is latched (sa12==1).
+             * PC will also be incremented with 2 when we have an unaligned 32-bit instruction. Because
+             * an unaligned 32-bit instruction is followed by either a 16-bit instruction, or yet another
+             * unaligned 32-bit instruction, we have was_rvc_instr <= potential_rvc_instr | luh, hece
+             * was_rvc_instr is a misnomer.
+             */
+            reg reg_was_rvc_instr;
+            always @(posedge clk)
+              if (sa12 & progress_ucode)
+                reg_was_rvc_instr <= potential_rvc_instr | luh;
+            assign was_rvc_instr = reg_was_rvc_instr;
+            assign pcinc_by_2 = was_rvc_instr | pc1;
+            
+            /* When pc is incremented from ...10 to ...00, and we did not see a rvc instruction,
+             * we need to load the upper half word of an unaligned 32-bit instruction
+             */
+            reg reg_luh;
+            always @(posedge clk)
+              if (sa12 & progress_ucode)
+                reg_luh <= pc1 & ~potential_rvc_instr;
+            assign luh = reg_luh;
+
+         end else begin
+            /*
+             *
+             *           ___                           ___              
+             *  sa24 ---|I0 |              pc1 -------|I0 | cmb_pc1  __          
+             *  sa25 ---|I1 |-- upd_pc1    B[1] ------|I1 |---------|  |-- pc1
+             *  sa26 ---|I2 |              upd_pc1 ---|I2 |         >__|
+             *  sa27 ---|I3_|                      ---|I3_|             
+             *                     
+             *                        ___
+             * Di[0] ----------------|I0 |
+             * Di[1] ----------------|I1 |----------- potential_rvc_instr
+             * pc1 ------------------|I2 |
+             *                   +---|I3_|
+             *                  /y\   ___
+             * pc1 -------------(((--|I0 |
+             *          Di[16] -((+--|I1 |----------- pcinc_by_2
+             *          Di[17] -+(---|I2 |
+             * was_rvc_instr ----(---|I3_|
+             *                   0
+             *                        ___
+             * potential_rvc_instr --|I0 |
+             * luh  -----------------|I1 | lwas_rvc_instr __         
+             * was_rvc_instr --------|I2 |---------------|  |-- was_rvc_instr
+             * sa12 -----------------|I3_|               >  |        
+             * progress_ucode ---------------------------E__|        
+             *
+             *                        ___
+             * potential_rvc_instr --|I0 |
+             * pc1  -----------------|I1 | lluh           __         
+             * luh ------------------|I2 |---------------|  |-- luh  
+             * sa12 -----------------|I3_|               >  |        
+             * progress_ucode ---------------------------E__|        
+             */
+            wire lwas_rvc_instr,lluh;
+            wire Di17and16,upd_pc1,cmb_pc1;
+            wire potential_rvc_instr;
+            
+            bn_l4v #(.I(16'h0400)) lupd_pc1(.o(upd_pc1),.i({sa27,sa26,sa25,sa24}));
+            bn_l4v #(.I(16'hcaca)) lcmb_pc1(.o(cmb_pc1),.i({1'b0,upd_pc1,B[1],pc1}));
+            SB_DFF regpc1( .Q(pc1), .C(clk), .D(cmb_pc1));
+
+            bn_lcy4v_b #(.I(16'hffaa)) lpcinc_by_2(.o(pcinc_by_2),.co(Di17and16), .ci(1'b0), .i({was_rvc_instr,Di[17:16],pc1}));
+            bn_l4v #(.I(16'h07f7)) lpotential_rvc_instr(.o(potential_rvc_instr),.i({Di17and16,pc1,Di[1:0]}));
+
+            bn_l4v #(.I(16'heef0)) llwas_rvc_instr(.o(lwas_rvc_instr),.i({sa12,was_rvc_instr,luh,potential_rvc_instr}));
+            SB_DFFE regwas_rvc_instr( .Q(was_rvc_instr),.C(clk),.E(progress_ucode),.D(lwas_rvc_instr));
+            
+            bn_l4v #(.I(16'h44f0)) llluh(.o(lluh),.i({sa12,luh,pc1,potential_rvc_instr}));
+            SB_DFFE regluh( .Q(luh),.C(clk),.E(progress_ucode),.D(lluh));
+            
+         end
       end
    endgenerate
 

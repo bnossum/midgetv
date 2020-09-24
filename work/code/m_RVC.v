@@ -139,15 +139,15 @@ c[11:7]==5'h2 (rs1eq2)
  pc1 luh
  0    0    Di[31:0] is word aligned. If Di[1:0] != 3, Dii[31:0] is the instruction expanded from Di[15:0].
            If Di[1:0] == 3, Dii[31:0] is  Di[31:0], the incoming normal 32-bit instruction.
-           isvalid_instrhigh = 1, isvalid_instrlow = 1
+           is_valid_instrhigh = 1, is_valid_instrlow = 1
  1    0    Di[31:0] is not word aligned. If Di[17:16] != 3, Dii[31:0] is the instruction expanded from Di[31:16]
-           isvalid_instrhigh = 1, isvalid_instrlow = 1
+           is_valid_instrhigh = 1, is_valid_instrlow = 1
            If Di[17:16] == 3, Dii[15:0] is Di[31:16], the lower hword of the normal 32-bit instruction. Dii[31:16] 
            is not valid.
-           isvalid_instrhigh = 0, isvalid_instrlow = 1
+           is_valid_instrhigh = 0, is_valid_instrlow = 1
  x    1    Di[31:0] is not word aligned and we are to get the upper hword of the normal 32-bit instruction. 
            Here Dii[15:0] is not valid. Dii[31:16] is Di[15:0], the upper howrd of the normal 32-bit instruction.
-           isvalid_instrhigh = 1, isvalid_instrlow = 0
+           is_valid_instrhigh = 1, is_valid_instrlow = 0
  */
 module m_RVC # ( parameter RVC = 1) 
    (
@@ -155,18 +155,19 @@ module m_RVC # ( parameter RVC = 1)
     /* verilator lint_off UNUSED */
     input             pc1, // Bit 1 of pc for alignment
     input             luh, // Load upper halfword
+    input             sa12, // Anticipating size optimalisation, we bring in this signal that is an overall "is_valid_instr" signal
     /* verilator lint_on UNUSED */
     output reg [31:0] Dii, //  Expanded result
-    output reg        isvalid_instrlow,
-    output reg        isvalid_instrhigh
+    output reg        is_valid_instrlow,
+    output reg        is_valid_instrhigh
     );
    
    generate
       if ( RVC == 0 ) begin
          always @(/*AS*/Di) begin
             Dii = Di;
-            isvalid_instrlow = 1'b1;
-            isvalid_instrhigh = 1'b1;
+            is_valid_instrlow  = sa12;
+            is_valid_instrhigh = sa12;
          end
       end else begin
          /*verilator lint_off UNUSED */
@@ -177,8 +178,8 @@ module m_RVC # ( parameter RVC = 1)
 //         wire [15:0] uhw = (luh) ? Di[15:0]  : Di[31:16]; Probably all we need
 
          always @(/*AS*/Di or luh or pc1) begin
-            isvalid_instrlow  = ~luh;
-            isvalid_instrhigh = luh | ~pc1 | (Di[17:16] != 2'b11);
+            is_valid_instrlow  = sa12 & ~luh;
+            is_valid_instrhigh = sa12 & (luh | ~pc1 | (Di[17:16] != 2'b11));
          end
          
          wire [4:0]  inx = {c[1:0],c[15:13]};

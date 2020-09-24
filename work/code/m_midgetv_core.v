@@ -504,8 +504,8 @@ module m_midgetv_core
    wire                 ctrlreg_we;             // From inst_progressctrl of m_progressctrl.v
    wire                 enaQ;                   // From inst_progressctrl of m_progressctrl.v
    wire                 is_brcond;              // From inst_condcode of m_condcode.v
-   wire                 isvalid_instrhigh;      // From inst_RVC of m_RVC.v
-   wire                 isvalid_instrlow;       // From inst_RVC of m_RVC.v
+   wire                 is_valid_instrhigh;     // From inst_RVC of m_RVC.v
+   wire                 is_valid_instrlow;      // From inst_RVC of m_RVC.v
    wire                 iwe;                    // From inst_progressctrl of m_progressctrl.v
    wire                 lastshift;              // From inst_shiftcounter of m_shiftcounter.v
    wire                 luh;                    // From inst_progressctrl of m_progressctrl.v
@@ -788,7 +788,10 @@ module m_midgetv_core
       .STB_O                            (STB_O),
       .ADR_O                            (ADR_O[31:0]));
 
-   m_alu_carryin #(.HIGHLEVEL(xHIGHLEVEL), .MULDIV(MULDIV))
+   wire                 mod_s_alu_1;
+   assign mod_s_alu_1 = (s_alu == 3'b100 && clrM == 1'b0) ? ~MULDIVREG[0] : s_alu[1];
+   
+   m_alu_carryin #(.HIGHLEVEL(HIGHLEVEL), .MULDIV(MULDIV))
    inst_alu_carryin
      (// Inputs
       .ADR_O_31                         (ADR_O[31]),
@@ -808,9 +811,6 @@ module m_midgetv_core
       .mod_s_alu_1                      (mod_s_alu_1),
       .s_alu_carryin                    (s_alu_carryin[1:0]));
 
-   wire                 mod_s_alu_1;
-   assign mod_s_alu_1 = (s_alu == 3'b100 && clrM == 1'b0) ? ~MULDIVREG[0] : s_alu[1];
-   
    m_alu #(.HIGHLEVEL(                 HIGHLEVEL       ), 
            .ucodeopt_HAS_MINSTRET(     ucodeopt_HAS_MINSTRET     ),
            .ucodeopt_HAS_EBR_MINSTRET( ucodeopt_HAS_EBR_MINSTRET ),
@@ -962,14 +962,15 @@ module m_midgetv_core
      (/*AUTOINST*/
       // Outputs
       .Dii                              (Dii[31:0]),
-      .isvalid_instrlow                 (isvalid_instrlow),
-      .isvalid_instrhigh                (isvalid_instrhigh),
+      .is_valid_instrlow                (is_valid_instrlow),
+      .is_valid_instrhigh               (is_valid_instrhigh),
       // Inputs
       .Di                               (Di[31:0]),
       .pc1                              (pc1),
-      .luh                              (luh));
+      .luh                              (luh),
+      .sa12                             (sa12));
 
-   m_opreg #(.HIGHLEVEL(xHIGHLEVEL), .RVC(RVC))
+   m_opreg #(.HIGHLEVEL(HIGHLEVEL), .RVC(RVC))
      inst_opreg
        (/*AUTOINST*/
         // Outputs
@@ -981,9 +982,8 @@ module m_midgetv_core
         .FUNC7                          (FUNC7[6:0]),
         // Inputs
         .clk                            (clk),
-        .sa12                           (sa12),
-        .isvalid_instrlow               (isvalid_instrlow),
-        .isvalid_instrhigh              (isvalid_instrhigh),
+        .is_valid_instrlow              (is_valid_instrlow),
+        .is_valid_instrhigh             (is_valid_instrhigh),
         .Dii                            (Dii[31:0]));
 
    m_condcode #(.HIGHLEVEL(HIGHLEVEL), .MULDIV(MULDIV) ) 
@@ -1029,7 +1029,7 @@ module m_midgetv_core
     */
    wire                 lastshiftoverride = INSTR[25] & (INSTR[6:2] == 5'b01100);     // MULDIV. Can probably be simplified further
    wire                 isDIVREM = INSTR[25] & ( INSTR[6:2] == 5'b01100) & INSTR[14]; // Can probably be simplified further
-   m_progressctrl #(.HIGHLEVEL(          xHIGHLEVEL          ),
+   m_progressctrl #(.HIGHLEVEL(          HIGHLEVEL          ),
                     .RVC(                RVC                ),
                     .MULDIV(             MULDIV             ),
                     .DISREGARD_WB4_3_55( DISREGARD_WB4_3_55 ),

@@ -186,11 +186,15 @@ module m_cyclecnt
             // =======================================================
             // LOWLEVEL, NO CYCLECNT
             // =======================================================
-            NOT_CURRENT this_case_not_implemented();
             
             wire cmb_rcrun;
             assign QQ[6:2] = ADR_O[6:2];
-            SB_LUT4 #(.LUT_INIT(16'habab)) qqmux1(.O(QQ[1]),.I3(1'b0),.I2(s_cyclecnt[0]), .I1(s_cyclecnt[1]), .I0(ADR_O[1])); 
+
+            // Is possible to save 1 lut by using carrychain.
+//          SB_LUT4 #(.LUT_INIT(16'habab)) qqmux1(.O(QQ[1]),.I3(1'b0),.I2(s_cyclecnt[0]), .I1(s_cyclecnt[1]), .I0(ADR_O[1]));
+            bn_l4 #(.I(16'haa3f)) l_hQQ1( .o(hQQ1),  .i3(s_cyclecnt[1]), .i2(ctrl_pcinc_by_2),.i1(pcinc_by_2), .i0(ADR_O[1]) );
+            bn_l4 #(.I(16'hcaca)) c_qq_1( .o(QQ[1]), .i3(1'b0),          .i2(s_cyclecnt[0]),  .i1(ADR_O[1]),   .i0(hQQ1    ) );
+            
             SB_LUT4 #(.LUT_INIT(16'haacf)) qqmux0(.O(QQ[0]),.I3(s_cyclecnt[0]),.I2(s_cyclecnt[1]), .I1(ADR_O[0]), .I0(start)); 
             SB_LUT4 #(.LUT_INIT(16'heeee)) cmb_rcrun_l(.O(cmb_rcrun), .I3(1'b0), .I2(1'b0), .I1(corerunning), .I0(start));
             SB_DFF rcrun(.Q(corerunning), .C(clk), .D(cmb_rcrun));

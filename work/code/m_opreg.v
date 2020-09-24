@@ -23,16 +23,20 @@
  * The very first cycle DAT_O is unknowm, it comes from EBR. However,
  * rDee == 0 and shADR_0 == 0, so Di is indeed 0.
  * 
- * The above must be restated after RVC is implemented
+ * The above is slightly different now that RVC is implemented.
+ * Insead of sa12, we have is_valid_instrlow and is_valid_instrhigh.
+ * If RVC is not included, these are infact sa12. If RVC is included,
+ * these are a result of (sa12 & something), so at startup sa12 will
+ * never "as low as ever", and the above argumentation holds.
  */
 module m_opreg
   # ( parameter HIGHLEVEL = 0, RVC = 1)
   ( 
     input         clk,
-    input         sa12,
+//    input         sa12,
     /* verilator lint_off UNUSED */
-    input         isvalid_instrlow,
-    input         isvalid_instrhigh,
+    input         is_valid_instrlow,
+    input         is_valid_instrhigh,
     /* verilator lint_on UNUSED */
     input [31:0]  Dii,
     output [31:0] INSTR,
@@ -45,22 +49,19 @@ module m_opreg
       if ( HIGHLEVEL ) begin
 
          reg [31:0]     rINSTRUCTION;
-         if ( RVC == 0 ) begin
-            always @(posedge clk) 
-              if ( sa12 ) 
-                rINSTRUCTION <= Dii;
-         end else begin
-            always @(posedge clk) begin
-               if ( isvalid_instrlow & sa12 )
-                 rINSTRUCTION[15:0] <= Dii[15:0];
-               if ( isvalid_instrhigh & sa12 )
-                 rINSTRUCTION[31:16] <= Dii[31:16];               
-            end
+         always @(posedge clk) begin
+            if ( is_valid_instrlow )
+              rINSTRUCTION[15:0] <= Dii[15:0];
+            if ( is_valid_instrhigh )
+              rINSTRUCTION[31:16] <= Dii[31:16];               
          end
          assign INSTR = rINSTRUCTION;
          
       end else begin
-         SB_DFFE OpC [31:0] (.Q(INSTR),.E(sa12),.C(clk),.D(Dii));
+
+         SB_DFFE OpC15_0  [15:0]  (.Q(INSTR[15:0]), .E(is_valid_instrlow), .C(clk),.D(Dii[15:0]));
+         SB_DFFE OpC31_16 [31:16] (.Q(INSTR[31:16]),.E(is_valid_instrhigh),.C(clk),.D(Dii[31:16]));
+         
       end
    endgenerate
    

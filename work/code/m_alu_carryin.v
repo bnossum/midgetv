@@ -79,44 +79,82 @@ module m_alu_carryin  # ( parameter HIGHLEVEL = 1, MULDIV = 1 )
     output      alu_carryin, sra_msb, rlastshift
     );
    
-   wire [1:0]           mod_s_alu_carryin;
-   wire                 mod_raluF;
-   assign mod_s_alu_carryin = (mod_s_alu_1 ^ s_alu_1) ? 2'b00 : s_alu_carryin;
-   assign mod_raluF  = s_alu_carryin[1] ? muldivregmsb : raluF;
-   
    generate
       if ( HIGHLEVEL != 0 ) begin
-         reg rrlastshift;
-         always @(posedge clk)
-           rrlastshift <= lastshift;
-         assign rlastshift = rrlastshift;
 
-         if ( MULDIV == 0 ) begin
-            // Will be removed
-            reg r_alu_carryin, r_sra_msb;
-            always @(*) 
-              case ( mod_s_alu_carryin )
-                2'b00 : r_alu_carryin = 1'b0;
-                2'b01 : r_alu_carryin = mod_raluF;
-                2'b10 : r_alu_carryin = mod_raluF;
-                2'b11 : r_alu_carryin = 1'b1;
-              endcase
-            always @(*) 
-              r_sra_msb = FUNC7_5 ? ADR_O_31 : 1'b0;
-            assign sra_msb = r_sra_msb;
-            assign alu_carryin = r_alu_carryin;
-         end else begin
-            wire prealucyin;
+         if ( MULDIV != 0 ) begin
+                        
+            wire [1:0] mod_s_alu_carryin;
+            wire       mod_raluF;
+            assign mod_s_alu_carryin = (mod_s_alu_1 ^ s_alu_1) ? 2'b00 : s_alu_carryin;
+            assign mod_raluF  = s_alu_carryin[1] ? muldivregmsb : raluF;
+            
+            reg        rrlastshift;
+            always @(posedge clk)
+              rrlastshift <= lastshift;
+            assign rlastshift = rrlastshift;
+            
+            wire       prealucyin;
             assign sra_msb = FUNC7_5 ? ADR_O_31 : (FUNC7_0 ? mod_raluF : 0);
             assign prealucyin = mod_raluF | ADR_O_31;
             assign alu_carryin = &mod_s_alu_carryin | (mod_s_alu_carryin[1] & prealucyin) | (mod_s_alu_carryin[0] & prealucyin);
+
+         end else begin
+
+            reg r_alu_carryin, r_sra_msb;
+            always @(/*AS*/raluF or s_alu_carryin) 
+              case ( s_alu_carryin )
+                2'b00 : r_alu_carryin = 1'b0;
+                2'b01 : r_alu_carryin = raluF;
+                2'b10 : r_alu_carryin = raluF;
+                2'b11 : r_alu_carryin = 1'b1;
+              endcase
+            always @(/*AS*/ADR_O_31 or FUNC7_5) 
+              r_sra_msb = FUNC7_5 ? ADR_O_31 : 1'b0;
+            assign sra_msb = r_sra_msb;
+            assign alu_carryin = r_alu_carryin;
+            reg rrlastshift;
+            always @(posedge clk)
+              rrlastshift <= lastshift;
+            assign rlastshift = rrlastshift;
+
          end
       end else begin
          
-         wire prealucyin,dup_lastshift;
-         bn_lcy4v_b #(.I(16'haaaa)) la(.o(dup_lastshift), .co(prealucyin),  .ci(1'b1),       .i({1'b0,1'b0,mod_raluF,lastshift}));
-         bn_lcy4v_b #(.I(16'haa00)) lb(.o(sra_msb),       .co(alu_carryin), .ci(prealucyin), .i({FUNC7_5,mod_s_alu_carryin,ADR_O_31}));
-         SB_DFF reglastshift( .Q(rlastshift), .C(clk), .D(dup_lastshift));
+         if ( MULDIV != 0 ) begin
+
+            wire [1:0] mod_s_alu_carryin;
+            wire       mod_raluF;
+            /*
+             * When MULDIV was added, control to this module was changed like this:
+             *     assign mod_s_alu_carryin = (mod_s_alu_1 ^ s_alu_1) ? 2'b00 : s_alu_carryin;
+             * Experimentally, it seems to be enough to do 
+             *     assign mod_s_alu_carryin[0] = (mod_s_alu_1 ^ s_alu_1) ? 1'b0 : s_alu_carryin[0];
+             *     assign mod_s_alu_carryin[1] = s_alu_carryin[1];
+             * so until further, I go with this reduced version.
+             */
+            bn_l4v #(.I(16'h8282)) lmod_s_alu_carryin0( .o(mod_s_alu_carryin[0]), .i({1'b0,mod_s_alu_1,s_alu_1,s_alu_carryin[0]}));
+            assign mod_s_alu_carryin[1] = s_alu_carryin[1];
+
+            bn_l4v #(.I(16'hcaca)) lmod_raluF(.o(mod_raluF), .i({1'b0,s_alu_carryin[1],muldivregmsb,raluF}));
+            
+            wire prealucyin,dup_lastshift;
+            bn_lcy4v_b #(.I(16'hf088)) lb(.o(sra_msb),       .co(prealucyin),  .ci(1'b1),       .i({FUNC7_5,ADR_O_31,mod_raluF,FUNC7_0}));
+            bn_lcy4v_b #(.I(16'haaaa)) la(.o(dup_lastshift), .co(alu_carryin), .ci(prealucyin), .i({1'b0,mod_s_alu_carryin,lastshift}));
+            SB_DFF reglastshift( .Q(rlastshift), .C(clk), .D(dup_lastshift));
+
+         end else begin
+            
+            wire prealucyin,dup_lastshift;
+            bn_lcy4v_b #(.I(16'hf088)) lb(.o(sra_msb),       .co(prealucyin),  .ci(1'b1),       .i({FUNC7_5,ADR_O_31,raluF,FUNC7_0}));
+            bn_lcy4v_b #(.I(16'haaaa)) la(.o(dup_lastshift), .co(alu_carryin), .ci(prealucyin), .i({1'b0,s_alu_carryin,lastshift}));
+            SB_DFF reglastshift( .Q(rlastshift), .C(clk), .D(dup_lastshift));
+
+//            wire prealucyin,dup_lastshift;
+//            bn_lcy4v_b #(.I(16'haaaa)) la(.o(dup_lastshift), .co(prealucyin),  .ci(1'b1),       .i({1'b0,1'b0,raluF,lastshift}));
+//            bn_lcy4v_b #(.I(16'haa00)) lb(.o(sra_msb),       .co(alu_carryin), .ci(prealucyin), .i({FUNC7_5,s_alu_carryin,ADR_O_31}));
+//            SB_DFF reglastshift( .Q(rlastshift), .C(clk), .D(dup_lastshift));            
+         end
       end
       
    endgenerate
