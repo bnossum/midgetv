@@ -30,31 +30,29 @@ privilege mode of midgetv is always *machine-mode*.
 
 Make a tiny RISC-V core for the ice40 family FPGAs. The core should be
 just powerfull enough to be usable in my own projects. The core should
-be reasonable well debugged, so that others can use it without too
-much pain.
-
+be reasonable well debugged, so others can use it.
 
 ### Overall results
- -  [x] Passes RISC-V rv32i/rv32im/rv32imc/rv32Zifence/rm32Zicsr compliance
-        tests in simulation using Verilator
- -  [x] Passes RISC-V rv32i/rv32im/rv32imc/rv32Zifence/rm32Zicsr compliance
-        tests using an `icebreaker` board
- -  [x] Targetable to all ICE40 devices that have EBR
- -  [x] Support for SRAM in ICE40 devices that have SRAM
- -  [x] Complience with RV32I (version 2.1), with standard extensions M, C,
-        Zicsr, Zifence (all version 2.0)
- -  [x] Wishbone b4 used for interconnect
- -  [x] Tested on ICE40UP5K using a `icebreaker` board, 
-  - [x] Rudimentary tests on ICE40HX1K using a `iceblink40-hx1k` board and
-        also on ICE40UP5K using a `UPDuino2` board, 
+ -  Passes RISC-V rv32i/rv32im/rv32imc/rv32Zifence/rm32Zicsr compliance
+    tests in simulation using Verilator
+ -  Passes RISC-V rv32i/rv32im/rv32imc/rv32Zifence/rm32Zicsr compliance
+    tests using an `icebreaker` board
+ -  Due to the above; complience with RV32I (version 2.1), with standard 
+    extensions M, C, Zicsr and Zifence (all version 2.0)
+ -  Targetable to all ICE40 devices that have EBR ram
+ -  Support for SRAM in ICE40 devices that have SRAM
+ -  Wishbone b4 used for interconnect
+ -  Tested on ICE40UP5K using a `icebreaker` board, 
+  - Rudimentary tests on ICE40HX1K using a `iceblink40-hx1k` board and
+    also on ICE40UP5K using a `UPDuino2` board, 
 
 ### Future plans, in order of priority
  - Production of a monolithic source file to ease integration of `midgetv` into projects.
  - Restructure the directory-tree - it is way to complex now.
  - Test on external interrupts, no work has been done here for a long time.
  - Test on nested interrupts/exceptions, errors are expected to be found
- - Compliance with riscv-privileged-vX.XX.pdf
  - Write and test exhaustive CSR code, just now only a minimum exists
+ - Compliance with riscv-privileged-vX.XX.pdf
  - Table that show clockcycles used per instruction
  - Cleanup on code, and especially Makefiles
 
