@@ -26,10 +26,10 @@ a corresponding interface, see `m_digilent.v`. Usage:
 ### Format of the program to upload
 This is chunk based. There are one header word, and two chunk types.
 
-| :----------- | :------------------------------- |
-| Header word  | `0x01071f3f`                     |
-| Data chunk:  | `uint32_t loadadr`<br>`uint32_t endloadadr`<br>`endloadadr-loadadr bytes of data` |
-| Exec chunk   | `0x00000000`<br>Startadr         |
+:----------- | :------------------------------- 
+Header word  | `0x01071f3f`                     
+Data chunk:  | `uint32_t loadadr`<br>`uint32_t endloadadr`<br>`endloadadr-loadadr bytes of data` 
+Exec chunk   | `0x00000000`<br>Startadr         
 
 
 The loaded program can be 0 to any number of data chunks,
