@@ -199,7 +199,7 @@ kluge1: add     rtmp,rtmp,rCSRadr
         bgtu    rrd,rtmp,1f             // from the stack when exiting this code.
 
 //        addi    rrd,rrd,%lo(_ex_dup_x0) //  Does not work
-fitte2: addi    rrd,rrd,DIRTY_ADR_ex_dup_x0
+dbgtag2:addi    rrd,rrd,DIRTY_ADR_ex_dup_x0
 
 1:        
         srli    rrs1,rrs1,10            // Get the rs1 field - this is either
@@ -214,9 +214,9 @@ fitte2: addi    rrd,rrd,DIRTY_ADR_ex_dup_x0
         slli    rrs1,rrs1,2             // From register number to register memory address
         bgtu    rrs1,rtmp,1f            // Contents if registers x1-x5 was stored at entry of this code, 
 
-        //fitte:  addi    rrs1,rrs1,%lo(_ex_dup_x0)//and must be fetched from the stack
+        //wanted:  addi    rrs1,rrs1,%lo(_ex_dup_x0)//and must be fetched from the stack
         // The above line does not work with   riscv32-unknown-elf-gcc (GCC) 10.1.0
-fitte3: addi    rrs1,rrs1,DIRTY_ADR_ex_dup_x0
+dbgtag3:addi    rrs1,rrs1,DIRTY_ADR_ex_dup_x0
         
         sw      x0,%lo(_ex_dup_x0)(x0)  // A previous CSR instruction may have used _ex_dup_x0
 1:      lw      rrs1,0(rrs1)            // The value to write to CSR
