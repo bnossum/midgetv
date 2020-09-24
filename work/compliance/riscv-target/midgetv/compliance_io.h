@@ -13,7 +13,7 @@
 #define STRINGIFY(x) #x
 #define TOSTRING(x)  STRINGIFY(x)
 
-#define SILENT  0
+#define SILENT  1
 
         
 //-----------------------------------------------------------------------

@@ -15,6 +15,7 @@ done
 # 
 #while [ "$startofreply" != "Don" ]; do
 #    read reply <&4
+#    startofreply=${reply:0:3}
 #    echo "${reply}"
 #done
 

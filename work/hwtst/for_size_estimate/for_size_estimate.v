@@ -34,6 +34,7 @@
 `include "../../code/m_ucodepc.v"
 `include "../../code/m_progressctrl.v"
 `include "../../code/m_shlr.v"
+`include "../../code/m_RVC.v"
 `include "../../code/m_midgetv_core.v"
 
 
@@ -83,26 +84,28 @@ module mytop
 `include "ice40loaderprog.hv"
 
 `ifdef INVESTIGATE_SMALLEST
-   localparam IWIDTH             = 1;
-   localparam SRAMADRWIDTH       = 0;
-   localparam FORCEEBRADRWIDTH   = 8;
-   localparam NO_CYCLECNT        = 1;
-   localparam MTIMETAP           = 0;
-   localparam LAZY_DECODE        = 2;
-   localparam DISREGARD_WB4_3_55 = 1;
+   localparam IWIDTH                   = 1;
+   localparam SRAMADRWIDTH             = 0;
+   localparam FORCEEBRADRWIDTH         = 8;
+   localparam NO_CYCLECNT              = 1;
+   localparam MTIMETAP                 = 0;
+   localparam LAZY_DECODE              = 2;
+   localparam DISREGARD_WB4_3_55       = 1;
+   localparam DAT_I_ZERO_WHEN_INACTIVE = 1;  
    wire                RST_I = 1'b0;
    wire                start = 1'b1;
    wire                meip  = 1'b0;                
 `endif
 
 `ifdef INVESTIGATE_LARGEST
-   localparam IWIDTH             = 32;
-   localparam SRAMADRWIDTH       = 17;
-   localparam FORCEEBRADRWIDTH   = 11;
-   localparam NO_CYCLECNT        = 0;
-   localparam MTIMETAP           = 16;
-   localparam LAZY_DECODE        = 0;
-   localparam DISREGARD_WB4_3_55 = 0;
+   localparam IWIDTH                   = 32;
+   localparam SRAMADRWIDTH             = 17;
+   localparam FORCEEBRADRWIDTH         = 11;
+   localparam NO_CYCLECNT              = 0;
+   localparam MTIMETAP                 = 16;
+   localparam LAZY_DECODE              = 0;
+   localparam DISREGARD_WB4_3_55       = 0;
+   localparam DAT_I_ZERO_WHEN_INACTIVE = 0;  
 
    /* To get this into a package I must reduce the number of IOs.
     * This leads to some SB_LUT4 that are to be subtracted from
@@ -175,14 +178,15 @@ module mytop
    // End of automatics
 m_midgetv_core
      #(
-       .SRAMADRWIDTH       ( SRAMADRWIDTH       ),
-       .EBRADRWIDTH        ( FORCEEBRADRWIDTH   ),
-       .IWIDTH             ( IWIDTH             ),
-       .NO_CYCLECNT        ( NO_CYCLECNT        ),
-       .MTIMETAP           ( MTIMETAP           ),
-       .HIGHLEVEL          ( HIGHLEVEL          ),
-       .LAZY_DECODE        ( LAZY_DECODE        ),
-       .DISREGARD_WB4_3_55 ( DISREGARD_WB4_3_55 ),
+       .SRAMADRWIDTH           ( SRAMADRWIDTH             ),
+       .EBRADRWIDTH            ( FORCEEBRADRWIDTH         ),
+       .IWIDTH                 ( IWIDTH                   ),
+       .NO_CYCLECNT            ( NO_CYCLECNT              ),
+       .MTIMETAP               ( MTIMETAP                 ),
+       .HIGHLEVEL              ( HIGHLEVEL                ),
+       .LAZY_DECODE            ( LAZY_DECODE              ),
+       .DISREGARD_WB4_3_55     ( DISREGARD_WB4_3_55       ),
+      .DAT_I_ZERO_WHEN_INACTIVE( DAT_I_ZERO_WHEN_INACTIVE ),
        .prg00(prg00),       .prg01(prg01),       .prg02(prg02),       .prg03(prg03),
        .prg04(prg04),       .prg05(prg05),       .prg06(prg06),       .prg07(prg07),
        .prg08(prg08),       .prg09(prg09),       .prg0A(prg0A),       .prg0B(prg0B),

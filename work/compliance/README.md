@@ -40,7 +40,7 @@ example `I-ADD-01.S), the following happens:
 * `cat I-ADD-01.elf.bin > /dev/ttyUSB1`
   * `midgetv` in `icebraker` has a bit-bang uart, the program `mb`
     residing in `midgetv` is set up to load a new program.
-  * I-ADD-01.elf.bin is processed to be in a form recognizable by by
+  * I-ADD-01.elf.bin is processed to be in a form recognizable by
     `mb` (see the link file).
   
 * The script `sig_from_board.sh` is executed.
