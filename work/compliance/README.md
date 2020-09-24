@@ -28,7 +28,7 @@ loader program that allows upload and execution of a program on `midgetv`).
 * Do a `make VERBOSE=1` to see how everything fits together.
 
 * Note: If `midgetv` has been compiled with the reduced instruction
-  set, it will fail in the program "I-MISALIGN_JMP-01,S", this program
+  set, it will fail in the program "I-MISALIGN_JMP-01.S", this program
   must be excluded for rv32imc and rv32ic. 
 
 

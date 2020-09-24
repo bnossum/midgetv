@@ -3,8 +3,8 @@
 ## midgetv - specifically for ice40* FPGAs
    
 Midgetv is non-pipelined and microcoded - it trades speed for
-size. The size of Midgetv changes as it is developped, I have given up
-to state a fixed number. Just now, september 2020, the following holds
+size. The size of Midgetv changes as it is developed, I have given up
+to state a fixed number. Just now, September 2020, the following holds
 for an image that can run the RISC-V compliance suite on an
 `icebreaker` board:
 
@@ -29,7 +29,7 @@ privilege mode of midgetv is always *machine-mode*.
 ### Overall goal
 
 Make a tiny RISC-V core for the ice40 family FPGAs. The core should be
-just powerfull enough to be usable in my own projects. The core should
+just powerful enough to be usable in my own projects. The core should
 be reasonable well debugged, so others can use it.
 
 ### Overall results
@@ -37,7 +37,7 @@ be reasonable well debugged, so others can use it.
     tests in simulation using Verilator
  -  Passes RISC-V rv32i/rv32im/rv32imc/rv32Zifence/rm32Zicsr compliance
     tests using an `icebreaker` board
- -  Due to the above; complience with RV32I (version 2.1), with standard 
+ -  Due to the above; compliance with RV32I (version 2.1), with standard 
     extensions M, C, Zicsr and Zifence (all version 2.0)
  -  Can be targeted to all ICE40 devices that have EBR ram
  -  Support for SRAM in ICE40 devices that have SRAM
@@ -54,7 +54,7 @@ be reasonable well debugged, so others can use it.
  - Test on nested interrupts/exceptions, errors are expected to be found
  - Write and test exhaustive CSR code, just now only a minimum exists
  - Compliance with riscv-privileged-vX.XX.pdf
- - Table that show clockcycles used per instruction
+ - Table that show clock cycles used per instruction
  - Cleanup on code, and especially Makefiles
  - Documentation (strange how this tends to be last...)
  
@@ -72,9 +72,6 @@ least effort you need:
 - A toolchain for FPGA compilation and upload, for example:
   - iCEcube2 from Lattice
   - A toolchain based on the very impressive icestorm project, such as: yosys/arachne-pnr/icepack
-  The size of midgetv as stated in the start of this README is found using LSE syntethis from Lattice. 
-  yosys/arachne-pnr usually give considerable larger images. For the time being I
-  will not look into this.
 
 All my work is done under Linux.
 
