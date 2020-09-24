@@ -9,7 +9,7 @@ for an image that can run the RISC-V compliance suite on an
 `icebreaker` board:
 
 Core    | Toolchain    | Size (SB_LUTs) | Clock (MHz) 
---------|--------------|----------------|-----------
+  :---  |  :---------  |  -----------:  |  --------:
 rv32i   | Synplify Pro | 395            | 31.7
 rv32im  | Lattice LSI  | 468            | 26.4
 rv32imc | Yosys/Arachne| 668            | 19.2
@@ -51,9 +51,9 @@ much pain.
 ### Future plans, in order of priority
  - Production of a monolithic source file to ease integration of `midgetv` into projects.
  - Restructure the directory-tree - it is way to complex now.
- - Test on external interrupts
- - Test on nested interrupts/exceptions
- - Compliance with riscv-privileged-v1.10.pdf
+ - Test on external interrupts, no work has been done here for a long time.
+ - Test on nested interrupts/exceptions, errors are expected to be found
+ - Compliance with riscv-privileged-vX.XX.pdf
  - Write and test exhaustive CSR code, just now only a minimum exists
  - Table that show clockcycles used per instruction
  - Cleanup on code, and especially Makefiles
