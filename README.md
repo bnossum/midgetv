@@ -1,40 +1,62 @@
 ![picture of midgetv](doc/m_midgetv_core.png)
                        
-## midgetv -- specifically for ice40* FPGAs
+## midgetv - specifically for ice40* FPGAs
    
 Midgetv is non-pipelined and microcoded - it trades speed for
-size. The smallest possibly useful implementation requires around 256
-SB_LUT4s and 4 EBRs. The smallest implementation that successfully
-executes all programs in the rv32i test suite in simulation is 271
-SB_LUT4s and 6 EBRs. Currently, the largest implementation requires
-around 411 SB_LUT4s, 18 EBRs and 4 SPRAMS. Typical clock frequencies
-(worst case conditions):
- - ICE40HX1K: 65 MHz
- - ICE40UP5K: 24 MHz
+size. The size of Midgetv changes as it is developped, I have given up
+to state a fixed number. Just now, september 2020, the following holds
+for an image that can run the RISC-V compliance suite on an
+`icebreaker` board:
 
-Each RISCV instruction use between 4 clock cycles and about 40 clock
-cycles (for shifts of a register by 31). Average number of clocks per
-instruction (CPI) is ~9. Unaligned word/hword load/store instructions
-must be performed in software (something like
-[this](work/sw/first/t160.S)). CSR instructions are decoded in
-microcode, but executed by
-[emulation software](work/sw/inc/midgetv_minimal_csr.S).  The
+Core    | Toolchain    | Size (SB_LUTs) | Clock (MHz) 
+--------|--------------|----------------|-----------
+rv32i   | Synplify Pro | 395            | 31.7
+rv32im  | Lattice LSI  | 468            | 26.4
+rv32imc | Yosys/Arachne| 668            | 19.2
+
+These cores use 6 EBR rams, and 2 SPRAM256KA.
+
+Each rv32i/rv32ic instruction use between 4 clock cycles and about 40
+clock cycles (for shifts of a register by 31). Average number of
+clocks per instruction (CPI) seems to be ~9. Unaligned word/hword
+load/store instructions must be performed in software (something like
+[this](work/sw/first/t160.S)).  CSR instructions are decoded in
+microcode, but executed by [emulation software](work/sw/inc/midgetv_minimal_csr.S),
+and are thus very slow. MUL/DIV is done bit serially, essentially 2
+clock cycles per bit, and hence require around 75 clock cycles.  The
 privilege mode of midgetv is always *machine-mode*.
 
-### Overall goals 
- -  [x] Targetable to all ICE40 devices that have EBR
- -  [x] Support for SRAM in ICE40 devices that have SRAM
- -  [x] Easy interconnect
- -  [x] Complience with RV32I as per riscv-spec-v2.2.pdf
- -  [ ] Compliance with riscv-privileged-v1.10.pdf
- -  [ ] Support of "C" standard extension
- -  [x] Support of "M" standard extension
+### Overall goal
+
+Make a tiny RISC-V core for the ice40 family FPGAs. The core should be
+just powerfull enough to be usable in my own projects. The core should
+be reasonable well debugged, so that others can use it without too
+much pain.
+
 
 ### Overall results
-  - Tested on ICE40HX1K using a `iceblink40-hx1k` board
-  - Tested on ICE40UP5K using a `UPDuino2` board, 
-  - Tested on ICE40UP5K using a `icebreaker` board, 
-  - Passes the RISC-V rv32i compliance tests in simulation
+ -  [x] Passes RISC-V rv32i/rv32im/rv32imc/rv32Zifence/rm32Zicsr compliance
+        tests in simulation using Verilator
+ -  [x] Passes RISC-V rv32i/rv32im/rv32imc/rv32Zifence/rm32Zicsr compliance
+        tests using an `icebreaker` board
+ -  [x] Targetable to all ICE40 devices that have EBR
+ -  [x] Support for SRAM in ICE40 devices that have SRAM
+ -  [x] Complience with RV32I (version 2.1), with standard extensions M, C,
+        Zicsr, Zifence (all version 2.0)
+ -  [x] Wishbone b4 used for interconnect
+ -  [x] Tested on ICE40UP5K using a `icebreaker` board, 
+  - [x] Rudimentary tests on ICE40HX1K using a `iceblink40-hx1k` board and
+        also on ICE40UP5K using a `UPDuino2` board, 
+
+### Future plans, in order of priority
+ - Production of a monolithic source file to ease integration of `midgetv` into projects.
+ - Restructure the directory-tree - it is way to complex now.
+ - Test on external interrupts
+ - Test on nested interrupts/exceptions
+ - Compliance with riscv-privileged-v1.10.pdf
+ - Write and test exhaustive CSR code, just now only a minimum exists
+ - Table that show clockcycles used per instruction
+ - Cleanup on code, and especially Makefiles
 
 ### Software requirements
 
@@ -51,7 +73,7 @@ least effort you need:
   - iCEcube2 from Lattice
   - A toolchain based on the very impressive icestorm project, such as: yosys/arachne-pnr/icepack
   The size of midgetv as stated in the start of this README is found using LSE syntethis from Lattice. 
-  yosys/arachne-pnr give considerable larger images (but my toolchain is old). For the time being I
+  yosys/arachne-pnr usually give considerable larger images. For the time being I
   will not look into this.
 
 All my work is done under Linux.
@@ -69,6 +91,9 @@ See [here](work/tst) for the simulator code. Many small programs to
 test specific instructions in midgetv is [here](work/sw/first), and
 code to do the riscv compliance test suite is [here](work/sw/second).
 
+### Running the riscv-test suite on an `icebreaker` board.
+See [here](work/compliance).
+
 ### How to compile
 A first time user need some instructions on how/what to compile. Presently this
 is not written, but a very short introduction is [here](doc/README.md).
@@ -78,13 +103,3 @@ is not written, but a very short introduction is [here](doc/README.md).
 2. The coarse [memory map](work/sw/inc/midgetv.inc) of midgetv is part of the API. 
 3. The way a binary file is mapped to `localparam` specifications by the
    utility [`midgetv_bin2ebr`](work/util/midgetv_bin2ebr.c) is part of the API.
-
-
-### Future plans
-- Write and test exhaustive CSR code, just now only a minimum exists
-- Test on external interrupts
-- Test on nested interrupts/exceptions
-- Support of compressed instructions (will bloat the controller)
-- Cleanup on code
-- Table that show clockcycles used per instruction
-- Production of a monolithic source file to ease integration of `midgetv` into projects.

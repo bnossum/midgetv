@@ -187,7 +187,7 @@ module m_cyclecnt
             // LOWLEVEL, NO CYCLECNT
             // =======================================================
             
-            wire cmb_rcrun;
+            wire cmb_rcrun,hQQ1;
             assign QQ[6:2] = ADR_O[6:2];
 
             // Is possible to save 1 lut by using carrychain.
