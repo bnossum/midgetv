@@ -39,7 +39,7 @@ be reasonable well debugged, so others can use it.
     tests using an `icebreaker` board
  -  Due to the above; complience with RV32I (version 2.1), with standard 
     extensions M, C, Zicsr and Zifence (all version 2.0)
- -  Targetable to all ICE40 devices that have EBR ram
+ -  Can be targeted to all ICE40 devices that have EBR ram
  -  Support for SRAM in ICE40 devices that have SRAM
  -  Wishbone b4 used for interconnect
  -  Tested on ICE40UP5K using a `icebreaker` board, 
@@ -47,7 +47,7 @@ be reasonable well debugged, so others can use it.
     also on ICE40UP5K using a `UPDuino2` board, 
 
 ### Future plans, in order of priority
- - Consolidate. Increase coverage on module tests in directory /tst.
+ - Consolidate. Increase coverage on module tests in directory [tst](work/tst).
  - Production of a monolithic source file to ease integration of `midgetv` into projects.
  - Restructure the directory-tree - it is way to complex now.
  - Test on external interrupts, no work has been done here for a long time.
@@ -56,7 +56,8 @@ be reasonable well debugged, so others can use it.
  - Compliance with riscv-privileged-vX.XX.pdf
  - Table that show clockcycles used per instruction
  - Cleanup on code, and especially Makefiles
-
+ - Documentation (strange how this tends to be last...)
+ 
 ### Software requirements
 
 I try not to tie-in this code to any particular tools, but to compile the code with 
