@@ -60,6 +60,6 @@ a new test program. So ideally the PC should hold for a short time before
 it continues with the next program. As I have never seen any problems
 here, I leave this race condition unresolved for now.
 
-
-
-  
+Terminal output from running the tests on `icebreaker` with a midgetv
+configured as a rv32imc is seen in
+(/work/compliance/example_compliance_midgetv_rv32imc.txt).
