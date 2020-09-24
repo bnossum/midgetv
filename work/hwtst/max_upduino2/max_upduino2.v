@@ -33,20 +33,20 @@
 `include "../../code/m_ucodepc.v"
 `include "../../code/m_progressctrl.v"
 `include "../../code/m_shlr.v"
+`include "../../code/m_RVC.v"
 `include "../../code/m_midgetv_core.v"
 
 
 module mytop
   # ( parameter
-      SRAMADRWIDTH       = 17,
-      FORCEEBRADRWIDTH   = 11,
+      SRAMADRWIDTH       = 16,
+      FORCEEBRADRWIDTH   = 9, 
       IWIDTH             = 32, 
       NO_CYCLECNT        = 0, 
-      MTIMETAP           = 16, 
+      MTIMETAP           = 0,//16, 
       HIGHLEVEL          = 0,
-      LAZY_DECODE        = 0,
-      DISREGARD_WB4_3_55 = 0,
-      MULDIV             = 1
+      LAZY_DECODE        = 1,
+      DISREGARD_WB4_3_55 = 0
       )
    (
     input  usartRX,
@@ -254,7 +254,6 @@ module mytop
        .HIGHLEVEL          ( HIGHLEVEL          ),
        .LAZY_DECODE        ( LAZY_DECODE        ),
        .DISREGARD_WB4_3_55 ( DISREGARD_WB4_3_55 ),
-       .MULDIV             ( MULDIV             ),
        .prg00(prg00),       .prg01(prg01),       .prg02(prg02),       .prg03(prg03),
        .prg04(prg04),       .prg05(prg05),       .prg06(prg06),       .prg07(prg07),
        .prg08(prg08),       .prg09(prg09),       .prg0A(prg0A),       .prg0B(prg0B),
@@ -283,6 +282,7 @@ module mytop
      
 endmodule   
 
+      
 /* -----------------------------------------------------------------------------
  * Bitbang UART
  */
