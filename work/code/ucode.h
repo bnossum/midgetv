@@ -3,8 +3,9 @@
  * 2019. Copyright B. Nossum.
  * For licence, see LICENCE
  * -----------------------------------------------------------------------------
- * The microcode of midgetv.
-
+  The microcode of midgetv.
+ 
+  Switches in midgetv_ucodeoptions.h affects generated ucode.
 
  */
 
@@ -12,6 +13,12 @@
 #if HAS_MINSTRET == 0 && HAS_EBR_MINSTRET == 1
 #error Can not do this, see comment in "midgetv_ucodeoptions.h"
 #endif
+/* The number of control equations depends on what options are included.
+ */
+#define MIDGETV_UCODE_NREQ                      \
+        (ucodeopt_MULDIV ?                      \
+         (ucodeopt_RVC ? (38+8) : 0) :          \
+         (ucodeopt_RVC ?  0 : (33+8)) )
 
 /* Some analysis of microcode is done easier by
    defining value fields that are in use.
@@ -132,40 +139,40 @@
  *                                          sa17           s_alu[2:0]
  *                                          |sa16          |||s_alu_carryin[1:0]
  *                                          ||             |||||         */
-#define A_nearXOR                         ( IO << 10 ) | ( OOOxx << 1 )  // B = D^(~Q)                               
-#define A_iszero                          ( IO << 10 ) | ( OOOII << 1 )  // Used in DIV to test for zero in a particular setting
-#define A_passd                           ( IO << 10 ) | ( OOIxx << 1 )  // D
-#define A_invq                            ( IO << 10 ) | ( OIOxx << 1 )  // ~Q
-#define A_nearAND                         ( IO << 10 ) | ( OIIxx << 1 )  // D&(~Q)           
-#define A_addDQ               (I<<34) |   ( IO << 10 ) | ( IOOOO << 1 )  // D+Q         subtle interaction between MULDIV and branch, need (I<<34)
-#define A_cycnt               (I<<34) |   ( II << 10 ) | ( IOOOO << 1 )  // D+cyclecnt  subtle
-#define A_add1                (I<<34) |   ( IO << 10 ) | ( IOOII << 1 )  // D+Q+1
-#define A_add3                (I<<34) |   ( OO << 10 ) | ( IOOOO << 1 )  // D+(Q|3)+0   subtle, needed see test prog t154.S                                  
-#define A_add4               (II<<34) |   ( OO << 10 ) | ( IOOII << 1 )  // D+(Q|3)+1
-#define A_add3w               (I<<34) |   ( OO << 10 ) | ( IOOOO << 1 )  // D+(Q|3)+0   subtle, needed see test prog t154.S Revise all use of this
-#define A_add4w              (II<<34) |   ( OO << 10 ) | ( IOOII << 1 )  // D+(Q|3)+1   REVISE all use of this
-#define A_add2or4 (I<<37) |  (II<<34) |   ( OO << 10 ) | ( IOOII << 1 )  // D+(Q|((~rvc_pcinc<<1,1))+1 
+#define A_nearXOR                         ( IO << 18 ) | ( OOOxx <<9 )  // B = D^(~Q)                               
+#define A_iszero                          ( IO << 18 ) | ( OOOII <<9 )  // Used in DIV to test for zero in a particular setting
+#define A_passd                           ( IO << 18 ) | ( OOIxx <<9 )  // D
+#define A_invq                            ( IO << 18 ) | ( OIOxx <<9 )  // ~Q
+#define A_nearAND                         ( IO << 18 ) | ( OIIxx <<9 )  // D&(~Q)           
+#define A_addDQ               (I<<42) |   ( IO << 18 ) | ( IOOOO <<9 )  // D+Q         subtle interaction between MULDIV and branch, need (I<<42)
+#define A_cycnt               (I<<42) |   ( II << 18 ) | ( IOOOO <<9 )  // D+cyclecnt  subtle
+#define A_add1                (I<<42) |   ( IO << 18 ) | ( IOOII <<9 )  // D+Q+1
+#define A_add3                (I<<42) |   ( OO << 18 ) | ( IOOOO <<9 )  // D+(Q|3)+0   subtle, needed see test prog t154.S                                  
+#define A_add4               (II<<42) |   ( OO << 18 ) | ( IOOII <<9 )  // D+(Q|3)+1
+#define A_add3w               (I<<42) |   ( OO << 18 ) | ( IOOOO <<9 )  // D+(Q|3)+0   subtle, needed see test prog t154.S Revise all use of this
+#define A_add4w              (II<<42) |   ( OO << 18 ) | ( IOOII <<9 )  // D+(Q|3)+1   REVISE all use of this
+#define A_add2or4 (I<<45) |  (II<<42) |   ( OO << 18 ) | ( IOOII <<9 )  // D+(Q|((~rvc_pcinc<<1,1))+1 
 
-#define A_shlq                  ( IO << 10 ) | ( IOIOO << 1 )  // B = (QQ<<1)|cin (with D=0xffffffff)
-#define A_shlqdiv               ( IO << 10 ) | ( IOIIO << 1 )  // B = (QQ<<1)|M[0] (with D=0xffffffff)
-#define A_nearOR                ( IO << 10 ) | ( IIIOO << 1 )  // (~D)|Q
-#define A_passq                 ( IO << 10 ) | ( IIOOO << 1 )  // Let through Q
-#define A_passq4                ( OO << 10 ) | ( IIOII << 1 )  // Let through (Q|3)+1
-#define A_pasq2or4  (I<<36) |   ( OO << 10 ) | ( IIOII << 1 )  // Let through (Q|1)+1 or (Q|3)+1
-#define A_passq_F               ( IO << 10 ) | ( IIOOI << 1 )  // Let through Q+flgF
-#define A_xx                    ( xO << 10 ) | ( xxxxx << 1 )  // ALU is don't care
+#define A_shlq                  ( IO <<18 ) | ( IOIOO <<9 )  // B = (QQ<<1)|cin (with D=0xffffffff)
+#define A_shlqdiv               ( IO <<18 ) | ( IOIIO <<9 )  // B = (QQ<<1)|M[0] (with D=0xffffffff)
+#define A_nearOR                ( IO <<18 ) | ( IIIOO <<9 )  // (~D)|Q
+#define A_passq                 ( IO <<18 ) | ( IIOOO <<9 )  // Let through Q
+#define A_passq4                ( OO <<18 ) | ( IIOII <<9 )  // Let through (Q|3)+1
+#define A_pasq2or4  (I<<44) |   ( OO <<18 ) | ( IIOII <<9 )  // Let through (Q|1)+1 or (Q|3)+1
+#define A_passq_F               ( IO <<18 ) | ( IIOOI <<9 )  // Let through Q+flgF
+#define A_xx                    ( xO <<18 ) | ( xxxxx <<9 )  // ALU is don't care
 
 // Variants used in MUL/DIV
-#define MA_nearXOR              ( IO << 10 ) | ( OOOxx << 1 )  // B = D^(~Q)                               
-#define MA_iszero               ( IO << 10 ) | ( OOOII << 1 )  // Used in DIV to test for zero in a particular setting
-#define MA_passd                ( IO << 10 ) | ( OOIxx << 1 )  // D
-#define MA_addDQ     (I<<34) |  ( IO << 10 ) | ( IOOOO << 1 )  // D+Q                                         
-#define MA_addDQm    (O<<34) |  ( IO << 10 ) | ( IOOOO << 1 )  // D+Q  may be changed to a passQ by verilog              
-#define MA_add1      (I<<34) |  ( IO << 10 ) | ( IOOII << 1 )  // D+Q+1
-#define MA_usub      (I<<34) |  ( IO << 10 ) | ( IOOII << 1 )  // D+Q+1 (D previously inverted)
-#define MA_shlqdiv              ( IO << 10 ) | ( IOIIO << 1 )  // B = (QQ<<1)|M[0] (with D=0xffffffff)
-#define MA_passq                ( IO << 10 ) | ( IIOOO << 1 )  // Let through Q
-#define MA_xx                   ( xO << 10 ) | ( xxxxx << 1 )  // ALU is don't care
+#define MA_nearXOR              ( IO <<18 ) | ( OOOxx <<9 )  // B = D^(~Q)                               
+#define MA_iszero               ( IO <<18 ) | ( OOOII <<9 )  // Used in DIV to test for zero in a particular setting
+#define MA_passd                ( IO <<18 ) | ( OOIxx <<9 )  // D
+#define MA_addDQ     (I<<42) |  ( IO <<18 ) | ( IOOOO <<9 )  // D+Q                                         
+#define MA_addDQm    (O<<42) |  ( IO <<18 ) | ( IOOOO <<9 )  // D+Q  may be changed to a passQ by verilog              
+#define MA_add1      (I<<42) |  ( IO <<18 ) | ( IOOII <<9 )  // D+Q+1
+#define MA_usub      (I<<42) |  ( IO <<18 ) | ( IOOII <<9 )  // D+Q+1 (D previously inverted)
+#define MA_shlqdiv              ( IO <<18 ) | ( IOIIO <<9 )  // B = (QQ<<1)|M[0] (with D=0xffffffff)
+#define MA_passq                ( IO <<18 ) | ( IIOOO <<9 )  // Let through Q
+#define MA_xx                   ( xO <<18 ) | ( xxxxx <<9 )  // ALU is don't care
 
 
 
@@ -175,29 +182,29 @@
 
         
 
-#define nxtSTB (I << 32) // sa42 : Possibly STB_O or sram_stb to be set high next cycle
-#define nxtWE  (I << 33) // sa43 : Possibly WE_O to be set high next cycle.
+#define nxtSTB (I <<40) // sa42 : Possibly STB_O or sram_stb to be set high next cycle
+#define nxtWE  (I <<41) // sa43 : Possibly WE_O to be set high next cycle.
 
 ///* Write address and write enable. 
 // */
 ////                       ssss         
 ////          sa41         2211         
 ////          |            1098         
-#define Wnn   (I << 31) | (OOOO << 18) // No write. Set SEL_O = 4'b1111
-#define Wbp   (I << 31) | (OOIO << 18) // Prepare write byte. Setup SEL_O as per B[1:0].
-#define Whp   (I << 31) | (OOOI << 18) // Prepare write halfword. Setup SEL_O as per B[1]
-#define WAQb              (OOIO << 18) // Write to MEM, adr in Q
-#define WAQh              (OOOI << 18) // Write to MEM, adr in Q
-#define WAQW              (OOII << 18) // Write to MEM, adr in Q
-#define WTRG              (OIOO << 18) // Write target reg. 
-#define Wjj               (IOOO << 18) // Write to jj
-#define Wrinst            (IOOI << 18) // Write to rinst
-#define Wpc               (IOIO << 18) // Write B to PC
-#define Wttime            (IOII << 18) // Write to tinytime
-#define Wyy               (IIOO << 18) // Write to scratch register yy
-#define Wmepc             (IIOI << 18) // Write to mepc
-#define Wmcaus            (IIIO << 18) // Write to mcause
-#define Wmtval            (IIII << 18) // Write to mtval
+#define Wnn   (I <<39) | (OOOO <<26) // No write. Set SEL_O = 4'b1111
+#define Wbp   (I <<39) | (OOIO <<26) // Prepare write byte. Setup SEL_O as per B[1:0].
+#define Whp   (I <<39) | (OOOI <<26) // Prepare write halfword. Setup SEL_O as per B[1]
+#define WAQb              (OOIO <<26) // Write to MEM, adr in Q
+#define WAQh              (OOOI <<26) // Write to MEM, adr in Q
+#define WAQW              (OOII <<26) // Write to MEM, adr in Q
+#define WTRG              (OIOO <<26) // Write target reg. 
+#define Wjj               (IOOO <<26) // Write to jj
+#define Wrinst            (IOOI <<26) // Write to rinst
+#define Wpc               (IOIO <<26) // Write B to PC
+#define Wttime            (IOII <<26) // Write to tinytime
+#define Wyy               (IIOO <<26) // Write to scratch register yy
+#define Wmepc             (IIOI <<26) // Write to mepc
+#define Wmcaus            (IIIO <<26) // Write to mcause
+#define Wmtval            (IIII <<26) // Write to mtval
 
 ///* Read address
 // */
@@ -206,26 +213,26 @@
 ////                                        |        |sa22
 ////                                        |        ||sa21
 ////                                        |        |||sa20
-#define Rjj        ( ( O << 30 ) |   ( O << 27 ) | ( OOOO << 14 ) )  // Scratch register JJ
-#define Rrinst     ( ( O << 30 ) |   ( O << 27 ) | ( OOOI << 14 ) )  // noinstret_base
-#define Rpc        ( ( O << 30 ) |   ( O << 27 ) | ( OOIO << 14 ) )  // PC
-#define rttime     ( ( O << 30 ) |   ( O << 27 ) | ( OOII << 14 ) )  // 
-#define NMIorInInt ( ( O << 30 ) |   ( O << 27 ) | ( OIOO << 14 ) )  // 
-#define rFFFFFF7F  ( ( O << 30 ) |   ( O << 27 ) | ( OIOI << 14 ) )  // 
-#define r000000FF  ( ( O << 30 ) |   ( O << 27 ) | ( OIIO << 14 ) )  // 
-#define r0000FFFF  ( ( O << 30 ) |   ( O << 27 ) | ( OIII << 14 ) )  // 
-#define rFFFF7FFF  ( ( O << 30 ) |   ( O << 27 ) | ( IOOO << 14 ) )  // 
-#define rmtvec     ( ( O << 30 ) |   ( O << 27 ) | ( IOOI << 14 ) )  // trap vector  
-#define r00000000  ( ( O << 30 ) |   ( O << 27 ) | ( IOIO << 14 ) )  // 
-#define rFFFFFFFF  ( ( O << 30 ) |   ( O << 27 ) | ( IOII << 14 ) )  // 
-#define Ryy        ( ( O << 30 ) |   ( O << 27 ) | ( IIOO << 14 ) )  // Scratch register YY
-#define Ralu       ( ( O << 30 ) |   ( O << 27 ) | ( IIOI << 14 ) )  // ALU result is internal read address.
-#define RS2        ( ( O << 30 ) |   ( O << 27 ) | ( IIIO << 14 ) )  // Read register specified in registered rs2 field of instruction
-#define RS1        ( ( O << 30 ) |   ( O << 27 ) | ( IIII << 14 ) )  // Read register specified in registered rs1 field of instruction
-#define r_xx       ( ( O << 30 ) |   ( O << 27 ) | ( xxxx << 14 ) )  // Read address is dont care. 
-#define rHorL      ( ( O << 30 ) |   ( I << 27 ) | ( IOII << 14 ) )  // 
-#define rHorPC     ( ( I << 30 ) |   ( O << 27 ) | ( IOII << 14 ) )  // 
-#define rHorTtime  ( ( I << 30 ) |   ( I << 27 ) | ( IOII << 14 ) )  // 
+#define Rjj        ( ( O <<38 ) |   ( O <<35 ) | ( OOOO <<22  ) )  // Scratch register JJ
+#define Rrinst     ( ( O <<38 ) |   ( O <<35 ) | ( OOOI <<22  ) )  // noinstret_base
+#define Rpc        ( ( O <<38 ) |   ( O <<35 ) | ( OOIO <<22  ) )  // PC
+#define rttime     ( ( O <<38 ) |   ( O <<35 ) | ( OOII <<22  ) )  // 
+#define NMIorInInt ( ( O <<38 ) |   ( O <<35 ) | ( OIOO <<22  ) )  // 
+#define rFFFFFF7F  ( ( O <<38 ) |   ( O <<35 ) | ( OIOI <<22  ) )  // 
+#define r000000FF  ( ( O <<38 ) |   ( O <<35 ) | ( OIIO <<22  ) )  // 
+#define r0000FFFF  ( ( O <<38 ) |   ( O <<35 ) | ( OIII <<22  ) )  // 
+#define rFFFF7FFF  ( ( O <<38 ) |   ( O <<35 ) | ( IOOO <<22  ) )  // 
+#define rmtvec     ( ( O <<38 ) |   ( O <<35 ) | ( IOOI <<22  ) )  // trap vector  
+#define r00000000  ( ( O <<38 ) |   ( O <<35 ) | ( IOIO <<22  ) )  // 
+#define rFFFFFFFF  ( ( O <<38 ) |   ( O <<35 ) | ( IOII <<22  ) )  // 
+#define Ryy        ( ( O <<38 ) |   ( O <<35 ) | ( IIOO <<22  ) )  // Scratch register YY
+#define Ralu       ( ( O <<38 ) |   ( O <<35 ) | ( IIOI <<22  ) )  // ALU result is internal read address.
+#define RS2        ( ( O <<38 ) |   ( O <<35 ) | ( IIIO <<22  ) )  // Read register specified in registered rs2 field of instruction
+#define RS1        ( ( O <<38 ) |   ( O <<35 ) | ( IIII <<22  ) )  // Read register specified in registered rs1 field of instruction
+#define r_xx       ( ( O <<38 ) |   ( O <<35 ) | ( xxxx <<22  ) )  // Read address is dont care. 
+#define rHorL      ( ( O <<38 ) |   ( I <<35 ) | ( IOII <<22  ) )  // 
+#define rHorPC     ( ( I <<38 ) |   ( O <<35 ) | ( IOII <<22  ) )  // 
+#define rHorTtime  ( ( I <<38 ) |   ( I <<35 ) | ( IOII <<22  ) )  // 
 //                          |
 //                          sa40 extra select signal for Rai
 
@@ -236,18 +243,18 @@
 ////                |            |             Part of enable to Q (sa15)
 /////               |            |             |nReset Q (sa14)
 ////                |            |             ||
-#define Qu        ( O << 0 ) |  (O << 25 ) | ( II << 8)  // 0010 Q = B
-#define Qeu       ( O << 0 ) |  (I << 25 ) | ( OI << 8)  // Nearly Qu, but a variant to distinguish SRAM operand fetch
-#define Qs        ( O << 0 ) |  (I << 25 ) | ( II << 8)  // 0110 If rack==0, Q hold. If rack==1, sample B
-#define Qshr      ( I << 0 ) |  (O << 25 ) | ( II << 8)  // 0010 Q == (msbshr<<31) | (Q>>1)
-#define Qz        ( O << 0 ) |  (O << 25 ) | ( IO << 8)  // 0011 Q = 0
-#define Qcndz     ( O << 0 ) |  (I << 25 ) | ( IO << 8)  // 0101 Q = 0 if rack==1
-//#define QzCYZ   ( O << 0 ) |  (O << 25 ) | ( IO << 8)  // 0011 Q = 0, s11 must be high for zero-find. Todo - check that this is the case, delete
-#define Qzh       ( O << 0 ) |  (O << 25 ) | ( IO << 8)  // 0xx1 Q = 0 or Q hold (assumes it was zero beforehand). Changed to Q = 0
-#define Qudec     ( O << 0 ) |  (O << 25 ) | ( II << 8)  // 1010 Q = decoded immediate
-#define Qhld      ( O << 0 ) |  (O << 25 ) | ( OI << 8)  // x001 Q unchanged. sa14 must be 1 here. Don't understand why it is not don't care
-#define Qx        ( O << 0 ) |  (O << 25 ) | ( Ox << 8)  // xxxx Q don't care
-#define psa00     ( I << 0 )
+#define Qu        ( O << 8 ) |  (O << 33 ) | ( II << 16)  // 0010 Q = B
+#define Qeu       ( O << 8 ) |  (I << 33 ) | ( OI << 16)  // Nearly Qu, but a variant to distinguish SRAM operand fetch
+#define Qs        ( O << 8 ) |  (I << 33 ) | ( II << 16)  // 0110 If rack==0, Q hold. If rack==1, sample B
+#define Qshr      ( I << 8 ) |  (O << 33 ) | ( II << 16)  // 0010 Q == (msbshr<<31) | (Q>>1)
+#define Qz        ( O << 8 ) |  (O << 33 ) | ( IO << 16)  // 0011 Q = 0
+#define Qcndz     ( O << 8 ) |  (I << 33 ) | ( IO << 16)  // 0101 Q = 0 if rack==1
+//#define QzCYZ   ( O << 8 ) |  (O << 33 ) | ( IO << 16)  // 0011 Q = 0, s11 must be high for zero-find. Todo - check that this is the case, delete
+#define Qzh       ( O << 8 ) |  (O << 33 ) | ( IO << 16)  // 0xx1 Q = 0 or Q hold (assumes it was zero beforehand). Changed to Q = 0
+#define Qudec     ( O << 8 ) |  (O << 33 ) | ( II << 16)  // 1010 Q = decoded immediate
+#define Qhld      ( O << 8 ) |  (O << 33 ) | ( OI << 16)  // x001 Q unchanged. sa14 must be 1 here. Don't understand why it is not don't care
+#define Qx        ( O << 8 ) |  (O << 33 ) | ( Ox << 16)  // xxxx Q don't care
+#define psa00     ( I << 8 )
 
 
 
@@ -256,44 +263,44 @@
 ////               ss
 ////               11
 ////               32                                        
-#define srImm    ( OO << 12 ) // shregcnt = B[4:0]                   B[1:0] BB[1:0]       
-#define srDec    ( OI << 12 ) // Decrement shift count               01     11         
-#define sr_h     ( II << 12 ) // shregcnt hold
-#define sr43a    ( IO << 12 ) // shregcnt = {B[1:0],3'b000}          00     00         
+#define srImm    ( OO << 20 ) // shregcnt = B[4:0]                   B[1:0] BB[1:0]       
+#define srDec    ( OI << 20 ) // Decrement shift count               01     11         
+#define sr_h     ( II << 20 ) // shregcnt hold
+#define sr43a    ( IO << 20 ) // shregcnt = {B[1:0],3'b000}          00     00         
 
 
 
 //                                               Read into   ADR1Mustbe0
 //                      use_brcond  shrep        Instruction |Adr0Mustbe0
 //                      |           |    sa33    |           ||use_dinx
-#define use_dinx      ( O << 6) | ( O << 26) | ( O << 7) | ( xxI << 22) // dinx determines where to start microcode
-#define u_cont        ( O << 6) | ( O << 26) | ( O << 7) | ( OOO << 22) // rinx determines next microcode instruction
-#define u_io_i_latch  ( O << 6) | ( O << 26) | ( I << 7) | ( OOO << 22) // 
-#define u_io_i        ( O << 6) | ( O << 26) | ( O << 7) | ( OOO << 22) // Repeat until read SRAM/IO succeeds. Then use rinx to find next ucodeinstr.
-#define u_io_o        ( O << 6) | ( O << 26) | ( O << 7) | ( OOO << 22) // Repeat write data out until WACK
-#define u_shrep       ( O << 6) | ( I << 26) | ( O << 7) | ( OOO << 22) // Repeat shift operation until shiftcounter == 0 
-#define usebcond      ( I << 6) | ( O << 26) | ( O << 7) | ( OOO << 22) // rinx determines next microcode instruction, but with lsb determined by condition
-#define wordaligned   ( O << 6) | ( O << 26) | ( O << 7) | ( IIO << 22) // 
-#define hwordaligned  ( O << 6) | ( O << 26) | ( O << 7) | ( OIO << 22) // 
+#define use_dinx      ( O << 14) | ( O << 34) | ( O << 15) | ( xxI << 30) // dinx determines where to start microcode
+#define u_cont        ( O << 14) | ( O << 34) | ( O << 15) | ( OOO << 30) // rinx determines next microcode instruction
+#define u_io_i_latch  ( O << 14) | ( O << 34) | ( I << 15) | ( OOO << 30) // 
+#define u_io_i        ( O << 14) | ( O << 34) | ( O << 15) | ( OOO << 30) // Repeat until read SRAM/IO succeeds. Then use rinx to find next ucodeinstr.
+#define u_io_o        ( O << 14) | ( O << 34) | ( O << 15) | ( OOO << 30) // Repeat write data out until WACK
+#define u_shrep       ( O << 14) | ( I << 34) | ( O << 15) | ( OOO << 30) // Repeat shift operation until shiftcounter == 0 
+#define usebcond      ( I << 14) | ( O << 34) | ( O << 15) | ( OOO << 30) // rinx determines next microcode instruction, but with lsb determined by condition
+#define wordaligned   ( O << 14) | ( O << 34) | ( O << 15) | ( IIO << 30) // 
+#define hwordaligned  ( O << 14) | ( O << 34) | ( O << 15) | ( OIO << 30) // 
 
 
 
         
-#define isr_none      ( OO << 28 ) // No trap or CSR entry or exit
-#define isr_use_ij    ( OI << 28 ) // inCSR = 0; ij bit 1 determines if we are to do MIE = MPIE; MPIE = 1.
-#define isr_intoCSR   ( IO << 28 ) // inCSR = 1;
-#define isr_intoTrap  ( II << 28 ) // MPIE = MIE; MIE = 0;
-#define isr_xx        ( xx << 28 )
+#define isr_none      ( OO << 36 ) // No trap or CSR entry or exit
+#define isr_use_ij    ( OI << 36 ) // inCSR = 0; ij bit 1 determines if we are to do MIE = MPIE; MPIE = 1.
+#define isr_intoCSR   ( IO << 36 ) // inCSR = 1;
+#define isr_intoTrap  ( II << 36 ) // MPIE = MIE; MIE = 0;
+#define isr_xx        ( xx << 36 )
 
 /* 3 extra variables when MULDIV ? 
 */
 
-#define MCLR               ( II << 34) // Transfer M to rDee, clearM
-#define MLD                ( IO << 34) // ceM==1 clrM==0, sa14 == 0, so loads
-#define MSL                ( IO << 34) // ceM==1 clrM==0, sa14 == 1, so shifts
-#define CH                 ( OI << 34) // ceM==0 clrM==1 conditional hold
-#define CH13  ( I << 36)               // Branch on INSTR[13] to distinguish DIV[U] and MOD[U]
-#define bsign ( I << 36) | ( IO << 34) // Branch on sign of DAT_O[31]
+#define MCLR               ( II << 42) // Transfer M to rDee, clearM
+#define MLD                ( IO << 42) // ceM==1 clrM==0, sa14 == 0, so loads
+#define MSL                ( IO << 42) // ceM==1 clrM==0, sa14 == 1, so shifts
+#define CH                 ( OI << 42) // ceM==0 clrM==1 conditional hold
+#define CH13  ( I << 44)               // Branch on INSTR[13] to distinguish DIV[U] and MOD[U]
+#define bsign ( I << 44) | ( IO << 42) // Branch on sign of DAT_O[31]
 
 // MLD used by:
 //efine _LB_6     LB_6    ,"       WTRG=(D^0x80)+0xFFFFFF7F+1=(D^0x80)-0x80",       isr_none|MLD | A_add1    | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  // Must follow DIVU_5. Kluge to let add1 work in DIV instr
@@ -312,10 +319,9 @@
 //efine _DIVU_2   DIVU_2,  "       Shift (Q,M) left. Prepare unsigned sub",         isr_none|MSL |MA_shlqdiv | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(DIVU_3)    // loops because ceM set and rlastshift clear
 //efine _DIV_7    DIV_7,   "       Shift (Q,M) left. Prepare unsigned sub",         isr_none|MSL |MA_shlqdiv | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(DIV_8)     // loops because ceM set and rlastshift clear
 
-#define MIDGETV_UCODE_NREQ 38 // Not including index
-/* Next ucode instruction to execute
- */
-#define n(x) (((uint64_t)x)<< MIDGETV_UCODE_NREQ )
+
+
+#define n(x) (((uint64_t)x) & 255 )
 
 
 /* =============================================================================

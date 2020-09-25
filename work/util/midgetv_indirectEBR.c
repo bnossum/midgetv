@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
  * Part of midgetv
- * 2019. Copyright B. Nossum.
+ * 2019-2020. Copyright B. Nossum.
  * For licence, see LICENCE
  * -----------------------------------------------------------------------------
  * This is an utility to reduce the number of columns that needs to be stored
@@ -59,11 +59,11 @@ typedef enum {
         _LEND
 } LABELS;
 
-#define NREQATIONS (MIDGETV_UCODE_NREQ+8)
+#define NREQATIONS MIDGETV_UCODE_NREQ
 #define LUTSIZE 4
 #define NREBR   2
 #define NRCOLUMNS NREQATIONS
-#define COLUMNMASK ((1uLL<<(MIDGETV_UCODE_NREQ+8))-1)
+#define COLUMNMASK ((1uLL<<(MIDGETV_UCODE_NREQ))-1)
 
 // This table is essentially the data to be selected from the 8-bit
 // index
@@ -114,7 +114,7 @@ void printf_preamble( void ) {
         printf( 
                 "/* -----------------------------------------------------------------------------\n"
                 " * Part of midgetv\n"
-                " * 2019. Copyright B. Nossum.\n"
+                " * 2019-2020. Copyright B. Nossum.\n"
                 " * For licence, see LICENCE\n"
                 " * -----------------------------------------------------------------------------\n"
                 " * Automatically generated from %s by %s.\n"
@@ -188,7 +188,8 @@ uint64_t process( TBL *tp, uint64_t maskedcolumns ) {
 //                ferr( "Should not be here, only %d disinct lines left in untreated columns\n", m );
 
         fprintf( fo, " * %d distinct lines in remaining untreated columns\n * ", m );
-        for ( j = NRCOLUMNS-1; j >= 0; j-- ) {
+//        for ( j = NRCOLUMNS-1; j >= 0; j-- ) { I believe this is the wrong way.
+        for ( j = 0; j < NRCOLUMNS; j++ ) { 
                 if (  j > 9 ) {
                         fprintf( fo, "c" );
                 } else {
@@ -304,7 +305,8 @@ uint64_t make_compressed_table( TBL *tblp,       // Original
                         }
                 }
                 if ( jj != nrebr*16 - rounds*LUTSIZE )
-                        ferr( "Internal\n" );
+                        ferr( "Internal. jj=%d, while nrebr*16 - rounds*LUTSIZE = %d*16-%d*%d = %d\n",
+                              jj,  nrebr, rounds, LUTSIZE, nrebr*16 - rounds*LUTSIZE);
                 for ( i = 0; i < rounds; i++ ) {
                         int iix = indirinx[i][k];
                         if ( iix >= (1<<lutsize) )
@@ -532,13 +534,13 @@ int main( void ) {
         //if ( ( fo = fopen("/dev/null","w")) == NULL ) ferr( "Que?\n" );
         
         printf_preamble();
-        fprintf( fo, "/* Using LUTSIZE=%d. Using %d EBR%s Initial table has  %d columns\n", LUTSIZE, NREBR, NREBR == 1 ? "." : "s.", NRCOLUMNS );
+        fprintf( fo, "/* Using LUTSIZE=%d. Using %d EBR%s Initial table has %d columns\n", LUTSIZE, NREBR, NREBR == 1 ? "." : "s.", NRCOLUMNS );
         uint64_t newmaskedcolumns;
         uint64_t removecolumns = 0;
         uint64_t reservedcolumns = 0;
         
         removecolumns = 0;//inpow2( 6, 7, 10, 22, 27, 29, 30, 33, -1 ); // Result out of investigate14. Can represent these columns by combinations
-        reservedcolumns = inpow2( 10, -1); // Column should be represented directly         
+        reservedcolumns = inpow2( 18, -1); // Column should be represented directly         
         // reservedcolumns = inpow2( 1,2,3,4,-1);
                                                         
         int nrremoved = __builtin_popcountll(removecolumns);
