@@ -8,11 +8,11 @@ to state a fixed number. Just now, September 2020, the following holds
 for an image that can run the RISC-V compliance suite on an
 `icebreaker` board:
 
-Core    | Toolchain    | Size (SB_LUTs) | Clock (MHz) 
-  :---  |  :---------  |  -----------:  |  --------:
-rv32i   | Synplify Pro | 395            | 31.7
-rv32im  | Lattice LSI  | 468            | 26.4
-rv32imc | Yosys/Arachne| 668            | 19.2
+Core    | Toolchain    | Size (SB_LUTs) | Clock (MHz) | Comment
+  :---  |  :---------  |  -----------:  |  --------:  | :----
+rv32i   | Lattice LSI  | 325            | 31.1        | No auto-lut cascade in placement. Preference file `icecube_icebreaker.pcf`
+rv32im  | Lattice LSI  | 401            | 23.3        | No auto-lut cascade in placement. Preference file `icecube_icebreaker.pcf`
+rv32imc | Yosys/Arachne| 640            | 19.6        |
 
 These cores use 6 EBR rams, and 2 SPRAM256KA.
 
@@ -94,6 +94,15 @@ See [here](work/compliance).
 ### How to compile
 A first time user need some instructions on how/what to compile. Presently this
 is not written, but a very short introduction is [here](doc/README.md).
+
+### History
+
+Midgetv development started with the RISC-V SoftCPU contest late
+2018. As it turned out, midgetv was not in a state do be presented as
+a candidate for the competition, a fate surely shared with many other
+designs. It was, however, so close to usefulness for me that I could
+not just ignore it and let it die.
+
 
 ### Semantic Versioning API specification
 1. Signal interface to module [`m_midgetv_core`](work/code/m_midgetv_core.v) is part of the API.

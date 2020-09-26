@@ -99,7 +99,7 @@ module m_ucode
    assign ceM  = d[43]; // CE for M register. Also used by m_condcode
    assign potentialMODbranch = d[44]; // Distinguish DIV or MOD
    assign ctrl_pcinc_by_2 = d[45]; // May perhaps combine with another controleq?
-   assign ucode_killwarnings = d[47]; // ???
+   assign ucode_killwarnings = &d[47:46]; // ???
 endmodule
 
 // Local Variables:

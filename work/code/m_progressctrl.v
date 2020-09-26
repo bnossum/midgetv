@@ -441,6 +441,8 @@ module m_progressctrl
 
    generate
       if ( RVC == 0 ) begin
+
+         /* No code for this case */
          assign pcinc_by_2 = 1'b0;
          assign pc1 = 1'b0;
          assign was_rvc_instr = 1'b0;

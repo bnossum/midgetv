@@ -164,7 +164,7 @@ module m_RVC # ( parameter RVC = 1)
    
    generate
       if ( RVC == 0 ) begin
-         always @(/*AS*/Di) begin
+         always @(/*AS*/Di or sa12) begin
             Dii = Di;
             is_valid_instrlow  = sa12;
             is_valid_instrhigh = sa12;
@@ -177,7 +177,7 @@ module m_RVC # ( parameter RVC = 1)
          wire [15:0] uhw = (pc1 | luh) ? Di[15:0]  : Di[31:16];
 //         wire [15:0] uhw = (luh) ? Di[15:0]  : Di[31:16]; Probably all we need
 
-         always @(/*AS*/Di or luh or pc1) begin
+         always @(/*AS*/Di or luh or pc1 or sa12) begin
             is_valid_instrlow  = sa12 & ~luh;
             is_valid_instrhigh = sa12 & (luh | ~pc1 | (Di[17:16] != 2'b11));
          end

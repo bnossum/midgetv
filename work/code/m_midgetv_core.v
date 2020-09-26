@@ -789,7 +789,13 @@ module m_midgetv_core
       .ADR_O                            (ADR_O[31:0]));
 
    wire                 mod_s_alu_1;
-   assign mod_s_alu_1 = (s_alu == 3'b100 && clrM == 1'b0) ? ~MULDIVREG[0] : s_alu[1];
+   generate
+      if ( MULDIV == 0 ) begin
+         assign mod_s_alu_1 = s_alu[1];
+      end else begin
+         assign mod_s_alu_1 = (s_alu == 3'b100 && clrM == 1'b0) ? ~MULDIVREG[0] : s_alu[1];
+      end
+   endgenerate
    
    m_alu_carryin #(.HIGHLEVEL(HIGHLEVEL), .MULDIV(MULDIV))
    inst_alu_carryin

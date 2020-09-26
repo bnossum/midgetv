@@ -400,7 +400,7 @@ void printf_result(
 //        for ( k = 0; k < 25; k++ ) {
                 printf( "    * %2.2x ", k );
                 printf( "%-8s ", labeltext[k] );
-                int next = (( ucode0[k] >> (NREQATIONS-8)) & 255);
+                int next = ( ucode0[k] & 255);
                 if ( next ) {
                         printf( "%-8s ", labeltext[next] );
                 } else {

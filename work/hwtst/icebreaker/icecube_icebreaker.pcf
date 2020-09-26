@@ -71,40 +71,40 @@ set_io  BTN3       18
 #
 # These are input mux LUTs, goes to INSTRUCTION ff and cascaded to luta of alu.v
 #
-##  set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_0
-##  set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_1
-##  set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_2
-##  set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_3
-##  set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_4
-##  set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_5
-##  set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_6
-##  set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_7
-##  set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_8
-##  set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_9
-##  set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_10
-##  set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_11
-##  set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_12
-##  set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_13
-##  set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_14
-##  set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_15
-##  set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_16
-##  set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_17
-##  set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_18
-##  set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_19
-##  set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_20
-##  set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_21
-##  set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_22
-##  set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_23
-##  set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_24
-##  set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_25
-##  set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_26
-##  set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_27
-##  set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_28
-##  set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_29
-##  set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_30
-##  set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_31
-##  
-##  set_cascading inst_midgetv_core.inst_progressctrl.blka_l_cmb_bsel0
-##  set_cascading inst_midgetv_core.inst_progressctrl.blka_l_cmb_bsel1
-##  set_cascading inst_midgetv_core.inst_progressctrl.blka_l_cmb_bsel2
-##  set_cascading inst_midgetv_core.inst_progressctrl.blka_l_cmb_bsel3
+set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_0
+set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_1
+set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_2
+set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_3
+set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_4
+set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_5
+set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_6
+set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_7
+set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_8
+set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_9
+set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_10
+set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_11
+set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_12
+set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_13
+set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_14
+set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_15
+set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_16
+set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_17
+set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_18
+set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_19
+set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_20
+set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_21
+set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_22
+set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_23
+set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_24
+set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_25
+set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_26
+set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_27
+set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_28
+set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_29
+set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_30
+set_cascading inst_midgetv_core.inst_mimux.genblk1.cmb_31
+
+set_cascading inst_midgetv_core.inst_progressctrl.blka_l_cmb_bsel0
+set_cascading inst_midgetv_core.inst_progressctrl.blka_l_cmb_bsel1
+set_cascading inst_midgetv_core.inst_progressctrl.blka_l_cmb_bsel2
+set_cascading inst_midgetv_core.inst_progressctrl.blka_l_cmb_bsel3

@@ -17,8 +17,8 @@
  */
 #define MIDGETV_UCODE_NREQ                      \
         (ucodeopt_MULDIV ?                      \
-         (ucodeopt_RVC ? (38+8) : 0) :          \
-         (ucodeopt_RVC ?  0 : (33+8)) )
+         (ucodeopt_RVC ? 46 : 45   ) :          \
+         (ucodeopt_RVC ?  0 : 42    ))
 
 /* Some analysis of microcode is done easier by
    defining value fields that are in use.
@@ -292,7 +292,7 @@
 #define isr_intoTrap  ( II << 36 ) // MPIE = MIE; MIE = 0;
 #define isr_xx        ( xx << 36 )
 
-/* 3 extra variables when MULDIV ? 
+/* 3 extra variables when MULDIV.
 */
 
 #define MCLR               ( II << 42) // Transfer M to rDee, clearM
