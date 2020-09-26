@@ -8,7 +8,9 @@
  * 
  */
 module m_ucode
-  # ( parameter NO_UCODEOPT = 0 )
+  # ( parameter NO_UCODEOPT = 0,
+      parameter MULDIV = 0,
+      parameter RVC = 0)
    (
     input        clk,
     input [7:0]  minx,
@@ -95,10 +97,20 @@ module m_ucode
    assign sa41 = d[39]; // Latch SEL signals etc
    assign sa42 = d[40]; // Possibly activate STB_O or sram_stb
    assign sa43 = d[41]; // Possibly activate WE_O next cycle
-   assign clrM = d[42]; // R for M register. Also used to flag unsigned subtraction in DIV/DIVU/REM/REMU
-   assign ceM  = d[43]; // CE for M register. Also used by m_condcode
-   assign potentialMODbranch = d[44]; // Distinguish DIV or MOD
-   assign ctrl_pcinc_by_2 = d[45]; // May perhaps combine with another controleq?
+
+   generate
+      if ( MULDIV == 0 && RVC == 1 ) begin
+         assign ctrl_pcinc_by_2 = d[42]; // May perhaps combine with another controleq?
+         assign clrM = d[43];               // Fake! R for M register. Also used to flag unsigned subtraction in DIV/DIVU/REM/REMU
+         assign ceM  = d[44];               // Fake! CE for M register. Also used by m_condcode
+         assign potentialMODbranch = d[45]; // Fake! Distinguish DIV or MOD
+      end else begin
+         assign clrM = d[42]; // R for M register. Also used to flag unsigned subtraction in DIV/DIVU/REM/REMU
+         assign ceM  = d[43]; // CE for M register. Also used by m_condcode
+         assign potentialMODbranch = d[44]; // Distinguish DIV or MOD
+         assign ctrl_pcinc_by_2 = d[45]; // May perhaps combine with another controleq?
+      end
+   endgenerate
    assign ucode_killwarnings = &d[47:46]; // ???
 endmodule
 

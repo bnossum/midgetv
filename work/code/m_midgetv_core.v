@@ -1100,7 +1100,7 @@ module m_midgetv_core
       .sa22                             (sa22),
       .sa23                             (sa23));
    
-   m_ucode #(.NO_UCODEOPT(NO_UCODEOPT))
+   m_ucode #(.NO_UCODEOPT(NO_UCODEOPT),.MULDIV(MULDIV), .RVC(RVC))
      inst_ucode
        (/*AUTOINST*/
         // Outputs

@@ -12,6 +12,7 @@ Core    | Toolchain    | Size (SB_LUTs) | Clock (MHz) | Comment
   :---  |  :---------  |  -----------:  |  --------:  | :----
 rv32i   | Lattice LSI  | 325            | 31.1        | No auto-lut cascade in placement. Preference file `icecube_icebreaker.pcf`
 rv32im  | Lattice LSI  | 401            | 23.3        | No auto-lut cascade in placement. Preference file `icecube_icebreaker.pcf`
+rv32ic  | Yosys/Arachne| 574            | 19.3        |
 rv32imc | Yosys/Arachne| 640            | 19.6        |
 
 These cores use 6 EBR rams, and 2 SPRAM256KA.

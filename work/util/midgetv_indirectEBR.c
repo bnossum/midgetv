@@ -539,9 +539,10 @@ int main( void ) {
         uint64_t removecolumns = 0;
         uint64_t reservedcolumns = 0;
         
-        removecolumns = 0;//inpow2( 6, 7, 10, 22, 27, 29, 30, 33, -1 ); // Result out of investigate14. Can represent these columns by combinations
+        //removecolumns   = inpow2( 6, 7, 10, 22, 27, 29, 30, 33, -1 ); // Result out of investigate14. Can represent these columns by combinations
+//38 35 32 31 30 25 21 15 14 10 9 bad
+        removecolumns = 0;//inpow2( 0, -1);
         reservedcolumns = inpow2( 18, -1); // Column should be represented directly         
-        // reservedcolumns = inpow2( 1,2,3,4,-1);
                                                         
         int nrremoved = __builtin_popcountll(removecolumns);
         maskedcolumns = removecolumns;

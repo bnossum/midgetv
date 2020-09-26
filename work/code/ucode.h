@@ -4,7 +4,6 @@
  * For licence, see LICENCE
  * -----------------------------------------------------------------------------
   The microcode of midgetv.
- 
   Switches in midgetv_ucodeoptions.h affects generated ucode.
 
  */
@@ -13,12 +12,6 @@
 #if HAS_MINSTRET == 0 && HAS_EBR_MINSTRET == 1
 #error Can not do this, see comment in "midgetv_ucodeoptions.h"
 #endif
-/* The number of control equations depends on what options are included.
- */
-#define MIDGETV_UCODE_NREQ                      \
-        (ucodeopt_MULDIV ?                      \
-         (ucodeopt_RVC ? 46 : 45   ) :          \
-         (ucodeopt_RVC ?  0 : 42    ))
 
 /* Some analysis of microcode is done easier by
    defining value fields that are in use.
@@ -125,54 +118,91 @@
 #define x16 ((x8<<8)|x8)
 #define unx ( ((x16<<15) | x16) | n(Fetch) )
 
+/* =============================================================================
+   The number of control equations depends on what options are included.
+   At the high end of the table, position of a few variables depends on
+   what extensions are included. Together with MIDGETV_UCODE_NREQ this
+   ensure a table with "no holes" for later optimalization.
+*/
+
+#define MIDGETV_UCODE_NREQ                      \
+        (ucodeopt_MULDIV ?                      \
+         (ucodeopt_RVC ? 46 : 45   ) :          \
+         (ucodeopt_RVC ? 43 : 42   ))
+
+#if (ucodeopt_MULDIV == 0) && (ucodeopt_RVC == 1 )
+#define extCbase 42
+#define extMbase 43
+#else
+// For cores rv32i,rv32im,rv32imc:
+#define extMbase 42
+#define extCbase 45
+#endif
+
+
+/* 3 extra variables when MULDIV */
+#define MCLRpos    extMbase
+#define Mbranchpos (extMbase+2)
+
+/* 1 extra variable when RVC */
+#define RVCpcincctrlpos extCbase
 
 /* =============================================================================
  * The following is definition of fields of microcode
  */
+
+#define MCLR               ( II << MCLRpos ) // Transfer M to rDee, clearM
+#define MLD                ( IO << MCLRpos ) // ceM==1 clrM==0, sa14 == 0, so loads
+#define MSL                ( IO << MCLRpos ) // ceM==1 clrM==0, sa14 == 1, so shifts
+#define CH                 ( OI << MCLRpos ) // ceM==0 clrM==1 conditional hold
+#define CH13  ( I << Mbranchpos)                     // Branch on INSTR[13] to distinguish DIV[U] and MOD[U]
+#define bsign ( I << Mbranchpos) | ( IO << MCLRpos ) // Branch on sign of DAT_O[31]
+
+
 
 /* The ALU and cycle counter control.
  * Observation: s_alu[2] could be represented by a combination of 
  *              s_alu[1:0] and s_alu_carryin to save one column in the
  *              control table. Optimalization not done now.
  *
- *                                          Cyclecnt etc   
- *                                          sa17           s_alu[2:0]
- *                                          |sa16          |||s_alu_carryin[1:0]
- *                                          ||             |||||         */
-#define A_nearXOR                         ( IO << 18 ) | ( OOOxx <<9 )  // B = D^(~Q)                               
-#define A_iszero                          ( IO << 18 ) | ( OOOII <<9 )  // Used in DIV to test for zero in a particular setting
-#define A_passd                           ( IO << 18 ) | ( OOIxx <<9 )  // D
-#define A_invq                            ( IO << 18 ) | ( OIOxx <<9 )  // ~Q
-#define A_nearAND                         ( IO << 18 ) | ( OIIxx <<9 )  // D&(~Q)           
-#define A_addDQ               (I<<42) |   ( IO << 18 ) | ( IOOOO <<9 )  // D+Q         subtle interaction between MULDIV and branch, need (I<<42)
-#define A_cycnt               (I<<42) |   ( II << 18 ) | ( IOOOO <<9 )  // D+cyclecnt  subtle
-#define A_add1                (I<<42) |   ( IO << 18 ) | ( IOOII <<9 )  // D+Q+1
-#define A_add3                (I<<42) |   ( OO << 18 ) | ( IOOOO <<9 )  // D+(Q|3)+0   subtle, needed see test prog t154.S                                  
-#define A_add4               (II<<42) |   ( OO << 18 ) | ( IOOII <<9 )  // D+(Q|3)+1
-#define A_add3w               (I<<42) |   ( OO << 18 ) | ( IOOOO <<9 )  // D+(Q|3)+0   subtle, needed see test prog t154.S Revise all use of this
-#define A_add4w              (II<<42) |   ( OO << 18 ) | ( IOOII <<9 )  // D+(Q|3)+1   REVISE all use of this
-#define A_add2or4 (I<<45) |  (II<<42) |   ( OO << 18 ) | ( IOOII <<9 )  // D+(Q|((~rvc_pcinc<<1,1))+1 
+ *                                                            Cyclecnt etc   
+ *                                                            sa17           s_alu[2:0]
+ *                                                            |sa16          |||s_alu_carryin[1:0]
+ *                                                            ||             |||||         */
+#define A_nearXOR                                           ( IO << 18 ) | ( OOOxx <<9 )  // B = D^(~Q)                               
+#define A_iszero                                            ( IO << 18 ) | ( OOOII <<9 )  // Used in DIV to test for zero in a particular setting
+#define A_passd                                             ( IO << 18 ) | ( OOIxx <<9 )  // D
+#define A_invq                                              ( IO << 18 ) | ( OIOxx <<9 )  // ~Q
+#define A_nearAND                                           ( IO << 18 ) | ( OIIxx <<9 )  // D&(~Q)           
+#define A_addDQ                            (I<<MCLRpos) |   ( IO << 18 ) | ( IOOOO <<9 )  // D+Q         subtle interaction between MULDIV and branch, need (I<<42)
+#define A_cycnt                            (I<<MCLRpos) |   ( II << 18 ) | ( IOOOO <<9 )  // D+cyclecnt  subtle
+#define A_add1                             (I<<MCLRpos) |   ( IO << 18 ) | ( IOOII <<9 )  // D+Q+1
+#define A_add3                             (I<<MCLRpos) |   ( OO << 18 ) | ( IOOOO <<9 )  // D+(Q|3)+0   subtle, needed see test prog t154.S                                  
+#define A_add4                            (II<<MCLRpos) |   ( OO << 18 ) | ( IOOII <<9 )  // D+(Q|3)+1
+#define A_add3w                            (I<<MCLRpos) |   ( OO << 18 ) | ( IOOOO <<9 )  // D+(Q|3)+0   subtle, needed see test prog t154.S Revise all use of this
+#define A_add4w                           (II<<MCLRpos) |   ( OO << 18 ) | ( IOOII <<9 )  // D+(Q|3)+1   REVISE all use of this
+#define A_add2or4 (I<<RVCpcincctrlpos) |  (II<<MCLRpos) |   ( OO << 18 ) | ( IOOII <<9 )  // D+(Q|((~rvc_pcinc<<1,1))+1 
 
-#define A_shlq                  ( IO <<18 ) | ( IOIOO <<9 )  // B = (QQ<<1)|cin (with D=0xffffffff)
-#define A_shlqdiv               ( IO <<18 ) | ( IOIIO <<9 )  // B = (QQ<<1)|M[0] (with D=0xffffffff)
-#define A_nearOR                ( IO <<18 ) | ( IIIOO <<9 )  // (~D)|Q
-#define A_passq                 ( IO <<18 ) | ( IIOOO <<9 )  // Let through Q
-#define A_passq4                ( OO <<18 ) | ( IIOII <<9 )  // Let through (Q|3)+1
-#define A_pasq2or4  (I<<44) |   ( OO <<18 ) | ( IIOII <<9 )  // Let through (Q|1)+1 or (Q|3)+1
-#define A_passq_F               ( IO <<18 ) | ( IIOOI <<9 )  // Let through Q+flgF
-#define A_xx                    ( xO <<18 ) | ( xxxxx <<9 )  // ALU is don't care
+#define A_shlq                          ( IO <<18 ) | ( IOIOO <<9 )  // B = (QQ<<1)|cin (with D=0xffffffff)
+#define A_shlqdiv                       ( IO <<18 ) | ( IOIIO <<9 )  // B = (QQ<<1)|M[0] (with D=0xffffffff)
+#define A_nearOR                        ( IO <<18 ) | ( IIIOO <<9 )  // (~D)|Q
+#define A_passq                         ( IO <<18 ) | ( IIOOO <<9 )  // Let through Q
+#define A_passq4                        ( OO <<18 ) | ( IIOII <<9 )  // Let through (Q|3)+1
+#define A_pasq2or4  (I<<Mbranchpos) |   ( OO <<18 ) | ( IIOII <<9 )  // Let through (Q|1)+1 or (Q|3)+1
+#define A_passq_F                       ( IO <<18 ) | ( IIOOI <<9 )  // Let through Q+flgF
+#define A_xx                            ( xO <<18 ) | ( xxxxx <<9 )  // ALU is don't care
 
 // Variants used in MUL/DIV
-#define MA_nearXOR              ( IO <<18 ) | ( OOOxx <<9 )  // B = D^(~Q)                               
-#define MA_iszero               ( IO <<18 ) | ( OOOII <<9 )  // Used in DIV to test for zero in a particular setting
-#define MA_passd                ( IO <<18 ) | ( OOIxx <<9 )  // D
-#define MA_addDQ     (I<<42) |  ( IO <<18 ) | ( IOOOO <<9 )  // D+Q                                         
-#define MA_addDQm    (O<<42) |  ( IO <<18 ) | ( IOOOO <<9 )  // D+Q  may be changed to a passQ by verilog              
-#define MA_add1      (I<<42) |  ( IO <<18 ) | ( IOOII <<9 )  // D+Q+1
-#define MA_usub      (I<<42) |  ( IO <<18 ) | ( IOOII <<9 )  // D+Q+1 (D previously inverted)
-#define MA_shlqdiv              ( IO <<18 ) | ( IOIIO <<9 )  // B = (QQ<<1)|M[0] (with D=0xffffffff)
-#define MA_passq                ( IO <<18 ) | ( IIOOO <<9 )  // Let through Q
-#define MA_xx                   ( xO <<18 ) | ( xxxxx <<9 )  // ALU is don't care
+#define MA_nearXOR                   ( IO <<18 ) | ( OOOxx <<9 )  // B = D^(~Q)                               
+#define MA_iszero                    ( IO <<18 ) | ( OOOII <<9 )  // Used in DIV to test for zero in a particular setting
+#define MA_passd                     ( IO <<18 ) | ( OOIxx <<9 )  // D
+#define MA_addDQ     (I<<MCLRpos) |  ( IO <<18 ) | ( IOOOO <<9 )  // D+Q                                         
+#define MA_addDQm    (O<<MCLRpos) |  ( IO <<18 ) | ( IOOOO <<9 )  // D+Q  may be changed to a passQ by verilog              
+#define MA_add1      (I<<MCLRpos) |  ( IO <<18 ) | ( IOOII <<9 )  // D+Q+1
+#define MA_usub      (I<<MCLRpos) |  ( IO <<18 ) | ( IOOII <<9 )  // D+Q+1 (D previously inverted)
+#define MA_shlqdiv                   ( IO <<18 ) | ( IOIIO <<9 )  // B = (QQ<<1)|M[0] (with D=0xffffffff)
+#define MA_passq                     ( IO <<18 ) | ( IIOOO <<9 )  // Let through Q
+#define MA_xx                        ( xO <<18 ) | ( xxxxx <<9 )  // ALU is don't care
 
 
 
@@ -291,33 +321,6 @@
 #define isr_intoCSR   ( IO << 36 ) // inCSR = 1;
 #define isr_intoTrap  ( II << 36 ) // MPIE = MIE; MIE = 0;
 #define isr_xx        ( xx << 36 )
-
-/* 3 extra variables when MULDIV.
-*/
-
-#define MCLR               ( II << 42) // Transfer M to rDee, clearM
-#define MLD                ( IO << 42) // ceM==1 clrM==0, sa14 == 0, so loads
-#define MSL                ( IO << 42) // ceM==1 clrM==0, sa14 == 1, so shifts
-#define CH                 ( OI << 42) // ceM==0 clrM==1 conditional hold
-#define CH13  ( I << 44)               // Branch on INSTR[13] to distinguish DIV[U] and MOD[U]
-#define bsign ( I << 44) | ( IO << 42) // Branch on sign of DAT_O[31]
-
-// MLD used by:
-//efine _LB_6     LB_6    ,"       WTRG=(D^0x80)+0xFFFFFF7F+1=(D^0x80)-0x80",       isr_none|MLD | A_add1    | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  // Must follow DIVU_5. Kluge to let add1 work in DIV instr
-//efine _MULHU_1  MULHU_1, "       rM<=RS2,  Rjj<=Q=0. next read RS1. ",            isr_none|MLD |MA_passq   | Wjj   | RS1       | Qz   | sr_h  | u_cont         | n(MULHU_2)   // sa14 == 0 so this loads rM. Also clears rF
-//efine _MULH_3   MULH_3,  "       rM<=RS2, Q = 0. next read RS1. Join.",           isr_none|MLD |MA_xx      | Wnn   | RS1       | Qz   | sr_h  | u_cont         | n(MULHU_2)
-//efine _MUL_0    MUL_0,   "MUL    Store rs1 tp rM. Next read rs2. Q clear",        isr_none|MLD |MA_xx      | Wnn   | RS2       | Qz   | sr_h  | u_cont         | n(MUL_1)
-//efine _DIVU_0   DIVU_0,  "DIVU   Store rs1 to rM. Q=0. Prepare invert rs2",       isr_none|MLD |MA_xx      | Wnn   | RS2       | Qz   | srDec | u_cont         | n(DIVU_1)    
-//efine _REMU_0   REMU_0,  "REMU   Store dividend to rM. Prepare read divisor.Q=0", isr_none|MLD |MA_xx      | Wnn   | RS2       | Qz   | srDec | u_cont         | n(DIVU_1)
-//efine _DIV_5    DIV_5,   "       Kluge to let add1 work in DIV instr",            isr_none|MLD |MA_add1    | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(DIV_3)     // Must follow DIV_4
-//efine _DIV_6    DIV_6,   "       Write M. Prepare shift",                         isr_none|MLD |MA_xx      | Wnn   | rFFFFFFFF | Qz   | sr_h  | u_cont         | n(DIV_7)
-
-// MSL used by
-//efine _MULHU_3  MULHU_3, "       Shift Q and rM. Prepare read rs1",               isr_none|MSL |MA_passd   | Wnn   | RS1       | Qu   | sr_h  | u_cont         | n(MULHU_2)   // xxxxxxxxxxxxxxxxxxxxxxxxxxxx document me. Loops
-//efine _MULHU_7  MULHU_7, "       Last shift.",                                    isr_none|MSL |MA_passd   | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)
-//efine _MUL_2    MUL_2,   "       Shift Q and rM. Prepare read rs2",               isr_none|MSL |MA_passd   | Wnn   | RS2       | Qu   | sr_h  | u_cont         | n(MUL_1)     // Loops
-//efine _DIVU_2   DIVU_2,  "       Shift (Q,M) left. Prepare unsigned sub",         isr_none|MSL |MA_shlqdiv | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(DIVU_3)    // loops because ceM set and rlastshift clear
-//efine _DIV_7    DIV_7,   "       Shift (Q,M) left. Prepare unsigned sub",         isr_none|MSL |MA_shlqdiv | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(DIV_8)     // loops because ceM set and rlastshift clear
 
 
 

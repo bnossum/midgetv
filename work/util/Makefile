@@ -5,7 +5,8 @@
 # -----------------------------------------------------------------------------
 
 TRG := ../bin/midgetv_bin2ebr ../bin/midgetv_genucode  ../bin/midgetv_indirectEBR \
-	../bin/iceblinkcom ../bin/atest ../bin/midgetv_prepare_defines
+	../bin/iceblinkcom ../bin/atest ../bin/midgetv_prepare_defines \
+	../bin/investigate15 ../bin/tablefold
 
 # ../bin/midgetv_tablefold ../bin/midgetv_ucode_linepermutate
 
@@ -38,6 +39,8 @@ all:$(TRG)
 ../bin/midgetv_prepare_defines:midgetv_prepare_defines.c
 	gcc -Wall -Wextra -o $@ $< 
 
+../bin/investigate15:investigate15.c bnvector.c 
+	gcc -Wall -Wextra -mpopcnt -O3 -Dnakedfname=../code/ucode.h -o $@ $^
 
 clean:
 	rm $(TRG)
