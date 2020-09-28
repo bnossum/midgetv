@@ -167,6 +167,9 @@ module humansized_muldiv
       .raluF                            (raluF),
       .FUNC7_5                          (FUNC7_5),
       .ADR_O_31                         (ADR_O_31),
+      .mod_s_alu_1                      (mod_s_alu_1),
+      .s_alu_1                          (s_alu_1),
+      .muldivregmsb                     (muldivregmsb),
       .FUNC7_0                          (FUNC7_0));
 
    //assign new_sra_msb = FUNC7_5 ? ADR_O[ALUWIDTH-1] : FUNC7_0 ? raluF : 0;
