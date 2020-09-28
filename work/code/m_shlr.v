@@ -39,6 +39,7 @@ module m_shlr
       HIGHLEVEL = 1
       )
    (
+    /* verilator lint_off UNUSED */
     input                 clk,
     input                 loadMn, //    Initiating
     input                 ceM, //       Need to hold register certain cycles
@@ -46,6 +47,7 @@ module m_shlr
     input                 cmb_rF2, //   Used to determine lsb during unsigned subtraction in DIV    
     input                 ADR_O0, //    During MULx we shift right. This is msb
     input [ALUWIDTH-1:0]  DAT_O, //     To initiate shift register
+    /* verilator lint_on UNUSED */
     output [ALUWIDTH-1:0] MULDIVREG  // Eventually holds low 32 bits of MULT or quotient of DIV
     );
    

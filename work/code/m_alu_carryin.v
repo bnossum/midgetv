@@ -71,8 +71,8 @@
 module m_alu_carryin  # ( parameter HIGHLEVEL = 1, MULDIV = 1 )   
    (
     input       clk, lastshift, raluF, FUNC7_5, ADR_O_31,
-    input       mod_s_alu_1, s_alu_1,muldivregmsb,
     /* verilator lint_off UNUSED */
+    input       mod_s_alu_1, s_alu_1,muldivregmsb,
     input       FUNC7_0, 
     /* verilator lint_on UNUSED */
     input [1:0] s_alu_carryin,
