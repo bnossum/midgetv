@@ -6,6 +6,8 @@
  * This plays the role of a testbench together with verilator.
  */
 
+`include "../../generated/midgetv_ucodeoptions.hv"
+
 module m_ice40sim_EBRonly
   # ( parameter
       SRAMADRWIDTH       = 0,  
@@ -16,7 +18,7 @@ module m_ice40sim_EBRonly
       HIGHLEVEL          = 0,
       LAZY_DECODE        = 0,
       DISREGARD_WB4_3_55 = 1,
-      MULDIV             = 1 //
+      MULDIV             = `ucodeopt_MULDIV
       )
    (
     input CLK_I, // Toggled from verilator

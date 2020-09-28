@@ -7,6 +7,9 @@
  * Just a wrapper to set a parameter, I don't know how to do
  * this when compiling with verilator, it can probably not be done?
  */
+
+`include "../../generated/midgetv_ucodeoptions.hv"
+
 module m_ice40sim_SRAM
   # ( parameter
       SRAMADRWIDTH       = 16,  
@@ -17,7 +20,7 @@ module m_ice40sim_SRAM
       HIGHLEVEL          = 0,
       LAZY_DECODE        = 0,
       DISREGARD_WB4_3_55 = 0,
-      MULDIV             = 1
+      MULDIV             = `ucodeopt_MULDIV
       )
    (
     input CLK_I, // Toggled from verilator
