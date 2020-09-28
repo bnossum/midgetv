@@ -115,6 +115,6 @@ module m_ucode
 endmodule
 
 // Local Variables:
-// verilog-library-directories:("." "../obj_dir" )
+// verilog-library-directories:("." "../obj_dir" "../generated/" )
 // verilog-library-extensions:(".v" )
 // End:
