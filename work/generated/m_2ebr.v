@@ -18,12 +18,12 @@
  * 155 157 157 157 157 155 154 156 156 156 156 153         157 157 157 157   x 156 157 157     157 157 156 157 156 157 157 157 157 157 157 157 157 157 157 157 157 157 157  kill col 11  Tbl  37 cols 000000000000000000010001000011100000000000 has 153 unique lines.
  * 151 153 153 153 152 151 150 152 152 152 152             153 153 153 153   x 151 153 153     153 153 152 153 152 153 153 153 153 153 153 153 153 153 153 153 153 153 153  kill col  6  Tbl  36 cols 000000000000000000010001000011100001000000 has 150 unique lines.
  * 147 150 149 150 149 148     149 149 149 149             150 150 150 150   x 148 150 150     150 150 149 150 149 150 150 150 150 150 150 150 150 150 150 150 150 150 150  kill col  0  Tbl  35 cols 000000000000000000010001000011100001000001 has 147 unique lines.
- *     147 146 147 144 144     145 146 146 146             147 147 147 147   x 145 147 147     147 147 146 147 146 147 147 147 147 147 147 147 147 147 147 147 147 147 147  kill col  5  Tbl  34 cols 000000000000000000010001000011100001100001 has 144 unique lines.
- *     142 140 143 140         142 143 143 143             144 144 144 144   x 141 144 144     144 143 142 144 142 144 143 144 144 144 144 144 144 144 144 144 144 144 144  kill col  4  Tbl  33 cols 000000000000000000010001000011100001110001 has 140 unique lines.
- *     136 135 136             137 139 139 139             140 140 140 140   x 137 140 140     140 139 136 140 137 140 139 140 140 140 140 140 140 140 140 140 140 140 140  kill col  2  Tbl  32 cols 000000000000000000010001000011100001110101 has 135 unique lines.
- *     129     128             126 134 134 134             135 135 134 134   x 130 135 135     135 133 131 135 132 134 134 135 135 135 135 134 135 135 135 135 135 135 135  kill col  7  Tbl  31 cols 000000000000000000010001000011100011110101 has 126 unique lines.
- *     115     118                 125 125 125             125 126 124 125   x 120 126 126     124 120 120 126 123 124 125 126 126 126 126 124 126 126 126 126 126 126 126  kill col  1  Tbl  30 cols 000000000000000000010001000011100011110111 has 115 unique lines.
- *              97                 114 114 114             113 115 110 111   x 109 115 115     112 109 108 113 112 112 113 115 115 114 115 113 115 115 115 115 115 115 115  kill col  3  Tbl  29 cols 000000000000000000010001000011100011111111 has  97 unique lines.
+ *     147 146 147 144 144     144 146 146 146             147 147 147 147   x 145 147 147     147 147 146 147 146 147 147 147 147 147 147 147 147 147 147 147 147 147 147  kill col  7  Tbl  34 cols 000000000000000000010001000011100011000001 has 144 unique lines.
+ *     143 139 144 140 141         143 143 143             144 144 144 144   x 142 144 144     143 143 143 144 143 143 144 144 144 144 144 144 144 144 144 144 144 144 144  kill col  2  Tbl  33 cols 000000000000000000010001000011100011000101 has 139 unique lines.
+ *     136     136 135 133         138 138 138             139 139 138 139   x 136 139 139     138 138 138 139 138 138 139 139 139 139 139 139 139 139 139 139 139 139 139  kill col  5  Tbl  32 cols 000000000000000000010001000011100011100101 has 133 unique lines.
+ *     127     128 126             132 132 132             133 133 132 133   x 130 133 133     132 128 131 133 131 132 132 133 133 133 133 133 133 133 133 133 133 133 133  kill col  4  Tbl  31 cols 000000000000000000010001000011100011110101 has 126 unique lines.
+ *     115     118                 125 125 125             125 126 124 125   x 120 126 126     124 119 120 126 123 124 125 126 126 126 126 124 126 126 126 126 126 126 126  kill col  1  Tbl  30 cols 000000000000000000010001000011100011110111 has 115 unique lines.
+ *              97                 114 114 114             113 115 110 111   x 109 115 115     113 109 107 113 112 112 113 115 115 114 115 113 115 115 115 115 115 115 115  kill col  3  Tbl  29 cols 000000000000000000010001000011100011111111 has  97 unique lines.
  *                                  95  96  96              94  97  92  92   x  92  97  97      91  88  87  96  95  94  94  97  96  96  97  94  97  97  97  97  97  97  97  kill col 25  Tbl  28 cols 000000000000000010010001000011100011111111 has  87 unique lines.
  *                                  85  86  86              82  87  81  82   x  81  87  87      76  78      86  85  85  84  87  86  86  86  84  87  87  87  87  87  87  87  kill col 23  Tbl  27 cols 000000000000000010110001000011100011111111 has  76 unique lines.
  *                                  74  75  75              71  76  71  72   x  71  76  76          67      74  73  73  73  76  75  75  75  73  76  76  76  76  76  76  75  kill col 24  Tbl  26 cols 000000000000000011110001000011100011111111 has  67 unique lines.
@@ -52,13 +52,13 @@
  * 144 145 145 146 145 144 142 145   x   x   x               x   x 146 146   x 143 146   x     146 146 144 146 145 146 146   x   x   x   x   x   x 146 146   x 146 146 146  kill col  6  Tbl  23 cols 000100111111000000011001001111111101000000 has 142 unique lines.
  * 139 141 140 142 141 139     141   x   x   x               x   x 142 141   x 139 142   x     142 141 140 142 141 142 142   x   x   x   x   x   x 142 142   x 142 142 142  kill col 19  Tbl  22 cols 000100111111000000011011001111111101000000 has 139 unique lines.
  * 134 137 137 139 138 135     136   x   x   x               x   x 139 138   x     139   x     139 138 137 139 138 139 139   x   x   x   x   x   x 139 139   x 139 139 139  kill col  0  Tbl  21 cols 000100111111000000011011001111111101000001 has 134 unique lines.
- *     131 132 133 130 129     130   x   x   x               x   x 133 133   x     134   x     134 131 131 133 133 134 134   x   x   x   x   x   x 134 134   x 134 134 134  kill col  5  Tbl  20 cols 000100111111000000011011001111111101100001 has 129 unique lines.
- *     125 122 126 122         122   x   x   x               x   x 125 126   x     129   x     129 125 125 128 127 129 127   x   x   x   x   x   x 129 129   x 129 129 129  kill col  7  Tbl  19 cols 000100111111000000011011001111111111100001 has 122 unique lines.
- *     117 113 117 111               x   x   x               x   x 117 118   x     122   x     121 113 117 121 120 121 120   x   x   x   x   x   x 122 122   x 122 122 122  kill col  4  Tbl  18 cols 000100111111000000011011001111111111110001 has 111 unique lines.
- *     103  97 103                   x   x   x               x   x 102 106   x     110   x     107 101 103 110 108 110 108   x   x   x   x   x   x 111 111   x 111 111 111  kill col  2  Tbl  17 cols 000100111111000000011011001111111111110101 has  97 unique lines.
- *      84      87                   x   x   x               x   x  87  90   x      95   x      92  86  84  96  94  95  94   x   x   x   x   x   x  97  97   x  97  97  97  kill col 25  Tbl  16 cols 000100111111000010011011001111111111110101 has  84 unique lines.
- *      71      71                   x   x   x               x   x  73  76   x      82   x      76  73      83  81  82  82   x   x   x   x   x   x  84  84   x  84  84  84  kill col  3  Tbl  15 cols 000100111111000010011011001111111111111101 has  71 unique lines.
- *      52                           x   x   x               x   x  60  61   x      69   x      60  61      68  68  68  68   x   x   x   x   x   x  70  71   x  71  70  71  kill col  1  Tbl  14 cols 000100111111000010011011001111111111111111 has  52 unique lines.
+ *     131 132 133 130 129     129   x   x   x               x   x 133 133   x     134   x     134 131 131 133 133 134 134   x   x   x   x   x   x 134 134   x 134 134 134  kill col  7  Tbl  20 cols 000100111111000000011011001111111111000001 has 129 unique lines.
+ *     126 122 126 121 121           x   x   x               x   x 128 127   x     129   x     128 124 126 128 128 128 129   x   x   x   x   x   x 129 129   x 129 129 129  kill col  5  Tbl  19 cols 000100111111000000011011001111111111100001 has 121 unique lines.
+ *     117 112 117 110               x   x   x               x   x 116 117   x     121   x     119 111 115 120 119 120 119   x   x   x   x   x   x 121 121   x 121 121 121  kill col  4  Tbl  18 cols 000100111111000000011011001111111111110001 has 110 unique lines.
+ *     102  97 103                   x   x   x               x   x 101 105   x     109   x     105 100 101 109 107 109 107   x   x   x   x   x   x 110 110   x 110 110 110  kill col  2  Tbl  17 cols 000100111111000000011011001111111111110101 has  97 unique lines.
+ *      84      87                   x   x   x               x   x  88  90   x      95   x      92  86  85  96  94  95  94   x   x   x   x   x   x  97  97   x  97  97  97  kill col  1  Tbl  16 cols 000100111111000000011011001111111111110111 has  84 unique lines.
+ *              65                   x   x   x               x   x  71  76   x      82   x      76  74  71  81  81  81  80   x   x   x   x   x   x  83  84   x  84  83  84  kill col  3  Tbl  15 cols 000100111111000000011011001111111111111111 has  65 unique lines.
+ *                                   x   x   x               x   x  55  55   x      63   x      57  55  52  63  63  62  62   x   x   x   x   x   x  64  65   x  65  64  65  kill col 25  Tbl  14 cols 000100111111000010011011001111111111111111 has  52 unique lines.
  *                                   x   x   x               x   x  44  43   x      50   x      44  45      50  50  50  50   x   x   x   x   x   x  51  52   x  52  51  52  kill col 17  Tbl  13 cols 000100111111000010011011101111111111111111 has  43 unique lines.
  *                                   x   x   x               x   x  37       x      41   x      38  37      41  40  41  41   x   x   x   x   x   x  42  43   x  43  42  43  kill col 24  Tbl  12 cols 000100111111000011011011101111111111111111 has  37 unique lines.
  *                                   x   x   x               x   x  32       x      35   x      31          34  34  35  35   x   x   x   x   x   x  36  36   x  37  36  37  kill col 23  Tbl  11 cols 000100111111000011111011101111111111111111 has  31 unique lines.
@@ -92,14 +92,14 @@ module m_2ebr
     * 06 LB_3     LB_4     1 0 00001101101010x000000111|        q = ~mem[rs1+ofs]
     * 07 LB_4     LB_5     1 0 00001011101011x000001001|        q = (uint8_t) mem[rs1+Iimm]
     * 08 _L08     SB_1     5 0 000111001011000001011010| SB     Store byte. wjj=wradr=RS1+Simm
-    * 09 LB_5     LB_6     1 0 00001011101000x010100011|        q = D^0xffffffff^q = D^0x80
+    * 09 LB_5     LB_6     1 0 00001011101000x010011011|        q = D^0xffffffff^q = D^0x80
     * 0a _L0a     SB_1     5 0 000111001011000001011010| SB     Store byte. wjj=wradr=RS1+Simm
     * 0b JALR_2   JAL_2    6 3 10000101101011x010000110|        Q = (RS1+imn) & 0xfffffffe
     * 0c ADD_0    ADDI_0   1 0 00011101101001x000000100| ADD    add     Addition Q = RS1
     * 0d MUL_0    ILLe     3 0 000xxxx1x00xxxx011111110| Illegal instruction seen
     * 0e SUB_0    SUB_1    3 0 00011101x01xxxx000010000| SUB    Subtraction
     * 0f _L0f     StdIncPc 4 0 100001011011100011100110| LUI    q = imm20
-    * 10 SUB_1    LB_6     1 0 00011111101000x010100011|        Q = ~RS2
+    * 10 SUB_1    LB_6     1 0 00011111101000x010011011|        Q = ~RS2
     * 11 AND_1    ANDI_1   1 0 00011101101000x000011010|        RS1^0xffffffff to Q
     * 12 eFetch3           5 4 001111111011001000000000|  Fr11  Write minstret. Update I. Q=immediate, use dinx
     * 13 condb_2  condb_3  1 0 00011111101000x000010100|        ~RS2 in Q
@@ -170,7 +170,7 @@ module m_2ebr
     * 54 LH_2     LH_3     1 d 00010101101001x111101011|        Repeat shr until shreg = 0 (0, 8 or 16 times)
     * 55 aFaultb  aFault_1 6 0 111101011011100000011110|  err   LH Load access fault. Faulting adr to mtval
     * 56 LH_4     LH_5     1 0 00010001101011x001010111|        q = (uint16_t) mem[rs1+Iimm]
-    * 57 LH_5     LB_6     1 0 00010001101000x010100011|        q = D^0xffffffff^q = D ^ 0x00008000
+    * 57 LH_5     LB_6     1 0 00010001101000x010011011|        q = D^0xffffffff^q = D ^ 0x00008000
     * 58 DIV_A    ILLe     3 0 000xxxx1x00xxxx011111110| Illegal instruction seen
     * 59 DIV_B    ILLe     3 0 000xxxx1x00xxxx011111110| Illegal instruction seen
     * 5a SB_1     SB_2     5 8 10010111101001x001011101|        Write d to Q and yy (for sh 0). Prep shift
@@ -233,20 +233,20 @@ module m_2ebr
     * 93 SW_E2    SW_E3    6 0 10110111101001x010010101|        Store address that faulted
     * 94 SW_E4    JAL_3    b 0 110100111001010000110100|        Store 6 to mcause
     * 95 SW_E3    SW_E4    1 5 000101110011001010010100|        Q = 3
-    * 96 SH_1     SH_2     5 8 10010111101001x010011010|        Write d to Q and yy (for sh 0). Prep shift
+    * 96 SH_1     SH_2     5 8 10010111101001x010111011|        Write d to Q and yy (for sh 0). Prep shift
     * 97 SWH      SW_E2    6 0 111001011001100010010011|        Store faulting address alignment to mtval
     * 98 BLT      condb_2  6 0 100111011011100000010011| BLT    Conditional Branch. Offset to Ryy
     * 99 _L99     ILLe     3 0 000xxxx1x00xxxx011111110| Illegal instruction seen
-    * 9a SH_2     SH_3     5 b 100101111011010010110101|        Repeat shl until shreg = 0 (0,8 or 24 times)
-    * 9b MULHU_1  ILLe     3 0 000xxxx1x00xxxx011111110| Illegal instruction seen
+    * 9a DIVU_5   ILLe     3 0 000xxxx1x00xxxx011111110| Illegal instruction seen
+    * 9b LB_6     StdIncPc 4 5 100001011011001011100110|        WTRG=(D^0x80)+0xFFFFFF7F+1=(D^0x80)-0x80
     * 9c DIV_10   ILLe     3 0 000xxxx1x00xxxx011111110| Illegal instruction seen
     * 9d DIV_11   ILLe     3 0 000xxxx1x00xxxx011111110| Illegal instruction seen
     * 9e SH_4     SH_5     9 0 00111001101001x010011111|        Address back to Q. Prepare get item to write
     * 9f SH_5     SW_2     8 0 00111001100001x011110010|        Write d to a+k until accepted
     * a0 LHU_0    LHU_1    7 2 100110101011000001011110| LHU    Load unsigned hword. Q = rdadr=RS1+Iimm.
     * a1 ECALL_4  ECALL_5  1 5 000101010011001011001110|        Q = 4
-    * a2 DIVU_5   ILLe     3 0 000xxxx1x00xxxx011111110| Illegal instruction seen
-    * a3 LB_6     StdIncPc 4 5 100001011011001011100110|        WTRG=(D^0x80)+0xFFFFFF7F+1=(D^0x80)-0x80
+    * a2 MULHU_3  ILLe     3 0 000xxxx1x00xxxx011111110| Illegal instruction seen
+    * a3 MULHU_1  ILLe     3 0 000xxxx1x00xxxx011111110| Illegal instruction seen
     * a4 SRxI_0   SRxI_1   3 8 000111101001100000111010| SRxI   Shift Right immediate (both logic/arith here)
     * a5 MRET_3   MRET_4   1 5 000011011011001010101111|        0x102 + 0xff + 1 = 0x202
     * a6 ECAL_RET ECALL_1  1 3 000101111001100011010000| ECALL/(U/S/M)RET Select ECALL or (U/S/M)RET
@@ -270,7 +270,7 @@ module m_2ebr
     * b8 BGE      condb_2  6 0 100111011011100000010011| BGE    Conditional Branch. Offset to Ryy
     * b9 DIV_e    ILLe     3 0 000xxxx1x00xxxx011111110| Illegal instruction seen
     * ba DIV_C    ILLe     3 0 000xxxx1x00xxxx011111110| Illegal instruction seen
-    * bb MULHU_3  ILLe     3 0 000xxxx1x00xxxx011111110| Illegal instruction seen
+    * bb SH_2     SH_3     5 b 100101111011010010110101|        Repeat shl until shreg = 0 (0,8 or 24 times)
     * bc CSRRWI_0 CSRRW_1  6 0 100011011011100001001001| CSRRWI Decoded CSR adr in yy
     * bd IJ_4     Fetch    7 a 01011011100011x011011110|        Mask and use as PC
     * be IJ_1     IJ_2     1 a 00010111101001x000011111|        Read until q=mem[(rs1+ofs)&~3u]
@@ -340,18 +340,18 @@ module m_2ebr
     * fe ILLe     ILL_1    3 0 00000101x01xxxx001000110| Illegal
     * ff QINT_0   QINT_1   3 0 00000101x01xxxx011000111| INT    Get current PC
     */
-   localparam u0_0 = 256'hb8e6201000fea404ac86b05aa0a3b05aac09a8070004b0e620e6b0bea5d2b001;
-   localparam u0_1 = 256'hb8b732d4bce698a69832ace6b041b813b0741adea416b215a014b200a01aa0a3;
+   localparam u0_0 = 256'hb8e6201000fea404ac86b05aa09bb05aac09a8070004b0e620e6b0bea5d2b001;
+   localparam u0_1 = 256'hb8b732d4bce698a69832ace6b041b813b0741adea416b215a014b200a01aa09b;
    localparam u0_2 = 256'hb8e6a8f700fe003eb230b096a021b096b01da0270004983520e600fea0e6b052;
    localparam u0_3 = 256'h843a8435a503b8499832a53d00feb813a4d7b403a43684de9081b086a02bbae6;
    localparam u0_4 = 256'hb2e600fe00fe203184b0b066b24bb066a48fa447b265a82b00fe00feb20bb050;
-   localparam u0_5 = 256'h98daa570b46ab8499832a45d00fe00fea0a3ac57b81ea5eb98daa55498daa4e6;
+   localparam u0_5 = 256'h98daa570b46ab8499832a45d00fe00fea09bac57b81ea5eb98daa55498daa4e6;
    localparam u0_6 = 256'hb2cfa81a00fe2031a47ab86b00fe00fe989384f220efa82b00fe00fe00fe00fe;
    localparam u0_7 = 256'h847da4908434b849983284f200fe00fe927da0770073a4f4a476a81ab81ea56e;
    localparam u0_8 = 256'hb88a109200fe20299234b28b00fe00fe847f1234a5f0a82100fe00fe847db085;
-   localparam u0_9 = 256'h84f2a49f00fe00fe00feb4b500feb8139893a49a32949434a49584341292b834;
-   localparam u0_A = 256'hb2c5003f00fe003fa4aa103400fe00feb02e98d0b2af983ab2e600fe32ceb05e;
-   localparam u0_B = 256'ha4c1a41f8cdeb84900fe00fe00feb81330bd00deb89e00de00de12de00de32b2;
+   localparam u0_9 = 256'h84f2a49f00fe00feb2e600fe00feb8139893a4bb32949434a49584341292b834;
+   localparam u0_A = 256'hb2c5003f00fe003fa4aa103400fe00feb02e98d0b2af983a00fe00fe32ceb05e;
+   localparam u0_B = 256'ha4c1a41f8cdeb849b4b500fe00feb81330bd00deb89e00de00de12de00de32b2;
    localparam u0_C = 256'h204f32aa00fe2026b8e600fe30a500fea4cbac47a86fa8e100fe00feb8e900fe;
    localparam u0_D = 256'hb8f4b8f4b8e5b8499292209100feb813b8a100fe00de9292b81ea506b8c9b237;
    localparam u0_E = 256'h12de00fe00fe2011a85600fe30c600feb81e12de328ea81a00fe00fea41d00fe;
@@ -365,9 +365,9 @@ module m_2ebr
    localparam u1_6 = 256'h1501100f3001301d905930013001300160e5807d3605101f3001300130013001;
    localparam u1_7 = 256'h60f560a1b0d3608d130580593001300165b5100530053f1760f9100d60f51d15;
    localparam u1_8 = 256'h60f5b0c53001301fb5d315153001300160b945991117101f3001300160b5001a;
-   localparam u1_9 = 256'h803990393001300130015b973001609d60e558971517b0d360b760b3b5c5b0e9;
-   localparam u1_A = 256'h1501301d3001301d60b5b0d33001300110011317150d381e458530011515729a;
-   localparam u1_B = 256'h1a171a177a5b608d300130013001609d10194800300148004800775b48001515;
+   localparam u1_9 = 256'h8039903930013001458530013001609d60e558971517b0d360b760b3b5c5b0e9;
+   localparam u1_A = 256'h1501301d3001301d60b5b0d33001300110011317150d381e300130011515729a;
+   localparam u1_B = 256'h1a171a177a5b608d5b9730013001609d10194800300148004800775b48001515;
    localparam u1_C = 256'h360d15153001301fb0e93001100d300160a170bb1001601f3001300160953001;
    localparam u1_D = 256'h6f176f1760f5608d65c530153001609d60f530014800b5c560f51d15600d1505;
    localparam u1_E = 256'h775b30013001301f100f30011019300160f5775b1515101f3001300110013001;
