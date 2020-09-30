@@ -323,9 +323,8 @@ DAT_I[31:0] ------------|or|-|\   ___  rDee                      |
  *    ( funct3 = 3'b100, opcode = 7'b0110011). However, 
  *    one should really also check that funct7 = 7'b0000000.
  *    With LAZY_DECODE == 1, this check is not performed.
- * 2: Nearly no checking. Not recommended. Example,
- *    "XOR" can be decoded by 
- *    ( funct3 = 3'b100, opcode[6:2] = 5'b01100).
+ * 2: Nearly no checking. Not recommended, because illegal
+ *    opcodes may hang the controler.
  * 
  * DISREGARD_WB4_3_55 
  * -------------------
