@@ -931,7 +931,7 @@
 
 #define _eILL0a   eILL0a,  "Illegal instruction seen",                              isr_none     | A_xx      | Wnn   | r_xx      | Qx   | sr_h  | u_cont         | n(ILLe )    /* Must preceede  _WFI_5 */
 
-//!! Should have a tighter decode. MRET=0x30200073, so rs1=0 rd=0. Imm=0x302. 
+//!! Should have a tighter decode. MRET=0x30200073, so rs1=0 rd=0. Imm==0x302 checked
 #define _MRET_1   MRET_1,  "MRET   First save Imm, start build constant for check", isr_none     | A_passq   | Wjj   | r000000FF | Qz   | sr_h  | u_cont         | n(MRET_2)   /* Must follow _ECALL_1 */
 #define _MRET_2   MRET_2,  "       0xff+3 = 0x102",                                 isr_none     | A_add3w   | Wnn   | r000000FF | Qu   | sr_h  | u_cont         | n(MRET_3)
 #define _MRET_3   MRET_3,  "       0x102 + 0xff + 1 = 0x202",                       isr_none     | A_add1    | Wnn   | r000000FF | Qu   | sr_h  | u_cont         | n(MRET_4)
@@ -1197,7 +1197,6 @@
  *
  */
 
-// PROBLEM indicates indexes that may be hit by my rv32i decod
 
 //         Fixed  Paired
 //         spes   spec                     reachability
@@ -1248,7 +1247,7 @@
 /* 2b */Y( 0,     0 , _SLTIX_1           , 0, 0xffffffff, 0x00000000, 0          ) //                         
 /* 2c */Y( 1,     0 , _SLL_0             , 1, 0xfe00707f, 0x00001033, (1<<15)    ) // SLL                     
 /* 2d */Y( 1,     0 , _MULH_0            , 1, 0xfe00707f, 0x02001033, (1<<15)    ) // MULH
-/* 2e */Y( 0,     0 , _EBRKWFI2          , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1 
+/* 2e */Y( 0,     0 , _EBRKWFI2          , 0, 0xffffffff, 0x00000000, 0          ) // secureme 
 /* 2f */Y( 1,     0 , _LUI_0(_L2f)       , 1, 0x0000007f, 0x00000037, (1<<25)/2  ) // LUI 2/2                 
 /* 30 */Y( 0,     0 , _SLTIX_2           , 0, 0xffffffff, 0x00000000, 0          ) //                         
 /* 31 */Y( 0,     0 , _SLTX_1            , 0, 0xffffffff, 0x00000000, 0          ) //                         
@@ -1272,16 +1271,16 @@
 /* 43 */Y( 0,  0x03 , _MULHU_4           , 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to FENCE
 /* 44 */Y( 1,     0 , _SLTI_0            , 1, 0x0000707f, 0x00002013, (1<<22)    ) // SLTI
 /* 45 */Y( 0,     0 , _WFI_3             , 0, 0xffffffff, 0x00000000, 0          ) // 
-/* 46 */Y( 0,     0 , _ILL_1             , 0, 0xffffffff, 0x00000000, 0          ) // illegal PROBLEM
-/* 47 */Y( 0,     0 , _ILL_2             , 0, 0xffffffff, 0x00000000, 0          ) // illegal PROBLEM
+/* 46 */Y( 0,     0 , _ILL_1             , 0, 0xffffffff, 0x00000000, 0          ) // Potential problem, can this instructions be reached bv an OpCode decode?
+/* 47 */Y( 0,     0 , _ILL_2             , 0, 0xffffffff, 0x00000000, 0          ) // Potential problem, can this instructions be reached bv an OpCode decode?
 /* 48 */Y( 1,     0 , _SW_0(_L48)        , 1, 0x0000707f, 0x00002023, (1<<22)/2  ) // SW 1/2
 /* 49 */Y( 0,     0 , _CSRRW_1           , 0, 0xffffffff, 0x00000000, 0          )
 /* 4a */Y( 1,     0 , _SW_0(_L4a)        , 1, 0x0000707f, 0x00002023, (1<<22)/2  ) // SW 2/2
 /* 4b */Y( 0,     0 , _CSRRW_2           , 0, 0xffffffff, 0x00000000, 0          )
 /* 4c */Y( 1,     0 , _SLT_0             , 1, 0xfe00707f, 0x00002033, (1<<15)    ) // SLT
 /* 4d */Y( 1,     0 , _MULHSU_0          , 1, 0xfe00707f, 0x02002033, (1<<15)    ) // MULHSU
-/* 4e */Y( 0,  0x04 , _eILL0b            , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1
-/* 4f */Y( 0,  0x04 , _MRET_8            , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1
+/* 4e */Y( 0,  0x04 , _eILL0b            , 0, 0xffffffff, 0x00000000, 0          ) // secureme                        Reached with LAZY_DECODE==1 but forward progress ensured || Wants to relocate these
+/* 4f */Y( 0,  0x04 , _MRET_8            , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1. Will work as a strange JMP  || Wants to relocate these
 /* 50 */Y( 0,  0x05 , _LW_1              , 0, 0xffffffff, 0x00000000, 0          ) 
 /* 51 */Y( 0,  0x05 , _LDAF(LDAF_LW)     , 0, 0xffffffff, 0x00000000, 0          )
 /* 52 */Y( 0,  0x06 , _LH_1              , 0, 0xffffffff, 0x00000000, 0          )
@@ -1298,22 +1297,22 @@
 /* 5d */Y( 0,     0 , _SB_2              , 0, 0xffffffff, 0x00000000, 0          )
 /* 5e */Y( 0,  0x09 , _LHU_1             , 0, 0xffffffff, 0x00000000, 0          )
 /* 5f */Y( 0,  0x09 , _LDAF(LDAF_LHU)    , 0, 0xffffffff, 0x00000000, 0          )
-/* 60 */Y( 0,  0x0a , _DIV_14            , 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "LW"
-/* 61 */Y( 0,  0x0a , _DIV_15            , 0, 0xffffffff, 0x00000000, 0          )
+/* 60 */Y( 0,  0x0a , _DIV_14            , 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "LW" | Move around to other pair to get 1 location for LAZY_DECODE 2/12
+/* 61 */Y( 0,  0x0a , _DIV_15            , 0, 0xffffffff, 0x00000000, 0          ) //                                                            |
 /* 62 */Y( 0,  0x0b , _DIV_8             , 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "ij"
 /* 63 */Y( 0,  0x0b , _DIV_9             , 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to FENCE
 /* 64 */Y( 1,     0 , _SLTIU_0           , 1, 0x0000707f, 0x00003013, (1<<22)    ) // SLTIU
 /* 65 */Y( 0,     0 , _WFI_4             , 0, 0xffffffff, 0x00000000, 0          ) 
 /* 66 */Y( 0,  0x0c , _SW_1              , 0, 0xffffffff, 0x00000000, 0          ) 
 /* 67 */Y( 0,  0x0c , _SW_E1(SWE)        , 0, 0xffffffff, 0x00000000, 0          )
-/* 68 */Y( 0,  0x23 , _DIV_12            , 2, 0x00200000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "SW"
-/* 69 */Y( 0,  0x23 , _DIV_13            , 0, 0xffffffff, 0x00000000, 0          ) 
-/* 6a */Y( 0,     0 , _MULH_1            , 0, 0xffffffff, 0x00000000, 0          ) // illegal as entry. Can get here from OpClde close to "LW" and also "SW"
+/* 68 */Y( 0,  0x23 , _DIV_12            , 2, 0x00200000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "SW" | Move around to other pair to get 1 location for LAZY_DECODE 3/12
+/* 69 */Y( 0,  0x23 , _DIV_13            , 0, 0xffffffff, 0x00000000, 0          ) //                                                          |
+/* 6a */Y( 0,     0 , _MULH_1            , 2, 0xffffffff, 0x00000000, 0          ) // illegal as entry. Can get here from OpClde close to "LW" and also "SW"
 /* 6b */Y( 0,     0 , _SB_4              , 0, 0xffffffff, 0x00000000, 0          )
 /* 6c */Y( 1,     0 , _SLTU_0            , 1, 0xfe00707f, 0x00003033, (1<<15)    ) // SLTU
 /* 6d */Y( 1,     0 , _MULHU_0           , 1, 0xfe00707f, 0x02003033, (1<<15)    ) // MULHU
-/* 6e */Y( 0,     0 , _LHU_3             , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1
-/* 6f */Y( 0,     0 , _MRET_6            , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1
+/* 6e */Y( 0,     0 , _LHU_3             , 0, 0xffffffff, 0x00000000, 0          ) // secureme                        Reached with LAZY_DECODE==1 || Want to relocate
+/* 6f */Y( 0,     0 , _MRET_6            , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1 || Want to relocate
 /* 70 */Y( 0,  0x0d , _LHU_2             , 0, 0xffffffff, 0x00000000, 0          )
 /* 71 */Y( 0,  0x0d , _aFaultc           , 0, 0xffffffff, 0x00000000, 0          )
 /* 72 */Y( 0,     0 , _LBU_3             , 0, 0xffffffff, 0x00000000, 0          )
@@ -1338,15 +1337,15 @@
 /* 85 */Y( 0,     0 , _LBU_1             , 0, 0xffffffff, 0x00000000, 0          )
 /* 86 */Y( 0,  0x11 , _JAL_2             , 0, 0xffffffff, 0x00000000, 0          )
 /* 87 */Y( 0,  0x11 , _JALRE1            , 0, 0xffffffff, 0x00000000, 0          ) // 
-/* 88 */Y( 0,  0x12 , _DIV_E             , 2, 0x00200000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "SW"
-/* 89 */Y( 0,  0x12 , _DIV_F             , 0, 0xffffffff, 0x00000000, 0          )
+/* 88 */Y( 0,  0x12 , _DIV_E             , 2, 0x00200000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "SW"  || Move around to get 1 location for LAZY_DECODE 4/12
+/* 89 */Y( 0,  0x12 , _DIV_F             , 0, 0xffffffff, 0x00000000, 0          ) //                                                           ||
 /* 8a */Y( 0,  0x15 , _DIVU_5            , 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "SW" 
-/* 8b */Y( 0,  0x15 , _LB_6              , 2, 0x00400000, 0x00000000, 0          ) 
+/* 8b */Y( 0,  0x15 , _LB_6              , 0, 0x00400000, 0x00000000, 0          ) 
 /* 8c */Y( 1,     0 , _XOR_0             , 1, 0xfe00707f, 0x00004033, (1<<15)    ) // XOR
 /* 8d */Y( 1,     0 , _DIV_0             , 1, 0xfe00707f, 0x02004033, (1<<15)    ) // DIV
-/* 8e */Y( 0,     0 , _aF_SW_3           , 0, 0xffffffff, 0x00000000, 0          ) // illegal. Must be even ucode adr due to use of add4       Potential PROBLEM
-/* 8f */Y( 0,     0 , _ILL_3             , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1
-/* 90 */Y( 0,     0 , _NMI_2             , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1
+/* 8e */Y( 0,     0 , _aF_SW_3           , 0, 0xffffffff, 0x00000000, 0          ) // secureme illegal. Must be even ucode adr due to use of add4       Reached with LAZY_DECODE==1 || Want to relocate
+/* 8f */Y( 0,     0 , _ILL_3             , 0, 0xffffffff, 0x00000000, 0          ) //                                                          Reached with LAZY_DECODE==1 || Want to relocate
+/* 90 */Y( 0,     0 , _NMI_2             , 0, 0xffffffff, 0x00000000, 0          ) //                         
 /* 91 */Y( 0,     0 , _LDAF_2            , 0, 0xffffffff, 0x00000000, 0          )
 /* 92 */Y( 0,     0 , _LDAF_3            , 0, 0xffffffff, 0x00000000, 0          )
 /* 93 */Y( 0,     0 , _SW_E2             , 0, 0xffffffff, 0x00000000, 0          )
@@ -1356,28 +1355,28 @@
 /* 97 */Y( 0,  0x13 , _SW_E1(SWH)        , 0, 0xffffffff, 0x00000000, 0          )
 /* 98 */Y( 1,     0 , _BLT               , 1, 0x0000707f, 0x00004063, (1<<22)    ) // BLT
 /* 99 */Y( 0,     0 , _ILL_0(_L99)       , 2, 0x00400000, 0x00000000, 0          ) // illegal Can get here from OpCode close to "JALR". Only location I have left to play with
-/* 9a */Y( 0,     0 , _ECALL_6           , 2, 0x00200000, 0x00000000, 0          ) // Must be even ucode adr for unknown reason
+/* 9a */Y( 0,     0 , _ECALL_6           , 0, 0x00200000, 0x00000000, 0          ) // Must be even ucode adr for unknown reason
 /* 9b */Y( 0,     0 , _ILL_5             , 0, 0xffffffff, 0x00000000, 0          ) 
-/* 9c */Y( 0,  0x14 , _DIV_10            , 2, 0x00001000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "EBREAK/ECALL/CSR"
-/* 9d */Y( 0,  0x14 , _DIV_11            , 0, 0xffffffff, 0x00000000, 0          )
+/* 9c */Y( 0,  0x14 , _DIV_10            , 2, 0x00001000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "EBREAK/ECALL/CSR" || Move around to get 1 location for LAZY_DECODE 5/12
+/* 9d */Y( 0,  0x14 , _DIV_11            , 0, 0xffffffff, 0x00000000, 0          ) //                                                                        || 
 /* 9e */Y( 0,     0 , _SH_4              , 0, 0xffffffff, 0x00000000, 0          )
 /* 9f */Y( 0,     0 , _SH_5              , 0, 0xffffffff, 0x00000000, 0          )
 /* a0 */Y( 1,     0 , _LHU_0             , 1, 0x0000707f, 0x00005003, (1<<22)    ) // LHU
 /* a1 */Y( 0,     0 , _ECALL_4           , 0, 0xffffffff, 0x00000000, 0          )
-/* a2 */Y( 0,     0 , _MULHU_3           , 0, 0xffffffff, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "ij"
-/* a3 */Y( 0,     0 , _MULHU_1           , 0, 0xffffffff, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to FENCE
+/* a2 */Y( 0,     0 , _MULHU_3           , 2, 0xffffffff, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "ij"
+/* a3 */Y( 0,     0 , _MULHU_1           , 2, 0xffffffff, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to FENCE
 /* a4 */Y( 1,     0 , _SRxI_0            , 1, 0xbe00707f, 0x00005013, (1<<15)*2  ) // SRLI/SRAI
 /* a5 */Y( 0,     0 , _MRET_3            , 0, 0xffffffff, 0x00000000, 0          )
 /* a6 */Y( 0,  0x16 , _ECAL_RET          , 0, 0xffffffff, 0x00000000, 0          )
 /* a7 */Y( 0,  0x16 , _EBRKWFI1          , 0, 0xffffffff, 0x00000000, 0          )
 /* a8 */Y( 0   ,  0 , _DIV_3             , 2, 0x00200000, 0x00000000, 0          ) // Illegal as entry. Can get here from OpCode close to "SW". DIV_3 must be even ucode adr
-/* a9 */Y( 0,     0 , _ILL_4             , 2, 0x00200000, 0x00000000, 0          ) 
-/* aa */Y( 0,     0 , _DIV_6             , 0, 0xffffffff, 0x00000000, 0          ) // Illegal as entry. Can get here from OpCode close to "SW"
+/* a9 */Y( 0,     0 , _ILL_4             , 0, 0x00200000, 0x00000000, 0          ) 
+/* aa */Y( 0,     0 , _DIV_6             , 2, 0xffffffff, 0x00000000, 0          ) // Illegal as entry. Can get here from OpCode close to "SW"
 /* ab */Y( 0,     0 , _EBREAK_2          , 0, 0xffffffff, 0x00000000, 0          )
 /* ac */Y( 1,     0 , _SRx_0(_Lac)       , 1, 0xfe00707f, 0x00005033, (1<<15)    ) // SRL
 /* ad */Y( 1,     0 , _DIVU_0            , 1, 0xfe00707f, 0x02005033, (1<<15)    ) // DIVU
 /* ae */Y( 1,     0 , _SRx_0(_Lae)       , 1, 0xfe00707f, 0x40005033, (1<<15)    ) // SRA
-/* af */Y( 0,     0 , _MRET_4            , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1
+/* af */Y( 0,     0 , _MRET_4            , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1. Has forward progress, but want to relocate
 /* b0 */Y( 0,     0 , _CSRRW_3           , 0, 0xffffffff, 0x00000000, 0          )
 /* b1 */Y( 0,     0 , _CSRRS_1           , 0, 0xffffffff, 0x00000000, 0          )
 /* b2 */Y( 0,     0 , _CSRRC_1           , 0, 0xffffffff, 0x00000000, 0          )
@@ -1388,7 +1387,7 @@
 /* b7 */Y( 0,     0 , _IJ_3              , 0, 0xffffffff, 0x00000000, 0          )
 /* b8 */Y( 1,     0 , _BGE               , 1, 0x0000707f, 0x00005063, (1<<22)    ) // BGE
 /* b9 */Y( 0,     0 , _DIV_e             , 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "JALR".
-/* ba */Y( 0,     0 , _DIV_C             , 0, 0xffffffff, 0x00000000, 0          ) // Must be even ucode adr for unknown reason. Must find owut this. Probably because MCLR was used prev cycle.
+/* ba */Y( 0,     0 , _DIV_C             , 0, 0xffffffff, 0x00000000, 0          ) // Must be even ucode adr for unknown reason. Must find owut this. Probably because MCLR was used prev cycle.. Move around to get 1 location for LAZY_DECODE 6/12
 /* bb */Y( 0,     0 , _SH_2              , 0, 0xffffffff, 0x00000000, 0          ) 
 /* bc */Y( 1,     0 , _CSRRWI_0          , 1, 0x0000707f, 0x00005073, (1<<22)    ) // CSRRWI
 /* bd */Y( 0,     0 , _IJ_4              , 0, 0xffffffff, 0x00000000, 0          )
@@ -1397,19 +1396,19 @@
 /* c0 */Y( 0,     0 , _DIV_D             , 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "LW"
 /* c1 */Y( 0,     0 , _IJT_2             , 0, 0xffffffff, 0x00000000, 0          )
 /* c2 */Y( 0,  0x18 , _DIVU_3            , 2, 0x00400000, 0x00000000, 0          ) // Illegal as entry. Can get here from OpCode close to "ij"
-/* c3 */Y( 0,  0x18,  _DIVU_4            , 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to FENCE
-/* c4 */Y( 1,     0 , _ORI_0             , 1, 0x0000707f, 0x00006013, (1<<22)    ) // ORI
+/* c3 */Y( 0,  0x18,  _DIVU_4            , 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to FENCE. 
+/* c4 */Y( 1,     0 , _ORI_0             , 1, 0x0000707f, 0x00006013, (1<<22)    ) // ORI                                                        
 /* c5 */Y( 0,     0 , _MRET_5            , 0, 0xffffffff, 0x00000000, 0          )
 /* c6 */Y( 0,     0 , _IJT_4             , 0, 0xffffffff, 0x00000000, 0          )
 /* c7 */Y( 0,     0 , _QINT_1            , 0, 0xffffffff, 0x00000000, 0          )
-/* c8 */Y( 9,     0 , _DIV_7             , 2, 0x00200000, 0x00000000, 0          ) // Illegal as entry. Can get here from OpCode close to "SW". DIV_7 must be even ucode adr
+/* c8 */Y( 0,     0 , _DIV_7             , 2, 0x00200000, 0x00000000, 0          ) // Illegal as entry. Can get here from OpCode close to "SW". DIV_7 must be even ucode adr
 /* c9 */Y( 0,     0 , _MRET_2            , 0, 0xffffffff, 0x00000000, 0          )
 /* ca */Y( 0,     0 , _DIVU_2            , 2, 0x00200000, 0x00000000, 0          ) // illegal
 /* cb */Y( 0,     0 , _QINT_2            , 0, 0xffffffff, 0x00000000, 0          )
 /* cc */Y( 1,     0 , _OR_0              , 1, 0xfe00707f, 0x00006033, (1<<15)    ) // OR
 /* cd */Y( 1,     0 , _REM_0             , 1, 0xfe00707f, 0x02006033, (1<<15)    ) // REM
-/* ce */Y( 0,     0 , _ECALL_5           , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1
-/* cf */Y( 0,     0 , _MRET_7            , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1
+/* ce */Y( 0,     0 , _ECALL_5           , 0, 0xffffffff, 0x00000000, 0          ) // secureme                        Reached with LAZY_DECODE==1 || Want to relocate
+/* cf */Y( 0,     0 , _MRET_7            , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1 || Want to relocate
 /* d0 */Y( 0,  0x19 , _ECALL_1           , 0, 0xffffffff, 0x00000000, 0          )
 /* d1 */Y( 0,  0x19 , _MRET_1            , 0, 0xffffffff, 0x00000000, 0          )
 /* d2 */Y( 0,  0x1a , _LB_2              , 0, 0xffffffff, 0x00000000, 0          )
@@ -1436,12 +1435,12 @@
 /* e7 */Y( 0,  0x1e , _aFault            , 0, 0xffffffff, 0x00000000, 0          )
 /* e8 */Y( 0,     0 , _MUL_2             , 2, 0x00200000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "SW".
 /* e9 */Y( 0,     0 , _IJT_3             , 0, 0xffffffff, 0x00000000, 0          )
-/* ea */Y( 0,     0 , _MULHU_5           , 2, 0x00200000, 0x00000000, 0          ) //(illegal) 
+/* ea */Y( 0,     0 , _MULHU_5           , 2, 0x00200000, 0x00000000, 0          ) //(illegal) May be moved 1/12 needed for LAZY_DECODE
 /* eb */Y( 0,     0 , _LH_3              , 0, 0xffffffff, 0x00000000, 0          )
 /* ec */Y( 1,     0 , _AND_0             , 1, 0xfe00707f, 0x00007033, (1<<15)    ) // AND
 /* ed */Y( 1,     0 , _REMU_0            , 1, 0xfe00707f, 0x02007033, (1<<15)    ) // REMU
-/* ee */Y( 0,  0x1f , _eILL0a            , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1
-/* ef */Y( 0,  0x1f , _WFI_5             , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1
+/* ee */Y( 0,  0x1f , _eILL0a            , 0, 0xffffffff, 0x00000000, 0          ) // secureme                        Reached with LAZY_DECODE==1 Want to relocate
+/* ef */Y( 0,  0x1f , _WFI_5             , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1 Want to relocate
 /* f0 */Y( 0,  0x20 , _LBU_2             , 0, 0xffffffff, 0x00000000, 0          ) 
 /* f1 */Y( 0,  0x20 , _aFaulte           , 0, 0xffffffff, 0x00000000, 0          )
 /* f2 */Y( 0,  0x21 , _SW_2              , 0, 0xffffffff, 0x00000000, 0          )
