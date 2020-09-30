@@ -1,0 +1,64 @@
+# 12 MHz clock
+set_io -nowarn INSTR[0]  35
+
+# RS232
+set_io -nowarn INSTR[1]       6
+set_io -nowarn illegal     9
+
+# LEDs and Button
+set_io -nowarn INSTR[2]     10
+set_io -nowarn INSTR[3]     11
+set_io -nowarn INSTR[4]     37
+
+# RGB LED Driver
+set_io -nowarn INSTR[5]  39
+set_io -nowarn INSTR[6]  40
+set_io -nowarn INSTR[7]  41
+
+# SPI Flash
+set_io -nowarn INSTR[8]  15
+set_io -nowarn INSTR[9]  16
+set_io -nowarn INSTR[10]  14
+set_io -nowarn INSTR[11]  17
+set_io -nowarn INSTR[12]  12
+set_io -nowarn INSTR[13]  13
+
+# PMOD 1A
+set_io -nowarn INSTR[14]       4
+set_io -nowarn INSTR[15]       2
+set_io -nowarn INSTR[16]      47
+set_io -nowarn INSTR[17]      45
+set_io -nowarn INSTR[18]       3
+set_io -nowarn INSTR[19]      48
+set_io -nowarn INSTR[20]      46
+set_io -nowarn INSTR[21]      44
+
+# PMOD 1B
+set_io -nowarn INSTR[22]      43
+set_io -nowarn INSTR[23]      38
+set_io -nowarn INSTR[24]      34
+set_io -nowarn INSTR[25]      31
+set_io -nowarn INSTR[26]      42
+set_io -nowarn INSTR[27]      36
+set_io -nowarn INSTR[28]      32
+set_io -nowarn INSTR[29]      28
+
+# PMOD 2
+set_io -nowarn INSTR[30]       27
+set_io -nowarn INSTR[31]       25
+set_io -nowarn corerunning     21
+set_io -nowarn P2_4       19
+set_io -nowarn P2_7       26
+set_io -nowarn P2_8       23
+set_io -nowarn P2_9       20
+set_io -nowarn P2_10      18
+
+# LEDs and Buttons (PMOD 2)
+set_io -nowarn LED1 26
+set_io -nowarn LED2 27
+set_io -nowarn LED3 25
+set_io -nowarn LED4 23
+set_io -nowarn LED5       21
+set_io -nowarn BTN1       20
+set_io -nowarn BTN2       19
+set_io -nowarn BTN3       18
