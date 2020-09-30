@@ -67,10 +67,10 @@ int main( void ) {
 //#define P(x) puts(x); putchar( ' ' );
 #define P(x)
         
-        opcode = 3;
-//        opcode = 0x10500077-4;
-//        opcode = 0x40003027;
-
+//        opcode = 0x30200000;
+        opcode = 0;
+        
+        opcode |= 3;
         do {
                 //puthex32( opcode ); putchar(' ');
                 switch ( opcode & 0b1111111 ) {
@@ -177,7 +177,8 @@ int main( void ) {
                         case 0b000 :
                                 if ( opcode == 0b00000000000000000000000001110011 || /* ECALL  */
                                      opcode == 0b00000000000100000000000001110011 || /* EBREAK */
-                                     opcode == 0b00010000010100000000000001110011 )  /* WFI    */
+                                     opcode == 0b00010000010100000000000001110011 || /* WFI    */
+                                     opcode == 0b00110000001000000000000001110011 )  /* MRET   */
                                         goto Legal;
                                 goto Illegal;
                         case 0b001 : P("CSRRW"); goto Legal;
@@ -217,14 +218,20 @@ int main( void ) {
                 nrgood++;
                 *LED = 2;
         L:
+                if ( (opcode & 0xfffff) == 3 ) {
+                        if ( (opcode & 0x3ffffff) == 3 ) {
+                                puts( "\n" );
+                                putchar(((opcode>>26)&63) + 0x40); // ...26
+                                puts( " : " );
+                        }
+                        putchar(((opcode>>20)&63) + 0x40); // ...20
+                }
                 opcode += 4;
                 /* The number of illegal instruction traps should always be
                    exactly equal the number of counted illegal instructions
                 */
                 if ( nrillegal != nrillegaltraps )
                         goto Fatal;
-                if ( (opcode & 0x3ffffff) == 0x3ffffff )
-                        putchar(((opcode>>26)&63) + 0x40);
         } while ( opcode != 3 );
 
         // 1 red

@@ -39,6 +39,7 @@
 `include "../../code/m_progressctrl.v"
 `include "../../code/m_shlr.v"
 `include "../../code/m_RVC.v"
+`include "../../code/m_illegalop.v"
 `include "../../code/m_midgetv_core.v"
 
 
