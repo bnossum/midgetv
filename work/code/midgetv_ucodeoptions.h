@@ -42,4 +42,4 @@
 /* Nudgetv can optionally include the “C” Standard Extension for
  * Compressed Instructions, Version 2.0
  */
-#define ucodeopt_RVC              1
+#define ucodeopt_RVC              0

@@ -288,12 +288,6 @@ DAT_I[31:0] ------------|or|-|\   ___  rDee                      |
  * still have a 32 bit counter, that works as a retired instruction
  * counter. Legal values: 0 or 1.
  * 
- * MTIMETAP_LOWLIM
- * ---------------
- * A constant, but I propagate as a parameter because it is likely to
- * be changed once I know the maximum number of cycles needed to do
- * *any* CSR instruction.
- *  
  * MTIMETAP
  * -------
  * This is for mtime and control registers.
@@ -315,22 +309,6 @@ DAT_I[31:0] ------------|or|-|\   ___  rDee                      |
  * slight, but some modules (for example m_immexp_zfind_q) have a huge
  * difference in size.
  *  
- * LAZY_DECODE
- * -----------
- * 0: All supported instructions are fully decoded, riscv compliance.
- * 1: Some minor code spaces are not checked. For example,
- *    "XOR" can be decoded by 
- *    ( funct3 = 3'b100, opcode = 7'b0110011). However, 
- *    one should really also check that funct7 = 7'b0000000.
- *    With LAZY_DECODE == 1, this check is not performed.
- * 2: Nearly no checking. Not recommended, because illegal
- *    opcodes may hang the controler.
- * 
- * DISREGARD_WB4_3_55 
- * -------------------
- * 0: Obey rule 3.55 of Wishbone B.3, recommended.
- * 1: Ignore rule 3.55. This should save one! LUT. 
- * 
  * DAT_I_ZERO_WHEN_INACTIVE
  * ------------------------
  * Wishbone B.3 does not mandate any default value for
@@ -344,11 +322,6 @@ DAT_I[31:0] ------------|or|-|\   ___  rDee                      |
  *
  * 0: DAT_I[] unknown when not active
  * 1: DAT_I[] == 0 when not active. 
- * 
- * NO_UCODEOPT
- * --------
- * 0: Use 2 EBRs + ~20 LUTs for control, recommended.
- * 1: Use 3 EBRs for control. 
  * 
  * EBRADRWIDTH
  * -----------
@@ -400,12 +373,9 @@ module m_midgetv_core
       NO_CYCLECNT        =  0, 
       MTIMETAP           =  0, 
       HIGHLEVEL          =  0, 
-      LAZY_DECODE        =  1, 
-      DISREGARD_WB4_3_55 =  1,
       DAT_I_ZERO_WHEN_INACTIVE = 0,
-      MTIMETAP_LOWLIM    = 14, // Only location where this value is really to be set 
-      NO_UCODEOPT        =  0, // Only set to 1 during debugging
       DBGA               =  0, // Only set to 1 during debugging
+
       parameter [4095:0] prg00 = 4096'h0, // | 
       parameter [4095:0] prg01 = 4096'h0, // | Always specified by module
       parameter [4095:0] prg02 = 4096'h0, // | that instantiates m_midgetv_core
@@ -449,7 +419,53 @@ module m_midgetv_core
     output [31:0]      dbga, //        For hardware debugging
     output             midgetv_core_killwarnings // To tie-off unused signals. Do not connect.
     );
-   localparam ALUWIDTH = 32;
+
+   /* Local parameters
+    *
+    * 
+    * LAZY_DECODE
+    * -----------
+    * 0: All supported instructions are fully decoded, riscv 
+    *    compliance. Recommended
+    * 1: Some minor code spaces are not checked. For example,
+    *    "XOR" can be decoded by 
+    *    ( funct3 = 3'b100, opcode = 7'b0110011). However, 
+    *    one should really also check that funct7 = 7'b0000000.
+    *    With LAZY_DECODE == 1, this check is not performed.
+    *    In a few cases, executed instructions will hang the
+    *    controller. Not recommended
+    * 2: Nearly no checking. Not recommended, because illegal
+    *    opcodes nearly certainly will hang the controler.
+    * 
+    * ALUWIDTH
+    * --------
+    * This is a constant. The reason for making it a parameter
+    * is to allow simulation of the ALU with a smaller number
+    * of bits.
+    * 
+    * DISREGARD_WB4_3_55 
+    * -------------------
+    * 0: Obey rule 3.55 of Wishbone B.3, recommended.
+    * 1: Ignore rule 3.55. This should save one! LUT. 
+    * 
+    * MTIMETAP_LOWLIM
+    * ---------------
+    * A constant, but I propagate as a parameter because it is likely to
+    * be changed once I know the maximum number of cycles needed to do
+    * *any* CSR instruction.
+    *  
+    * NO_UCODEOPT
+    * --------
+    * 0: Use 2 EBRs + ~20 LUTs for control, recommended.
+    * 1: Use 3 EBRs for control. 
+    * 
+    * 
+    */
+   localparam LAZY_DECODE        =  0;
+   localparam ALUWIDTH           = 32;
+   localparam DISREGARD_WB4_3_55 =  0;
+   localparam MTIMETAP_LOWLIM    = 14; // Only location where this value is really to be set 
+   localparam NO_UCODEOPT        =  0; // Only set to 1 during debugging
    
    wire                clk; //   My signal name for the clock.
    assign clk   = CLK_I;

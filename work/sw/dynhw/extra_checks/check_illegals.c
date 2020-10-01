@@ -3,7 +3,10 @@
  * and those bitpatterns that are illegal are executed. Each time
  * such a bitpattern is executed, an "illegal instruction" trap should
  * occur. 
+ *
+ * This program is for rv32im
  */
+#define MULDIV 1
 
 #include <stdint.h>
 
@@ -25,9 +28,23 @@ int main( void ) {
         uint32_t nrgood = 0;
         uint32_t nrillegal = 0;
         extern uint32_t nrillegaltraps;
+        int c;
+        int muldiv = 0;
+        int rvc = 0;
         
         *LED = 0;
         getchar();
+Again:
+        puts( "i/m/c/C for rv32i/rv32im/rm32imc/rv32ic :" );
+        c = getchar();
+        switch ( c ) {
+        case 'i' : puts("Testing for rv32i\n" );   break;
+        case 'm' : puts("Testing for rv32im\n" );  muldiv = 1; break;
+        case 'c' : puts("Testing for rv32imc\n" ); muldiv = 1; rvc = 1; break;
+        case 'C' : puts("Testing for rv32ic\n" );  rvc = 1;
+        default  : goto Again;
+        }
+        
         puts( "Running. Wait for 64 characters (8h?)\n" );
         /* Coarse classification */
         do {
@@ -136,6 +153,14 @@ int main( void ) {
                 case 0b0101011 : goto Illegal;
                 case 0b0101111 : goto Illegal;
                 case 0b0110011 :
+                        if ( muldiv ) {
+                                if ( (opcode>>25) & 1 ) {
+                                        if (opcode>>26 )
+                                                goto Illegal;
+                                        /* MUL MULH MULHSU MULHU DIV DIVU REM REMU */
+                                        goto Legal; 
+                                } 
+                        }
                         switch ( (opcode>>12) & 0b111) {
                         case 0b000 :
                         case 0b101 :
@@ -145,7 +170,9 @@ int main( void ) {
                         }
                         if (opcode>>25 )
                                 goto Illegal;
-                        goto Legal; /* ADD SLL SLT SLTU XOR SRL OR AND */                        
+                        /* ADD SLL SLT SLTU XOR SRL OR AND */
+                        goto Legal; 
+                
                 case 0b0110111 : P("LUI");  goto Legal;
                 case 0b0111011 : goto Illegal;
                 case 0b0111111 : goto Illegal;

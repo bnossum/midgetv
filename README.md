@@ -4,18 +4,24 @@
    
 Midgetv is non-pipelined and microcoded - it trades speed for
 size. The size of Midgetv changes as it is developed, I have given up
-to state a fixed number. Just now, September 2020, the following holds
+to state a fixed number. Also, the size depends on included
+features. Here I try to give an indication of the size of a usable
+controller.
+
+Just now, September 2020, the following holds
 for an image that can run the RISC-V compliance suite on an
 `icebreaker` board:
 
 Core    | Toolchain    | Size (SB_LUTs) | Clock (MHz) | Comment
   :---  |  :---------  |  -----------:  |  --------:  | :----
-rv32i   | Lattice LSI  | 325            | 31.1        | No auto-lut cascade in placement. Preference file `icecube_icebreaker.pcf`
-rv32im  | Lattice LSI  | 401            | 23.3        | No auto-lut cascade in placement. Preference file `icecube_icebreaker.pcf`
+rv32i   | Lattice LSI  | 336            | 32.0        | No auto-lut cascade in placement. Preference file `icecube_icebreaker.pcf`
+rv32im  | Lattice LSI  | 413            | 23.7        | No auto-lut cascade in placement. Preference file `icecube_icebreaker.pcf`
 rv32ic  | Yosys/Arachne| 574            | 19.3        |
 rv32imc | Yosys/Arachne| 640            | 19.6        |
 
-These cores use 6 EBR rams, and 2 SPRAM256KA.
+These cores use 6 EBR rams, and 2 SPRAM256KA. Full instruction decode
+is performed, and as far as I can accertain, all illegal instruction
+traps.
 
 Each rv32i/rv32ic instruction use between 4 clock cycles and about 40
 clock cycles (for shifts of a register by 31). Average number of
