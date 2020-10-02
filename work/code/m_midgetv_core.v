@@ -803,6 +803,7 @@ module m_midgetv_core
       .STB_O                            (STB_O),
       .ADR_O                            (ADR_O[31:0]));
 
+   // Problem with a write to mcause in _ILL_5 had nothing to do with mod_s_alu_1
    wire                 mod_s_alu_1;
    generate
       if ( MULDIV == 0 ) begin
@@ -812,7 +813,7 @@ module m_midgetv_core
       end
    endgenerate
    
-   m_alu_carryin #(.HIGHLEVEL(HIGHLEVEL), .MULDIV(MULDIV))
+   m_alu_carryin #(.HIGHLEVEL(xHIGHLEVEL), .MULDIV(MULDIV)) 
    inst_alu_carryin
      (// Inputs
       .ADR_O_31                         (ADR_O[31]),

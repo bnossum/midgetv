@@ -1,51 +1,51 @@
 # 12 MHz clock
-set_io -nowarn INSTR[0]  35
+set_io -nowarn Op[0]  35
 
 # RS232
-set_io -nowarn INSTR[1]       6
-set_io -nowarn illegal     9
+set_io -nowarn Op[1]       6
+set_io -nowarn ill     9
 
 # LEDs and Button
-set_io -nowarn INSTR[2]     10
-set_io -nowarn INSTR[3]     11
-set_io -nowarn INSTR[4]     37
+set_io -nowarn Op[2]     10
+set_io -nowarn Op[3]     11
+set_io -nowarn Op[4]     37
 
 # RGB LED Driver
-set_io -nowarn INSTR[5]  39
-set_io -nowarn INSTR[6]  40
-set_io -nowarn INSTR[7]  41
+set_io -nowarn Op[5]  39
+set_io -nowarn Op[6]  40
+set_io -nowarn Op[7]  41
 
 # SPI Flash
-set_io -nowarn INSTR[8]  15
-set_io -nowarn INSTR[9]  16
-set_io -nowarn INSTR[10]  14
-set_io -nowarn INSTR[11]  17
-set_io -nowarn INSTR[12]  12
-set_io -nowarn INSTR[13]  13
+set_io -nowarn Op[8]  15
+set_io -nowarn Op[9]  16
+set_io -nowarn Op[10]  14
+set_io -nowarn Op[11]  17
+set_io -nowarn Op[12]  12
+set_io -nowarn Op[13]  13
 
 # PMOD 1A
-set_io -nowarn INSTR[14]       4
-set_io -nowarn INSTR[15]       2
-set_io -nowarn INSTR[16]      47
-set_io -nowarn INSTR[17]      45
-set_io -nowarn INSTR[18]       3
-set_io -nowarn INSTR[19]      48
-set_io -nowarn INSTR[20]      46
-set_io -nowarn INSTR[21]      44
+set_io -nowarn Op[14]       4
+set_io -nowarn Op[15]       2
+set_io -nowarn Op[16]      47
+set_io -nowarn Op[17]      45
+set_io -nowarn Op[18]       3
+set_io -nowarn Op[19]      48
+set_io -nowarn Op[20]      46
+set_io -nowarn Op[21]      44
 
 # PMOD 1B
-set_io -nowarn INSTR[22]      43
-set_io -nowarn INSTR[23]      38
-set_io -nowarn INSTR[24]      34
-set_io -nowarn INSTR[25]      31
-set_io -nowarn INSTR[26]      42
-set_io -nowarn INSTR[27]      36
-set_io -nowarn INSTR[28]      32
-set_io -nowarn INSTR[29]      28
+set_io -nowarn Op[22]      43
+set_io -nowarn Op[23]      38
+set_io -nowarn Op[24]      34
+set_io -nowarn Op[25]      31
+set_io -nowarn Op[26]      42
+set_io -nowarn Op[27]      36
+set_io -nowarn Op[28]      32
+set_io -nowarn Op[29]      28
 
 # PMOD 2
-set_io -nowarn INSTR[30]       27
-set_io -nowarn INSTR[31]       25
+set_io -nowarn Op[30]       27
+set_io -nowarn Op[31]       25
 set_io -nowarn corerunning     21
 set_io -nowarn P2_4       19
 set_io -nowarn P2_7       26

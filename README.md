@@ -15,7 +15,7 @@ for an image that can run the RISC-V compliance suite on an
 Core    | Toolchain    | Size (SB_LUTs) | Clock (MHz) | Comment
   :---  |  :---------  |  -----------:  |  --------:  | :----
 rv32i   | Lattice LSI  | 336            | 32.0        | No auto-lut cascade in placement. Preference file `icecube_icebreaker.pcf`
-rv32im  | Lattice LSI  | 413            | 23.7        | No auto-lut cascade in placement. Preference file `icecube_icebreaker.pcf`
+rv32im  | Lattice LSI  | 424            | 21.7        | No auto-lut cascade in placement. Preference file `icecube_icebreaker.pcf`
 rv32ic  | Yosys/Arachne| 574            | 19.3        |
 rv32imc | Yosys/Arachne| 640            | 19.6        |
 

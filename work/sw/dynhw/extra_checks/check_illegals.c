@@ -24,29 +24,81 @@ int puthex32(uint32_t v);
 uint32_t opcode = 0;
 
 /////////////////////////////////////////////////////////////////////////////
+int isprint( int c ) {
+        return ( (c >= 0x20) && (c < 0x7F) );
+}
+
+/////////////////////////////////////////////////////////////////////////////
+void dump( uint32_t *p, uint32_t len ) {
+        p = (uint32_t *)((uint32_t) p & ~3u);
+        uint32_t *e = p + len/4;
+        uint8_t *q;
+        
+        do {
+                puts( "\r\n" );
+                puthex32( (uint32_t)p );
+                puts( " | " );
+
+                q = (uint8_t *)p;
+                do {
+                        puthex32( *p );
+                        putchar( ' ' );
+                        p++;
+                } while ( ((uint32_t)p & 0x1c) != 0 );
+
+                while ( q != (uint8_t *)p ) {
+                        int c = *q++;
+                        if ( isprint(c) ) {
+                                putchar( c );
+                        } else {
+                                putchar( '.' );
+                        }
+                }
+                        
+
+        } while ( p != e );
+        puts( "\r\n" );
+}
+
+/////////////////////////////////////////////////////////////////////////////
+/* What to expect:
+ *         Program option for checking
+ * Core    i    C    m    c      Note
+ * rv32i   ok   fail ok   fail   [1]
+ * rv32im  fail fail ok   fail   [2]
+ * rv32ic
+ * rv32imc
+ *
+ * Notes:
+ * 1: Program option m succeeds on rv32i because multiplications are simply not flagged as illegal in prog
+ * 2: Program option i fails on rv32im because a tested multiplication was not an illegal instruction.
+ *
+ */
 int main( void ) {
         uint32_t nrgood = 0;
         uint32_t nrillegal = 0;
         extern uint32_t nrillegaltraps;
         int c;
-        int muldiv = 0;
-        int rvc = 0;
-        
-        *LED = 0;
+        int muldiv;
+        int rvc;
+
+        opcode = 0; // Tmp. I do not clear bss in crt0 yet 
+        *LED = 4;
         getchar();
 Again:
         puts( "i/m/c/C for rv32i/rv32im/rm32imc/rv32ic :" );
         c = getchar();
         switch ( c ) {
-        case 'i' : puts("Testing for rv32i\n" );   break;
-        case 'm' : puts("Testing for rv32im\n" );  muldiv = 1; break;
-        case 'c' : puts("Testing for rv32imc\n" ); muldiv = 1; rvc = 1; break;
-        case 'C' : puts("Testing for rv32ic\n" );  rvc = 1;
+        case 'i' : puts("Check rv32i\n" );   muldiv = 0; rvc = 0; break;                           
+        case 'C' : puts("Check rv32ic\n" );  muldiv = 0; rvc = 1; break;
+        case 'm' : puts("Check rv32im\n" );  muldiv = 1; rvc = 0; break;               
+        case 'c' : puts("Check rv32imc\n" ); muldiv = 1; rvc = 1; break;      
         default  : goto Again;
         }
+
         
-        puts( "Running. Wait for 64 characters (8h?)\n" );
-        /* Coarse classification */
+        puts( "\nRunning. Wait for 64x64 characters (8h?)\n" );
+#if 0        /* Coarse classification */
         do {
                 switch ( opcode & 3) {
                 case 0b00 :
@@ -78,18 +130,25 @@ Again:
         */
         if ( nrillegal != nrillegaltraps )
                 goto Fatal;
-
+#endif
+        
         /* Now do the same for 32-bit instructions ending in 0b11
          */
 //#define P(x) puts(x); putchar( ' ' );
 #define P(x)
         
-//        opcode = 0x30200000;
         opcode = 0;
+/*        opcode = 0x06000000; leads to 00000001Unexp Trap:06004033
+ * What if we start at 0x06004033?
+ */      
+//        opcode = 0x06004033-4*4; // Same result
+        // Try with image from iceCube. Glad to say we have the same result.
+        // However, a simple test program runs corectly?
         
-        opcode |= 3;
+        
+        opcode |= 3; // Easy to forget that low 2 msb must be set.
         do {
-                //puthex32( opcode ); putchar(' ');
+//                puthex32( opcode ); 
                 switch ( opcode & 0b1111111 ) {
                 case 0b0000011 :
                         switch ( (opcode>>12) & 0b111 ) {
@@ -114,9 +173,6 @@ Again:
                         case 0b000 : P("FENCE");  goto Legal;
                         case 0b001 : P("FENCE.I");  goto Legal;
                         }
-                        //P("[");
-                        //puthex32(opcode);
-                        //P("]");
                         goto Illegal;
                 case 0b0010011 :
                         switch ( (opcode>>12) & 0b111 ) {
@@ -229,6 +285,7 @@ Again:
                 
         Illegal:
                 P("Err");
+                //puts( ":Test " );
                 nrillegal++;
                 *LED = 1;
                 /* Any illegal code should result in a trap
@@ -239,26 +296,27 @@ Again:
                 goto L;
                 
         IgnoreIllegal:
-
+                
         Legal:
                 P("Ok");
+                //puts( ":Skip " );
                 nrgood++;
                 *LED = 2;
         L:
                 if ( (opcode & 0xfffff) == 3 ) {
                         if ( (opcode & 0x3ffffff) == 3 ) {
                                 puts( "\n" );
-                                putchar(((opcode>>26)&63) + 0x40); // ...26
+                                putchar(((opcode>>26)&63) + 0x3F); // ...26
                                 puts( " : " );
                         }
-                        putchar(((opcode>>20)&63) + 0x40); // ...20
+                        putchar(((opcode>>20)&63) + 0x3F); // ...20
                 }
-                opcode += 4;
                 /* The number of illegal instruction traps should always be
                    exactly equal the number of counted illegal instructions
                 */
                 if ( nrillegal != nrillegaltraps )
                         goto Fatal;
+                opcode += 4;
         } while ( opcode != 3 );
 
         // 1 red
@@ -276,8 +334,10 @@ Again:
                 *LED = 10;
 
 Fatal:
-        puts( "Fail detected. Opcode=" );
+        puts( "Fail detected. Opcode now =" );
         puthex32( opcode );
+        puts( ". Last opcode that should have been trapped = " );
+        puthex32( *(uint32_t *)testbed32);
         while (1)
                 *LED = -1;
         return 0;

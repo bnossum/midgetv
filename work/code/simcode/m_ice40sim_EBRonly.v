@@ -16,8 +16,6 @@ module m_ice40sim_EBRonly
       NO_CYCLECNT        = 0, 
       MTIMETAP           = 14, 
       HIGHLEVEL          = 0,
-      LAZY_DECODE        = 0,
-      DISREGARD_WB4_3_55 = 1,
       MULDIV             = `ucodeopt_MULDIV
       )
    (
@@ -81,8 +79,6 @@ module m_ice40sim_EBRonly
        .NO_CYCLECNT       ( NO_CYCLECNT        ),
        .MTIMETAP          ( MTIMETAP           ),
        .HIGHLEVEL         ( HIGHLEVEL          ),
-       .LAZY_DECODE       ( LAZY_DECODE        ),
-       .DISREGARD_WB4_3_55( DISREGARD_WB4_3_55 ),
        .MULDIV            ( MULDIV             ),
        .prg00(prg00),       .prg01(prg01),       .prg02(prg02),       .prg03(prg03),
        .prg04(prg04),       .prg05(prg05),       .prg06(prg06),       .prg07(prg07),

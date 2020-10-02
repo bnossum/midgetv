@@ -101,49 +101,130 @@ module m_illegalop
              0000001 rs2   rs1 111,   rd 011x0xx  remu         1 0
              instructions which main_illegal says are legal    0 x
              instructions which main_illegal says are illegal  x x
-
              */
-
             assign checkfunct7 = (opcode[5:4] ==  2'b01 && opcode[2] == 0 && funct3[1:0] == 2'b01 ) |
                                  (opcode[6:4] == 3'b011 && opcode[2] == 0 );
             assign funct7_5_dontcare = (opcode[5] == 0 && funct3[2] == 1'b1 ) ||
                                        (opcode[5] == 1 && (funct3 == 3'b000 || funct3 == 3'b101) && funct7[0] == 1'b0);
             assign mostof_funct7_ne0 = ({funct7[6],funct7[4:1]} != 5'h0) || (opcode[5] == 0 && funct7[0]);
-         end
-         
-         /* 
-          Issue 3:
-          ecall, ebreak, wfi, and mret put requirements onto the immediate
-          field imm12, which is decoded to register Q.
-          
-          |__imm12______|
-          funct7   rs2    rs1    funct3 rd      opcode
-          0000000, 00000, 00000, 000,   00000,  1110011, ecall     imm12 checked by ucode
-          0000000, 00001, 00000, 000,   00000,  1110011, ebreak    imm12 checked by ucode
-          0001000, 00101, 00000, 000,   00000,  1110011, wfi       imm12 checked by ucode
-          0011000, 00010, 00000, 000,   00000,  1110011, mret      imm12 checked by ucode
-          
-          All of these instructions should have field rs1 and rd as 5'b00000.
-          
-          */
-         wire    check_rs1_rd = (opcode[6] == 1'b1 && opcode[4] == 1'b1) && (funct3[1:0] == 2'b00);
-         wire    rs1_ne_zero = INSTR[19:15] != 5'h0;
-         wire    rd_ne_zero  = INSTR[11:7] != 5'h0;
-         wire    illegal_rs1_rd = check_rs1_rd & (rs1_ne_zero | rd_ne_zero);
-         
-         assign illegal_funct7_or_illegal_rs1_rd
-           = (checkfunct7 & mostof_funct7_ne0) |
-             (checkfunct7 & ~funct7_5_dontcare & funct7[5]) |
-             illegal_rs1_rd;
-         
-         
-      end
+            
+            /*
+             When MULDIV == 1, a number of entries in the microcodetable, formerly used to
+             detect illegal opcodes, are now used to implement MUL/DIV instructions.              
+             These opcodes must now be detected by firmware.
+                   111 
+             65432 432     Comment
+             00000 00x   0
+             00000 010   0
+             00000 011   1 close to LB   
+             000
+             00000 11x   1 close to LB   
+             00001 xxx   x
+             00010 001     close to ij   
+             00010 01x     close to ij   
+             00010 1xx     close to ij   
+             00011 01x     close to FENCE
+             00011 1xx     close to FENCE
+             01000 011     close to SW   
+             01000 1xx     close to SW   
+             11000 01x     close to BEQ  
+             11001 001     close to JALR 
+             11001 01x     close to JALR 
+             11001 1xx     close to JALR 
+             11100 100     close to CSR
+             */
+            reg also_illegal;
+            always @(/*AS*/INSTR)
+              casez ( {INSTR[6:2],INSTR[14:12]} )
+                //       111
+                // 65432 432   also_illegal  Comment
+                8'b00000_00? : also_illegal = 1'b0;
+                8'b00000_010 : also_illegal = 1'b0;
+                8'b00000_011 : also_illegal = 1'b1; // close to LB
+                8'b00000_10? : also_illegal = 1'b0;
+                8'b00000_11? : also_illegal = 1'b1; // close to LB       
+                
+                8'b00001_??? : also_illegal = 1'b?; // 
+                
+                8'b00010_000 : also_illegal = 1'b0;
+                8'b00010_001 : also_illegal = 1'b1;  // close to ij   
+                8'b00010_01? : also_illegal = 1'b1;  // close to ij   
+                8'b00010_1?? : also_illegal = 1'b1;  // close to ij
+                
+                8'b00011_00? : also_illegal = 1'b0;
+                8'b00011_01? : also_illegal = 1'b1;  // close to FENCE
+                8'b00011_1?? : also_illegal = 1'b1;  // close to FENCE
+                
+                8'b0010?_??? : also_illegal = 1'b0;
+                8'b0011?_??? : also_illegal = 1'b?;
+                
+                8'b01000_00? : also_illegal = 1'b0;
+                8'b01000_010 : also_illegal = 1'b0;
+                8'b01000_011 : also_illegal = 1'b1;  // close to SW   
+                8'b01000_1?? : also_illegal = 1'b1;  // close to SW   
+                
+                8'b01001_??? : also_illegal = 1'b?;
+                8'b0101?_??? : also_illegal = 1'b?;
+                8'b0110?_??? : also_illegal = 1'b0;
+                8'b0111?_??? : also_illegal = 1'b?;
+                8'b10???_??? : also_illegal = 1'b?;
+                
+                8'b11000_00? : also_illegal = 1'b0;
+                8'b11000_01? : also_illegal = 1'b1;  // close to BEQ
+                8'b11000_1?? : also_illegal = 1'b0;
 
+                8'b11001_000 : also_illegal = 1'b0;
+                8'b11001_001 : also_illegal = 1'b1;  // close to JALR 
+                8'b11001_01? : also_illegal = 1'b1;  // close to JALR 
+                8'b11001_1?? : also_illegal = 1'b1;  // close to JALR
+                
+                8'b11010_??? : also_illegal = 1'b?;
+                8'b11011_??? : also_illegal = 1'b0;
+                
+                8'b11100_0?? : also_illegal = 1'b0;
+                8'b11100_100 : also_illegal = 1'b1;  // close to CSR
+                8'b11100_101 : also_illegal = 1'b0;
+                8'b11100_11? : also_illegal = 1'b0;
+                
+                8'b11101_??? : also_illegal = 1'b?;
+                8'b1111?_??? : also_illegal = 1'b?;
+              endcase
+            
+            
+            /* 
+             Issue 3:
+             ecall, ebreak, wfi, and mret put requirements onto the immediate
+             field imm12, which is decoded to register Q.
+             
+             |__imm12______|
+             funct7   rs2    rs1    funct3 rd      opcode
+             0000000, 00000, 00000, 000,   00000,  1110011, ecall     imm12 checked by ucode
+             0000000, 00001, 00000, 000,   00000,  1110011, ebreak    imm12 checked by ucode
+             0001000, 00101, 00000, 000,   00000,  1110011, wfi       imm12 checked by ucode
+             0011000, 00010, 00000, 000,   00000,  1110011, mret      imm12 checked by ucode
+             
+             All of these instructions should have field rs1 and rd as 5'b00000.
+             
+             */
+            wire check_rs1_rd = (opcode[6] == 1'b1 && opcode[4] == 1'b1) && (funct3[1:0] == 2'b00);
+            wire rs1_ne_zero = INSTR[19:15] != 5'h0;
+            wire rd_ne_zero  = INSTR[11:7] != 5'h0;
+            wire illegal_rs1_rd = check_rs1_rd & (rs1_ne_zero | rd_ne_zero);
+            
+            assign illegal_funct7_or_illegal_rs1_rd
+              = (checkfunct7 & mostof_funct7_ne0) |
+                (checkfunct7 & ~funct7_5_dontcare & funct7[5]) |
+                illegal_rs1_rd | also_illegal;
+            
+            
+         end
+      end
+      
       /* =============================================================================
        * The illegal signal
        * ============================================================================= */
       if ( LAZY_DECODE == 2 ) begin
-
+         
          assign  illegal = ~INSTR[0] & corerunning;
          
       end else begin

@@ -50,9 +50,7 @@ module top
       IWIDTH             = 32, 
       NO_CYCLECNT        = 0, 
       MTIMETAP           = 0,//16, 
-      HIGHLEVEL          = 0,
-      LAZY_DECODE        = 0,
-      DISREGARD_WB4_3_55 = 0
+      HIGHLEVEL          = 0
       )
    (
     input  CLK,
@@ -173,8 +171,6 @@ module top
        .NO_CYCLECNT        ( NO_CYCLECNT        ),
        .MTIMETAP           ( MTIMETAP           ),
        .HIGHLEVEL          ( HIGHLEVEL          ),
-       .LAZY_DECODE        ( LAZY_DECODE        ),
-       .DISREGARD_WB4_3_55 ( DISREGARD_WB4_3_55 ),
        .prg00(prg00),       .prg01(prg01),       .prg02(prg02),       .prg03(prg03),
        .prg04(prg04),       .prg05(prg05),       .prg06(prg06),       .prg07(prg07),
        .prg08(prg08),       .prg09(prg09),       .prg0A(prg0A),       .prg0B(prg0B),

@@ -155,7 +155,7 @@ module m_cyclecnt
             // deasserted later on, the core continues to run. However,
             // the cycle counter will only count if start is high.
             //
-            // If the cyclecounter increments from 0b101111 we have
+            // If the cyclecounter increments from 0b111111 we have
             // a bus-error, some IO has not given ACK, buserror is 
             // set one cycle.
             // =======================================================

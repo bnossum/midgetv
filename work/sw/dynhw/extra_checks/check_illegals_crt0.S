@@ -13,6 +13,28 @@
         .globl _start
         .extern main
         
+        // The linker script will write EBR ram from location 0xb4. There are fixed addresses
+        // to obey, so the start here is:
+x__mepc:         .word 0                 // 0xb4 10110100  0x2d For exception handling
+x__mcause:       .word 0                 // 0xb8 10111000  0x2e For exception handling
+x__mtval:        .word 0                 // 0xbc 10111100  0x2f For exception handling
+x__mscratch:     .word 0                 // 0xc0 Used by CSR code
+x__misa:         .word 0x40800105        // 0xc4 Used by CSR code. RV32I base ISA, nonstd. ext. present, XLEN = 32. RVC implemented
+x_ex_dup_x0:     .word 0 		// 0xc8 | Used by CSR emulation. These
+x_ex_rCSRadr:    .word 1 		// 0xcc | locations must be consequtive
+x_ex_rCSRty:     .word 2 		// 0xd0 | 
+x_ex_rrs1:       .word 3 		// 0xd4 | 
+x_ex_rrd:        .word 4 		// 0xd8 | 
+x_ex_rtmp:       .word 5 		// 0xdc | 
+x_mtime:         .word 0 		// 0xe0 Read/write from user code. Updated by internal interrupt
+x_mtimeh:        .word 0 		// 0xe4 Read/write from user code. Updated by internal interrupt
+x__freefornow_e8:.word 0                 // 0xe8 By convention used to store bitrate
+x__minstreth:    .word 0 		// 0xec Read/write from user code. Updated by internal interrupt
+x__mcycleh:      .word 0 		// 0xf0 Read/write from user code. Updated by internal interrupt
+x__freefornow_f4:.word 0                 // 0xf4 By convention used by compliance test code
+x__mtimecmp:     .word 0xffffffff	// 0xf8 Read/write from user code. 
+x__mtimecmph:    .word 0xffffffff	// 0xfc Read/write from user code. 
+//        .org 0x100  			//
         
         // In the event of any exception, or CSR instruction, count on LEDs and hang.
 CSRretadr:      .word 0                 //0x100 Microcode writes PC to CSRretadr when a CSR instruction is seen.
@@ -40,11 +62,12 @@ nrillegaltraps:
         .extern opcode
         # =============================================================================
 TrapHandle:
-        sw      rtmp,%lo(_ex_rtmp)(x0)          // Store working register
-        lw      rtmp,%lo(__mcause)(x0)          // Trap is illegal instruction?
+        sw      rtmp,_ex_rtmp(x0)               // Store working register
+        lw      rtmp,__mcause(x0)               // Trap is illegal instruction?        
         addi    rtmp,rtmp,-2                    //
         bnez    rtmp,UnexpectedTrap             // Should not have any other traps
-        lw      rtmp,nrillegaltraps
+ContinueTrap:
+        lw      rtmp,%lo(nrillegaltraps)(x0)
         addi    rtmp,rtmp,1
         sw      rtmp,%lo(nrillegaltraps)(x0)
         lw      rtmp,%lo(__mepc)(x0)            // Ignore the illegal instruction
@@ -54,31 +77,52 @@ TrapHandle:
         lw      rtmp,%lo(_ex_rtmp)(x0)          // restore working register
         ij      0,0x100,0                       // Exit
 UnexpectedTrap:
+        // Use same stack in this test
+        sw      a0,%lo(_ex_rrd)(x0)
+        sw      ra,%lo(_ex_rrs1)(x0)
+        la      a0,preambletxt
+        jal     puts
+        lw      rtmp,__mcause(x0)                 
+        jal     puthex32
+        la      a0,mtvaltxt
+        jal     puts
+        lw      a0,__mtval(x0)
+        jal     puthex32
+        
         la      a0,UnexpTrap
         jal     puts
         la      a0,opcode
         lw      a0,0(a0)
         jal     puthex32
-        j       InternalISR
+        lw      ra,%lo(_ex_rrs1)(x0)
+        lw      a0,%lo(_ex_rrd)(x0)
+        j       ContinueTrap
 
+preambletxt:
+        .string "\n mcause:"
+mtvaltxt:
+        .string " mtval:"
 UnexpTrap:
-        .string "Unexp Trap:"
+        .string " Unexp Trap:"
         
         # =============================================================================
+        .align 2
 _start:
+        sw      x10,0xe8(x0);           // Transfer bitrate back to expected location after loading
+        li      x2,0xfffffffc           // Initiate stack pointer
         la      x1,StartTrap            // Initiate mtvec
         sw      x1,%lo(__mtvec)(x0)
         la      x1,NMI                  // Set up the internal ISR handle
         sw      x1,%lo(__rNMI_IIV)(x0)
-        j       main
+        tail     main
 
         # =============================================================================
         .global testbed16
         .global testbed32
 testbed16:
 testbed32:
-        .hword  0
-        .hword  0
+        .word 0x00000007 // Blatantly illegal
+//        .word  0x00000013       // addi x0,x0,0 == nop
         ret
         
         # =============================================================================
@@ -195,7 +239,6 @@ getchar:
 1:      add     t4,t4,t4                // Shift bitmask
         addi    t2,t4,-0x100            // Sampled 8 bits?
         bne     t2,x0,2b                // 
-        // Know I am here
         lw      t4,16(sp)
         lw      t3,12(sp)
         lw      t2,8(sp)

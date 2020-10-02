@@ -176,6 +176,7 @@
 #define A_nearAND                                           ( IO << 18 ) | ( OIIxx <<9 )  // D&(~Q)           
 #define A_addDQ                            (I<<MCLRpos) |   ( IO << 18 ) | ( IOOOO <<9 )  // D+Q         subtle interaction between MULDIV and branch, need (I<<42)
 #define A_cycnt                            (I<<MCLRpos) |   ( II << 18 ) | ( IOOOO <<9 )  // D+cyclecnt  subtle
+#define A_a1                                                ( IO << 18 ) | ( IOOII <<9 )  // D+Q+1 Chasing an error in update of Q in ILL_4
 #define A_add1                             (I<<MCLRpos) |   ( IO << 18 ) | ( IOOII <<9 )  // D+Q+1
 #define A_add3                             (I<<MCLRpos) |   ( OO << 18 ) | ( IOOOO <<9 )  // D+(Q|3)+0   subtle, needed see test prog t154.S                                  
 #define A_add4                            (II<<MCLRpos) |   ( OO << 18 ) | ( IOOII <<9 )  // D+(Q|3)+1
@@ -217,24 +218,24 @@
 
 ///* Write address and write enable. 
 // */
-////                       ssss         
-////          sa41         2211         
-////          |            1098         
+////                      ssss         
+////          sa41        2211         
+////          |           1098         
 #define Wnn   (I <<39) | (OOOO <<26) // No write. Set SEL_O = 4'b1111
 #define Wbp   (I <<39) | (OOIO <<26) // Prepare write byte. Setup SEL_O as per B[1:0].
 #define Whp   (I <<39) | (OOOI <<26) // Prepare write halfword. Setup SEL_O as per B[1]
-#define WAQb              (OOIO <<26) // Write to MEM, adr in Q
-#define WAQh              (OOOI <<26) // Write to MEM, adr in Q
-#define WAQW              (OOII <<26) // Write to MEM, adr in Q
-#define WTRG              (OIOO <<26) // Write target reg. 
-#define Wjj               (IOOO <<26) // Write to jj
-#define Wrinst            (IOOI <<26) // Write to rinst
-#define Wpc               (IOIO <<26) // Write B to PC
-#define Wttime            (IOII <<26) // Write to tinytime
-#define Wyy               (IIOO <<26) // Write to scratch register yy
-#define Wmepc             (IIOI <<26) // Write to mepc
-#define Wmcaus            (IIIO <<26) // Write to mcause
-#define Wmtval            (IIII <<26) // Write to mtval
+#define WAQb             (OOIO <<26) // Write to MEM, adr in Q
+#define WAQh             (OOOI <<26) // Write to MEM, adr in Q
+#define WAQW             (OOII <<26) // Write to MEM, adr in Q
+#define WTRG             (OIOO <<26) // Write target reg. 
+#define Wjj              (IOOO <<26) // Write to jj
+#define Wrinst           (IOOI <<26) // Write to rinst
+#define Wpc              (IOIO <<26) // Write B to PC
+#define Wttime           (IOII <<26) // Write to tinytime
+#define Wyy              (IIOO <<26) // Write to scratch register yy
+#define Wmepc            (IIOI <<26) // Write to mepc
+#define Wmcaus           (IIIO <<26) // Write to mcause
+#define Wmtval           (IIII <<26) // Write to mtval
 
 ///* Read address
 // */
@@ -399,6 +400,16 @@
 #define _jFault_1 jFault_1,"       Store 1 to mcause",                              isr_none     | A_add1    | Wmcaus| Rpc       | Qx   | sr_h  | u_cont         | n(LDAF_3)
 //efine _LDAF_3   LDAF_3,  "       PC to mepc",                                     
 //efine _JAL_3    JAL_3,   "       PC+imm/trap entrypt to PC. OpFetch",             
+
+///* Searching for an error in illegal instructons. Seems jFault is accidentially triggered? It was not*/
+////                                                                                  ISR          | ALU         Write   intern      Reg    Shreg   Ucode            Next
+////                                                                                  action       | op          adr/en  read adr    op     op      operation        ucode
+//#define _jFault   jFault,  " err   Search for error",                               isr_none     | A_xx      | Wnn   | r_xx      | Qx   | sr_h  | u_cont         | n(ILLe)  
+//#define _jFault_1 jFault_1,"       Store 1 to mcause",                              isr_none     | A_add1    | Wmcaus| Rpc       | Qx   | sr_h  | u_cont         | n(LDAF_3)
+////efine _LDAF_3   LDAF_3,  "       PC to mepc",                                     
+////efine _JAL_3    JAL_3,   "       PC+imm/trap entrypt to PC. OpFetch",             
+
+
 
 #if   ucodeopt_HAS_MINSTRET == 0 && ucodeopt_HAS_EBR_MINSTRET == 0
 
@@ -885,18 +896,36 @@
 #define _SB_5     SB_5,    "       Write d to a+k until accepted",                  isr_none     | A_passd   | WAQb  | Ryy       | Qhld | sr_h  | u_io_o         | n(SW_2)     
 //efine _SW_2     SW_2,    "       Prepare read PC",                                
 //      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 
-//                                                                                                                                                               
-// The following will be changed. Will write 0 into mtval because I will have problems
-// with correctly writing mtval with the illegal instruction when said instruction is
-// 16 bits (standard 'C' extension supported).
+
+
+//Original
 #define _ILL_0(i) i,       "Illegal instruction seen",                              isr_none     | A_xx      | Wnn   | r_xx      | Qx   | sr_h  | u_cont         | n(ILLe )     
 #define _ILLe     ILLe,    "Illegal",                                               isr_none     | A_xx      | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(ILL_1)     
 #define _ILL_1    ILL_1,   "       Store PC to mepc and Q for read of instr",       nxtSTB       | A_passd   | Wmepc | Ralu      | Qu   | sr_h  | u_cont         | n(ILL_2)     
 #define _ILL_2    ILL_2,   "       Read until Q is offending instruction",          isr_none     | A_passd   | Wnn   | rFFFFFFFF | Qs   | sr_h  | u_io_i         | n(ILL_3)     
 #define _ILL_3    ILL_3,   "       Store illegal instruction to mtval",             isr_none     | A_passq   | Wmtval| r00000000 | Qz   | sr_h  | u_cont         | n(ILL_4)     
-#define _ILL_4    ILL_4,   "       Q = 1",                                          isr_none     | A_add1    | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(ILL_5)     
-#define _ILL_5    ILL_5,   "       Store 2 to mcause",                              isr_intoTrap | A_add1    | Wmcaus| rmtvec    | Qx   | sr_h  | u_cont         | n(JAL_3)
+#define _ILL_4    ILL_4,   "       Q = 1",                                          isr_none     | A_a1      | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(ILL_5)     
+#define _ILL_5    ILL_5,   "       Store 2 to mcause",                              isr_intoTrap | A_add1    | Wmcaus| rmtvec    | Qx   | sr_h  | u_cont         | n(JAL_3) 
 //efine _JAL_3    JAL_3,   "       PC = trap entry point. OpFetch",                 
+                                                                                                                                                               
+
+
+
+// // TMP, see if we alway are here at illegals, or if we get somewere else?
+// // Seems we always are here. Do one of the A_add1 fail?
+// #define _ILL_0(i) i,       "Illegal instruction seen",                              isr_none     | A_xx      | Wnn   | r_xx      | Qx   | sr_h  | u_cont         | n(ILLe )     
+// #define _ILLe     ILLe,    "Illegal",                                               isr_none     | A_xx      | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(ILL_1)     
+// #define _ILL_1    ILL_1,   "       Store PC to mepc and Q for read of instr",       nxtSTB       | A_passd   | Wmepc | Ralu      | Qu   | sr_h  | u_cont         | n(ILL_2)     
+// #define _ILL_2    ILL_2,   "       Read until Q is offending instruction",          isr_none     | A_passd   | Wnn   | rFFFFFFFF | Qs   | sr_h  | u_io_i         | n(ILL_3)     
+// #define _ILL_3    ILL_3,   "       Store illegal instruction to mtval",             isr_none     | A_passq   | Wmtval| r000000FF | Qz   | sr_h  | u_cont         | n(ILL_4)     
+// //efine _ILL_4    ILL_4,   "       Q = 1",                                          isr_none     | A_add1    | Wmcaus| r0000FFFF | Qu   | sr_h  | u_cont         | n(ILL_5)  // Sometimes, Q is not updated
+// #define _ILL_4    ILL_4,   "       Q = 1",                                          isr_none     | A_addDQ   | Wmcaus| r0000FFFF | Qu   | sr_h  | u_cont         | n(ILL_5)  // Sometimes Q is not updated
+// //efine _ILL_4    ILL_4,   "       Q = 1",                                          isr_none     | A_passd   | Wmcaus| r0000FFFF | Qu   | sr_h  | u_cont         | n(ILL_5)  // Q is always updated
+// #define _ILL_5    ILL_5,   "       Store 2 to mcause",                              isr_intoTrap | A_addDQ   | Wmtval| rmtvec    | Qx   | sr_h  | u_cont         | n(JAL_3)  // Is it Wmcaus that fails? At error 0 is always written
+// //efine _JAL_3    JAL_3,   "       PC = trap entry point. OpFetch",                 // Inspection of Wmcaus does not show any errors
+// //                                                                                  I believe now it is update of Q that fails.fitte
+
+
 //                                                                                                                                                               
 #define _FENCE(x) x,       "f      Prepare read PC (FENCE)",                        isr_none     | A_xx      | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  
 //      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 isr_none     | A_add4    | Wpc   | Ralu      | Qu   | sr_h  | u_cont         | n(OpFetch )  etc
