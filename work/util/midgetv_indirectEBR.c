@@ -188,8 +188,8 @@ uint64_t process( TBL *tp, uint64_t maskedcolumns ) {
 //                ferr( "Should not be here, only %d disinct lines left in untreated columns\n", m );
 
         fprintf( fo, " * %d distinct lines in remaining untreated columns\n * ", m );
-//        for ( j = NRCOLUMNS-1; j >= 0; j-- ) { I believe this is the wrong way.
-        for ( j = 0; j < NRCOLUMNS; j++ ) { 
+        for ( j = NRCOLUMNS-1; j >= 0; j-- ) { 
+//        for ( j = 0; j < NRCOLUMNS; j++ ) { 
                 if (  j > 9 ) {
                         fprintf( fo, "c" );
                 } else {
@@ -205,12 +205,12 @@ uint64_t process( TBL *tp, uint64_t maskedcolumns ) {
          * columns until the table of unmasked columns has no
          * more than (1<<LUTSIZE) lines.
          */
-        int ma;
         while ( (m  = nrdistinctlines( indirinx, usedindexes, tp, maskedcolumns )) > (1<<LUTSIZE)) {
-                ma = m;
+                int ma,nrcandidates;
+                ma = -1;
+                nrcandidates = 1;
                 fprintf( fo, " * " );
-//                for ( j = NRCOLUMNS-1; j >= 0; j-- ) {
-                for ( j = 0; j < NRCOLUMNS; j++ ) {
+                for ( j = NRCOLUMNS-1; j >= 0; j-- ) {
                         if ( maskedcolumns & (1uLL << j ) ) {
                                 if (originalremoved & (1uLL << j ) ) {
                                         fprintf( fo, "  x " );
@@ -225,13 +225,16 @@ uint64_t process( TBL *tp, uint64_t maskedcolumns ) {
                         /*
                           Here is code to determine what column to mask
                           out. I have no good heuristics.
-                          Real-life example dictate I simply
-                          take the first processed line.
+                          I remove the column that leaves the simplest table.
+                          In the case of a tie, I remove the first encountered.
                         */
-
-                        if ( a <= ma ) { // Must be "<=" to ensure mi is valid
-                                ma = a; // To remove the column that simplifies mostx
+                        if ( a < ma || ma == -1) { 
+                                ma = a; 
                                 mi = j;
+                                nrcandidates = 1;
+                        } else {
+                                if (a == ma)
+                                        nrcandidates++;
                         }
                 }
                 
@@ -241,7 +244,7 @@ uint64_t process( TBL *tp, uint64_t maskedcolumns ) {
                 fprintf( fo, "Tbl %3d cols ", NRCOLUMNS - __builtin_popcountl(maskedcolumns) );
                 FVECTORPRI( fo, (uint32_t *)&maskedcolumns, NRCOLUMNS );
                 int ndl = nrdistinctlines( indirinx, usedindexes, tp, maskedcolumns);
-                fprintf( fo, " has %3d unique lines.\n", ndl );
+                fprintf( fo, " has %3d unique lines. There were %d good candidates for removal\n", ndl, nrcandidates );
                 
         }        
         return maskedcolumns;
