@@ -21,22 +21,22 @@
 #define fname STR(nakedfname)
 
 uint8_t reachability[256] = {
-#define X(label,txt,def,reachability,mask,instr,hitnr) reachability,
+#define X(label,text,ty,pos,value,reachability,mask,instr,nrhit) reachability,
 #include fname
 };
 
 uint32_t mask[256] = {
-#define X(label,txt,def,reachability,mask,instr,hitnr) mask,
+#define X(label,text,ty,pos,value,reachability,mask,instr,nrhit) mask,
 #include fname
 };
 
 uint32_t facit_hit[256] = {
-#define X(label,txt,def,reachability,mask,instr,hitnr) hitnr,
+#define X(label,text,ty,pos,value,reachability,mask,instr,nrhit) nrhit,
 #include fname
 };
         
 uint32_t instr[256] = {
-#define X(label,txt,def,reachability,mask,instr,hitnr) instr,
+#define X(label,text,ty,pos,value,reachability,mask,instr,nrhit) instr,
 #include fname
 };
         

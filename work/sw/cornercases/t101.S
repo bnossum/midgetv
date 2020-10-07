@@ -18,25 +18,24 @@ _start:
         la      x11,__mtvec
         sw      x10,0(x11)
         li      x28,0   // Count nr times in trap handle
-//        .word 0x0000100b
-//        .word 0x0000200b
-//        .word 0x0000300b
-//        .word 0x0000400b
-//        .word 0x0000500b
-//        .word 0x0000600b
-//        .word 0x0000700b
-//        .word 0x4000100b
-//        .word 0x4000200b
-//        .word 0x4000300b
-//        .word 0x4000400b
-//        .word 0x4000500b
-//        .word 0x4000600b
+        .word 0x0000100b
+        .word 0x0000200b
+        .word 0x0000300b
+        .word 0x0000400b
+        .word 0x0000500b
+        .word 0x0000600b
+        .word 0x0000700b
+        .word 0x4000100b
+        .word 0x4000200b
+        .word 0x4000300b
+        .word 0x4000400b
+        .word 0x4000500b
+        .word 0x4000600b
 LastOne:.word 0x4000700b
         simerr 1
-        
+       
         // -----------------------------------------------------------------------------
 _trap_handler:
-        simend
         addi    x28,x28,1
         la      x31,__mepc
         lw      x30,0(x31)

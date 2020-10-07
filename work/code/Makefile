@@ -22,7 +22,7 @@ $(GEN_DIR)/m_2ebr.v:$(BIN_DIR)/midgetv_indirectEBR ../code/ucode.h
 # compiled. This rule is duplicated in the Makefile of the utilities.
 #
 $(BIN_DIR)/midgetv_genucode:../util/midgetv_genucode.c ../code/ucode.h $(GEN_DIR)/midgetv_ucodeoptions.hv
-	gcc -Wall -Wextra -Dnakedfname=../code/ucode.h -o $@ $< 
+	gcc -Wall -Wextra -Dnakedfname=../code/ucode.h -o $@ $<  ../util/bnvector.c 
 
 $(BIN_DIR)/midgetv_indirectEBR:../util/midgetv_indirectEBR.c ../util/bnvector.c ../code/ucode.h $(GEN_DIR)/midgetv_ucodeoptions.hv
 	gcc -O3 -Wall -Wextra -Dnakedfname=../code/ucode.h -o $@ $< ../util/bnvector.c 

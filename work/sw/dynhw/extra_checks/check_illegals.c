@@ -11,7 +11,8 @@
 #include <stdint.h>
 
 #define LED (volatile uint32_t volatile *)0x60000004
-//#define LED (uint8_t *)0x60000004
+//#define P(x) puts(x); putchar( ' ' );
+#define P(x)
 
 void testbed16( void );
 void testbed32( void );
@@ -20,6 +21,7 @@ int getchar( void );
 int putchar(int c);
 int puts( const char *s);
 int puthex32(uint32_t v);
+int check_what_options( void );
 
 uint32_t opcode = 0;
 
@@ -76,29 +78,32 @@ void dump( uint32_t *p, uint32_t len ) {
  */
 int main( void ) {
         uint32_t nrgood = 0;
-        uint32_t nrillegal = 0;
-        extern uint32_t nrillegaltraps;
-        int c;
+        extern uint32_t nrillegaltraps; // Maintained in trap routine
+        extern uint32_t Coretype;       // Found by startup code
         int muldiv;
         int rvc;
 
         opcode = 0; // Tmp. I do not clear bss in crt0 yet 
         *LED = 4;
         getchar();
-Again:
-        puts( "i/m/c/C for rv32i/rv32im/rm32imc/rv32ic :" );
-        c = getchar();
-        switch ( c ) {
-        case 'i' : puts("Check rv32i\n" );   muldiv = 0; rvc = 0; break;                           
-        case 'C' : puts("Check rv32ic\n" );  muldiv = 0; rvc = 1; break;
-        case 'm' : puts("Check rv32im\n" );  muldiv = 1; rvc = 0; break;               
-        case 'c' : puts("Check rv32imc\n" ); muldiv = 1; rvc = 1; break;      
-        default  : goto Again;
-        }
 
+        puts( "Chk opt\n" );
+        rvc = Coretype;
+        puthex32(rvc);
         
-        puts( "\nRunning. Wait for 64x64 characters (8h?)\n" );
-#if 0        /* Coarse classification */
+        muldiv = rvc & 1;
+        rvc >>= 1;
+
+        puts( "Check that illegals trap correctly. Running test for core rv32i" );
+        if ( muldiv )
+                putchar('m');
+        if ( rvc )
+                putchar('c');
+        puts( ". Warning - runtime > 8h\n" );
+
+        uint32_t nrillegal = 0;
+        int inRVC = 1;
+        nrillegaltraps = 0;
         do {
                 switch ( opcode & 3) {
                 case 0b00 :
@@ -108,35 +113,98 @@ Again:
                 case 0b11 :
                         goto NotRVC;
                 }
+                
+                
         RVC:
+                if ( rvc == 0 ) 
+                        goto Illegal16;
+
+                while (1)
+                        ;
+                
+//                //puthex32( opcode ); putchar(' ');
+//                
+//                switch ( ((opcode&3)<<3) | (opcode>>13) ) {
+//                case 0b00000 : 
+//                        if ( opcode == 0 ) {
+//                                P("C.Illegal " );
+//                                goto Illegal16;
+//                        }
+//                        P("C.ADDI4SPN " );
+//                        goto Legal16;
+//                case 0b00001 : P("C.FLD " ); goto Illegal16; 
+//                case 0b00010 : goto Legal16;   // C.LW
+//                case 0b00011 : goto Illegal16; // C.FLW
+//                case 0b00100 : goto Legal16;   // reserved
+//                case 0b00101 : goto Illegal16; // C.FSD
+//                case 0b00110 : goto Legal16;   // C.SW
+//                case 0b00111 : goto Illegal16; // C.FSW
+//
+//                case 0b01000 : goto Legal16;   // C.NOP, C.ADDI
+//                case 0b01001 : goto Legal16;   // C.JAL
+//                case 0b01010 : goto Legal16;   // C.LI
+//                case 0b01011 : goto Legal16;   // C.ADDI16SP, C.LUI
+//                case 0b01100 : 
+//                        if ( ((opcode>>10) & 7) == 7 && ((opcode>>6)&1) == 0 ) {
+//                                //puts( " U " );
+//                                goto Illegal16;
+//                        }
+//                        //puts( " H " );
+//                        goto Legal16; // Many instructions
+//                case 0b01101 : goto Legal16;   // C.J
+//                case 0b01110 : goto Legal16;   // C.BEQZ
+//                case 0b01111 : goto Legal16;   // C.BNEZ
+//
+//                case 0b10000 : goto Legal16;   // C.SLLI
+//                case 0b10001 : goto Illegal16; // C.FLDSP
+//                case 0b10010 : goto Legal16;   // C.LWSP
+//                case 0b10011 : goto Illegal16; // C.FLWSP
+//                case 0b10100 : goto Legal16;   // C.JR, C.MV
+//                case 0b10101 : goto Illegal16; // C.FSDSP
+//                case 0b10110 : goto Legal16;   // C.SWSP
+//                case 0b10111 : goto Illegal16; // C.FSWSP
+//                }
+//                
+        Illegal16:
                 nrillegal++;
                 *LED = 1;
-
+                
                 /* Any illegal code should result in a trap
                  * Store the opcode to a location and try to execute it.
                  */
                 *(uint16_t *)testbed16 = opcode;
                 testbed16();
-                goto CL;
+                
+                /* The number of illegal instruction traps should be
+                   exactly equal the number of counted illegal instructions
+                */
+                if ( nrillegal != nrillegaltraps ) {
+                        puts( "Error in RVC " );
+                        puthex32(nrillegal);
+                        putchar( ' ' );
+                        puthex32(nrillegaltraps);
+                        puts( "\n" );   
+                        goto Fatal;
+                }
+                goto NextRVC;
+                
+        Legal16:
+                nrgood++;
 
         NotRVC:
                 *LED = 2;
-        CL:
+
+        NextRVC:
+                //NrGood=0x0d8a8004 NrBad=0x3275c07d sum=0x40004081                  
+                
                 opcode++;
         } while ( opcode < 0x10000 );
+        inRVC = 0;
 
-        /* The number of illegal instruction traps should be
-           exactly equal the number of counted illegal instructions
-        */
-        if ( nrillegal != nrillegaltraps )
-                goto Fatal;
-#endif
         
+        puts( "Check 32-bit instructions. Wait for 64x64 characters\n" );
         /* Now do the same for 32-bit instructions ending in 0b11
          */
-//#define P(x) puts(x); putchar( ' ' );
-#define P(x)
-        
         opcode = 0;
 /*        opcode = 0x06000000; leads to 00000001Unexp Trap:06004033
  * What if we start at 0x06004033?
@@ -295,7 +363,7 @@ Again:
                 testbed32();
                 goto L;
                 
-        IgnoreIllegal:
+//        IgnoreIllegal:
                 
         Legal:
                 P("Ok");
@@ -334,10 +402,16 @@ Again:
                 *LED = 10;
 
 Fatal:
-        puts( "Fail detected. Opcode now =" );
+        puts( "Fail detected" );
+        if ( inRVC )
+                puts( " in RVC" );
+        puts(". Opcode now =" );
         puthex32( opcode );
-        puts( ". Last opcode that should have been trapped = " );
+        puts( ". Last opcode16/32 that should have been trapped = " );
+        puthex32( *(uint16_t *)testbed16);
+        putchar( ' ' );
         puthex32( *(uint32_t *)testbed32);
+        
         while (1)
                 *LED = -1;
         return 0;

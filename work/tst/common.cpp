@@ -816,11 +816,11 @@ int p_luh( int lnr, int onebit ) {
 void common_simprintf( INFOCHUNK * const p, uint32_t cy) {
         static int lnr;        
         const char *ucodetxt[256] = {
-#define X(label,txt,val,reachability,mask,instr,hitnr) txt,
+#define X(label,text,ty,pos,value,reachability,mask,instr,nrhit) text,
 #include "../code/ucode.h"
         };
         const char *ucodelabeltxt[256] = {
-#define X(label,txt,val,reachability,mask,instr,hitnr) STR(label),
+#define X(label,text,ty,pos,value,reachability,mask,instr,nrhit) STR(label),
 #include "../code/ucode.h"
         };
                 

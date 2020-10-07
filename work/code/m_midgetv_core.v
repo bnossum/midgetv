@@ -813,7 +813,7 @@ module m_midgetv_core
       end
    endgenerate
    
-   m_alu_carryin #(.HIGHLEVEL(xHIGHLEVEL), .MULDIV(MULDIV)) 
+   m_alu_carryin #(.HIGHLEVEL(HIGHLEVEL), .MULDIV(MULDIV)) 
    inst_alu_carryin
      (// Inputs
       .ADR_O_31                         (ADR_O[31]),

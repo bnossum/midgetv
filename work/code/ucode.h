@@ -111,12 +111,29 @@
 /* Locations that are unused in the table should never be accessed.
    If they are, the controller have a fatal error. To make debugging
    in such a case a bit easier, I should ensure there is no loops in
-   these cases. 
+   these cases. I sould also avoid repetitions, and strobes and ack's.
+   Should have: 
+   Wnn  (No write)
+   isr_none
+   u_cont
+   nxtSTB == 0
+   nxtWE  == 0
+   Rpc
+   next StdIncPc
  */
 //#define unx StdIncPc
 #define x8 ((xxxx<<4) | xxxx )
+#define x10 ((xx<<8)|x8)
 #define x16 ((x8<<8)|x8)
-#define unx ( ((x16<<15) | x16) | n(Fetch) )
+#define x32 ((x16<<16)|x16)
+#define x42 ((x10<<32)|x32)
+//#define unx 0,-1, ( ((x16<<15) | x16) | n(Fetch) )
+//           Fixed/even       ISR          | ALU         Write   intern      Reg    Shreg   Ucode            Next
+//           | Pair           action       | op          adr/en  read adr    op     op      operation        ucode
+//efine unx  0,-1,            isr_none     | A_xx   |    Wnn   | Ralu      | Qx   | sr_h  | u_cont         | n(StdIncPc)
+#define unx  0,-1, x42
+
+
 
 /* =============================================================================
    The number of control equations depends on what options are included.
@@ -169,20 +186,20 @@
  *                                                            sa17           s_alu[2:0]
  *                                                            |sa16          |||s_alu_carryin[1:0]
  *                                                            ||             |||||         */
-#define A_nearXOR                                           ( IO << 18 ) | ( OOOxx <<9 )  // B = D^(~Q)                               
-#define A_iszero                                            ( IO << 18 ) | ( OOOII <<9 )  // Used in DIV to test for zero in a particular setting
-#define A_passd                                             ( IO << 18 ) | ( OOIxx <<9 )  // D
-#define A_invq                                              ( IO << 18 ) | ( OIOxx <<9 )  // ~Q
-#define A_nearAND                                           ( IO << 18 ) | ( OIIxx <<9 )  // D&(~Q)           
-#define A_addDQ                            (I<<MCLRpos) |   ( IO << 18 ) | ( IOOOO <<9 )  // D+Q         subtle interaction between MULDIV and branch, need (I<<42)
-#define A_cycnt                            (I<<MCLRpos) |   ( II << 18 ) | ( IOOOO <<9 )  // D+cyclecnt  subtle
-#define A_a1                                                ( IO << 18 ) | ( IOOII <<9 )  // D+Q+1 Chasing an error in update of Q in ILL_4
-#define A_add1                             (I<<MCLRpos) |   ( IO << 18 ) | ( IOOII <<9 )  // D+Q+1
-#define A_add3                             (I<<MCLRpos) |   ( OO << 18 ) | ( IOOOO <<9 )  // D+(Q|3)+0   subtle, needed see test prog t154.S                                  
-#define A_add4                            (II<<MCLRpos) |   ( OO << 18 ) | ( IOOII <<9 )  // D+(Q|3)+1
-#define A_add3w                            (I<<MCLRpos) |   ( OO << 18 ) | ( IOOOO <<9 )  // D+(Q|3)+0   subtle, needed see test prog t154.S Revise all use of this
-#define A_add4w                           (II<<MCLRpos) |   ( OO << 18 ) | ( IOOII <<9 )  // D+(Q|3)+1   REVISE all use of this
-#define A_add2or4 (I<<RVCpcincctrlpos) |  (II<<MCLRpos) |   ( OO << 18 ) | ( IOOII <<9 )  // D+(Q|((~rvc_pcinc<<1,1))+1 
+#define A_nearXOR                                           ( IO << 18 ) | ( OOOxx << 9 )  // B = D^(~Q)                               
+#define A_iszero                                            ( IO << 18 ) | ( OOOII << 9 )  // Used in DIV to test for zero in a particular setting
+#define A_passd                                             ( IO << 18 ) | ( OOIxx << 9 )  // D
+#define A_invq                                              ( IO << 18 ) | ( OIOxx << 9 )  // ~Q
+#define A_nearAND                                           ( IO << 18 ) | ( OIIxx << 9 )  // D&(~Q)           
+#define A_addDQ                            (I<<MCLRpos) |   ( IO << 18 ) | ( IOOOO << 9 )  // D+Q         subtle interaction between MULDIV and branch, need (I<<42)
+#define A_cycnt                            (I<<MCLRpos) |   ( II << 18 ) | ( IOOOO << 9 )  // D+cyclecnt  subtle
+#define A_a1                                                ( IO << 18 ) | ( IOOII << 9 )  // D+Q+1 Chasing an error in update of Q in ILL_4. This seems to do the trick. Is it needed elsewhere ? (problem was that Q was held when it should not have been)
+#define A_add1                             (I<<MCLRpos) |   ( IO << 18 ) | ( IOOII << 9 )  // D+Q+1
+#define A_add3                             (I<<MCLRpos) |   ( OO << 18 ) | ( IOOOO << 9 )  // D+(Q|3)+0   subtle, needed see test prog t154.S                                  
+#define A_add4                            (II<<MCLRpos) |   ( OO << 18 ) | ( IOOII << 9 )  // D+(Q|3)+1
+#define A_add3w                            (I<<MCLRpos) |   ( OO << 18 ) | ( IOOOO << 9 )  // D+(Q|3)+0   subtle, needed see test prog t154.S Revise all use of this
+#define A_add4w                           (II<<MCLRpos) |   ( OO << 18 ) | ( IOOII << 9 )  // D+(Q|3)+1   REVISE all use of this
+#define A_add2or4 (I<<RVCpcincctrlpos) |  (II<<MCLRpos) |   ( OO << 18 ) | ( IOOII << 9 )  // D+(Q|((~rvc_pcinc<<1,1))+1 
 
 #define A_shlq                          ( IO <<18 ) | ( IOIOO <<9 )  // B = (QQ<<1)|cin (with D=0xffffffff)
 #define A_shlqdiv                       ( IO <<18 ) | ( IOIIO <<9 )  // B = (QQ<<1)|M[0] (with D=0xffffffff)
@@ -204,12 +221,6 @@
 #define MA_shlqdiv                   ( IO <<18 ) | ( IOIIO <<9 )  // B = (QQ<<1)|M[0] (with D=0xffffffff)
 #define MA_passq                     ( IO <<18 ) | ( IIOOO <<9 )  // Let through Q
 #define MA_xx                        ( xO <<18 ) | ( xxxxx <<9 )  // ALU is don't care
-
-
-
-
-
-
 
         
 
@@ -301,9 +312,9 @@
 
 
 
-//                                               Read into   ADR1Mustbe0
-//                      use_brcond  shrep        Instruction |Adr0Mustbe0
-//                      |           |    sa33    |           ||use_dinx
+//                                                Read into    ADR1Mustbe0
+//                      use_brcond  shrep         Instruction  |Adr0Mustbe0
+//                      |           |     sa33    |            ||use_dinx
 #define use_dinx      ( O << 14) | ( O << 34) | ( O << 15) | ( xxI << 30) // dinx determines where to start microcode
 #define u_cont        ( O << 14) | ( O << 34) | ( O << 15) | ( OOO << 30) // rinx determines next microcode instruction
 #define u_io_i_latch  ( O << 14) | ( O << 34) | ( I << 15) | ( OOO << 30) // 
@@ -343,8 +354,8 @@
  *
  * Reading from EBR
  * 
- * executes ucode:     LW_0        LW_1        StdIncPc
- * nextucode| LW_0   | LW_1      | StdIncPc  | Fetch
+ * executes ucode:     LW_0        LW_1        $tdIncPc
+ * nextucode| LW_0   | LW_1      | $tdIncPc  | Fetch
  * B       ||        | [RS1]+imm |  data     | pc+4        |
  * DAT_O   ||        | [RS1]     | data      | pc          |
  * ADR_O   ||        | imm       | [RS1]+imm | 0
@@ -364,7 +375,7 @@
  *
  * Executing from EBR, no retired instruction counter
  *                                               1st instr
- *         ||StdIncPc| Fetch     | Fetch2      | ucode
+ *         ||$tdIncPc| Fetch     | Fetch2      | ucode
  * I       ||        | op        | op          | op
  * B       || pc+4   |           | ttime+cycnt | 
  * DAT_O   ||        | op        | ttime       | [RS1]
@@ -372,7 +383,7 @@
  * 
  * Executing from EBR, with retired instruction counter
  *                                                            1st instr
- *         ||StdIncPc| Fetch     | Fetch2      | Fetch3      | ucode
+ *         ||$tdIncPc| Fetch     | Fetch2      | Fetch3      | ucode
  * I       ||        | op        | op          | op          | op
  * B       || pc+4   |           | ttime+cycnt | rinst+1     | 
  * DAT_O   ||        | op        | ttime       | rinst       | [RS1]
@@ -380,7 +391,7 @@
  * 
  * Executing from SRAM, no retired instruction counter
  *                                                                           1st instr
- *         ||StdIncPc| eFetch(1) | eFetch(2)   | eFetch(3)   | eFetch2     | ucode
+ *         ||$tdIncPc| eFetch(1) | eFetch(2)   | eFetch(3)   | eFetch2     | ucode
  * I       ||        |           |             |             | op          | op
  * B       || pc+4   |           |             |             | ttime+cycnt |   
  * DAT_O   ||        |           | FFFFFFFF    | FFFFFFFF    | ttime       | [RS1]
@@ -393,47 +404,65 @@
  *
  *
  */
-
-//                                                                                  ISR          | ALU         Write   intern      Reg    Shreg   Ucode            Next
-//                                                                                  action       | op          adr/en  read adr    op     op      operation        ucode
-#define _jFault   jFault,  " err   Fetch access fault. Faulting adr to mtval",      isr_none     | A_passq   | Wmtval| r00000000 | Qz   | sr_h  | u_cont         | n(jFault_1)  // [6] Must be after [5]
-#define _jFault_1 jFault_1,"       Store 1 to mcause",                              isr_none     | A_add1    | Wmcaus| Rpc       | Qx   | sr_h  | u_cont         | n(LDAF_3)
+/*
+  Fields for internal consistency:
+  Fixed/even : 0 if ucode can be placed freely
+               1 if ucode has a fixed position
+               2 if ucode can be placed freely at an even ucode address
+               4 if ucode must be placed in range 0x22, 0x39, 0x42-0x43, 0x58-0x60, 0x62-0x63, 0x68, 0x6a, 0x78-0x79, 
+                 0x82-0x83, 0x88, 0x8a, 0x99, 0x9c, 0xa2-0xa3, 0xa8, 0xaa, 0xb9, 0xc0, 0xc2-0xc3, 0xc8, 0xca, 0xd9, 
+                 0xe0, 0xe2-0xe3, 0xe8, or 0xf9 (illegal as entry).
+               8 if ucode is the second of a placed pair
+  Pair:  if (fixed/even == 1):  position of microcode instruction
+         if (fixed/even == 8):  label of the microcode instruction at the address preceeding this microcode instruction (part 2 of a pair)
+         Otherwise           :  -1 if there is no requirement
+ */
+//                                                                                  Fixed/even       ISR          | ALU         Write   intern      Reg    Shreg   Ucode            Next
+//                                                                                  | Pair           action       | op          adr/en  read adr    op     op      operation        ucode
+#define _jFault   jFault,  " err   Fetch access fault. Faulting adr to mtval",      8,Fetch2,        isr_none     | A_passq   | Wmtval| r00000000 | Qz   | sr_h  | u_cont         | n(jFault_1)  // [6] Must be after [5]
+#define _jFault_1 jFault_1,"       Store 1 to mcause",                              0,-1,            isr_none     | A_add1    | Wmcaus| Rpc       | Qx   | sr_h  | u_cont         | n(LDAF_3)
 //efine _LDAF_3   LDAF_3,  "       PC to mepc",                                     
 //efine _JAL_3    JAL_3,   "       PC+imm/trap entrypt to PC. OpFetch",             
-
-///* Searching for an error in illegal instructons. Seems jFault is accidentially triggered? It was not*/
-////                                                                                  ISR          | ALU         Write   intern      Reg    Shreg   Ucode            Next
-////                                                                                  action       | op          adr/en  read adr    op     op      operation        ucode
-//#define _jFault   jFault,  " err   Search for error",                               isr_none     | A_xx      | Wnn   | r_xx      | Qx   | sr_h  | u_cont         | n(ILLe)  
-//#define _jFault_1 jFault_1,"       Store 1 to mcause",                              isr_none     | A_add1    | Wmcaus| Rpc       | Qx   | sr_h  | u_cont         | n(LDAF_3)
-////efine _LDAF_3   LDAF_3,  "       PC to mepc",                                     
-////efine _JAL_3    JAL_3,   "       PC+imm/trap entrypt to PC. OpFetch",             
-
 
 
 #if   ucodeopt_HAS_MINSTRET == 0 && ucodeopt_HAS_EBR_MINSTRET == 0
 
 #if ucodeopt_RVC == 0
-#define _StdIncPc StdIncPc," Fr00  IncPC, OpFetch",                                 nxtSTB       | A_add4    | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch)     // [1] Must be at even ucode adr. Goes to either Fetch or eFetch. 
-#define _Fetch    Fetch ,  " Fr00  Read and latch instruction",                     isr_none     | A_passq   | Wjj   | rttime    | Qz   | sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR
-#define _Fetch2   Fetch2,  " Fr00  Update ttime. Update I. Q=immediate. Use dinx",  isr_none     | A_cycnt   | Wttime| RS1       | Qudec| sr_h  | use_dinx      
-#define _eFetch   eFetch,  " Fr00  rep Read until d=mem[(rs1+ofs) & ~3u]",          isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2 )   // [4]] Must be at address after [3]
+//                                                                                  
+//                                                                                  Fixed/even       ISR          | ALU         Write   intern      Reg    Shreg   Ucode            Next
+//                                                                                  | Pair           action       | op          adr/en  read adr    op     op      operation        ucode
+#define _StdIncPc StdIncPc," Fr00  IncPC, OpFetch",                                 2,-1,            nxtSTB       | A_add4    | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch)     // [1] Must be at even ucode adr. Goes to either Fetch or eFetch. 
+#define _Fetch    Fetch ,  " Fr00  Read and latch instruction",                     2,-1,            isr_none     | A_passq   | Wjj   | rttime    | Qz   | sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR
+#define _Fetch2   Fetch2,  " Fr00  Update ttime. Update I. Q=immediate. Use dinx",  2,-1,            isr_none     | A_cycnt   | Wttime| RS1       | Qudec| sr_h  | use_dinx                      // [5] Must be at even ucode adr.
+#define _eFetch   eFetch,  " Fr00  rep Read until d=mem[(rs1+ofs) & ~3u]",          8,Fetch,         isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2 )   // [4]] Must be at address after [3]
 #define _eFetch2  eFetch2, " Fr00  Not in use",                                     unx
 #define _eFetch3  eFetch3, " Fr00  Not in use",                                     unx
+
+#define _LASTINCH LASTINCH,"       Reserved to facilitate manual equation",         unx
+#ifndef XXLASTINCH
+#define XXLASTINCH(...)
+#endif
+XXLASTINCH("wire instr0100,instr1x110100;        \
+bn_l4v #(.I(16'h0010)) leq0100(     .o(instr0100),     .i({minx[3:0]}));\
+bn_l4v #(.I(16'h8000)) leq1x110100( .o(instr1x110100), .i({minx[7],minx[5:4],instr0100}));\
+SB_DFFE reg_d18( .Q(d[18]), .C(clk), .E(progress_ucode), .D(instr1x110100));\
+assign d[30] = d[18];")
+#undef XXLASTINCH
+
 #else
 /* When RVC is implemented, I ran into a problem with unaligned 32-bit instructions.
  * The essential problem was that pc may be incremented to straddle the two words
  * that contain the 32-bit instruction, but then PC is too large (by 2) for
  * instructions that uses PC as an addres. This is at least AUIPC, BEQ,BNE, etc
  */
-#define _StdIncPc StdIncPc," Fr00  IncPC, OpFetch",                                 nxtSTB       | A_add2or4 | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch   )  // [1] Must be at even ucode adr. Goes to either Fetch or eFetch. 
-#define _Fetch    Fetch ,  " Fr00  Read and latch instruction",                     isr_none     | A_passq   | Wjj   | rttime    | Qz   | sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR. Write copy of PC to jj
-#define _Fetch2   Fetch2,  " Fr00  Upd ttime, I. Q=imm Use dinx unless unaligned ", isr_none     | A_cycnt   | Wttime| RS1       | Qudec| sr_h  | use_dinx       | n(unalignd)  // [5] Must be at even ucode adr. At unaligned 32-bit instr goto unalignd, else done.
-#define _eFetch   eFetch,  " Fr00  rep Read until d=mem[(rs1+ofs) & ~3u]",          isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [4]] Must be at address after [3]. Fetch from SRAM
-#define _unalignd unalignd," Fr00u Unaligned pc, prep read high hword",             isr_none     | A_passq   | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(straddle)  // For unaligned 32-bit instr
-#define _straddle straddle," Fr00u IncPC, OpFetch",                                 nxtSTB       | A_add2or4 | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetchu  )  // [1] Must be at even ucode adr. Goes to either Fetchu or eFetchu. 
-#define _Fetchu   Fetchu , " Fr00u Read and latch instruction",                     isr_none     | A_passq   | Wnn   | rttime    | Qz   | sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR. Write copy of PC to yy
-#define _eFetchu  eFetchu, " Fr00u rep Read until d=mem[(rs1+ofs) & ~3u]",          isr_none     | A_passq   | Wnn   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [4]] Must be at address after [3]. Fetch from SRAM
+#define _StdIncPc StdIncPc," Fr00  IncPC, OpFetch",                                 work nxtSTB       | A_add2or4 | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch   )  // [1] Must be at even ucode adr. Goes to either Fetch or eFetch. 
+#define _Fetch    Fetch ,  " Fr00  Read and latch instruction",                     work isr_none     | A_passq   | Wjj   | rttime    | Qz   | sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR. Write copy of PC to jj
+#define _Fetch2   Fetch2,  " Fr00  Upd ttime, I. Q=imm Use dinx unless unaligned ", work isr_none     | A_cycnt   | Wttime| RS1       | Qudec| sr_h  | use_dinx       | n(unalignd)  // [5] Must be at even ucode adr. At unaligned 32-bit instr goto unalignd, else done.
+#define _eFetch   eFetch,  " Fr00  rep Read until d=mem[(rs1+ofs) & ~3u]",          work isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [4]] Must be at address after [3]. Fetch from SRAM
+#define _unalignd unalignd," Fr00u Unaligned pc, prep read high hword",             work isr_none     | A_passq   | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(straddle)  // For unaligned 32-bit instr
+#define _straddle straddle," Fr00u IncPC, OpFetch",                                 work nxtSTB       | A_add2or4 | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetchu  )  // [1] Must be at even ucode adr. Goes to either Fetchu or eFetchu. 
+#define _Fetchu   Fetchu , " Fr00u Read and latch instruction",                     work isr_none     | A_passq   | Wnn   | rttime    | Qz   | sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR. Write copy of PC to yy
+#define _eFetchu  eFetchu, " Fr00u rep Read until d=mem[(rs1+ofs) & ~3u]",          work isr_none     | A_passq   | Wnn   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [4]] Must be at address after [3]. Fetch from SRAM
 
 #define _eFetch2  _unalignd // Reused
 #define _eFetch3  _straddle // Reused
@@ -443,48 +472,48 @@
 #elif ucodeopt_HAS_MINSTRET == 1 && ucodeopt_HAS_EBR_MINSTRET == 0
 
 #if ucodeopt_RVC == 0
-#define _StdIncPc StdIncPc," Fr10  IncPC, OpFetch",                                 nxtSTB       | A_add4    | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch)     // [1] Must be at even ucode adr. Goes to either Fetch or eFetch. 
-#define _Fetch    Fetch ,  " Fr10  Read and latch instruction",                     isr_none     | A_passd   | Wnn   | rttime    | Qz   | sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR
-#define _Fetch2   Fetch2,  " Fr10  Update ttime. Update I. Q=immediate. Use dinx",  isr_none     | A_cycnt   | Wttime| RS1       | Qudec| sr_h  | use_dinx                      // [5] Must be at even ucode adr. 
-#define _eFetch   eFetch,  " Fr10  rep Read until d=mem[(rs1+ofs) & ~3u]",          isr_none     | A_passd   | Wnn   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(eFetch2 )  // [4]] Must be at address after [3]
-#define _eFetch2  eFetch2, " Fr10  Update ttime",                                   isr_none     | A_cycnt   | Wttime| Rrinst    | Qz   | sr_h  | u_cont         | n(eFetch3 )
-#define _eFetch3  eFetch3, " Fr10  Update minstret, Q=immediate. Use dinx",         isr_none     | A_add1    | Wrinst| RS1       | Qudec| sr_h  | use_dinx
+#define _StdIncPc StdIncPc," Fr10  IncPC, OpFetch",                                 work nxtSTB       | A_add4    | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch)     // [1] Must be at even ucode adr. Goes to either Fetch or eFetch. 
+#define _Fetch    Fetch ,  " Fr10  Read and latch instruction",                     work isr_none     | A_passd   | Wnn   | rttime    | Qz   | sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR
+#define _Fetch2   Fetch2,  " Fr10  Update ttime. Update I. Q=immediate. Use dinx",  work isr_none     | A_cycnt   | Wttime| RS1       | Qudec| sr_h  | use_dinx                      // [5] Must be at even ucode adr. 
+#define _eFetch   eFetch,  " Fr10  rep Read until d=mem[(rs1+ofs) & ~3u]",          work isr_none     | A_passd   | Wnn   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(eFetch2 )  // [4]] Must be at address after [3]
+#define _eFetch2  eFetch2, " Fr10  Update ttime",                                   work isr_none     | A_cycnt   | Wttime| Rrinst    | Qz   | sr_h  | u_cont         | n(eFetch3 )
+#define _eFetch3  eFetch3, " Fr10  Update minstret, Q=immediate. Use dinx",         work isr_none     | A_add1    | Wrinst| RS1       | Qudec| sr_h  | use_dinx
 #else
-#define _StdIncPc StdIncPc," Fr10  IncPC, OpFetch",                                 nxtSTB       | A_add2or4 | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch)     // [1] Must be at even ucode adr. Goes to either Fetch or eFetch. 
-#define _Fetch    Fetch ,  " Fr10  Read and latch instruction",                     isr_none     | A_passq   | Wjj   | rttime    | Qz   | sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR
-#define _Fetch2   Fetch2,  " Fr10  Update ttime. Update I. Q=immediate. Use dinx",  isr_none     | A_cycnt   | Wttime| RS1       | Qudec| sr_h  | use_dinx       | n(unalignd)  // [5] Must be at even ucode adr. At unaligned 32-bit instr goto unalignd, else done
-#define _eFetch   eFetch,  " Fr10  rep Read until d=mem[(rs1+ofs) & ~3u]",          isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(eFetch2 )  // [4]] Must be at address after [3]
-#define _eFetch2  eFetch2, " Fr10  Update ttime",                                   isr_none     | A_cycnt   | Wttime| Rrinst    | Qz   | sr_h  | u_cont         | n(eFetch3 )
-#define _eFetch3  eFetch3, " Fr10  Update minstret, Q=immediate. Use dinx",         isr_none     | A_add1    | Wrinst| RS1       | Qudec| sr_h  | use_dinx       | n(unalignd)  //  At unaligned 32-bit instr goto unalignd, else done
+#define _StdIncPc StdIncPc," Fr10  IncPC, OpFetch",                                 work nxtSTB       | A_add2or4 | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch)     // [1] Must be at even ucode adr. Goes to either Fetch or eFetch. 
+#define _Fetch    Fetch ,  " Fr10  Read and latch instruction",                     work isr_none     | A_passq   | Wjj   | rttime    | Qz   | sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR
+#define _Fetch2   Fetch2,  " Fr10  Update ttime. Update I. Q=immediate. Use dinx",  work isr_none     | A_cycnt   | Wttime| RS1       | Qudec| sr_h  | use_dinx       | n(unalignd)  // [5] Must be at even ucode adr. At unaligned 32-bit instr goto unalignd, else done
+#define _eFetch   eFetch,  " Fr10  rep Read until d=mem[(rs1+ofs) & ~3u]",          work isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(eFetch2 )  // [4]] Must be at address after [3]
+#define _eFetch2  eFetch2, " Fr10  Update ttime",                                   work isr_none     | A_cycnt   | Wttime| Rrinst    | Qz   | sr_h  | u_cont         | n(eFetch3 )
+#define _eFetch3  eFetch3, " Fr10  Update minstret, Q=immediate. Use dinx",         work isr_none     | A_add1    | Wrinst| RS1       | Qudec| sr_h  | use_dinx       | n(unalignd)  //  At unaligned 32-bit instr goto unalignd, else done
 
-#define _unalignd unalignd," Fr10u Unaligned pc, prep read high hword",             isr_none     | A_passq   | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(straddle)  // For unaligned 32-bit instr
-#define _straddle straddle," Fr10u IncPC, OpFetch",                                 nxtSTB       | A_add2or4 | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetchu  )  // [1] Must be at even ucode adr. Goes to either Fetchu or eFetchu. 
-#define _Fetchu   Fetchu , " Fr10u Read and latch instruction",                     isr_none     | A_passq   | Wnn   | rttime    | Qz   | sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR. Write copy of PC to yy
-#define _eFetchu  eFetchu, " Fr10u rep Read until d=mem[(rs1+ofs) & ~3u]",          isr_none     | A_passq   | Wnn   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [4]] Must be at address after [3]. Fetch from SRAM
+#define _unalignd unalignd," Fr10u Unaligned pc, prep read high hword",             work isr_none     | A_passq   | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(straddle)  // For unaligned 32-bit instr
+#define _straddle straddle," Fr10u IncPC, OpFetch",                                 work nxtSTB       | A_add2or4 | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetchu  )  // [1] Must be at even ucode adr. Goes to either Fetchu or eFetchu. 
+#define _Fetchu   Fetchu , " Fr10u Read and latch instruction",                     work isr_none     | A_passq   | Wnn   | rttime    | Qz   | sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR. Write copy of PC to yy
+#define _eFetchu  eFetchu, " Fr10u rep Read until d=mem[(rs1+ofs) & ~3u]",          work isr_none     | A_passq   | Wnn   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [4]] Must be at address after [3]. Fetch from SRAM
 #endif
 
 #elif ucodeopt_HAS_MINSTRET == 1 && ucodeopt_HAS_EBR_MINSTRET == 1
 
 #if ucodeopt_RVC == 0
-#define _StdIncPc StdIncPc," Fr11  IncPC, OpFetch",                                 nxtSTB       | A_add4    | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch   )  // [1] Must be at even ucode adr. Goes to either Fetch or eFetch. 
-#define _Fetch    Fetch ,  " Fr11  Read and latch instruction",                     isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR
-#define _Fetch2   Fetch2,  " Fr11  Update ttime. Update I. Q=immediate. Use dinx",  isr_none     | A_cycnt   | Wttime| Rrinst    | Qz   | sr_h  | u_cont         | n(eFetch3 )  // [5] Must be at even ucode adr. 
-#define _eFetch   eFetch,  " Fr11  rep Read until d=mem[(rs1+ofs) & ~3u]",          isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [4]] Must be at address after [3]. Fetch from SRAM
-#define _eFetch2  eFetch2, " Fr11  Not in use",                                     unx
-#define _eFetch3  eFetch3, " Fr11  Write minstret. Update I. Q=immediate, use dinx",isr_none     | A_add1    | Wrinst| RS1       | Qudec| sr_h  | use_dinx
+#define _StdIncPc StdIncPc," Fr11  IncPC, OpFetch",                                 work nxtSTB       | A_add4    | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch   )  // [1] Must be at even ucode adr. Goes to either Fetch or eFetch. 
+#define _Fetch    Fetch ,  " Fr11  Read and latch instruction",                     work isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR
+#define _Fetch2   Fetch2,  " Fr11  Update ttime. Update I. Q=immediate. Use dinx",  work isr_none     | A_cycnt   | Wttime| Rrinst    | Qz   | sr_h  | u_cont         | n(eFetch3 )  // [5] Must be at even ucode adr. 
+#define _eFetch   eFetch,  " Fr11  rep Read until d=mem[(rs1+ofs) & ~3u]",          work isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [4]] Must be at address after [3]. Fetch from SRAM
+#define _eFetch2  eFetch2, " Fr11  Not in use",                                     work unx
+#define _eFetch3  eFetch3, " Fr11  Write minstret. Update I. Q=immediate, use dinx",work isr_none     | A_add1    | Wrinst| RS1       | Qudec| sr_h  | use_dinx
 #else
-#define _StdIncPc StdIncPc," Fr11  IncPC, OpFetch",                                 nxtSTB       | A_add2or4 | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch   )  // [1] Must be at even ucode adr. Goes to either Fetch or eFetch. 
-#define _Fetch    Fetch ,  " Fr11  Read and latch instruction",                     isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR
-#define _Fetch2   Fetch2,  " Fr11  Update ttime. Update I. Q=immediate. Use dinx",  isr_none     | A_cycnt   | Wttime| Rrinst    | Qz   | sr_h  | u_cont         | n(eFetch3 )  // [5] Must be at even ucode adr. 
-#define _eFetch   eFetch,  " Fr11  rep Read until d=mem[(rs1+ofs) & ~3u]",          isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [4]] Must be at address after [3]. Fetch from SRAM
+#define _StdIncPc StdIncPc," Fr11  IncPC, OpFetch",                                 work nxtSTB       | A_add2or4 | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch   )  // [1] Must be at even ucode adr. Goes to either Fetch or eFetch. 
+#define _Fetch    Fetch ,  " Fr11  Read and latch instruction",                     work isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR
+#define _Fetch2   Fetch2,  " Fr11  Update ttime. Update I. Q=immediate. Use dinx",  work isr_none     | A_cycnt   | Wttime| Rrinst    | Qz   | sr_h  | u_cont         | n(eFetch3 )  // [5] Must be at even ucode adr. 
+#define _eFetch   eFetch,  " Fr11  rep Read until d=mem[(rs1+ofs) & ~3u]",          work isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [4]] Must be at address after [3]. Fetch from SRAM
 #define _eFetch2  _Fetch2u // Reused
-#define _Fetch2u  Fetch2u, " Fr11  Update ttime. Update I. Q=immediate. Use dinx",  isr_none     | A_cycnt   | Wttime| RS1       | Qudec| sr_h  | use_dinx                      //  
-#define _eFetch3  eFetch3, " Fr11  Write minstret. Update I. Q=immediate, use dinx",isr_none     | A_add1    | Wrinst| RS1       | Qudec| sr_h  | use_dinx       | n(unalignd)  // At unaligned 32-bit instr goto unalignd, else done
+#define _Fetch2u  Fetch2u, " Fr11  Update ttime. Update I. Q=immediate. Use dinx",  work isr_none     | A_cycnt   | Wttime| RS1       | Qudec| sr_h  | use_dinx                      //  
+#define _eFetch3  eFetch3, " Fr11  Write minstret. Update I. Q=immediate, use dinx",work isr_none     | A_add1    | Wrinst| RS1       | Qudec| sr_h  | use_dinx       | n(unalignd)  // At unaligned 32-bit instr goto unalignd, else done
 
-#define _unalignd unalignd," Fr10u Unaligned pc, prep read high hword",             isr_none     | A_passq   | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(straddle)  // For unaligned 32-bit instr
-#define _straddle straddle," Fr10u IncPC, OpFetch",                                 nxtSTB       | A_add2or4 | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetchu  )  // [1] Must be at even ucode adr. Goes to either Fetchu or eFetchu. 
-#define _Fetchu   Fetchu , " Fr10u Read and latch instruction",                     isr_none     | A_passq   | Wnn   | rttime    | Qz   | sr_h  | u_io_i_latch   | n(Fetch2u )  // [3] Must be at even ucode adr. Fetch from EBR. Write copy of PC to yy
-#define _eFetchu  eFetchu, " Fr10u rep Read until d=mem[(rs1+ofs) & ~3u]",          isr_none     | A_passq   | Wnn   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2u )  // [4]] Must be at address after [3]. Fetch from SRAM
+#define _unalignd unalignd," Fr10u Unaligned pc, prep read high hword",             work isr_none     | A_passq   | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(straddle)  // For unaligned 32-bit instr
+#define _straddle straddle," Fr10u IncPC, OpFetch",                                 work nxtSTB       | A_add2or4 | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetchu  )  // [1] Must be at even ucode adr. Goes to either Fetchu or eFetchu. 
+#define _Fetchu   Fetchu , " Fr10u Read and latch instruction",                     work isr_none     | A_passq   | Wnn   | rttime    | Qz   | sr_h  | u_io_i_latch   | n(Fetch2u )  // [3] Must be at even ucode adr. Fetch from EBR. Write copy of PC to yy
+#define _eFetchu  eFetchu, " Fr10u rep Read until d=mem[(rs1+ofs) & ~3u]",          work isr_none     | A_passq   | Wnn   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2u )  // [4]] Must be at address after [3]. Fetch from SRAM
 #endif
 
 #else
@@ -492,33 +521,37 @@
 #endif                                                                                                                                                               
 
 
-#define _aFault   aFault,  " err   Load access fault. Faulting adr to mtval",       isr_none     | A_passq   | Wmtval| r00000000 | Qz   | sr_h  | u_cont         | n(aFault_1) // [2] Must be after [1]
-#define _aFault_1 aFault_1,"       Q = 4",                                          isr_none     | A_add4w   | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(aFault_2)
-#define _aFault_2 aFault_2,"       Store 5 to mcause",                              isr_intoTrap | A_add1    | Wmcaus| Rpc       | Qx   | sr_h  | u_cont         | n(LDAF_3)
+//                                                                                  Fixed/even       ISR          | ALU         Write   intern      Reg    Shreg   Ucode            Next
+//                                                                                  | Pair           action       | op          adr/en  read adr    op     op      operation        ucode
+#define _aFault   aFault,  " err   Load access fault. Faulting adr to mtval",       0,StdIncPc,      isr_none     | A_passq   | Wmtval| r00000000 | Qz   | sr_h  | u_cont         | n(aFault_1) // [2] Must be after [1]
+#define _aFault_1 aFault_1,"       Q = 4",                                          0,-1,            isr_none     | A_add4w   | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(aFault_2)
+#define _aFault_2 aFault_2,"       Store 5 to mcause",                              0,-1,            isr_intoTrap | A_add1    | Wmcaus| Rpc       | Qx   | sr_h  | u_cont         | n(LDAF_3)
 //efine _LDAF_3   LDAF_3,  "       PC to mepc",                                     
 //efine _JAL_3    JAL_3,   "       PC+imm/trap entrypt to PC. OpFetch",             
 
 /* Note. It is legal to read a byte from input devices. Seen from the
  * side of the input device, a word read access is performed.
  */                                                                                                                                                                 
-#define _LB_0     LB_0    ,"LB     Load byte. q = rdadr=RS1+0fs",                   nxtSTB       | A_addDQ   | Wnn   | Ralu      | Qu   | sr43a | u_cont         | n(LB_1    )  
-#define _LB_1     LB_1    ,"       Read until q=mem[rs1+ofs) & ~3u]",               isr_none     | A_passd   | Wnn   | rHorL     | Qs   | sr_h  | u_io_i | psa00 | n(LB_2    )
-#define _LB_2     LB_2    ,"       Repeat shr until shreg == 0 (0,8,16,24 times)",  isr_none     | A_passd   | Wnn   | r00000000 | Qshr | srDec | u_shrep        | n(LB_3    )  // [gg] Must be even ucodeadr
-#define _LB_3     LB_3    ,"       q = ~mem[rs1+ofs]",                              isr_none     | A_invq    | Wnn   | r000000FF | Qu   | sr_h  | u_cont         | n(LB_4    )  
-#define _LB_4     LB_4    ,"       q = (uint8_t) mem[rs1+Iimm]",                    isr_none     | A_nearAND | Wnn   | rFFFFFF7F | Qu   | sr_h  | u_cont         | n(LB_5    )  
-#define _LB_5     LB_5    ,"       q = D^0xffffffff^q = D^0x80",                    isr_none     | A_nearXOR | Wnn   | rFFFFFF7F | Qu   | sr_h  | u_cont         | n(LB_6    )
-#define _LB_6     LB_6    ,"       WTRG=(D^0x80)+0xFFFFFF7F+1=(D^0x80)-0x80",       isr_none|MLD | A_add1    | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  // Must follow DIVU_5. Kluge to let add1 work in DIV instr
+//                                                                                  Fixed/even       ISR          | ALU         Write   intern      Reg    Shreg   Ucode            Next
+//                                                                                  | Pair           action       | op          adr/en  read adr    op     op      operation        ucode
+#define _LB_0     LB_0    ,"LB     Load byte. q = rdadr=RS1+0fs",                   1,0x00,          nxtSTB       | A_addDQ   | Wnn   | Ralu      | Qu   | sr43a | u_cont         | n(LB_1    )  
+#define _LB_1     LB_1    ,"       Read until q=mem[rs1+ofs) & ~3u]",               0,-1,            isr_none     | A_passd   | Wnn   | rHorL     | Qs   | sr_h  | u_io_i | psa00 | n(LB_2    )
+#define _LB_2     LB_2    ,"       Repeat shr until shreg == 0 (0,8,16,24 times)",  2,-1,            isr_none     | A_passd   | Wnn   | r00000000 | Qshr | srDec | u_shrep        | n(LB_3    )  // [gg] Must be even ucodeadr
+#define _LB_3     LB_3    ,"       q = ~mem[rs1+ofs]",                              0,-1,            isr_none     | A_invq    | Wnn   | r000000FF | Qu   | sr_h  | u_cont         | n(LB_4    )  
+#define _LB_4     LB_4    ,"       q = (uint8_t) mem[rs1+Iimm]",                    0,-1,            isr_none     | A_nearAND | Wnn   | rFFFFFF7F | Qu   | sr_h  | u_cont         | n(LB_5    )  
+#define _LB_5     LB_5    ,"       q = D^0xffffffff^q = D^0x80",                    0,-1,            isr_none     | A_nearXOR | Wnn   | rFFFFFF7F | Qu   | sr_h  | u_cont         | n(LB_6    )
+#define _LB_6     LB_6    ,"       WTRG=(D^0x80)+0xFFFFFF7F+1=(D^0x80)-0x80",       8,DIVU_5,        isr_none|MLD | A_add1    | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  // Must follow DIVU_5. Kluge to let add1 work in DIV instr
 //                                                                                                                                                               
-#define _aFaultd  aFaultd, " err   LB Load access fault. Faulting adr to mtval",    isr_none     | A_passq   | Wmtval| r00000000 | Qz   | sr_h  | u_cont         | n(aFault_1) // [[hh] Must follow [gg]
+#define _aFaultd  aFaultd, " err   LB Load access fault. Faulting adr to mtval",    8,LB_2,          isr_none     | A_passq   | Wmtval| r00000000 | Qz   | sr_h  | u_cont         | n(aFault_1) // [[hh] Must follow [gg]
 //                                                                                                                                                               
-#define _LBU_0    LBU_0,   "LBU    Load unsigned byte. Q = rdadr=RS1+Iimm.",        nxtSTB       | A_addDQ   | Wnn   | Ralu      | Qu   | sr43a | u_cont         | n(LBU_1)     
-#define _LBU_1    LBU_1   ,"       Read until q=mem[(rs1+ofs) & ~3u]",              isr_none     | A_passd   | Wnn   | rHorL     | Qs   | sr_h  | u_io_i | psa00 | n(LBU_2)     
-#define _LBU_2    LBU_2   ,"       Repeat shr until shreg = 0 (0, 8 or 16 times)",  isr_none     | A_passd   | Wnn   | r00000000 | Qshr | srDec | u_shrep        | n(LBU_3)    // [ii] Must be even ucodeadr
-#define _LBU_3    LBU_3   ,"       Invert q. Prepare read mask",                    isr_none     | A_invq    | Wnn   | r000000FF | Qu   | sr_h  | u_cont         | n(ANDI_1)    
+#define _LBU_0    LBU_0,   "LBU    Load unsigned byte. Q = rdadr=RS1+Iimm.",        1,0x80,          nxtSTB       | A_addDQ   | Wnn   | Ralu      | Qu   | sr43a | u_cont         | n(LBU_1)     
+#define _LBU_1    LBU_1   ,"       Read until q=mem[(rs1+ofs) & ~3u]",              0,-1,            isr_none     | A_passd   | Wnn   | rHorL     | Qs   | sr_h  | u_io_i | psa00 | n(LBU_2)     
+#define _LBU_2    LBU_2   ,"       Repeat shr until shreg = 0 (0, 8 or 16 times)",  2,-1,            isr_none     | A_passd   | Wnn   | r00000000 | Qshr | srDec | u_shrep        | n(LBU_3)    // [ii] Must be even ucodeadr
+#define _LBU_3    LBU_3   ,"       Invert q. Prepare read mask",                    0,-1,            isr_none     | A_invq    | Wnn   | r000000FF | Qu   | sr_h  | u_cont         | n(ANDI_1)    
 //efine _ANDI_1   ANDI_1,  "       rd = Iimm & RS1",                                
 //efine _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 
 //                                                                                                                                                                 
-#define _aFaulte  aFaulte, " err   LBU Load access fault. Faulting adr to mtval",   isr_none     | A_passq   | Wmtval| r00000000 | Qz   | sr_h  | u_cont         | n(aFault_1) // [[jj] Must follow [ii]
+#define _aFaulte  aFaulte, " err   LBU Load access fault. Faulting adr to mtval",   8,LBU_2,         isr_none     | A_passq   | Wmtval| r00000000 | Qz   | sr_h  | u_cont         | n(aFault_1) // [[jj] Must follow [ii]
 //                                                                                                                                                               
 /*
  * For word in SRAM or Input
@@ -531,65 +564,66 @@
  * LW_1 Data written to targetregister. Prepare PC read. Q clear.
  *
  */
-#define _LW_0     LW_0,    "LW     Load word. Q=yy=rdadr=RS1+Iimm",                 nxtSTB       | A_addDQ   | Wnn   | Ralu      | Qu   | sr_h  | wordaligned    | n(LW_1)      
-#define _LW_1     LW_1,    "       Read until d=mem[(rs1+ofs) & ~3u]",              isr_none     | A_passd   | WTRG  | rHorPC    | Qcndz| sr_h  | u_io_i         | n(StdIncPc)       // [aa] Just before [bb]
-//      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 isr_none     | A_add4    | Wpc   | Ralu      | Qu   | sr_h  | u_cont         | n(OpFetch )  etc
+//                                                                                  Fixed/even       ISR          | ALU         Write   intern      Reg    Shreg   Ucode            Next
+//                                                                                  | Pair           action       | op          adr/en  read adr    op     op      operation        ucode
+#define _LW_0     LW_0,    "LW     Load word. Q=yy=rdadr=RS1+Iimm",                 1,0x40,          nxtSTB       | A_addDQ   | Wnn   | Ralu      | Qu   | sr_h  | wordaligned    | n(LW_1)      
+#define _LW_1     LW_1,    "       Read until d=mem[(rs1+ofs) & ~3u]",              2,-1,            isr_none     | A_passd   | WTRG  | rHorPC    | Qcndz| sr_h  | u_io_i         | n(StdIncPc)       // [aa] Just before [bb]
 //                                                                                                                                                               
-#define _LHU_0    LHU_0,   "LHU    Load unsigned hword. Q = rdadr=RS1+Iimm.",       nxtSTB       | A_addDQ   | Wyy   | Ralu      | Qu   | sr43a | hwordaligned   | n(LHU_1)     
-#define _LHU_1    LHU_1,   "       Read until q=mem[(rs1+ofs) & ~3u]",              isr_none     | A_passd   | Wnn   | rHorL     | Qs   | sr_h  | u_io_i | psa00 | n(LHU_2 )    // Even ucodeadr
-#define _LHU_2    LHU_2,   "       Repeat shr until shreg = 0 (0, 8 or 16 times)",  isr_none     | A_passd   | Wnn   | r00000000 | Qshr | srDec | u_shrep        | n(LHU_3 )    // [ee] Must be even ucodeadr
-#define _LHU_3    LHU_3,   "       Invert q. Prepare read mask",                    isr_none     | A_invq    | Wnn   | r0000FFFF | Qu   | sr_h  | u_cont         | n(ANDI_1)    
-//efine _ANDI_1   ANDI_1,  "       rd = Iimm & RS1",                                isr_none     | A_nearAND | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  
-//      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 isr_none     | A_add4    | Wpc   | Ralu      | Qu   | sr_h  | u_cont         | n(OpFetch )  etc
+#define _LDAF_LW  LDAF_LW, " err   LD AlignFault. Faulting adr to mtval",           8,LW_1,          isr_none     | A_passq   | Wmtval| r00000000 | Qhld | sr_h  | u_cont         | n(LDAF_a)    
+#define _LDAF_a   LDAF_a,  "       Extra cycle after error detected write mtval",   0,-1,            isr_none     | A_xx      | Wnn   | r00000000 | Qz   | sr_h  | u_cont         | n(LDAF_2)
+#define _LDAF_2   LDAF_2,  "       Store 4 to mcause",                              0,-1,            isr_intoTrap | A_add4w   | Wmcaus| Rpc       | Qx   | sr_h  | u_cont         | n(LDAF_3)    
+#define _LDAF_3   LDAF_3,  "       PC to mepc",                                     0,-1,            isr_none     | A_passd   | Wmepc | rmtvec    | Qx   | sr_h  | u_cont         | n(JAL_3)
 //
-#define _aFaultc  aFaultc, " err   LHU Load access fault. Faulting adr to mtval",   isr_none     | A_passq   | Wmtval| r00000000 | Qz   | sr_h  | u_cont         | n(aFault_1) // [[ff] Must follow [ee]
+#define _LHU_0    LHU_0,   "LHU    Load unsigned hword. Q = rdadr=RS1+Iimm",        1,0xa0,          nxtSTB       | A_addDQ   | Wyy   | Ralu      | Qu   | sr43a | hwordaligned   | n(LHU_1)     
+#define _LHU_1    LHU_1,   "       Read until q=mem[(rs1+ofs) & ~3u]",              2,-1,            isr_none     | A_passd   | Wnn   | rHorL     | Qs   | sr_h  | u_io_i | psa00 | n(LHU_2 )    // Even ucodeadr
+#define _LHU_2    LHU_2,   "       Repeat shr until shreg = 0 (0, 8 or 16 times)",  2,-1,            isr_none     | A_passd   | Wnn   | r00000000 | Qshr | srDec | u_shrep        | n(LHU_3 )    // [ee] Must be even ucodeadr
+#define _LHU_3    LHU_3,   "       Invert q. Prepare read mask",                    5,-1,            isr_none     | A_invq    | Wnn   | r0000FFFF | Qu   | sr_h  | u_cont         | n(ANDI_1)    
+//
+#define _LDAF_LHU LDAF_LHU," err   LD AlignFault. Faulting adr to mtval",           8,LHU_1,         isr_none     | A_passq   | Wmtval| r00000000 | Qhld | sr_h  | u_cont         | n(LDAF_a)    // [bb] Just after [aa]
+//
+#define _aFaultc  aFaultc, " err   LHU Load access fault. Faulting adr to mtval",   8,LHU_2,         isr_none     | A_passq   | Wmtval| r00000000 | Qz   | sr_h  | u_cont         | n(aFault_1) // [[ff] Must follow [ee]
 //                                                                                                                                                               
-#define _LDAF(x)  x,       " err   LD AlignFault. Faulting adr to mtval",           isr_none     | A_passq   | Wmtval| r00000000 | Qhld | sr_h  | u_cont         | n(LDAF_a)    // [bb] Just after [aa]
-#define _LDAF_a   LDAF_a,  "       Extra cycle after error detected write mtval",   isr_none     | A_xx      | Wnn   | r00000000 | Qz   | sr_h  | u_cont         | n(LDAF_2)
-#define _LDAF_2   LDAF_2,  "       Store 4 to mcause",                              isr_intoTrap | A_add4w   | Wmcaus| Rpc       | Qx   | sr_h  | u_cont         | n(LDAF_3)    
-#define _LDAF_3   LDAF_3,  "       PC to mepc",                                     isr_none     | A_passd   | Wmepc | rmtvec    | Qx   | sr_h  | u_cont         | n(JAL_3)
-//efine _JAL_3    JAL_3,   "       PC+imm/trap entrypt to PC. OpFetch",             
-//                                                                                                                                                               
-#define _LH_0     LH_0,    "LH     Load hword. Q = rdadr=RS1+Iimm.",                nxtSTB       | A_addDQ   | Wyy   | Ralu      | Qu   | sr43a | hwordaligned   | n(LH_1)      
-#define _LH_1     LH_1,    "       Read until q=mem[(rs1+ofs) & ~3u]",              isr_none     | A_passd   | Wnn   | rHorL     | Qs   | sr_h  | u_io_i | psa00 | n(LH_2)      // Even ucodeadr
-#define _LH_2     LH_2,    "       Repeat shr until shreg = 0 (0, 8 or 16 times)",  isr_none     | A_passd   | Wnn   | r00000000 | Qshr | srDec | u_shrep        | n(LH_3)      // [cc] Must be even ucodeadr
-#define _LH_3     LH_3,    "       q = ~mem[rs1+ofs]",                              isr_none     | A_invq    | Wnn   | r0000FFFF | Qu   | sr_h  | u_cont         | n(LH_4)      
-#define _LH_4     LH_4,    "       q = (uint16_t) mem[rs1+Iimm]",                   isr_none     | A_nearAND | Wnn   | rFFFF7FFF | Qu   | sr_h  | u_cont         | n(LH_5)      
-#define _LH_5     LH_5,    "       q = D^0xffffffff^q = D ^ 0x00008000",            isr_none     | A_nearXOR | Wnn   | rFFFF7FFF | Qu   | sr_h  | u_cont         | n(LB_6)      
-//efine _LB_6     LB_6    ,"       WTRG=(D^0x80)+0xFFFFFF7F+1=(D^0x80)-0x80 (join)",isr_none     | A_add1    | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  
-//efine _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 isr_none     | A_add4    | Wpc   | Ralu      | Qu   | sr_h  | u_cont         | n(OpFetch )  etc
+#define _LH_0     LH_0,    "LH     Load hword. Q = rdadr=RS1+Iimm.",                1,0x20,          nxtSTB       | A_addDQ   | Wyy   | Ralu      | Qu   | sr43a | hwordaligned   | n(LH_1)      
+#define _LH_1     LH_1,    "       Read until q=mem[(rs1+ofs) & ~3u]",              2,-1,            isr_none     | A_passd   | Wnn   | rHorL     | Qs   | sr_h  | u_io_i | psa00 | n(LH_2)      // Even ucodeadr
+#define _LH_2     LH_2,    "       Repeat shr until shreg = 0 (0, 8 or 16 times)",  2,-1,            isr_none     | A_passd   | Wnn   | r00000000 | Qshr | srDec | u_shrep        | n(LH_3)      // [cc] Must be even ucodeadr
+#define _LH_3     LH_3,    "       q = ~mem[rs1+ofs]",                              0,-1,            isr_none     | A_invq    | Wnn   | r0000FFFF | Qu   | sr_h  | u_cont         | n(LH_4)      
+#define _LH_4     LH_4,    "       q = (uint16_t) mem[rs1+Iimm]",                   0,-1,            isr_none     | A_nearAND | Wnn   | rFFFF7FFF | Qu   | sr_h  | u_cont         | n(LH_5)      
+#define _LH_5     LH_5,    "       q = D^0xffffffff^q = D ^ 0x00008000",            0,-1,            isr_none     | A_nearXOR | Wnn   | rFFFF7FFF | Qu   | sr_h  | u_cont         | n(LB_6)      
 //
-#define _aFaultb  aFaultb, " err   LH Load access fault. Faulting adr to mtval",    isr_none     | A_passq   | Wmtval| r00000000 | Qz   | sr_h  | u_cont         | n(aFault_1) // [[dd] Must follow [cc]
+#define _LDAF_LH  LDAF_LH, " err   LD AlignFault. Faulting adr to mtval",           8,LH_1,          isr_none     | A_passq   | Wmtval| r00000000 | Qhld | sr_h  | u_cont         | n(LDAF_a)    // [bb] Just after [aa]
 //
-#define _BEQ      BEQ,     "BEQ    Conditional Branch. Offset to Ryy",              isr_none     | A_passq   | Wyy   | RS2       | Qz   | sr_h  | u_cont         | n(condb_2 )  
-#define _BNE      BNE,     "BNE    Conditional Branch. Offset to Ryy",              isr_none     | A_passq   | Wyy   | RS2       | Qz   | sr_h  | u_cont         | n(condb_2 )  
-#define _BLT      BLT,     "BLT    Conditional Branch. Offset to Ryy",              isr_none     | A_passq   | Wyy   | RS2       | Qz   | sr_h  | u_cont         | n(condb_2 )   
-#define _BGE      BGE,     "BGE    Conditional Branch. Offset to Ryy",              isr_none     | A_passq   | Wyy   | RS2       | Qz   | sr_h  | u_cont         | n(condb_2 )  
-#define _BLTU     BLTU,    "BLTU   Conditional Branch. Offset to Ryy",              isr_none     | A_passq   | Wyy   | RS2       | Qz   | sr_h  | u_cont         | n(condb_2 )  
-#define _BGEU     BGEU,    "BGEU   Conditional Branch. Offset to Ryy",              isr_none     | A_passq   | Wyy   | RS2       | Qz   | sr_h  | u_cont         | n(condb_2 )
+#define _aFaultb  aFaultb, " err   LH Load access fault. Faulting adr to mtval",    8,LH_2,          isr_none     | A_passq   | Wmtval| r00000000 | Qz   | sr_h  | u_cont         | n(aFault_1) // [[dd] Must follow [cc]
+//
+#define _BEQ      BEQ,     "BEQ    Conditional Branch. Offset to Ryy",              1,0x18,          isr_none     | A_passq   | Wyy   | RS2       | Qz   | sr_h  | u_cont         | n(condb_2 )  
+#define _BNE      BNE,     "BNE    Conditional Branch. Offset to Ryy",              1,0x38,          isr_none     | A_passq   | Wyy   | RS2       | Qz   | sr_h  | u_cont         | n(condb_2 )  
+#define _BLT      BLT,     "BLT    Conditional Branch. Offset to Ryy",              1,0x98,          isr_none     | A_passq   | Wyy   | RS2       | Qz   | sr_h  | u_cont         | n(condb_2 )   
+#define _BGE      BGE,     "BGE    Conditional Branch. Offset to Ryy",              1,0xb8,          isr_none     | A_passq   | Wyy   | RS2       | Qz   | sr_h  | u_cont         | n(condb_2 )  
+#define _BLTU     BLTU,    "BLTU   Conditional Branch. Offset to Ryy",              1,0xd8,          isr_none     | A_passq   | Wyy   | RS2       | Qz   | sr_h  | u_cont         | n(condb_2 )  
+#define _BGEU     BGEU,    "BGEU   Conditional Branch. Offset to Ryy",              1,0xf8,          isr_none     | A_passq   | Wyy   | RS2       | Qz   | sr_h  | u_cont         | n(condb_2 )
 //
 #if ucodeopt_RVC == 0        
-#define _condb_2  condb_2, "       ~RS2 in Q",                                      isr_none     | A_nearXOR | Wnn   | RS1       | Qu   | sr_h  | u_cont         | n(condb_3 )  
-#define _condb_3  condb_3, "       Calculate RS1+~RS2+1",                           isr_none     | A_add1    | Wnn   | Rpc       | Qu   | sr_h  | u_cont         | n(condb_4 )  
-#define _condb_4  condb_4, "       Branch on condition",                            isr_none     | A_passd   | Wnn   | Ryy       | Qu   | sr_h  | usebcond       | n(condb_5 )  
-#define _condb_5  condb_5, "       Branch not taken.",                              nxtSTB       | A_passq4  | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch   )  /* Must be placed at even ucode adr. Goes to either Fetch or eFetch     */
-#define _condb_5t condb_5t,"       Branch taken.",                                  nxtSTB       | A_addDQ   | Wpc   | Ralu      | Qu   | sr_h  | wordaligned    | n(BrOpFet )  /* Must be placed at the next ucode adr */
+#define _condb_2  condb_2, "       ~RS2 in Q",                                      0,-1,            isr_none     | A_nearXOR | Wnn   | RS1       | Qu   | sr_h  | u_cont         | n(condb_3 )  
+#define _condb_3  condb_3, "       Calculate RS1+~RS2+1",                           0,-1,            isr_none     | A_add1    | Wnn   | Rpc       | Qu   | sr_h  | u_cont         | n(condb_4 )  
+#define _condb_4  condb_4, "       Branch on condition",                            0,-1,            isr_none     | A_passd   | Wnn   | Ryy       | Qu   | sr_h  | usebcond       | n(condb_5 )  
+#define _condb_5  condb_5, "       Branch not taken.",                              2,-1,            nxtSTB       | A_passq4  | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch   )  /* Must be placed at even ucode adr. Goes to either Fetch or eFetch     */
+#define _condb_5t condb_5t,"       Branch taken.",                                  8,condb_5,       nxtSTB       | A_addDQ   | Wpc   | Ralu      | Qu   | sr_h  | wordaligned    | n(BrOpFet )  /* Must be placed at the next ucode adr */
 #else
-#define _condb_2  condb_2, "       ~RS2 in Q",                                      isr_none     | A_nearXOR | Wnn   | RS1       | Qu   | sr_h  | u_cont         | n(condb_3 )  
-#define _condb_3  condb_3, "       Calculate RS1+~RS2+1",                           isr_none     | A_add1    | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(condb_4 )  // next Get back the offset
-#define _condb_4  condb_4, "       Branch on condition",                            isr_none     | A_passd   | Wnn   | Rjj       | Qu   | sr_h  | usebcond       | n(condb_5 )  // next get back PC for next consequtive instr
-#define _condb_5  condb_5, "       Branch not taken.",                              isr_none     | A_xx      | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  /* Must be placed at even ucode adr. Goes to either Fetch or eFetch     */
-#define _condb_5t condb_5t,"       Branch taken.",                                  nxtSTB       | A_addDQ   | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch   ) 
+#define _condb_2  condb_2, "       ~RS2 in Q",                                      work isr_none     | A_nearXOR | Wnn   | RS1       | Qu   | sr_h  | u_cont         | n(condb_3 )  
+#define _condb_3  condb_3, "       Calculate RS1+~RS2+1",                           work isr_none     | A_add1    | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(condb_4 )  // next Get back the offset
+#define _condb_4  condb_4, "       Branch on condition",                            work isr_none     | A_passd   | Wnn   | Rjj       | Qu   | sr_h  | usebcond       | n(condb_5 )  // next get back PC for next consequtive instr
+#define _condb_5  condb_5, "       Branch not taken.",                              work isr_none     | A_xx      | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  /* Must be placed at even ucode adr. Goes to either Fetch or eFetch     */
+#define _condb_5t condb_5t,"       Branch taken.",                                  work nxtSTB       | A_addDQ   | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch   ) 
 #endif
-
+//
+//                                                                                  Fixed/even       ISR          | ALU         Write   intern      Reg    Shreg   Ucode            Next
+//                                                                                  | Pair           action       | op          adr/en  read adr    op     op      operation        ucode
 #if ucodeopt_RVC == 0
-#define _BrOpFet  BrOpFet ,"NewOp2 Read until instruction latched",                 isr_none     | A_passd   | Wnn   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  /* Must be placed at even ucode adr     */ 
-#define _BAlignEr BAlignEr," Err   Branch target instruction address misaligned",   isr_none     | A_xx      | Wnn   | Rpc       | Qx   | sr_h  | u_cont         | n(BAERR_1)   /* Must be placed at the next ucode adr */
-#define _BAERR_1  BAERR_1, "       Faultadr to mtval. Prepare get offset",          isr_none     | A_passd   | Wmtval| Ryy       | Qz   | sr_h  | u_cont         | n(BAERR_2)   
-#define _BAERR_2  BAERR_2, "       ~offset to Q. Prep read (origPC+offset)",        isr_none     | A_nearXOR | Wnn   | Rpc       | Qu   | sr_h  | u_cont         | n(BAERR_3)   
-#define _BAERR_3  BAERR_3, "       origPC to mepc. Prep read 0",                    isr_none     | A_add1    | Wmepc | r00000000 | Qx   | sr_h  | u_cont         | n(BAERR_4)   
-#define _BAERR_4  BAERR_4, "       Store 0 to mcause. Prep get trap entry pont",    isr_intoTrap | A_passd   | Wmcaus| rmtvec    | Qx   | sr_h  | u_cont         | n(JAL_3)   
-//efine _JAL_3    JAL_3,   "       PC = trap entry point. OpFetch",                 
+#define _BrOpFet  BrOpFet ,"NewOp2 Read until instruction latched",                 2,-1,            isr_none     | A_passd   | Wnn   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  /* Must be placed at even ucode adr     */ 
+#define _BAlignEr BAlignEr," Err   Branch target instruction address misaligned",   8,BrOpFet,       isr_none     | A_xx      | Wnn   | Rpc       | Qx   | sr_h  | u_cont         | n(BAERR_1)   /* Must be placed at the next ucode adr */
+#define _BAERR_1  BAERR_1, "       Faultadr to mtval. Prepare get offset",          0,-1,            isr_none     | A_passd   | Wmtval| Ryy       | Qz   | sr_h  | u_cont         | n(BAERR_2)   
+#define _BAERR_2  BAERR_2, "       ~offset to Q. Prep read (origPC+offset)",        0,-1,            isr_none     | A_nearXOR | Wnn   | Rpc       | Qu   | sr_h  | u_cont         | n(BAERR_3)   
+#define _BAERR_3  BAERR_3, "       origPC to mepc. Prep read 0",                    0,-1,            isr_none     | A_add1    | Wmepc | r00000000 | Qx   | sr_h  | u_cont         | n(BAERR_4)   
+#define _BAERR_4  BAERR_4, "       Store 0 to mcause. Prep get trap entry pont",    0,-1,            isr_intoTrap | A_passd   | Wmcaus| rmtvec    | Qx   | sr_h  | u_cont         | n(JAL_3)   
 #else
 #define _BrOpFet  _unalignd // Reused
 #define _BAlignEr _straddle // Reused
@@ -598,489 +632,376 @@
 #define _BAERR_3  _eFetchu  // Reused   |
 #define _BAERR_4  BAERR_4, "      not used",                                        unx
 #endif
+//
+//                                                                                  Fixed/even       ISR          | ALU         Write   intern      Reg    Shreg   Ucode            Next
+//                                                                                  | Pair           action       | op          adr/en  read adr    op     op      operation        ucode
+#define _SUB_0    SUB_0,   "SUB    Subtraction",                                    1,0x0e,          isr_none     | A_xx      | Wnn   | RS2       | Qz   | sr_h  | u_cont         | n(SUB_1  )    
+#define _SUB_1    SUB_1,   "       Q = ~RS2",                                       0,-1,            isr_none     | A_nearXOR | Wnn   | RS1       | Qu   | sr_h  | u_cont         | n(LB_6   )    
+//                                                                                  
+#define _ANDI_0   ANDI_0,  "ANDI   And immediate. Q=~Iimm",                         1,0xe4,          isr_none     | A_invq    | Wnn   | RS1       | Qu   | sr_h  | u_cont         | n(ANDI_1)    
+#define _ANDI_1   ANDI_1,  "       rd = Iimm & RS1",                                0,-1,            isr_none     | A_nearAND | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  
+//                                                                                                                                                               
+#define _ORI_0    ORI_0,   "ORI    Or immediate. jj=~Iimm",                         1,0xc4,          isr_none     | A_invq    | Wjj   | RS1       | Qzh  | sr_h  | u_cont         | n(ORI_1)     
+#define _ORI_1    ORI_1,   "       Q = RS1",                                        0,-1,            isr_none     | A_passd   | Wnn   | Rjj       | Qu   | sr_h  | u_cont         | n(ORI_2   )  
+#define _ORI_2    ORI_2,   "       rd = Iimm | RS1",                                0,-1,            isr_none     | A_nearOR  | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  
+//                                                                                                                                                               
+#define _XORI_0   XORI_0,  "XORI   Xor immediate. Q=~Iimm",                         1,0x84,          isr_none     | A_invq    | Wnn   | RS1       | Qu   | sr_h  | u_cont         | n(XORI_1)    
+#define _XORI_1   XORI_1,  "       rd = Iimm ^ RS1",                                0,-1,            isr_none     | A_nearXOR | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  
+//                                                                                                                                                               
+#define _AND_0    AND_0,   "AND    And ",                                           1,0xec,          isr_none     | A_xx      | Wnn   | RS1       | Qz   | sr_h  | u_cont         | n(AND_1)     
+#define _AND_1    AND_1,   "       RS1^0xffffffff to Q",                            0,-1,            isr_none     | A_nearXOR | Wnn   | RS2       | Qu   | sr_h  | u_cont         | n(ANDI_1)    
+//                                                                                                                                                               
+#define _OR_0     OR_0,    "OR     or",                                             1,0xcc,          isr_none     | A_xx      | Wnn   | RS1       | Qz   | sr_h  | u_cont         | n(OR_1)      
+#define _OR_1     OR_1,    "       RS1^0xffffffff to jj",                           0,-1,            isr_none     | A_nearXOR | Wjj   | RS2       | Qzh  | sr_h  | u_cont         | n(OR_2)      
+#define _OR_2     OR_2,    "       Q = rs2",                                        0,-1,            isr_none     | A_addDQ   | Wnn   | Rjj       | Qu   | sr_h  | u_cont         | n(ORI_2)     
+//                                                                                                                                                               
+#define _XOR_0    XOR_0,   "XOR    xor",                                            1,0x8c,          isr_none     | A_xx      | Wnn   | RS1       | Qz   | sr_h  | u_cont         | n(XOR_1)     
+#define _XOR_1    XOR_1,   "       Q = RS1^0xFFFFFFFF",                             0,-1,            isr_none     | A_nearXOR | Wnn   | RS2       | Qu   | sr_h  | u_cont         | n(XORI_1)    
+//                                                                                                                                                               
+#define _SLTIU_0  SLTIU_0, "SLTIU  Set less than immediate (unsigned)",             1,0x64,          isr_none     | A_invq    | Wnn   | RS1       | Qu   | sr_h  | u_cont         | n(SLTIX_1)   
+#define _SLTIX_1  SLTIX_1, "       RS1 - imm / RS1 - RS2",                          0,-1,            isr_none     | A_add1    | Wnn   | r_xx      | Qz   | sr_h  | u_cont         | n(SLTIX_2)   
+#define _SLTIX_2  SLTIX_2, "       Registered ALU flag to rd",                      0,-1,            isr_none     | A_passq_F | WTRG  | Rpc       | Qzh  | sr_h  | u_cont         | n(StdIncPc)  
+//
+#define _SLTI_0   SLTI_0,  "SLTI   Set less than immediate (signed)",               1,0x44,          isr_none     | A_invq    | Wnn   | RS1       | Qu   | sr_h  | u_cont         | n(SLTIX_1)   
+//
+#define _SLT_0    SLT_0,   "SLT    Set less than (signed)",                         1,0x4c,          isr_none     | A_xx      | Wnn   | RS2       | Qz   | sr_h  | u_cont         | n(SLTX_1)    
+#define _SLTX_1   SLTX_1,  "       ~rs2 to Q",                                      0,-1,            isr_none     | A_nearXOR | Wnn   | RS1       | Qu   | sr_h  | u_cont         | n(SLTIX_1)   
 
-#define _SUB_0    SUB_0,   "SUB    Subtraction",                                    isr_none     | A_xx      | Wnn   | RS2       | Qz   | sr_h  | u_cont         | n(SUB_1  )    
-#define _SUB_1    SUB_1,   "       Q = ~RS2",                                       isr_none     | A_nearXOR | Wnn   | RS1       | Qu   | sr_h  | u_cont         | n(LB_6   )    
-//      _LB_6     LB_6    ,"       WTRG=(D^0x80)+0xFFFFFF7F+1=(D^0x80)-0x80 (join)",isr_none     | A_add1    | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  
-//      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 isr_none     | A_add4    | Wpc   | Ralu      | Qu   | sr_h  | u_cont         | n(OpFetch )  etc
-//                                                                                  isr_none     |                                                                              
-#define _ANDI_0   ANDI_0,  "ANDI   And immediate. Q=~Iimm",                         isr_none     | A_invq    | Wnn   | RS1       | Qu   | sr_h  | u_cont         | n(ANDI_1)    
-#define _ANDI_1   ANDI_1,  "       rd = Iimm & RS1",                                isr_none     | A_nearAND | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  
-//      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 isr_none     | A_add4    | Wpc   | Ralu      | Qu   | sr_h  | u_cont         | n(OpFetch )  etc
-//                                                                                                                                                               
-#define _ORI_0    ORI_0,   "ORI    Or immediate. jj=~Iimm",                         isr_none     | A_invq    | Wjj   | RS1       | Qzh  | sr_h  | u_cont         | n(ORI_1)     
-#define _ORI_1    ORI_1,   "       Q = RS1",                                        isr_none     | A_passd   | Wnn   | Rjj       | Qu   | sr_h  | u_cont         | n(ORI_2   )  
-#define _ORI_2    ORI_2,   "       rd = Iimm | RS1",                                isr_none     | A_nearOR  | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  
-//      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 isr_none     | A_add4    | Wpc   | Ralu      | Qu   | sr_h  | u_cont         | n(OpFetch )  etc
-//                                                                                                                                                               
-#define _XORI_0   XORI_0,  "XORI   Xor immediate. Q=~Iimm",                         isr_none     | A_invq    | Wnn   | RS1       | Qu   | sr_h  | u_cont         | n(XORI_1)    
-#define _XORI_1   XORI_1,  "       rd = Iimm ^ RS1",                                isr_none     | A_nearXOR | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  
-//      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 isr_none     | A_add4    | Wpc   | Ralu      | Qu   | sr_h  | u_cont         | n(OpFetch )  etc
-//                                                                                                                                                               
-#define _AND_0    AND_0,   "AND    And ",                                           isr_none     | A_xx      | Wnn   | RS1       | Qz   | sr_h  | u_cont         | n(AND_1)     
-#define _AND_1    AND_1,   "       RS1^0xffffffff to Q",                            isr_none     | A_nearXOR | Wnn   | RS2       | Qu   | sr_h  | u_cont         | n(ANDI_1)    
-//efine _ANDI_1   ANDI_1,  "       rd = Iimm & RS1",                                isr_none     | A_nearAND | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  
-//      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 isr_none     | A_add4    | Wpc   | Ralu      | Qu   | sr_h  | u_cont         | n(OpFetch )  etc
-//                                                                                                                                                               
-#define _OR_0     OR_0,    "OR     or",                                             isr_none     | A_xx      | Wnn   | RS1       | Qz   | sr_h  | u_cont         | n(OR_1)      
-#define _OR_1     OR_1,    "       RS1^0xffffffff to jj",                           isr_none     | A_nearXOR | Wjj   | RS2       | Qzh  | sr_h  | u_cont         | n(OR_2)      
-#define _OR_2     OR_2,    "       Q = rs2",                                        isr_none     | A_addDQ   | Wnn   | Rjj       | Qu   | sr_h  | u_cont         | n(ORI_2)     
-//efine _ORI_2    ORI_2,   "       rd = Iimm | RS1",                                isr_none     | A_nearOR  | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  
-//      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 isr_none     | A_add4    | Wpc   | Ralu      | Qu   | sr_h  | u_cont         | n(OpFetch )  etc
-//                                                                                                                                                               
-#define _XOR_0    XOR_0,   "XOR    xor",                                            isr_none     | A_xx      | Wnn   | RS1       | Qz   | sr_h  | u_cont         | n(XOR_1)     
-#define _XOR_1    XOR_1,   "       Q = RS1^0xFFFFFFFF",                             isr_none     | A_nearXOR | Wnn   | RS2       | Qu   | sr_h  | u_cont         | n(XORI_1)    
-//efine _XORI_1   XORI_1,  "       rd = Iimm ^ RS1",                                isr_none     | A_nearXOR | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  
-//      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 isr_none     | A_add4    | Wpc   | Ralu      | Qu   | sr_h  | u_cont         | n(OpFetch )  etc
-//                                                                                                                                                               
-#define _SLTIU_0  SLTIU_0, "SLTIU  Set less than immediate (unsigned)",             isr_none     | A_invq    | Wnn   | RS1       | Qu   | sr_h  | u_cont         | n(SLTIX_1)   
-#define _SLTIX_1  SLTIX_1, "       RS1 - imm / RS1 - RS2",                          isr_none     | A_add1    | Wnn   | r_xx      | Qz   | sr_h  | u_cont         | n(SLTIX_2)   
-#define _SLTIX_2  SLTIX_2, "       Registered ALU flag to rd",                      isr_none     | A_passq_F | WTRG  | Rpc       | Qzh  | sr_h  | u_cont         | n(StdIncPc)  
-
-#define _SLTI_0   SLTI_0,  "SLTI   Set less than immediate (signed)",               isr_none     | A_invq    | Wnn   | RS1       | Qu   | sr_h  | u_cont         | n(SLTIX_1)   
-
-#define _SLT_0    SLT_0,   "SLT    Set less than (signed)",                         isr_none     | A_xx      | Wnn   | RS2       | Qz   | sr_h  | u_cont         | n(SLTX_1)    
-#define _SLTX_1   SLTX_1,  "       ~rs2 to Q",                                      isr_none     | A_nearXOR | Wnn   | RS1       | Qu   | sr_h  | u_cont         | n(SLTIX_1)   
-
-#define _SLTU_0   SLTU_0,  "SLTU   Set less than (unsigned)",                       isr_none     | A_xx      | Wnn   | RS2       | Qz   | sr_h  | u_cont         | n(SLTX_1)    
+#define _SLTU_0   SLTU_0,  "SLTU   Set less than (unsigned)",                       1,0x6c,          isr_none     | A_xx      | Wnn   | RS2       | Qz   | sr_h  | u_cont         | n(SLTX_1)    
 
 // Have changed decode so I do not need 16 copies of _LUI_0, only 2
-#define _LUI_0(x) x,       "LUI    q = imm20",                                      isr_none     | A_passq   | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  
-//      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 isr_none     | A_add4    | Wpc   | Ralu      | Qu   | sr_h  | u_cont         | n(OpFetch )  etc
+#define _LUI_0(x) _L ## x, "LUI    q = imm20",                                      1,x,             isr_none     | A_passq   | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  
 //                                                                                                                                                               
-#define _ADDI_0   ADDI_0,  "ADDI   Add immediate. rd =RS1+Iimm (or joined)",        isr_none     | A_addDQ   | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  
-//      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 isr_none     | A_add4    | Wpc   | Ralu      | Qu   | sr_h  | u_cont         | n(OpFetch )  etc
+#define _ADDI_0   ADDI_0,  "ADDI   Add immediate. rd =RS1+Iimm (or joined)",        1,0x04,          isr_none     | A_addDQ   | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  
 #if ucodeopt_RVC == 0
-#define _AUIPC_0(x) x,     "AUIPC  q = imm20 (copy x/8)",                           isr_none     | A_xx      | Wnn   | Rpc       | Qhld | sr_h  | u_cont         | n(ADDI_0)    
+#define _AUIPC_0(x) _L ## x,"AUIPC  q = imm20 (copy x/2)",                          1,x,             isr_none     | A_xx      | Wnn   | Rpc       | Qhld | sr_h  | u_cont         | n(ADDI_0)    
 #else
-#define _AUIPC_0(x) x,     "AUIPC  q = imm20+2 or imm20+4  (copy x/8)",             isr_none     | A_xx      | Wnn   | Rjj       | Qhld | sr_h  | u_cont         | n(ADDI_0)
+#define _AUIPC_0(x) x,     "AUIPC  q = imm20+2 or imm20+4  (copy x/2)",             work isr_none     | A_xx      | Wnn   | Rjj       | Qhld | sr_h  | u_cont         | n(ADDI_0)
 #endif
 
-#define _ADD_0    ADD_0,   "ADD    add     Addition Q = RS1",                       isr_none     | A_passd   | Wnn   | RS2       | Qu   | sr_h  | u_cont         | n(ADDI_0)    
-//efine _ADDI_0   ADDI_0,  "ADDI   Add immediate. rd =RS1+Iimm (or joined)",        isr_none     | A_addDQ   | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  
-//      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 isr_none     | A_add4    | Wpc   | Ralu      | Qu   | sr_h  | u_cont         | n(OpFetch )  etc
+//                                                                                  Fixed/even       ISR          | ALU         Write   intern      Reg    Shreg   Ucode            Next
+//                                                                                  | Pair           action       | op          adr/en  read adr    op     op      operation        ucode
+#define _ADD_0    ADD_0,   "ADD    add     Addition Q = RS1",                       1,0x0c,          isr_none     | A_passd   | Wnn   | RS2       | Qu   | sr_h  | u_cont         | n(ADDI_0)    
 //                                                                                                                                                               
 #if ucodeopt_RVC == 0
 //             In first cycle, must use A_passq because alignment is                                                                                             
 //             determined from output of B. */                                                                                                                   
-#define _JAL_0(x) x,       "JAL    J-imm is in q. Branch on alignfault",            isr_none     | A_passq   | Wnn   | Rpc       | Qhld | sr_h  | wordaligned    | n(JAL_1)
+#define _JAL_0(x) _L ## x, "JAL    J-imm is in q. Branch on alignfault",            1,x,             isr_none     | A_passq   | Wnn   | Rpc       | Qhld | sr_h  | wordaligned    | n(JAL_1)
 #else
-#define _JAL_0(x) x,       "JAL    J-imm is in q.",                                 isr_none     | A_passq   | Wnn   | Rjj       | Qhld | sr_h  | u_cont         | n(JAL_1)
+#define _JAL_0(x) x,       "JAL    J-imm is in q.",                                 work isr_none     | A_passq   | Wnn   | Rjj       | Qhld | sr_h  | u_cont         | n(JAL_1)
 #endif
-#define _JAL_1    JAL_1,   "       Target adr to yy",                               isr_none     | A_addDQ   | Wyy   | Rpc       | Qz   | sr_h  | u_cont         | n(JAL_2)     
-#define _JAL_2    JAL_2,   "       Return address to TRG",                          isr_none     | A_add2or4 | WTRG  | Ryy       | Qx   | sr_h  | u_cont         | n(JAL_3)   /* [qq] JAL_2 must be at even ucodeadr */
-#define _JAL_3    JAL_3,   "       PC+imm/trap entrypt to PC. OpFetch",             nxtSTB       | A_passd   | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch)   /* Goes to either Fetch or eFetch */
+#define _JAL_1    JAL_1,   "       Target adr to yy",                               2,-1,            isr_none     | A_addDQ   | Wyy   | Rpc       | Qz   | sr_h  | u_cont         | n(JAL_2)   /* Must be at even ucodeadr */  
+#define _JAL_2    JAL_2,   "       Return address to TRG",                          2,-1,            isr_none     | A_add2or4 | WTRG  | Ryy       | Qx   | sr_h  | u_cont         | n(JAL_3)   /* [qq] JAL_2 must be at even ucodeadr */
+#define _JAL_3    JAL_3,   "       PC+imm/trap entrypt to PC. OpFetch",             0,-1,            nxtSTB       | A_passd   | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch)   /* Goes to either Fetch or eFetch */
 
 #if ucodeopt_RVC == 0
 //                                                                                                                                                               
 //             The first of these instructions must be placed directly                                                                                           
 //             following the JAL_1 instruction                                                                                                                   
-#define _JAERR_1  JAERR_1, " Err   JAL target adr misaligned, store to mtval",      isr_none     | A_addDQ   | Wmtval| Rpc       | Qx   | sr_h  | u_cont         | n(JAERR_2)   
-#define _JAERR_2  JAERR_2, "       Store PC to mepc",                               isr_none     | A_passd   | Wmepc | r00000000 | Qx   | sr_h  | u_cont         | n(BAERR_4)   
-//efine _BAERR_4  BAERR_4, "       Store 0 to mcause. Prep get trap entry pont",    
-//efine _JAL_3    JAL_3,   "       PC = trap entry point. OpFetch",
+#define _JAERR_1  JAERR_1, " Err   JAL target adr misaligned, store to mtval",      8,JAL_1,         isr_none     | A_addDQ   | Wmtval| Rpc       | Qx   | sr_h  | u_cont         | n(JAERR_2)   
+#define _JAERR_2  JAERR_2, "       Store PC to mepc",                               0,-1,            isr_none     | A_passd   | Wmepc | r00000000 | Qx   | sr_h  | u_cont         | n(BAERR_4)   
 #else
 #define _JAERR_1  JAERR_1, "       Not in use",                                     unx
 #define _JAERR_2  JAERR_2, "       Not in use",                                     unx
 #endif
-
-
-//                                                                                                                                                               
-#define _SLLI_0   SLLI_0,  "SLLI   Shift left immediate.",                          isr_none     | A_passq   | Wnn   | RS1       | Qx   | srImm | u_cont         | n(SLLI_1)    
-#define _SLLI_1   SLLI_1,  "       Register to shift to Q (and TRG for shift 0)",   isr_none     | A_passd   | WTRG  | rFFFFFFFF | Qu   | srDec | u_cont         | n(SLLI_2  )  
-#define _SLLI_2   SLLI_2,  "       Repeat Q = Q+Q until shregcnt == 0",             isr_none     | A_shlq    | WTRG  | rFFFFFFFF | Qu   | srDec | u_shrep        | n(FENCE   )  
-//efine _FENCE(x) x,       "       Prepare read PC",                                
-//      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 
-//                                                                                                                                                               
-#define _SLL_0    SLL_0,   "SLL    Shift left",                                     isr_none     | A_xx      | Wnn   | RS2       | Qx   | sr_h  | u_cont         | n(SLL_1)     
-#define _SLL_1    SLL_1,   "       Shiftamount was in low 5 bits of RS2",           isr_none     | A_passd   | Wnn   | RS1       | Qx   | srImm | u_cont         | n(SLLI_1)    
-//efine _SLLI_1   SLLI_1,  "       Register to shift to Q (and TRG for shift 0)",   
-//efine _SLLI_2   SLLI_2,  "       Repeat Q = Q+Q until shregcnt == 0",             
-//efine _FENCE(x) x,       "       Prepare read PC",                                
-//      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 
-//                                                                                                                                                               
-#define _SRxI_0   SRxI_0,  "SRxI   Shift Right immediate (both logic/arith here)",  isr_none     | A_passq   | Wnn   | RS1       | Qx   | srImm | u_cont         | n(SRxI_1  )  
-#define _SRxI_1   SRxI_1,  "       Register to shift to Q",                         isr_none     | A_passd   | WTRG  | r00000000 | Qu   | srDec | u_cont | psa00 | n(SRxI_2)    
-#define _SRxI_2   SRxI_2,  "       Repeat Q >>= 1 until shregcnt == 0",             isr_none     | A_passd   | WTRG  | r00000000 | Qshr | srDec | u_shrep        | n(FENCE )    
-//efine _FENCE(x) x,       "       Prepare read PC",                                
-//      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 
-//                                                                                                                                                               
-#define _SRx_0(x) x,       "SRx    Shift Right (both SRL and SRA)",                 isr_none     | A_xx      | Wnn   | RS2       | Qx   | sr_h  | u_cont         | n(SRx_1)     
-#define _SRx_1    SRx_1,   "       Shiftamount in low 5 bits of RS2",               isr_none     | A_passd   | Wnn   | RS1       | Qx   | srImm | u_cont         | n(SRxI_1)    
-//efine _SRxI_1   SRxI_1,  "       Register to shift to Q",                         
-//efine _SRxI_2   SRxI_2,  "       Repeat Q >>= 1 until shregcnt == 0",             
-//efine _SLLI_3   SLLI_3,  "       Prepare read PC",                                
-//      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 
-//                                                                                                                                                               
-#define _JALR_0   JALR_0,  "JALR   jj=RS1+imm",                                     isr_none     | A_addDQ   | Wjj   | r00000000 | Qz   | sr_h  | u_cont         | n(JALR_1)    
-#define _JALR_1   JALR_1,  "       Q=1",                                            isr_none     | A_add1    | Wnn   | Rjj       | Qu   | sr_h  | u_cont         | n(JALR_2)    
+//
+#define _JALR_0   JALR_0,  "JALR   jj=RS1+imm",                                     1,0x19,          isr_none     | A_addDQ   | Wjj   | r00000000 | Qz   | sr_h  | u_cont         | n(JALR_1)    
+#define _JALR_1   JALR_1,  "       Q=1",                                            0,-1,            isr_none     | A_add1    | Wnn   | Rjj       | Qu   | sr_h  | u_cont         | n(JALR_2)    
 #if ucodeopt_RVC == 0
-#define _JALR_2   JALR_2,  "       Q = (RS1+imn) & 0xfffffffe",                     isr_none     | A_nearAND | Wyy   | Rpc       | Qz   | sr_h  | wordaligned    | n(JAL_2)
+#define _JALR_2   JALR_2,  "       Q = (RS1+imn) & 0xfffffffe",                     0,-1,            isr_none     | A_nearAND | Wyy   | Rpc       | Qz   | sr_h  | wordaligned    | n(JAL_2)
 #else
-#define _JALR_2   JALR_2,  "       Q = (RS1+imn) & 0xfffffffe",                     isr_none     | A_nearAND | Wyy   | Rpc       | Qz   | sr_h  | u_cont         | n(JAL_2)
+#define _JALR_2   JALR_2,  "       Q = (RS1+imn) & 0xfffffffe",                     work  isr_none     | A_nearAND | Wyy   | Rpc       | Qz   | sr_h  | u_cont         | n(JAL_2)
 #endif
 //                                                                                                                                                               
 #if ucodeopt_RVC == 0
 ///* The next instruction must follow JAL_2 (no typo) */                                                                                                         
-#define _JALRE1   JALRE1,  " err   Store pc to mepc",                               isr_none     | A_passd   | Wmepc | Ryy       | Qx   | sr_h  | u_cont         | n(JALRE2)    // [rr] follows [qq]
-#define _JALRE2   JALRE2,  "       mtval is target",                                isr_none     | A_passd   | Wmtval| r00000000 | Qx   | sr_h  | u_cont         | n(BAERR_4)   
-//efine _BAERR_4  BAERR_4, "       Store 0 to mcause. Prep get trap entry pont",    
-//efine _JAL_3    JAL_3,   "       PC = trap entry point. OpFetch",                 
+#define _JALRE1   JALRE1,  " err   Store pc to mepc",                               8,JAL_2,         isr_none     | A_passd   | Wmepc | Ryy       | Qx   | sr_h  | u_cont         | n(JALRE2)    // [rr] follows [qq]
+#define _JALRE2   JALRE2,  "       mtval is target",                                0,-1,            isr_none     | A_passd   | Wmtval| r00000000 | Qx   | sr_h  | u_cont         | n(BAERR_4)   
 #else
 #define _JALRE1   JALRE1,  "       Not in use",                                     unx
 #define _JALRE2   JALRE2,  "       Not in use",                                     unx
 #endif        
 //                                                                                                                                                               
-#define _SW_0(x)  x,       "SW     Store word. Q=wradr=RS1+Simm",                   nxtSTB |nxtWE| A_addDQ   | Wnn   | RS2       | Qu   | sr_h  | wordaligned    | n(SW_1)      
-#define _SW_1     SW_1,    "       Write d to a+k until accepted",                  isr_none     | A_passd   | WAQW  | RS2       | Qhld | sr_h  | u_io_o         | n(SW_2)      // [A] even ucode adr 
-#define _SW_2     SW_2,    "       Prepare read PC",                                isr_none     | A_xx      | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  // [C] even ucode adr   
-//      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 
-//
-#define _aF_SW    aF_SW,   " err   SW/SH/SB access fault. Rest to set SEL_O=4'hf",  isr_none     | A_xx      | Wnn   | r_xx      | Qhld | sr_h  | u_cont         | n(aF_SW_1)   // [D] directly following [C]
-#define _aF_SW_1  aF_SW_1, " err   SW Store access fault. Faulting adr to mtval",   isr_none     | A_passq   | Wmtval| r00000000 | Qz   | sr_h  | u_cont         | n(aF_SW_2)
-#define _aF_SW_2  aF_SW_2, "       Q = 4",                                          isr_none     | A_add4w   | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(aF_SW_3)
-#define _aF_SW_3  aF_SW_3, "       Store 7 to mcause",                              isr_intoTrap | A_add3w   | Wmcaus| Rpc       | Qx   | sr_h  | u_cont         | n(LDAF_3)
-//efine _LDAF_3   LDAF_3,  "       PC to mepc",                                     
-//efine _JAL_3    JAL_3,   "       PC+imm/trap entrypt to PC. OpFetch",             
-//
-#define _SW_E1(x) x,       "       Store faulting address alignment to mtval",      isr_none     | A_passq   | Wmtval| Rpc       | Qx   | sr_h  | u_cont         | n(SW_E2)     // [B] directly following [A]
-#define _SW_E2    SW_E2,   "       Store address that faulted",                     isr_none     | A_passd   | Wmepc | rFFFFFFFF | Qz   | sr_h  | u_cont         | n(SW_E3)     
-#define _SW_E3    SW_E3,   "       Q = 3",                                          isr_none     | A_add4w   | Wnn   | rFFFFFFFF | Qu   | sr_h  | u_cont         | n(SW_E4)     
-#define _SW_E4    SW_E4,   "       Store 6 to mcause",                              isr_intoTrap | A_shlq    | Wmcaus| rmtvec    | Qx   | sr_h  | u_cont         | n(JAL_3)
-//efine _JAL_3    JAL_3,   "       PC = trap entry point. OpFetch",                 
+#define _SLLI_0   SLLI_0,  "SLLI   Shift left immediate.",                          1,0x24,          isr_none     | A_passq   | Wnn   | RS1       | Qx   | srImm | u_cont         | n(SLLI_1)    
+#define _SLLI_1   SLLI_1,  "       Register to shift to Q (and TRG for shift 0)",   0,-1,            isr_none     | A_passd   | WTRG  | rFFFFFFFF | Qu   | srDec | u_cont         | n(SLLI_2  )  
+#define _SLLI_2   SLLI_2,  "       Repeat Q = Q+Q until shregcnt == 0",             0,-1,            isr_none     | A_shlq    | WTRG  | rFFFFFFFF | Qu   | srDec | u_shrep        | n(FENCE   )  
 //                                                                                                                                                               
-#define _SH_0(x)  x,       "SH     Store halfword. jjw=wradr=RS1+Simm",             isr_none     | A_addDQ   | Wjj   | RS2       | Qu   | sr43a | hwordaligned   | n(SH_1)      
-#define _SH_1     SH_1,    "       Write d to Q and yy (for sh 0). Prep shift",     isr_none     | A_passd   | Wyy   | rFFFFFFFF | Qu   | srDec | u_cont         | n(SH_2)      
-#define _SH_2     SH_2,    "       Repeat shl until shreg = 0 (0,8 or 24 times)",   isr_none     | A_shlq    | Wyy   | rFFFFFFFF | Qu   | srDec | u_shrep        | n(SH_3)      
-#define _SH_3     SH_3,    "       Prepare get back address to use ",               isr_none     | A_passq   | Wnn   | Rjj       | Qz   | sr_h  | u_cont         | n(SH_4)      
-#define _SH_4     SH_4,    "       Address back to Q. Prepare get item to write",   nxtSTB |nxtWE| A_passd   | Whp   | Ryy       | Qu   | sr_h  | u_cont         | n(SH_5)      
-#define _SH_5     SH_5,    "       Write d to a+k until accepted",                  isr_none     | A_passd   | WAQh  | Ryy       | Qhld | sr_h  | u_io_o         | n(SW_2)
-//efine _SW_2     SW_2,    "       Prepare read PC",                                
-//      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 
-
-
+#define _SLL_0    SLL_0,   "SLL    Shift left",                                     1,0x2c,          isr_none     | A_xx      | Wnn   | RS2       | Qx   | sr_h  | u_cont         | n(SLL_1)     
+#define _SLL_1    SLL_1,   "       Shiftamount was in low 5 bits of RS2",           0,-1,            isr_none     | A_passd   | Wnn   | RS1       | Qx   | srImm | u_cont         | n(SLLI_1)    
+//                                                                                                                                                               
+#define _SRxI_0   SRxI_0,  "SRxI   Shift Right immediate (both logic/arith here)",  1,0xa4,          isr_none     | A_passq   | Wnn   | RS1       | Qx   | srImm | u_cont         | n(SRxI_1  )  
+#define _SRxI_1   SRxI_1,  "       Register to shift to Q",                         0,-1,            isr_none     | A_passd   | WTRG  | r00000000 | Qu   | srDec | u_cont | psa00 | n(SRxI_2)    
+#define _SRxI_2   SRxI_2,  "       Repeat Q >>= 1 until shregcnt == 0",             0,-1,            isr_none     | A_passd   | WTRG  | r00000000 | Qshr | srDec | u_shrep        | n(FENCE )    
+//                                                                                                                                                               
+#define _SRx_0(x) _L ## x, "SRx    Shift Right (both SRL and SRA)",                 1,x,             isr_none     | A_xx      | Wnn   | RS2       | Qx   | sr_h  | u_cont         | n(SRx_1)     
+#define _SRx_1    SRx_1,   "       Shiftamount in low 5 bits of RS2",               0,-1,            isr_none     | A_passd   | Wnn   | RS1       | Qx   | srImm | u_cont         | n(SRxI_1)    
+//                                                                                                                                                               
+#define _SW_0(x)  _L ## x, "SW     Store word. Q=wradr=RS1+Simm",                   1,x,             nxtSTB |nxtWE| A_addDQ   | Wnn   | RS2       | Qu   | sr_h  | wordaligned    | n(SW_1)      
+#define _SW_1     SW_1,    "       Write d to a+k until accepted",                  2,-1,            isr_none     | A_passd   | WAQW  | RS2       | Qhld | sr_h  | u_io_o         | n(SW_2)      // [A] even ucode adr 
+#define _SW_2     SW_2,    "       Prepare read PC",                                2,-1,            isr_none     | A_xx      | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  // [C] even ucode adr   
+//
+#define _SW_E1SWE SW_E1SWE,"       Store faulting address alignment to mtval",      8,SW_1,          isr_none     | A_passq   | Wmtval| Rpc       | Qx   | sr_h  | u_cont         | n(SW_E2)     // [B] directly following [A]
+#define _SW_E2    SW_E2,   "       Store address that faulted",                     0,-1,            isr_none     | A_passd   | Wmepc | rFFFFFFFF | Qz   | sr_h  | u_cont         | n(SW_E3)     
+#define _SW_E3    SW_E3,   "       Q = 3",                                          0,-1,            isr_none     | A_add4w   | Wnn   | rFFFFFFFF | Qu   | sr_h  | u_cont         | n(SW_E4)     
+#define _SW_E4    SW_E4,   "       Store 6 to mcause",                              0,-1,            isr_intoTrap | A_shlq    | Wmcaus| rmtvec    | Qx   | sr_h  | u_cont         | n(JAL_3)     // A comment I don't recall require this to be at an even ucodeadr see [what!]. Is it because we go into trap?
+//                                                                                                                                                               
+#define _aF_SW    aF_SW,   " err   SW/SH/SB access fault. Rest to set SEL_O=4'hf",  8,SW_2,          isr_none     | A_xx      | Wnn   | r_xx      | Qhld | sr_h  | u_cont         | n(aF_SW_1)   // [D] directly following [C]
+#define _aF_SW_1  aF_SW_1, " err   SW Store access fault. Faulting adr to mtval",   0,-1,            isr_none     | A_passq   | Wmtval| r00000000 | Qz   | sr_h  | u_cont         | n(aF_SW_2)
+#define _aF_SW_2  aF_SW_2, "       Q = 4",                                          0,-1,            isr_none     | A_add4w   | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(aF_SW_3)
+#define _aF_SW_3  aF_SW_3, "       Store 7 to mcause",                              0,-1,            isr_intoTrap | A_add3w   | Wmcaus| Rpc       | Qx   | sr_h  | u_cont         | n(LDAF_3)
+//
+#define _SH_0(x)  _L ## x, "SH     Store halfword. jjw=wradr=RS1+Simm",             1,x,             isr_none     | A_addDQ   | Wjj   | RS2       | Qu   | sr43a | hwordaligned   | n(SH_1)      
+#define _SH_1     SH_1,    "       Write d to Q and yy (for sh 0). Prep shift",     2,-1,            isr_none     | A_passd   | Wyy   | rFFFFFFFF | Qu   | srDec | u_cont         | n(SH_2)      
+#define _SH_2     SH_2,    "       Repeat shl until shreg = 0 (0,8 or 24 times)",   0,-1,            isr_none     | A_shlq    | Wyy   | rFFFFFFFF | Qu   | srDec | u_shrep        | n(SH_3)      
+#define _SH_3     SH_3,    "       Prepare get back address to use ",               0,-1,            isr_none     | A_passq   | Wnn   | Rjj       | Qz   | sr_h  | u_cont         | n(SH_4)      
+#define _SH_4     SH_4,    "       Address back to Q. Prepare get item to write",   0,-1,            nxtSTB |nxtWE| A_passd   | Whp   | Ryy       | Qu   | sr_h  | u_cont         | n(SH_5)      
+#define _SH_5     SH_5,    "       Write d to a+k until accepted",                  0,-1,            isr_none     | A_passd   | WAQh  | Ryy       | Qhld | sr_h  | u_io_o         | n(SW_2)
+//
+#define _SW_E1SWH SW_E1SWH,"       Store faulting address alignment to mtval",      8,SH_1,          isr_none     | A_passq   | Wmtval| Rpc       | Qx   | sr_h  | u_cont         | n(SW_E2)     // [B] directly following [A]
+//                                                                                                                                                               
 #if ucodeopt_MULDIV
-
-#define _MULHU_0  MULHU_0, "MULHU  Store rs1 to Ryy. Next read rs2. Q=0, shcnt--",  isr_none     |MA_passd   | Wyy   | RS2       | Qz   | srDec | u_cont         | n(MULHU_1)
-#define _MULHU_1  MULHU_1, "       rM<=RS2,  Rjj<=Q=0. next read RS1. ",            isr_none|MLD |MA_passq   | Wjj   | RS1       | Qz   | sr_h  | u_cont         | n(MULHU_2)   // sa14 == 0 so this loads rM. Also clears rF
-#define _MULHU_2  MULHU_2, "       Q <= rM[0] ? Q+rs1 : Q. Prepare shr/sar",        isr_none     |MA_addDQm  | Wnn   | r00000000 | Qu   | srDec | u_cont | psa00 | n(MULHU_3)   // (Must be even ucode adr). Either ADD or PASSQ
-#define _MULHU_3  MULHU_3, "       Shift Q and rM. Prepare read rs1",               isr_none|MSL |MA_passd   | Wnn   | RS1       | Qu   | sr_h  | u_cont         | n(MULHU_2)   // xxxxxxxxxxxxxxxxxxxxxxxxxxxx document me. Loops
-#define _MULHU_4  MULHU_4, "       Prepare read Rjj.",                              isr_none     |MA_nearXOR | Wnn   | Rjj       | Qhld | sr_h  | u_cont         | n(MULHU_5)   // Must follow MULHU_2
-#define _MULHU_5  MULHU_5, "       Q <= rM[0] ? Q+Rjj : Q. Prepare read Ryy",       isr_none     |MA_addDQm  | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(MULHU_6)
-#define _MULHU_6  MULHU_6, "       Q <= rM[0] ? Q+Ryy : Q. Prepare last shr/sar",   isr_none     |MA_addDQm  | Wnn   | r00000000 | Qu   | sr_h  | u_cont | psa00 | n(MULHU_7)
-#define _MULHU_7  MULHU_7, "       Last shift.",                                    isr_none|MSL |MA_passd   | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)   // Investigate - MSL will work as a MLD here, I don't think it matters but it is confusing
+#define _MULHU_0  MULHU_0, "MULHU  Store rs1 to Ryy. Next read rs2. Q=0, shcnt--",  1,0x6d,          isr_none     |MA_passd   | Wyy   | RS2       | Qz   | srDec | u_cont         | n(MULHU_1)
+#define _MULHU_1  MULHU_1, "       rM<=RS2,  Rjj<=Q=0. next read RS1. ",            0,-1,            isr_none|MLD |MA_passq   | Wjj   | RS1       | Qz   | sr_h  | u_cont         | n(MULHU_2)   // sa14 == 0 so this loads rM. Also clears rF
+#define _MULHU_2  MULHU_2, "       Q <= rM[0] ? Q+rs1 : Q. Prepare shr/sar",        2,-1,            isr_none     |MA_addDQm  | Wnn   | r00000000 | Qu   | srDec | u_cont | psa00 | n(MULHU_3)   // (Must be even ucode adr). Either ADD or PASSQ
+#define _MULHU_3  MULHU_3, "       Shift Q and rM. Prepare read rs1",               0,-1,            isr_none|MSL |MA_passd   | Wnn   | RS1       | Qu   | sr_h  | u_cont         | n(MULHU_2)   // xxxxxxxxxxxxxxxxxxxxxxxxxxxx document me. Loops
+#define _MULHU_4  MULHU_4, "       Prepare read Rjj.",                              8,MULHU_2,       isr_none     |MA_nearXOR | Wnn   | Rjj       | Qhld | sr_h  | u_cont         | n(MULHU_5)   // Must follow MULHU_2
+#define _MULHU_5  MULHU_5, "       Q <= rM[0] ? Q+Rjj : Q. Prepare read Ryy",       0,-1,            isr_none     |MA_addDQm  | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(MULHU_6)
+#define _MULHU_6  MULHU_6, "       Q <= rM[0] ? Q+Ryy : Q. Prepare last shr/sar",   0,-1,            isr_none     |MA_addDQm  | Wnn   | r00000000 | Qu   | sr_h  | u_cont | psa00 | n(MULHU_7)
+#define _MULHU_7  MULHU_7, "       Last shift.",                                    0,-1,            isr_none|MSL |MA_passd   | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)   // Investigate - MSL will work as a MLD here, I don't think it matters but it is confusing
                                                                                                   
-#define _MULHSU_0 MULHSU_0,"MULHSU Signed rs1 to Ryy, nxt rd rs2. Q=0, shcnt--",    isr_none     |MA_passd   | Wyy   | RS2       | Qz   | srDec | u_cont         | n(MULHU_1)
+#define _MULHSU_0 MULHSU_0,"MULHSU Signed rs1 to Ryy, nxt rd rs2. Q=0, shcnt--",    1,0x4d,          isr_none     |MA_passd   | Wyy   | RS2       | Qz   | srDec | u_cont         | n(MULHU_1)
                                                                                                   
-#define _MULH_0   MULH_0,  "MULH   Store rs1 to Q. Prep read 0, shcnt--",           isr_none     |MA_passd   | Wnn   | r00000000 | Qu   | srDec | u_cont         | n(MULH_1)
-#define _MULH_1   MULH_1,  "       Store ~rs1 to Ryy. Prep construct 1.",           isr_none     |MA_nearXOR | Wyy   | r00000000 | Qz   | sr_h  | u_cont         | n(MULH_2)
-#define _MULH_2   MULH_2,  "       Store 1 to Rjj. next read rs2, Q=0",             isr_none     |MA_add1    | Wjj   | RS2       | Qzh  | sr_h  | u_cont         | n(MULH_3)
-#define _MULH_3   MULH_3,  "       rM<=RS2, Q = 0. next read RS1. Join.",           isr_none|MLD |MA_xx      | Wnn   | RS1       | Qz   | sr_h  | u_cont         | n(MULHU_2)
+#define _MULH_0   MULH_0,  "MULH   Store rs1 to Q. Prep read 0, shcnt--",           1,0x2d,          isr_none     |MA_passd   | Wnn   | r00000000 | Qu   | srDec | u_cont         | n(MULH_1)
+#define _MULH_1   MULH_1,  "       Store ~rs1 to Ryy. Prep construct 1.",           0,-1,            isr_none     |MA_nearXOR | Wyy   | r00000000 | Qz   | sr_h  | u_cont         | n(MULH_2)
+#define _MULH_2   MULH_2,  "       Store 1 to Rjj. next read rs2, Q=0",             0,-1,            isr_none     |MA_add1    | Wjj   | RS2       | Qzh  | sr_h  | u_cont         | n(MULH_3)
+#define _MULH_3   MULH_3,  "       rM<=RS2, Q = 0. next read RS1. Join.",           0,-1,            isr_none|MLD |MA_xx      | Wnn   | RS1       | Qz   | sr_h  | u_cont         | n(MULHU_2)
                                                                                                   
-#define _MUL_0    MUL_0,   "MUL    Store rs1 tp rM. Next read rs2. Q clear",        isr_none|MLD |MA_xx      | Wnn   | RS2       | Qz   | sr_h  | u_cont         | n(MUL_1)
-#define _MUL_1    MUL_1,   "       Q <= rM[0] ? Q+rs2 : Q. Prepare shr/sar",        isr_none     |MA_addDQm  | Wnn   | r00000000 | Qu   | srDec | u_cont | psa00 | n(MUL_2)     // Must be even ucode adr
-#define _MUL_2    MUL_2,   "       Shift Q and rM. Prepare read rs2",               isr_none|MSL |MA_passd   | Wnn   | RS2       | Qu   | sr_h  | u_cont         | n(MUL_1)     // Loops
-#define _MUL_3    MUL_3,   "       Transfer rM to rDee",                            isr_none|MCLR|MA_xx      | Wnn   | rFFFFFFFF | Qz   | sr_h  | u_cont | psa00 | n(ANDI_1)    // Must follow MUL_1
+#define _MUL_0    MUL_0,   "MUL    Store rs1 tp rM. Next read rs2. Q clear",        1,0x0d,          isr_none|MLD |MA_xx      | Wnn   | RS2       | Qz   | sr_h  | u_cont         | n(MUL_1)
+#define _MUL_1    MUL_1,   "       Q <= rM[0] ? Q+rs2 : Q. Prepare shr/sar",        2,-1,            isr_none     |MA_addDQm  | Wnn   | r00000000 | Qu   | srDec | u_cont | psa00 | n(MUL_2)     // Must be even ucode adr
+#define _MUL_2    MUL_2,   "       Shift Q and rM. Prepare read rs2",               0,-1,            isr_none|MSL |MA_passd   | Wnn   | RS2       | Qu   | sr_h  | u_cont         | n(MUL_1)     // Loops
+#define _MUL_3    MUL_3,   "       Transfer rM to rDee",                            8,MUL_1,         isr_none|MCLR|MA_xx      | Wnn   | rFFFFFFFF | Qz   | sr_h  | u_cont | psa00 | n(ANDI_1)    // Must follow MUL_1
                                                                                                                                                                                
-#define _DIVU_0   DIVU_0,  "DIVU   Store rs1 to rM. Q=0. Prepare invert rs2",       isr_none|MLD |MA_xx      | Wnn   | RS2       | Qz   | srDec | u_cont         | n(DIVU_1)    
-#define _DIVU_1   DIVU_1,  "       Store inverted rs2 to yy. Prepare shift",        isr_none     |MA_nearXOR | Wyy   | rFFFFFFFF | Qzh  | sr_h  | u_cont         | n(DIVU_2)    
-#define _DIVU_2   DIVU_2,  "       Shift (Q,M) left. Prepare unsigned sub",         isr_none|MSL |MA_shlqdiv | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(DIVU_3)    // loops because ceM set and rlastshift clear
-#define _DIVU_3   DIVU_3,  "       Conditionally subtract rs2. Update M[0]",        isr_none|CH  |MA_usub    | Wnn   | rFFFFFFFF | Qu   | srDec | u_cont         | n(DIVU_2)    // Must be even ucode adr
-#define _DIVU_4   DIVU_4,  "       Last Cond. -rs2. Upd M[0]. Branch on INSTR[13]", isr_none|CH13|MA_usub    | Wnn   | rFFFFFFFF | Qu   | sr_h  | u_cont         | n(DIVU_5)    // Must follow DIVU_3. 
-#define _DIVU_5   DIVU_5,  "       Transfer rM to rDee",                            isr_none|MCLR|MA_xx      | Wnn   | rFFFFFFFF | Qz   | sr_h  | u_cont | psa00 | n(ANDI_1)    // Must be even ucode adr
-//efine _DIVU_6   DIVU_6,  "       Write Q to destination for REMU",                isr_none     |MA_add1    | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  // Must follow DIVU_5  Is covered by _LB_6
+#define _DIVU_0   DIVU_0,  "DIVU   Store rs1 to rM. Q=0. Prepare invert rs2",       1,0xad,          isr_none|MLD |MA_xx      | Wnn   | RS2       | Qz   | srDec | u_cont         | n(DIVU_1)    
+#define _DIVU_1   DIVU_1,  "       Store inverted rs2 to yy. Prepare shift",        0,-1,            isr_none     |MA_nearXOR | Wyy   | rFFFFFFFF | Qzh  | sr_h  | u_cont         | n(DIVU_2)    
+#define _DIVU_2   DIVU_2,  "       Shift (Q,M) left. Prepare unsigned sub",         0,-1,            isr_none|MSL |MA_shlqdiv | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(DIVU_3)    // loops because ceM set and rlastshift clear
+#define _DIVU_3   DIVU_3,  "       Conditionally subtract rs2. Update M[0]",        2,-1,            isr_none|CH  |MA_usub    | Wnn   | rFFFFFFFF | Qu   | srDec | u_cont         | n(DIVU_2)    // Must be even ucode adr
+#define _DIVU_4   DIVU_4,  "       Last Cond. -rs2. Upd M[0]. Branch on INSTR[13]", 8,DIVU_3,        isr_none|CH13|MA_usub    | Wnn   | rFFFFFFFF | Qu   | sr_h  | u_cont         | n(DIVU_5)    // Must follow DIVU_3. 
+#define _DIVU_5   DIVU_5,  "       Transfer rM to rDee",                            2,-1,            isr_none|MCLR|MA_xx      | Wnn   | rFFFFFFFF | Qz   | sr_h  | u_cont | psa00 | n(ANDI_1)    // Must be even ucode adr
+//efine _DIVU_6   DIVU_6,  "       Write Q to destination for REMU",                8,DIVU_5,        isr_none     |MA_add1    | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  // Must follow DIVU_5  Is covered by _LB_6 which usethe same calculations
                                                                                                   
-#define _REMU_0   REMU_0,  "REMU   Store dividend to rM. Prepare read divisor.Q=0", isr_none|MLD |MA_xx      | Wnn   | RS2       | Qz   | srDec | u_cont         | n(DIVU_1)
+#define _REMU_0   REMU_0,  "REMU   Store dividend to rM. Prepare read divisor.Q=0", 1,0xed,          isr_none|MLD |MA_xx      | Wnn   | RS2       | Qz   | srDec | u_cont         | n(DIVU_1)
 // 20 left?                                                                                       
 /* First make abs(RS1) (dividend) and                                                             
  * ~abs(RS1) (divisor), if RS1 >= 0, ~abs(RS1) == ~RS1                                            
  *                      if RS1 < 0,  ~abs(RS1) = ~(~RS1+1)                                        
  */                                                                                               
-#define _REM_0    REM_0,   "REM    Branch on sign dividend RS1",                    isr_none     |MA_passd   | Wnn   | rFFFFFFFF | Qu   | srDec | u_cont | bsign | n(DIV_1)
+#define _REM_0    REM_0,   "REM    Branch on sign dividend RS1",                    1,0xcd,          isr_none     |MA_passd   | Wnn   | rFFFFFFFF | Qu   | srDec | u_cont | bsign | n(DIV_1)
                                                                                                   
-#define _DIV_0    DIV_0,   "DIV    Branch on sign dividend RS1",                    isr_none     |MA_passd   | Wnn   | rFFFFFFFF | Qu   | srDec | u_cont | bsign | n(DIV_1)
-#define _DIV_1    DIV_1,   "       jj=abs(RS1). Next handle divisor",               isr_none     |MA_nearXOR | Wjj   | RS2       | Qz   | sr_h  | u_cont         | n(DIV_3)     // Even ucode adr
-#define _DIV_2    DIV_2,   "       Dividend negative, make RS1-1",                  isr_none     |MA_addDQ   | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(DIV_1)     // Must follow DIV_1
-#define _DIV_3    DIV_3,   "       Branch on sign divisor RS2",                     isr_none     |MA_nearXOR | Wnn   | r00000000 | Qu   | sr_h  | u_cont | bsign | n(DIV_4)
-#define _DIV_4    DIV_4,   "       ~abs(divisor) to yy",                            isr_none     |MA_passq   | Wyy   | Rjj       | Qz   | sr_h  | u_cont         | n(DIV_6)     // Even ucode adr
-#define _DIV_5    DIV_5,   "       Kluge to let add1 work in DIV instr",            isr_none|MLD |MA_add1    | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(DIV_3)     // Must follow DIV_4
-#define _DIV_6    DIV_6,   "       Write M. Prepare shift",                         isr_none|MLD |MA_xx      | Wnn   | rFFFFFFFF | Qz   | sr_h  | u_cont         | n(DIV_7)
-#define _DIV_7    DIV_7,   "       Shift (Q,M) left. Prepare unsigned sub",         isr_none|MSL |MA_shlqdiv | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(DIV_8)     // loops because ceM set and rlastshift clear
-#define _DIV_8    DIV_8,   "       Conditionally subtract rs2. Update M[0]",        isr_none|CH  |MA_usub    | Wnn   | rFFFFFFFF | Qu   | srDec | u_cont         | n(DIV_7)     // Must be even ucode adr
-#define _DIV_9    DIV_9,   "       Last Cond. -rs2. Upd M[0]. Branch on INSTR[13]", isr_none|CH13|MA_usub    | Wnn   | rFFFFFFFF | Qu   | sr_h  | u_cont         | n(DIV_A)     // Must follow DIV_8. 
+#define _DIV_0    DIV_0,   "DIV    Branch on sign dividend RS1",                    1,0x8d,          isr_none     |MA_passd   | Wnn   | rFFFFFFFF | Qu   | srDec | u_cont | bsign | n(DIV_1)
+#define _DIV_1    DIV_1,   "       jj=abs(RS1). Next handle divisor",               2,-1,            isr_none     |MA_nearXOR | Wjj   | RS2       | Qz   | sr_h  | u_cont         | n(DIV_3)     // Even ucode adr
+#define _DIV_2    DIV_2,   "       Dividend negative, make RS1-1",                  8,DIV_1,         isr_none     |MA_addDQ   | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(DIV_1)     // Must follow DIV_1
+#define _DIV_3    DIV_3,   "       Branch on sign divisor RS2",                     0,-1,            isr_none     |MA_nearXOR | Wnn   | r00000000 | Qu   | sr_h  | u_cont | bsign | n(DIV_4)
+#define _DIV_4    DIV_4,   "       ~abs(divisor) to yy",                            2,-1,            isr_none     |MA_passq   | Wyy   | Rjj       | Qz   | sr_h  | u_cont         | n(DIV_6)     // Even ucode adr
+#define _DIV_5    DIV_5,   "       Kluge to let add1 work in DIV instr",            8,DIV_4,         isr_none|MLD |MA_add1    | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(DIV_3)     // Must follow DIV_4
+#define _DIV_6    DIV_6,   "       Write M. Prepare shift",                         0,-1,            isr_none|MLD |MA_xx      | Wnn   | rFFFFFFFF | Qz   | sr_h  | u_cont         | n(DIV_7)
+#define _DIV_7    DIV_7,   "       Shift (Q,M) left. Prepare unsigned sub",         0,-1,            isr_none|MSL |MA_shlqdiv | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(DIV_8)     // loops because ceM set and rlastshift clear
+#define _DIV_8    DIV_8,   "       Conditionally subtract rs2. Update M[0]",        2,-1,            isr_none|CH  |MA_usub    | Wnn   | rFFFFFFFF | Qu   | srDec | u_cont         | n(DIV_7)     // Must be even ucode adr
+#define _DIV_9    DIV_9,   "       Last Cond. -rs2. Upd M[0]. Branch on INSTR[13]", 8,DIV_8,         isr_none|CH13|MA_usub    | Wnn   | rFFFFFFFF | Qu   | sr_h  | u_cont         | n(DIV_A)     // Must follow DIV_8. 
                                                                                                   
 /* rM == abs(rs1)/abs(rs2), must change sign if (RS1[31]^RS2[31]) && RS2 != 0                     
  * Q = abs(rs1) % abs(rs2), must cahnge sign if RS1 != 0                                          
 */                                                                                                
-#define _DIV_A    DIV_A,   "       Transfer rM to rDee",                            isr_none|MCLR|MA_passd   | Wnn   | rFFFFFFFF | Qu   | sr_h  | u_cont | psa00 | n(DIV_C)     // Must be even ucode adr  PROBLEM M_CLR
-#define _DIV_B    DIV_B,   "       REM = Q to yy",                                  isr_none     |MA_passq   | Wyy   | RS1       | Qz   | sr_h  | u_cont         | n(DIV_10)    // Must follow DIV_A
+#define _DIV_A    DIV_A,   "       Transfer rM to rDee",                            2,-1,            isr_none|MCLR|MA_passd   | Wnn   | rFFFFFFFF | Qu   | sr_h  | u_cont | psa00 | n(DIV_C)     // Must be even ucode adr  PROBLEM M_CLR
+#define _DIV_B    DIV_B,   "       REM = Q to yy",                                  8,DIV_A,         isr_none     |MA_passq   | Wyy   | RS1       | Qz   | sr_h  | u_cont         | n(DIV_10)    // Must follow DIV_A
 
-#define _DIV_C    DIV_C,   "       rM to yy. Q=ffffffff",                           isr_none     |MA_passd   | Wyy   | RS2       | Qhld | sr_h  | u_cont         | n(DIV_e)     //
-#define _DIV_e    DIV_e,   "       Calc carry of RS2+0xFFFFFFFF",                   isr_none     |MA_iszero  | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(DIV_D)     //
-#define _DIV_D    DIV_D,   "       Is RS2 == 0?",                                   isr_none     |MA_passd   | Wnn   | RS2       | Qu   | sr_h  | usebcond       | n(DIV_E)     // Even ucode adr due to DIV_C
-#define _DIV_E    DIV_E,   "       RS2 != 0. Check signs",                          isr_none     |MA_xx      | Wnn   | RS1       | Qx   | sr_h  | u_cont | bsign | n(DIV_10)    // Even ucode adr
-#define _DIV_F    DIV_F,   "       RS2 == 0, return 0xffffffff",                    isr_none     |MA_passq   | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  // Must follow DIV_E
+#define _DIV_C    DIV_C,   "       rM to yy. Q=ffffffff",                           0,-1,            isr_none     |MA_passd   | Wyy   | RS2       | Qhld | sr_h  | u_cont         | n(DIV_e)     //
+#define _DIV_e    DIV_e,   "       Calc carry of RS2+0xFFFFFFFF",                   0,-1,            isr_none     |MA_iszero  | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(DIV_D)     //
+#define _DIV_D    DIV_D,   "       Is RS2 == 0?",                                   2,-1,            isr_none     |MA_passd   | Wnn   | RS2       | Qu   | sr_h  | usebcond       | n(DIV_E)     // Even ucode adr due to DIV_C
+#define _DIV_E    DIV_E,   "       RS2 != 0. Check signs",                          2,-1,            isr_none     |MA_xx      | Wnn   | RS1       | Qx   | sr_h  | u_cont | bsign | n(DIV_10)    // Even ucode adr
+#define _DIV_F    DIV_F,   "       RS2 == 0, return 0xffffffff",                    8,DIV_E,         isr_none     |MA_passq   | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  // Must follow DIV_E
 
-#define _DIV_10   DIV_10,  "       RS2 > 0. Branch on sign of RS1",                 isr_none     |MA_passd   | Wnn   | Ryy       | Qz   | sr_h  | u_cont | bsign | n(DIV_12)    // Even ucode adr
-#define _DIV_11   DIV_11,  "       RS2 < 0. Branch on sign of RS1",                 isr_none     |MA_passd   | Wnn   | Ryy       | Qz   | sr_h  | u_cont | bsign | n(DIV_14)    // Must follow DIV_10
+#define _DIV_10   DIV_10,  "       RS2 > 0. Branch on sign of RS1",                 2,-1,            isr_none     |MA_passd   | Wnn   | Ryy       | Qz   | sr_h  | u_cont | bsign | n(DIV_12)    // Even ucode adr
+#define _DIV_11   DIV_11,  "       RS2 < 0. Branch on sign of RS1",                 8,DIV_10,        isr_none     |MA_passd   | Wnn   | Ryy       | Qz   | sr_h  | u_cont | bsign | n(DIV_14)    // Must follow DIV_10
 
-#define _DIV_12   DIV_12,  "       RS2 > 0, RS1 >= 0, yy is true result",           isr_none     |MA_passd   | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  // Even ucode adr
-#define _DIV_13   DIV_13,  "       RS2 > 0, RS1 < 0, change sign yy",               isr_none     |MA_nearXOR | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(LB_6)      // DIVU_6 is the same as LB_6 // Must follow DIV_12
+#define _DIV_12   DIV_12,  "       RS2 > 0, RS1 >= 0, yy is true result",           2,-1,            isr_none     |MA_passd   | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  // Even ucode adr
+#define _DIV_13   DIV_13,  "       RS2 > 0, RS1 < 0, change sign yy",               8,DIV_12,        isr_none     |MA_nearXOR | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(LB_6)      // DIVU_6 is the same as LB_6 // Must follow DIV_12
 
-#define _DIV_14   DIV_14,  "       RS2 < 0, RS1 >= 0, change sign yy",              isr_none     |MA_nearXOR | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(LB_6)      // DIVU_6 is the same as LB_6 // Even ucode adr
-#define _DIV_15   DIV_15,  "       RS2 < 0, RS1 < 0, yy is true result",            isr_none     |MA_passd   | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  // Must follow DIV_14   
+#define _DIV_14   DIV_14,  "       RS2 < 0, RS1 >= 0, change sign yy",              2,-1,            isr_none     |MA_nearXOR | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(LB_6)      // DIVU_6 is the same as LB_6 // Even ucode adr
+#define _DIV_15   DIV_15,  "       RS2 < 0, RS1 < 0, yy is true result",            8,DIV_14,        isr_none     |MA_passd   | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  // Must follow DIV_14   
 
 
 #else
-
-#define _MULHU_0  _ILL_0(MULHU_0  )
-#define _MULHU_1  _ILL_0(MULHU_1  )
-#define _MULHU_2  _ILL_0(MULHU_2  )
-#define _MULHU_3  _ILL_0(MULHU_3  )
-#define _MULHU_4  _ILL_0(MULHU_4  )
-#define _MULHU_5  _ILL_0(MULHU_5  )
-#define _MULHU_6  _ILL_0(MULHU_6  )
-#define _MULHU_7  _ILL_0(MULHU_7  )
-#define _MULHSU_0 _ILL_0(MULHSU_0 )
-#define _MULH_0   _ILL_0(MULH_0   )
-#define _MULH_1   _ILL_0(MULH_1   )
-#define _MULH_2   _ILL_0(MULH_2   )
-#define _MULH_3   _ILL_0(MULH_3   )
-#define _MUL_0    _ILL_0(MUL_0    )
-#define _MUL_1    _ILL_0(MUL_1    )
-#define _MUL_2    _ILL_0(MUL_2    )
-#define _MUL_3    _ILL_0(MUL_3    )
-#define _DIVU_0   _ILL_0(DIVU_0   )
-#define _DIVU_1   _ILL_0(DIVU_1   )
-#define _DIVU_2   _ILL_0(DIVU_2   )
-#define _DIVU_3   _ILL_0(DIVU_3   )
-#define _DIVU_4   _ILL_0(DIVU_4   )
-#define _DIVU_5   _ILL_0(DIVU_5   )
-#define _REMU_0   _ILL_0(REMU_0   )
-#define _REM_0    _ILL_0(REM_0    )
-#define _DIV_0    _ILL_0(DIV_0    )
-#define _DIV_1    _ILL_0(DIV_1    )
-#define _DIV_2    _ILL_0(DIV_2    )
-#define _DIV_3    _ILL_0(DIV_3    )
-#define _DIV_4    _ILL_0(DIV_4    )
-#define _DIV_5    _ILL_0(DIV_5    )
-#define _DIV_6    _ILL_0(DIV_6    )
-#define _DIV_7    _ILL_0(DIV_7    )
-#define _DIV_8    _ILL_0(DIV_8    )
-#define _DIV_9    _ILL_0(DIV_9    )
-#define _DIV_A    _ILL_0(DIV_A    )
-#define _DIV_B    _ILL_0(DIV_B    )
-#define _DIV_C    _ILL_0(DIV_C    )
-#define _DIV_e    _ILL_0(DIV_e    )
-#define _DIV_D    _ILL_0(DIV_D    )
-#define _DIV_E    _ILL_0(DIV_E    )
-#define _DIV_F    _ILL_0(DIV_F    )
-#define _DIV_10   _ILL_0(DIV_10   )
-#define _DIV_11   _ILL_0(DIV_11   )
-#define _DIV_12   _ILL_0(DIV_12   )
-#define _DIV_13   _ILL_0(DIV_13   )
-#define _DIV_14   _ILL_0(DIV_14   )
-#define _DIV_15   _ILL_0(DIV_15   )
+//                                                                                  Fixed/even       ISR          | ALU         Write   intern      Reg    Shreg   Ucode            Next
+//                                                                                  | Pair           action       | op          adr/en  read adr    op     op      operation        ucode
+#define _ILLm0(i)  i,      "Illegal instruction seen (math)",                       4,-1,            isr_none     | A_xx      | Wnn   | r_xx      | Qx   | sr_h  | u_cont         | n(ILLe )
+#define _Mentry(i) i,      "Math entry point not used",                             1,i,             isr_none     | A_xx      | Wnn   | r_xx      | Qx   | sr_h  | u_cont         | n(ILLe )
+//                                                                   Used to flag illegals in decode
+#define _MULHU_0  _Mentry(MULHU_0 )                               // x
+#define _MULHU_1  _ILL0b(MULHU_1  )                               // x
+#define _MULHU_2  _ILLm0(MULHU_2  ) // Paired with MULHU_4        // x
+#define _MULHU_3  _ILLm0(MULHU_3  )                               // x
+#define _MULHU_4  _ILLm0(MULHU_4  )                               // x
+#define _MULHU_5  _ILL0b(MULHU_5  )                               // x
+#define _MULHU_6  _ILLm0(MULHU_6  )                               // x
+#define _MULHU_7  _ILLm0(MULHU_7  )                               // x
+#define _MULHSU_0 _Mentry(MULHSU_0)                               // x
+#define _MULH_0   _LUI_0(0x2d)                                    // without MUL/DIV this entry is LUI
+#define _MULH_1   _ILLm0(MULH_1   )                               // x
+#define _MULH_2   _ILLm0(MULH_2   )                               // x
+#define _MULH_3   _ILLm0(MULH_3   )                               // x
+#define _MUL_0    _LUI_0(0x0d)                                    // without MUL/DIV this entry is LUI
+#define _MUL_1    _ILLm0(MUL_1    ) // Paired with MUL_3          // x
+#define _MUL_2    _ILLm0(MUL_2    )                               // x
+#define _MUL_3    _ILLm0(MUL_3    )                               // x
+#define _DIVU_0   _Mentry(DIVU_0  )                               // x
+#define _DIVU_1   _ILLm0(DIVU_1   )                               // x
+#define _DIVU_2   _ILLm0(DIVU_2   )                               // x
+#define _DIVU_3   _ILLm0(DIVU_3   ) // Paired with DIVU_4         // x
+#define _DIVU_4   _ILLm0(DIVU_4   )                               // x
+#define _DIVU_5   _ILLm0(DIVU_5   ) // Paired with LB_6           // x
+#define _REMU_0   _Mentry(REMU_0  )                               // x
+#define _REM_0    _Mentry(REM_0   )                               // x
+#define _DIV_0    _Mentry(DIV_0   )                               // x
+#define _DIV_1    _ILLm0(DIV_1    ) // Paired with DIV_2          // x
+#define _DIV_2    _ILLm0(DIV_2    )                               // x
+#define _DIV_3    _ILLm0(DIV_3    )                               // x
+#define _DIV_4    _ILLm0(DIV_4    ) // Paired with DIV_5          // x
+#define _DIV_5    _ILLm0(DIV_5    )                               // x
+#define _DIV_6    _ILLm0(DIV_6    )                               // x
+#define _DIV_7    _ILLm0(DIV_7    )                               // x
+#define _DIV_8    _ILLm0(DIV_8    ) // Paired with DIV_9          // x
+#define _DIV_9    _ILLm0(DIV_9    )                               // x
+#define _DIV_A    _ILLm0(DIV_A    ) // Paired with DIV_B          // x
+#define _DIV_B    _ILLm0(DIV_B    )                               // x
+#define _DIV_C    _ILL0b(DIV_C    )                               // x
+#define _DIV_e    _ILLm0(DIV_e    )                               // x
+#define _DIV_D    _ILLm0(DIV_D    )                               // x
+#define _DIV_E    _ILLm0(DIV_E    ) // Paired with DIV_F          // x
+#define _DIV_F    _ILL0b(DIV_F    )                               // not used, but follows DIV_E
+#define _DIV_10   _ILLm0(DIV_10   ) // Paired with DIV_11         // x
+#define _DIV_11   _ILL0b(DIV_11   )                               // not used, but follows DIV_10
+#define _DIV_12   _ILLm0(DIV_12   ) // Paired with DIV_13         // x
+#define _DIV_13   _ILL0b(DIV_13   )                               // not used, but follows DIV_12
+#define _DIV_14   _ILLm0(DIV_14   ) // Paired with DIV_15         // x
+#define _DIV_15   _ILL0b(DIV_15   )                               // x
 
 #endif
 
 
+//                                                                                  Fixed/even       ISR          | ALU         Write   intern      Reg    Shreg   Ucode            Next
+//                                                                                  | Pair           action       | op          adr/en  read adr    op     op      operation        ucode
+#define _SB_0(x)  _L ## x, "SB     Store byte. wjj=wradr=RS1+Simm",                 1,x,             isr_none     | A_addDQ   | Wjj   | RS2       | Qu   | sr43a | u_cont         | n(SB_1)      
+#define _SB_1     SB_1,    "       Write d to Q and yy (for sh 0). Prep shift",     0,-1,            isr_none     | A_passd   | Wyy   | rFFFFFFFF | Qu   | srDec | u_cont         | n(SB_2)      
+#define _SB_2     SB_2,    "       Repeat shl until shreg = 0 (0,8,16 or 24 times)",0,-1,            isr_none     | A_shlq    | Wyy   | rFFFFFFFF | Qu   | srDec | u_shrep        | n(SB_3)      
+#define _SB_3     SB_3,    "       Prepare get back address to use ",               0,-1,            isr_none     | A_passq   | Wnn   | Rjj       | Qz   | sr_h  | u_cont         | n(SB_4)      
+#define _SB_4     SB_4,    "       Address back to Q. Prepare get item to write",   0,-1,            nxtSTB |nxtWE| A_passd   | Wbp   | Ryy       | Qu   | sr_h  | u_cont         | n(SB_5)      
+#define _SB_5     SB_5,    "       Write d to a+k until accepted",                  0,-1,            isr_none     | A_passd   | WAQb  | Ryy       | Qhld | sr_h  | u_io_o         | n(SW_2)     
 
-//      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 
+// Before RVC we had this. But when RVC is included, we can not read the offending
+// instruction from RAM with certainty, it may be unaligned. Luckily the spec say
+// "The mtval register can optionally also be used to return the faulting instruction bits on an illegal
+//  instruction exception (mepc points to the faulting instruction in memory).
+//  If this feature is not provided, then mtval is set to zero on an illegal instruction fault.""
+// (Section 3.1.17)
+#define _ILL_0(x) _L ## x, "Illegal instruction seen (at illegal entrypt)",         4,-1,            isr_none     | A_xx      | Wnn   | r_xx      | Qx   | sr_h  | u_cont         | n(ILLe )     
+#define _ILL0b(x) _L ## x, "Illegal instruction seen",                              0,-1,            isr_none     | A_xx      | Wnn   | r_xx      | Qx   | sr_h  | u_cont         | n(ILLe )     
+
+#define _ILLe     ILLe,    "Illegal",                                               1,0xfe,          isr_none     | A_xx      | Wnn   | Rpc       | Qx   | sr_h  | u_cont         | n(ILL_1)     
+#define _ILL_1    ILL_1,   "       Store PC to mepc",                               0,-1,            isr_none     | A_passd   | Wmepc | r00000000 | Qx   | sr_h  | u_cont         | n(ILL_2)     
+#define _ILL_2    ILL_2,   "       Store 0 to mtval",                               0,-1,            isr_none     | A_passd   | Wmtval| r00000000 | Qz   | sr_h  | u_cont         | n(ILL_3)
+#define _ILL_3    ILL_3,   "       Q = 1",                                          0,-1,            isr_none     | A_a1      | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(ILL_4)     
+#define _ILL_4    ILL_4,   "       Store 2 to mcause",                              0,-1,            isr_intoTrap | A_add1    | Wmcaus| rmtvec    | Qx   | sr_h  | u_cont         | n(JAL_3) 
+#define _ILL_5    ILL_5,   "       Not in use",                                     unx
 //                                                                                                                                                               
-#define _SB_0(x)  x,       "SB     Store byte. wjj=wradr=RS1+Simm",                 isr_none     | A_addDQ   | Wjj   | RS2       | Qu   | sr43a | u_cont         | n(SB_1)      
-#define _SB_1     SB_1,    "       Write d to Q and yy (for sh 0). Prep shift",     isr_none     | A_passd   | Wyy   | rFFFFFFFF | Qu   | srDec | u_cont         | n(SB_2)      
-#define _SB_2     SB_2,    "       Repeat shl until shreg = 0 (0,8,16 or 24 times)",isr_none     | A_shlq    | Wyy   | rFFFFFFFF | Qu   | srDec | u_shrep        | n(SB_3)      
-#define _SB_3     SB_3,    "       Prepare get back address to use ",               isr_none     | A_passq   | Wnn   | Rjj       | Qz   | sr_h  | u_cont         | n(SB_4)      
-#define _SB_4     SB_4,    "       Address back to Q. Prepare get item to write",   nxtSTB |nxtWE| A_passd   | Wbp   | Ryy       | Qu   | sr_h  | u_cont         | n(SB_5)      
-#define _SB_5     SB_5,    "       Write d to a+k until accepted",                  isr_none     | A_passd   | WAQb  | Ryy       | Qhld | sr_h  | u_io_o         | n(SW_2)     
-//efine _SW_2     SW_2,    "       Prepare read PC",                                
-//      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 
-
-
-//Original
-#define _ILL_0(i) i,       "Illegal instruction seen",                              isr_none     | A_xx      | Wnn   | r_xx      | Qx   | sr_h  | u_cont         | n(ILLe )     
-#define _ILLe     ILLe,    "Illegal",                                               isr_none     | A_xx      | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(ILL_1)     
-#define _ILL_1    ILL_1,   "       Store PC to mepc and Q for read of instr",       nxtSTB       | A_passd   | Wmepc | Ralu      | Qu   | sr_h  | u_cont         | n(ILL_2)     
-#define _ILL_2    ILL_2,   "       Read until Q is offending instruction",          isr_none     | A_passd   | Wnn   | rFFFFFFFF | Qs   | sr_h  | u_io_i         | n(ILL_3)     
-#define _ILL_3    ILL_3,   "       Store illegal instruction to mtval",             isr_none     | A_passq   | Wmtval| r00000000 | Qz   | sr_h  | u_cont         | n(ILL_4)     
-#define _ILL_4    ILL_4,   "       Q = 1",                                          isr_none     | A_a1      | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(ILL_5)     
-#define _ILL_5    ILL_5,   "       Store 2 to mcause",                              isr_intoTrap | A_add1    | Wmcaus| rmtvec    | Qx   | sr_h  | u_cont         | n(JAL_3) 
+#define _FENCE(x) _L ## x, "FENCE  Prepare read PC (FENCE/FENCE.I)",                1,x,             isr_none     | A_xx      | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)
+#define FENCE _L0x03 // To continue ucode at FENCE
+//
+#define _ECAL_BRK ECAL_BRK,"ECALL/EBREAK  Select ECALL/(U/S/M)RET or EBREAK/WFI",   1,0x1c,          isr_none     | A_passq   | Wnn   | rFFFFFFFF | Qhld | sr_h  | hwordaligned   | n(ECAL_RET)
+#define _ECAL_RET ECAL_RET,"ECALL/(U/S/M)RET Select ECALL or (U/S/M)RET",           2,-1,            isr_none     | A_passq   | Wnn   | rFFFFFFFF | Qhld | sr_h  | wordaligned    | n(ECALL_1) /* Must be at even ucode adr */
+#define _ECALL_1  ECALL_1, "ECALL  Verify Imm==0x000",                              2,-1,            isr_none     | A_add1    | Wnn   | Rpc       | Qu   | sr_h  | u_cont         | n(ECALL_2) /* Must be at even ucode adr */
+#define _ECALL_2  ECALL_2, "       mepc = pc, prep store 0 to mtval",               0,-1,            isr_none     | A_passd   | Wmepc | r_xx      | Qz   | sr_h  | usebcond       | n(ECALL_3) 
+#define _ECALL_3  ECALL_3, "       mtval = 0, now start the chore of 11 to mcause", 8,eILL0c,        isr_none     | A_passq   | Wmtval| r00000000 | Qz   | sr_h  | u_cont         | n(ECALL_4) /* Must be at odd ucode adr following a _ILL_0() */
+#define _ECALL_4  ECALL_4, "       Q = 4",                                          0,-1,            isr_none     | A_add4w   | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(ECALL_5)   
+#define _ECALL_5  ECALL_5, "       Q = 8",                                          0,-1,            isr_none     | A_add4w   | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(ECALL_6)   
+#define _ECALL_6  ECALL_6, "       mcause = 11",                                    0,-1,            isr_intoTrap | A_add3w   | Wmcaus| rmtvec    | Qx   | sr_h  | u_cont         | n(JAL_3)   // A comment I don't recall say this must be at even adr [what2]
 //efine _JAL_3    JAL_3,   "       PC = trap entry point. OpFetch",                 
                                                                                                                                                                
+#define _eILL0c   eILL0c,  "Illegal instruction seen",                              2,-1,            isr_none     | A_xx      | Wnn   | r_xx      | Qx   | sr_h  | u_cont         | n(ILLe )    /* Must preceeded _ECALL_3 */
 
-
-
-// // TMP, see if we alway are here at illegals, or if we get somewere else?
-// // Seems we always are here. Do one of the A_add1 fail?
-// #define _ILL_0(i) i,       "Illegal instruction seen",                              isr_none     | A_xx      | Wnn   | r_xx      | Qx   | sr_h  | u_cont         | n(ILLe )     
-// #define _ILLe     ILLe,    "Illegal",                                               isr_none     | A_xx      | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(ILL_1)     
-// #define _ILL_1    ILL_1,   "       Store PC to mepc and Q for read of instr",       nxtSTB       | A_passd   | Wmepc | Ralu      | Qu   | sr_h  | u_cont         | n(ILL_2)     
-// #define _ILL_2    ILL_2,   "       Read until Q is offending instruction",          isr_none     | A_passd   | Wnn   | rFFFFFFFF | Qs   | sr_h  | u_io_i         | n(ILL_3)     
-// #define _ILL_3    ILL_3,   "       Store illegal instruction to mtval",             isr_none     | A_passq   | Wmtval| r000000FF | Qz   | sr_h  | u_cont         | n(ILL_4)     
-// //efine _ILL_4    ILL_4,   "       Q = 1",                                          isr_none     | A_add1    | Wmcaus| r0000FFFF | Qu   | sr_h  | u_cont         | n(ILL_5)  // Sometimes, Q is not updated
-// #define _ILL_4    ILL_4,   "       Q = 1",                                          isr_none     | A_addDQ   | Wmcaus| r0000FFFF | Qu   | sr_h  | u_cont         | n(ILL_5)  // Sometimes Q is not updated
-// //efine _ILL_4    ILL_4,   "       Q = 1",                                          isr_none     | A_passd   | Wmcaus| r0000FFFF | Qu   | sr_h  | u_cont         | n(ILL_5)  // Q is always updated
-// #define _ILL_5    ILL_5,   "       Store 2 to mcause",                              isr_intoTrap | A_addDQ   | Wmtval| rmtvec    | Qx   | sr_h  | u_cont         | n(JAL_3)  // Is it Wmcaus that fails? At error 0 is always written
-// //efine _JAL_3    JAL_3,   "       PC = trap entry point. OpFetch",                 // Inspection of Wmcaus does not show any errors
-// //                                                                                  I believe now it is update of Q that fails.fitte
-
-
-//                                                                                                                                                               
-#define _FENCE(x) x,       "f      Prepare read PC (FENCE)",                        isr_none     | A_xx      | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  
-//      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 isr_none     | A_add4    | Wpc   | Ralu      | Qu   | sr_h  | u_cont         | n(OpFetch )  etc
+#define _EBRKWFI1 EBRKWFI1,"EBREAK/WFI1 Prepare select EBREAK or WFI",              8,ECAL_RET,      isr_none     | A_addDQ   | Wnn   | r_xx      | Qu   | sr_h  | u_cont         | n(EBRKWFI2) /* Must follow _ECAL_RET */
+#define _EBRKWFI2 EBRKWFI2,"EBREAK/WFI2 Select EBREAK or WFI",                      0,-1,            isr_none     | A_invq    | Wjj   | r000000FF | Qz   | sr_h  | usebcond       | n(EBREAK_1)
+#define _EBREAK_1 EBREAK_1,"EBREAK mepc = pc, store 0 to mtval",                    8,WFI_1,         isr_none     | A_passq   | Wmtval| Rpc       | Qz   | sr_h  | u_cont         | n(EBREAK_2) /* Must be at odd ucode adr */
+#define _EBREAK_2 EBREAK_2,"       pc to mepc",                                     0,-1,            isr_none     | A_passd   | Wmepc | r00000000 | Qz   | sr_h  | u_cont         | n(ECALL_6)
 //
-//!! Should have a tighter decode. ECALL =0x00000073, so rs1=0, rd=0. Imm==0x000 checked
-//!! Should have a tighter decode. EBREAK=0x00100073, so rs1=0, rd=0. Imm==0x001 checked
-//!! Should have a tighter decode. WFI   =0x10500073, so rs1=0, rd=0. Imm==0x105 checked
-#define _ECAL_BRK ECAL_BRK,"ECALL/EBREAK  Select ECALL/(U/S/M)RET or EBREAK/WFI",   isr_none     | A_passq   | Wnn   | rFFFFFFFF | Qhld | sr_h  | hwordaligned   | n(ECAL_RET)
-#define _ECAL_RET ECAL_RET,"ECALL/(U/S/M)RET Select ECALL or (U/S/M)RET",           isr_none     | A_passq   | Wnn   | rFFFFFFFF | Qhld | sr_h  | wordaligned    | n(ECALL_1) /* Must be at even ucode adr */
-#define _ECALL_1  ECALL_1, "ECALL  Verify Imm==0x000",                              isr_none     | A_add1    | Wnn   | Rpc       | Qu   | sr_h  | u_cont         | n(ECALL_2) /* Must be at even ucode adr */
-#define _ECALL_2  ECALL_2, "       mepc = pc, prep store 0 to mtval",               isr_none     | A_passd   | Wmepc | r_xx      | Qz   | sr_h  | usebcond       | n(ECALL_3) 
-#define _ECALL_3  ECALL_3, "       mtval = 0, now start the chore of 11 to mcause", isr_none     | A_passq   | Wmtval| r00000000 | Qz   | sr_h  | u_cont         | n(ECALL_4) /* Must be at odd ucode adr following a _ILL_0() */
-#define _ECALL_4  ECALL_4, "       Q = 4",                                          isr_none     | A_add4w   | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(ECALL_5)   
-#define _ECALL_5  ECALL_5, "       Q = 8",                                          isr_none     | A_add4w   | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(ECALL_6)   
-#define _ECALL_6  ECALL_6, "       mcause = 11",                                    isr_intoTrap | A_add3w   | Wmcaus| rmtvec    | Qx   | sr_h  | u_cont         | n(JAL_3)
-//efine _JAL_3    JAL_3,   "       PC = trap entry point. OpFetch",                 
-                                                                                                                                                               
-#define _eILL0c   eILL0c,  "Illegal instruction seen",                              isr_none     | A_xx      | Wnn   | r_xx      | Qx   | sr_h  | u_cont         | n(ILLe )    /* Must preceeded _ECALL_3 */
-
-#define _EBRKWFI1 EBRKWFI1,"EBREAK/WFI1 Prepare select EBREAK or WFI",              isr_none     | A_addDQ   | Wnn   | r_xx      | Qu   | sr_h  | u_cont         | n(EBRKWFI2) /* Must follow _ECAL_RET */
-#define _EBRKWFI2 EBRKWFI2,"EBREAK/WFI2 Select EBREAK or WFI",                      isr_none     | A_invq    | Wjj   | r000000FF | Qz   | sr_h  | usebcond       | n(EBREAK_1)
-#define _EBREAK_1 EBREAK_1,"EBREAK mepc = pc, store 0 to mtval",                    isr_none     | A_passq   | Wmtval| Rpc       | Qz   | sr_h  | u_cont         | n(EBREAK_2) /* Must be at odd ucode adr */
-#define _EBREAK_2 EBREAK_2,"       pc to mepc",                                     isr_none     | A_passd   | Wmepc | r00000000 | Qz   | sr_h  | u_cont         | n(ECALL_6)  
-//efine _ECALL_6  ECALL_6, "       mcause = 11",                                    isr_intoTrap | A_add3    | Wmcaus| rmtvec    | Qx   | sr_h  | u_cont         | n(JAL_3)
-//efine _JAL_3    JAL_3,   "       PC = trap entry point. OpFetch",                 
-
-#define _WFI_1    WFI_1,   "WFI    To check offset",                                isr_none     | A_add4w   | Wnn   | Rjj       | Qu   | sr_h  | u_cont         | n(WFI_2   ) /* This preceeds EBREAK_1  */
-#define _WFI_2    WFI_2,   "       Check offset",                                   isr_none     | A_add1    | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(WFI_3   )
-#define _WFI_3    WFI_3,   "       More check offset",                              isr_none     | A_add1    | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(WFI_4   )
-#define _WFI_4    WFI_4,   "       Prepare read PC",                                isr_none     | A_xx      | Wnn   | Rpc       | Qz   | sr_h  | usebcond       | n(WFI_5   )
-#define _WFI_5    WFI_5,   "       IncPC, OpFetch",                                 nxtSTB       | A_add4w   | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch   ) /* Must follow eILL0a.  */
-
-#define _eILL0a   eILL0a,  "Illegal instruction seen",                              isr_none     | A_xx      | Wnn   | r_xx      | Qx   | sr_h  | u_cont         | n(ILLe )    /* Must preceede  _WFI_5 */
-
-//!! Should have a tighter decode. MRET=0x30200073, so rs1=0 rd=0. Imm==0x302 checked
-#define _MRET_1   MRET_1,  "MRET   First save Imm, start build constant for check", isr_none     | A_passq   | Wjj   | r000000FF | Qz   | sr_h  | u_cont         | n(MRET_2)   /* Must follow _ECALL_1 */
-#define _MRET_2   MRET_2,  "       0xff+3 = 0x102",                                 isr_none     | A_add3w   | Wnn   | r000000FF | Qu   | sr_h  | u_cont         | n(MRET_3)
-#define _MRET_3   MRET_3,  "       0x102 + 0xff + 1 = 0x202",                       isr_none     | A_add1    | Wnn   | r000000FF | Qu   | sr_h  | u_cont         | n(MRET_4)
-#define _MRET_4   MRET_4,  "       0x202 + 0xff + 1 = 0x302",                       isr_none     | A_add1    | Wnn   | r_xx      | Qu   | sr_h  | u_cont         | n(MRET_5)
-#define _MRET_5   MRET_5,  "       ~302",                                           isr_none     | A_invq    | Wnn   | Rjj       | Qu   | sr_h  | u_cont         | n(MRET_6)
-#define _MRET_6   MRET_6,  "       ~302 + origImm + 1 for branch decision",         isr_none     | A_add1    | Wnn   | r_xx      | Qu   | sr_h  | u_cont         | n(MRET_7)
-#define _MRET_7   MRET_7,  "       Prepare emulation entry point 0x104",            isr_none     | A_xx      | Wnn   | r000000FF | Qz   | sr_h  | usebcond       | n(MRET_8)  
-#define _MRET_8   MRET_8,  "       Prep +4",                                        isr_none     | A_add1    | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(StdIncPc) /* Must be at odd ucode adr following a _ILL_0()*/
-//      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 isr_none     | A_add4    | Wpc   | Ralu      | Qu   | sr_h  | u_cont         | n(OpFetch )  etc
-
-#define _eILL0b   eILL0b,  "Illegal instruction seen",                              isr_none     | A_xx      | Wnn   | r_xx      | Qx   | sr_h  | u_cont         | n(ILLe )    /* Must preceeded _MRET_8 */
-
-//efine _xRET_1   xRET_1,  "(U/S/M)RET Prepare emulation entry point 0x104",        isr_none     | A_xx      | Wnn   | r000000FF | Qz   | sr_h  | u_cont         | n(xRET_2)  /* Must follow _ECALL_1 */
-//efine _xRET_2   xRET_2,  "       Prep +4",                                        isr_none     | A_add1    | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(StdIncPc)
-//      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 isr_none     | A_add4    | Wpc   | Ralu      | Qu   | sr_h  | u_cont         | n(OpFetch )  etc
+#define _WFI_1    WFI_1,   "WFI    To check offset",                                2,-1,            isr_none     | A_add4w   | Wnn   | Rjj       | Qu   | sr_h  | u_cont         | n(WFI_2   ) /* This preceeds EBREAK_1  */
+#define _WFI_2    WFI_2,   "       Check offset",                                   0,-1,            isr_none     | A_add1    | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(WFI_3   )
+#define _WFI_3    WFI_3,   "       More check offset",                              0,-1,            isr_none     | A_add1    | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(WFI_4   )
+#define _WFI_4    WFI_4,   "       Prepare read PC",                                0,-1,            isr_none     | A_xx      | Wnn   | Rpc       | Qz   | sr_h  | usebcond       | n(WFI_5   )
+#define _WFI_5    WFI_5,   "       IncPC, OpFetch",                                 8,eILL0a,        nxtSTB       | A_add4w   | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch   ) /* Must follow eILL0a.  */
 //
-#if OLD        
-//#define _CSRRW_0  CSRRW_0, "CSRRW  Decoded CSR adr in jj",                          isr_none     | A_passq   | Wjj   | r000000FF | Qz   | sr_h  | u_cont         | n(CSRRW_1)   
-//#define _CSRRW_1  CSRRW_1, "       CSRRW sentinel 0x00000100",                      isr_none     | A_add1    | Wyy   | Rpc       | Qu   | sr_h  | u_cont         | n(CSRRW_2)   
-//#define _CSRRW_2  CSRRW_2, "       Write PC to 0x100 start Prep emulation entrypt", isr_intoCSR  | A_passd   | WAQW  | r00000000 | Qhld | sr_h  | u_cont         | n(CSRRW_3)   
-//#define _CSRRW_3  CSRRW_3, "       Prep emulation entrypt 0x108, here Q to 0x104",  isr_none     | A_add4    | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(StdIncPc)
-////      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 isr_none     | A_add4    | Wpc   | Ralu      | Qu   | sr_h  | u_cont         | n(OpFetch )  etc
-////                                                                                                                                                               
-//#define _CSRRS_0  CSRRS_0, "CSRRS  Decoded CSR adr in jj",                          isr_none     | A_passq   | Wjj   | r000000FF | Qz   | sr_h  | u_cont         | n(CSRRS_1)   
-//#define _CSRRS_1  CSRRS_1, "       CSRRS sentinel 0x00000102 or 0xffffff82",        isr_none     | A_add3    | Wyy   | r000000FF | Qz   | sr_h  | u_cont         | n(CSRRWI_2)
-////efine _CSRRWI_2 CSRRWI_2,"       Prepare write current PC to 0x100",              isr_none     | A_add1    | Wnn   | Rpc       | Qu   | sr_h  | u_cont         | n(CSRRW_2)  
-////efine _CSRRW_2  CSRRW_2, "       Write PC to 0x100 start Prep emulation entrypt", isr_intoCSR  | A_passd   | WAQW  | r00000000 | Qhld | sr_h  | u_cont         | n(CSRRW_3)   
-////efine _CSRRW_3  CSRRW_3, "       Prep emulation entrypt 0x108, here Q to 0x104",  isr_none     | A_add4    | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(StdIncPc)
-////      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 isr_none     | A_add4    | Wpc   | Ralu      | Qu   | sr_h  | u_cont         | n(OpFetch )  etc
-////                                                                                                                                                               
-//#define _CSRRC_0  CSRRC_0, "CSRRC  Decoded CSR adr in jj",                          isr_none     | A_passq   | Wjj   | r000000FF | Qz   | sr_h  | u_cont         | n(CSRRC_1)   
-//#define _CSRRC_1  CSRRC_1, "       CSRRC sentinel 0x0000103",                       isr_none     | A_add4    | Wyy   | r000000FF | Qz   | sr_h  | u_cont         | n(CSRRWI_2)   
-////efine _CSRRWI_2 CSRRWI_2,"       Prepare write current PC to 0x100",              isr_none     | A_add1    | Wnn   | Rpc       | Qu   | sr_h  | u_cont         | n(CSRRW_2)  
-////efine _CSRRW_2  CSRRW_2, "       Write PC to 0x100 start Prep emulation entrypt", isr_intoCSR  | A_passd   | WAQW  | r00000000 | Qhld | sr_h  | u_cont         | n(CSRRW_3)   
-////efine _CSRRW_3  CSRRW_3, "       Prep emulation entrypt 0x108, here Q to 0x104",  isr_none     | A_add4    | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(StdIncPc)
-////      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 isr_none     | A_add4    | Wpc   | Ralu      | Qu   | sr_h  | u_cont         | n(OpFetch )  etc
-////                                                                                                                                                               
-//#define _CSRRWI_0 CSRRWI_0,"CSRRWI Decoded CSR adr in jj",                          isr_none     | A_passq   | Wjj   | rFFFFFF7F | Qz   | sr_h  | u_cont         | n(CSRRWI_1)  
-//#define _CSRRWI_1 CSRRWI_1,"       CSRRWI sentinel 0xffffff80",                     isr_none     | A_add1    | Wyy   | r000000FF | Qz   | sr_h  | u_cont         | n(CSRRWI_2)  
-//#define _CSRRWI_2 CSRRWI_2,"       Prepare write current PC to 0x100",              isr_none     | A_add1    | Wnn   | Rpc       | Qu   | sr_h  | u_cont         | n(CSRRW_2)  
-////efine _CSRRW_2  CSRRW_2, "       Write PC to 0x100 start Prep emulation entrypt", isr_intoCSR  | A_passd   | WAQW  | r00000000 | Qhld | sr_h  | u_cont         | n(CSRRW_3)   
-////efine _CSRRW_3  CSRRW_3, "       Prep emulation entrypt 0x108, here Q to 0x104",  isr_none     | A_add4    | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(StdIncPc)
-////      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 isr_none     | A_add4    | Wpc   | Ralu      | Qu   | sr_h  | u_cont         | n(OpFetch )  etc
-////                                                                                                                                                               
-//#define _CSRRSI_0 CSRRSI_0,"CSRRSI Decoded CSR adr in jj",                          isr_none     | A_passq   | Wjj   | rFFFFFF7F | Qz   | sr_h  | u_cont         | n(CSRRS_1)  
-////efine _CSRRS_1  CSRRS_1, "       CSRRS sentinel 0x00000102 or 0xffffff82",        isr_none     | A_add3    | Wyy   | r000000FF | Qz   | sr_h  | u_cont         | n(CSRRWI_2)
-////efine _CSRRWI_2 CSRRWI_2,"       Prepare write current PC to 0x100",              isr_none     | A_add1    | Wnn   | Rpc       | Qu   | sr_h  | u_cont         | n(CSRRW_2)  
-////efine _CSRRW_2  CSRRW_2, "       Write PC to 0x100 start Prep emulation entrypt", isr_intoCSR  | A_passd   | WAQW  | r00000000 | Qhld | sr_h  | u_cont         | n(CSRRW_3)   
-////efine _CSRRW_3  CSRRW_3, "       Prep emulation entrypt 0x108, here Q to 0x104",  isr_none     | A_add4    | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(StdIncPc)
-////      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 isr_none     | A_add4    | Wpc   | Ralu      | Qu   | sr_h  | u_cont         | n(OpFetch )  etc
-////                                                                                                                                                               
-//#define _CSRRCI_0 CSRRCI_0,"CSRRCI Decoded CSR adr in jj",                          isr_none     | A_passq   | Wjj   | rFFFFFF7F | Qz   | sr_h  | u_cont         | n(CSRRCI_1)  
-//#define _CSRRCI_1 CSRRCI_1,"       CSRRCI sentinel 0xffffff83",                     isr_none     | A_add4    | Wyy   | r000000FF | Qz   | sr_h  | u_cont         | n(CSRRWI_2)  // IMPROVE
-////efine _CSRRWI_2 CSRRWI_2,"       Prepare write current PC to 0x100",              isr_none     | A_add1    | Wnn   | Rpc       | Qu   | sr_h  | u_cont         | n(CSRRW_2)  
-////efine _CSRRW_2  CSRRW_2, "       Write PC to 0x100 start Prep emulation entrypt", isr_intoCSR  | A_passd   | WAQW  | r00000000 | Qhld | sr_h  | u_cont         | n(CSRRW_3)   
-////efine _CSRRW_3  CSRRW_3, "       Prep emulation entrypt 0x108, here Q to 0x104",  isr_none     | A_add4    | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(StdIncPc)
-////      _StdIncPc StdIncPc,"       IncPC, OpFetch",                                 isr_none     | A_add4    | Wpc   | Ralu      | Qu   | sr_h  | u_cont         | n(OpFetch )  etc
-////                                                                                                                                                               
-#else
-#define _CSRRW_0  CSRRW_0, "CSRRW  Decoded CSR adr in yy",                          isr_none     | A_passq   | Wyy   | r000000FF | Qz   | sr_h  | u_cont         | n(CSRRW_1)   
-#define _CSRRW_1  CSRRW_1, "       Construct PC storage adr",                       isr_none     | A_add1    | Wnn   | Rjj       | Qu   | sr_h  | u_cont         | n(CSRRW_2)   
-#define _CSRRW_2  CSRRW_2, "       Write PC to 0x100 start Prep emulation entrypt", isr_intoCSR  | A_passd   | WAQW  | r00000000 | Qhld | sr_h  | u_cont         | n(CSRRW_3)   
-#define _CSRRW_3  CSRRW_3, "       Prep emulation entrypt 0x108, here Q to 0x104",  isr_none     | A_add4    | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(CSRRW_4)
-#define _CSRRW_4  CSRRW_4, "       IncPC, OpFetch, but force +4",                   nxtSTB       | A_add4    | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch)     
+#define _eILL0a   eILL0a,  "Illegal instruction seen",                              2,-1,            isr_none     | A_xx      | Wnn   | r_xx      | Qx   | sr_h  | u_cont         | n(ILLe )    /* Must preceede  _WFI_5 */
+//
+#define _MRET_1   MRET_1,  "MRET   First save Imm, start build constant for check", 8,ECALL_1,       isr_none     | A_passq   | Wjj   | r000000FF | Qz   | sr_h  | u_cont         | n(MRET_2)   /* Must follow _ECALL_1 */
+#define _MRET_2   MRET_2,  "       0xff+3 = 0x102",                                 0,-1,            isr_none     | A_add3w   | Wnn   | r000000FF | Qu   | sr_h  | u_cont         | n(MRET_3)
+#define _MRET_3   MRET_3,  "       0x102 + 0xff + 1 = 0x202",                       0,-1,            isr_none     | A_add1    | Wnn   | r000000FF | Qu   | sr_h  | u_cont         | n(MRET_4)
+#define _MRET_4   MRET_4,  "       0x202 + 0xff + 1 = 0x302",                       0,-1,            isr_none     | A_add1    | Wnn   | r_xx      | Qu   | sr_h  | u_cont         | n(MRET_5)
+#define _MRET_5   MRET_5,  "       ~302",                                           0,-1,            isr_none     | A_invq    | Wnn   | Rjj       | Qu   | sr_h  | u_cont         | n(MRET_6)
+#define _MRET_6   MRET_6,  "       ~302 + origImm + 1 for branch decision",         0,-1,            isr_none     | A_add1    | Wnn   | r_xx      | Qu   | sr_h  | u_cont         | n(MRET_7)
+#define _MRET_7   MRET_7,  "       Prepare emulation entry point 0x104",            0,-1,            isr_none     | A_xx      | Wnn   | r000000FF | Qz   | sr_h  | usebcond       | n(MRET_8)  
+#define _MRET_8   MRET_8,  "       Prep +4",                                        8,eILL0b,        isr_none     | A_add1    | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(StdIncPc) /* Must be at odd ucode adr following a _ILL_0()*/
+//
+#define _eILL0b   eILL0b,  "Illegal instruction seen",                              2,-1,            isr_none     | A_xx      | Wnn   | r_xx      | Qx   | sr_h  | u_cont         | n(ILLe )    /* Must preceeded _MRET_8 */
+//
+#define _CSRRW_0  CSRRW_0, "CSRRW  Decoded CSR adr in yy",                          1,0x3c,          isr_none     | A_passq   | Wyy   | r000000FF | Qz   | sr_h  | u_cont         | n(CSRRW_1)   
+#define _CSRRW_1  CSRRW_1, "       Construct PC storage adr",                       0,-1,            isr_none     | A_add1    | Wnn   | Rjj       | Qu   | sr_h  | u_cont         | n(CSRRW_2)   
+#define _CSRRW_2  CSRRW_2, "       Write PC to 0x100 start Prep emulation entrypt", 0,-1,            isr_intoCSR  | A_passd   | WAQW  | r00000000 | Qhld | sr_h  | u_cont         | n(CSRRW_3)   
+#define _CSRRW_3  CSRRW_3, "       Prep emulation entrypt 0x108, here Q to 0x104",  0,-1,            isr_none     | A_add4    | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(CSRRW_4)
+#define _CSRRW_4  CSRRW_4, "       IncPC, OpFetch, but force +4",                   0,-1,            nxtSTB       | A_add4    | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch)     // Cleanup once verified
 //                                                                                                                                                               
-#define _CSRRS_0  CSRRS_0, "CSRRS  Decoded CSR adr in yy",                          isr_none     | A_passq   | Wyy   | r000000FF | Qz   | sr_h  | u_cont         | n(CSRRW_1)   
-#define _CSRRC_0  CSRRC_0, "CSRRC  Decoded CSR adr in yy",                          isr_none     | A_passq   | Wyy   | r000000FF | Qz   | sr_h  | u_cont         | n(CSRRW_1)   
-#define _CSRRWI_0 CSRRWI_0,"CSRRWI Decoded CSR adr in yy",                          isr_none     | A_passq   | Wyy   | r000000FF | Qz   | sr_h  | u_cont         | n(CSRRW_1)   
-#define _CSRRSI_0 CSRRSI_0,"CSRRSI Decoded CSR adr in yy",                          isr_none     | A_passq   | Wyy   | r000000FF | Qz   | sr_h  | u_cont         | n(CSRRW_1)   
-#define _CSRRCI_0 CSRRCI_0,"CSRRCI Decoded CSR adr in yy",                          isr_none     | A_passq   | Wyy   | r000000FF | Qz   | sr_h  | u_cont         | n(CSRRW_1)   
-#define _CSRRS_1  CSRRS_1, "       Not in use",                                     unx
-#define _CSRRC_1  _CSRRW_4 // Reused CSRRC_1 ,"       Not in use",                                     unx
+#define _CSRRS_0  CSRRS_0, "CSRRS  Decoded CSR adr in yy",                          1,0x5c,          isr_none     | A_passq   | Wyy   | r000000FF | Qz   | sr_h  | u_cont         | n(CSRRW_1)   
+#define _CSRRC_0  CSRRC_0, "CSRRC  Decoded CSR adr in yy",                          1,0x7c,          isr_none     | A_passq   | Wyy   | r000000FF | Qz   | sr_h  | u_cont         | n(CSRRW_1)   
+#define _CSRRWI_0 CSRRWI_0,"CSRRWI Decoded CSR adr in yy",                          1,0xbc,          isr_none     | A_passq   | Wyy   | r000000FF | Qz   | sr_h  | u_cont         | n(CSRRW_1)   
+#define _CSRRSI_0 CSRRSI_0,"CSRRSI Decoded CSR adr in yy",                          1,0xdc,          isr_none     | A_passq   | Wyy   | r000000FF | Qz   | sr_h  | u_cont         | n(CSRRW_1)   
+#define _CSRRCI_0 CSRRCI_0,"CSRRCI Decoded CSR adr in yy",                          1,0xfc,          isr_none     | A_passq   | Wyy   | r000000FF | Qz   | sr_h  | u_cont         | n(CSRRW_1)   
+#define _CSRRC_1  _CSRRW_4 // Reused CSRRC_1 ,"       Not in use",                                     unx           Cleanup this once ucode with consistency check is verified
 #define _CSRRWI_1 CSRRWI_1,"       Not in use",                                     unx
-#define _CSRRWI_2 CSRRWI_2,"       Not in use",                                     unx
-#define _CSRRCI_1 CSRRCI_1,"       Not in use",                                     unx        
-#endif        
+
+#define _CSRRCI_1 _ILL0b(CSRRCI_1) // Rename
+#define _CSRRS_1  _ILL0b(CSRRS_1) // Rename
 
 #if ucodeopt_RVC == 0        
-#define _IJ_0     IJ_0,    "IJ     Jump to mem[(rs1+ofs)&~3u]. inCSR=0",            isr_use_ij   | A_addDQ   | Wnn   | Ralu      | Qu   | sr_h  | hwordaligned   | n(IJ_1)
-#define _IJ_1     IJ_1,    "       Read until q=mem[(rs1+ofs)&~3u]",                isr_none     | A_passd   | Wnn   | rFFFFFFFF | Qs   | sr_h  | u_io_i         | n(IJ_2)     /* Must be placed at even ucode adr */
-#define _IJ_2     IJ_2,    "       Read word is to be masked with 2 lsb = 00",      isr_none     | A_passq   | Wyy   | r00000000 | Qz   | sr_h  | u_cont         | n(IJ_3)
-#define _IJ_3     IJ_3,    "       Construct Q = 3",                                isr_none     | A_add3w   | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(IJ_4)
-#define _IJ_4     IJ_4,    "       Mask and use as PC",                             nxtSTB       | A_nearAND | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch)    /* Goes to either Fetch or eFetch */
+//                                                                                  Fixed/even       ISR          | ALU         Write   intern      Reg    Shreg   Ucode            Next
+//                                                                                  | Pair           action       | op          adr/en  read adr    op     op      operation        ucode
+#define _IJ_0     IJ_0,    "IJ     Jump to mem[(rs1+ofs)&~3u]. inCSR=0",            1,0x02,          isr_use_ij   | A_addDQ   | Wnn   | Ralu      | Qu   | sr_h  | hwordaligned   | n(IJ_1)
+#define _IJ_1     IJ_1,    "       Read until q=mem[(rs1+ofs)&~3u]",                2,-1,            isr_none     | A_passd   | Wnn   | rFFFFFFFF | Qs   | sr_h  | u_io_i         | n(IJ_2)     /* Must be placed at even ucode adr */
+#define _IJ_2     IJ_2,    "       Read word is to be masked with 2 lsb = 00",      0,-1,            isr_none     | A_passq   | Wyy   | r00000000 | Qz   | sr_h  | u_cont         | n(IJ_3)
+#define _IJ_3     IJ_3,    "       Construct Q = 3",                                0,-1,            isr_none     | A_add3w   | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(IJ_4)
+#define _IJ_4     IJ_4,    "       Mask and use as PC",                             0,-1,            nxtSTB       | A_nearAND | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch)    /* Goes to either Fetch or eFetch */
                                                                                                                                                                  
-#define _IJT_1    IJT_1,   "       Exit CSR, enter trap",                           isr_none     | A_passd   | Wnn   | rFFFFFFFF | Qs   | sr_h  | u_io_i         | n(IJT_2)    /* Ajacent to IJ_1 */
-#define _IJT_2    IJT_2,   "       Read word is to be masked with ~3u",             isr_none     | A_passq   | Wyy   | r00000000 | Qz   | sr_h  | u_cont         | n(IJT_3)
-#define _IJT_3    IJT_3,   "       Construct Q = 3",                                isr_none     | A_add3w   | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(IJT_4)
-#define _IJT_4    IJT_4,   "       Mask and store to mepc and Q for read of instr", nxtSTB       | A_nearAND | Wmepc | Ralu      | Qu   | sr_h  | u_cont         | n(ILL_2)     
-//efine _ILL_2    ILL_2,   "       Read until Q is offending instruction",          
-//efine _ILL_3    ILL_3,   "       Store illegal instruction to mtval",             
-//efine _ILL_4    ILL_4,   "       Q = 1",                                          
-//efine _ILL_5    ILL_5,   "       Store 2 to mcause",                              
-//efine _JAL_3    JAL_3,   "       PC = trap entry point. OpFetch",                 
+#define _IJT_1    IJT_1,   "       Exit CSR, enter trap",                           8,IJ_1,          isr_none     | A_passd   | Wnn   | rFFFFFFFF | Qs   | sr_h  | u_io_i         | n(IJT_2)    /* Ajacent to IJ_1 */
+#define _IJT_2    IJT_2,   "       Read word is to be masked with ~3u",             0,-1,            isr_none     | A_passq   | Wyy   | r00000000 | Qz   | sr_h  | u_cont         | n(IJT_3)
+#define _IJT_3    IJT_3,   "       Construct Q = 3",                                0,-1,            isr_none     | A_add3w   | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(IJT_4)
+#define _IJT_4    IJT_4,   "       Mask and store to mepc and Q for read of instr", 0,-1,            nxtSTB       | A_nearAND | Wmepc | Ralu      | Qu   | sr_h  | u_cont         | n(ILL_2)     // Probable error here, we do not any longer write to mtval because the instricton we wanted to read may be unaligned
 #else
-#define _IJ_0     IJ_0,    "IJ     Jump to mem[(rs1+ofs)&~1u]. inCSR=0",            isr_use_ij   | A_addDQ   | Wnn   | Ralu      | Qu   | sr_h  | hwordaligned   | n(IJ_1)
-#define _IJ_1     IJ_1,    "       Read until q=mem[(rs1+ofs)&~1u]",                isr_none     | A_passd   | Wnn   | rFFFFFFFF | Qs   | sr_h  | u_io_i         | n(IJ_2)     /* Must be placed at even ucode adr */
-#define _IJ_2     IJ_2,    "       Read word is to be masked with lsb = 0",         isr_none     | A_passq   | Wyy   | r00000000 | Qz   | sr_h  | u_cont         | n(IJ_3)
-#define _IJ_3     IJ_3,    "       Construct Q = 1",                                isr_none     | A_add1    | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(IJ_4)
-#define _IJ_4     IJ_4,    "       Mask and use as PC",                             nxtSTB       | A_nearAND | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch)    /* Goes to either Fetch or eFetch */
+#define _IJ_0     IJ_0,    "IJ     Jump to mem[(rs1+ofs)&~1u]. inCSR=0",            1,0x02,          isr_use_ij   | A_addDQ   | Wnn   | Ralu      | Qu   | sr_h  | hwordaligned   | n(IJ_1)
+#define _IJ_1     IJ_1,    "       Read until q=mem[(rs1+ofs)&~1u]",                2,-1,            isr_none     | A_passd   | Wnn   | rFFFFFFFF | Qs   | sr_h  | u_io_i         | n(IJ_2)     /* Must be placed at even ucode adr */
+#define _IJ_2     IJ_2,    "       Read word is to be masked with lsb = 0",         0,-1,            isr_none     | A_passq   | Wyy   | r00000000 | Qz   | sr_h  | u_cont         | n(IJ_3)
+#define _IJ_3     IJ_3,    "       Construct Q = 1",                                0,-1,            isr_none     | A_add1    | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(IJ_4)
+#define _IJ_4     IJ_4,    "       Mask and use as PC",                             0,-1,            nxtSTB       | A_nearAND | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch)    /* Goes to either Fetch or eFetch */
                                                                                                                                                                  
-#define _IJT_1    IJT_1,   "       Exit CSR, enter trap",                           isr_none     | A_passd   | Wnn   | rFFFFFFFF | Qs   | sr_h  | u_io_i         | n(IJT_2)    /* Ajacent to IJ_1 */
-#define _IJT_2    IJT_2,   "       Read word is to be masked with ~1u",             isr_none     | A_passq   | Wyy   | r00000000 | Qz   | sr_h  | u_cont         | n(IJT_3)
-#define _IJT_3    IJT_3,   "       Construct Q = 1",                                isr_none     | A_add1    | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(IJT_4)
-#define _IJT_4    IJT_4,   "       Mask and store to mepc and Q for read of instr", nxtSTB       | A_nearAND | Wmepc | Ralu      | Qu   | sr_h  | u_cont         | n(ILL_2)     
-//efine _ILL_2    ILL_2,   "       Read until Q is offending instruction",          
-//efine _ILL_3    ILL_3,   "       Store illegal instruction to mtval",             
-//efine _ILL_4    ILL_4,   "       Q = 1",                                          
-//efine _ILL_5    ILL_5,   "       Store 2 to mcause",                              
-//efine _JAL_3    JAL_3,   "       PC = trap entry point. OpFetch",                 
+#define _IJT_1    IJT_1,   "       Exit CSR, enter trap",                           8,IJ_1,          isr_none     | A_passd   | Wnn   | rFFFFFFFF | Qs   | sr_h  | u_io_i         | n(IJT_2)    /* Ajacent to IJ_1 */
+#define _IJT_2    IJT_2,   "       Read word is to be masked with ~1u",             0,-1,            isr_none     | A_passq   | Wyy   | r00000000 | Qz   | sr_h  | u_cont         | n(IJT_3)
+#define _IJT_3    IJT_3,   "       Construct Q = 1",                                0,-1,            isr_none     | A_add1    | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(IJT_4)
+#define _IJT_4    IJT_4,   "       Mask and store to mepc and Q for read of instr", 0,-1,            nxtSTB       | A_nearAND | Wmepc | Ralu      | Qu   | sr_h  | u_cont         | n(ILL_2)     
 #endif
-
-#define _QINT_0   QINT_0,  "INT    Get current PC",                                 isr_none     | A_xx      | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(QINT_1)
-#define _QINT_1   QINT_1,  "       Store pc to mepc.",                              isr_none     | A_passd   | Wmepc | r_xx      | Qz   | sr_h  | u_cont         | n(QINT_2)
-#define _QINT_2   QINT_2,  "       mtval = 0.",                                     isr_intoTrap | A_passq   | Wmtval| NMIorInInt| Qz   | sr_h  | u_cont         | n(StdIncPc)
-//efine _StdIncPc StdIncPc,"       PC = NMIorInInt+4",                              
-
-#define _NMI_0    NMI_0,   "NMI    Get current PC",                                 isr_none     | A_xx      | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(NMI_1)
-#define _NMI_1    NMI_1,   "       Store pc to mepc.",                              isr_none     | A_passd   | Wmepc | r_xx      | Qz   | sr_h  | u_cont         | n(NMI_2)
-#define _NMI_2    NMI_2,   "       mtval = 0.",                                     isr_intoTrap | A_passq   | Wmtval| NMIorInInt| Qz   | sr_h  | u_cont         | n(JAL_3)
-//efine _JAL_3    JAL_3,   "       PC = NMIorInInt. OpFetch",                 
+//
+#define _QINT_0   QINT_0,  "INT    Get current PC",                                 1,0xff,          isr_none     | A_xx      | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(QINT_1)
+#define _QINT_1   QINT_1,  "       Store pc to mepc.",                              0,-1,            isr_none     | A_passd   | Wmepc | r_xx      | Qz   | sr_h  | u_cont         | n(QINT_2)
+#define _QINT_2   QINT_2,  "       mtval = 0.",                                     0,-1,            isr_intoTrap | A_passq   | Wmtval| NMIorInInt| Qz   | sr_h  | u_cont         | n(StdIncPc)
+//
+#define _NMI_0    NMI_0,   "NMI    Get current PC",                                 1,0xfd,          isr_none     | A_xx      | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(NMI_1)
+#define _NMI_1    NMI_1,   "       Store pc to mepc.",                              0,-1,            isr_none     | A_passd   | Wmepc | r_xx      | Qz   | sr_h  | u_cont         | n(NMI_2)
+#define _NMI_2    NMI_2,   "       mtval = 0.",                                     0,-1,            isr_intoTrap | A_passq   | Wmtval| NMIorInInt| Qz   | sr_h  | u_cont         | n(JAL_3)
 
 /*
  * Even in small implementations I must:
@@ -1233,19 +1154,19 @@
 /* 00 */Y( 1,     0 , _LB_0              , 1, 0x0000707f, 0x00000003, (1<<22)    ) // LB                      
 /* 01 */Y( 0,     0 , _LB_1              , 0, 0xffffffff, 0x00000000, 0          )                            
 /* 02 */Y( 1,     0 , _IJ_0              , 1, 0x0000707f, 0x0000000b, (1<<22)    ) // custom-0 instruction    
-/* 03 */Y( 1,     0 , _FENCE(FENCE)      , 1, 0x0000707f, 0x0000000f, (1<<22)    ) // FENCE                   Too lacy
+/* 03 */Y( 1,     0 , _FENCE(0x03)       , 1, 0x0000707f, 0x0000000f, (1<<22)    ) // FENCE                   Too lacy
 /* 04 */Y( 1,     0 , _ADDI_0            , 1, 0x0000707f, 0x00000013, (1<<22)    ) // ADDI                    
-/* 05 */Y( 1,     0 , _AUIPC_0(_L05)     , 1, 0x0000007f, 0x00000017, (1<<25)/2  ) // AUIPC 1/2               
+/* 05 */Y( 1,     0 , _AUIPC_0(0x05)     , 1, 0x0000007f, 0x00000017, (1<<25)/2  ) // AUIPC 1/2               
 /* 06 */Y( 0,     0 , _LB_3              , 0, 0xffffffff, 0x00000000, 0          ) //                         
 /* 07 */Y( 0,     0 , _LB_4              , 0, 0xffffffff, 0x00000000, 0          ) //                         
-/* 08 */Y( 1,     0 , _SB_0(_L08)        , 1, 0x0000707f, 0x00000023, (1<<22)/2  ) // SB 1/2                  
+/* 08 */Y( 1,     0 , _SB_0(0x08)        , 1, 0x0000707f, 0x00000023, (1<<22)/2  ) // SB 1/2                  
 /* 09 */Y( 0,     0 , _LB_5              , 0, 0xffffffff, 0x00000000, 0          ) //                         
-/* 0a */Y( 1,     0 , _SB_0(_L0a)        , 1, 0x0000707f, 0x00000023, (1<<22)/2  ) // SB 2/2                  
+/* 0a */Y( 1,     0 , _SB_0(0x0a)        , 1, 0x0000707f, 0x00000023, (1<<22)/2  ) // SB 2/2                  
 /* 0b */Y( 0,     0 , _JALR_2            , 0, 0xffffffff, 0x00000000, 0          )                            
 /* 0c */Y( 1,     0 , _ADD_0             , 1, 0xfe00707f, 0x00000033, (1<<15)    ) // ADD                     
-/* 0d */Y( 1,     0 , _MUL_0             , 1, 0xfe00707f, 0x02000033, (1<<15)    ) // MUL
+/* 0d */Y( 1,     0 , _MUL_0             , 1, 0xfe00707f, 0x02000033, (1<<15)    ) // MUL/LUI when no MUL
 /* 0e */Y( 1,     0 , _SUB_0             , 1, 0xfe00707f, 0x40000033, (1<<15)    ) // SUB
-/* 0f */Y( 1,     0 , _LUI_0(_L0f)       , 1, 0x0000007f, 0x00000037, (1<<25)/2  ) // LUI 1/2                 
+/* 0f */Y( 1,     0 , _LUI_0(0x0f)       , 1, 0x0000007f, 0x00000037, (1<<25)/2  ) // LUI 1/2                 
 /* 10 */Y( 0,     0 , _SUB_1             , 0, 0xffffffff, 0x00000000, 0          ) //                         
 /* 11 */Y( 0,     0 , _AND_1             , 0, 0xffffffff, 0x00000000, 0          ) //                         
 /* 12 */Y( 0,     0 , _eFetch3           , 0, 0xffffffff, 0x00000000, 0          ) //                         
@@ -1257,7 +1178,7 @@
 /* 18 */Y( 1,     0 , _BEQ               , 1, 0x0000707f, 0x00000063, (1<<22)    ) // BEQ                     
 /* 19 */Y( 1,     0 , _JALR_0            , 1, 0x0000707f, 0x00000067, (1<<22)    ) // JALR                    
 /* 1a */Y( 0,     0 , _ANDI_1            , 0, 0xffffffff, 0x00000000, 0          ) //                         
-/* 1b */Y( 1,     0 , _JAL_0(_L1b)       , 1, 0x0000007f, 0x0000006f, (1<<25)/4  ) // JAL 1/4                 
+/* 1b */Y( 1,     0 , _JAL_0(0x1b)       , 1, 0x0000007f, 0x0000006f, (1<<25)/4  ) // JAL 1/4                 
 /* 1c */Y( 1,     0 , _ECAL_BRK          , 1, 0x0000707f, 0x00000073, (1<<12)    ) // ECALL/EBREAK/WFI/MRET   
 /* 1d */Y( 0,     0 , _ORI_2             , 0, 0xffffffff, 0x00000000, 0          )                            
 /* 1e */Y( 0,     0 , _aFault_1          , 0, 0xffffffff, 0x00000000, 0          ) //                         
@@ -1265,19 +1186,19 @@
 /* 20 */Y( 1,     0 , _LH_0              , 1, 0x0000707f, 0x00001003, (1<<22)    ) // LH                      
 /* 21 */Y( 0,     0 , _XORI_1            , 0, 0xffffffff, 0x00000000, 0          ) //                         
 /* 22 */Y( 0,     0 , _MULHU_6           , 2, 0x00400000, 0x00000000, 0          ) // illegal at entry. Can get here from OpCode close to "ij"
-/* 23 */Y( 1,     0 , _FENCE(FENCEI)     , 1, 0x0000707f, 0x0000100f, (1<<22)    ) // FENCEI                  To lacy
+/* 23 */Y( 1,     0 , _FENCE(0x23)       , 1, 0x0000707f, 0x0000100f, (1<<22)    ) // FENCEI                  To lacy
 /* 24 */Y( 1,     0 , _SLLI_0            , 1, 0xfe00707f, 0x00001013, (1<<15)    ) // SLLI                    
-/* 25 */Y( 1,     0 , _AUIPC_0(_L25)     , 1, 0x0000007f, 0x00000017, (1<<25)/2  ) // AUIPC 2/2               
+/* 25 */Y( 1,     0 , _AUIPC_0(0x25)     , 1, 0x0000007f, 0x00000017, (1<<25)/2  ) // AUIPC 2/2               
 /* 26 */Y( 0,     0 , _OR_1              , 0, 0xffffffff, 0x00000000, 0          ) //                         
 /* 27 */Y( 0,     0 , _OR_2              , 0, 0xffffffff, 0x00000000, 0          ) //                         
-/* 28 */Y( 1,     0 , _SH_0(_L28)        , 1, 0x0000707f, 0x00001023, (1<<22)/2  ) // SH 1/2                  
+/* 28 */Y( 1,     0 , _SH_0(0x28)        , 1, 0x0000707f, 0x00001023, (1<<22)/2  ) // SH 1/2                  
 /* 29 */Y( 0,     0 , _XOR_1             , 0, 0xffffffff, 0x00000000, 0          ) //                         
-/* 2a */Y( 1,     0 , _SH_0(_L2a)        , 1, 0x0000707f, 0x00001023, (1<<22)/2  ) // SH 2/2                  
+/* 2a */Y( 1,     0 , _SH_0(0x2a)        , 1, 0x0000707f, 0x00001023, (1<<22)/2  ) // SH 2/2                  
 /* 2b */Y( 0,     0 , _SLTIX_1           , 0, 0xffffffff, 0x00000000, 0          ) //                         
 /* 2c */Y( 1,     0 , _SLL_0             , 1, 0xfe00707f, 0x00001033, (1<<15)    ) // SLL                     
-/* 2d */Y( 1,     0 , _MULH_0            , 1, 0xfe00707f, 0x02001033, (1<<15)    ) // MULH
-/* 2e */Y( 0,     0 , _EBRKWFI2          , 0, 0xffffffff, 0x00000000, 0          ) // secureme 
-/* 2f */Y( 1,     0 , _LUI_0(_L2f)       , 1, 0x0000007f, 0x00000037, (1<<25)/2  ) // LUI 2/2                 
+/* 2d */Y( 1,     0 , _MULH_0            , 1, 0xfe00707f, 0x02001033, (1<<15)    ) // LUI/MULH
+/* 2e */Y( 0,     0 , _MULHU_1           , 2, 0xffffffff, 0x00000000, 0          ) //
+/* 2f */Y( 1,     0 , _LUI_0(0x2f)       , 1, 0x0000007f, 0x00000037, (1<<25)/2  ) // LUI 2/2                 
 /* 30 */Y( 0,     0 , _SLTIX_2           , 0, 0xffffffff, 0x00000000, 0          ) //                         
 /* 31 */Y( 0,     0 , _SLTX_1            , 0, 0xffffffff, 0x00000000, 0          ) //                         
 /* 32 */Y( 0,  0x02 , _JAL_1             , 0, 0xffffffff, 0x00000000, 0          ) //                         
@@ -1289,7 +1210,7 @@
 /* 38 */Y( 1,     0 , _BNE               , 1, 0x0000707f, 0x00001063, (1<<22)    ) // BNE
 /* 39 */Y( 0,     0 , _MULHU_7           , 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "JALR"
 /* 3a */Y( 0,     0 ,  _SRxI_1           , 0, 0xffffffff, 0x00000000, 0          )
-/* 3b */Y( 1,     0 , _JAL_0(_L3b)       , 1, 0x0000007f, 0x0000006f, (1<<25)/4  ) // JAL 2/4
+/* 3b */Y( 1,     0 , _JAL_0(0x3b)       , 1, 0x0000007f, 0x0000006f, (1<<25)/4  ) // JAL 2/4
 /* 3c */Y( 1,     0 , _CSRRW_0           , 1, 0x0000707f, 0x00001073, (1<<22)    ) // CSRRW
 /* 3d */Y( 0,     0 , _SRxI_2            , 0, 0xffffffff, 0x00000000, 0          )
 /* 3e */Y( 0,     0 , _SLL_1             , 0, 0xffffffff, 0x00000000, 0          )
@@ -1302,18 +1223,18 @@
 /* 45 */Y( 0,     0 , _WFI_3             , 0, 0xffffffff, 0x00000000, 0          ) // 
 /* 46 */Y( 0,     0 , _ILL_1             , 0, 0xffffffff, 0x00000000, 0          ) // Potential problem, can this instructions be reached bv an OpCode decode?
 /* 47 */Y( 0,     0 , _ILL_2             , 0, 0xffffffff, 0x00000000, 0          ) // Potential problem, can this instructions be reached bv an OpCode decode?
-/* 48 */Y( 1,     0 , _SW_0(_L48)        , 1, 0x0000707f, 0x00002023, (1<<22)/2  ) // SW 1/2
+/* 48 */Y( 1,     0 , _SW_0(0x48)        , 1, 0x0000707f, 0x00002023, (1<<22)/2  ) // SW 1/2
 /* 49 */Y( 0,     0 , _CSRRW_1           , 0, 0xffffffff, 0x00000000, 0          )
-/* 4a */Y( 1,     0 , _SW_0(_L4a)        , 1, 0x0000707f, 0x00002023, (1<<22)/2  ) // SW 2/2
+/* 4a */Y( 1,     0 , _SW_0(0x4a)        , 1, 0x0000707f, 0x00002023, (1<<22)/2  ) // SW 2/2
 /* 4b */Y( 0,     0 , _CSRRW_2           , 0, 0xffffffff, 0x00000000, 0          )
 /* 4c */Y( 1,     0 , _SLT_0             , 1, 0xfe00707f, 0x00002033, (1<<15)    ) // SLT
 /* 4d */Y( 1,     0 , _MULHSU_0          , 1, 0xfe00707f, 0x02002033, (1<<15)    ) // MULHSU
 /* 4e */Y( 0,  0x04 , _eILL0b            , 0, 0xffffffff, 0x00000000, 0          ) // secureme                        Reached with LAZY_DECODE==1 but forward progress ensured || Wants to relocate these
 /* 4f */Y( 0,  0x04 , _MRET_8            , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1. Will work as a strange JMP  || Wants to relocate these
 /* 50 */Y( 0,  0x05 , _LW_1              , 0, 0xffffffff, 0x00000000, 0          ) 
-/* 51 */Y( 0,  0x05 , _LDAF(LDAF_LW)     , 0, 0xffffffff, 0x00000000, 0          )
+/* 51 */Y( 0,  0x05 , _LDAF_LW           , 0, 0xffffffff, 0x00000000, 0          )
 /* 52 */Y( 0,  0x06 , _LH_1              , 0, 0xffffffff, 0x00000000, 0          )
-/* 53 */Y( 0,  0x06 , _LDAF(LDAF_LH)     , 0, 0xffffffff, 0x00000000, 0          )
+/* 53 */Y( 0,  0x06 , _LDAF_LH           , 0, 0xffffffff, 0x00000000, 0          )
 /* 54 */Y( 0,  0x07 , _LH_2              , 0, 0xffffffff, 0x00000000, 0          )
 /* 55 */Y( 0,  0x07 , _aFaultb           , 0, 0xffffffff, 0x00000000, 0          )
 /* 56 */Y( 0,     0 , _LH_4              , 0, 0xffffffff, 0x00000000, 0          )
@@ -1321,26 +1242,26 @@
 /* 58 */Y( 0,  0x08 , _DIV_A             , 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "BEQ"
 /* 59 */Y( 0,  0x08 , _DIV_B             , 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "JALR"
 /* 5a */Y( 0,     0 , _SB_1              , 0, 0xffffffff, 0x00000000, 0          )
-/* 5b */Y( 1,     0 , _JAL_0(_L5b)       , 1, 0x0000007f, 0x0000006f, (1<<25)/4  ) // JAL 3/4
+/* 5b */Y( 1,     0 , _JAL_0(0x5b)       , 1, 0x0000007f, 0x0000006f, (1<<25)/4  ) // JAL 3/4
 /* 5c */Y( 1,     0 , _CSRRS_0           , 1, 0x0000707f, 0x00002073, (1<<22)    ) // CSRRS
 /* 5d */Y( 0,     0 , _SB_2              , 0, 0xffffffff, 0x00000000, 0          )
 /* 5e */Y( 0,  0x09 , _LHU_1             , 0, 0xffffffff, 0x00000000, 0          )
-/* 5f */Y( 0,  0x09 , _LDAF(LDAF_LHU)    , 0, 0xffffffff, 0x00000000, 0          )
-/* 60 */Y( 0,  0x0a , _DIV_14            , 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "LW" | Move around to other pair to get 1 location for LAZY_DECODE 2/12
-/* 61 */Y( 0,  0x0a , _DIV_15            , 0, 0xffffffff, 0x00000000, 0          ) //                                                            |
+/* 5f */Y( 0,  0x09 , _LDAF_LHU          , 0, 0xffffffff, 0x00000000, 0          )
+/* 60 */Y( 0,     0 , _MULHU_3           , 2, 0xffffffff, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "LW"
+/* 61 */Y( 0,     0 , _EBRKWFI2          , 0, 0xffffffff, 0x00000000, 0          ) // 
 /* 62 */Y( 0,  0x0b , _DIV_8             , 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "ij"
 /* 63 */Y( 0,  0x0b , _DIV_9             , 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to FENCE
 /* 64 */Y( 1,     0 , _SLTIU_0           , 1, 0x0000707f, 0x00003013, (1<<22)    ) // SLTIU
 /* 65 */Y( 0,     0 , _WFI_4             , 0, 0xffffffff, 0x00000000, 0          ) 
 /* 66 */Y( 0,  0x0c , _SW_1              , 0, 0xffffffff, 0x00000000, 0          ) 
-/* 67 */Y( 0,  0x0c , _SW_E1(SWE)        , 0, 0xffffffff, 0x00000000, 0          )
+/* 67 */Y( 0,  0x0c , _SW_E1SWE          , 0, 0xffffffff, 0x00000000, 0          )
 /* 68 */Y( 0,  0x23 , _DIV_12            , 2, 0x00200000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "SW" | Move around to other pair to get 1 location for LAZY_DECODE 3/12
 /* 69 */Y( 0,  0x23 , _DIV_13            , 0, 0xffffffff, 0x00000000, 0          ) //                                                          |
 /* 6a */Y( 0,     0 , _MULH_1            , 2, 0xffffffff, 0x00000000, 0          ) // illegal as entry. Can get here from OpClde close to "LW" and also "SW"
 /* 6b */Y( 0,     0 , _SB_4              , 0, 0xffffffff, 0x00000000, 0          )
 /* 6c */Y( 1,     0 , _SLTU_0            , 1, 0xfe00707f, 0x00003033, (1<<15)    ) // SLTU
 /* 6d */Y( 1,     0 , _MULHU_0           , 1, 0xfe00707f, 0x02003033, (1<<15)    ) // MULHU
-/* 6e */Y( 0,     0 , _LHU_3             , 0, 0xffffffff, 0x00000000, 0          ) // secureme                        Reached with LAZY_DECODE==1 || Want to relocate
+/* 6e */Y( 0,     0 , _DIV_C             , 0, 0xffffffff, 0x00000000, 0          ) // 
 /* 6f */Y( 0,     0 , _MRET_6            , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1 || Want to relocate
 /* 70 */Y( 0,  0x0d , _LHU_2             , 0, 0xffffffff, 0x00000000, 0          )
 /* 71 */Y( 0,  0x0d , _aFaultc           , 0, 0xffffffff, 0x00000000, 0          )
@@ -1353,7 +1274,7 @@
 /* 78 */Y( 0,  0x0f , _DIV_4             , 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "BEQ"
 /* 79 */Y( 0,  0x0f , _DIV_5             , 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "JALR"
 /* 7a */Y( 0,     0 , _SB_5              , 0, 0xffffffff, 0x00000000, 0          )
-/* 7b */Y( 1,     0 , _JAL_0(_L7b)       , 1, 0x0000007f, 0x0000006f, (1<<25)/4  ) // JAL 4/4
+/* 7b */Y( 1,     0 , _JAL_0(0x7b)       , 1, 0x0000007f, 0x0000006f, (1<<25)/4  ) // JAL 4/4
 /* 7c */Y( 1,     0 , _CSRRC_0           , 1, 0x0000707f, 0x00003073, (1<<22)    ) // CSRRC
 /* 7d */Y( 0,     0 , _BAERR_4           , 0, 0xffffffff, 0x00000000, 0          )
 /* 7e */Y( 0,     0 , _NMI_1             , 0, 0xffffffff, 0x00000000, 0          )
@@ -1372,19 +1293,19 @@
 /* 8b */Y( 0,  0x15 , _LB_6              , 0, 0x00400000, 0x00000000, 0          ) 
 /* 8c */Y( 1,     0 , _XOR_0             , 1, 0xfe00707f, 0x00004033, (1<<15)    ) // XOR
 /* 8d */Y( 1,     0 , _DIV_0             , 1, 0xfe00707f, 0x02004033, (1<<15)    ) // DIV
-/* 8e */Y( 0,     0 , _aF_SW_3           , 0, 0xffffffff, 0x00000000, 0          ) // secureme illegal. Must be even ucode adr due to use of add4       Reached with LAZY_DECODE==1 || Want to relocate
+/* 8e */Y( 0,     0 , _CSRRS_1           , 0, 0xffffffff, 0x00000000, 0          ) // secureme illegal. Must be even ucode adr due to use of add4       Reached with LAZY_DECODE==1 || Want to relocate
 /* 8f */Y( 0,     0 , _ILL_3             , 0, 0xffffffff, 0x00000000, 0          ) //                                                          Reached with LAZY_DECODE==1 || Want to relocate
 /* 90 */Y( 0,     0 , _NMI_2             , 0, 0xffffffff, 0x00000000, 0          ) //                         
 /* 91 */Y( 0,     0 , _LDAF_2            , 0, 0xffffffff, 0x00000000, 0          )
 /* 92 */Y( 0,     0 , _LDAF_3            , 0, 0xffffffff, 0x00000000, 0          )
 /* 93 */Y( 0,     0 , _SW_E2             , 0, 0xffffffff, 0x00000000, 0          )
-/* 94 */Y( 0,     0 , _SW_E4             , 0, 0xffffffff, 0x00000000, 0          ) // Must be even ucode adr due to use of add4 in SW_E3
+/* 94 */Y( 0,     0 , _SW_E4             , 0, 0xffffffff, 0x00000000, 0          ) // Must be even ucode adr due to use of add4 in SW_E3 [what!]
 /* 95 */Y( 0,     0 , _SW_E3             , 0, 0xffffffff, 0x00000000, 0          ) // [a] probably pair with above
 /* 96 */Y( 0,  0x13 , _SH_1              , 0, 0xffffffff, 0x00000000, 0          )
-/* 97 */Y( 0,  0x13 , _SW_E1(SWH)        , 0, 0xffffffff, 0x00000000, 0          )
+/* 97 */Y( 0,  0x13 , _SW_E1SWH          , 0, 0xffffffff, 0x00000000, 0          )
 /* 98 */Y( 1,     0 , _BLT               , 1, 0x0000707f, 0x00004063, (1<<22)    ) // BLT
-/* 99 */Y( 0,     0 , _ILL_0(_L99)       , 2, 0x00400000, 0x00000000, 0          ) // illegal Can get here from OpCode close to "JALR". Only location I have left to play with
-/* 9a */Y( 0,     0 , _ECALL_6           , 0, 0x00200000, 0x00000000, 0          ) // Must be even ucode adr for unknown reason
+/* 99 */Y( 0,     0 , _ILL_0(0x99)       , 2, 0x00400000, 0x00000000, 0          ) // illegal Can get here from OpCode close to "JALR". Only location I have left to play with
+/* 9a */Y( 0,     0 , _ECALL_6           , 0, 0x00200000, 0x00000000, 0          ) // Must be even ucode adr for unknown reason [what2]
 /* 9b */Y( 0,     0 , _ILL_5             , 0, 0xffffffff, 0x00000000, 0          ) 
 /* 9c */Y( 0,  0x14 , _DIV_10            , 2, 0x00001000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "EBREAK/ECALL/CSR" || Move around to get 1 location for LAZY_DECODE 5/12
 /* 9d */Y( 0,  0x14 , _DIV_11            , 0, 0xffffffff, 0x00000000, 0          ) //                                                                        || 
@@ -1392,8 +1313,8 @@
 /* 9f */Y( 0,     0 , _SH_5              , 0, 0xffffffff, 0x00000000, 0          )
 /* a0 */Y( 1,     0 , _LHU_0             , 1, 0x0000707f, 0x00005003, (1<<22)    ) // LHU
 /* a1 */Y( 0,     0 , _ECALL_4           , 0, 0xffffffff, 0x00000000, 0          )
-/* a2 */Y( 0,     0 , _MULHU_3           , 2, 0xffffffff, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "ij"
-/* a3 */Y( 0,     0 , _MULHU_1           , 2, 0xffffffff, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to FENCE
+/* a2 */Y( 0,  0x0a , _DIV_14            , 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "ij"
+/* a3 */Y( 0,  0x0a , _DIV_15            , 0, 0xffffffff, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to FENCE
 /* a4 */Y( 1,     0 , _SRxI_0            , 1, 0xbe00707f, 0x00005013, (1<<15)*2  ) // SRLI/SRAI
 /* a5 */Y( 0,     0 , _MRET_3            , 0, 0xffffffff, 0x00000000, 0          )
 /* a6 */Y( 0,  0x16 , _ECAL_RET          , 0, 0xffffffff, 0x00000000, 0          )
@@ -1402,21 +1323,21 @@
 /* a9 */Y( 0,     0 , _ILL_4             , 0, 0x00200000, 0x00000000, 0          ) 
 /* aa */Y( 0,     0 , _DIV_6             , 2, 0xffffffff, 0x00000000, 0          ) // Illegal as entry. Can get here from OpCode close to "SW"
 /* ab */Y( 0,     0 , _EBREAK_2          , 0, 0xffffffff, 0x00000000, 0          )
-/* ac */Y( 1,     0 , _SRx_0(_Lac)       , 1, 0xfe00707f, 0x00005033, (1<<15)    ) // SRL
+/* ac */Y( 1,     0 , _SRx_0(0xac)       , 1, 0xfe00707f, 0x00005033, (1<<15)    ) // SRL
 /* ad */Y( 1,     0 , _DIVU_0            , 1, 0xfe00707f, 0x02005033, (1<<15)    ) // DIVU
-/* ae */Y( 1,     0 , _SRx_0(_Lae)       , 1, 0xfe00707f, 0x40005033, (1<<15)    ) // SRA
+/* ae */Y( 1,     0 , _SRx_0(0xae)       , 1, 0xfe00707f, 0x40005033, (1<<15)    ) // SRA
 /* af */Y( 0,     0 , _MRET_4            , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1. Has forward progress, but want to relocate
 /* b0 */Y( 0,     0 , _CSRRW_3           , 0, 0xffffffff, 0x00000000, 0          )
-/* b1 */Y( 0,     0 , _CSRRS_1           , 0, 0xffffffff, 0x00000000, 0          )
+/* b1 */Y( 0,     0 , _aF_SW_3           , 0, 0xffffffff, 0x00000000, 0          ) 
 /* b2 */Y( 0,     0 , _CSRRC_1           , 0, 0xffffffff, 0x00000000, 0          )
 /* b3 */Y( 0,     0 , _CSRRWI_1          , 0, 0xffffffff, 0x00000000, 0          )
-/* b4 */Y( 0,     0 , _CSRRWI_2          , 0, 0xffffffff, 0x00000000, 0          )
+/* b4 */Y( 0,     0 , _LASTINCH          , 0, 0xffffffff, 0x00000000, 0          ) // Reserved to facilitate manual equation
 /* b5 */Y( 0,     0 , _SH_3              , 0, 0xffffffff, 0x00000000, 0          ) 
-/* b6 */Y( 0,     0 , _CSRRCI_1          , 0, 0xffffffff, 0x00000000, 0          )
+/* b6 */Y( 0,     0 , _ECALL_5           , 0, 0xffffffff, 0x00000000, 0          )
 /* b7 */Y( 0,     0 , _IJ_3              , 0, 0xffffffff, 0x00000000, 0          )
 /* b8 */Y( 1,     0 , _BGE               , 1, 0x0000707f, 0x00005063, (1<<22)    ) // BGE
 /* b9 */Y( 0,     0 , _DIV_e             , 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "JALR".
-/* ba */Y( 0,     0 , _DIV_C             , 0, 0xffffffff, 0x00000000, 0          ) // Must be even ucode adr for unknown reason. Must find owut this. Probably because MCLR was used prev cycle.. Move around to get 1 location for LAZY_DECODE 6/12
+/* ba */Y( 0,     0 , _LHU_3             , 0, 0xffffffff, 0x00000000, 0          ) // Must be even ucode adr for unknown reason. Must find owut this. Probably because MCLR was used prev cycle.. Move around to get 1 location for LAZY_DECODE 6/12
 /* bb */Y( 0,     0 , _SH_2              , 0, 0xffffffff, 0x00000000, 0          ) 
 /* bc */Y( 1,     0 , _CSRRWI_0          , 1, 0x0000707f, 0x00005073, (1<<22)    ) // CSRRWI
 /* bd */Y( 0,     0 , _IJ_4              , 0, 0xffffffff, 0x00000000, 0          )
@@ -1436,7 +1357,7 @@
 /* cb */Y( 0,     0 , _QINT_2            , 0, 0xffffffff, 0x00000000, 0          )
 /* cc */Y( 1,     0 , _OR_0              , 1, 0xfe00707f, 0x00006033, (1<<15)    ) // OR
 /* cd */Y( 1,     0 , _REM_0             , 1, 0xfe00707f, 0x02006033, (1<<15)    ) // REM
-/* ce */Y( 0,     0 , _ECALL_5           , 0, 0xffffffff, 0x00000000, 0          ) // secureme                        Reached with LAZY_DECODE==1 || Want to relocate
+/* ce */Y( 0,     0 , _CSRRCI_1          , 0, 0xffffffff, 0x00000000, 0          ) // secureme                        Reached with LAZY_DECODE==1 || Want to relocate
 /* cf */Y( 0,     0 , _MRET_7            , 0, 0xffffffff, 0x00000000, 0          ) //                         Reached with LAZY_DECODE==1 || Want to relocate
 /* d0 */Y( 0,  0x19 , _ECALL_1           , 0, 0xffffffff, 0x00000000, 0          )
 /* d1 */Y( 0,  0x19 , _MRET_1            , 0, 0xffffffff, 0x00000000, 0          )
@@ -1474,10 +1395,10 @@
 /* f1 */Y( 0,  0x20 , _aFaulte           , 0, 0xffffffff, 0x00000000, 0          )
 /* f2 */Y( 0,  0x21 , _SW_2              , 0, 0xffffffff, 0x00000000, 0          )
 /* f3 */Y( 0,  0x21 , _aF_SW             , 0, 0xffffffff, 0x00000000, 0          ) 
-/* f4 */Y( 0,     0 , _Fetch2            , 0, 0xffffffff, 0x00000000, 0          )
-/* f5 */Y( 0,     0 , _jFault            , 0, 0xffffffff, 0x00000000, 0          ) // How do I get to this instruction ? 20200915
-/* f6 */Y( 0,  0x22 , _WFI_1             , 0, 0xffffffff, 0x00000000, 0          )
-/* f7 */Y( 0,  0x22 , _EBREAK_1          , 0, 0xffffffff, 0x00000000, 0          ) 
+/* f4 */Y( 0,  0x22 , _Fetch2            , 0, 0xffffffff, 0x00000000, 0          )
+/* f5 */Y( 0,  0x22 , _jFault            , 0, 0xffffffff, 0x00000000, 0          ) 
+/* f6 */Y( 0,  0x23 , _WFI_1             , 0, 0xffffffff, 0x00000000, 0          )
+/* f7 */Y( 0,  0x23 , _EBREAK_1          , 0, 0xffffffff, 0x00000000, 0          ) 
 /* f8 */Y( 1,     0 , _BGEU              , 1, 0x0000707f, 0x00007063, (1<<22)    ) // BGEU
 /* f9 */Y( 0,     0 , _MULH_2            , 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "JALR".
 /* fa */Y( 0,     0 , _WFI_2             , 0, 0xffffffff, 0x00000000, 0          )
@@ -1486,6 +1407,8 @@
 /* fd */Y( 1,     0 , _NMI_0             , 3, 0xffffffff, 0x00000000, 0          ) // Reserved for NMI
 /* fe */Y( 1,     0 , _ILLe              , 2, 0x2af56000, 0x00000000, 0          ) // Reserved for illegals
 /* ff */Y( 1,     0 , _QINT_0            , 3, 0xffffffff, 0x00000000, 0          ) // Reserved for qualified interrupt
+
+
 
 /* Before multiplication and division, I have
    11 free locations, and 36 illegal entry points = 47 locations to play with.

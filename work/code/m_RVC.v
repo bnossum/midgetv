@@ -171,7 +171,7 @@ module m_RVC # ( parameter RVC = 1)
          end
       end else begin
          /*verilator lint_off UNUSED */
-         reg [59:0]  cc;
+         reg [60:0]  cc;
          /*verilator lint_on UNUSED */
          wire [15:0] c   = (pc1 ? Di[31:16] :  Di[15:0]) | {14'h0000,luh,luh};
          wire [15:0] uhw = (pc1 | luh) ? Di[15:0]  : Di[31:16];
@@ -200,6 +200,7 @@ module m_RVC # ( parameter RVC = 1)
             cc[41] = c[11:10] == 2'b10 ? 1 : {c[11:10],c[6]} == 3'b111 ? 1 : 0;   
             cc[42] = c[11:10] != 2'b11 ? 1 : c[6:5] == 2'b11 ? 1 : 0;
             cc[43] = c[11:10] == 2'b11 ? 1 : 0;
+            cc[60] = c[12:10] == 3'b111 ? c[6] : 1; 
             
             // Helping LUI/ADDI16SP
             cc[20] = rs1eq2 ? c[4] : c[12];
@@ -245,36 +246,35 @@ module m_RVC # ( parameter RVC = 1)
          end
          
          
-         always @(*) begin // 31     30    29      28   27     26     25     24     23     22     21     20     19     18     17     16     15     14     13     12     11     10      9      8      7      6      5      4      3     2     1    0       
-            case (inx) //     --     --    --      --   --     --     --     --     --     --     --     --     --     --     --     --     --     --     --     --     --     --     --     --     --     --     --     --     --    --    --   --       
-              5'h00  : Dii={ 1'b0  ,1'b0  ,cc[10],cc[9] ,cc[8] ,cc[7] ,cc[12],cc[11],cc[5] ,cc[6] ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b1  ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b1  ,cc[4] ,cc[3] ,cc[2] ,1'b0  ,1'b0  ,1'b1  ,1'b0,1'b0  ,1'b1,cc[18]};   
-              5'h01  : Dii={ 1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx,1'bx  ,1'bx,1'b0  };
-              5'h02  : Dii={ 1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,cc[5] ,cc[12],cc[11],cc[10],cc[6] ,1'b0  ,1'b0  ,1'b0  ,1'b1  ,cc[9] ,cc[8] ,cc[7] ,1'b0  ,1'b1  ,1'b0  ,1'b0  ,1'b1  ,cc[4] ,cc[3] ,cc[2] ,1'b0  ,1'b0  ,1'b0  ,1'b0,1'b0  ,1'b1,1'b1  };
-              5'h03  : Dii={ 1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx,1'bx  ,1'bx,1'b0  };
-              5'h04  : Dii={ 1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx,1'bx  ,1'bx,1'bx  };
-              5'h05  : Dii={ 1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx,1'bx  ,1'bx,1'b0  };
-              5'h06  : Dii={ 1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,cc[5] ,cc[12],1'b0  ,1'b1  ,cc[4] ,cc[3] ,cc[2] ,1'b0  ,1'b1  ,cc[9] ,cc[8] ,cc[7] ,1'b0  ,1'b1  ,1'b0  ,cc[11],cc[10],cc[6] ,1'b0  ,1'b0  ,1'b0  ,1'b1  ,1'b0  ,1'b0,1'b0  ,1'b1,1'b1  };
-              5'h07  : Dii={ 1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx,1'bx  ,1'bx,1'b0  };
-              5'h08  : Dii={ cc[12],cc[12],cc[12],cc[12],cc[12],cc[12],cc[12],cc[6] ,cc[5] ,cc[4] ,cc[3] ,cc[2] ,cc[11],cc[10],cc[9] ,cc[8] ,cc[7] ,1'b0  ,1'b0  ,1'b0  ,cc[11],cc[10],cc[9] ,cc[8] ,cc[7] ,1'b0  ,1'b0  ,1'b1  ,1'b0,1'b0  ,1'b1,1'b1  };
-              5'h09  : Dii={ cc[12],cc[8] ,cc[10],cc[9] ,cc[6] ,cc[7] ,cc[2] ,cc[11],cc[5] ,cc[4] ,cc[3] ,cc[12],cc[12],cc[12],cc[12],cc[12],cc[12],cc[12],cc[12],cc[12],1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b1  ,1'b1  ,1'b1  ,1'b0  ,1'b1,1'b1  ,1'b1,1'b1  };
-              5'h0a  : Dii={ cc[12],cc[12],cc[12],cc[12],cc[12],cc[12],cc[12],cc[6] ,cc[5] ,cc[4] ,cc[3] ,cc[2] ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,cc[11],cc[10],cc[9] ,cc[8] ,cc[7] ,1'b0  ,1'b0  ,1'b1  ,1'b0,1'b0  ,1'b1,1'b1  };
-              5'h0b  : Dii={ cc[12],cc[12],cc[12],cc[20],cc[21],cc[22],cc[23],cc[24],cc[25],cc[25],cc[25],cc[25],cc[25],cc[25],cc[25],cc[26],cc[27],cc[28],cc[29],cc[30],cc[31],cc[32],cc[33],cc[34],cc[35],1'b0  ,cc[17],1'b1  ,1'b0,cc[17],1'b1,1'b1  };
-              5'h0c  : Dii={ cc[36],cc[37],cc[36],cc[36],cc[36],cc[36],cc[36],cc[38],cc[39],cc[4] ,cc[3] ,cc[2] ,1'b0  ,1'b1  ,cc[9] ,cc[8] ,cc[7] ,cc[40],cc[41],cc[42],1'b0  ,1'b1  ,cc[9] ,cc[8] ,cc[7] ,1'b0  ,cc[43],1'b1  ,1'b0,1'b0  ,1'b1,1'b1  };
-              5'h0d  : Dii={ cc[12],cc[8] ,cc[10],cc[9] ,cc[6] ,cc[7] ,cc[2] ,cc[11],cc[5] ,cc[4] ,cc[3] ,cc[12],cc[12],cc[12],cc[12],cc[12],cc[12],cc[12],cc[12],cc[12],1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b1  ,1'b1  ,1'b0  ,1'b1,1'b1  ,1'b1,1'b1  };
-              5'h0e  : Dii={ cc[12],cc[12],cc[12],cc[12],cc[6] ,cc[5] ,cc[2] ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b1  ,cc[9] ,cc[8] ,cc[7] ,1'b0  ,1'b0  ,1'b0  ,cc[11],cc[10],cc[4] ,cc[3] ,cc[12],1'b1  ,1'b1  ,1'b0  ,1'b0,1'b0  ,1'b1,1'b1  };
-              5'h0f  : Dii={ cc[12],cc[12],cc[12],cc[12],cc[6] ,cc[5] ,cc[2] ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b1  ,cc[9] ,cc[8] ,cc[7] ,1'b0  ,1'b0  ,1'b1  ,cc[11],cc[10],cc[4] ,cc[3] ,cc[12],1'b1  ,1'b1  ,1'b0  ,1'b0,1'b0  ,1'b1,1'b1  };
-              5'h10  : Dii={ 1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,cc[6] ,cc[5] ,cc[4] ,cc[3] ,cc[2] ,cc[11],cc[10],cc[9] ,cc[8] ,cc[7] ,1'b0  ,1'b0  ,1'b1  ,cc[11],cc[10],cc[9] ,cc[8] ,cc[7] ,1'b0  ,1'b0  ,1'b1  ,1'b0,1'b0  ,1'b1,1'b1  };
-              5'h11  : Dii={ 1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx,1'bx  ,1'bx,1'b0  };
-              5'h12  : Dii={ 1'b0  ,1'b0  ,1'b0  ,1'b0  ,cc[3] ,cc[2] ,cc[12],cc[6] ,cc[5] ,cc[4] ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b1  ,1'b0  ,1'b0  ,1'b1  ,1'b0  ,cc[11],cc[10],cc[9] ,cc[8] ,cc[7] ,1'b0  ,1'b0  ,1'b0  ,1'b0,1'b0  ,1'b1,1'b1  };
-              5'h13  : Dii={ 1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx,1'bx  ,1'bx,1'b0  };
-              5'h14  : Dii={ 1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,cc[44],cc[45],cc[46],cc[47],cc[48],cc[49],cc[50],cc[51],cc[52],cc[53],1'b0  ,1'b0  ,1'b0  ,cc[54],cc[55],cc[56],cc[57],cc[58],cc[59],1'b1  ,cc[16],1'b0,cc[19],1'b1,1'b1  };
-              5'h15  : Dii={ 1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx,1'bx  ,1'bx,1'b0  };
-              5'h16  : Dii={ 1'b0  ,1'b0  ,1'b0  ,1'b0  ,cc[8] ,cc[7] ,cc[12],cc[6] ,cc[5] ,cc[4] ,cc[3] ,cc[2] ,1'b0  ,1'b0  ,1'b0  ,1'b1  ,1'b0  ,1'b0  ,1'b1  ,1'b0  ,cc[11],cc[10],cc[9] ,1'b0  ,1'b0  ,1'b0  ,1'b1  ,1'b0  ,1'b0,1'b0  ,1'b1,1'b1  };
-              5'h17  : Dii={ 1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx,1'bx  ,1'bx,1'b0  };
+         always @(*) begin //    31     30    29      28   27     26     25     24     23     22     21     20     19     18     17     16     15     14     13     12     11     10      9      8      7      6      5      4      3     2     1     0       
+            case (inx) //        --     --    --      --   --     --     --     --     --     --     --     --     --     --     --     --     --     --     --     --     --     --     --     --     --     --     --     --     --    --    --    --       
+              5'b00000 : Dii={ 1'b0  ,1'b0  ,cc[10],cc[9] ,cc[8] ,cc[7] ,cc[12],cc[11],cc[5] ,cc[6] ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b1  ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b1  ,cc[4] ,cc[3] ,cc[2] ,1'b0  ,1'b0  ,1'b1  ,1'b0,1'b0  ,1'b1, cc[18]};   
+              5'b00001 : Dii={ 1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx,1'bx  ,1'bx, 1'b0  };
+              5'b00010 : Dii={ 1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,cc[5] ,cc[12],cc[11],cc[10],cc[6] ,1'b0  ,1'b0  ,1'b0  ,1'b1  ,cc[9] ,cc[8] ,cc[7] ,1'b0  ,1'b1  ,1'b0  ,1'b0  ,1'b1  ,cc[4] ,cc[3] ,cc[2] ,1'b0  ,1'b0  ,1'b0  ,1'b0,1'b0  ,1'b1, 1'b1  };
+              5'b00011 : Dii={ 1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx,1'bx  ,1'bx, 1'b0  };
+              5'b00100 : Dii={ 1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx,1'bx  ,1'bx, 1'bx  };
+              5'b00101 : Dii={ 1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx,1'bx  ,1'bx, 1'b0  };
+              5'b00110 : Dii={ 1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,cc[5] ,cc[12],1'b0  ,1'b1  ,cc[4] ,cc[3] ,cc[2] ,1'b0  ,1'b1  ,cc[9] ,cc[8] ,cc[7] ,1'b0  ,1'b1  ,1'b0  ,cc[11],cc[10],cc[6] ,1'b0  ,1'b0  ,1'b0  ,1'b1  ,1'b0  ,1'b0,1'b0  ,1'b1, 1'b1  };
+              5'b00111 : Dii={ 1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx,1'bx  ,1'bx, 1'b0  };
+              5'b01000 : Dii={ cc[12],cc[12],cc[12],cc[12],cc[12],cc[12],cc[12],cc[6] ,cc[5] ,cc[4] ,cc[3] ,cc[2] ,cc[11],cc[10],cc[9] ,cc[8] ,cc[7] ,1'b0  ,1'b0  ,1'b0  ,cc[11],cc[10],cc[9] ,cc[8] ,cc[7] ,1'b0  ,1'b0  ,1'b1  ,1'b0,1'b0  ,1'b1, 1'b1  };
+              5'b01001 : Dii={ cc[12],cc[8] ,cc[10],cc[9] ,cc[6] ,cc[7] ,cc[2] ,cc[11],cc[5] ,cc[4] ,cc[3] ,cc[12],cc[12],cc[12],cc[12],cc[12],cc[12],cc[12],cc[12],cc[12],1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b1  ,1'b1  ,1'b1  ,1'b0  ,1'b1,1'b1  ,1'b1, 1'b1  };
+              5'b01010 : Dii={ cc[12],cc[12],cc[12],cc[12],cc[12],cc[12],cc[12],cc[6] ,cc[5] ,cc[4] ,cc[3] ,cc[2] ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,cc[11],cc[10],cc[9] ,cc[8] ,cc[7] ,1'b0  ,1'b0  ,1'b1  ,1'b0,1'b0  ,1'b1, 1'b1  };
+              5'b01011 : Dii={ cc[12],cc[12],cc[12],cc[20],cc[21],cc[22],cc[23],cc[24],cc[25],cc[25],cc[25],cc[25],cc[25],cc[25],cc[25],cc[26],cc[27],cc[28],cc[29],cc[30],cc[31],cc[32],cc[33],cc[34],cc[35],1'b0  ,cc[17],1'b1  ,1'b0,cc[17],1'b1, 1'b1  };
+              5'b01100 : Dii={ cc[36],cc[37],cc[36],cc[36],cc[36],cc[36],cc[36],cc[38],cc[39],cc[4] ,cc[3] ,cc[2] ,1'b0  ,1'b1  ,cc[9] ,cc[8] ,cc[7] ,cc[40],cc[41],cc[42],1'b0  ,1'b1  ,cc[9] ,cc[8] ,cc[7] ,1'b0  ,cc[43],1'b1  ,1'b0,1'b0  ,1'b1, cc[60]};
+              5'b01101 : Dii={ cc[12],cc[8] ,cc[10],cc[9] ,cc[6] ,cc[7] ,cc[2] ,cc[11],cc[5] ,cc[4] ,cc[3] ,cc[12],cc[12],cc[12],cc[12],cc[12],cc[12],cc[12],cc[12],cc[12],1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b1  ,1'b1  ,1'b0  ,1'b1,1'b1  ,1'b1, 1'b1  };
+              5'b01110 : Dii={ cc[12],cc[12],cc[12],cc[12],cc[6] ,cc[5] ,cc[2] ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b1  ,cc[9] ,cc[8] ,cc[7] ,1'b0  ,1'b0  ,1'b0  ,cc[11],cc[10],cc[4] ,cc[3] ,cc[12],1'b1  ,1'b1  ,1'b0  ,1'b0,1'b0  ,1'b1, 1'b1  };
+              5'b01111 : Dii={ cc[12],cc[12],cc[12],cc[12],cc[6] ,cc[5] ,cc[2] ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b1  ,cc[9] ,cc[8] ,cc[7] ,1'b0  ,1'b0  ,1'b1  ,cc[11],cc[10],cc[4] ,cc[3] ,cc[12],1'b1  ,1'b1  ,1'b0  ,1'b0,1'b0  ,1'b1, 1'b1  };
+              5'b10000 : Dii={ 1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,cc[6] ,cc[5] ,cc[4] ,cc[3] ,cc[2] ,cc[11],cc[10],cc[9] ,cc[8] ,cc[7] ,1'b0  ,1'b0  ,1'b1  ,cc[11],cc[10],cc[9] ,cc[8] ,cc[7] ,1'b0  ,1'b0  ,1'b1  ,1'b0,1'b0  ,1'b1, 1'b1  };
+              5'b10001 : Dii={ 1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx,1'bx  ,1'bx, 1'b0  };
+              5'b10010 : Dii={ 1'b0  ,1'b0  ,1'b0  ,1'b0  ,cc[3] ,cc[2] ,cc[12],cc[6] ,cc[5] ,cc[4] ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b1  ,1'b0  ,1'b0  ,1'b1  ,1'b0  ,cc[11],cc[10],cc[9] ,cc[8] ,cc[7] ,1'b0  ,1'b0  ,1'b0  ,1'b0,1'b0  ,1'b1, 1'b1  };
+              5'b10011 : Dii={ 1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx,1'bx  ,1'bx, 1'b0  };
+              5'b10100 : Dii={ 1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,1'b0  ,cc[44],cc[45],cc[46],cc[47],cc[48],cc[49],cc[50],cc[51],cc[52],cc[53],1'b0  ,1'b0  ,1'b0  ,cc[54],cc[55],cc[56],cc[57],cc[58],cc[59],1'b1  ,cc[16],1'b0,cc[19],1'b1, 1'b1  };
+              5'b10101 : Dii={ 1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx,1'bx  ,1'bx, 1'b0  };
+              5'b10110 : Dii={ 1'b0  ,1'b0  ,1'b0  ,1'b0  ,cc[8] ,cc[7] ,cc[12],cc[6] ,cc[5] ,cc[4] ,cc[3] ,cc[2] ,1'b0  ,1'b0  ,1'b0  ,1'b1  ,1'b0  ,1'b0  ,1'b1  ,1'b0  ,cc[11],cc[10],cc[9] ,1'b0  ,1'b0  ,1'b0  ,1'b1  ,1'b0  ,1'b0,1'b0  ,1'b1, 1'b1  };
+              5'b10111 : Dii={ 1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx  ,1'bx,1'bx  ,1'bx, 1'b0  };
               default: Dii={ uhw, c[15:2], 2'b11}; // Uncompressed
             endcase
          end
       end
    endgenerate
 endmodule
-

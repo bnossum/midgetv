@@ -40,9 +40,7 @@ x__mtimecmph:    .word 0xffffffff	// 0xfc Read/write from user code.
 CSRretadr:      .word 0                 //0x100 Microcode writes PC to CSRretadr when a CSR instruction is seen.
 Entry_xRET:     ij      0,0xb6,0        //0x104 Microcode branches to here when MRET/SRET/URET is seen
 EntryCSR:                               //0x108 Microcode branches to here when a CSR instruction is seen
-
-StartTrap:
-        j       TrapHandle
+        nop
 NMI:
         nop
 InternalISR:
@@ -60,25 +58,74 @@ InternalISR:
 nrillegaltraps:        
         .word    0
         .extern opcode
+
         # =============================================================================
 TrapHandle:
-        sw      rtmp,_ex_rtmp(x0)               // Store working register
+        sw      a0,_ex_rtmp(x0)               // Store working registers
+        lw      a0,__mcause(x0)               // Trap is illegal instruction?        
+        addi    a0,a0,-2                    //
+        bnez    a0,UnexpectedTrap             // Should not have any other traps
+ContinueTrap:
+        lw      a0,%lo(nrillegaltraps)(x0)
+        addi    a0,a0,1
+        sw      a0,%lo(nrillegaltraps)(x0)
+
+        // Want to ignore the illegal instruction.
+        lw      a0,%lo(__mepc)(x0)            // a0 == faulting address
+        addi    a0,a0,4                     // Return to next instr
+        sw      a0,%lo(CSRretadr)(x0)
+        lw      a0,%lo(_ex_rtmp)(x0)          // restore working register
+        ij      0,0x100,0                       // Exit
+        
+UnexpectedTrap:
+        // Use main program stack in this test, sloppy, will regret it!
+        sw      ra,%lo(_ex_rrs1)(x0)
+        la      a0,preambletxt
+        jal     puts
+        lw      a0,__mcause(x0)                 
+        jal     puthex32
+        la      a0,mtvaltxt
+        jal     puts
+        lw      a0,__mtval(x0)
+        jal     puthex32
+        
+        la      a0,UnexpTrap
+        jal     puts
+        la      a0,opcode
+        lw      a0,0(a0)
+        jal     puthex32
+        lw      ra,%lo(_ex_rrs1)(x0)
+        j       ContinueTrap
+
+        
+        # =============================================================================
+TrapHandleRVC:
+        sw      rtmp,_ex_rtmp(x0)               // Store working registers
+        sw      a0,%lo(_ex_rrd)(x0)             //
         lw      rtmp,__mcause(x0)               // Trap is illegal instruction?        
         addi    rtmp,rtmp,-2                    //
-        bnez    rtmp,UnexpectedTrap             // Should not have any other traps
-ContinueTrap:
+        bnez    rtmp,UnexpectedTrapRVC          // Should not have any other traps
+ContinueTrapRVC:
         lw      rtmp,%lo(nrillegaltraps)(x0)
         addi    rtmp,rtmp,1
         sw      rtmp,%lo(nrillegaltraps)(x0)
-        lw      rtmp,%lo(__mepc)(x0)            // Ignore the illegal instruction
-        addi    rtmp,rtmp,4                     // Return to next instr
-        andi    rtmp,rtmp,0xfffffffc            // but ensure it is 32-word aligned
+
+        // Want to ignore the illegal instruction.
+        // If the core is rv32ic or rv32imc, we must find out if the instruction was 16 or 32 bits.
+        lw      rtmp,%lo(__mepc)(x0)            // rtmp == faulting address
+        lhu     a0,0(rtmp)                      // get low 16 bits of instruction
+        andi    a0,a0,3                         // examine low 2 bits
+        addi    a0,a0,-3
+        bne     a0,x0,1f                        // Jump if 16-bit instruction
+        addi    rtmp,rtmp,2
+1:      addi    rtmp,rtmp,2                     // Return to next instr
         sw      rtmp,%lo(CSRretadr)(x0)
-        lw      rtmp,%lo(_ex_rtmp)(x0)          // restore working register
+
+        lw      a0,%lo(_ex_rrd)(x0)             // restore working register
+        lw      rtmp,%lo(_ex_rtmp)(x0)
         ij      0,0x100,0                       // Exit
-UnexpectedTrap:
-        // Use same stack in this test
-        sw      a0,%lo(_ex_rrd)(x0)
+UnexpectedTrapRVC:
+        // Use main program stack in this test, sloppy, will regret it!
         sw      ra,%lo(_ex_rrs1)(x0)
         la      a0,preambletxt
         jal     puts
@@ -95,8 +142,7 @@ UnexpectedTrap:
         lw      a0,0(a0)
         jal     puthex32
         lw      ra,%lo(_ex_rrs1)(x0)
-        lw      a0,%lo(_ex_rrd)(x0)
-        j       ContinueTrap
+        j       ContinueTrapRVC
 
 preambletxt:
         .string "\n mcause:"
@@ -107,22 +153,70 @@ UnexpTrap:
         
         # =============================================================================
         .align 2
+
+        # =============================================================================
+
+        # =============================================================================
+VerySimpleTrapHandle:
+        li      t5,0                            
+        lw      t6,%lo(__mepc)(x0)              
+        addi    t6,t6,4
+        sw      t6,%lo(CSRretadr)(x0)
+        ij      0,0x100,0                       // Exit
+
+        # =============================================================================
+
+        // Return: 0  rv32i
+        //         1  rv32im
+        //         2  rv32ic
+        //         3  rv32imc
+        .global Coretype
+Coretype:
+        .word   0  
+        
 _start:
         sw      x10,0xe8(x0);           // Transfer bitrate back to expected location after loading
         li      x2,0xfffffffc           // Initiate stack pointer
-        la      x1,StartTrap            // Initiate mtvec
-        sw      x1,%lo(__mtvec)(x0)
-        la      x1,NMI                  // Set up the internal ISR handle
+
+        la      x1,NMI                  // Set up the internal ISR handle (not used)
         sw      x1,%lo(__rNMI_IIV)(x0)
+
+        // First set a fake trap handler
+        la      a0,VerySimpleTrapHandle
+        sw      a0,%lo(__mtvec)(x0)
+        li      t5,1
+        .word   0x02000033              // mul     x0,x0,x0
+        addi    a0,t5,0                 // rv32im(c), a0 = 1, 0 otherwise
+        j       UnalignedInstr
+        // Here only if RVC not implemented
+        sw      a0,Coretype,t0
+
+        // Instal a more complete trap handler
+        la      x1,TrapHandle           // Initiate mtvec
+        j       1f
+        
+        .hword  0x0001                  // C.NOP
+UnalignedInstr: 
+        .hword  0x0001                  // C.NOP
+        // Here only if RVC implemented
+        ori     a0,a0,2
+        sw      a0,Coretype,t0
+      
+        // Now instal a more complete trap handler
+        la      x1,TrapHandleRVC        // Initiate mtvec
+1:      sw      x1,%lo(__mtvec)(x0)
         tail     main
 
         # =============================================================================
         .global testbed16
-        .global testbed32
 testbed16:
+        .hword 0x0
+        .hword 0x8082           // C.JR x1 that is"ret"
+        ret                     // Needed when RVC is not included
+        
+        .global testbed32
 testbed32:
-        .word 0x00000007 // Blatantly illegal
-//        .word  0x00000013       // addi x0,x0,0 == nop
+        .word  0
         ret
         
         # =============================================================================
