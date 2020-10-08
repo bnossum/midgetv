@@ -423,7 +423,9 @@ void printf_result(
         printf( "   input         clk,\n" );
         printf( "   input [7:0]   minx,\n" );
         printf( "   input         progress_ucode,\n" );
+        printf( "/* verilator lint_off UNOPTFLAT */\n" ); // Stop whining of Verilator
         printf( "   output [47:0] d\n" );
+        printf( "/* verilator lint_on UNOPTFLAT */\n" );
         printf( "   );\n" );
         
         
