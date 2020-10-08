@@ -440,10 +440,10 @@
 #define _Fetch2   Fetch2,  " Fr00  Update ttime. Update I. Q=immediate. Use dinx",  2,-1,            isr_none     | A_cycnt   | Wttime| RS1       | Qudec| sr_h  | use_dinx                      // [5] Must be at even ucode adr.
 #define _eFetch   eFetch,  " Fr00  rep Read until d=mem[(rs1+ofs) & ~3u]",          8,Fetch,         isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2 )   // [4]] Must be at address after [3]
 #define _eFetch2  eFetch2, " Fr00  Not in use",                                     unx
-#define _eFetch3  eFetch3, " Fr00  Not in use",                                     unx
+#define _eFetch3  eFetch3, " Fr00  Not in use, reserved to allow LASTINCH",         0,0xb4,          x42
 
 #define LASTINCH_REMOVECOLUMS ((1ull<<30) | (1ull<<18))
-#define _LASTINCH LASTINCH,"       Reserved to facilitate manual equation",         unx
+#define _LASTINCH LASTINCH,"       not in use ",                                    unx
 #ifndef XXLASTINCH
 #define XXLASTINCH(...)
 #endif
@@ -486,40 +486,26 @@ assign d[30] = d[18];")
 //                                                                                  Fixed/even       ISR          | ALU         Write   intern      Reg    Shreg   Ucode            Next
 //                                                                                  | Pair           action       | op          adr/en  read adr    op     op      operation        ucode
 #define _StdIncPc StdIncPc," Fr10  IncPC, OpFetch",                                 2,-1,            nxtSTB       | A_add4    | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch)     // [1] Must be at even ucode adr. Goes to either Fetch or eFetch. 
-#define _Fetch    Fetch ,  " Fr10  Read and latch instruction",                     2,-1,            isr_none     | A_passq   | Wjj   | rttime    | Qz   | sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR
+#define _Fetch    Fetch ,  " Fr10  Read and latch instruction",                     2,-1,            isr_none     | A_passq   | Wjj   | rttime    | Qz   | sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR. jFault is adjacent to Fetch
 #define _Fetch2   Fetch2,  " Fr10  Update ttime. Update I. Q=immediate. Use dinx",  2,-1,            isr_none     | A_cycnt   | Wttime| RS1       | Qudec| sr_h  | use_dinx                      // [5] Must be at even ucode adr. 
 #define _eFetch   eFetch,  " Fr10  rep Read until d=mem[(rs1+ofs) & ~3u]",          8,Fetch,         isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(eFetch2 )  // [4]] Must be at address after [3]
-#define _eFetch2  eFetch2, " Fr10  Update ttime",                                   0,-1,            isr_none     | A_cycnt   | Wttime| Rrinst    | Qz   | sr_h  | u_cont         | n(eFetch3 )
+#define _eFetch2  eFetch2, " Fr10  Update ttime",                                   0,-1,            isr_none     | A_cycnt   | Wttime| Rrinst    | Qz   | sr_h  | u_cont         | n(eFetch3 )  // I wonder, perhaps this should be part of apair to allow for bus error detection?
 #define _eFetch3  eFetch3, " Fr10  Update minstret, Q=immediate. Use dinx",         0,-1,            isr_none     | A_add1    | Wrinst| RS1       | Qudec| sr_h  | use_dinx
+#define _LASTINCH LASTINCH,"       not in use ",                                    unx
 
-#define LASTINCH_REMOVECOLUMS 0
-#define _LASTINCH LASTINCH,"       Reserved to facilitate manual equation",         unx
+// bit 18 is control for cycnt, bit 30 is control for use_dinx
+// In this case we only replace bit 30
+// It is possible we could move eFetch2 so that bit 18 can
+// be replaced as well, but this has low priority.
+#define LASTINCH_REMOVECOLUMS ((1ull<<30))
 #ifndef XXLASTINCH
 #define XXLASTINCH(...)
 #endif
-XXLASTINCH(" ")
+XXLASTINCH("wire instr0100,instr1x110100;        \
+bn_l4v #(.I(16'h0010)) leq0100(     .o(instr0100),     .i({minx[3:0]}));\
+bn_l4v #(.I(16'h8000)) leq1x110100( .o(instr1x110100), .i({minx[7],minx[5:4],instr0100}));\
+SB_DFFE reg_d18( .Q(d[30]), .C(clk), .E(progress_ucode), .D(instr1x110100));")
 #undef XXLASTINCH
-/*this is for 00, works  #define _StdIncPc StdIncPc," Fr00  IncPC, OpFetch",                                 2,-1,            nxtSTB       | A_add4    | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch)     // [1] Must be at even ucode adr. Goes to either Fetch or eFetch. 
-  this is for 00, works  #define _Fetch    Fetch ,  " Fr00  Read and latch instruction",                     2,-1,            isr_none     | A_passq   | Wjj   | rttime    | Qz   | sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR
-  this is for 00, works  #define _Fetch2   Fetch2,  " Fr00  Update ttime. Update I. Q=immediate. Use dinx",  2,-1,            isr_none     | A_cycnt   | Wttime| RS1       | Qudec| sr_h  | use_dinx                      // [5] Must be at even ucode adr.
-  this is for 00, works  #define _eFetch   eFetch,  " Fr00  rep Read until d=mem[(rs1+ofs) & ~3u]",          8,Fetch,         isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2 )   // [4]] Must be at address after [3]
-  this is for 00, works  #define _eFetch2  eFetch2, " Fr00  Not in use",                                     unx
-  this is for 00, works  #define _eFetch3  eFetch3, " Fr00  Not in use",                                     unx
-  this is for 00, works  
-  this is for 00, works  #define LASTINCH_REMOVECOLUMS ((1ull<<30) | (1ull<<18))
-  this is for 00, works  #define _LASTINCH LASTINCH,"       Reserved to facilitate manual equation",         unx
-  this is for 00, works  #ifndef XXLASTINCH
-  this is for 00, works  #define XXLASTINCH(...)
-  this is for 00, works  #endif
-  this is for 00, works  XXLASTINCH("wire instr0100,instr1x110100;        \
-  this is for 00, works  bn_l4v #(.I(16'h0010)) leq0100(     .o(instr0100),     .i({minx[3:0]}));\
-  this is for 00, works  bn_l4v #(.I(16'h8000)) leq1x110100( .o(instr1x110100), .i({minx[7],minx[5:4],instr0100}));\
-  this is for 00, works  SB_DFFE reg_d18( .Q(d[18]), .C(clk), .E(progress_ucode), .D(instr1x110100));\
-  this is for 00, works  assign d[30] = d[18];")
-  this is for 00, works  #undef XXLASTINCH
-  this is for 00, works  
-*/
-
 
 #else
 #define _StdIncPc StdIncPc," Fr10  IncPC, OpFetch",                                 work nxtSTB       | A_add2or4 | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch)     // [1] Must be at even ucode adr. Goes to either Fetch or eFetch. 
@@ -546,30 +532,35 @@ XXLASTINCH(" ")
 //                                                                                  
 //                                                                                  Fixed/even       ISR          | ALU         Write   intern      Reg    Shreg   Ucode            Next
 //                                                                                  | Pair           action       | op          adr/en  read adr    op     op      operation        ucode
-//tmp#define _StdIncPc StdIncPc," Fr11  IncPC, OpFetch",                                 2,-1,            nxtSTB       | A_add4    | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch   )  // [1] Must be at even ucode adr. Goes to either Fetch or eFetch. 
-//tmp#define _Fetch    Fetch ,  " Fr11  Read and latch instruction",                     2,-1,            isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR
-//tmp#define _Fetch2   Fetch2,  " Fr11  Update ttime. Update I. Q=immediate. Use dinx",  2,-1,            isr_none     | A_cycnt   | Wttime| Rrinst    | Qz   | sr_h  | u_cont         | n(eFetch3 )  // [5] Must be at even ucode adr. 
-//tmp#define _eFetch   eFetch,  " Fr11  rep Read until d=mem[(rs1+ofs) & ~3u]",          8,Fetch,         isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [4]] Must be at address after [3]. Fetch from SRAM
-//tmp#define _eFetch2  eFetch2, " Fr11  Not in use",                                     unx
-//tmp#define _eFetch3  eFetch3, " Fr11  Write minstret. Update I. Q=immediate, use dinx",0,-1,            isr_none     | A_add1    | Wrinst| RS1       | Qudec| sr_h  | use_dinx
+#define _StdIncPc StdIncPc," Fr11  IncPC, OpFetch",                                 2,-1,            nxtSTB       | A_add4    | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch   )  // [1] Must be at even ucode adr. Goes to either Fetch or eFetch. 
+#define _Fetch    Fetch ,  " Fr11  Read and latch instruction",                     2,-1,            isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR
+#define _Fetch2   Fetch2,  " Fr11  Update ttime. Update I. Q=immediate. Use dinx",  2,-1,            isr_none     | A_cycnt   | Wttime| Rrinst    | Qz   | sr_h  | u_cont         | n(eFetch3 )  // [5] Must be at even ucode adr. 
+#define _eFetch   eFetch,  " Fr11  rep Read until d=mem[(rs1+ofs) & ~3u]",          8,Fetch,         isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [4]] Must be at address after [3]. Fetch from SRAM
+#define _eFetch2  eFetch2, " Fr11  Not in use",                                     unx
+#define _eFetch3  eFetch3, " Fr11  Write minstret. Update I. Q=immediate, use dinx",0,-1,            isr_none     | A_add1    | Wrinst| RS1       | Qudec| sr_h  | use_dinx
+#define _LASTINCH LASTINCH,"       not in use ",                                    unx
 
-// Temporarely replaces with simpler code        
-#define _StdIncPc StdIncPc," Fr00  IncPC, OpFetch",                                 2,-1,            nxtSTB       | A_add4    | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch)     // [1] Must be at even ucode adr. Goes to either Fetch or eFetch. 
-#define _Fetch    Fetch ,  " Fr00  Read and latch instruction",                     2,-1,            isr_none     | A_passq   | Wjj   | rttime    | Qz   | sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR
-#define _Fetch2   Fetch2,  " Fr00  Update ttime. Update I. Q=immediate. Use dinx",  2,-1,            isr_none     | A_cycnt   | Wttime| RS1       | Qudec| sr_h  | use_dinx                      // [5] Must be at even ucode adr.
-#define _eFetch   eFetch,  " Fr00  rep Read until d=mem[(rs1+ofs) & ~3u]",          8,Fetch,         isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2 )   // [4]] Must be at address after [3]
-#define _eFetch2  eFetch2, " Fr00  Not in use",                                     unx
-#define _eFetch3  eFetch3, " Fr00  Not in use",                                     unx
-
-
-
-#define LASTINCH_REMOVECOLUMS 0
-#define _LASTINCH LASTINCH,"       Reserved to facilitate manual equation",         unx
-#ifndef XXLASTINCH
-#define XXLASTINCH(...)
-#endif
-XXLASTINCH("")
-#undef XXLASTINCH
+/*  bit 18 is control for cycnt, bit 30 is control for use_dinx
+    In this case we only replace bit 30
+    By rearrangement of free ucodes we may save one lut here
+*/
+  #define LASTINCH_REMOVECOLUMS ((1ull<<30))
+  #ifndef XXLASTINCH
+  #define XXLASTINCH(...)
+  #endif
+  XXLASTINCH("wire instrxxxx0100,insgtr1011xxxx,instr10110100;        \
+  bn_l4v #(.I(16'h0010)) leq0100(     .o(instrxxxx0100),     .i({minx[3:0]}));\
+  bn_l4v #(.I(16'h0800)) leq1011(     .o(instr1011xxxx),     .i({minx[7:4]}));\
+  bn_l4v #(.I(16'h8888)) leq1x110100( .o(instr10110100), .i({2'b0,instr1011xxxx,instrxxxx0100}));\
+  SB_DFFE reg_d18( .Q(d[30]), .C(clk), .E(progress_ucode), .D(instr10110100));")
+  #undef XXLASTINCH
+           
+//#define LASTINCH_REMOVECOLUMS 0
+//#ifndef XXLASTINCH
+//#define XXLASTINCH(...)
+//#endif
+//XXLASTINCH("")
+//#undef XXLASTINCH
 
 #else
 #define _StdIncPc StdIncPc," Fr11  IncPC, OpFetch",                                 work nxtSTB       | A_add2or4 | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch   )  // [1] Must be at even ucode adr. Goes to either Fetch or eFetch. 
@@ -1239,7 +1230,7 @@ XXLASTINCH("")
 /* 0f */Y( 1,     0 , _LUI_0(0x0f)       , 1, 0x0000007f, 0x00000037, (1<<25)/2  ) // LUI 1/2                 
 /* 10 */Y( 0,     0 , _SUB_1             , 0, 0xffffffff, 0x00000000, 0          ) //                         
 /* 11 */Y( 0,     0 , _AND_1             , 0, 0xffffffff, 0x00000000, 0          ) //                         
-/* 12 */Y( 0,     0 , _eFetch3           , 0, 0xffffffff, 0x00000000, 0          ) //                         
+/* 12 */Y( 0,     0 , _LASTINCH          , 0, 0xffffffff, 0x00000000, 0          ) //                         
 /* 13 */Y( 0,     0 , _condb_2           , 0, 0xffffffff, 0x00000000, 0          ) //                         
 /* 14 */Y( 0,     0 , _condb_3           , 0, 0xffffffff, 0x00000000, 0          ) //                         
 /* 15 */Y( 0,     0 , _condb_4           , 0, 0xffffffff, 0x00000000, 0          ) //                         
@@ -1401,7 +1392,7 @@ XXLASTINCH("")
 /* b1 */Y( 0,     0 , _aF_SW_3           , 0, 0xffffffff, 0x00000000, 0          ) 
 /* b2 */Y( 0,     0 , _CSRRC_1           , 0, 0xffffffff, 0x00000000, 0          )
 /* b3 */Y( 0,     0 , _CSRRWI_1          , 0, 0xffffffff, 0x00000000, 0          )
-/* b4 */Y( 0,     0 , _LASTINCH          , 0, 0xffffffff, 0x00000000, 0          ) // Reserved to facilitate manual equation
+/* b4 */Y( 0,     0 , _eFetch3           , 0, 0xffffffff, 0x00000000, 0          ) 
 /* b5 */Y( 0,     0 , _SH_3              , 0, 0xffffffff, 0x00000000, 0          ) 
 /* b6 */Y( 0,     0 , _ECALL_5           , 0, 0xffffffff, 0x00000000, 0          )
 /* b7 */Y( 0,     0 , _IJ_3              , 0, 0xffffffff, 0x00000000, 0          )

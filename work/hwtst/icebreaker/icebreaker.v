@@ -84,7 +84,7 @@ module top
    //wire                 willbestart;
    
    assign start = 1'b1;       
-   localparam USE_PLL = 0;
+   localparam USE_PLL = 1;
    generate
       if ( USE_PLL == 0  ) begin
          assign CLK_I = CLK;
