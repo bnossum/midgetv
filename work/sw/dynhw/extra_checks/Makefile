@@ -13,7 +13,10 @@ CFLAGS = -mabi=ilp32 -march=rv32i -nodefaultlibs -nostartfiles -Os -Wall -Wextra
 # intermixed C and assembler:
 # -Wa,-alh
 
-all: $(OBJ)/check_illegals.bin $(OBJ)/check_illegals.lst 
+all: $(OBJ)/check_illegals.bin $(OBJ)/check_illegals.lst  \
+	$(OBJ)/t112.bin $(OBJ)/t112.lst
+
+# $(OBJ)/t112.o: $(OBJ)/check_illegals_crt0.o 
 
 $(OBJ)/check_illegals.o: $(OBJ)/check_illegals_crt0.o 
 
@@ -30,8 +33,12 @@ $(OBJ)/%.o:%.S
 %.o:%.S
 	riscv32-unknown-elf-gcc -c $(CFLAGS) -o $@ $<
 
+%t112.out:%t112.o
+	riscv32-unknown-elf-ld -Tlink.ld -nodefaultlibs -nostartfiles -o $@ $< -M > $(OBJ)/$(*F).map
+
 %.out:%.o
 	riscv32-unknown-elf-ld -Tlink.ld -nodefaultlibs -nostartfiles -o $@ $(OBJ)/check_illegals_crt0.o $< -M > $(OBJ)/$(*F).map
+
 
 %.bin:%.out
 	riscv32-unknown-elf-objcopy -O binary $< $@ 

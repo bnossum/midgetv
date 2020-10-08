@@ -17,8 +17,7 @@ module m_ice40sim_SRAM
       IWIDTH             = 32, 
       NO_CYCLECNT        = 0, 
       MTIMETAP           = 14, 
-      HIGHLEVEL          = 0,
-      MULDIV             = `ucodeopt_MULDIV
+      HIGHLEVEL          = 0
       )
    (
     input CLK_I, // Toggled from verilator
@@ -34,8 +33,7 @@ module m_ice40sim_SRAM
        .IWIDTH             ( IWIDTH              ),
        .NO_CYCLECNT        ( NO_CYCLECNT         ),
        .MTIMETAP           ( MTIMETAP            ),
-       .HIGHLEVEL          ( HIGHLEVEL           ),
-       .MULDIV             ( MULDIV              )
+       .HIGHLEVEL          ( HIGHLEVEL           )
        )
    inst_ice40sim_EBRonly
      (/*AUTOINST*/

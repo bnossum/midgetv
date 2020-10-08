@@ -29,7 +29,7 @@ module m_illegalop
          wire [6:0] funct7 = INSTR[31:25];
          wire [6:0] opcode = INSTR[6:0];
          wire       checkfunct7;
-         wire       funct7_5_relevant;
+         wire       also_check_funct7_5;
          wire       mostof_funct7_ne0;
          
          if ( MULDIV == 0 ) begin
@@ -44,27 +44,26 @@ module m_illegalop
              cases are weeded out.
              
                                                                checkfunct7
-                                         INSTR                 | funct7_5_relevant
+                                         INSTR                 | also_check_funct7_5 (check that it is zero)
              funct7  rs2   rs1 funct3 rd 6543210  Instruction  | |
-             0000000 shamt rs1 001,   rd x01x0xx  slli         1 0      ucode do not find out correct state of funct7_5 for this case
-             0x00000 shamt rs1 101,   rd x01x0xx  srli/srai    1 1
-             0x00000 rs2   rs1 000,   rd 011x0xx  add/sub      1 1
-             0000000 rs2   rs1 001,   rd 011x0xx  sll          1 x
-             0000000 rs2   rs1 010,   rd 011x0xx  slt          1 x
-             0000000 rs2   rs1 011,   rd 011x0xx  sltu         1 x
-             0000000 rs2   rs1 100,   rd 011x0xx  xor          1 x
-             0x00000 rs2   rs1 101,   rd 011x0xx  srl/sra      1 1
-             0000000 rs2   rs1 110,   rd 011x0xx  or           1 x
-             0000000 rs2   rs1 111,   rd 011x0xx  and          1 x
+             0000000 shamt rs1 001,   rd x01x0xx  slli         1 1      ucode do not find out correct state of funct7_5 for this case
+             0x00000 shamt rs1 101,   rd x01x0xx  srli/srai    1 0
+             0x00000 rs2   rs1 000,   rd 011x0xx  add/sub      1 0
+             0000000 rs2   rs1 001,   rd 011x0xx  sll          1 1
+             0000000 rs2   rs1 010,   rd 011x0xx  slt          1 1
+             0000000 rs2   rs1 011,   rd 011x0xx  sltu         1 1
+             0000000 rs2   rs1 100,   rd 011x0xx  xor          1 1
+             0x00000 rs2   rs1 101,   rd 011x0xx  srl/sra      1 0
+             0000000 rs2   rs1 110,   rd 011x0xx  or           1 1
+             0000000 rs2   rs1 111,   rd 011x0xx  and          1 1
              instructions which main_illegal says are legal    0 x
              instructions which main_illegal says are illegal  x x
              */
             
             assign checkfunct7 = (opcode[5:4] == 2'b01 && opcode[2] == 0 && funct3[1:0] == 2'b01 ) |
                                  (opcode[6:4] == 3'b011 && opcode[2] == 0 );
-//            assign funct7_5_relevant = (opcode[5] == 0 && funct3[2] == 1'b1 ) ||
-//                                       (opcode[5] == 1 && (funct3 == 3'b000 || funct3 == 3'b101));
-            assign funct7_5_relevant = funct3[2] & ~funct3[0];
+            assign also_check_funct7_5 = (opcode[5] == 0 && funct3[2] == 1'b0) |
+                                         (opcode[5] == 1 && ~(funct3 == 3'b000 || funct3 == 3'b101));
             assign mostof_funct7_ne0 = {funct7[6],funct7[4:0]} != 6'h0;
 
             always @(*) 
@@ -82,7 +81,7 @@ module m_illegalop
              mul/mylh/mulhsu/mulhu/div/divu/rem/remu. This is handled by 
              the index, outside of this code. So the only difference from
              the case with (MULDIV == 0) is that the function
-             funct7_5_relevant is more selective, and 
+             also_check_funct7_5 is more selective, and 
              mostof_funct7_ne0 must be modified.
              
                                                                checkfunct7
@@ -111,7 +110,7 @@ module m_illegalop
              */
             assign checkfunct7 = (opcode[5:4] ==  2'b01 && opcode[2] == 0 && funct3[1:0] == 2'b01 ) |
                                  (opcode[6:4] == 3'b011 && opcode[2] == 0 );
-            assign funct7_5_relevant = (opcode[5] == 0 && funct3[2] == 1'b1 ) ||
+            assign also_check_funct7_5 = (opcode[5] == 0 && funct3[2] == 1'b1 ) ||
                                        (opcode[5] == 1 && (funct3 == 3'b000 || funct3 == 3'b101) && funct7[0] == 1'b0);
             assign mostof_funct7_ne0 = ({funct7[6],funct7[4:1]} != 5'h0) || (opcode[5] == 0 && funct7[0]);
             
@@ -140,7 +139,9 @@ module m_illegalop
              11001 1xx     close to JALR 
              11100 100     close to CSR
              */
-            always @(/*AS*/INSTR)
+`define really_dontcare 1'b0
+            
+            always @*
               casez ( {INSTR[6:2],INSTR[14:12]} )
                 //       111
                 // 65432 432   also_illegal  Comment
@@ -150,7 +151,7 @@ module m_illegalop
                 8'b00000_10? : also_illegal = 1'b0;
                 8'b00000_11? : also_illegal = 1'b1; // close to LB       
                 
-                8'b00001_??? : also_illegal = 1'b?; // 
+                8'b00001_??? : also_illegal = `really_dontcare; // 
                 
                 8'b00010_000 : also_illegal = 1'b0;
                 8'b00010_001 : also_illegal = 1'b1;  // close to ij   
@@ -162,18 +163,18 @@ module m_illegalop
                 8'b00011_1?? : also_illegal = 1'b1;  // close to FENCE
                 
                 8'b0010?_??? : also_illegal = 1'b0;
-                8'b0011?_??? : also_illegal = 1'b?;
+                8'b0011?_??? : also_illegal = `really_dontcare;
                 
                 8'b01000_00? : also_illegal = 1'b0;
                 8'b01000_010 : also_illegal = 1'b0;
                 8'b01000_011 : also_illegal = 1'b1;  // close to SW   
                 8'b01000_1?? : also_illegal = 1'b1;  // close to SW   
                 
-                8'b01001_??? : also_illegal = 1'b?;
-                8'b0101?_??? : also_illegal = 1'b?;
+                8'b01001_??? : also_illegal = `really_dontcare;
+                8'b0101?_??? : also_illegal = `really_dontcare;
                 8'b0110?_??? : also_illegal = 1'b0;
-                8'b0111?_??? : also_illegal = 1'b?;
-                8'b10???_??? : also_illegal = 1'b?;
+                8'b0111?_??? : also_illegal = `really_dontcare;
+                8'b10???_??? : also_illegal = `really_dontcare;
                 
                 8'b11000_00? : also_illegal = 1'b0;
                 8'b11000_01? : also_illegal = 1'b1;  // close to BEQ
@@ -184,7 +185,7 @@ module m_illegalop
                 8'b11001_01? : also_illegal = 1'b1;  // close to JALR 
                 8'b11001_1?? : also_illegal = 1'b1;  // close to JALR
                 
-                8'b11010_??? : also_illegal = 1'b?;
+                8'b11010_??? : also_illegal = `really_dontcare;
                 8'b11011_??? : also_illegal = 1'b0;
                 
                 8'b11100_0?? : also_illegal = 1'b0;
@@ -192,8 +193,9 @@ module m_illegalop
                 8'b11100_101 : also_illegal = 1'b0;
                 8'b11100_11? : also_illegal = 1'b0;
                 
-                8'b11101_??? : also_illegal = 1'b?;
-                8'b1111?_??? : also_illegal = 1'b?;
+                8'b11101_??? : also_illegal = `really_dontcare;
+                8'b1111?_??? : also_illegal = `really_dontcare;
+                default : also_illegal = `really_dontcare;
               endcase
          end
          
@@ -220,7 +222,7 @@ module m_illegalop
          
          assign illegal_funct7_or_illegal_rs1_rd
            = (checkfunct7 & mostof_funct7_ne0) |
-             (checkfunct7 & ~funct7_5_relevant & funct7[5]) |
+             (checkfunct7 & also_check_funct7_5 & funct7[5]) |
              illegal_rs1_rd | also_illegal;
                   
       end

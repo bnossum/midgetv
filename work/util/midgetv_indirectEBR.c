@@ -430,7 +430,7 @@ void printf_result(
         // First make extensive comment
         printf( "   /*\n" );
         for ( int t = rounds-1; t > 0; t-- ) {
-                printf( "   %c*                      ", t == rounds-1 ? '/' : ' ' );
+                printf( "    *                      " );
                 for ( k = rounds-1; k > t; k-- ) 
                         printf( "| " );
                 printf( "indirect_index %d\n", t );
@@ -601,6 +601,12 @@ int main( void ) {
 //        reservedcolumns = inpow2( 18, -1); // Column should be represented directly         
 
 //        removecolumns = inpow2( 30, 18, -1);
+
+        /* ucode.h informs us if any of the columns are handled separately.
+         * This works together with a macro that inserts Verilog code into 
+         * the output from this program.
+         */
+        removecolumns = LASTINCH_REMOVECOLUMS;
 
         // Check against impossible startcondition
         if ( removecolumns & reservedcolumns )

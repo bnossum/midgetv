@@ -15,8 +15,7 @@ module m_ice40sim_EBRonly
       IWIDTH             = 32, 
       NO_CYCLECNT        = 0, 
       MTIMETAP           = 14, 
-      HIGHLEVEL          = 0,
-      MULDIV             = `ucodeopt_MULDIV
+      HIGHLEVEL          = 0
       )
    (
     input CLK_I, // Toggled from verilator
@@ -79,7 +78,6 @@ module m_ice40sim_EBRonly
        .NO_CYCLECNT       ( NO_CYCLECNT        ),
        .MTIMETAP          ( MTIMETAP           ),
        .HIGHLEVEL         ( HIGHLEVEL          ),
-       .MULDIV            ( MULDIV             ),
        .prg00(prg00),       .prg01(prg01),       .prg02(prg02),       .prg03(prg03),
        .prg04(prg04),       .prg05(prg05),       .prg06(prg06),       .prg07(prg07),
        .prg08(prg08),       .prg09(prg09),       .prg0A(prg0A),       .prg0B(prg0B),

@@ -36,7 +36,7 @@ $(OBJ)/%.o:%.S
 	riscv32-unknown-elf-objcopy -Obinary $< $@ 
 
 %.lst:%.out
-	riscv32-unknown-elf-objdump -M numeric,no-aliases -D $< > $@
+	riscv32-unknown-elf-objdump -x -s -M numeric,no-aliases -D $< > $@
 
 clean:
 	rm -f $(OBJ)/dynblinky.bin $(OBJ)/dynblinky.lst $(OBJ)/dynblinky.o $(OBJ)/dynblinky_crt0.o \

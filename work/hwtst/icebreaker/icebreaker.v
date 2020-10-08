@@ -78,9 +78,28 @@ module top
    wire                 midgetv_core_killwarnings;// From inst_midgetv_core of m_midgetv_core.v
    wire                 uart_ACK_O;             // From i_BBUART of m_BBUART.v
    // End of automatics
+
+   wire                 start;
+   wire                 CLK_I;
+   //wire                 willbestart;
    
-   wire        start = 1'b1;       
-   wire        CLK_I = CLK;
+   assign start = 1'b1;       
+   localparam USE_PLL = 0;
+   generate
+      if ( USE_PLL == 0  ) begin
+         assign CLK_I = CLK;
+      end else begin
+         icecube_top_pll myPLL
+           (// Outputs
+            .PLLOUTCORE(CLK_I),
+            // Inputs
+            .PACKAGEPIN(CLK),
+            .RESET(1'b1)
+            );
+         
+      end
+   endgenerate
+   
    
    
    /* IO adr map of icebreaker. Write
@@ -198,6 +217,90 @@ module top
       .start                            (start));
      
 endmodule   
+
+
+
+/**
+ * PLL configuration
+ *
+ * This Verilog module was generated automatically
+ * using the icepll tool from the IceStorm project.
+ * Use at your own risk.
+ *
+ * Given input frequency:        12.000 MHz
+ * Requested output frequency:   24.000 MHz
+ * Achieved output frequency:    24.000 MHz
+ */
+//
+//module pll(
+//	input  clock_in,
+//	output clock_out,
+//	output locked
+//	);
+//
+//SB_PLL40_PAD #(
+//		.FEEDBACK_PATH("SIMPLE"),
+//		.DIVR(4'b0000),		// DIVR =  0
+//		.DIVF(7'b0111111),	// DIVF = 63
+//		.DIVQ(3'b101),		// DIVQ =  5
+//		.FILTER_RANGE(3'b001)	// FILTER_RANGE = 1
+//	) uut (
+//		.LOCK(locked),
+//		.RESETB(1'b1),
+//		.BYPASS(1'b0),
+//		.PACKAGEPIN(clock_in),
+//		.PLLOUTGLOBAL(clock_out)
+//		);
+//
+//endmodule
+
+module icecube_top_pll(PACKAGEPIN,
+                       PLLOUTCORE,
+                       PLLOUTGLOBAL,
+                       RESET,
+                       LOCK);
+   
+   inout PACKAGEPIN;
+   input RESET;    /* To initialize the simulation properly, the RESET signal (Active Low) must be asserted at the beginning of the simulation */ 
+   output PLLOUTCORE;
+   output PLLOUTGLOBAL;
+   output LOCK;
+   
+   SB_PLL40_PAD icecube_top_pll_inst(.PACKAGEPIN(PACKAGEPIN),
+                                     .PLLOUTCORE(PLLOUTCORE),
+                                     .PLLOUTGLOBAL(PLLOUTGLOBAL),
+                                     .EXTFEEDBACK(),
+                                     .DYNAMICDELAY(),
+                                     .RESETB(RESET),
+                                     .BYPASS(1'b0),
+                                     .LATCHINPUTVALUE(),
+                                     .LOCK(LOCK),
+                                     .SDI(),
+                                     .SDO(),
+                                     .SCLK());
+   
+   //\\ Fin=12, Fout=24;
+   defparam icecube_top_pll_inst.DIVR = 4'b0000;
+   defparam icecube_top_pll_inst.DIVF = 7'b0111111;
+//   defparam icecube_top_pll_inst.DIVQ = 3'b101; // 24 MHz
+   defparam icecube_top_pll_inst.DIVQ = 3'b100; // 48 MHz
+   defparam icecube_top_pll_inst.FILTER_RANGE = 3'b001;
+   defparam icecube_top_pll_inst.FEEDBACK_PATH = "SIMPLE";
+   defparam icecube_top_pll_inst.DELAY_ADJUSTMENT_MODE_FEEDBACK = "FIXED";
+   defparam icecube_top_pll_inst.FDA_FEEDBACK = 4'b0000;
+   defparam icecube_top_pll_inst.DELAY_ADJUSTMENT_MODE_RELATIVE = "FIXED";
+   defparam icecube_top_pll_inst.FDA_RELATIVE = 4'b0000;
+   defparam icecube_top_pll_inst.SHIFTREG_DIV_MODE = 2'b00;
+   defparam icecube_top_pll_inst.PLLOUT_SELECT = "GENCLK";
+   defparam icecube_top_pll_inst.ENABLE_ICEGATE = 1'b0;
+/* For 48 MHz:
+DIVR:  0 (4'b0000)
+DIVF: 63 (7'b0111111)
+DIVQ:  4 (3'b100)
+FILTER_RANGE: 1 (3'b001)
+*/
+   
+endmodule
 
       
 /* -----------------------------------------------------------------------------

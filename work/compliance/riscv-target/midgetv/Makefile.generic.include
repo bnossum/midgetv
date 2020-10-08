@@ -4,6 +4,7 @@
 # Copyright: Baard Nossum
 # For licence, see LICENCE.TXT
 
+# For a 12 MHz clock, the maximum reliable bitrate is 57600 bps
 MIDGETV_BITRATE      ?= 57600
 MIDGETV_SERIALDEVICE ?= /dev/ttyUSB1
 

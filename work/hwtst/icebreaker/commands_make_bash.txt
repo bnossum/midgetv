@@ -1,0 +1,5 @@
+
+ 2278  yosys -p 'synth_ice40 -json icebreaker.json' icebreaker.v 
+ 2279  nextpnr-ice40 --up5k --package sg48 --json icebreaker.json --pcf icebreaker.pcf --asc icebreaker.asc
+ 2280  icepack icebreaker.asc icebreaker.bin
+ 2281  sudo iceprog icebreaker.bin 

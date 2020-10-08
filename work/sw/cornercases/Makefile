@@ -9,7 +9,8 @@
 TARGETSEBR  := t101 t102 t103 t104 t105 t106 t107 t108 t109 \
 	t111
 
-TARGETSSRAM := t101 t102 t103 t104 t105 t106 t107 t108 t109 t110
+TARGETSSRAM := t101 t102 t103 t104 t105 t106 t107 t108 t109 t110 
+
 
 OBJDIREBR := ../../obj_dir/cornerfirst
 OBJDIRSRAM := ../../obj_dir/cornersfirst

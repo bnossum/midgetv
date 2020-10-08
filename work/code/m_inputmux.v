@@ -236,7 +236,7 @@ module m_inputmux
        
     end else if ( INPUTMUXTYPE == 5 ) begin
        /* Multiplier and system registers, but no sram.
-       /* Many bits implemented as this:
+        * Many bits implemented as this:
         * sysregack -------+
         * STB_O ------+    |    _          __
         * DAT_I     -|1\   +--o| |-- a ---|  |- rDee
