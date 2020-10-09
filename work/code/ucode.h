@@ -477,14 +477,20 @@ assign d[30] = d[18];")
 #define _eFetchu  eFetchu, " Fr00u rep Read until d=mem[(rs1+ofs) & ~3u]",          8,Fetchu,	     isr_none     | A_passq   | Wnn   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [4b] Must be at address after [3b]. Fetch from SRAM
 
 #define _eFetch2  _unalignd // Reused
-#define _eFetch3  _straddle // Reused
-#define _LASTINCH LASTINCH,"       not in use ",                                    unx
-#define LASTINCH_REMOVECOLUMS 0
+#define _eFetch3  eFetch3, " Fr00  Not in use, reserved to allow LASTINCH",         0,0xb4,          x42
+#define _LASTINCH _straddle // Reused
+
+#define LASTINCH_REMOVECOLUMS ((1ull<<30) | (1ull<<18))
 #ifndef XXLASTINCH
 #define XXLASTINCH(...)
 #endif
-XXLASTINCH("")
+XXLASTINCH("wire instr0100,instr1x110100;        \
+bn_l4v #(.I(16'h0010)) leq0100(     .o(instr0100),     .i({minx[3:0]}));\
+bn_l4v #(.I(16'h8000)) leq1x110100( .o(instr1x110100), .i({minx[7],minx[5:4],instr0100}));\
+SB_DFFE reg_d18( .Q(d[18]), .C(clk), .E(progress_ucode), .D(instr1x110100));\
+assign d[30] = d[18];")
 #undef XXLASTINCH
+
 
 #endif
 
