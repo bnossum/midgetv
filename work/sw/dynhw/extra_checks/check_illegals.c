@@ -18,6 +18,7 @@ void testbed16( void );
 void testbed32( void );
 
 int getchar( void );
+int getcharto( uint32_t timeout );
 int putchar(int c);
 int puts( const char *s);
 int puthex32(uint32_t v);
@@ -82,24 +83,30 @@ int main( void ) {
         extern uint32_t Coretype;       // Found by startup code
         int muldiv;
         int rvc;
-
+        int i,t;
+        // const char *corestr[4] = { "rv32i", "rv32im", "rv32ic", "rv32imc" }; --> memcpy invoked.
+        i = 2;
         opcode = 0; // Tmp. I do not clear bss in crt0 yet 
         *LED = 4;
-        getchar();
 
-        puts( "Chk opt\n" );
-        rvc = Coretype;
-        puthex32(rvc);
+        muldiv = Coretype & 1;
+        rvc    = Coretype >> 1;
+
+        do {
+                *LED = i;
+                i ^= 2;
+                puts( "rv32i" );
+                if ( muldiv )
+                        putchar( 'm' );
+                if ( rvc )
+                        putchar( 'c' );
+                puts( ": Check that illegals trap correctly. Press 'v' for verbose test, any other character for fast test\n" );
+                t = getcharto(0x100000);
+        } while ( t < 0 );
+        int fulltest = t == 'V' || t == 'v';
         
-        muldiv = rvc & 1;
-        rvc >>= 1;
-
-        puts( "Check that illegals trap correctly. Running test for core rv32i" );
-        if ( muldiv )
-                putchar('m');
-        if ( rvc )
-                putchar('c');
-        puts( ". Warning - runtime > 8h\n" );
+        if ( fulltest )
+                puts( ".\nRuntime ~8h at 12MHz\n" );
 
         uint32_t nrillegal = 0;
         int inRVC = 1;
@@ -119,52 +126,51 @@ int main( void ) {
                 if ( rvc == 0 ) 
                         goto Illegal16;
 
-                while (1)
-                        ;
                 
-//                //puthex32( opcode ); putchar(' ');
-//                
-//                switch ( ((opcode&3)<<3) | (opcode>>13) ) {
-//                case 0b00000 : 
-//                        if ( opcode == 0 ) {
-//                                P("C.Illegal " );
-//                                goto Illegal16;
-//                        }
-//                        P("C.ADDI4SPN " );
-//                        goto Legal16;
-//                case 0b00001 : P("C.FLD " ); goto Illegal16; 
-//                case 0b00010 : goto Legal16;   // C.LW
-//                case 0b00011 : goto Illegal16; // C.FLW
-//                case 0b00100 : goto Legal16;   // reserved
-//                case 0b00101 : goto Illegal16; // C.FSD
-//                case 0b00110 : goto Legal16;   // C.SW
-//                case 0b00111 : goto Illegal16; // C.FSW
-//
-//                case 0b01000 : goto Legal16;   // C.NOP, C.ADDI
-//                case 0b01001 : goto Legal16;   // C.JAL
-//                case 0b01010 : goto Legal16;   // C.LI
-//                case 0b01011 : goto Legal16;   // C.ADDI16SP, C.LUI
-//                case 0b01100 : 
-//                        if ( ((opcode>>10) & 7) == 7 && ((opcode>>6)&1) == 0 ) {
-//                                //puts( " U " );
-//                                goto Illegal16;
-//                        }
-//                        //puts( " H " );
-//                        goto Legal16; // Many instructions
-//                case 0b01101 : goto Legal16;   // C.J
-//                case 0b01110 : goto Legal16;   // C.BEQZ
-//                case 0b01111 : goto Legal16;   // C.BNEZ
-//
-//                case 0b10000 : goto Legal16;   // C.SLLI
-//                case 0b10001 : goto Illegal16; // C.FLDSP
-//                case 0b10010 : goto Legal16;   // C.LWSP
-//                case 0b10011 : goto Illegal16; // C.FLWSP
-//                case 0b10100 : goto Legal16;   // C.JR, C.MV
-//                case 0b10101 : goto Illegal16; // C.FSDSP
-//                case 0b10110 : goto Legal16;   // C.SWSP
-//                case 0b10111 : goto Illegal16; // C.FSWSP
-//                }
-//                
+                //puthex32( opcode ); putchar(' ');
+                if ( (opcode & 0x1ffc) == 0 )
+                        putchar( ':' );
+                switch ( ((opcode&3)<<3) | (opcode>>13) ) {
+                case 0b00000 : 
+                        if ( opcode == 0 ) {
+                                P("C.Illegal " );
+                                goto Illegal16;
+                        }
+                        P("C.ADDI4SPN " );
+                        goto Legal16;
+                case 0b00001 : P("C.FLD " ); goto Illegal16; 
+                case 0b00010 : goto Legal16;   // C.LW
+                case 0b00011 : goto Illegal16; // C.FLW
+                case 0b00100 : goto Legal16;   // reserved
+                case 0b00101 : goto Illegal16; // C.FSD
+                case 0b00110 : goto Legal16;   // C.SW
+                case 0b00111 : goto Illegal16; // C.FSW
+
+                case 0b01000 : goto Legal16;   // C.NOP, C.ADDI
+                case 0b01001 : goto Legal16;   // C.JAL
+                case 0b01010 : goto Legal16;   // C.LI
+                case 0b01011 : goto Legal16;   // C.ADDI16SP, C.LUI
+                case 0b01100 : 
+                        if ( ((opcode>>10) & 7) == 7 && ((opcode>>6)&1) == 0 ) {
+                                //puts( " U " );
+                                goto Illegal16;
+                        }
+                        //puts( " H " );
+                        goto Legal16; // Many instructions
+                case 0b01101 : goto Legal16;   // C.J
+                case 0b01110 : goto Legal16;   // C.BEQZ
+                case 0b01111 : goto Legal16;   // C.BNEZ
+
+                case 0b10000 : goto Legal16;   // C.SLLI
+                case 0b10001 : goto Illegal16; // C.FLDSP
+                case 0b10010 : goto Legal16;   // C.LWSP
+                case 0b10011 : goto Illegal16; // C.FLWSP
+                case 0b10100 : goto Legal16;   // C.JR, C.MV
+                case 0b10101 : goto Illegal16; // C.FSDSP
+                case 0b10110 : goto Legal16;   // C.SWSP
+                case 0b10111 : goto Illegal16; // C.FSWSP
+                }
+                
         Illegal16:
                 nrillegal++;
                 *LED = 1;
@@ -202,17 +208,9 @@ int main( void ) {
         inRVC = 0;
 
         
-        puts( "Check 32-bit instructions. Wait for 64x64 characters\n" );
-        /* Now do the same for 32-bit instructions ending in 0b11
-         */
-        opcode = 0;
-/*        opcode = 0x06000000; leads to 00000001Unexp Trap:06004033
- * What if we start at 0x06004033?
- */      
-//        opcode = 0x06004033-4*4; // Same result
-        // Try with image from iceCube. Glad to say we have the same result.
-        // However, a simple test program runs corectly?
-        
+        puts( "\nCheck 32-bit instructions. Wait for 64x64 characters\n" );
+        opcode = 0;        
+        //opcode = 0x42000033;
         
         opcode |= 3; // Easy to forget that low 2 msb must be set.
         do {
@@ -371,29 +369,47 @@ int main( void ) {
                 nrgood++;
                 *LED = 2;
         L:
-                if ( (opcode & 0xfffff) == 3 ) {
-                        if ( (opcode & 0x3ffffff) == 3 ) {
-                                puts( "\n" );
-                                putchar(((opcode>>26)&63) + 0x3F); // ...26
-                                puts( " : " );
+                if ( !fulltest ) {
+                        putchar( '.' );
+                } else {
+                        if ( (opcode & 0xfffff) == 3 ) {
+                                if ( (opcode & 0x3ffffff) == 3 ) {
+                                        puts( "\n" );
+                                        putchar(((opcode>>26)&63) + 0x3F); // ...26
+                                        puts( " : " );
+                                }
+                                putchar(((opcode>>20)&63) + 0x3F); // ...20
                         }
-                        putchar(((opcode>>20)&63) + 0x3F); // ...20
+                        /* The number of illegal instruction traps should always be
+                           exactly equal the number of counted illegal instructions
+                        */
                 }
-                /* The number of illegal instruction traps should always be
-                   exactly equal the number of counted illegal instructions
-                */
+                
                 if ( nrillegal != nrillegaltraps )
                         goto Fatal;
+
                 opcode += 4;
+                if ( !fulltest ) {
+                        // Strictly only need to iterate over instruction bits 30,25,14,13,12,6,5,4,3,2.
+                        if ( opcode &     0x00000080 )
+                                opcode += 0x00000f80u;
+                        if ( opcode &     0x00008000 )
+                                opcode += 0x01ff8000u;
+                        if ( opcode &     0x04000000 )
+                                opcode += 0x3c000000u;
+                        if ( opcode &     0x40000000 )
+                                opcode += 0xc0000000u;
+                }
+                        
         } while ( opcode != 3 );
 
         // 1 red
         // 2 green right
         // 4 green left  something is wrong in icebreaker.v
         // 8 green down
-        puts( "Success? NrGood=0x" );
+        puts( "\nDone. Notrapped instructions=0x" );
         puthex32(nrgood);
-        puts( " NrBad=0x" );
+        puts( " Trapped instructions=0x" );
         puthex32(nrillegal);
         puts( " sum=0x");
         puthex32(nrgood+nrillegal);

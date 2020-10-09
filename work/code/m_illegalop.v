@@ -32,6 +32,9 @@ module m_illegalop
          wire       also_check_funct7_5;
          wire       mostof_funct7_ne0;
          
+         assign checkfunct7 = (opcode[5:4] == 2'b01 && opcode[2] == 0 && funct3[1:0] == 2'b01 ) |
+                              (opcode[6:4] == 3'b011 && opcode[2] == 0 );
+
          if ( MULDIV == 0 ) begin
             // =======================================================
             // Full instruction decode. Without multiplication
@@ -60,11 +63,9 @@ module m_illegalop
              instructions which main_illegal says are illegal  x x
              */
             
-            assign checkfunct7 = (opcode[5:4] == 2'b01 && opcode[2] == 0 && funct3[1:0] == 2'b01 ) |
-                                 (opcode[6:4] == 3'b011 && opcode[2] == 0 );
+            assign mostof_funct7_ne0 = {funct7[6],funct7[4:0]} != 6'h0;
             assign also_check_funct7_5 = (opcode[5] == 0 && funct3[2] == 1'b0) |
                                          (opcode[5] == 1 && ~(funct3 == 3'b000 || funct3 == 3'b101));
-            assign mostof_funct7_ne0 = {funct7[6],funct7[4:0]} != 6'h0;
 
             always @(*) 
               also_illegal = 0;
@@ -76,70 +77,49 @@ module m_illegalop
             // Full instruction decode. With multiplication and division
             // =======================================================
             /*  
-             Instruction bit 25 is used to differentiate between 
-             add/sll/slt/sltu/xor/srl/or/and and
-             mul/mylh/mulhsu/mulhu/div/divu/rem/remu. This is handled by 
-             the index, outside of this code. So the only difference from
-             the case with (MULDIV == 0) is that the function
-             also_check_funct7_5 is more selective, and 
-             mostof_funct7_ne0 must be modified.
+             We must not trigger on MUL/DIV instructions. mostof_funct7_ne0
+             is relaxed, it does not check funct7[0] for 
+             add/sub/sll/slt/sltu/xor/srl/sra/or/and any more,
+             while also_check_funct7_5 is extended (and is now a misnomer).
              
                                                                checkfunct7
-                                         INSTR                 | funct7_5_relevant
+                                         INSTR                 | also_check_funct7_5
              funct7  rs2   rs1 funct3 rd 6543210  Instruction  | |
-             0000000 shamt rs1 001,   rd x01x0xx  slli         1 0
-             0x00000 shamt rs1 101,   rd x01x0xx  srli/srai    1 1
-             0x00000 rs2   rs1 000,   rd 011x0xx  add/sub      1 1
-             0000000 rs2   rs1 001,   rd 011x0xx  sll          1 0
-             0000000 rs2   rs1 010,   rd 011x0xx  slt          1 0
-             0000000 rs2   rs1 011,   rd 011x0xx  sltu         1 0
-             0000000 rs2   rs1 100,   rd 011x0xx  xor          1 0
-             0x00000 rs2   rs1 101,   rd 011x0xx  srl/sra      1 1
-             0000000 rs2   rs1 110,   rd 011x0xx  or           1 0
-             0000000 rs2   rs1 111,   rd 011x0xx  and          1 0
-             0000001 rs2   rs1 000,   rd 011x0xx  mul          1 0
-             0000001 rs2   rs1 001,   rd 011x0xx  mulh         1 0
-             0000001 rs2   rs1 010,   rd 011x0xx  mulhsu       1 0
-             0000001 rs2   rs1 011,   rd 011x0xx  mulhu        1 0
-             0000001 rs2   rs1 100,   rd 011x0xx  div          1 0
-             0000001 rs2   rs1 101,   rd 011x0xx  divu         1 0
-             0000001 rs2   rs1 110,   rd 011x0xx  rem          1 0
-             0000001 rs2   rs1 111,   rd 011x0xx  remu         1 0
+             0000000 shamt rs1 001,   rd x01x0xx  slli         1 1
+             0x00000 shamt rs1 101,   rd x01x0xx  srli/srai    1 0
+             0x00000 rs2   rs1 000,   rd 011x0xx  add/sub      1 0
+             0000000 rs2   rs1 001,   rd 011x0xx  sll          1 1
+             0000000 rs2   rs1 010,   rd 011x0xx  slt          1 1
+             0000000 rs2   rs1 011,   rd 011x0xx  sltu         1 1
+             0000000 rs2   rs1 100,   rd 011x0xx  xor          1 1
+             0x00000 rs2   rs1 101,   rd 011x0xx  srl/sra      1 0
+             0000000 rs2   rs1 110,   rd 011x0xx  or           1 1
+             0000000 rs2   rs1 111,   rd 011x0xx  and          1 1
+             0000001 rs2   rs1 000,   rd 011x0xx  mul          1 1
+             0000001 rs2   rs1 001,   rd 011x0xx  mulh         1 1
+             0000001 rs2   rs1 010,   rd 011x0xx  mulhsu       1 1
+             0000001 rs2   rs1 011,   rd 011x0xx  mulhu        1 1
+             0000001 rs2   rs1 100,   rd 011x0xx  div          1 1
+             0000001 rs2   rs1 101,   rd 011x0xx  divu         1 1
+             0000001 rs2   rs1 110,   rd 011x0xx  rem          1 1
+             0000001 rs2   rs1 111,   rd 011x0xx  remu         1 1
              instructions which main_illegal says are legal    0 x
              instructions which main_illegal says are illegal  x x
              */
-            assign checkfunct7 = (opcode[5:4] ==  2'b01 && opcode[2] == 0 && funct3[1:0] == 2'b01 ) |
-                                 (opcode[6:4] == 3'b011 && opcode[2] == 0 );
-            assign also_check_funct7_5 = (opcode[5] == 0 && funct3[2] == 1'b1 ) ||
-                                       (opcode[5] == 1 && (funct3 == 3'b000 || funct3 == 3'b101) && funct7[0] == 1'b0);
             assign mostof_funct7_ne0 = ({funct7[6],funct7[4:1]} != 5'h0) || (opcode[5] == 0 && funct7[0]);
+            assign also_check_funct7_5 = (opcode[5] == 0 && funct3[2] == 1'b0) |
+                                         (opcode[5] == 1 && ~(funct3 == 3'b000 || funct3 == 3'b101)) |
+                                         (opcode[5] == 1 && funct7[0]);
             
             /*
              When MULDIV == 1, a number of entries in the microcodetable, formerly used to
              detect illegal opcodes, are now used to implement MUL/DIV instructions.              
-             These opcodes must now be detected by firmware.
-                   111 
-             65432 432     Comment
-             00000 00x   0
-             00000 010   0
-             00000 011   1 close to LB   
-             000
-             00000 11x   1 close to LB   
-             00001 xxx   x
-             00010 001     close to ij   
-             00010 01x     close to ij   
-             00010 1xx     close to ij   
-             00011 01x     close to FENCE
-             00011 1xx     close to FENCE
-             01000 011     close to SW   
-             01000 1xx     close to SW   
-             11000 01x     close to BEQ  
-             11001 001     close to JALR 
-             11001 01x     close to JALR 
-             11001 1xx     close to JALR 
-             11100 100     close to CSR
+             These opcodes must now be detected here.
              */
+
+            // I have some trouble with some versions of yosys, hence this:
 `define really_dontcare 1'b0
+            // Ideally we could loosen up somewhat: really_dontcare 1'b?
             
             always @*
               casez ( {INSTR[6:2],INSTR[14:12]} )
@@ -197,6 +177,7 @@ module m_illegalop
                 8'b1111?_??? : also_illegal = `really_dontcare;
                 default : also_illegal = `really_dontcare;
               endcase
+            
          end
          
          

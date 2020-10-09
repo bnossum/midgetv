@@ -126,7 +126,9 @@ module m_ucodepc
 
    assign maybranch = Adr0Mustbe0 | Adr1Mustbe0 | use_brcond | (sa32 & ~sa15) | ceM;
 
-   /* Slight mangling of INSTRUCTION to an index.
+   /* Slight mangling of INSTRUCTION to an index. The following bits are used:
+    * 30,14,13,12,6,5,4,3,2, or in case MUL/DIV is included:
+    * 30,25,14,13,12,6,5,4,3,2
     */
    generate
       if ( MULDIV ) begin

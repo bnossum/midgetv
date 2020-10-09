@@ -29,8 +29,26 @@ loader program that allows upload and execution of a program on `midgetv`).
 
 * Note: If `midgetv` has been compiled with the reduced instruction
   set, it will fail in the program "I-MISALIGN_JMP-01.S", this program
-  must be excluded for rv32imc and rv32ic. 
+  must be excluded for rv32imc and rv32ic. The way I do this by manually
+  editing `riscv-test-suite/rv32i/Makefrag`:
 
+    # rv32imc will fail I-MISALIGN_JMP-0 so make it conditional
+    ifneq ($(RISCV_TARGET_FLAGS),1)
+        theMISALIGN_JMP = I-MISALIGN_JMP-01
+    else
+        theMISALIGN_JMP =
+    endif
+
+    # these tests will trap and require privilege support
+    ifneq ($(NOTRAPS),1)
+        rv32i_sc_tests_trap = \
+            $(theMISALIGN_JMP) \
+            I-MISALIGN_LDST-01 \
+            I-ECALL-01 \
+            I-EBREAK-01
+    endif
+
+    and do a `make RISCV_TARGET_FLAGS=1`.
 
 ### How it works
 
