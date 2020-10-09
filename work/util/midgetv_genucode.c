@@ -155,7 +155,9 @@ void check_internal_consistency( void ) {
                 case 2 :
                         if ( k & 1 )
                                 ferr( "uinstr say at even address, but this is not the case. Error at 0x%2.2x\n", k );
-                        break;
+                        if ( ucodespeced_pair_or_pos[k] != -1 && ucodespeced_pair_or_pos[k] != k )
+                                ferr( "uinstr say fixed pos, but ucode appears at wrong location 0x%2.2x\n", k );
+                        break;                                                        
                 case 4 :
                         ensure_k_at_illegal_at_entry_location(k);
                         break;

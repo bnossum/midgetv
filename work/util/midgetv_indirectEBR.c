@@ -107,11 +107,36 @@ char *labeltext[256] = {
 #include fname
 };
 
-char *removecolumns_codereplacement =
-#define XXLASTINCH(...) __VA_ARGS__
 #define X(...)
 #include fname
-        ;
+char *removecolumns_codereplacement = LASTINCH_CODE;
+
+        
+//char *removecolumns_codereplacement =
+//#if ucodeopt_HAS_MINSTRET == 0 && ucodeopt_HAS_EBR_MINSTRET == 0
+//# if ucodeopt_RVC == 0
+//#  define LASTINCH_REMOVECOLUMS i0LASTINCH_REMOVECOLUMS        
+//#  define i0XXLASTINCH(...) __VA_ARGS__
+//#  define im0XXLASTINCH(...) __VA_ARGS__
+//# else
+//#  define LASTINCH_REMOVECOLUMS ic0LASTINCH_REMOVECOLUMS        
+//#  define ic0XXLASTINCH(...) __VA_ARGS__
+//#  define imc0XXLASTINCH(...) __VA_ARGS__
+//# endif
+//#elif ucodeopt_HAS_MINSTRET == 1 && ucodeopt_HAS_EBR_MINSTRET == 0
+//# if ucodeopt_RVC == 0
+//#  define LASTINCH_REMOVECOLUMS i1LASTINCH_REMOVECOLUMS        
+//#  define i1XXLASTINCH(...) __VA_ARGS__
+//#  define im1XXLASTINCH(...) __VA_ARGS__
+//# else
+//#  define LASTINCH_REMOVECOLUMS ic1LASTINCH_REMOVECOLUMS        
+//#  define ic1XXLASTINCH(...) __VA_ARGS__
+//#  define imc1XXLASTINCH(...) __VA_ARGS__
+//# endif
+//#endif
+//#define X(...)
+//#include fname
+//        ;
         
 FILE *fo;
 

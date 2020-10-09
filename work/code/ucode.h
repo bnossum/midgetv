@@ -13,100 +13,8 @@
 #error Can not do this, see comment in "midgetv_ucodeoptions.h"
 #endif
 
-/* Some analysis of microcode is done easier by
-   defining value fields that are in use.
-*/
-#define I 0b1ull
-#define O 0b0ull
-
-#define OO 0b00ull
-#define OI 0b01ull
-#define IO 0b10ull
-#define II 0b11ull
-
-#define OOO 0b000ull
-#define OOI 0b001ull
-#define OIO 0b010ull
-#define OII 0b011ull
-#define IOO 0b100ull
-#define IOI 0b101ull
-#define IIO 0b110ull
-#define III 0b111ull
-
-#define OOOO 0b0000ull
-#define OOOI 0b0001ull
-#define OOIO 0b0010ull
-#define OOII 0b0011ull
-#define OIOO 0b0100ull
-#define OIOI 0b0101ull
-#define OIIO 0b0110ull
-#define OIII 0b0111ull
-#define IOOO 0b1000ull
-#define IOOI 0b1001ull
-#define IOIO 0b1010ull
-#define IOII 0b1011ull
-#define IIOO 0b1100ull
-#define IIOI 0b1101ull
-#define IIIO 0b1110ull
-#define IIII 0b1111ull
-
-#define OOOOO 0b00000ull
-#define OOOOI 0b00001ull
-#define OOOIO 0b00010ull
-#define OOOII 0b00011ull
-#define OOIOO 0b00100ull
-#define OOIOI 0b00101ull
-#define OIIOO 0b01100ull
-#define IOIOO 0b10100ull
-#define IOOOO 0b10000ull
-#define IOOOI 0b10001ull
-#define IOOII 0b10011ull
-#define IOIOI 0b10101ull
-#define IOIIO 0b10110ull
-#define IOIII 0b10111ull
-#define IIOOO 0b11000ull
-#define IIOOI 0b11001ull
-#define IIOIO 0b11010ull
-#define IIOII 0b11011ull
-#define IIIOO 0b11100ull
-#define IIIOI 0b11101ull
-#define IIIIO 0b11110ull
-#define IIIII 0b11111ull
-
-#define OOIOOO 0b001000ull
-#define OOIOOI 0b001001ull
-#define OOIOIO 0b001010ull
-#define OIIOOO 0b011000ull
-#define IOIOOO 0b101000ull
-#define IIIOOO 0b111000ull
-#define IIIOII 0b111011ull
-#define IIIIIO 0b111110ull
-
-/* To get out don't care values I use some value fields where the 'x'
- * can be changed to 0b0/0b1 at will in the program that uses this include file 
- */
-#ifndef x
-#define x 0b0ull
-#endif
-
-#define xO (0b00ull     | ((x) << 1) )
-#define xI (0b01ull     | ((x) << 1) )
-#define Ox (0b00ull     | ((x) << 0) )
-#define xx (((x)<<1) | (x))
-
-#define xxI (((xx)<<1)| 1ull << 0)
-
-#define xxxx  (((xx)<<2) | (xx))
-#define Oxxx  ((0b0000)   | ( ((xx)<<1) | (x)))
-#define OOIx  (0b0010ull | (x))
-#define OIIx  (0b0110ull | (x))
-#define IOIx  (0b1010ull | (x))
-
-#define OOOxx (0b00000ull | (xx))
-#define OOIxx (0b00100ull | (xx))     
-#define OIOxx (0b01000ull | (xx))     
-#define OIIxx (0b01100ull | (xx))
-#define xxxxx (((x)<<4) | (xxxx))  
+#include "ucode_constantdefs.h"
+#include "ucode_fielddefs.h"
 
 /* Locations that are unused in the table should never be accessed.
    If they are, the controller have a fatal error. To make debugging
@@ -127,11 +35,6 @@
 #define x16 ((x8<<8)|x8)
 #define x32 ((x16<<16)|x16)
 #define x42 ((x10<<32)|x32)
-//#define unx 0,-1, ( ((x16<<15) | x16) | n(Fetch) )
-//           Fixed/even       ISR          | ALU         Write   intern      Reg    Shreg   Ucode            Next
-//           | Pair           action       | op          adr/en  read adr    op     op      operation        ucode
-//efine unx  0,-1,            isr_none     | A_xx   |    Wnn   | Ralu      | Qx   | sr_h  | u_cont         | n(StdIncPc)
-#define unx  0,-1, x42
 
 
 
@@ -156,187 +59,12 @@
 #define extCbase 45
 #endif
 
-
 /* 3 extra variables when MULDIV */
 #define MCLRpos    extMbase
 #define Mbranchpos (extMbase+2)
 
 /* 1 extra variable when RVC */
 #define RVCpcincctrlpos extCbase
-
-/* =============================================================================
- * The following is definition of fields of microcode
- */
-
-#define MCLR               ( II << MCLRpos ) // Transfer M to rDee, clearM
-#define MLD                ( IO << MCLRpos ) // ceM==1 clrM==0, sa14 == 0, so loads
-#define MSL                ( IO << MCLRpos ) // ceM==1 clrM==0, sa14 == 1, so shifts
-#define CH                 ( OI << MCLRpos ) // ceM==0 clrM==1 conditional hold
-#define CH13  ( I << Mbranchpos)                     // Branch on INSTR[13] to distinguish DIV[U] and MOD[U]
-#define bsign ( I << Mbranchpos) | ( IO << MCLRpos ) // Branch on sign of DAT_O[31]
-
-
-
-/* The ALU and cycle counter control.
- * Observation: s_alu[2] could be represented by a combination of 
- *              s_alu[1:0] and s_alu_carryin to save one column in the
- *              control table. Optimalization not done now.
- *
- *                                                            Cyclecnt etc   
- *                                                            sa17           s_alu[2:0]
- *                                                            |sa16          |||s_alu_carryin[1:0]
- *                                                            ||             |||||         */
-#define A_nearXOR                                           ( IO << 18 ) | ( OOOxx << 9 )  // B = D^(~Q)                               
-#define A_iszero                                            ( IO << 18 ) | ( OOOII << 9 )  // Used in DIV to test for zero in a particular setting
-#define A_passd                                             ( IO << 18 ) | ( OOIxx << 9 )  // D
-#define A_invq                                              ( IO << 18 ) | ( OIOxx << 9 )  // ~Q
-#define A_nearAND                                           ( IO << 18 ) | ( OIIxx << 9 )  // D&(~Q)           
-#define A_addDQ                            (I<<MCLRpos) |   ( IO << 18 ) | ( IOOOO << 9 )  // D+Q         subtle interaction between MULDIV and branch, need (I<<42)
-#define A_cycnt                            (I<<MCLRpos) |   ( II << 18 ) | ( IOOOO << 9 )  // D+cyclecnt  subtle
-#define A_a1                                                ( IO << 18 ) | ( IOOII << 9 )  // D+Q+1 Chasing an error in update of Q in ILL_4. This seems to do the trick. Is it needed elsewhere ? (problem was that Q was held when it should not have been)
-#define A_add1                             (I<<MCLRpos) |   ( IO << 18 ) | ( IOOII << 9 )  // D+Q+1
-#define A_add3                             (I<<MCLRpos) |   ( OO << 18 ) | ( IOOOO << 9 )  // D+(Q|3)+0   subtle, needed see test prog t154.S                                  
-#define A_add4                            (II<<MCLRpos) |   ( OO << 18 ) | ( IOOII << 9 )  // D+(Q|3)+1
-#define A_add3w                            (I<<MCLRpos) |   ( OO << 18 ) | ( IOOOO << 9 )  // D+(Q|3)+0   subtle, needed see test prog t154.S Revise all use of this
-#define A_add4w                           (II<<MCLRpos) |   ( OO << 18 ) | ( IOOII << 9 )  // D+(Q|3)+1   REVISE all use of this
-#define A_add2or4 (I<<RVCpcincctrlpos) |  (II<<MCLRpos) |   ( OO << 18 ) | ( IOOII << 9 )  // D+(Q|((~rvc_pcinc<<1,1))+1 
-
-#define A_shlq                          ( IO <<18 ) | ( IOIOO <<9 )  // B = (QQ<<1)|cin (with D=0xffffffff)
-#define A_shlqdiv                       ( IO <<18 ) | ( IOIIO <<9 )  // B = (QQ<<1)|M[0] (with D=0xffffffff)
-#define A_nearOR                        ( IO <<18 ) | ( IIIOO <<9 )  // (~D)|Q
-#define A_passq                         ( IO <<18 ) | ( IIOOO <<9 )  // Let through Q
-#define A_passq4                        ( OO <<18 ) | ( IIOII <<9 )  // Let through (Q|3)+1
-#define A_pasq2or4  (I<<Mbranchpos) |   ( OO <<18 ) | ( IIOII <<9 )  // Let through (Q|1)+1 or (Q|3)+1
-#define A_passq_F                       ( IO <<18 ) | ( IIOOI <<9 )  // Let through Q+flgF
-#define A_xx                            ( xO <<18 ) | ( xxxxx <<9 )  // ALU is don't care
-
-// Variants used in MUL/DIV
-#define MA_nearXOR                   ( IO <<18 ) | ( OOOxx <<9 )  // B = D^(~Q)                               
-#define MA_iszero                    ( IO <<18 ) | ( OOOII <<9 )  // Used in DIV to test for zero in a particular setting
-#define MA_passd                     ( IO <<18 ) | ( OOIxx <<9 )  // D
-#define MA_addDQ     (I<<MCLRpos) |  ( IO <<18 ) | ( IOOOO <<9 )  // D+Q                                         
-#define MA_addDQm    (O<<MCLRpos) |  ( IO <<18 ) | ( IOOOO <<9 )  // D+Q  may be changed to a passQ by verilog              
-#define MA_add1      (I<<MCLRpos) |  ( IO <<18 ) | ( IOOII <<9 )  // D+Q+1
-#define MA_usub      (I<<MCLRpos) |  ( IO <<18 ) | ( IOOII <<9 )  // D+Q+1 (D previously inverted)
-#define MA_shlqdiv                   ( IO <<18 ) | ( IOIIO <<9 )  // B = (QQ<<1)|M[0] (with D=0xffffffff)
-#define MA_passq                     ( IO <<18 ) | ( IIOOO <<9 )  // Let through Q
-#define MA_xx                        ( xO <<18 ) | ( xxxxx <<9 )  // ALU is don't care
-
-        
-
-#define nxtSTB (I <<40) // sa42 : Possibly STB_O or sram_stb to be set high next cycle
-#define nxtWE  (I <<41) // sa43 : Possibly WE_O to be set high next cycle.
-
-///* Write address and write enable. 
-// */
-////                      ssss         
-////          sa41        2211         
-////          |           1098         
-#define Wnn   (I <<39) | (OOOO <<26) // No write. Set SEL_O = 4'b1111
-#define Wbp   (I <<39) | (OOIO <<26) // Prepare write byte. Setup SEL_O as per B[1:0].
-#define Whp   (I <<39) | (OOOI <<26) // Prepare write halfword. Setup SEL_O as per B[1]
-#define WAQb             (OOIO <<26) // Write to MEM, adr in Q
-#define WAQh             (OOOI <<26) // Write to MEM, adr in Q
-#define WAQW             (OOII <<26) // Write to MEM, adr in Q
-#define WTRG             (OIOO <<26) // Write target reg. 
-#define Wjj              (IOOO <<26) // Write to jj
-#define Wrinst           (IOOI <<26) // Write to rinst
-#define Wpc              (IOIO <<26) // Write B to PC
-#define Wttime           (IOII <<26) // Write to tinytime
-#define Wyy              (IIOO <<26) // Write to scratch register yy
-#define Wmepc            (IIOI <<26) // Write to mepc
-#define Wmcaus           (IIIO <<26) // Write to mcause
-#define Wmtval           (IIII <<26) // Write to mtval
-
-///* Read address
-// */
-////                                        sa34: Controls read of r00000000 or rFFFFFFFF in last cycle memory/io read
-////                                        |        sa23
-////                                        |        |sa22
-////                                        |        ||sa21
-////                                        |        |||sa20
-#define Rjj        ( ( O <<38 ) |   ( O <<35 ) | ( OOOO <<22  ) )  // Scratch register JJ
-#define Rrinst     ( ( O <<38 ) |   ( O <<35 ) | ( OOOI <<22  ) )  // noinstret_base
-#define Rpc        ( ( O <<38 ) |   ( O <<35 ) | ( OOIO <<22  ) )  // PC
-#define rttime     ( ( O <<38 ) |   ( O <<35 ) | ( OOII <<22  ) )  // 
-#define NMIorInInt ( ( O <<38 ) |   ( O <<35 ) | ( OIOO <<22  ) )  // 
-#define rFFFFFF7F  ( ( O <<38 ) |   ( O <<35 ) | ( OIOI <<22  ) )  // 
-#define r000000FF  ( ( O <<38 ) |   ( O <<35 ) | ( OIIO <<22  ) )  // 
-#define r0000FFFF  ( ( O <<38 ) |   ( O <<35 ) | ( OIII <<22  ) )  // 
-#define rFFFF7FFF  ( ( O <<38 ) |   ( O <<35 ) | ( IOOO <<22  ) )  // 
-#define rmtvec     ( ( O <<38 ) |   ( O <<35 ) | ( IOOI <<22  ) )  // trap vector  
-#define r00000000  ( ( O <<38 ) |   ( O <<35 ) | ( IOIO <<22  ) )  // 
-#define rFFFFFFFF  ( ( O <<38 ) |   ( O <<35 ) | ( IOII <<22  ) )  // 
-#define Ryy        ( ( O <<38 ) |   ( O <<35 ) | ( IIOO <<22  ) )  // Scratch register YY
-#define Ralu       ( ( O <<38 ) |   ( O <<35 ) | ( IIOI <<22  ) )  // ALU result is internal read address.
-#define RS2        ( ( O <<38 ) |   ( O <<35 ) | ( IIIO <<22  ) )  // Read register specified in registered rs2 field of instruction
-#define RS1        ( ( O <<38 ) |   ( O <<35 ) | ( IIII <<22  ) )  // Read register specified in registered rs1 field of instruction
-#define r_xx       ( ( O <<38 ) |   ( O <<35 ) | ( xxxx <<22  ) )  // Read address is dont care. 
-#define rHorL      ( ( O <<38 ) |   ( I <<35 ) | ( IOII <<22  ) )  // 
-#define rHorPC     ( ( I <<38 ) |   ( O <<35 ) | ( IOII <<22  ) )  // 
-#define rHorTtime  ( ( I <<38 ) |   ( I <<35 ) | ( IOII <<22  ) )  // 
-//                          |
-//                          sa40 extra select signal for Rai
-
-///* The Q register
-// */
-////                                                                 
-////                Shift right  Part of enable to Q (sa32)     
-////                |            |             Part of enable to Q (sa15)
-/////               |            |             |nReset Q (sa14)
-////                |            |             ||
-#define Qu        ( O << 8 ) |  (O << 33 ) | ( II << 16)  // 0010 Q = B
-#define Qeu       ( O << 8 ) |  (I << 33 ) | ( OI << 16)  // Nearly Qu, but a variant to distinguish SRAM operand fetch
-#define Qs        ( O << 8 ) |  (I << 33 ) | ( II << 16)  // 0110 If rack==0, Q hold. If rack==1, sample B
-#define Qshr      ( I << 8 ) |  (O << 33 ) | ( II << 16)  // 0010 Q == (msbshr<<31) | (Q>>1)
-#define Qz        ( O << 8 ) |  (O << 33 ) | ( IO << 16)  // 0011 Q = 0
-#define Qcndz     ( O << 8 ) |  (I << 33 ) | ( IO << 16)  // 0101 Q = 0 if rack==1
-//#define QzCYZ   ( O << 8 ) |  (O << 33 ) | ( IO << 16)  // 0011 Q = 0, s11 must be high for zero-find. Todo - check that this is the case, delete
-#define Qzh       ( O << 8 ) |  (O << 33 ) | ( IO << 16)  // 0xx1 Q = 0 or Q hold (assumes it was zero beforehand). Changed to Q = 0
-#define Qudec     ( O << 8 ) |  (O << 33 ) | ( II << 16)  // 1010 Q = decoded immediate
-#define Qhld      ( O << 8 ) |  (O << 33 ) | ( OI << 16)  // x001 Q unchanged. sa14 must be 1 here. Don't understand why it is not don't care
-#define Qx        ( O << 8 ) |  (O << 33 ) | ( Ox << 16)  // xxxx Q don't care
-#define psa00     ( I << 8 )
-
-
-
-///* The shift counter
-//*/
-////               ss
-////               11
-////               32                                        
-#define srImm    ( OO << 20 ) // shregcnt = B[4:0]                   B[1:0] BB[1:0]       
-#define srDec    ( OI << 20 ) // Decrement shift count               01     11         
-#define sr_h     ( II << 20 ) // shregcnt hold
-#define sr43a    ( IO << 20 ) // shregcnt = {B[1:0],3'b000}          00     00         
-
-
-
-//                                                Read into    ADR1Mustbe0
-//                      use_brcond  shrep         Instruction  |Adr0Mustbe0
-//                      |           |     sa33    |            ||use_dinx
-#define use_dinx      ( O << 14) | ( O << 34) | ( O << 15) | ( xxI << 30) // dinx determines where to start microcode
-#define u_cont        ( O << 14) | ( O << 34) | ( O << 15) | ( OOO << 30) // rinx determines next microcode instruction
-#define u_io_i_latch  ( O << 14) | ( O << 34) | ( I << 15) | ( OOO << 30) // 
-#define u_io_i        ( O << 14) | ( O << 34) | ( O << 15) | ( OOO << 30) // Repeat until read SRAM/IO succeeds. Then use rinx to find next ucodeinstr.
-#define u_io_o        ( O << 14) | ( O << 34) | ( O << 15) | ( OOO << 30) // Repeat write data out until WACK
-#define u_shrep       ( O << 14) | ( I << 34) | ( O << 15) | ( OOO << 30) // Repeat shift operation until shiftcounter == 0 
-#define usebcond      ( I << 14) | ( O << 34) | ( O << 15) | ( OOO << 30) // rinx determines next microcode instruction, but with lsb determined by condition
-#define wordaligned   ( O << 14) | ( O << 34) | ( O << 15) | ( IIO << 30) // 
-#define hwordaligned  ( O << 14) | ( O << 34) | ( O << 15) | ( OIO << 30) // 
-
-
-
-        
-#define isr_none      ( OO << 36 ) // No trap or CSR entry or exit
-#define isr_use_ij    ( OI << 36 ) // inCSR = 0; ij bit 1 determines if we are to do MIE = MPIE; MPIE = 1.
-#define isr_intoCSR   ( IO << 36 ) // inCSR = 1;
-#define isr_intoTrap  ( II << 36 ) // MPIE = MIE; MIE = 0;
-#define isr_xx        ( xx << 36 )
-
-
-
-#define n(x) (((uint64_t)x) & 255 )
 
 
 /* =============================================================================
@@ -348,62 +76,9 @@
 #define Y(fixedpos, paired, ...) X(__VA_ARGS__) /* X-macro expansion help */
 #endif
 
-/* =============================================================================
- *
- * Simplified diagrams of some bus cycles. Do not use blindly, look at definitions.
- *
- * Reading from EBR
- * 
- * executes ucode:     LW_0        LW_1        $tdIncPc
- * nextucode| LW_0   | LW_1      | $tdIncPc  | Fetch
- * B       ||        | [RS1]+imm |  data     | pc+4        |
- * DAT_O   ||        | [RS1]     | data      | pc          |
- * ADR_O   ||        | imm       | [RS1]+imm | 0
- *         || _______             _________________________
- * iwe     ||        \ __________/                         \
 
- * All the rest wrong.
- *
- * Reading from SRAM (reading from input is similar)
- * B       || adr    |           |             |   data      |
- * ADR_O   ||        | adr       | adr         |  /          |
- * SRAMout ||        |           | data        | /           |
- * rDee    ||        |           |             | data        |
- *                    _________________________
- * STB_O ____________/            _____________\______________
- * ACK_I ________________________/             \______________
- *
- * Executing from EBR, no retired instruction counter
- *                                               1st instr
- *         ||$tdIncPc| Fetch     | Fetch2      | ucode
- * I       ||        | op        | op          | op
- * B       || pc+4   |           | ttime+cycnt | 
- * DAT_O   ||        | op        | ttime       | [RS1]
- * ADR_O   ||        | pc+4      | 0           | Imm
- * 
- * Executing from EBR, with retired instruction counter
- *                                                            1st instr
- *         ||$tdIncPc| Fetch     | Fetch2      | Fetch3      | ucode
- * I       ||        | op        | op          | op          | op
- * B       || pc+4   |           | ttime+cycnt | rinst+1     | 
- * DAT_O   ||        | op        | ttime       | rinst       | [RS1]
- * ADR_O   ||        | pc+4      | 0           |             | Imm
- * 
- * Executing from SRAM, no retired instruction counter
- *                                                                           1st instr
- *         ||$tdIncPc| eFetch(1) | eFetch(2)   | eFetch(3)   | eFetch2     | ucode
- * I       ||        |           |             |             | op          | op
- * B       || pc+4   |           |             |             | ttime+cycnt |   
- * DAT_O   ||        |           | FFFFFFFF    | FFFFFFFF    | ttime       | [RS1]
- * ADR_O   ||        | pc+4      | pc+4        |             | 0           | Imm
- * SRAMout ||        |           | op          |             |             |
- * rDee    ||        |           |             |             | op          |
- *                    _________________________
- * STB_O ____________/            _____________\______________
- * ACK_I ________________________/             \______________
- *
- *
- */
+#define unx  0,-1, x42  // Replace this with definition?
+
 /*
   Fields for internal consistency:
   Fixed/even : 0 if ucode can be placed freely
@@ -417,44 +92,99 @@
          if (fixed/even == 8):  label of the microcode instruction at the address preceeding this microcode instruction (part 2 of a pair)
          Otherwise           :  -1 if there is no requirement
  */
-//                                                                                  Fixed/even       ISR          | ALU         Write   intern      Reg    Shreg   Ucode            Next
-//                                                                                  | Pair           action       | op          adr/en  read adr    op     op      operation        ucode
-#define _jFault   jFault,  " err   Fetch access fault. Faulting adr to mtval",      8,Fetch2,        isr_none     | A_passq   | Wmtval| r00000000 | Qz   | sr_h  | u_cont         | n(jFault_1)  // [6] Must be after [5]
-#define _jFault_1 jFault_1,"       Store 1 to mcause",                              0,-1,            isr_none     | A_add1    | Wmcaus| Rpc       | Qx   | sr_h  | u_cont         | n(LDAF_3)
-//efine _LDAF_3   LDAF_3,  "       PC to mepc",                                     
-//efine _JAL_3    JAL_3,   "       PC+imm/trap entrypt to PC. OpFetch",             
+//                                                                                      Fixed/even       ISR          | ALU         Write   intern      Reg    Shreg   Ucode            Next
+//                                                                                      | Pair           action       | op          adr/en  read adr    op     op      operation        ucode
+#define _jFault   jFault,  " err   Fetch access fault. Faulting adr to mtval",          8,Fetch2,        isr_none     | A_passq   | Wmtval| r00000000 | Qz   | sr_h  | u_cont         | n(jFault_1)  // [6] Must be after [5]
+#define _jFault_1 jFault_1,"       Store 1 to mcause",                                  0,-1,            isr_none     | A_add1    | Wmcaus| Rpc       | Qx   | sr_h  | u_cont         | n(LDAF_3)
 
 
-#if ucodeopt_HAS_MINSTRET == 0 && ucodeopt_HAS_EBR_MINSTRET == 0
-#if ucodeopt_RVC == 0
 /* ===================== *
  * HAS_EBR_MINSTRET = 0  *
  * HAS_MINSTRET     = 0  *
  * RVC              = 0  *
  * ======================*/
-//                                                                                  
-//                                                                                  Fixed/even       ISR          | ALU         Write   intern      Reg    Shreg   Ucode            Next
-//                                                                                  | Pair           action       | op          adr/en  read adr    op     op      operation        ucode
-#define _StdIncPc StdIncPc," Fr00  IncPC, OpFetch",                                 2,-1,            nxtSTB       | A_add4    | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch)     // [1] Must be at even ucode adr. Goes to either Fetch or eFetch. 
-#define _Fetch    Fetch ,  " Fr00  Read and latch instruction",                     2,-1,            isr_none     | A_passq   | Wjj   | rttime    | Qz   | sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR
-#define _Fetch2   Fetch2,  " Fr00  Update ttime. Update I. Q=immediate. Use dinx",  2,-1,            isr_none     | A_cycnt   | Wttime| RS1       | Qudec| sr_h  | use_dinx                      // [5] Must be at even ucode adr.
-#define _eFetch   eFetch,  " Fr00  rep Read until d=mem[(rs1+ofs) & ~3u]",          8,Fetch,         isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2 )   // [4]] Must be at address after [3]
-#define _eFetch2  eFetch2, " Fr00  Not in use",                                     unx
-#define _eFetch3  eFetch3, " Fr00  Not in use, reserved to allow LASTINCH",         0,0xb4,          x42
+//                                                                                      Fixed/even       ISR          | ALU         Write   intern      Reg    Shreg   Ucode            Next
+//                                                                                      | Pair           action       | op          adr/en  read adr    op     op      operation        ucode
+#define _i0StdIncPc StdIncPc," Fr00  IncPC, OpFetch",                                   2,-1,            nxtSTB       | A_add4    | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch)     // [1] Must be at even ucode adr. Goes to either Fetch or eFetch. 
+#define _i0Fetch    Fetch ,  " Fr00  Read and latch instruction",                       2,-1,            isr_none     | A_passq   | Wjj   | rttime    | Qz   | sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR
+#define _i0Fetch2   Fetch2,  " Fr00  Update ttime. Update I. Q=immediate. Use dinx",    2,0xf4,          isr_none     | A_cycnt   | Wttime| RS1       | Qudec| sr_h  | use_dinx                      // [5] Must be at even ucode adr. Fixed address to allow simplification 0xf4,0xb4
+#define _i0eFetch   eFetch,  " Fr00  rep Read until d=mem[(rs1+ofs) & ~3u]",            8,Fetch,         isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2 )   // [4]] Must be at address after [3]
 
+#define _i0reserved i0reserv, "Not in use, reserved to allow LASTINCH",                 0,0xb4,          x42
+#define _i0unx0     i0unx0,  " Not in use",                                             0,-1,            x42
+#define _i0unx1     i0unx1,   "Not in use ",                                            0,-1,            x42
+
+/* We need to conway some information to C programs. What columns are to be
+ * removed, and replaced with inserted Verilog code. Technically this is
+ * done by simple inclusion of this file, with most macros disabled
+ */
+#if ucodeopt_RVC == 0 && ucodeopt_HAS_MINSTRET == 0 && ucodeopt_HAS_EBR_MINSTRET == 0
 #define LASTINCH_REMOVECOLUMS ((1ull<<30) | (1ull<<18))
-#define _LASTINCH LASTINCH,"       not in use ",                                    unx
-#ifndef XXLASTINCH
-#define XXLASTINCH(...)
+#define LASTINCH_CODE "wire instr0100,instr1x110100;        \
+    bn_l4v #(.I(16'h0010)) leq0100(     .o(instr0100),     .i({minx[3:0]}));\
+    bn_l4v #(.I(16'h8000)) leq1x110100( .o(instr1x110100), .i({minx[7],minx[5:4],instr0100}));\
+    SB_DFFE reg_d18( .Q(d[18]), .C(clk), .E(progress_ucode), .D(instr1x110100));\
+    assign d[30] = d[18];"
 #endif
-XXLASTINCH("wire instr0100,instr1x110100;        \
-bn_l4v #(.I(16'h0010)) leq0100(     .o(instr0100),     .i({minx[3:0]}));\
-bn_l4v #(.I(16'h8000)) leq1x110100( .o(instr1x110100), .i({minx[7],minx[5:4],instr0100}));\
-SB_DFFE reg_d18( .Q(d[18]), .C(clk), .E(progress_ucode), .D(instr1x110100));\
-assign d[30] = d[18];")
-#undef XXLASTINCH
 
-#else
+/* ===================== *
+ * HAS_EBR_MINSTRET = 0  *
+ * HAS_MINSTRET     = 1  *
+ * RVC              = 0  *
+ * ======================*/
+//                                                                                  
+//                                                                                      Fixed/even       ISR          | ALU         Write   intern      Reg    Shreg   Ucode            Next
+//                                                                                      | Pair           action       | op          adr/en  read adr    op     op      operation        ucode
+#define _i1StdIncPc StdIncPc," Fr10  IncPC, OpFetch",                                   2,-1,            nxtSTB       | A_add4    | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch)     // [1] Must be at even ucode adr. Goes to either Fetch or eFetch. 
+#define _i1Fetch    Fetch ,  " Fr10  Read and latch instruction",                       2,-1,            isr_none     | A_passq   | Wjj   | rttime    | Qz   | sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR. jFault is adjacent to Fetch
+#define _i1Fetch2   Fetch2,  " Fr10  Update ttime. Update I. Q=immediate. Use dinx",    2,-1,            isr_none     | A_cycnt   | Wttime| RS1       | Qudec| sr_h  | use_dinx                      // [5] Must be at even ucode adr. 
+#define _i1eFetch   eFetch,  " Fr10  rep Read until d=mem[(rs1+ofs) & ~3u]",            8,Fetch,         isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(eFetch2 )  // [4]] Must be at address after [3]
+#define _i1eFetch2  eFetch2, " Fr10  Update ttime",                                     0,-1,            isr_none     | A_cycnt   | Wttime| Rrinst    | Qz   | sr_h  | u_cont         | n(eFetch3 )  // I wonder, perhaps this should be part of apair to allow for bus error detection?
+#define _i1eFetch3  eFetch3, " Fr10  Update minstret, Q=immediate. Use dinx",           0,-1,            isr_none     | A_add1    | Wrinst| RS1       | Qudec| sr_h  | use_dinx
+#define _i1unx0     i1unx0,   "Not in use ",                                            0,-1,            x42
+
+// bit 18 is control for cycnt, bit 30 is control for use_dinx
+// In this case we only replace bit 30
+// It is possible we could move eFetch2 so that bit 18 can
+// be replaced as well, but this has low priority.
+#if ucodeopt_RVC == 0 && ucodeopt_HAS_MINSTRET == 1 && ucodeopt_HAS_EBR_MINSTRET == 0
+#define LASTINCH_REMOVECOLUMS ((1ull<<30))
+#define LASTINCH_CODE "wire instr0100,instr1x110100;        \
+    bn_l4v #(.I(16'h0010)) leq0100(     .o(instr0100),     .i({minx[3:0]}));\
+    bn_l4v #(.I(16'h8000)) leq1x110100( .o(instr1x110100), .i({minx[7],minx[5:4],instr0100}));\
+    SB_DFFE reg_d18( .Q(d[30]), .C(clk), .E(progress_ucode), .D(instr1x110100));"
+#endif
+
+
+/* ===================== *
+ * HAS_EBR_MINSTRET = 1  *
+ * HAS_MINSTRET     = 1  *
+ * RVC              = 0  *
+ * ======================*/
+//                                                                                  
+//                                                                                      Fixed/even       ISR          | ALU         Write   intern      Reg    Shreg   Ucode            Next
+//                                                                                      | Pair           action       | op          adr/en  read adr    op     op      operation        ucode
+#define _i2StdIncPc StdIncPc," Fr11  IncPC, OpFetch",                                   2,-1,            nxtSTB       | A_add4    | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch   )  // [1] Must be at even ucode adr. Goes to either Fetch or eFetch. 
+#define _i2Fetch    Fetch ,  " Fr11  Read and latch instruction",                       2,-1,            isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR
+#define _i2Fetch2   Fetch2,  " Fr11  Update ttime. Update I. Q=immediate. Use dinx",    2,-1,            isr_none     | A_cycnt   | Wttime| Rrinst    | Qz   | sr_h  | u_cont         | n(eFetch3 )  // [5] Must be at even ucode adr. 
+#define _i2eFetch   eFetch,  " Fr11  rep Read until d=mem[(rs1+ofs) & ~3u]",            8,Fetch,         isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [4]] Must be at address after [3]. Fetch from SRAM
+#define _i2eFetch2  eFetch2, " Fr11  Not in use",                                       0,-1, x42
+#define _i2eFetch3  eFetch3, " Fr11  Write minstret. Update I. Q=immediate, use dinx",  0,-1,            isr_none     | A_add1    | Wrinst| RS1       | Qudec| sr_h  | use_dinx
+#define _i2unx0     i2unx0,  "       not in use ",                                      0,-1, x42
+
+//  bit 18 is control for cycnt, bit 30 is control for use_dinx
+//  In this case we only replace bit 30
+//  By rearrangement of free ucodes we may save one lut here
+#if ucodeopt_RVC == 0 && ucodeopt_HAS_MINSTRET == 1 && ucodeopt_HAS_EBR_MINSTRET == 1
+#define LASTINCH_REMOVECOLUMS ((1ull<<30))
+#define LASTINCH_CODE "wire instrxxxx0100,insgtr1011xxxx,instr10110100;        \
+  bn_l4v #(.I(16'h0010)) leq0100(     .o(instrxxxx0100),     .i({minx[3:0]}));\
+  bn_l4v #(.I(16'h0800)) leq1011(     .o(instr1011xxxx),     .i({minx[7:4]}));\
+  bn_l4v #(.I(16'h8888)) leq1x110100( .o(instr10110100), .i({2'b0,instr1011xxxx,instrxxxx0100})); \
+  SB_DFFE reg_d18( .Q(d[30]), .C(clk), .E(progress_ucode), .D(instr10110100));"
+#endif
+           
+
 /* ===================== *
  * HAS_EBR_MINSTRET = 0  *
  * HAS_MINSTRET     = 0  *
@@ -465,123 +195,55 @@ assign d[30] = d[18];")
  * that contain the 32-bit instruction, but then PC is too large (by 2) for
  * instructions that uses PC as an addres. This is at least AUIPC, BEQ,BNE, etc
  */
-//                                                                                  Fixed/even       ISR          | ALU         Write   intern      Reg    Shreg   Ucode            Next
-//                                                                                  | Pair           action       | op          adr/en  read adr    op     op      operation        ucode
-#define _StdIncPc StdIncPc," Fr00  IncPC, OpFetch",                                 2,-1,	     nxtSTB       | A_add2or4 | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch   )  // [1] Must be at even ucode adr. Goes to either Fetch or eFetch. 
-#define _Fetch    Fetch ,  " Fr00  Read and latch instruction",                     2,-1,	     isr_none     | A_passq   | Wjj   | rttime    | Qz   | sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR. Write copy of PC to jj
-#define _Fetch2   Fetch2,  " Fr00  Upd ttime, I. Q=imm Use dinx unless unaligned ", 2,-1,	     isr_none     | A_cycnt   | Wttime| RS1       | Qudec| sr_h  | use_dinx       | n(unalignd)  // [5] Must be at even ucode adr. At unaligned 32-bit instr goto unalignd, else done.
-#define _eFetch   eFetch,  " Fr00  rep Read until d=mem[(rs1+ofs) & ~3u]",          8,Fetch,	     isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [4] Must be at address after [3]. Fetch from SRAM
-#define _unalignd unalignd," Fr00u Unaligned pc, prep read high hword",             0,-1,	     isr_none     | A_passq   | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(straddle)  // For unaligned 32-bit instr
-#define _straddle straddle," Fr00u IncPC, OpFetch",                                 0,-1,	     nxtSTB       | A_add2or4 | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetchu  )  // fittetesthere 2,-1
-#define _Fetchu   Fetchu , " Fr00u Read and latch instruction",                     2,-1,	     isr_none     | A_passq   | Wnn   | rttime    | Qz   | sr_h  | u_io_i_latch   | n(Fetch2  )  // [3b] Must be at even ucode adr. Fetch from EBR. Write copy of PC to yy
-#define _eFetchu  eFetchu, " Fr00u rep Read until d=mem[(rs1+ofs) & ~3u]",          8,Fetchu,	     isr_none     | A_passq   | Wnn   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [4b] Must be at address after [3b]. Fetch from SRAM
-
-#define _eFetch2  _unalignd // Reused
-#define _eFetch3  eFetch3, " Fr00  Not in use, reserved to allow LASTINCH",         0,0xb4,          x42
-#define _LASTINCH _straddle // Reused
-
+//                                                                                      Fixed/even       ISR          | ALU         Write   intern      Reg    Shreg   Ucode            Next
+//                                                                                      | Pair           action       | op          adr/en  read adr    op     op      operation        ucode
+#define _ic0StdIncPc StdIncPc," Fr00  IncPC, OpFetch",                                  2,-1,	         nxtSTB       | A_add2or4 | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch   )  // [1] Must be at even ucode adr. Goes to either Fetch or eFetch. 
+#define _ic0Fetch    Fetch ,  " Fr00  Read and latch instruction",                      2,-1,	         isr_none     | A_passq   | Wjj   | rttime    | Qz   | sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR. Write copy of PC to jj
+#define _ic0Fetch2   Fetch2,  " Fr00  Upd ttime, I. Q=imm Use dinx unless unaligned ",  2,-1,	         isr_none     | A_cycnt   | Wttime| RS1       | Qudec| sr_h  | use_dinx       | n(unalignd)  // [5] Must be at even ucode adr. At unaligned 32-bit instr goto unalignd, else done.
+#define _ic0eFetch   eFetch,  " Fr00  rep Read until d=mem[(rs1+ofs) & ~3u]",           8,Fetch,         isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [4] Must be at address after [3]. Fetch from SRAM
+#define _ic0unalignd unalignd," Fr00u Unaligned pc, prep read high hword",              0,-1,	         isr_none     | A_passq   | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(straddle)  // For unaligned 32-bit instr
+#define _ic0straddle straddle," Fr00u IncPC, OpFetch",                                  0,-1,	         nxtSTB       | A_add2or4 | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetchu  )  // fittetesthere 2,-1
+#define _ic0Fetchu   Fetchu , " Fr00u Read and latch instruction",                      2,-1,	         isr_none     | A_passq   | Wnn   | rttime    | Qz   | sr_h  | u_io_i_latch   | n(Fetch2  )  // [3b] Must be at even ucode adr. Fetch from EBR. Write copy of PC to yy
+#define _ic0eFetchu  eFetchu, " Fr00u rep Read until d=mem[(rs1+ofs) & ~3u]",           8,Fetchu,	 isr_none     | A_passq   | Wnn   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [4b] Must be at address after [3b]. Fetch from SRAM
+#define _ic0reserved ic0reser," Fr00  Not in use, reserved to allow LASTINCH",          0,0xb4,          x42
+#if ucodeopt_RVC == 1 && ucodeopt_HAS_MINSTRET == 0 && ucodeopt_HAS_EBR_MINSTRET == 0
 #define LASTINCH_REMOVECOLUMS ((1ull<<30) | (1ull<<18))
-#ifndef XXLASTINCH
-#define XXLASTINCH(...)
-#endif
-XXLASTINCH("wire instr0100,instr1x110100;        \
+#define LASTINCH_CODE "wire instr0100,instr1x110100;        \
 bn_l4v #(.I(16'h0010)) leq0100(     .o(instr0100),     .i({minx[3:0]}));\
 bn_l4v #(.I(16'h8000)) leq1x110100( .o(instr1x110100), .i({minx[7],minx[5:4],instr0100}));\
 SB_DFFE reg_d18( .Q(d[18]), .C(clk), .E(progress_ucode), .D(instr1x110100));\
-assign d[30] = d[18];")
-#undef XXLASTINCH
-
-
+assign d[30] = d[18];"
 #endif
 
-#elif ucodeopt_HAS_MINSTRET == 1 && ucodeopt_HAS_EBR_MINSTRET == 0
-
-#if ucodeopt_RVC == 0
 /* ===================== *
  * HAS_EBR_MINSTRET = 0  *
  * HAS_MINSTRET     = 1  *
- * RVC              = 0  *
+ * RVC              = 1  *
  * ======================*/
-//                                                                                  
-//                                                                                  Fixed/even       ISR          | ALU         Write   intern      Reg    Shreg   Ucode            Next
-//                                                                                  | Pair           action       | op          adr/en  read adr    op     op      operation        ucode
-#define _StdIncPc StdIncPc," Fr10  IncPC, OpFetch",                                 2,-1,            nxtSTB       | A_add4    | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch)     // [1] Must be at even ucode adr. Goes to either Fetch or eFetch. 
-#define _Fetch    Fetch ,  " Fr10  Read and latch instruction",                     2,-1,            isr_none     | A_passq   | Wjj   | rttime    | Qz   | sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR. jFault is adjacent to Fetch
-#define _Fetch2   Fetch2,  " Fr10  Update ttime. Update I. Q=immediate. Use dinx",  2,-1,            isr_none     | A_cycnt   | Wttime| RS1       | Qudec| sr_h  | use_dinx                      // [5] Must be at even ucode adr. 
-#define _eFetch   eFetch,  " Fr10  rep Read until d=mem[(rs1+ofs) & ~3u]",          8,Fetch,         isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(eFetch2 )  // [4]] Must be at address after [3]
-#define _eFetch2  eFetch2, " Fr10  Update ttime",                                   0,-1,            isr_none     | A_cycnt   | Wttime| Rrinst    | Qz   | sr_h  | u_cont         | n(eFetch3 )  // I wonder, perhaps this should be part of apair to allow for bus error detection?
-#define _eFetch3  eFetch3, " Fr10  Update minstret, Q=immediate. Use dinx",         0,-1,            isr_none     | A_add1    | Wrinst| RS1       | Qudec| sr_h  | use_dinx
-#define _LASTINCH LASTINCH,"       not in use ",                                    unx
-
-// bit 18 is control for cycnt, bit 30 is control for use_dinx
-// In this case we only replace bit 30
-// It is possible we could move eFetch2 so that bit 18 can
-// be replaced as well, but this has low priority.
-#define LASTINCH_REMOVECOLUMS ((1ull<<30))
-#ifndef XXLASTINCH
-#define XXLASTINCH(...)
+#define _ic1StdIncPc StdIncPc," Fr10  IncPC, OpFetch",                                  2,-1,            nxtSTB       | A_add2or4 | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch)     // [1] Must be at even ucode adr. Goes to either Fetch or eFetch. 
+#define _ic1Fetch    Fetch ,  " Fr10  Read and latch instruction",                      2,-1,            isr_none     | A_passq   | Wjj   | rttime    | Qz   | sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR
+#define _ic1Fetch2   Fetch2,  " Fr10  Update ttime. Update I. Q=immediate. Use dinx",   2,-1,            isr_none     | A_cycnt   | Wttime| RS1       | Qudec| sr_h  | use_dinx       | n(unalignd)  // [5] Must be at even ucode adr. At unaligned 32-bit instr goto unalignd, else done
+#define _ic1eFetch   eFetch,  " Fr10  rep Read until d=mem[(rs1+ofs) & ~3u]",           8,Fetch,         isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(eFetch2 )  // [4]] Must be at address after [3]
+#define _ic1eFetch2  eFetch2, " Fr10  Update ttime",                                    0,-1,            isr_none     | A_cycnt   | Wttime| Rrinst    | Qz   | sr_h  | u_cont         | n(eFetch3 )
+#define _ic1eFetch3  eFetch3, " Fr10  Update minstret, Q=immediate. Use dinx",          0,-1,            isr_none     | A_add1    | Wrinst| RS1       | Qudec| sr_h  | use_dinx       | n(unalignd)  //  At unaligned 32-bit instr goto unalignd, else done
+#define _ic1unalignd unalignd," Fr10u Unaligned pc, prep read high hword",              0,-1,            isr_none     | A_passq   | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(straddle)  // For unaligned 32-bit instr
+#define _ic1straddle straddle," Fr10u IncPC, OpFetch",                                  0,-1,            nxtSTB       | A_add2or4 | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetchu  )  // I believe this comment to be wrong. [1] Must be at even ucode adr. Goes to either Fetchu or eFetchu. 
+#define _ic1Fetchu   Fetchu , " Fr10u Read and latch instruction",                      2,-1,            isr_none     | A_passq   | Wnn   | rttime    | Qz   | sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR. Write copy of PC to yy
+#define _ic1eFetchu  eFetchu, " Fr10u rep Read until d=mem[(rs1+ofs) & ~3u]",           8,Fetchu,        isr_none     | A_passq   | Wnn   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [4]] Must be at address after [3]. Fetch from SRAM
+//#define _ic1unx0     ic2unx0,  "      not in use",                                      0,-1,            x42
+#if ucodeopt_RVC == 1 && ucodeopt_HAS_MINSTRET == 1 && ucodeopt_HAS_EBR_MINSTRET == 0
+#define LASTINCH_REMOVECOLUMS 0
+#define LASTINCH_CODE ""
 #endif
-XXLASTINCH("wire instr0100,instr1x110100;        \
-bn_l4v #(.I(16'h0010)) leq0100(     .o(instr0100),     .i({minx[3:0]}));\
-bn_l4v #(.I(16'h8000)) leq1x110100( .o(instr1x110100), .i({minx[7],minx[5:4],instr0100}));\
-SB_DFFE reg_d18( .Q(d[30]), .C(clk), .E(progress_ucode), .D(instr1x110100));")
-#undef XXLASTINCH
 
+
+#if ucodeopt_HAS_MINSTRET == 1 && ucodeopt_HAS_EBR_MINSTRET == 0
+#if ucodeopt_RVC == 0
 #else
-#define _StdIncPc StdIncPc," Fr10  IncPC, OpFetch",                                 work nxtSTB       | A_add2or4 | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch)     // [1] Must be at even ucode adr. Goes to either Fetch or eFetch. 
-#define _Fetch    Fetch ,  " Fr10  Read and latch instruction",                     work isr_none     | A_passq   | Wjj   | rttime    | Qz   | sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR
-#define _Fetch2   Fetch2,  " Fr10  Update ttime. Update I. Q=immediate. Use dinx",  work isr_none     | A_cycnt   | Wttime| RS1       | Qudec| sr_h  | use_dinx       | n(unalignd)  // [5] Must be at even ucode adr. At unaligned 32-bit instr goto unalignd, else done
-#define _eFetch   eFetch,  " Fr10  rep Read until d=mem[(rs1+ofs) & ~3u]",          work isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(eFetch2 )  // [4]] Must be at address after [3]
-#define _eFetch2  eFetch2, " Fr10  Update ttime",                                   work isr_none     | A_cycnt   | Wttime| Rrinst    | Qz   | sr_h  | u_cont         | n(eFetch3 )
-#define _eFetch3  eFetch3, " Fr10  Update minstret, Q=immediate. Use dinx",         work isr_none     | A_add1    | Wrinst| RS1       | Qudec| sr_h  | use_dinx       | n(unalignd)  //  At unaligned 32-bit instr goto unalignd, else done
-
-#define _unalignd unalignd," Fr10u Unaligned pc, prep read high hword",             work isr_none     | A_passq   | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(straddle)  // For unaligned 32-bit instr
-#define fitte_straddle straddle," Fr10u IncPC, OpFetch",                                 work nxtSTB       | A_add2or4 | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetchu  )  // [1] Must be at even ucode adr. Goes to either Fetchu or eFetchu. 
-#define _Fetchu   Fetchu , " Fr10u Read and latch instruction",                     work isr_none     | A_passq   | Wnn   | rttime    | Qz   | sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR. Write copy of PC to yy
-#define _eFetchu  eFetchu, " Fr10u rep Read until d=mem[(rs1+ofs) & ~3u]",          work isr_none     | A_passq   | Wnn   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [4]] Must be at address after [3]. Fetch from SRAM
 #endif
-
 #elif ucodeopt_HAS_MINSTRET == 1 && ucodeopt_HAS_EBR_MINSTRET == 1
 
 #if ucodeopt_RVC == 0
-/* ===================== *
- * HAS_EBR_MINSTRET = 1  *
- * HAS_MINSTRET     = 1  *
- * RVC              = 0  *
- * ======================*/
-//                                                                                  
-//                                                                                  Fixed/even       ISR          | ALU         Write   intern      Reg    Shreg   Ucode            Next
-//                                                                                  | Pair           action       | op          adr/en  read adr    op     op      operation        ucode
-#define _StdIncPc StdIncPc," Fr11  IncPC, OpFetch",                                 2,-1,            nxtSTB       | A_add4    | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch   )  // [1] Must be at even ucode adr. Goes to either Fetch or eFetch. 
-#define _Fetch    Fetch ,  " Fr11  Read and latch instruction",                     2,-1,            isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR
-#define _Fetch2   Fetch2,  " Fr11  Update ttime. Update I. Q=immediate. Use dinx",  2,-1,            isr_none     | A_cycnt   | Wttime| Rrinst    | Qz   | sr_h  | u_cont         | n(eFetch3 )  // [5] Must be at even ucode adr. 
-#define _eFetch   eFetch,  " Fr11  rep Read until d=mem[(rs1+ofs) & ~3u]",          8,Fetch,         isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [4]] Must be at address after [3]. Fetch from SRAM
-#define _eFetch2  eFetch2, " Fr11  Not in use",                                     unx
-#define _eFetch3  eFetch3, " Fr11  Write minstret. Update I. Q=immediate, use dinx",0,-1,            isr_none     | A_add1    | Wrinst| RS1       | Qudec| sr_h  | use_dinx
-#define _LASTINCH LASTINCH,"       not in use ",                                    unx
-
-/*  bit 18 is control for cycnt, bit 30 is control for use_dinx
-    In this case we only replace bit 30
-    By rearrangement of free ucodes we may save one lut here
-*/
-  #define LASTINCH_REMOVECOLUMS ((1ull<<30))
-  #ifndef XXLASTINCH
-  #define XXLASTINCH(...)
-  #endif
-  XXLASTINCH("wire instrxxxx0100,insgtr1011xxxx,instr10110100;        \
-  bn_l4v #(.I(16'h0010)) leq0100(     .o(instrxxxx0100),     .i({minx[3:0]}));\
-  bn_l4v #(.I(16'h0800)) leq1011(     .o(instr1011xxxx),     .i({minx[7:4]}));\
-  bn_l4v #(.I(16'h8888)) leq1x110100( .o(instr10110100), .i({2'b0,instr1011xxxx,instrxxxx0100}));\
-  SB_DFFE reg_d18( .Q(d[30]), .C(clk), .E(progress_ucode), .D(instr10110100));")
-  #undef XXLASTINCH
-           
-//#define LASTINCH_REMOVECOLUMS 0
-//#ifndef XXLASTINCH
-//#define XXLASTINCH(...)
-//#endif
-//XXLASTINCH("")
-//#undef XXLASTINCH
-
 #else
 #define _StdIncPc StdIncPc," Fr11  IncPC, OpFetch",                                 work nxtSTB       | A_add2or4 | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch   )  // [1] Must be at even ucode adr. Goes to either Fetch or eFetch. 
 #define _Fetch    Fetch ,  " Fr11  Read and latch instruction",                     work isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR
@@ -598,7 +260,7 @@ SB_DFFE reg_d18( .Q(d[30]), .C(clk), .E(progress_ucode), .D(instr1x110100));")
 #endif
 
 #else
-#error Illegal combination ucodeopt_HAS_EBR_MINSTRET == 1 ucodeopt_HAS_MINSTRET = 0 encountered. Correct in midgetv_ucodeoptions.h
+//#error Illegal combination ucodeopt_HAS_EBR_MINSTRET == 1 ucodeopt_HAS_MINSTRET = 0 encountered. Correct in midgetv_ucodeoptions.h
 #endif                                                                                                                                                               
 
 
@@ -696,23 +358,22 @@ SB_DFFE reg_d18( .Q(d[30]), .C(clk), .E(progress_ucode), .D(instr1x110100));")
 #define _condb_5t condb_5t,"       Branch taken.",                                  8,condb_5,	     nxtSTB       | A_addDQ   | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch   ) 
 #endif
 //
-//                                                                                  Fixed/even       ISR          | ALU         Write   intern      Reg    Shreg   Ucode            Next
-//                                                                                  | Pair           action       | op          adr/en  read adr    op     op      operation        ucode
-#if ucodeopt_RVC == 0
-#define _BrOpFet  BrOpFet ,"NewOp2 Read until instruction latched",                 2,-1,            isr_none     | A_passd   | Wnn   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  /* Must be placed at even ucode adr     */ 
-#define _BAlignEr BAlignEr," Err   Branch target instruction address misaligned",   8,BrOpFet,       isr_none     | A_xx      | Wnn   | Rpc       | Qx   | sr_h  | u_cont         | n(BAERR_1)   /* Must be placed at the next ucode adr */
-#define _BAERR_1  BAERR_1, "       Faultadr to mtval. Prepare get offset",          0,-1,            isr_none     | A_passd   | Wmtval| Ryy       | Qz   | sr_h  | u_cont         | n(BAERR_2)   
-#define _BAERR_2  BAERR_2, "       ~offset to Q. Prep read (origPC+offset)",        0,-1,            isr_none     | A_nearXOR | Wnn   | Rpc       | Qu   | sr_h  | u_cont         | n(BAERR_3)   
-#define _BAERR_3  BAERR_3, "       origPC to mepc. Prep read 0",                    0,-1,            isr_none     | A_add1    | Wmepc | r00000000 | Qx   | sr_h  | u_cont         | n(BAERR_4)   
-#define _BAERR_4  BAERR_4, "       Store 0 to mcause. Prep get trap entry pont",    0,-1,            isr_intoTrap | A_passd   | Wmcaus| rmtvec    | Qx   | sr_h  | u_cont         | n(JAL_3)   
-#else
-#define _BrOpFet  oleduck, " why oleduck",                                          unx //_unalignd // Reused  fitte these are not used ?
-#define _BAlignEr doleduck," why doleduck",                                         unx //_straddle // Reused  fitte these are not used ?
-#define _BAERR_1  BAERR_1, "      not used",                                        unx
-#define _BAERR_2  _Fetchu   // Reused as [3b]  | These two must be consequtive
-#define _BAERR_3  _eFetchu  // Reused as [4b]  |
-#define _BAERR_4  BAERR_4, "      not used",                                        unx
-#endif
+//                                                                                      Fixed/even       ISR          | ALU         Write   intern      Reg    Shreg   Ucode            Next
+//                                                                                      | Pair           action       | op          adr/en  read adr    op     op      operation        ucode
+#define _ixBrOpFet  BrOpFet ,"NewOp2 Read until instruction latched",                   2,-1,            isr_none     | A_passd   | Wnn   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  /* Must be placed at even ucode adr     */ 
+#define _ixBAlignEr BAlignEr," Err   Branch target instruction address misaligned",     8,BrOpFet,       isr_none     | A_xx      | Wnn   | Rpc       | Qx   | sr_h  | u_cont         | n(BAERR_1)   /* Must be placed at the next ucode adr */
+#define _ixBAERR_1  BAERR_1, "       Faultadr to mtval. Prepare get offset",            0,-1,            isr_none     | A_passd   | Wmtval| Ryy       | Qz   | sr_h  | u_cont         | n(BAERR_2)   
+#define _ixBAERR_2  BAERR_2, "       ~offset to Q. Prep read (origPC+offset)",          0,-1,            isr_none     | A_nearXOR | Wnn   | Rpc       | Qu   | sr_h  | u_cont         | n(BAERR_3)   
+#define _ixBAERR_3  BAERR_3, "       origPC to mepc. Prep read 0",                      0,-1,            isr_none     | A_add1    | Wmepc | r00000000 | Qx   | sr_h  | u_cont         | n(BAERR_4)   
+#define _ixBAERR_4  BAERR_4, "       Store 0 to mcause. Prep get trap entry pont",      0,-1,            isr_intoTrap | A_passd   | Wmcaus| rmtvec    | Qx   | sr_h  | u_cont         | n(JAL_3)   
+
+#define _icunx0     icunx0,   "Not in use ",                                            0,-1,            x42
+#define _icunx1     icunx1,   "Not in use ",                                            0,-1,            x42
+#define _icunx2     icunx2,   "Not in use ",                                            0,-1,            x42
+#define _icunx3     icunx3,   "Not in use ",                                            0,-1,            x42
+
+
+
 //
 //                                                                                  Fixed/even       ISR          | ALU         Write   intern      Reg    Shreg   Ucode            Next
 //                                                                                  | Pair           action       | op          adr/en  read adr    op     op      operation        ucode
@@ -782,8 +443,8 @@ SB_DFFE reg_d18( .Q(d[30]), .C(clk), .E(progress_ucode), .D(instr1x110100));")
 #define _JAERR_1  JAERR_1, " Err   JAL target adr misaligned, store to mtval",      8,JAL_1,         isr_none     | A_addDQ   | Wmtval| Rpc       | Qx   | sr_h  | u_cont         | n(JAERR_2)   
 #define _JAERR_2  JAERR_2, "       Store PC to mepc",                               0,-1,            isr_none     | A_passd   | Wmepc | r00000000 | Qx   | sr_h  | u_cont         | n(BAERR_4)   
 #else
-#define _JAERR_1  JAERR_1, "       Not in use",                                     unx
-#define _JAERR_2  JAERR_2, "       Not in use",                                     unx
+#define _JAERR_1  JAERR_1, "       Not in use",                                     0,-1, x42
+#define _JAERR_2  JAERR_2, "       Not in use",                                     0,-1, x42
 #endif
 //
 #define _JALR_0   JALR_0,  "JALR   jj=RS1+imm",                                     1,0x19,          isr_none     | A_addDQ   | Wjj   | r00000000 | Qz   | sr_h  | u_cont         | n(JALR_1)    
@@ -799,8 +460,8 @@ SB_DFFE reg_d18( .Q(d[30]), .C(clk), .E(progress_ucode), .D(instr1x110100));")
 #define _JALRE1   JALRE1,  " err   Store pc to mepc",                               8,JAL_2,         isr_none     | A_passd   | Wmepc | Ryy       | Qx   | sr_h  | u_cont         | n(JALRE2)    // [rr] follows [qq]
 #define _JALRE2   JALRE2,  "       mtval is target",                                0,-1,            isr_none     | A_passd   | Wmtval| r00000000 | Qx   | sr_h  | u_cont         | n(BAERR_4)   
 #else
-#define _JALRE1   JALRE1,  "       Not in use",                                     unx
-#define _JALRE2   JALRE2,  "       Not in use",                                     unx
+#define _JALRE1   JALRE1,  "       Not in use",                                     0,-1, x42
+#define _JALRE2   JALRE2,  "       Not in use",                                     0,-1, x42
 #endif        
 //                                                                                                                                                               
 #define _SLLI_0   SLLI_0,  "SLLI   Shift left immediate.",                          1,0x24,          isr_none     | A_passq   | Wnn   | RS1       | Qx   | srImm | u_cont         | n(SLLI_1)    
@@ -992,7 +653,7 @@ SB_DFFE reg_d18( .Q(d[30]), .C(clk), .E(progress_ucode), .D(instr1x110100));")
 #define _ILL_2    ILL_2,   "       Store 0 to mtval",                               0,-1,            isr_none     | A_passd   | Wmtval| r00000000 | Qz   | sr_h  | u_cont         | n(ILL_3)
 #define _ILL_3    ILL_3,   "       Q = 1",                                          0,-1,            isr_none     | A_a1      | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(ILL_4)     
 #define _ILL_4    ILL_4,   "       Store 2 to mcause",                              0,-1,            isr_intoTrap | A_add1    | Wmcaus| rmtvec    | Qx   | sr_h  | u_cont         | n(JAL_3) 
-#define _ILL_5    ILL_5,   "       Not in use",                                     unx
+#define _ILL_5    ILL_5,   "       Not in use",                                     0,-1, x42
 //                                                                                                                                                               
 #define _FENCE(x) _L ## x, "FENCE  Prepare read PC (FENCE/FENCE.I)",                1,x,             isr_none     | A_xx      | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)
 #define FENCE _L0x03 // To continue ucode at FENCE
@@ -1044,7 +705,7 @@ SB_DFFE reg_d18( .Q(d[30]), .C(clk), .E(progress_ucode), .D(instr1x110100));")
 #define _CSRRSI_0 CSRRSI_0,"CSRRSI Decoded CSR adr in yy",                          1,0xdc,          isr_none     | A_passq   | Wyy   | r000000FF | Qz   | sr_h  | u_cont         | n(CSRRW_1)   
 #define _CSRRCI_0 CSRRCI_0,"CSRRCI Decoded CSR adr in yy",                          1,0xfc,          isr_none     | A_passq   | Wyy   | r000000FF | Qz   | sr_h  | u_cont         | n(CSRRW_1)   
 #define _CSRRC_1  _CSRRW_4 // Reused CSRRC_1 ,"       Not in use",                                     unx           Cleanup this once ucode with consistency check is verified
-#define _CSRRWI_1 CSRRWI_1,"       Not in use",                                     unx
+#define _CSRRWI_1 CSRRWI_1,"       Not in use",                                     0,-1, x42
 
 #define _CSRRCI_1 _ILL0b(CSRRCI_1) // Rename
 #define _CSRRS_1  _ILL0b(CSRRS_1) // Rename
@@ -1083,410 +744,310 @@ SB_DFFE reg_d18( .Q(d[30]), .C(clk), .E(progress_ucode), .D(instr1x110100));")
 #define _NMI_1    NMI_1,   "       Store pc to mepc.",                              0,-1,            isr_none     | A_passd   | Wmepc | r_xx      | Qz   | sr_h  | u_cont         | n(NMI_2)
 #define _NMI_2    NMI_2,   "       mtval = 0.",                                     0,-1,            isr_intoTrap | A_passq   | Wmtval| NMIorInInt| Qz   | sr_h  | u_cont         | n(JAL_3)
 
-/*
- * Even in small implementations I must:
- *   o  control interrupt enable. 
- *   o  implement MRET.
- *   o  I also need to get back to normal code from my CSR stubs.
- *
- * Interrupt enable in midgetv
- * ---------------------------
- *   o  An interrupt occurs (asynchronous trap) and MIE == 1:
- *      MPIE <= MIE, MIE <= 0
- *      Handled by microcode instruction (field isr_intoTrap).
- *   o  A synchronous trap occurs:
- *      MPIE <= MIE, MIE <= 0
- *      Handled by microcode instruction (field isr_intoTrap).
- *   o  When MRET is executed:
- *      Want MIE <= MPIE, MPIE <= 1
- *      This is specified by bit 1 of the source adr in instruction "ij".
- *   o  During execution of a CSR instruction, interrupts are disabled:
- *      inCSR <= 1
- *      Handled by microcode instruction (field isr_intoCSR).
- *   o  Exit from CSR instruction must clear inCSR
- *      This is handled by microcode (instruction "ij")
- *   o  A special case, from CSR emulation to a synchronous trap:
- *      This is needed because unimplemented CSR addresses should
- *      lead to a trap on the CSR instruction. What we need to do is
- *      to get inCSR = 0, and MPIE = MIE, MIE = 0 without any possible
- *      interrupt source to intervene. We do this by the "ij" instruction
- *      where bit 0 of the source adr is used to get this behaviour.
- * 
- * inCSR  MIE  MPIE   Instruction     What the code should do
- * 0      -    -      ij 0,0x100+0,0  Exit from CSR instr. emu.    (a)
- * 0      0    MIE    ij 0,0x100+1,0  From CSR instr. emu. to trap (b)
- * 0      -    -      ij 0,0x0a4+0,0  From internal INT to trap    (c)
- * 0      MPIE 1      ij 0,0x0b4+2,0  Used in exit from trap       (d)
- *
- * In case (a), we jump to the address stored in location 0x100. The ucode
- * has stored the address of the CSR instruction there. The CSR emulation
- * code will have incremented the contents in location 0x100 by 4 to return
- * to the instruction following the CSR instruction.
- *
- * In case (b), microcode do "mepc = mem[0x100]" so that the normal trap
- * seems to have had an exception at the CSR instruction.
- *
- * In case (c), the instruction is only used to get from internalINT to
- * the trap address without touching registers.
- *
- * In case (d), the situation is as follows. Instructions URET, SRET and 
- * MRET are emulated starting at address 0x104. I treat URET and SRET as
- * an MRET in this implementation. The code at address 0x104 is simply
- * "ij 0,0x0b4+2,0", so execution continues at mepc.
- *
- * This implementation follows the riscv privileged spec with regards
- * to treatment of MPIE and MIE. We introduce an additional interrupt
- * disable by the inCSR FF. The reason for this is that a user program
- * that uses a CSR could otherwise be interrupted while emulating the 
- * CSR, and the interrupt handle will certainly use CSR instructions. 
- *
- * I add a custom-0 instruction "ij" of the following format:
- *
- *  | 332222222222 | 11111 | 111 | 11    | 
- *  | 109876543210 | 98765 | 432 | 10987 | 6543210
- *  | ofs          | rs1   | 000 | rd    | 0001011
- *
- * "ij" is used to implement MRET, and to exit CSR emulation.
- * When exiting CSR emulation, ((rs1+ofs) & 2) == 0
- * When emulating MRET,        ((rs1+ofs) & 2) == 2.
- * 
- * The "ij" instruction implements an indirect memory jump
- * instruction, perhaps usable by programs. If "ij" is not
- * hword aligned, it will lead to an illegal instruction
- * exception, but use the contents of the memory source as
- * the exception address. This is to cover the case where 
- * an illegal CSR address is encountered.
- *
- * "ij  rd,ofs(rs1)"   t = pc; 
- *                     d = rs1+ofs;
- *                     inCSR = 0;
- *                     tMIE = (d & 1) ? 0 : ((d & 2) ? MPIE : MIE);
- *                     MPIE = (d & 1) ? MIE : ((d & 2) ? 1 : MPIE);
- *                     MIE = tMIE;
- *                     pc = mem[(rs1+d)&~3u]; 
- *                     rd = t
- *
- * I have some difficulties with the macro syntax of gnu as, so I do:
- * "ij  rd,ofs(rs1)" written as "ij  rdnr,ofs,rs1nr". Examples:
- * MRET translates to    ij 0, 0x0b6,0
- * CSRRET translates to  ij 0, 0x100,0
- *
- * When microcode that enters an exception is executed, it automatically do 
- * MPIE <= MIE, MIE <= 0.
- * 
- * Microcode that decode CSR automatically do inCSR = 1.
- *
- * Whenever "ij" is executed, inCSR is always cleared. 
- */
-
-/* -----------------------------------------------------------------------------
- * When a qualified interrupt occurs, the riscv specification
- * mandates that mepc = pc, mcause = interrupt number, mtval = 0,
- * MPIE = MIE, MIE = 0, and pc = mtvec.
- * 
- * To allow flexibility in implementation of interrupts on midgetv, we
- * instead do: mepc = pc, mcause = 0, mtval = 7, MPIE = MIE, MIE = 0
- * and pc = internalISR. The internalISR routine should massage
- * mcause to the correct value and jump to where mtvec points using
- * the "ij" instruction.
- */
-
-/* =============================================================================
- * Here is the real data. A number of entries must be at fixed
- * locations due to decoding of the instruction. A number of entries
- * must be consecutive, because we can have a microcode branch. Some
- * entries may be reached by riscv instructions that are not
- * supported.  Remaining locations in the table are used for
- * instructions. Example: "addi" is decoded in such a way that
- * location 4 contains the first microcode instruction. From the
- * definition of _ADDI_0 we can see that the next microcode
- * instruction is StdIncPc, that we find in location 0xe6 below. We
- * can then follow the chain to Fetch and further on.
- *
- * The use of this table, apart from those microcodeinstructions that
- * must be in fixed positions, is entirely up to me. I simply fill it
- * out here. 
- *
- * reachability is used in simulation only. An entry where reachability == 1
- * during instruction decode must come from an instruction as shown in 
- * INSTR, with bits as specified by MASK. If reachability == 0, the line
- * should not be hit by __any__ decode. If reachability == 2, the line can
- * be hit by an instruction, that instruction should not be supported in 
- * RV32I, nor be any other instruction midgetv support.
- *
- *
- * Fixed and spes:
- * 0 : Freely available for any ucode line
- * 1 : Fixed. ucode line must be here
- */
-
-/* When LAZY_DECODE == 0, we still hits those ucode indexes where reachability == 2.
- * When LAZY_DECODE == 1, we also hit indexes at lines commented below.
- * Lines that catch illegal instructions use the MASK as a count of the number of
- * times it should be hit.
- *
- */
-
-
+#if ucodeopt_MULDIV == 0
+# if ucodeopt_RVC == 0
+#  if ucodeopt_HAS_MINSTRET == 0
+#   define Z(i0,i1,i2,im0,im1,im2,ic0,ic1,ic2,imc0,imc1,imc2) i0
+#  else
+#   if ucodeopt_HAS_EBR_MINSTRET == 0
+#    define Z(i0,i1,i2,im0,im1,im2,ic0,ic1,ic2,imc0,imc1,imc2) i1
+#   else
+#    define Z(i0,i1,i2,im0,im1,im2,ic0,ic1,ic2,imc0,imc1,imc2) i2
+#   endif
+#  endif
+# else
+#  if ucodeopt_HAS_MINSTRET == 0
+#   define Z(i0,i1,i2,im0,im1,im2,ic0,ic1,ic2,imc0,imc1,imc2) ic0
+#  else
+#   if ucodeopt_HAS_EBR_MINSTRET == 0
+#    define Z(i0,i1,i2,im0,im1,im2,ic0,ic1,ic2,imc0,imc1,imc2) ic1
+#   else
+#    define Z(i0,i1,i2,im0,im1,im2,ic0,ic1,ic2,imc0,imc1,imc2) ic2
+#   endif
+#  endif
+# endif
+#else
+# if ucodeopt_RVC == 0
+#  if ucodeopt_HAS_MINSTRET == 0
+#   define Z(i0,i1,i2,im0,im1,im2,ic0,ic1,ic2,imc0,imc1,imc2) im0
+#  else
+#   if ucodeopt_HAS_EBR_MINSTRET == 0        
+#    define Z(i0,i1,i2,im0,im1,im2,ic0,ic1,ic2,imc0,imc1,imc2) im1
+#   else
+#    define Z(i0,i1,i2,im0,im1,im2,ic0,ic1,ic2,imc0,imc1,imc2) im2
+#   endif
+#  endif
+# else
+#  if ucodeopt_HAS_MINSTRET == 0
+#   define Z(i0,i1,i2,im0,im1,im2,ic0,ic1,ic2,imc0,imc1,imc2) imc0
+#  else
+#   if ucodeopt_HAS_EBR_MINSTRET == 0        
+#    define Z(i0,i1,i2,im0,im1,im2,ic0,ic1,ic2,imc0,imc1,imc2) imc1
+#   else
+#    define Z(i0,i1,i2,im0,im1,im2,ic0,ic1,ic2,imc0,imc1,imc2) imc2
+#   endif
+#  endif
+# endif
+#endif
 //         Fixed  Paired
-//         spes   spec                     reachability
-//ORIGTAB  |      |                        |    MASK        INSTR     HITNR        // ENTRYPOINT               This comment is important, used by midgetv_ucode_linepermutate to find this data.
-/* 00 */Y( 1,     0 , _LB_0              , 1, 0x0000707f, 0x00000003, (1<<22)    ) // LB                      
-/* 01 */Y( 0,     0 , _LB_1              , 0, 0xffffffff, 0x00000000, 0          )                            
-/* 02 */Y( 1,     0 , _IJ_0              , 1, 0x0000707f, 0x0000000b, (1<<22)    ) // custom-0 instruction    
-/* 03 */Y( 1,     0 , _FENCE(0x03)       , 1, 0x0000707f, 0x0000000f, (1<<22)    ) // FENCE                   
-/* 04 */Y( 1,     0 , _ADDI_0            , 1, 0x0000707f, 0x00000013, (1<<22)    ) // ADDI                    
-/* 05 */Y( 1,     0 , _AUIPC_0(0x05)     , 1, 0x0000007f, 0x00000017, (1<<25)/2  ) // AUIPC 1/2               
-/* 06 */Y( 0,     0 , _LB_3              , 0, 0xffffffff, 0x00000000, 0          ) //                         
-/* 07 */Y( 0,     0 , _LB_4              , 0, 0xffffffff, 0x00000000, 0          ) //                         
-/* 08 */Y( 1,     0 , _SB_0(0x08)        , 1, 0x0000707f, 0x00000023, (1<<22)/2  ) // SB 1/2                  
-/* 09 */Y( 0,     0 , _LB_5              , 0, 0xffffffff, 0x00000000, 0          ) //                         
-/* 0a */Y( 1,     0 , _SB_0(0x0a)        , 1, 0x0000707f, 0x00000023, (1<<22)/2  ) // SB 2/2                  
-/* 0b */Y( 0,     0 , _JALR_2            , 0, 0xffffffff, 0x00000000, 0          ) //                           
-/* 0c */Y( 1,     0 , _ADD_0             , 1, 0xfe00707f, 0x00000033, (1<<15)    ) // ADD                     
-/* 0d */Y( 1,     0 , _MUL_0             , 1, 0xfe00707f, 0x02000033, (1<<15)    ) // MUL/LUI when no MUL
-/* 0e */Y( 1,     0 , _SUB_0             , 1, 0xfe00707f, 0x40000033, (1<<15)    ) // SUB
-/* 0f */Y( 1,     0 , _LUI_0(0x0f)       , 1, 0x0000007f, 0x00000037, (1<<25)/2  ) // LUI 1/2                 
-/* 10 */Y( 0,     0 , _SUB_1             , 0, 0xffffffff, 0x00000000, 0          ) //                         
-/* 11 */Y( 0,     0 , _AND_1             , 0, 0xffffffff, 0x00000000, 0          ) //                         
-/* 12 */Y( 0,     0 , _LASTINCH          , 0, 0xffffffff, 0x00000000, 0          ) //                         
-/* 13 */Y( 0,     0 , _condb_2           , 0, 0xffffffff, 0x00000000, 0          ) //                         
-/* 14 */Y( 0,     0 , _condb_3           , 0, 0xffffffff, 0x00000000, 0          ) //                         
-/* 15 */Y( 0,     0 , _condb_4           , 0, 0xffffffff, 0x00000000, 0          ) //                         
-/* 16 */Y( 0,  0x01 , _condb_5           , 0, 0xffffffff, 0x00000000, 0          ) //                         
-/* 17 */Y( 0,  0x01 , _condb_5t          , 0, 0xffffffff, 0x00000000, 0          ) //                         
-/* 18 */Y( 1,     0 , _BEQ               , 1, 0x0000707f, 0x00000063, (1<<22)    ) // BEQ                     
-/* 19 */Y( 1,     0 , _JALR_0            , 1, 0x0000707f, 0x00000067, (1<<22)    ) // JALR                    
-/* 1a */Y( 0,     0 , _ANDI_1            , 0, 0xffffffff, 0x00000000, 0          ) //                         
-/* 1b */Y( 1,     0 , _JAL_0(0x1b)       , 1, 0x0000007f, 0x0000006f, (1<<25)/4  ) // JAL 1/4                 
-/* 1c */Y( 1,     0 , _ECAL_BRK          , 1, 0x0000707f, 0x00000073, (1<<12)    ) // ECALL/EBREAK/WFI/MRET   
-/* 1d */Y( 0,     0 , _ORI_2             , 0, 0xffffffff, 0x00000000, 0          ) ///                           
-/* 1e */Y( 0,     0 , _aFault_1          , 0, 0xffffffff, 0x00000000, 0          ) //                         
-/* 1f */Y( 0,     0 , _IJ_2              , 0, 0xffffffff, 0x00000000, 0          ) //                         
-/* 20 */Y( 1,     0 , _LH_0              , 1, 0x0000707f, 0x00001003, (1<<22)    ) // LH                      
-/* 21 */Y( 0,     0 , _XORI_1            , 0, 0xffffffff, 0x00000000, 0          ) //                         
-/* 22 */Y( 0,     0 , _MULHU_6           , 2, 0x00400000, 0x00000000, 0          ) // illegal at entry. Can get here from OpCode close to "ij"
-/* 23 */Y( 1,     0 , _FENCE(0x23)       , 1, 0x0000707f, 0x0000100f, (1<<22)    ) // FENCEI                  
-/* 24 */Y( 1,     0 , _SLLI_0            , 1, 0xfe00707f, 0x00001013, (1<<15)    ) // SLLI                    
-/* 25 */Y( 1,     0 , _AUIPC_0(0x25)     , 1, 0x0000007f, 0x00000017, (1<<25)/2  ) // AUIPC 2/2               
-/* 26 */Y( 0,     0 , _OR_1              , 0, 0xffffffff, 0x00000000, 0          ) //                         
-/* 27 */Y( 0,     0 , _OR_2              , 0, 0xffffffff, 0x00000000, 0          ) //                         
-/* 28 */Y( 1,     0 , _SH_0(0x28)        , 1, 0x0000707f, 0x00001023, (1<<22)/2  ) // SH 1/2                  
-/* 29 */Y( 0,     0 , _XOR_1             , 0, 0xffffffff, 0x00000000, 0          ) //                         
-/* 2a */Y( 1,     0 , _SH_0(0x2a)        , 1, 0x0000707f, 0x00001023, (1<<22)/2  ) // SH 2/2                  
-/* 2b */Y( 0,     0 , _SLTIX_1           , 0, 0xffffffff, 0x00000000, 0          ) //                         
-/* 2c */Y( 1,     0 , _SLL_0             , 1, 0xfe00707f, 0x00001033, (1<<15)    ) // SLL                     
-/* 2d */Y( 1,     0 , _MULH_0            , 1, 0xfe00707f, 0x02001033, (1<<15)    ) // LUI/MULH
-/* 2e */Y( 0,     0 , _MULHU_1           , 2, 0xffffffff, 0x00000000, 0          ) //
-/* 2f */Y( 1,     0 , _LUI_0(0x2f)       , 1, 0x0000007f, 0x00000037, (1<<25)/2  ) // LUI 2/2                 
-/* 30 */Y( 0,     0 , _SLTIX_2           , 0, 0xffffffff, 0x00000000, 0          ) //                         
-/* 31 */Y( 0,     0 , _SLTX_1            , 0, 0xffffffff, 0x00000000, 0          ) //                         
-/* 32 */Y( 0,  0x02 , _JAL_1             , 0, 0xffffffff, 0x00000000, 0          ) //                         
-/* 33 */Y( 0,  0x02 , _JAERR_1           , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 34 */Y( 0,     0 , _JAL_3             , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 35 */Y( 0,     0 , _SLLI_1            , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 36 */Y( 0,     0 , _SLLI_2            , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 37 */Y( 0,     0 , _ECALL_2           , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 38 */Y( 1,     0 , _BNE               , 1, 0x0000707f, 0x00001063, (1<<22)    ) // BNE
-/* 39 */Y( 0,     0 , _MULHU_7           , 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "JALR"
-/* 3a */Y( 0,     0 ,  _SRxI_1           , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 3b */Y( 1,     0 , _JAL_0(0x3b)       , 1, 0x0000007f, 0x0000006f, (1<<25)/4  ) // JAL 2/4
-/* 3c */Y( 1,     0 , _CSRRW_0           , 1, 0x0000707f, 0x00001073, (1<<22)    ) // CSRRW
-/* 3d */Y( 0,     0 , _SRxI_2            , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 3e */Y( 0,     0 , _SLL_1             , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 3f */Y( 0,     0 , _SRx_1             , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 40 */Y( 1,     0 , _LW_0              , 1, 0x0000707f, 0x00002003, (1<<22)    ) // LW
-/* 41 */Y( 0,     0 , _JALR_1            , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 42 */Y( 0,  0x03 , _MULHU_2           , 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "ij"
-/* 43 */Y( 0,  0x03 , _MULHU_4           , 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to FENCE
-/* 44 */Y( 1,     0 , _SLTI_0            , 1, 0x0000707f, 0x00002013, (1<<22)    ) // SLTI
-/* 45 */Y( 0,     0 , _WFI_3             , 0, 0xffffffff, 0x00000000, 0          ) // 
-/* 46 */Y( 0,     0 , _ILL_1             , 0, 0xffffffff, 0x00000000, 0          ) // Potential problem, can this instructions be reached bv an OpCode decode?
-/* 47 */Y( 0,     0 , _ILL_2             , 0, 0xffffffff, 0x00000000, 0          ) // Potential problem, can this instructions be reached bv an OpCode decode?
-/* 48 */Y( 1,     0 , _SW_0(0x48)        , 1, 0x0000707f, 0x00002023, (1<<22)/2  ) // SW 1/2
-/* 49 */Y( 0,     0 , _CSRRW_1           , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 4a */Y( 1,     0 , _SW_0(0x4a)        , 1, 0x0000707f, 0x00002023, (1<<22)/2  ) // SW 2/2
-/* 4b */Y( 0,     0 , _CSRRW_2           , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 4c */Y( 1,     0 , _SLT_0             , 1, 0xfe00707f, 0x00002033, (1<<15)    ) // SLT
-/* 4d */Y( 1,     0 , _MULHSU_0          , 1, 0xfe00707f, 0x02002033, (1<<15)    ) // MULHSU
-/* 4e */Y( 0,  0x04 , _eILL0b            , 0, 0xffffffff, 0x00000000, 0          ) // Reached with LAZY_DECODE==1 but forward progress ensured || Wants to relocate these
-/* 4f */Y( 0,  0x04 , _MRET_8            , 0, 0xffffffff, 0x00000000, 0          ) // Reached with LAZY_DECODE==1. Will work as a strange JMP  || Wants to relocate these
-/* 50 */Y( 0,  0x05 , _LW_1              , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 51 */Y( 0,  0x05 , _LDAF_LW           , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 52 */Y( 0,  0x06 , _LH_1              , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 53 */Y( 0,  0x06 , _LDAF_LH           , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 54 */Y( 0,  0x07 , _LH_2              , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 55 */Y( 0,  0x07 , _aFaultb           , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 56 */Y( 0,     0 , _LH_4              , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 57 */Y( 0,     0 , _LH_5              , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 58 */Y( 0,  0x08 , _DIV_A             , 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "BEQ"
-/* 59 */Y( 0,  0x08 , _DIV_B             , 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "JALR"
-/* 5a */Y( 0,     0 , _SB_1              , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 5b */Y( 1,     0 , _JAL_0(0x5b)       , 1, 0x0000007f, 0x0000006f, (1<<25)/4  ) // JAL 3/4
-/* 5c */Y( 1,     0 , _CSRRS_0           , 1, 0x0000707f, 0x00002073, (1<<22)    ) // CSRRS
-/* 5d */Y( 0,     0 , _SB_2              , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 5e */Y( 0,  0x09 , _LHU_1             , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 5f */Y( 0,  0x09 , _LDAF_LHU          , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 60 */Y( 0,     0 , _MULHU_3           , 2, 0xffffffff, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "LW"
-/* 61 */Y( 0,     0 , _EBRKWFI2          , 0, 0xffffffff, 0x00000000, 0          ) // 
-/* 62 */Y( 0,  0x0b , _DIV_8             , 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "ij"
-/* 63 */Y( 0,  0x0b , _DIV_9             , 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to FENCE
-/* 64 */Y( 1,     0 , _SLTIU_0           , 1, 0x0000707f, 0x00003013, (1<<22)    ) // SLTIU
-/* 65 */Y( 0,     0 , _WFI_4             , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 66 */Y( 0,  0x0c , _SW_1              , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 67 */Y( 0,  0x0c , _SW_E1SWE          , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 68 */Y( 0,  0x23 , _DIV_12            , 2, 0x00200000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "SW"
-/* 69 */Y( 0,  0x23 , _DIV_13            , 0, 0xffffffff, 0x00000000, 0          ) //                                                         
-/* 6a */Y( 0,     0 , _MULH_1            , 2, 0xffffffff, 0x00000000, 0          ) // illegal as entry. Can get here from OpClde close to "LW" (and also "SW"?)
-/* 6b */Y( 0,     0 , _SB_4              , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 6c */Y( 1,     0 , _SLTU_0            , 1, 0xfe00707f, 0x00003033, (1<<15)    ) // SLTU
-/* 6d */Y( 1,     0 , _MULHU_0           , 1, 0xfe00707f, 0x02003033, (1<<15)    ) // MULHU
-/* 6e */Y( 0,     0 , _DIV_C             , 0, 0xffffffff, 0x00000000, 0          ) // 
-/* 6f */Y( 0,     0 , _MRET_6            , 0, 0xffffffff, 0x00000000, 0          ) // Reached with LAZY_DECODE==1
-/* 70 */Y( 0,  0x0d , _LHU_2             , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 71 */Y( 0,  0x0d , _aFaultc           , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 72 */Y( 0,     0 , _LBU_3             , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 73 */Y( 0,     0 , _BAERR_1           , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 74 */Y( 0,  0x0e , _BrOpFet           , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 75 */Y( 0,  0x0e , _BAlignEr          , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 76 */Y( 0,  0x92 , _BAERR_2           , 0, 0xffffffff, 0x00000000, 0          ) // // Paired due to use with RVC
-/* 77 */Y( 0,  0x92 , _BAERR_3           , 0, 0xffffffff, 0x00000000, 0          ) // // Paired due to use with RVC
-/* 78 */Y( 0,  0x0f , _DIV_4             , 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "BEQ"
-/* 79 */Y( 0,  0x0f , _DIV_5             , 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "JALR"
-/* 7a */Y( 0,     0 , _SB_5              , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 7b */Y( 1,     0 , _JAL_0(0x7b)       , 1, 0x0000007f, 0x0000006f, (1<<25)/4  ) // JAL 4/4
-/* 7c */Y( 1,     0 , _CSRRC_0           , 1, 0x0000707f, 0x00003073, (1<<22)    ) // CSRRC
-/* 7d */Y( 0,     0 , _BAERR_4           , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 7e */Y( 0,     0 , _NMI_1             , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 7f */Y( 0,     0 , _JALRE2            , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 80 */Y( 1,     0 , _LBU_0             , 1, 0x0000707f, 0x00004003, (1<<22)    ) // LBU
-/* 81 */Y( 0,     0 , _JAERR_2           , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 82 */Y( 0,  0x10 , _DIV_1             , 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "ij"
-/* 83 */Y( 0,  0x10 , _DIV_2             , 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to FENCE
-/* 84 */Y( 1,     0 , _XORI_0            , 1, 0x0000707f, 0x00004013, (1<<22)    ) // XORI
-/* 85 */Y( 0,     0 , _LBU_1             , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 86 */Y( 0,  0x11 , _JAL_2             , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 87 */Y( 0,  0x11 , _JALRE1            , 0, 0xffffffff, 0x00000000, 0          ) // 
-/* 88 */Y( 0,  0x12 , _DIV_E             , 2, 0x00200000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "SW"
-/* 89 */Y( 0,  0x12 , _DIV_F             , 0, 0xffffffff, 0x00000000, 0          ) //                                                         
-/* 8a */Y( 0,  0x15 , _DIVU_5            , 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "SW" 
-/* 8b */Y( 0,  0x15 , _LB_6              , 0, 0x00400000, 0x00000000, 0          ) //
-/* 8c */Y( 1,     0 , _XOR_0             , 1, 0xfe00707f, 0x00004033, (1<<15)    ) // XOR
-/* 8d */Y( 1,     0 , _DIV_0             , 1, 0xfe00707f, 0x02004033, (1<<15)    ) // DIV
-/* 8e */Y( 0,     0 , _CSRRS_1           , 0, 0xffffffff, 0x00000000, 0          ) // illegal. Must be even ucode adr due to use of add4       Reached with LAZY_DECODE==1
-/* 8f */Y( 0,     0 , _ILL_3             , 0, 0xffffffff, 0x00000000, 0          ) //                                                          Reached with LAZY_DECODE==1
-/* 90 */Y( 0,     0 , _NMI_2             , 0, 0xffffffff, 0x00000000, 0          ) //                         
-/* 91 */Y( 0,     0 , _LDAF_2            , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 92 */Y( 0,     0 , _LDAF_3            , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 93 */Y( 0,     0 , _SW_E2             , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 94 */Y( 0,     0 , _SW_E4             , 0, 0xffffffff, 0x00000000, 0          ) // Must be even ucode adr due to use of add4 in SW_E3 [what!]
-/* 95 */Y( 0,     0 , _SW_E3             , 0, 0xffffffff, 0x00000000, 0          ) // [a] probably pair with above
-/* 96 */Y( 0,  0x13 , _SH_1              , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 97 */Y( 0,  0x13 , _SW_E1SWH          , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 98 */Y( 1,     0 , _BLT               , 1, 0x0000707f, 0x00004063, (1<<22)    ) // BLT
-/* 99 */Y( 0,     0 , _ILL_0(0x99)       , 2, 0x00400000, 0x00000000, 0          ) // illegal Can get here from OpCode close to "JALR". 
-/* 9a */Y( 0,     0 , _ECALL_6           , 0, 0x00200000, 0x00000000, 0          ) // Must be even ucode adr for unknown reason [what2]
-/* 9b */Y( 0,     0 , _ILL_5             , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 9c */Y( 0,  0x14 , _DIV_10            , 2, 0x00001000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "EBREAK/ECALL/CSR"
-/* 9d */Y( 0,  0x14 , _DIV_11            , 0, 0xffffffff, 0x00000000, 0          ) //                                                                       
-/* 9e */Y( 0,     0 , _SH_4              , 0, 0xffffffff, 0x00000000, 0          ) //
-/* 9f */Y( 0,     0 , _SH_5              , 0, 0xffffffff, 0x00000000, 0          ) //
-/* a0 */Y( 1,     0 , _LHU_0             , 1, 0x0000707f, 0x00005003, (1<<22)    ) // LHU
-/* a1 */Y( 0,     0 , _ECALL_4           , 0, 0xffffffff, 0x00000000, 0          ) //
-/* a2 */Y( 0,  0x0a , _DIV_14            , 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "ij"
-/* a3 */Y( 0,  0x0a , _DIV_15            , 0, 0xffffffff, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to FENCE
-/* a4 */Y( 1,     0 , _SRxI_0            , 1, 0xbe00707f, 0x00005013, (1<<15)*2  ) // SRLI/SRAI
-/* a5 */Y( 0,     0 , _MRET_3            , 0, 0xffffffff, 0x00000000, 0          ) //
-/* a6 */Y( 0,  0x16 , _ECAL_RET          , 0, 0xffffffff, 0x00000000, 0          ) //
-/* a7 */Y( 0,  0x16 , _EBRKWFI1          , 0, 0xffffffff, 0x00000000, 0          ) //
-/* a8 */Y( 0   ,  0 , _DIV_3             , 2, 0x00200000, 0x00000000, 0          ) // Illegal as entry. Can get here from OpCode close to "SW". DIV_3 must be even ucode adr
-/* a9 */Y( 0,     0 , _ILL_4             , 0, 0x00200000, 0x00000000, 0          ) //
-/* aa */Y( 0,     0 , _DIV_6             , 2, 0xffffffff, 0x00000000, 0          ) // Illegal as entry. Can get here from OpCode close to "SW"
-/* ab */Y( 0,     0 , _EBREAK_2          , 0, 0xffffffff, 0x00000000, 0          ) //
-/* ac */Y( 1,     0 , _SRx_0(0xac)       , 1, 0xfe00707f, 0x00005033, (1<<15)    ) // SRL
-/* ad */Y( 1,     0 , _DIVU_0            , 1, 0xfe00707f, 0x02005033, (1<<15)    ) // DIVU
-/* ae */Y( 1,     0 , _SRx_0(0xae)       , 1, 0xfe00707f, 0x40005033, (1<<15)    ) // SRA
-/* af */Y( 0,     0 , _MRET_4            , 0, 0xffffffff, 0x00000000, 0          ) // Reached with LAZY_DECODE==1. 
-/* b0 */Y( 0,     0 , _CSRRW_3           , 0, 0xffffffff, 0x00000000, 0          ) //
-/* b1 */Y( 0,     0 , _aF_SW_3           , 0, 0xffffffff, 0x00000000, 0          ) //
-/* b2 */Y( 0,     0 , _CSRRC_1           , 0, 0xffffffff, 0x00000000, 0          ) //
-/* b3 */Y( 0,     0 , _CSRRWI_1          , 0, 0xffffffff, 0x00000000, 0          ) //
-/* b4 */Y( 0,     0 , _eFetch3           , 0, 0xffffffff, 0x00000000, 0          ) //
-/* b5 */Y( 0,     0 , _SH_3              , 0, 0xffffffff, 0x00000000, 0          ) //
-/* b6 */Y( 0,     0 , _ECALL_5           , 0, 0xffffffff, 0x00000000, 0          ) //
-/* b7 */Y( 0,     0 , _IJ_3              , 0, 0xffffffff, 0x00000000, 0          ) //
-/* b8 */Y( 1,     0 , _BGE               , 1, 0x0000707f, 0x00005063, (1<<22)    ) // BGE
-/* b9 */Y( 0,     0 , _DIV_e             , 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "JALR".
-/* ba */Y( 0,     0 , _LHU_3             , 0, 0xffffffff, 0x00000000, 0          ) // Must be even ucode adr for unknown reason. Must find owut this. Probably because MCLR was used prev cycle.
-/* bb */Y( 0,     0 , _SH_2              , 0, 0xffffffff, 0x00000000, 0          ) //
-/* bc */Y( 1,     0 , _CSRRWI_0          , 1, 0x0000707f, 0x00005073, (1<<22)    ) // CSRRWI
-/* bd */Y( 0,     0 , _IJ_4              , 0, 0xffffffff, 0x00000000, 0          ) //
-/* be */Y( 0,  0x17 , _IJ_1              , 0, 0xffffffff, 0x00000000, 0          ) //
-/* bf */Y( 0,  0x17 , _IJT_1             , 0, 0xffffffff, 0x00000000, 0          ) //
-/* c0 */Y( 0,     0 , _DIV_D             , 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "LW"
-/* c1 */Y( 0,     0 , _IJT_2             , 0, 0xffffffff, 0x00000000, 0          ) //
-/* c2 */Y( 0,  0x18 , _DIVU_3            , 2, 0x00400000, 0x00000000, 0          ) // Illegal as entry. Can get here from OpCode close to "ij"
-/* c3 */Y( 0,  0x18,  _DIVU_4            , 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to FENCE. 
-/* c4 */Y( 1,     0 , _ORI_0             , 1, 0x0000707f, 0x00006013, (1<<22)    ) // ORI                                                        
-/* c5 */Y( 0,     0 , _MRET_5            , 0, 0xffffffff, 0x00000000, 0          ) //
-/* c6 */Y( 0,     0 , _IJT_4             , 0, 0xffffffff, 0x00000000, 0          ) //
-/* c7 */Y( 0,     0 , _QINT_1            , 0, 0xffffffff, 0x00000000, 0          ) //
-/* c8 */Y( 0,     0 , _DIV_7             , 2, 0x00200000, 0x00000000, 0          ) // Illegal as entry. Can get here from OpCode close to "SW". DIV_7 must be even ucode adr (why?)
-/* c9 */Y( 0,     0 , _MRET_2            , 0, 0xffffffff, 0x00000000, 0          ) //
-/* ca */Y( 0,     0 , _DIVU_2            , 2, 0x00200000, 0x00000000, 0          ) // illegal
-/* cb */Y( 0,     0 , _QINT_2            , 0, 0xffffffff, 0x00000000, 0          ) //
-/* cc */Y( 1,     0 , _OR_0              , 1, 0xfe00707f, 0x00006033, (1<<15)    ) // OR
-/* cd */Y( 1,     0 , _REM_0             , 1, 0xfe00707f, 0x02006033, (1<<15)    ) // REM
-/* ce */Y( 0,     0 , _CSRRCI_1          , 0, 0xffffffff, 0x00000000, 0          ) // Reached with LAZY_DECODE==1
-/* cf */Y( 0,     0 , _MRET_7            , 0, 0xffffffff, 0x00000000, 0          ) // Reached with LAZY_DECODE==1
-/* d0 */Y( 0,  0x19 , _ECALL_1           , 0, 0xffffffff, 0x00000000, 0          ) //
-/* d1 */Y( 0,  0x19 , _MRET_1            , 0, 0xffffffff, 0x00000000, 0          ) //
-/* d2 */Y( 0,  0x1a , _LB_2              , 0, 0xffffffff, 0x00000000, 0          ) //
-/* d3 */Y( 0,  0x1a , _aFaultd           , 0, 0xffffffff, 0x00000000, 0          ) //
-/* d4 */Y( 0,     0 , _aFault_2          , 0, 0xffffffff, 0x00000000, 0          ) //
-/* d5 */Y( 0,     0 , _eFetch2           , 0, 0xffffffff, 0x00000000, 0          ) //
-/* d6 */Y( 0,  0x1b , _eILL0c            , 0, 0xffffffff, 0x00000000, 0          ) //
-/* d7 */Y( 0,  0x1b , _ECALL_3           , 0, 0xffffffff, 0x00000000, 0          ) //
-/* d8 */Y( 1,     0 , _BLTU              , 1, 0x0000707f, 0x00006063, (1<<22)    ) // BLTU
-/* d9 */Y( 0,     0 , _MULH_3            , 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "JALR".
-/* da */Y( 0,     0 , _LDAF_a            , 0, 0xffffffff, 0x00000000, 0          ) //
-/* db */Y( 0,     0 , _jFault_1          , 0, 0xffffffff, 0x00000000, 0          ) //
-/* dc */Y( 1,     0 , _CSRRSI_0          , 1, 0x0000707f, 0x00006073, (1<<22)    ) // CSRRSI
-/* dd */Y( 0,     0 , _aF_SW_1           , 0, 0xffffffff, 0x00000000, 0          ) //
-/* de */Y( 0,  0x1c , _Fetch             , 0, 0xffffffff, 0x00000000, 0          ) //
-/* df */Y( 0,  0x1c , _eFetch            , 0, 0xffffffff, 0x00000000, 0          ) //
-/* e0 */Y( 0,     0 , _DIVU_1            , 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "LW"
-/* e1 */Y( 0,     0 , _ORI_1             , 0, 0xffffffff, 0x00000000, 0          ) //
-/* e2 */Y( 0,  0x1d , _MUL_1             , 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "ij"
-/* e3 */Y( 0,  0x1d , _MUL_3             , 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to FENCE
-/* e4 */Y( 1,     0 , _ANDI_0            , 1, 0x0000707f, 0x00007013, (1<<22)    ) // ANDI
-/* e5 */Y( 0,     0 , _aF_SW_2           , 0, 0xffffffff, 0x00000000, 0          ) //
-/* e6 */Y( 0,  0x1e , _StdIncPc          , 0, 0xffffffff, 0x00000000, 0          ) //
-/* e7 */Y( 0,  0x1e , _aFault            , 0, 0xffffffff, 0x00000000, 0          ) //
-/* e8 */Y( 0,     0 , _MUL_2             , 2, 0x00200000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "SW".
-/* e9 */Y( 0,     0 , _IJT_3             , 0, 0xffffffff, 0x00000000, 0          ) //
-/* ea */Y( 0,     0 , _MULHU_5           , 2, 0x00200000, 0x00000000, 0          ) // (illegal) 
-/* eb */Y( 0,     0 , _LH_3              , 0, 0xffffffff, 0x00000000, 0          ) //
-/* ec */Y( 1,     0 , _AND_0             , 1, 0xfe00707f, 0x00007033, (1<<15)    ) // AND
-/* ed */Y( 1,     0 , _REMU_0            , 1, 0xfe00707f, 0x02007033, (1<<15)    ) // REMU
-/* ee */Y( 0,  0x1f , _eILL0a            , 0, 0xffffffff, 0x00000000, 0          ) // Reached with LAZY_DECODE==1
-/* ef */Y( 0,  0x1f , _WFI_5             , 0, 0xffffffff, 0x00000000, 0          ) // Reached with LAZY_DECODE==1
-/* f0 */Y( 0,  0x20 , _LBU_2             , 0, 0xffffffff, 0x00000000, 0          ) //
-/* f1 */Y( 0,  0x20 , _aFaulte           , 0, 0xffffffff, 0x00000000, 0          ) //
-/* f2 */Y( 0,  0x21 , _SW_2              , 0, 0xffffffff, 0x00000000, 0          ) //
-/* f3 */Y( 0,  0x21 , _aF_SW             , 0, 0xffffffff, 0x00000000, 0          ) //
-/* f4 */Y( 0,  0x22 , _Fetch2            , 0, 0xffffffff, 0x00000000, 0          ) //
-/* f5 */Y( 0,  0x22 , _jFault            , 0, 0xffffffff, 0x00000000, 0          ) //
-/* f6 */Y( 0,  0x23 , _WFI_1             , 0, 0xffffffff, 0x00000000, 0          ) //
-/* f7 */Y( 0,  0x23 , _EBREAK_1          , 0, 0xffffffff, 0x00000000, 0          ) //
-/* f8 */Y( 1,     0 , _BGEU              , 1, 0x0000707f, 0x00007063, (1<<22)    ) // BGEU
-/* f9 */Y( 0,     0 , _MULH_2            , 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "JALR".
-/* fa */Y( 0,     0 , _WFI_2             , 0, 0xffffffff, 0x00000000, 0          ) //
-/* fb */Y( 0,     0 , _SB_3              , 2, 0x00200000, 0x00000000, 0          ) //
-/* fc */Y( 1,     0 , _CSRRCI_0          , 1, 0x0000707f, 0x00007073, (1<<22)    ) // CSRRCI
-/* fd */Y( 1,     0 , _NMI_0             , 3, 0xffffffff, 0x00000000, 0          ) // Reserved for NMI
-/* fe */Y( 1,     0 , _ILLe              , 2, 0x2af56000, 0x00000000, 0          ) // Reserved for illegals
-/* ff */Y( 1,     0 , _QINT_0            , 3, 0xffffffff, 0x00000000, 0          ) // Reserved for qualified interrupt
+//         spes   spec                                                                                                                                                                                                                                                     reachability
+//ORIGTAB  |      |      rv32i0              rv32i1              rv32i2              rv32im0             rv32im1             rv32im2             rv32ic0             rv32ic1             rv32ic2             rv32imc0            rv32imc1            rv32imc2              |    MASK        INSTR     HITNR        // ENTRYPOINT               This comment is important, used by midgetv_ucode_linepermutate to find this data.
+/* 00 */Y( 1,     0 , Z( _LB_0              ,_LB_0              ,_LB_0              ,_LB_0              ,_LB_0              ,_LB_0              ,_LB_0              ,_LB_0              ,_LB_0              ,_LB_0              ,_LB_0              ,_LB_0              ), 1, 0x0000707f, 0x00000003, (1<<22)    ) // LB                      
+/* 01 */Y( 0,     0 , Z( _LB_1              ,_LB_1              ,_LB_1              ,_LB_1              ,_LB_1              ,_LB_1              ,_LB_1              ,_LB_1              ,_LB_1              ,_LB_1              ,_LB_1              ,_LB_1              ), 0, 0xffffffff, 0x00000000, 0          )                            
+/* 02 */Y( 1,     0 , Z( _IJ_0              ,_IJ_0              ,_IJ_0              ,_IJ_0              ,_IJ_0              ,_IJ_0              ,_IJ_0              ,_IJ_0              ,_IJ_0              ,_IJ_0              ,_IJ_0              ,_IJ_0              ), 1, 0x0000707f, 0x0000000b, (1<<22)    ) // custom-0 instruction    
+/* 03 */Y( 1,     0 , Z( _FENCE(0x03)       ,_FENCE(0x03)       ,_FENCE(0x03)       ,_FENCE(0x03)       ,_FENCE(0x03)       ,_FENCE(0x03)       ,_FENCE(0x03)       ,_FENCE(0x03)       ,_FENCE(0x03)       ,_FENCE(0x03)       ,_FENCE(0x03)       ,_FENCE(0x03)       ), 1, 0x0000707f, 0x0000000f, (1<<22)    ) // FENCE                   
+/* 04 */Y( 1,     0 , Z( _ADDI_0            ,_ADDI_0            ,_ADDI_0            ,_ADDI_0            ,_ADDI_0            ,_ADDI_0            ,_ADDI_0            ,_ADDI_0            ,_ADDI_0            ,_ADDI_0            ,_ADDI_0            ,_ADDI_0            ), 1, 0x0000707f, 0x00000013, (1<<22)    ) // ADDI                    
+/* 05 */Y( 1,     0 , Z( _AUIPC_0(0x05)     ,_AUIPC_0(0x05)     ,_AUIPC_0(0x05)     ,_AUIPC_0(0x05)     ,_AUIPC_0(0x05)     ,_AUIPC_0(0x05)     ,_AUIPC_0(0x05)     ,_AUIPC_0(0x05)     ,_AUIPC_0(0x05)     ,_AUIPC_0(0x05)     ,_AUIPC_0(0x05)     ,_AUIPC_0(0x05)     ), 1, 0x0000007f, 0x00000017, (1<<25)/2  ) // AUIPC 1/2               
+/* 06 */Y( 0,     0 , Z( _LB_3              ,_LB_3              ,_LB_3              ,_LB_3              ,_LB_3              ,_LB_3              ,_LB_3              ,_LB_3              ,_LB_3              ,_LB_3              ,_LB_3              ,_LB_3              ), 0, 0xffffffff, 0x00000000, 0          ) //                         
+/* 07 */Y( 0,     0 , Z( _LB_4              ,_LB_4              ,_LB_4              ,_LB_4              ,_LB_4              ,_LB_4              ,_LB_4              ,_LB_4              ,_LB_4              ,_LB_4              ,_LB_4              ,_LB_4              ), 0, 0xffffffff, 0x00000000, 0          ) //                         
+/* 08 */Y( 1,     0 , Z( _SB_0(0x08)        ,_SB_0(0x08)        ,_SB_0(0x08)        ,_SB_0(0x08)        ,_SB_0(0x08)        ,_SB_0(0x08)        ,_SB_0(0x08)        ,_SB_0(0x08)        ,_SB_0(0x08)        ,_SB_0(0x08)        ,_SB_0(0x08)        ,_SB_0(0x08)        ), 1, 0x0000707f, 0x00000023, (1<<22)/2  ) // SB 1/2                  
+/* 09 */Y( 0,     0 , Z( _LB_5              ,_LB_5              ,_LB_5              ,_LB_5              ,_LB_5              ,_LB_5              ,_LB_5              ,_LB_5              ,_LB_5              ,_LB_5              ,_LB_5              ,_LB_5              ), 0, 0xffffffff, 0x00000000, 0          ) //                         
+/* 0a */Y( 1,     0 , Z( _SB_0(0x0a)        ,_SB_0(0x0a)        ,_SB_0(0x0a)        ,_SB_0(0x0a)        ,_SB_0(0x0a)        ,_SB_0(0x0a)        ,_SB_0(0x0a)        ,_SB_0(0x0a)        ,_SB_0(0x0a)        ,_SB_0(0x0a)        ,_SB_0(0x0a)        ,_SB_0(0x0a)        ), 1, 0x0000707f, 0x00000023, (1<<22)/2  ) // SB 2/2                  
+/* 0b */Y( 0,     0 , Z( _JALR_2            ,_JALR_2            ,_JALR_2            ,_JALR_2            ,_JALR_2            ,_JALR_2            ,_JALR_2            ,_JALR_2            ,_JALR_2            ,_JALR_2            ,_JALR_2            ,_JALR_2            ), 0, 0xffffffff, 0x00000000, 0          ) //                           
+/* 0c */Y( 1,     0 , Z( _ADD_0             ,_ADD_0             ,_ADD_0             ,_ADD_0             ,_ADD_0             ,_ADD_0             ,_ADD_0             ,_ADD_0             ,_ADD_0             ,_ADD_0             ,_ADD_0             ,_ADD_0             ), 1, 0xfe00707f, 0x00000033, (1<<15)    ) // ADD                     
+/* 0d */Y( 1,     0 , Z( _MUL_0             ,_MUL_0             ,_MUL_0             ,_MUL_0             ,_MUL_0             ,_MUL_0             ,_MUL_0             ,_MUL_0             ,_MUL_0             ,_MUL_0             ,_MUL_0             ,_MUL_0             ), 1, 0xfe00707f, 0x02000033, (1<<15)    ) // MUL/LUI when no MUL
+/* 0e */Y( 1,     0 , Z( _SUB_0             ,_SUB_0             ,_SUB_0             ,_SUB_0             ,_SUB_0             ,_SUB_0             ,_SUB_0             ,_SUB_0             ,_SUB_0             ,_SUB_0             ,_SUB_0             ,_SUB_0             ), 1, 0xfe00707f, 0x40000033, (1<<15)    ) // SUB
+/* 0f */Y( 1,     0 , Z( _LUI_0(0x0f)       ,_LUI_0(0x0f)       ,_LUI_0(0x0f)       ,_LUI_0(0x0f)       ,_LUI_0(0x0f)       ,_LUI_0(0x0f)       ,_LUI_0(0x0f)       ,_LUI_0(0x0f)       ,_LUI_0(0x0f)       ,_LUI_0(0x0f)       ,_LUI_0(0x0f)       ,_LUI_0(0x0f)       ), 1, 0x0000007f, 0x00000037, (1<<25)/2  ) // LUI 1/2                 
+/* 10 */Y( 0,     0 , Z( _SUB_1             ,_SUB_1             ,_SUB_1             ,_SUB_1             ,_SUB_1             ,_SUB_1             ,_SUB_1             ,_SUB_1             ,_SUB_1             ,_SUB_1             ,_SUB_1             ,_SUB_1             ), 0, 0xffffffff, 0x00000000, 0          ) //                         
+/* 11 */Y( 0,     0 , Z( _AND_1             ,_AND_1             ,_AND_1             ,_AND_1             ,_AND_1             ,_AND_1             ,_AND_1             ,_AND_1             ,_AND_1             ,_AND_1             ,_AND_1             ,_AND_1             ), 0, 0xffffffff, 0x00000000, 0          ) //                         
+/* 12 */Y( 0,     0 , Z( _i0unx1            ,_i1unx0            ,_i2unx0            ,_LASTINCH          ,_LASTINCH          ,_LASTINCH          ,_ic0straddle       ,_ic1straddle           ,_LASTINCH          ,_LASTINCH          ,_LASTINCH          ,_LASTINCH          ), 0, 0xffffffff, 0x00000000, 0          ) //                         
+/* 13 */Y( 0,     0 , Z( _condb_2           ,_condb_2           ,_condb_2           ,_condb_2           ,_condb_2           ,_condb_2           ,_condb_2           ,_condb_2           ,_condb_2           ,_condb_2           ,_condb_2           ,_condb_2           ), 0, 0xffffffff, 0x00000000, 0          ) //                         
+/* 14 */Y( 0,     0 , Z( _condb_3           ,_condb_3           ,_condb_3           ,_condb_3           ,_condb_3           ,_condb_3           ,_condb_3           ,_condb_3           ,_condb_3           ,_condb_3           ,_condb_3           ,_condb_3           ), 0, 0xffffffff, 0x00000000, 0          ) //                         
+/* 15 */Y( 0,     0 , Z( _condb_4           ,_condb_4           ,_condb_4           ,_condb_4           ,_condb_4           ,_condb_4           ,_condb_4           ,_condb_4           ,_condb_4           ,_condb_4           ,_condb_4           ,_condb_4           ), 0, 0xffffffff, 0x00000000, 0          ) //                         
+/* 16 */Y( 0,  0x01 , Z( _condb_5           ,_condb_5           ,_condb_5           ,_condb_5           ,_condb_5           ,_condb_5           ,_condb_5           ,_condb_5           ,_condb_5           ,_condb_5           ,_condb_5           ,_condb_5           ), 0, 0xffffffff, 0x00000000, 0          ) //                         
+/* 17 */Y( 0,  0x01 , Z( _condb_5t          ,_condb_5t          ,_condb_5t          ,_condb_5t          ,_condb_5t          ,_condb_5t          ,_condb_5t          ,_condb_5t          ,_condb_5t          ,_condb_5t          ,_condb_5t          ,_condb_5t          ), 0, 0xffffffff, 0x00000000, 0          ) //                         
+/* 18 */Y( 1,     0 , Z( _BEQ               ,_BEQ               ,_BEQ               ,_BEQ               ,_BEQ               ,_BEQ               ,_BEQ               ,_BEQ               ,_BEQ               ,_BEQ               ,_BEQ               ,_BEQ               ), 1, 0x0000707f, 0x00000063, (1<<22)    ) // BEQ                     
+/* 19 */Y( 1,     0 , Z( _JALR_0            ,_JALR_0            ,_JALR_0            ,_JALR_0            ,_JALR_0            ,_JALR_0            ,_JALR_0            ,_JALR_0            ,_JALR_0            ,_JALR_0            ,_JALR_0            ,_JALR_0            ), 1, 0x0000707f, 0x00000067, (1<<22)    ) // JALR                    
+/* 1a */Y( 0,     0 , Z( _ANDI_1            ,_ANDI_1            ,_ANDI_1            ,_ANDI_1            ,_ANDI_1            ,_ANDI_1            ,_ANDI_1            ,_ANDI_1            ,_ANDI_1            ,_ANDI_1            ,_ANDI_1            ,_ANDI_1            ), 0, 0xffffffff, 0x00000000, 0          ) //                         
+/* 1b */Y( 1,     0 , Z( _JAL_0(0x1b)       ,_JAL_0(0x1b)       ,_JAL_0(0x1b)       ,_JAL_0(0x1b)       ,_JAL_0(0x1b)       ,_JAL_0(0x1b)       ,_JAL_0(0x1b)       ,_JAL_0(0x1b)       ,_JAL_0(0x1b)       ,_JAL_0(0x1b)       ,_JAL_0(0x1b)       ,_JAL_0(0x1b)       ), 1, 0x0000007f, 0x0000006f, (1<<25)/4  ) // JAL 1/4                 
+/* 1c */Y( 1,     0 , Z( _ECAL_BRK          ,_ECAL_BRK          ,_ECAL_BRK          ,_ECAL_BRK          ,_ECAL_BRK          ,_ECAL_BRK          ,_ECAL_BRK          ,_ECAL_BRK          ,_ECAL_BRK          ,_ECAL_BRK          ,_ECAL_BRK          ,_ECAL_BRK          ), 1, 0x0000707f, 0x00000073, (1<<12)    ) // ECALL/EBREAK/WFI/MRET   
+/* 1d */Y( 0,     0 , Z( _ORI_2             ,_ORI_2             ,_ORI_2             ,_ORI_2             ,_ORI_2             ,_ORI_2             ,_ORI_2             ,_ORI_2             ,_ORI_2             ,_ORI_2             ,_ORI_2             ,_ORI_2             ), 0, 0xffffffff, 0x00000000, 0          ) ///                           
+/* 1e */Y( 0,     0 , Z( _aFault_1          ,_aFault_1          ,_aFault_1          ,_aFault_1          ,_aFault_1          ,_aFault_1          ,_aFault_1          ,_aFault_1          ,_aFault_1          ,_aFault_1          ,_aFault_1          ,_aFault_1          ), 0, 0xffffffff, 0x00000000, 0          ) //                         
+/* 1f */Y( 0,     0 , Z( _IJ_2              ,_IJ_2              ,_IJ_2              ,_IJ_2              ,_IJ_2              ,_IJ_2              ,_IJ_2              ,_IJ_2              ,_IJ_2              ,_IJ_2              ,_IJ_2              ,_IJ_2              ), 0, 0xffffffff, 0x00000000, 0          ) //                         
+/* 20 */Y( 1,     0 , Z( _LH_0              ,_LH_0              ,_LH_0              ,_LH_0              ,_LH_0              ,_LH_0              ,_LH_0              ,_LH_0              ,_LH_0              ,_LH_0              ,_LH_0              ,_LH_0              ), 1, 0x0000707f, 0x00001003, (1<<22)    ) // LH                      
+/* 21 */Y( 0,     0 , Z( _XORI_1            ,_XORI_1            ,_XORI_1            ,_XORI_1            ,_XORI_1            ,_XORI_1            ,_XORI_1            ,_XORI_1            ,_XORI_1            ,_XORI_1            ,_XORI_1            ,_XORI_1            ), 0, 0xffffffff, 0x00000000, 0          ) //                         
+/* 22 */Y( 0,     0 , Z( _MULHU_6           ,_MULHU_6           ,_MULHU_6           ,_MULHU_6           ,_MULHU_6           ,_MULHU_6           ,_MULHU_6           ,_MULHU_6           ,_MULHU_6           ,_MULHU_6           ,_MULHU_6           ,_MULHU_6           ), 2, 0x00400000, 0x00000000, 0          ) // illegal at entry. Can get here from OpCode close to "ij"
+/* 23 */Y( 1,     0 , Z( _FENCE(0x23)       ,_FENCE(0x23)       ,_FENCE(0x23)       ,_FENCE(0x23)       ,_FENCE(0x23)       ,_FENCE(0x23)       ,_FENCE(0x23)       ,_FENCE(0x23)       ,_FENCE(0x23)       ,_FENCE(0x23)       ,_FENCE(0x23)       ,_FENCE(0x23)       ), 1, 0x0000707f, 0x0000100f, (1<<22)    ) // FENCEI                  
+/* 24 */Y( 1,     0 , Z( _SLLI_0            ,_SLLI_0            ,_SLLI_0            ,_SLLI_0            ,_SLLI_0            ,_SLLI_0            ,_SLLI_0            ,_SLLI_0            ,_SLLI_0            ,_SLLI_0            ,_SLLI_0            ,_SLLI_0            ), 1, 0xfe00707f, 0x00001013, (1<<15)    ) // SLLI                    
+/* 25 */Y( 1,     0 , Z( _AUIPC_0(0x25)     ,_AUIPC_0(0x25)     ,_AUIPC_0(0x25)     ,_AUIPC_0(0x25)     ,_AUIPC_0(0x25)     ,_AUIPC_0(0x25)     ,_AUIPC_0(0x25)     ,_AUIPC_0(0x25)     ,_AUIPC_0(0x25)     ,_AUIPC_0(0x25)     ,_AUIPC_0(0x25)     ,_AUIPC_0(0x25)     ), 1, 0x0000007f, 0x00000017, (1<<25)/2  ) // AUIPC 2/2               
+/* 26 */Y( 0,     0 , Z( _OR_1              ,_OR_1              ,_OR_1              ,_OR_1              ,_OR_1              ,_OR_1              ,_OR_1              ,_OR_1              ,_OR_1              ,_OR_1              ,_OR_1              ,_OR_1              ), 0, 0xffffffff, 0x00000000, 0          ) //                         
+/* 27 */Y( 0,     0 , Z( _OR_2              ,_OR_2              ,_OR_2              ,_OR_2              ,_OR_2              ,_OR_2              ,_OR_2              ,_OR_2              ,_OR_2              ,_OR_2              ,_OR_2              ,_OR_2              ), 0, 0xffffffff, 0x00000000, 0          ) //                         
+/* 28 */Y( 1,     0 , Z( _SH_0(0x28)        ,_SH_0(0x28)        ,_SH_0(0x28)        ,_SH_0(0x28)        ,_SH_0(0x28)        ,_SH_0(0x28)        ,_SH_0(0x28)        ,_SH_0(0x28)        ,_SH_0(0x28)        ,_SH_0(0x28)        ,_SH_0(0x28)        ,_SH_0(0x28)        ), 1, 0x0000707f, 0x00001023, (1<<22)/2  ) // SH 1/2                  
+/* 29 */Y( 0,     0 , Z( _XOR_1             ,_XOR_1             ,_XOR_1             ,_XOR_1             ,_XOR_1             ,_XOR_1             ,_XOR_1             ,_XOR_1             ,_XOR_1             ,_XOR_1             ,_XOR_1             ,_XOR_1             ), 0, 0xffffffff, 0x00000000, 0          ) //                         
+/* 2a */Y( 1,     0 , Z( _SH_0(0x2a)        ,_SH_0(0x2a)        ,_SH_0(0x2a)        ,_SH_0(0x2a)        ,_SH_0(0x2a)        ,_SH_0(0x2a)        ,_SH_0(0x2a)        ,_SH_0(0x2a)        ,_SH_0(0x2a)        ,_SH_0(0x2a)        ,_SH_0(0x2a)        ,_SH_0(0x2a)        ), 1, 0x0000707f, 0x00001023, (1<<22)/2  ) // SH 2/2                  
+/* 2b */Y( 0,     0 , Z( _SLTIX_1           ,_SLTIX_1           ,_SLTIX_1           ,_SLTIX_1           ,_SLTIX_1           ,_SLTIX_1           ,_SLTIX_1           ,_SLTIX_1           ,_SLTIX_1           ,_SLTIX_1           ,_SLTIX_1           ,_SLTIX_1           ), 0, 0xffffffff, 0x00000000, 0          ) //                         
+/* 2c */Y( 1,     0 , Z( _SLL_0             ,_SLL_0             ,_SLL_0             ,_SLL_0             ,_SLL_0             ,_SLL_0             ,_SLL_0             ,_SLL_0             ,_SLL_0             ,_SLL_0             ,_SLL_0             ,_SLL_0             ), 1, 0xfe00707f, 0x00001033, (1<<15)    ) // SLL                     
+/* 2d */Y( 1,     0 , Z( _MULH_0            ,_MULH_0            ,_MULH_0            ,_MULH_0            ,_MULH_0            ,_MULH_0            ,_MULH_0            ,_MULH_0            ,_MULH_0            ,_MULH_0            ,_MULH_0            ,_MULH_0            ), 1, 0xfe00707f, 0x02001033, (1<<15)    ) // LUI/MULH
+/* 2e */Y( 0,     0 , Z( _MULHU_1           ,_MULHU_1           ,_MULHU_1           ,_MULHU_1           ,_MULHU_1           ,_MULHU_1           ,_MULHU_1           ,_MULHU_1           ,_MULHU_1           ,_MULHU_1           ,_MULHU_1           ,_MULHU_1           ), 2, 0xffffffff, 0x00000000, 0          ) //
+/* 2f */Y( 1,     0 , Z( _LUI_0(0x2f)       ,_LUI_0(0x2f)       ,_LUI_0(0x2f)       ,_LUI_0(0x2f)       ,_LUI_0(0x2f)       ,_LUI_0(0x2f)       ,_LUI_0(0x2f)       ,_LUI_0(0x2f)       ,_LUI_0(0x2f)       ,_LUI_0(0x2f)       ,_LUI_0(0x2f)       ,_LUI_0(0x2f)       ), 1, 0x0000007f, 0x00000037, (1<<25)/2  ) // LUI 2/2                 
+/* 30 */Y( 0,     0 , Z( _SLTIX_2           ,_SLTIX_2           ,_SLTIX_2           ,_SLTIX_2           ,_SLTIX_2           ,_SLTIX_2           ,_SLTIX_2           ,_SLTIX_2           ,_SLTIX_2           ,_SLTIX_2           ,_SLTIX_2           ,_SLTIX_2           ), 0, 0xffffffff, 0x00000000, 0          ) //                         
+/* 31 */Y( 0,     0 , Z( _SLTX_1            ,_SLTX_1            ,_SLTX_1            ,_SLTX_1            ,_SLTX_1            ,_SLTX_1            ,_SLTX_1            ,_SLTX_1            ,_SLTX_1            ,_SLTX_1            ,_SLTX_1            ,_SLTX_1            ), 0, 0xffffffff, 0x00000000, 0          ) //                         
+/* 32 */Y( 0,  0x02 , Z( _JAL_1             ,_JAL_1             ,_JAL_1             ,_JAL_1             ,_JAL_1             ,_JAL_1             ,_JAL_1             ,_JAL_1             ,_JAL_1             ,_JAL_1             ,_JAL_1             ,_JAL_1             ), 0, 0xffffffff, 0x00000000, 0          ) //                         
+/* 33 */Y( 0,  0x02 , Z( _JAERR_1           ,_JAERR_1           ,_JAERR_1           ,_JAERR_1           ,_JAERR_1           ,_JAERR_1           ,_JAERR_1           ,_JAERR_1           ,_JAERR_1           ,_JAERR_1           ,_JAERR_1           ,_JAERR_1           ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 34 */Y( 0,     0 , Z( _JAL_3             ,_JAL_3             ,_JAL_3             ,_JAL_3             ,_JAL_3             ,_JAL_3             ,_JAL_3             ,_JAL_3             ,_JAL_3             ,_JAL_3             ,_JAL_3             ,_JAL_3             ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 35 */Y( 0,     0 , Z( _SLLI_1            ,_SLLI_1            ,_SLLI_1            ,_SLLI_1            ,_SLLI_1            ,_SLLI_1            ,_SLLI_1            ,_SLLI_1            ,_SLLI_1            ,_SLLI_1            ,_SLLI_1            ,_SLLI_1            ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 36 */Y( 0,     0 , Z( _SLLI_2            ,_SLLI_2            ,_SLLI_2            ,_SLLI_2            ,_SLLI_2            ,_SLLI_2            ,_SLLI_2            ,_SLLI_2            ,_SLLI_2            ,_SLLI_2            ,_SLLI_2            ,_SLLI_2            ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 37 */Y( 0,     0 , Z( _ECALL_2           ,_ECALL_2           ,_ECALL_2           ,_ECALL_2           ,_ECALL_2           ,_ECALL_2           ,_ECALL_2           ,_ECALL_2           ,_ECALL_2           ,_ECALL_2           ,_ECALL_2           ,_ECALL_2           ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 38 */Y( 1,     0 , Z( _BNE               ,_BNE               ,_BNE               ,_BNE               ,_BNE               ,_BNE               ,_BNE               ,_BNE               ,_BNE               ,_BNE               ,_BNE               ,_BNE               ), 1, 0x0000707f, 0x00001063, (1<<22)    ) // BNE
+/* 39 */Y( 0,     0 , Z( _MULHU_7           ,_MULHU_7           ,_MULHU_7           ,_MULHU_7           ,_MULHU_7           ,_MULHU_7           ,_MULHU_7           ,_MULHU_7           ,_MULHU_7           ,_MULHU_7           ,_MULHU_7           ,_MULHU_7           ), 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "JALR"
+/* 3a */Y( 0,     0 , Z(  _SRxI_1           , _SRxI_1           , _SRxI_1           , _SRxI_1           , _SRxI_1           , _SRxI_1           , _SRxI_1           , _SRxI_1           , _SRxI_1           , _SRxI_1           , _SRxI_1           , _SRxI_1           ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 3b */Y( 1,     0 , Z( _JAL_0(0x3b)       ,_JAL_0(0x3b)       ,_JAL_0(0x3b)       ,_JAL_0(0x3b)       ,_JAL_0(0x3b)       ,_JAL_0(0x3b)       ,_JAL_0(0x3b)       ,_JAL_0(0x3b)       ,_JAL_0(0x3b)       ,_JAL_0(0x3b)       ,_JAL_0(0x3b)       ,_JAL_0(0x3b)       ), 1, 0x0000007f, 0x0000006f, (1<<25)/4  ) // JAL 2/4
+/* 3c */Y( 1,     0 , Z( _CSRRW_0           ,_CSRRW_0           ,_CSRRW_0           ,_CSRRW_0           ,_CSRRW_0           ,_CSRRW_0           ,_CSRRW_0           ,_CSRRW_0           ,_CSRRW_0           ,_CSRRW_0           ,_CSRRW_0           ,_CSRRW_0           ), 1, 0x0000707f, 0x00001073, (1<<22)    ) // CSRRW
+/* 3d */Y( 0,     0 , Z( _SRxI_2            ,_SRxI_2            ,_SRxI_2            ,_SRxI_2            ,_SRxI_2            ,_SRxI_2            ,_SRxI_2            ,_SRxI_2            ,_SRxI_2            ,_SRxI_2            ,_SRxI_2            ,_SRxI_2            ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 3e */Y( 0,     0 , Z( _SLL_1             ,_SLL_1             ,_SLL_1             ,_SLL_1             ,_SLL_1             ,_SLL_1             ,_SLL_1             ,_SLL_1             ,_SLL_1             ,_SLL_1             ,_SLL_1             ,_SLL_1             ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 3f */Y( 0,     0 , Z( _SRx_1             ,_SRx_1             ,_SRx_1             ,_SRx_1             ,_SRx_1             ,_SRx_1             ,_SRx_1             ,_SRx_1             ,_SRx_1             ,_SRx_1             ,_SRx_1             ,_SRx_1             ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 40 */Y( 1,     0 , Z( _LW_0              ,_LW_0              ,_LW_0              ,_LW_0              ,_LW_0              ,_LW_0              ,_LW_0              ,_LW_0              ,_LW_0              ,_LW_0              ,_LW_0              ,_LW_0              ), 1, 0x0000707f, 0x00002003, (1<<22)    ) // LW
+/* 41 */Y( 0,     0 , Z( _JALR_1            ,_JALR_1            ,_JALR_1            ,_JALR_1            ,_JALR_1            ,_JALR_1            ,_JALR_1            ,_JALR_1            ,_JALR_1            ,_JALR_1            ,_JALR_1            ,_JALR_1            ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 42 */Y( 0,  0x03 , Z( _MULHU_2           ,_MULHU_2           ,_MULHU_2           ,_MULHU_2           ,_MULHU_2           ,_MULHU_2           ,_MULHU_2           ,_MULHU_2           ,_MULHU_2           ,_MULHU_2           ,_MULHU_2           ,_MULHU_2           ), 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "ij"
+/* 43 */Y( 0,  0x03 , Z( _MULHU_4           ,_MULHU_4           ,_MULHU_4           ,_MULHU_4           ,_MULHU_4           ,_MULHU_4           ,_MULHU_4           ,_MULHU_4           ,_MULHU_4           ,_MULHU_4           ,_MULHU_4           ,_MULHU_4           ), 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to FENCE
+/* 44 */Y( 1,     0 , Z( _SLTI_0            ,_SLTI_0            ,_SLTI_0            ,_SLTI_0            ,_SLTI_0            ,_SLTI_0            ,_SLTI_0            ,_SLTI_0            ,_SLTI_0            ,_SLTI_0            ,_SLTI_0            ,_SLTI_0            ), 1, 0x0000707f, 0x00002013, (1<<22)    ) // SLTI
+/* 45 */Y( 0,     0 , Z( _WFI_3             ,_WFI_3             ,_WFI_3             ,_WFI_3             ,_WFI_3             ,_WFI_3             ,_WFI_3             ,_WFI_3             ,_WFI_3             ,_WFI_3             ,_WFI_3             ,_WFI_3             ), 0, 0xffffffff, 0x00000000, 0          ) // 
+/* 46 */Y( 0,     0 , Z( _ILL_1             ,_ILL_1             ,_ILL_1             ,_ILL_1             ,_ILL_1             ,_ILL_1             ,_ILL_1             ,_ILL_1             ,_ILL_1             ,_ILL_1             ,_ILL_1             ,_ILL_1             ), 0, 0xffffffff, 0x00000000, 0          ) // Potential problem, can this instructions be reached bv an OpCode decode?
+/* 47 */Y( 0,     0 , Z( _ILL_2             ,_ILL_2             ,_ILL_2             ,_ILL_2             ,_ILL_2             ,_ILL_2             ,_ILL_2             ,_ILL_2             ,_ILL_2             ,_ILL_2             ,_ILL_2             ,_ILL_2             ), 0, 0xffffffff, 0x00000000, 0          ) // Potential problem, can this instructions be reached bv an OpCode decode?
+/* 48 */Y( 1,     0 , Z( _SW_0(0x48)        ,_SW_0(0x48)        ,_SW_0(0x48)        ,_SW_0(0x48)        ,_SW_0(0x48)        ,_SW_0(0x48)        ,_SW_0(0x48)        ,_SW_0(0x48)        ,_SW_0(0x48)        ,_SW_0(0x48)        ,_SW_0(0x48)        ,_SW_0(0x48)        ), 1, 0x0000707f, 0x00002023, (1<<22)/2  ) // SW 1/2
+/* 49 */Y( 0,     0 , Z( _CSRRW_1           ,_CSRRW_1           ,_CSRRW_1           ,_CSRRW_1           ,_CSRRW_1           ,_CSRRW_1           ,_CSRRW_1           ,_CSRRW_1           ,_CSRRW_1           ,_CSRRW_1           ,_CSRRW_1           ,_CSRRW_1           ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 4a */Y( 1,     0 , Z( _SW_0(0x4a)        ,_SW_0(0x4a)        ,_SW_0(0x4a)        ,_SW_0(0x4a)        ,_SW_0(0x4a)        ,_SW_0(0x4a)        ,_SW_0(0x4a)        ,_SW_0(0x4a)        ,_SW_0(0x4a)        ,_SW_0(0x4a)        ,_SW_0(0x4a)        ,_SW_0(0x4a)        ), 1, 0x0000707f, 0x00002023, (1<<22)/2  ) // SW 2/2
+/* 4b */Y( 0,     0 , Z( _CSRRW_2           ,_CSRRW_2           ,_CSRRW_2           ,_CSRRW_2           ,_CSRRW_2           ,_CSRRW_2           ,_CSRRW_2           ,_CSRRW_2           ,_CSRRW_2           ,_CSRRW_2           ,_CSRRW_2           ,_CSRRW_2           ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 4c */Y( 1,     0 , Z( _SLT_0             ,_SLT_0             ,_SLT_0             ,_SLT_0             ,_SLT_0             ,_SLT_0             ,_SLT_0             ,_SLT_0             ,_SLT_0             ,_SLT_0             ,_SLT_0             ,_SLT_0             ), 1, 0xfe00707f, 0x00002033, (1<<15)    ) // SLT
+/* 4d */Y( 1,     0 , Z( _MULHSU_0          ,_MULHSU_0          ,_MULHSU_0          ,_MULHSU_0          ,_MULHSU_0          ,_MULHSU_0          ,_MULHSU_0          ,_MULHSU_0          ,_MULHSU_0          ,_MULHSU_0          ,_MULHSU_0          ,_MULHSU_0          ), 1, 0xfe00707f, 0x02002033, (1<<15)    ) // MULHSU
+/* 4e */Y( 0,  0x04 , Z( _eILL0b            ,_eILL0b            ,_eILL0b            ,_eILL0b            ,_eILL0b            ,_eILL0b            ,_eILL0b            ,_eILL0b            ,_eILL0b            ,_eILL0b            ,_eILL0b            ,_eILL0b            ), 0, 0xffffffff, 0x00000000, 0          ) // Reached with LAZY_DECODE==1 but forward progress ensured || Wants to relocate these
+/* 4f */Y( 0,  0x04 , Z( _MRET_8            ,_MRET_8            ,_MRET_8            ,_MRET_8            ,_MRET_8            ,_MRET_8            ,_MRET_8            ,_MRET_8            ,_MRET_8            ,_MRET_8            ,_MRET_8            ,_MRET_8            ), 0, 0xffffffff, 0x00000000, 0          ) // Reached with LAZY_DECODE==1. Will work as a strange JMP  || Wants to relocate these
+/* 50 */Y( 0,  0x05 , Z( _LW_1              ,_LW_1              ,_LW_1              ,_LW_1              ,_LW_1              ,_LW_1              ,_LW_1              ,_LW_1              ,_LW_1              ,_LW_1              ,_LW_1              ,_LW_1              ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 51 */Y( 0,  0x05 , Z( _LDAF_LW           ,_LDAF_LW           ,_LDAF_LW           ,_LDAF_LW           ,_LDAF_LW           ,_LDAF_LW           ,_LDAF_LW           ,_LDAF_LW           ,_LDAF_LW           ,_LDAF_LW           ,_LDAF_LW           ,_LDAF_LW           ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 52 */Y( 0,  0x06 , Z( _LH_1              ,_LH_1              ,_LH_1              ,_LH_1              ,_LH_1              ,_LH_1              ,_LH_1              ,_LH_1              ,_LH_1              ,_LH_1              ,_LH_1              ,_LH_1              ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 53 */Y( 0,  0x06 , Z( _LDAF_LH           ,_LDAF_LH           ,_LDAF_LH           ,_LDAF_LH           ,_LDAF_LH           ,_LDAF_LH           ,_LDAF_LH           ,_LDAF_LH           ,_LDAF_LH           ,_LDAF_LH           ,_LDAF_LH           ,_LDAF_LH           ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 54 */Y( 0,  0x07 , Z( _LH_2              ,_LH_2              ,_LH_2              ,_LH_2              ,_LH_2              ,_LH_2              ,_LH_2              ,_LH_2              ,_LH_2              ,_LH_2              ,_LH_2              ,_LH_2              ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 55 */Y( 0,  0x07 , Z( _aFaultb           ,_aFaultb           ,_aFaultb           ,_aFaultb           ,_aFaultb           ,_aFaultb           ,_aFaultb           ,_aFaultb           ,_aFaultb           ,_aFaultb           ,_aFaultb           ,_aFaultb           ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 56 */Y( 0,     0 , Z( _LH_4              ,_LH_4              ,_LH_4              ,_LH_4              ,_LH_4              ,_LH_4              ,_LH_4              ,_LH_4              ,_LH_4              ,_LH_4              ,_LH_4              ,_LH_4              ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 57 */Y( 0,     0 , Z( _LH_5              ,_LH_5              ,_LH_5              ,_LH_5              ,_LH_5              ,_LH_5              ,_LH_5              ,_LH_5              ,_LH_5              ,_LH_5              ,_LH_5              ,_LH_5              ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 58 */Y( 0,  0x08 , Z( _DIV_A             ,_DIV_A             ,_DIV_A             ,_DIV_A             ,_DIV_A             ,_DIV_A             ,_DIV_A             ,_DIV_A             ,_DIV_A             ,_DIV_A             ,_DIV_A             ,_DIV_A             ), 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "BEQ"
+/* 59 */Y( 0,  0x08 , Z( _DIV_B             ,_DIV_B             ,_DIV_B             ,_DIV_B             ,_DIV_B             ,_DIV_B             ,_DIV_B             ,_DIV_B             ,_DIV_B             ,_DIV_B             ,_DIV_B             ,_DIV_B             ), 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "JALR"
+/* 5a */Y( 0,     0 , Z( _SB_1              ,_SB_1              ,_SB_1              ,_SB_1              ,_SB_1              ,_SB_1              ,_SB_1              ,_SB_1              ,_SB_1              ,_SB_1              ,_SB_1              ,_SB_1              ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 5b */Y( 1,     0 , Z( _JAL_0(0x5b)       ,_JAL_0(0x5b)       ,_JAL_0(0x5b)       ,_JAL_0(0x5b)       ,_JAL_0(0x5b)       ,_JAL_0(0x5b)       ,_JAL_0(0x5b)       ,_JAL_0(0x5b)       ,_JAL_0(0x5b)       ,_JAL_0(0x5b)       ,_JAL_0(0x5b)       ,_JAL_0(0x5b)       ), 1, 0x0000007f, 0x0000006f, (1<<25)/4  ) // JAL 3/4
+/* 5c */Y( 1,     0 , Z( _CSRRS_0           ,_CSRRS_0           ,_CSRRS_0           ,_CSRRS_0           ,_CSRRS_0           ,_CSRRS_0           ,_CSRRS_0           ,_CSRRS_0           ,_CSRRS_0           ,_CSRRS_0           ,_CSRRS_0           ,_CSRRS_0           ), 1, 0x0000707f, 0x00002073, (1<<22)    ) // CSRRS
+/* 5d */Y( 0,     0 , Z( _SB_2              ,_SB_2              ,_SB_2              ,_SB_2              ,_SB_2              ,_SB_2              ,_SB_2              ,_SB_2              ,_SB_2              ,_SB_2              ,_SB_2              ,_SB_2              ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 5e */Y( 0,  0x09 , Z( _LHU_1             ,_LHU_1             ,_LHU_1             ,_LHU_1             ,_LHU_1             ,_LHU_1             ,_LHU_1             ,_LHU_1             ,_LHU_1             ,_LHU_1             ,_LHU_1             ,_LHU_1             ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 5f */Y( 0,  0x09 , Z( _LDAF_LHU          ,_LDAF_LHU          ,_LDAF_LHU          ,_LDAF_LHU          ,_LDAF_LHU          ,_LDAF_LHU          ,_LDAF_LHU          ,_LDAF_LHU          ,_LDAF_LHU          ,_LDAF_LHU          ,_LDAF_LHU          ,_LDAF_LHU          ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 60 */Y( 0,     0 , Z( _MULHU_3           ,_MULHU_3           ,_MULHU_3           ,_MULHU_3           ,_MULHU_3           ,_MULHU_3           ,_MULHU_3           ,_MULHU_3           ,_MULHU_3           ,_MULHU_3           ,_MULHU_3           ,_MULHU_3           ), 2, 0xffffffff, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "LW"
+/* 61 */Y( 0,     0 , Z( _EBRKWFI2          ,_EBRKWFI2          ,_EBRKWFI2          ,_EBRKWFI2          ,_EBRKWFI2          ,_EBRKWFI2          ,_EBRKWFI2          ,_EBRKWFI2          ,_EBRKWFI2          ,_EBRKWFI2          ,_EBRKWFI2          ,_EBRKWFI2          ), 0, 0xffffffff, 0x00000000, 0          ) // 
+/* 62 */Y( 0,  0x0b , Z( _DIV_8             ,_DIV_8             ,_DIV_8             ,_DIV_8             ,_DIV_8             ,_DIV_8             ,_DIV_8             ,_DIV_8             ,_DIV_8             ,_DIV_8             ,_DIV_8             ,_DIV_8             ), 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "ij"
+/* 63 */Y( 0,  0x0b , Z( _DIV_9             ,_DIV_9             ,_DIV_9             ,_DIV_9             ,_DIV_9             ,_DIV_9             ,_DIV_9             ,_DIV_9             ,_DIV_9             ,_DIV_9             ,_DIV_9             ,_DIV_9             ), 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to FENCE
+/* 64 */Y( 1,     0 , Z( _SLTIU_0           ,_SLTIU_0           ,_SLTIU_0           ,_SLTIU_0           ,_SLTIU_0           ,_SLTIU_0           ,_SLTIU_0           ,_SLTIU_0           ,_SLTIU_0           ,_SLTIU_0           ,_SLTIU_0           ,_SLTIU_0           ), 1, 0x0000707f, 0x00003013, (1<<22)    ) // SLTIU
+/* 65 */Y( 0,     0 , Z( _WFI_4             ,_WFI_4             ,_WFI_4             ,_WFI_4             ,_WFI_4             ,_WFI_4             ,_WFI_4             ,_WFI_4             ,_WFI_4             ,_WFI_4             ,_WFI_4             ,_WFI_4             ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 66 */Y( 0,  0x0c , Z( _SW_1              ,_SW_1              ,_SW_1              ,_SW_1              ,_SW_1              ,_SW_1              ,_SW_1              ,_SW_1              ,_SW_1              ,_SW_1              ,_SW_1              ,_SW_1              ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 67 */Y( 0,  0x0c , Z( _SW_E1SWE          ,_SW_E1SWE          ,_SW_E1SWE          ,_SW_E1SWE          ,_SW_E1SWE          ,_SW_E1SWE          ,_SW_E1SWE          ,_SW_E1SWE          ,_SW_E1SWE          ,_SW_E1SWE          ,_SW_E1SWE          ,_SW_E1SWE          ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 68 */Y( 0,  0x23 , Z( _DIV_12            ,_DIV_12            ,_DIV_12            ,_DIV_12            ,_DIV_12            ,_DIV_12            ,_DIV_12            ,_DIV_12            ,_DIV_12            ,_DIV_12            ,_DIV_12            ,_DIV_12            ), 2, 0x00200000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "SW"
+/* 69 */Y( 0,  0x23 , Z( _DIV_13            ,_DIV_13            ,_DIV_13            ,_DIV_13            ,_DIV_13            ,_DIV_13            ,_DIV_13            ,_DIV_13            ,_DIV_13            ,_DIV_13            ,_DIV_13            ,_DIV_13            ), 0, 0xffffffff, 0x00000000, 0          ) //                                                         
+/* 6a */Y( 0,     0 , Z( _MULH_1            ,_MULH_1            ,_MULH_1            ,_MULH_1            ,_MULH_1            ,_MULH_1            ,_MULH_1            ,_MULH_1            ,_MULH_1            ,_MULH_1            ,_MULH_1            ,_MULH_1            ), 2, 0xffffffff, 0x00000000, 0          ) // illegal as entry. Can get here from OpClde close to "LW" (and also "SW"?)
+/* 6b */Y( 0,     0 , Z( _SB_4              ,_SB_4              ,_SB_4              ,_SB_4              ,_SB_4              ,_SB_4              ,_SB_4              ,_SB_4              ,_SB_4              ,_SB_4              ,_SB_4              ,_SB_4              ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 6c */Y( 1,     0 , Z( _SLTU_0            ,_SLTU_0            ,_SLTU_0            ,_SLTU_0            ,_SLTU_0            ,_SLTU_0            ,_SLTU_0            ,_SLTU_0            ,_SLTU_0            ,_SLTU_0            ,_SLTU_0            ,_SLTU_0            ), 1, 0xfe00707f, 0x00003033, (1<<15)    ) // SLTU
+/* 6d */Y( 1,     0 , Z( _MULHU_0           ,_MULHU_0           ,_MULHU_0           ,_MULHU_0           ,_MULHU_0           ,_MULHU_0           ,_MULHU_0           ,_MULHU_0           ,_MULHU_0           ,_MULHU_0           ,_MULHU_0           ,_MULHU_0           ), 1, 0xfe00707f, 0x02003033, (1<<15)    ) // MULHU
+/* 6e */Y( 0,     0 , Z( _DIV_C             ,_DIV_C             ,_DIV_C             ,_DIV_C             ,_DIV_C             ,_DIV_C             ,_DIV_C             ,_DIV_C             ,_DIV_C             ,_DIV_C             ,_DIV_C             ,_DIV_C             ), 0, 0xffffffff, 0x00000000, 0          ) // 
+/* 6f */Y( 0,     0 , Z( _MRET_6            ,_MRET_6            ,_MRET_6            ,_MRET_6            ,_MRET_6            ,_MRET_6            ,_MRET_6            ,_MRET_6            ,_MRET_6            ,_MRET_6            ,_MRET_6            ,_MRET_6            ), 0, 0xffffffff, 0x00000000, 0          ) // Reached with LAZY_DECODE==1
+/* 70 */Y( 0,  0x0d , Z( _LHU_2             ,_LHU_2             ,_LHU_2             ,_LHU_2             ,_LHU_2             ,_LHU_2             ,_LHU_2             ,_LHU_2             ,_LHU_2             ,_LHU_2             ,_LHU_2             ,_LHU_2             ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 71 */Y( 0,  0x0d , Z( _aFaultc           ,_aFaultc           ,_aFaultc           ,_aFaultc           ,_aFaultc           ,_aFaultc           ,_aFaultc           ,_aFaultc           ,_aFaultc           ,_aFaultc           ,_aFaultc           ,_aFaultc           ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 72 */Y( 0,     0 , Z( _LBU_3             ,_LBU_3             ,_LBU_3             ,_LBU_3             ,_LBU_3             ,_LBU_3             ,_LBU_3             ,_LBU_3             ,_LBU_3             ,_LBU_3             ,_LBU_3             ,_LBU_3             ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 73 */Y( 0,     0 , Z( _ixBAERR_1         ,_ixBAERR_1         ,_ixBAERR_1         ,_BAERR_1           ,_BAERR_1           ,_BAERR_1           ,_icunx2            ,_ic1unalignd       ,_BAERR_1           ,_BAERR_1           ,_BAERR_1           ,_BAERR_1           ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 74 */Y( 0,  0x0e , Z( _ixBrOpFet         ,_ixBrOpFet         ,_ixBrOpFet         ,_BrOpFet           ,_BrOpFet           ,_BrOpFet           ,_icunx0            ,_icunx0            ,_BrOpFet           ,_BrOpFet           ,_BrOpFet           ,_BrOpFet           ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 75 */Y( 0,  0x0e , Z( _ixBAlignEr        ,_ixBAlignEr        ,_ixBAlignEr        ,_BAlignEr          ,_BAlignEr          ,_BAlignEr          ,_icunx1            ,_icunx1            ,_BAlignEr          ,_BAlignEr          ,_BAlignEr          ,_BAlignEr          ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 76 */Y( 0,  0x92 , Z( _ixBAERR_2         ,_ixBAERR_2         ,_ixBAERR_2         ,_BAERR_2           ,_BAERR_2           ,_BAERR_2           ,_ic0Fetchu         ,_ic1Fetchu         ,_BAERR_2           ,_BAERR_2           ,_BAERR_2           ,_BAERR_2           ), 0, 0xffffffff, 0x00000000, 0          ) // // Paired due to use with RVC
+/* 77 */Y( 0,  0x92 , Z( _ixBAERR_3         ,_ixBAERR_3         ,_ixBAERR_3         ,_BAERR_3           ,_BAERR_3           ,_BAERR_3           ,_ic0eFetchu        ,_ic1eFetchu        ,_BAERR_3           ,_BAERR_3           ,_BAERR_3           ,_BAERR_3           ), 0, 0xffffffff, 0x00000000, 0          ) // // Paired due to use with RVC
+/* 78 */Y( 0,  0x0f , Z( _DIV_4             ,_DIV_4             ,_DIV_4             ,_DIV_4             ,_DIV_4             ,_DIV_4             ,_DIV_4             ,_DIV_4             ,_DIV_4             ,_DIV_4             ,_DIV_4             ,_DIV_4             ), 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "BEQ"
+/* 79 */Y( 0,  0x0f , Z( _DIV_5             ,_DIV_5             ,_DIV_5             ,_DIV_5             ,_DIV_5             ,_DIV_5             ,_DIV_5             ,_DIV_5             ,_DIV_5             ,_DIV_5             ,_DIV_5             ,_DIV_5             ), 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "JALR"
+/* 7a */Y( 0,     0 , Z( _SB_5              ,_SB_5              ,_SB_5              ,_SB_5              ,_SB_5              ,_SB_5              ,_SB_5              ,_SB_5              ,_SB_5              ,_SB_5              ,_SB_5              ,_SB_5              ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 7b */Y( 1,     0 , Z( _JAL_0(0x7b)       ,_JAL_0(0x7b)       ,_JAL_0(0x7b)       ,_JAL_0(0x7b)       ,_JAL_0(0x7b)       ,_JAL_0(0x7b)       ,_JAL_0(0x7b)       ,_JAL_0(0x7b)       ,_JAL_0(0x7b)       ,_JAL_0(0x7b)       ,_JAL_0(0x7b)       ,_JAL_0(0x7b)       ), 1, 0x0000007f, 0x0000006f, (1<<25)/4  ) // JAL 4/4
+/* 7c */Y( 1,     0 , Z( _CSRRC_0           ,_CSRRC_0           ,_CSRRC_0           ,_CSRRC_0           ,_CSRRC_0           ,_CSRRC_0           ,_CSRRC_0           ,_CSRRC_0           ,_CSRRC_0           ,_CSRRC_0           ,_CSRRC_0           ,_CSRRC_0           ), 1, 0x0000707f, 0x00003073, (1<<22)    ) // CSRRC
+/* 7d */Y( 0,     0 , Z( _ixBAERR_4         ,_ixBAERR_4         ,_ixBAERR_4         ,_BAERR_4           ,_BAERR_4           ,_BAERR_4           ,_icunx3            ,_icunx3            ,_BAERR_4           ,_BAERR_4           ,_BAERR_4           ,_BAERR_4           ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 7e */Y( 0,     0 , Z( _NMI_1             ,_NMI_1             ,_NMI_1             ,_NMI_1             ,_NMI_1             ,_NMI_1             ,_NMI_1             ,_NMI_1             ,_NMI_1             ,_NMI_1             ,_NMI_1             ,_NMI_1             ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 7f */Y( 0,     0 , Z( _JALRE2            ,_JALRE2            ,_JALRE2            ,_JALRE2            ,_JALRE2            ,_JALRE2            ,_JALRE2            ,_JALRE2            ,_JALRE2            ,_JALRE2            ,_JALRE2            ,_JALRE2            ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 80 */Y( 1,     0 , Z( _LBU_0             ,_LBU_0             ,_LBU_0             ,_LBU_0             ,_LBU_0             ,_LBU_0             ,_LBU_0             ,_LBU_0             ,_LBU_0             ,_LBU_0             ,_LBU_0             ,_LBU_0             ), 1, 0x0000707f, 0x00004003, (1<<22)    ) // LBU
+/* 81 */Y( 0,     0 , Z( _JAERR_2           ,_JAERR_2           ,_JAERR_2           ,_JAERR_2           ,_JAERR_2           ,_JAERR_2           ,_JAERR_2           ,_JAERR_2           ,_JAERR_2           ,_JAERR_2           ,_JAERR_2           ,_JAERR_2           ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 82 */Y( 0,  0x10 , Z( _DIV_1             ,_DIV_1             ,_DIV_1             ,_DIV_1             ,_DIV_1             ,_DIV_1             ,_DIV_1             ,_DIV_1             ,_DIV_1             ,_DIV_1             ,_DIV_1             ,_DIV_1             ), 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "ij"
+/* 83 */Y( 0,  0x10 , Z( _DIV_2             ,_DIV_2             ,_DIV_2             ,_DIV_2             ,_DIV_2             ,_DIV_2             ,_DIV_2             ,_DIV_2             ,_DIV_2             ,_DIV_2             ,_DIV_2             ,_DIV_2             ), 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to FENCE
+/* 84 */Y( 1,     0 , Z( _XORI_0            ,_XORI_0            ,_XORI_0            ,_XORI_0            ,_XORI_0            ,_XORI_0            ,_XORI_0            ,_XORI_0            ,_XORI_0            ,_XORI_0            ,_XORI_0            ,_XORI_0            ), 1, 0x0000707f, 0x00004013, (1<<22)    ) // XORI
+/* 85 */Y( 0,     0 , Z( _LBU_1             ,_LBU_1             ,_LBU_1             ,_LBU_1             ,_LBU_1             ,_LBU_1             ,_LBU_1             ,_LBU_1             ,_LBU_1             ,_LBU_1             ,_LBU_1             ,_LBU_1             ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 86 */Y( 0,  0x11 , Z( _JAL_2             ,_JAL_2             ,_JAL_2             ,_JAL_2             ,_JAL_2             ,_JAL_2             ,_JAL_2             ,_JAL_2             ,_JAL_2             ,_JAL_2             ,_JAL_2             ,_JAL_2             ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 87 */Y( 0,  0x11 , Z( _JALRE1            ,_JALRE1            ,_JALRE1            ,_JALRE1            ,_JALRE1            ,_JALRE1            ,_JALRE1            ,_JALRE1            ,_JALRE1            ,_JALRE1            ,_JALRE1            ,_JALRE1            ), 0, 0xffffffff, 0x00000000, 0          ) // 
+/* 88 */Y( 0,  0x12 , Z( _DIV_E             ,_DIV_E             ,_DIV_E             ,_DIV_E             ,_DIV_E             ,_DIV_E             ,_DIV_E             ,_DIV_E             ,_DIV_E             ,_DIV_E             ,_DIV_E             ,_DIV_E             ), 2, 0x00200000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "SW"
+/* 89 */Y( 0,  0x12 , Z( _DIV_F             ,_DIV_F             ,_DIV_F             ,_DIV_F             ,_DIV_F             ,_DIV_F             ,_DIV_F             ,_DIV_F             ,_DIV_F             ,_DIV_F             ,_DIV_F             ,_DIV_F             ), 0, 0xffffffff, 0x00000000, 0          ) //                                                         
+/* 8a */Y( 0,  0x15 , Z( _DIVU_5            ,_DIVU_5            ,_DIVU_5            ,_DIVU_5            ,_DIVU_5            ,_DIVU_5            ,_DIVU_5            ,_DIVU_5            ,_DIVU_5            ,_DIVU_5            ,_DIVU_5            ,_DIVU_5            ), 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "SW" 
+/* 8b */Y( 0,  0x15 , Z( _LB_6              ,_LB_6              ,_LB_6              ,_LB_6              ,_LB_6              ,_LB_6              ,_LB_6              ,_LB_6              ,_LB_6              ,_LB_6              ,_LB_6              ,_LB_6              ), 0, 0x00400000, 0x00000000, 0          ) //
+/* 8c */Y( 1,     0 , Z( _XOR_0             ,_XOR_0             ,_XOR_0             ,_XOR_0             ,_XOR_0             ,_XOR_0             ,_XOR_0             ,_XOR_0             ,_XOR_0             ,_XOR_0             ,_XOR_0             ,_XOR_0             ), 1, 0xfe00707f, 0x00004033, (1<<15)    ) // XOR
+/* 8d */Y( 1,     0 , Z( _DIV_0             ,_DIV_0             ,_DIV_0             ,_DIV_0             ,_DIV_0             ,_DIV_0             ,_DIV_0             ,_DIV_0             ,_DIV_0             ,_DIV_0             ,_DIV_0             ,_DIV_0             ), 1, 0xfe00707f, 0x02004033, (1<<15)    ) // DIV
+/* 8e */Y( 0,     0 , Z( _CSRRS_1           ,_CSRRS_1           ,_CSRRS_1           ,_CSRRS_1           ,_CSRRS_1           ,_CSRRS_1           ,_CSRRS_1           ,_CSRRS_1           ,_CSRRS_1           ,_CSRRS_1           ,_CSRRS_1           ,_CSRRS_1           ), 0, 0xffffffff, 0x00000000, 0          ) // illegal. Must be even ucode adr due to use of add4       Reached with LAZY_DECODE==1
+/* 8f */Y( 0,     0 , Z( _ILL_3             ,_ILL_3             ,_ILL_3             ,_ILL_3             ,_ILL_3             ,_ILL_3             ,_ILL_3             ,_ILL_3             ,_ILL_3             ,_ILL_3             ,_ILL_3             ,_ILL_3             ), 0, 0xffffffff, 0x00000000, 0          ) //                                                          Reached with LAZY_DECODE==1
+/* 90 */Y( 0,     0 , Z( _NMI_2             ,_NMI_2             ,_NMI_2             ,_NMI_2             ,_NMI_2             ,_NMI_2             ,_NMI_2             ,_NMI_2             ,_NMI_2             ,_NMI_2             ,_NMI_2             ,_NMI_2             ), 0, 0xffffffff, 0x00000000, 0          ) //                         
+/* 91 */Y( 0,     0 , Z( _LDAF_2            ,_LDAF_2            ,_LDAF_2            ,_LDAF_2            ,_LDAF_2            ,_LDAF_2            ,_LDAF_2            ,_LDAF_2            ,_LDAF_2            ,_LDAF_2            ,_LDAF_2            ,_LDAF_2            ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 92 */Y( 0,     0 , Z( _LDAF_3            ,_LDAF_3            ,_LDAF_3            ,_LDAF_3            ,_LDAF_3            ,_LDAF_3            ,_LDAF_3            ,_LDAF_3            ,_LDAF_3            ,_LDAF_3            ,_LDAF_3            ,_LDAF_3            ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 93 */Y( 0,     0 , Z( _SW_E2             ,_SW_E2             ,_SW_E2             ,_SW_E2             ,_SW_E2             ,_SW_E2             ,_SW_E2             ,_SW_E2             ,_SW_E2             ,_SW_E2             ,_SW_E2             ,_SW_E2             ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 94 */Y( 0,     0 , Z( _SW_E4             ,_SW_E4             ,_SW_E4             ,_SW_E4             ,_SW_E4             ,_SW_E4             ,_SW_E4             ,_SW_E4             ,_SW_E4             ,_SW_E4             ,_SW_E4             ,_SW_E4             ), 0, 0xffffffff, 0x00000000, 0          ) // Must be even ucode adr due to use of add4 in SW_E3 [what!]
+/* 95 */Y( 0,     0 , Z( _SW_E3             ,_SW_E3             ,_SW_E3             ,_SW_E3             ,_SW_E3             ,_SW_E3             ,_SW_E3             ,_SW_E3             ,_SW_E3             ,_SW_E3             ,_SW_E3             ,_SW_E3             ), 0, 0xffffffff, 0x00000000, 0          ) // [a] probably pair with above
+/* 96 */Y( 0,  0x13 , Z( _SH_1              ,_SH_1              ,_SH_1              ,_SH_1              ,_SH_1              ,_SH_1              ,_SH_1              ,_SH_1              ,_SH_1              ,_SH_1              ,_SH_1              ,_SH_1              ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 97 */Y( 0,  0x13 , Z( _SW_E1SWH          ,_SW_E1SWH          ,_SW_E1SWH          ,_SW_E1SWH          ,_SW_E1SWH          ,_SW_E1SWH          ,_SW_E1SWH          ,_SW_E1SWH          ,_SW_E1SWH          ,_SW_E1SWH          ,_SW_E1SWH          ,_SW_E1SWH          ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 98 */Y( 1,     0 , Z( _BLT               ,_BLT               ,_BLT               ,_BLT               ,_BLT               ,_BLT               ,_BLT               ,_BLT               ,_BLT               ,_BLT               ,_BLT               ,_BLT               ), 1, 0x0000707f, 0x00004063, (1<<22)    ) // BLT
+/* 99 */Y( 0,     0 , Z( _ILL_0(0x99)       ,_ILL_0(0x99)       ,_ILL_0(0x99)       ,_ILL_0(0x99)       ,_ILL_0(0x99)       ,_ILL_0(0x99)       ,_ILL_0(0x99)       ,_ILL_0(0x99)       ,_ILL_0(0x99)       ,_ILL_0(0x99)       ,_ILL_0(0x99)       ,_ILL_0(0x99)       ), 2, 0x00400000, 0x00000000, 0          ) // illegal Can get here from OpCode close to "JALR". 
+/* 9a */Y( 0,     0 , Z( _ECALL_6           ,_ECALL_6           ,_ECALL_6           ,_ECALL_6           ,_ECALL_6           ,_ECALL_6           ,_ECALL_6           ,_ECALL_6           ,_ECALL_6           ,_ECALL_6           ,_ECALL_6           ,_ECALL_6           ), 0, 0x00200000, 0x00000000, 0          ) // Must be even ucode adr for unknown reason [what2]
+/* 9b */Y( 0,     0 , Z( _ILL_5             ,_ILL_5             ,_ILL_5             ,_ILL_5             ,_ILL_5             ,_ILL_5             ,_ILL_5             ,_ILL_5             ,_ILL_5             ,_ILL_5             ,_ILL_5             ,_ILL_5             ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 9c */Y( 0,  0x14 , Z( _DIV_10            ,_DIV_10            ,_DIV_10            ,_DIV_10            ,_DIV_10            ,_DIV_10            ,_DIV_10            ,_DIV_10            ,_DIV_10            ,_DIV_10            ,_DIV_10            ,_DIV_10            ), 2, 0x00001000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "EBREAK/ECALL/CSR"
+/* 9d */Y( 0,  0x14 , Z( _DIV_11            ,_DIV_11            ,_DIV_11            ,_DIV_11            ,_DIV_11            ,_DIV_11            ,_DIV_11            ,_DIV_11            ,_DIV_11            ,_DIV_11            ,_DIV_11            ,_DIV_11            ), 0, 0xffffffff, 0x00000000, 0          ) //                                                                       
+/* 9e */Y( 0,     0 , Z( _SH_4              ,_SH_4              ,_SH_4              ,_SH_4              ,_SH_4              ,_SH_4              ,_SH_4              ,_SH_4              ,_SH_4              ,_SH_4              ,_SH_4              ,_SH_4              ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 9f */Y( 0,     0 , Z( _SH_5              ,_SH_5              ,_SH_5              ,_SH_5              ,_SH_5              ,_SH_5              ,_SH_5              ,_SH_5              ,_SH_5              ,_SH_5              ,_SH_5              ,_SH_5              ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* a0 */Y( 1,     0 , Z( _LHU_0             ,_LHU_0             ,_LHU_0             ,_LHU_0             ,_LHU_0             ,_LHU_0             ,_LHU_0             ,_LHU_0             ,_LHU_0             ,_LHU_0             ,_LHU_0             ,_LHU_0             ), 1, 0x0000707f, 0x00005003, (1<<22)    ) // LHU
+/* a1 */Y( 0,     0 , Z( _ECALL_4           ,_ECALL_4           ,_ECALL_4           ,_ECALL_4           ,_ECALL_4           ,_ECALL_4           ,_ECALL_4           ,_ECALL_4           ,_ECALL_4           ,_ECALL_4           ,_ECALL_4           ,_ECALL_4           ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* a2 */Y( 0,  0x0a , Z( _DIV_14            ,_DIV_14            ,_DIV_14            ,_DIV_14            ,_DIV_14            ,_DIV_14            ,_DIV_14            ,_DIV_14            ,_DIV_14            ,_DIV_14            ,_DIV_14            ,_DIV_14            ), 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "ij"
+/* a3 */Y( 0,  0x0a , Z( _DIV_15            ,_DIV_15            ,_DIV_15            ,_DIV_15            ,_DIV_15            ,_DIV_15            ,_DIV_15            ,_DIV_15            ,_DIV_15            ,_DIV_15            ,_DIV_15            ,_DIV_15            ), 0, 0xffffffff, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to FENCE
+/* a4 */Y( 1,     0 , Z( _SRxI_0            ,_SRxI_0            ,_SRxI_0            ,_SRxI_0            ,_SRxI_0            ,_SRxI_0            ,_SRxI_0            ,_SRxI_0            ,_SRxI_0            ,_SRxI_0            ,_SRxI_0            ,_SRxI_0            ), 1, 0xbe00707f, 0x00005013, (1<<15)*2  ) // SRLI/SRAI
+/* a5 */Y( 0,     0 , Z( _MRET_3            ,_MRET_3            ,_MRET_3            ,_MRET_3            ,_MRET_3            ,_MRET_3            ,_MRET_3            ,_MRET_3            ,_MRET_3            ,_MRET_3            ,_MRET_3            ,_MRET_3            ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* a6 */Y( 0,  0x16 , Z( _ECAL_RET          ,_ECAL_RET          ,_ECAL_RET          ,_ECAL_RET          ,_ECAL_RET          ,_ECAL_RET          ,_ECAL_RET          ,_ECAL_RET          ,_ECAL_RET          ,_ECAL_RET          ,_ECAL_RET          ,_ECAL_RET          ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* a7 */Y( 0,  0x16 , Z( _EBRKWFI1          ,_EBRKWFI1          ,_EBRKWFI1          ,_EBRKWFI1          ,_EBRKWFI1          ,_EBRKWFI1          ,_EBRKWFI1          ,_EBRKWFI1          ,_EBRKWFI1          ,_EBRKWFI1          ,_EBRKWFI1          ,_EBRKWFI1          ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* a8 */Y( 0   ,  0 , Z( _DIV_3             ,_DIV_3             ,_DIV_3             ,_DIV_3             ,_DIV_3             ,_DIV_3             ,_DIV_3             ,_DIV_3             ,_DIV_3             ,_DIV_3             ,_DIV_3             ,_DIV_3             ), 2, 0x00200000, 0x00000000, 0          ) // Illegal as entry. Can get here from OpCode close to "SW". DIV_3 must be even ucode adr
+/* a9 */Y( 0,     0 , Z( _ILL_4             ,_ILL_4             ,_ILL_4             ,_ILL_4             ,_ILL_4             ,_ILL_4             ,_ILL_4             ,_ILL_4             ,_ILL_4             ,_ILL_4             ,_ILL_4             ,_ILL_4             ), 0, 0x00200000, 0x00000000, 0          ) //
+/* aa */Y( 0,     0 , Z( _DIV_6             ,_DIV_6             ,_DIV_6             ,_DIV_6             ,_DIV_6             ,_DIV_6             ,_DIV_6             ,_DIV_6             ,_DIV_6             ,_DIV_6             ,_DIV_6             ,_DIV_6             ), 2, 0xffffffff, 0x00000000, 0          ) // Illegal as entry. Can get here from OpCode close to "SW"
+/* ab */Y( 0,     0 , Z( _EBREAK_2          ,_EBREAK_2          ,_EBREAK_2          ,_EBREAK_2          ,_EBREAK_2          ,_EBREAK_2          ,_EBREAK_2          ,_EBREAK_2          ,_EBREAK_2          ,_EBREAK_2          ,_EBREAK_2          ,_EBREAK_2          ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* ac */Y( 1,     0 , Z( _SRx_0(0xac)       ,_SRx_0(0xac)       ,_SRx_0(0xac)       ,_SRx_0(0xac)       ,_SRx_0(0xac)       ,_SRx_0(0xac)       ,_SRx_0(0xac)       ,_SRx_0(0xac)       ,_SRx_0(0xac)       ,_SRx_0(0xac)       ,_SRx_0(0xac)       ,_SRx_0(0xac)       ), 1, 0xfe00707f, 0x00005033, (1<<15)    ) // SRL
+/* ad */Y( 1,     0 , Z( _DIVU_0            ,_DIVU_0            ,_DIVU_0            ,_DIVU_0            ,_DIVU_0            ,_DIVU_0            ,_DIVU_0            ,_DIVU_0            ,_DIVU_0            ,_DIVU_0            ,_DIVU_0            ,_DIVU_0            ), 1, 0xfe00707f, 0x02005033, (1<<15)    ) // DIVU
+/* ae */Y( 1,     0 , Z( _SRx_0(0xae)       ,_SRx_0(0xae)       ,_SRx_0(0xae)       ,_SRx_0(0xae)       ,_SRx_0(0xae)       ,_SRx_0(0xae)       ,_SRx_0(0xae)       ,_SRx_0(0xae)       ,_SRx_0(0xae)       ,_SRx_0(0xae)       ,_SRx_0(0xae)       ,_SRx_0(0xae)       ), 1, 0xfe00707f, 0x40005033, (1<<15)    ) // SRA
+/* af */Y( 0,     0 , Z( _MRET_4            ,_MRET_4            ,_MRET_4            ,_MRET_4            ,_MRET_4            ,_MRET_4            ,_MRET_4            ,_MRET_4            ,_MRET_4            ,_MRET_4            ,_MRET_4            ,_MRET_4            ), 0, 0xffffffff, 0x00000000, 0          ) // Reached with LAZY_DECODE==1. 
+/* b0 */Y( 0,     0 , Z( _CSRRW_3           ,_CSRRW_3           ,_CSRRW_3           ,_CSRRW_3           ,_CSRRW_3           ,_CSRRW_3           ,_CSRRW_3           ,_CSRRW_3           ,_CSRRW_3           ,_CSRRW_3           ,_CSRRW_3           ,_CSRRW_3           ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* b1 */Y( 0,     0 , Z( _aF_SW_3           ,_aF_SW_3           ,_aF_SW_3           ,_aF_SW_3           ,_aF_SW_3           ,_aF_SW_3           ,_aF_SW_3           ,_aF_SW_3           ,_aF_SW_3           ,_aF_SW_3           ,_aF_SW_3           ,_aF_SW_3           ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* b2 */Y( 0,     0 , Z( _CSRRC_1           ,_CSRRC_1           ,_CSRRC_1           ,_CSRRC_1           ,_CSRRC_1           ,_CSRRC_1           ,_CSRRC_1           ,_CSRRC_1           ,_CSRRC_1           ,_CSRRC_1           ,_CSRRC_1           ,_CSRRC_1           ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* b3 */Y( 0,     0 , Z( _CSRRWI_1          ,_CSRRWI_1          ,_CSRRWI_1          ,_CSRRWI_1          ,_CSRRWI_1          ,_CSRRWI_1          ,_CSRRWI_1          ,_CSRRWI_1          ,_CSRRWI_1          ,_CSRRWI_1          ,_CSRRWI_1          ,_CSRRWI_1          ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* b4 */Y( 0,     0 , Z( _i0reserved        ,_i1eFetch3         ,_i2eFetch3         ,_eFetch3           ,_eFetch3           ,_eFetch3           ,_ic0reserved       ,_ic1eFetch3        ,_eFetch3           ,_eFetch3           ,_eFetch3           ,_eFetch3           ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* b5 */Y( 0,     0 , Z( _SH_3              ,_SH_3              ,_SH_3              ,_SH_3              ,_SH_3              ,_SH_3              ,_SH_3              ,_SH_3              ,_SH_3              ,_SH_3              ,_SH_3              ,_SH_3              ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* b6 */Y( 0,     0 , Z( _ECALL_5           ,_ECALL_5           ,_ECALL_5           ,_ECALL_5           ,_ECALL_5           ,_ECALL_5           ,_ECALL_5           ,_ECALL_5           ,_ECALL_5           ,_ECALL_5           ,_ECALL_5           ,_ECALL_5           ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* b7 */Y( 0,     0 , Z( _IJ_3              ,_IJ_3              ,_IJ_3              ,_IJ_3              ,_IJ_3              ,_IJ_3              ,_IJ_3              ,_IJ_3              ,_IJ_3              ,_IJ_3              ,_IJ_3              ,_IJ_3              ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* b8 */Y( 1,     0 , Z( _BGE               ,_BGE               ,_BGE               ,_BGE               ,_BGE               ,_BGE               ,_BGE               ,_BGE               ,_BGE               ,_BGE               ,_BGE               ,_BGE               ), 1, 0x0000707f, 0x00005063, (1<<22)    ) // BGE
+/* b9 */Y( 0,     0 , Z( _DIV_e             ,_DIV_e             ,_DIV_e             ,_DIV_e             ,_DIV_e             ,_DIV_e             ,_DIV_e             ,_DIV_e             ,_DIV_e             ,_DIV_e             ,_DIV_e             ,_DIV_e             ), 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "JALR".
+/* ba */Y( 0,     0 , Z( _LHU_3             ,_LHU_3             ,_LHU_3             ,_LHU_3             ,_LHU_3             ,_LHU_3             ,_LHU_3             ,_LHU_3             ,_LHU_3             ,_LHU_3             ,_LHU_3             ,_LHU_3             ), 0, 0xffffffff, 0x00000000, 0          ) // Must be even ucode adr for unknown reason. Must find owut this. Probably because MCLR was used prev cycle.
+/* bb */Y( 0,     0 , Z( _SH_2              ,_SH_2              ,_SH_2              ,_SH_2              ,_SH_2              ,_SH_2              ,_SH_2              ,_SH_2              ,_SH_2              ,_SH_2              ,_SH_2              ,_SH_2              ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* bc */Y( 1,     0 , Z( _CSRRWI_0          ,_CSRRWI_0          ,_CSRRWI_0          ,_CSRRWI_0          ,_CSRRWI_0          ,_CSRRWI_0          ,_CSRRWI_0          ,_CSRRWI_0          ,_CSRRWI_0          ,_CSRRWI_0          ,_CSRRWI_0          ,_CSRRWI_0          ), 1, 0x0000707f, 0x00005073, (1<<22)    ) // CSRRWI
+/* bd */Y( 0,     0 , Z( _IJ_4              ,_IJ_4              ,_IJ_4              ,_IJ_4              ,_IJ_4              ,_IJ_4              ,_IJ_4              ,_IJ_4              ,_IJ_4              ,_IJ_4              ,_IJ_4              ,_IJ_4              ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* be */Y( 0,  0x17 , Z( _IJ_1              ,_IJ_1              ,_IJ_1              ,_IJ_1              ,_IJ_1              ,_IJ_1              ,_IJ_1              ,_IJ_1              ,_IJ_1              ,_IJ_1              ,_IJ_1              ,_IJ_1              ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* bf */Y( 0,  0x17 , Z( _IJT_1             ,_IJT_1             ,_IJT_1             ,_IJT_1             ,_IJT_1             ,_IJT_1             ,_IJT_1             ,_IJT_1             ,_IJT_1             ,_IJT_1             ,_IJT_1             ,_IJT_1             ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* c0 */Y( 0,     0 , Z( _DIV_D             ,_DIV_D             ,_DIV_D             ,_DIV_D             ,_DIV_D             ,_DIV_D             ,_DIV_D             ,_DIV_D             ,_DIV_D             ,_DIV_D             ,_DIV_D             ,_DIV_D             ), 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "LW"
+/* c1 */Y( 0,     0 , Z( _IJT_2             ,_IJT_2             ,_IJT_2             ,_IJT_2             ,_IJT_2             ,_IJT_2             ,_IJT_2             ,_IJT_2             ,_IJT_2             ,_IJT_2             ,_IJT_2             ,_IJT_2             ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* c2 */Y( 0,  0x18 , Z( _DIVU_3            ,_DIVU_3            ,_DIVU_3            ,_DIVU_3            ,_DIVU_3            ,_DIVU_3            ,_DIVU_3            ,_DIVU_3            ,_DIVU_3            ,_DIVU_3            ,_DIVU_3            ,_DIVU_3            ), 2, 0x00400000, 0x00000000, 0          ) // Illegal as entry. Can get here from OpCode close to "ij"
+/* c3 */Y( 0,  0x18,  Z( _DIVU_4            ,_DIVU_4            ,_DIVU_4            ,_DIVU_4            ,_DIVU_4            ,_DIVU_4            ,_DIVU_4            ,_DIVU_4            ,_DIVU_4            ,_DIVU_4            ,_DIVU_4            ,_DIVU_4            ), 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to FENCE. 
+/* c4 */Y( 1,     0 , Z( _ORI_0             ,_ORI_0             ,_ORI_0             ,_ORI_0             ,_ORI_0             ,_ORI_0             ,_ORI_0             ,_ORI_0             ,_ORI_0             ,_ORI_0             ,_ORI_0             ,_ORI_0             ), 1, 0x0000707f, 0x00006013, (1<<22)    ) // ORI                                                        
+/* c5 */Y( 0,     0 , Z( _MRET_5            ,_MRET_5            ,_MRET_5            ,_MRET_5            ,_MRET_5            ,_MRET_5            ,_MRET_5            ,_MRET_5            ,_MRET_5            ,_MRET_5            ,_MRET_5            ,_MRET_5            ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* c6 */Y( 0,     0 , Z( _IJT_4             ,_IJT_4             ,_IJT_4             ,_IJT_4             ,_IJT_4             ,_IJT_4             ,_IJT_4             ,_IJT_4             ,_IJT_4             ,_IJT_4             ,_IJT_4             ,_IJT_4             ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* c7 */Y( 0,     0 , Z( _QINT_1            ,_QINT_1            ,_QINT_1            ,_QINT_1            ,_QINT_1            ,_QINT_1            ,_QINT_1            ,_QINT_1            ,_QINT_1            ,_QINT_1            ,_QINT_1            ,_QINT_1            ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* c8 */Y( 0,     0 , Z( _DIV_7             ,_DIV_7             ,_DIV_7             ,_DIV_7             ,_DIV_7             ,_DIV_7             ,_DIV_7             ,_DIV_7             ,_DIV_7             ,_DIV_7             ,_DIV_7             ,_DIV_7             ), 2, 0x00200000, 0x00000000, 0          ) // Illegal as entry. Can get here from OpCode close to "SW". DIV_7 must be even ucode adr (why?)
+/* c9 */Y( 0,     0 , Z( _MRET_2            ,_MRET_2            ,_MRET_2            ,_MRET_2            ,_MRET_2            ,_MRET_2            ,_MRET_2            ,_MRET_2            ,_MRET_2            ,_MRET_2            ,_MRET_2            ,_MRET_2            ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* ca */Y( 0,     0 , Z( _DIVU_2            ,_DIVU_2            ,_DIVU_2            ,_DIVU_2            ,_DIVU_2            ,_DIVU_2            ,_DIVU_2            ,_DIVU_2            ,_DIVU_2            ,_DIVU_2            ,_DIVU_2            ,_DIVU_2            ), 2, 0x00200000, 0x00000000, 0          ) // illegal
+/* cb */Y( 0,     0 , Z( _QINT_2            ,_QINT_2            ,_QINT_2            ,_QINT_2            ,_QINT_2            ,_QINT_2            ,_QINT_2            ,_QINT_2            ,_QINT_2            ,_QINT_2            ,_QINT_2            ,_QINT_2            ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* cc */Y( 1,     0 , Z( _OR_0              ,_OR_0              ,_OR_0              ,_OR_0              ,_OR_0              ,_OR_0              ,_OR_0              ,_OR_0              ,_OR_0              ,_OR_0              ,_OR_0              ,_OR_0              ), 1, 0xfe00707f, 0x00006033, (1<<15)    ) // OR
+/* cd */Y( 1,     0 , Z( _REM_0             ,_REM_0             ,_REM_0             ,_REM_0             ,_REM_0             ,_REM_0             ,_REM_0             ,_REM_0             ,_REM_0             ,_REM_0             ,_REM_0             ,_REM_0             ), 1, 0xfe00707f, 0x02006033, (1<<15)    ) // REM
+/* ce */Y( 0,     0 , Z( _CSRRCI_1          ,_CSRRCI_1          ,_CSRRCI_1          ,_CSRRCI_1          ,_CSRRCI_1          ,_CSRRCI_1          ,_CSRRCI_1          ,_CSRRCI_1          ,_CSRRCI_1          ,_CSRRCI_1          ,_CSRRCI_1          ,_CSRRCI_1          ), 0, 0xffffffff, 0x00000000, 0          ) // Reached with LAZY_DECODE==1
+/* cf */Y( 0,     0 , Z( _MRET_7            ,_MRET_7            ,_MRET_7            ,_MRET_7            ,_MRET_7            ,_MRET_7            ,_MRET_7            ,_MRET_7            ,_MRET_7            ,_MRET_7            ,_MRET_7            ,_MRET_7            ), 0, 0xffffffff, 0x00000000, 0          ) // Reached with LAZY_DECODE==1
+/* d0 */Y( 0,  0x19 , Z( _ECALL_1           ,_ECALL_1           ,_ECALL_1           ,_ECALL_1           ,_ECALL_1           ,_ECALL_1           ,_ECALL_1           ,_ECALL_1           ,_ECALL_1           ,_ECALL_1           ,_ECALL_1           ,_ECALL_1           ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* d1 */Y( 0,  0x19 , Z( _MRET_1            ,_MRET_1            ,_MRET_1            ,_MRET_1            ,_MRET_1            ,_MRET_1            ,_MRET_1            ,_MRET_1            ,_MRET_1            ,_MRET_1            ,_MRET_1            ,_MRET_1            ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* d2 */Y( 0,  0x1a , Z( _LB_2              ,_LB_2              ,_LB_2              ,_LB_2              ,_LB_2              ,_LB_2              ,_LB_2              ,_LB_2              ,_LB_2              ,_LB_2              ,_LB_2              ,_LB_2              ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* d3 */Y( 0,  0x1a , Z( _aFaultd           ,_aFaultd           ,_aFaultd           ,_aFaultd           ,_aFaultd           ,_aFaultd           ,_aFaultd           ,_aFaultd           ,_aFaultd           ,_aFaultd           ,_aFaultd           ,_aFaultd           ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* d4 */Y( 0,     0 , Z( _aFault_2          ,_aFault_2          ,_aFault_2          ,_aFault_2          ,_aFault_2          ,_aFault_2          ,_aFault_2          ,_aFault_2          ,_aFault_2          ,_aFault_2          ,_aFault_2          ,_aFault_2          ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* d5 */Y( 0,     0 , Z( _i0unx0            ,_i1eFetch2         ,_i2eFetch2         ,_eFetch2           ,_eFetch2           ,_eFetch2           ,_ic0unalignd       ,_ic1eFetch2        ,_eFetch2           ,_eFetch2           ,_eFetch2           ,_eFetch2           ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* d6 */Y( 0,  0x1b , Z( _eILL0c            ,_eILL0c            ,_eILL0c            ,_eILL0c            ,_eILL0c            ,_eILL0c            ,_eILL0c            ,_eILL0c            ,_eILL0c            ,_eILL0c            ,_eILL0c            ,_eILL0c            ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* d7 */Y( 0,  0x1b , Z( _ECALL_3           ,_ECALL_3           ,_ECALL_3           ,_ECALL_3           ,_ECALL_3           ,_ECALL_3           ,_ECALL_3           ,_ECALL_3           ,_ECALL_3           ,_ECALL_3           ,_ECALL_3           ,_ECALL_3           ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* d8 */Y( 1,     0 , Z( _BLTU              ,_BLTU              ,_BLTU              ,_BLTU              ,_BLTU              ,_BLTU              ,_BLTU              ,_BLTU              ,_BLTU              ,_BLTU              ,_BLTU              ,_BLTU              ), 1, 0x0000707f, 0x00006063, (1<<22)    ) // BLTU
+/* d9 */Y( 0,     0 , Z( _MULH_3            ,_MULH_3            ,_MULH_3            ,_MULH_3            ,_MULH_3            ,_MULH_3            ,_MULH_3            ,_MULH_3            ,_MULH_3            ,_MULH_3            ,_MULH_3            ,_MULH_3            ), 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "JALR".
+/* da */Y( 0,     0 , Z( _LDAF_a            ,_LDAF_a            ,_LDAF_a            ,_LDAF_a            ,_LDAF_a            ,_LDAF_a            ,_LDAF_a            ,_LDAF_a            ,_LDAF_a            ,_LDAF_a            ,_LDAF_a            ,_LDAF_a            ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* db */Y( 0,     0 , Z( _jFault_1          ,_jFault_1          ,_jFault_1          ,_jFault_1          ,_jFault_1          ,_jFault_1          ,_jFault_1          ,_jFault_1          ,_jFault_1          ,_jFault_1          ,_jFault_1          ,_jFault_1          ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* dc */Y( 1,     0 , Z( _CSRRSI_0          ,_CSRRSI_0          ,_CSRRSI_0          ,_CSRRSI_0          ,_CSRRSI_0          ,_CSRRSI_0          ,_CSRRSI_0          ,_CSRRSI_0          ,_CSRRSI_0          ,_CSRRSI_0          ,_CSRRSI_0          ,_CSRRSI_0          ), 1, 0x0000707f, 0x00006073, (1<<22)    ) // CSRRSI
+/* dd */Y( 0,     0 , Z( _aF_SW_1           ,_aF_SW_1           ,_aF_SW_1           ,_aF_SW_1           ,_aF_SW_1           ,_aF_SW_1           ,_aF_SW_1           ,_aF_SW_1           ,_aF_SW_1           ,_aF_SW_1           ,_aF_SW_1           ,_aF_SW_1           ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* de */Y( 0,  0x1c , Z( _i0Fetch           ,_i1Fetch           ,_i2Fetch           ,_Fetch             ,_Fetch             ,_Fetch             ,_ic0Fetch          ,_ic1Fetch          ,_Fetch             ,_Fetch             ,_Fetch             ,_Fetch             ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* df */Y( 0,  0x1c , Z( _i0eFetch          ,_i1eFetch          ,_i2eFetch          ,_eFetch            ,_eFetch            ,_eFetch            ,_ic0eFetch         ,_ic1eFetch         ,_eFetch            ,_eFetch            ,_eFetch            ,_eFetch            ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* e0 */Y( 0,     0 , Z( _DIVU_1            ,_DIVU_1            ,_DIVU_1            ,_DIVU_1            ,_DIVU_1            ,_DIVU_1            ,_DIVU_1            ,_DIVU_1            ,_DIVU_1            ,_DIVU_1            ,_DIVU_1            ,_DIVU_1            ), 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "LW"
+/* e1 */Y( 0,     0 , Z( _ORI_1             ,_ORI_1             ,_ORI_1             ,_ORI_1             ,_ORI_1             ,_ORI_1             ,_ORI_1             ,_ORI_1             ,_ORI_1             ,_ORI_1             ,_ORI_1             ,_ORI_1             ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* e2 */Y( 0,  0x1d , Z( _MUL_1             ,_MUL_1             ,_MUL_1             ,_MUL_1             ,_MUL_1             ,_MUL_1             ,_MUL_1             ,_MUL_1             ,_MUL_1             ,_MUL_1             ,_MUL_1             ,_MUL_1             ), 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "ij"
+/* e3 */Y( 0,  0x1d , Z( _MUL_3             ,_MUL_3             ,_MUL_3             ,_MUL_3             ,_MUL_3             ,_MUL_3             ,_MUL_3             ,_MUL_3             ,_MUL_3             ,_MUL_3             ,_MUL_3             ,_MUL_3             ), 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to FENCE
+/* e4 */Y( 1,     0 , Z( _ANDI_0            ,_ANDI_0            ,_ANDI_0            ,_ANDI_0            ,_ANDI_0            ,_ANDI_0            ,_ANDI_0            ,_ANDI_0            ,_ANDI_0            ,_ANDI_0            ,_ANDI_0            ,_ANDI_0            ), 1, 0x0000707f, 0x00007013, (1<<22)    ) // ANDI
+/* e5 */Y( 0,     0 , Z( _aF_SW_2           ,_aF_SW_2           ,_aF_SW_2           ,_aF_SW_2           ,_aF_SW_2           ,_aF_SW_2           ,_aF_SW_2           ,_aF_SW_2           ,_aF_SW_2           ,_aF_SW_2           ,_aF_SW_2           ,_aF_SW_2           ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* e6 */Y( 0,  0x1e , Z( _i0StdIncPc        ,_i1StdIncPc        ,_i2StdIncPc        ,_StdIncPc          ,_StdIncPc          ,_StdIncPc          ,_ic0StdIncPc       ,_ic1StdIncPc       ,_StdIncPc          ,_StdIncPc          ,_StdIncPc          ,_StdIncPc          ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* e7 */Y( 0,  0x1e , Z( _aFault            ,_aFault            ,_aFault            ,_aFault            ,_aFault            ,_aFault            ,_aFault            ,_aFault            ,_aFault            ,_aFault            ,_aFault            ,_aFault            ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* e8 */Y( 0,     0 , Z( _MUL_2             ,_MUL_2             ,_MUL_2             ,_MUL_2             ,_MUL_2             ,_MUL_2             ,_MUL_2             ,_MUL_2             ,_MUL_2             ,_MUL_2             ,_MUL_2             ,_MUL_2             ), 2, 0x00200000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "SW".
+/* e9 */Y( 0,     0 , Z( _IJT_3             ,_IJT_3             ,_IJT_3             ,_IJT_3             ,_IJT_3             ,_IJT_3             ,_IJT_3             ,_IJT_3             ,_IJT_3             ,_IJT_3             ,_IJT_3             ,_IJT_3             ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* ea */Y( 0,     0 , Z( _MULHU_5           ,_MULHU_5           ,_MULHU_5           ,_MULHU_5           ,_MULHU_5           ,_MULHU_5           ,_MULHU_5           ,_MULHU_5           ,_MULHU_5           ,_MULHU_5           ,_MULHU_5           ,_MULHU_5           ), 2, 0x00200000, 0x00000000, 0          ) // (illegal) 
+/* eb */Y( 0,     0 , Z( _LH_3              ,_LH_3              ,_LH_3              ,_LH_3              ,_LH_3              ,_LH_3              ,_LH_3              ,_LH_3              ,_LH_3              ,_LH_3              ,_LH_3              ,_LH_3              ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* ec */Y( 1,     0 , Z( _AND_0             ,_AND_0             ,_AND_0             ,_AND_0             ,_AND_0             ,_AND_0             ,_AND_0             ,_AND_0             ,_AND_0             ,_AND_0             ,_AND_0             ,_AND_0             ), 1, 0xfe00707f, 0x00007033, (1<<15)    ) // AND
+/* ed */Y( 1,     0 , Z( _REMU_0            ,_REMU_0            ,_REMU_0            ,_REMU_0            ,_REMU_0            ,_REMU_0            ,_REMU_0            ,_REMU_0            ,_REMU_0            ,_REMU_0            ,_REMU_0            ,_REMU_0            ), 1, 0xfe00707f, 0x02007033, (1<<15)    ) // REMU
+/* ee */Y( 0,  0x1f , Z( _eILL0a            ,_eILL0a            ,_eILL0a            ,_eILL0a            ,_eILL0a            ,_eILL0a            ,_eILL0a            ,_eILL0a            ,_eILL0a            ,_eILL0a            ,_eILL0a            ,_eILL0a            ), 0, 0xffffffff, 0x00000000, 0          ) // Reached with LAZY_DECODE==1
+/* ef */Y( 0,  0x1f , Z( _WFI_5             ,_WFI_5             ,_WFI_5             ,_WFI_5             ,_WFI_5             ,_WFI_5             ,_WFI_5             ,_WFI_5             ,_WFI_5             ,_WFI_5             ,_WFI_5             ,_WFI_5             ), 0, 0xffffffff, 0x00000000, 0          ) // Reached with LAZY_DECODE==1
+/* f0 */Y( 0,  0x20 , Z( _LBU_2             ,_LBU_2             ,_LBU_2             ,_LBU_2             ,_LBU_2             ,_LBU_2             ,_LBU_2             ,_LBU_2             ,_LBU_2             ,_LBU_2             ,_LBU_2             ,_LBU_2             ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* f1 */Y( 0,  0x20 , Z( _aFaulte           ,_aFaulte           ,_aFaulte           ,_aFaulte           ,_aFaulte           ,_aFaulte           ,_aFaulte           ,_aFaulte           ,_aFaulte           ,_aFaulte           ,_aFaulte           ,_aFaulte           ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* f2 */Y( 0,  0x21 , Z( _SW_2              ,_SW_2              ,_SW_2              ,_SW_2              ,_SW_2              ,_SW_2              ,_SW_2              ,_SW_2              ,_SW_2              ,_SW_2              ,_SW_2              ,_SW_2              ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* f3 */Y( 0,  0x21 , Z( _aF_SW             ,_aF_SW             ,_aF_SW             ,_aF_SW             ,_aF_SW             ,_aF_SW             ,_aF_SW             ,_aF_SW             ,_aF_SW             ,_aF_SW             ,_aF_SW             ,_aF_SW             ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* f4 */Y( 0,  0x22 , Z( _i0Fetch2          ,_i1Fetch2          ,_i2Fetch2          ,_Fetch2            ,_Fetch2            ,_Fetch2            ,_ic0Fetch2         ,_ic1Fetch2         ,_Fetch2            ,_Fetch2            ,_Fetch2            ,_Fetch2            ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* f5 */Y( 0,  0x22 , Z( _jFault            ,_jFault            ,_jFault            ,_jFault            ,_jFault            ,_jFault            ,_jFault            ,_jFault            ,_jFault            ,_jFault            ,_jFault            ,_jFault            ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* f6 */Y( 0,  0x23 , Z( _WFI_1             ,_WFI_1             ,_WFI_1             ,_WFI_1             ,_WFI_1             ,_WFI_1             ,_WFI_1             ,_WFI_1             ,_WFI_1             ,_WFI_1             ,_WFI_1             ,_WFI_1             ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* f7 */Y( 0,  0x23 , Z( _EBREAK_1          ,_EBREAK_1          ,_EBREAK_1          ,_EBREAK_1          ,_EBREAK_1          ,_EBREAK_1          ,_EBREAK_1          ,_EBREAK_1          ,_EBREAK_1          ,_EBREAK_1          ,_EBREAK_1          ,_EBREAK_1          ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* f8 */Y( 1,     0 , Z( _BGEU              ,_BGEU              ,_BGEU              ,_BGEU              ,_BGEU              ,_BGEU              ,_BGEU              ,_BGEU              ,_BGEU              ,_BGEU              ,_BGEU              ,_BGEU              ), 1, 0x0000707f, 0x00007063, (1<<22)    ) // BGEU
+/* f9 */Y( 0,     0 , Z( _MULH_2            ,_MULH_2            ,_MULH_2            ,_MULH_2            ,_MULH_2            ,_MULH_2            ,_MULH_2            ,_MULH_2            ,_MULH_2            ,_MULH_2            ,_MULH_2            ,_MULH_2            ), 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "JALR".
+/* fa */Y( 0,     0 , Z( _WFI_2             ,_WFI_2             ,_WFI_2             ,_WFI_2             ,_WFI_2             ,_WFI_2             ,_WFI_2             ,_WFI_2             ,_WFI_2             ,_WFI_2             ,_WFI_2             ,_WFI_2             ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* fb */Y( 0,     0 , Z( _SB_3              ,_SB_3              ,_SB_3              ,_SB_3              ,_SB_3              ,_SB_3              ,_SB_3              ,_SB_3              ,_SB_3              ,_SB_3              ,_SB_3              ,_SB_3              ), 2, 0x00200000, 0x00000000, 0          ) //
+/* fc */Y( 1,     0 , Z( _CSRRCI_0          ,_CSRRCI_0          ,_CSRRCI_0          ,_CSRRCI_0          ,_CSRRCI_0          ,_CSRRCI_0          ,_CSRRCI_0          ,_CSRRCI_0          ,_CSRRCI_0          ,_CSRRCI_0          ,_CSRRCI_0          ,_CSRRCI_0          ), 1, 0x0000707f, 0x00007073, (1<<22)    ) // CSRRCI
+/* fd */Y( 1,     0 , Z( _NMI_0             ,_NMI_0             ,_NMI_0             ,_NMI_0             ,_NMI_0             ,_NMI_0             ,_NMI_0             ,_NMI_0             ,_NMI_0             ,_NMI_0             ,_NMI_0             ,_NMI_0             ), 3, 0xffffffff, 0x00000000, 0          ) // Reserved for NMI
+/* fe */Y( 1,     0 , Z( _ILLe              ,_ILLe              ,_ILLe              ,_ILLe              ,_ILLe              ,_ILLe              ,_ILLe              ,_ILLe              ,_ILLe              ,_ILLe              ,_ILLe              ,_ILLe              ), 2, 0x2af56000, 0x00000000, 0          ) // Reserved for illegals
+/* ff */Y( 1,     0 , Z( _QINT_0            ,_QINT_0            ,_QINT_0            ,_QINT_0            ,_QINT_0            ,_QINT_0            ,_QINT_0            ,_QINT_0            ,_QINT_0            ,_QINT_0            ,_QINT_0            ,_QINT_0            ), 3, 0xffffffff, 0x00000000, 0          ) // Reserved for qualified interrupt
 
 
 
@@ -1586,27 +1147,3 @@ SB_DFFE reg_d18( .Q(d[30]), .C(clk), .E(progress_ucode), .D(instr1x110100));")
 #undef xxxxx 
 
 
-
-// 0000000 00000 00000 000 00000 1110011 ECALL : mepc = pc, mtval = 0 mcause = 11                                                                                                                     
-// 0000000 00001 00000 000 00000 1110011 EBREAK: mepc = pc, mtval = 0 mcause = 3    
-// 0000000 00010 00000 000 00000 1110011 URET                                       
-// 0001000 00010 00000 000 00000 1110011 SRET                                       
-// 0011000 00010 00000 000 00000 1110011 MRET                                       
-                                                                                    
-                                                                                    
-// Easy constants                                                                   
-//  00000000 (r00000000     ) (passd)                                               
-//  00000001 (Q=0, r00000000),(add1 )                                               
-//  00000003 (Q=0, r00000000),(add3 )                                               
-//  00000004 (Q=0, r00000000),(add4 )                                               
-//  000000ff (r0000000f     ),(passd)                                               
-//  00000100 (Q=0, r000000ff),(add1 ) CSRRW                                         
-//  00000102 (Q=0, r000000ff),(add3 ) CSRRS                                         
-//  00000103 (Q=0, r000000ff),(add4 ) CSRRC                                         
-//  ffffffff (Q=0, rffffffff),(add1 )                                               
-//  00000002 (Q=0, rffffffff),(add3 )                                               
-//  ffffff7f (rffffff7f     ),(passd)                                               
-//  ffffff80 (Q=0, rFFFFFF7F),(add1 ) CSRRWI                                        
-//  ffffff82 (Q=0, rFFFFFF7F),(add3 ) CSRRSI                                        
-//  ffffff83 (Q=0, rFFFFFF7F),(add4 ) CSRRCI                                        
-//                                                                                  
