@@ -149,14 +149,21 @@ void check_internal_consistency( void ) {
                 case 1 :
                         if ( tbl_fixedposspec[k] != 1 )
                                 ferr( "uinstr say fixed pos, but table say not. Mismatch at 0x%2.2x\n", k );
+                case 17 :
                         if ( ucodespeced_pair_or_pos[k] != k )
-                                ferr( "uinstr say fixed pos, bit instruction at wrong location 0x%2.2x\n", k );
+                                ferr( "uinstr say fixed pos, but instruction at wrong location 0x%2.2x\n", k );
                         break;
+                        
+                case 6 : // This item is both to be in a range, and is also the first of a pair
+                        ensure_k_at_illegal_at_entry_location(k);
+                        // Fallthrough
                 case 2 :
                         if ( k & 1 )
                                 ferr( "uinstr say at even address, but this is not the case. Error at 0x%2.2x\n", k );
                         if ( ucodespeced_pair_or_pos[k] != -1 && ucodespeced_pair_or_pos[k] != k )
                                 ferr( "uinstr say fixed pos, but ucode appears at wrong location 0x%2.2x\n", k );
+                        if ( ucodespeced_fixedeven[k+1] != 8 )
+                                ferr( "uinstr at even address 0x%2.2x, but next uinstr is not the second item of a pair\n", k );
                         break;                                                        
                 case 4 :
                         ensure_k_at_illegal_at_entry_location(k);
@@ -167,7 +174,8 @@ void check_internal_consistency( void ) {
                                 ferr( "ucode instr say paired, but table contradicts at 0x%2.2x\n", k );
                         if ( (k & 1) == 0 )
                                 ferr( "The second item in a pair must be at an odd address. Error at 0x%2.2x\n", k );
-//                        if ( ucodespeced_pair[k] != k-1 )
+                        if ( ucodespeced_fixedeven[k-1] != 2 && ucodespeced_fixedeven[k-1] != 6 )
+                                ferr( "A second item in a pair is not proceeded by a first item. Error at 0x%2.2x\n", k );
                         break;
                 default: ferr( "Que?\n" );
                 }

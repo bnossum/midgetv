@@ -9,7 +9,7 @@
  */
 
 #include "midgetv_ucodeoptions.h"
-#if HAS_MINSTRET == 0 && HAS_EBR_MINSTRET == 1
+#if ucodeopt_HAS_MINSTRET == 0 && ucodeopt_HAS_EBR_MINSTRET == 1
 #error Can not do this, see comment in "midgetv_ucodeoptions.h"
 #endif
 
@@ -29,7 +29,6 @@
    Rpc
    next StdIncPc
  */
-//#define unx StdIncPc
 #define x8 ((xxxx<<4) | xxxx )
 #define x10 ((xx<<8)|x8)
 #define x16 ((x8<<8)|x8)
@@ -77,7 +76,7 @@
 #endif
 
 
-#define unx  0,-1, x42  // Replace this with definition?
+//#define unx  0,-1, x42  // Replace this with definition?
 
 /*
   Fields for internal consistency:
@@ -88,10 +87,27 @@
                  0x82-0x83, 0x88, 0x8a, 0x99, 0x9c, 0xa2-0xa3, 0xa8, 0xaa, 0xb9, 0xc0, 0xc2-0xc3, 0xc8, 0xca, 0xd9, 
                  0xe0, 0xe2-0xe3, 0xe8, or 0xf9 (illegal as entry).
                8 if ucode is the second of a placed pair
+              17 if ucode is don't care at a s[ecific fixed position
   Pair:  if (fixed/even == 1):  position of microcode instruction
          if (fixed/even == 8):  label of the microcode instruction at the address preceeding this microcode instruction (part 2 of a pair)
          Otherwise           :  -1 if there is no requirement
  */
+
+#define _unx12      unx12,   "12: Not in use ",                                         17,0x12,            x42
+#define _unx33      unx33,   "33: Not in use ",                                         17,0x33,            x42
+#define _unx73      unx73,   "73: Not in use ",                                         17,0x73,            x42
+#define _unx74      unx74,   "74: Not in use ",                                         17,0x74,            x42
+#define _unx75      unx75,   "75: Not in use ",                                         17,0x75,            x42
+#define _unx7d      unx7d,   "7d: Not in use ",                                         17,0x7d,            x42
+#define _unx7f      unx7f,   "7f: Not in use ",                                         17,0x7f,            x42
+#define _unx81      unx81,   "81: Not in use ",                                         17,0x81,            x42
+#define _unx87      unx87,   "87: Not in use ",                                         17,0x87,            x42
+#define _unx9b      unx9b,   "9b: Not in use ",                                         17,0x9b,            x42
+#define _unxb3      unxb3,   "b3: Not in use ",                                         17,0xb3,            x42
+#define _unxd5      unxd5,   "d5: Not in use",                                          17,0xd5,            x42
+
+
+        
 //                                                                                      Fixed/even       ISR          | ALU         Write   intern      Reg    Shreg   Ucode            Next
 //                                                                                      | Pair           action       | op          adr/en  read adr    op     op      operation        ucode
 #define _jFault   jFault,  " err   Fetch access fault. Faulting adr to mtval",          8,Fetch2,        isr_none     | A_passq   | Wmtval| r00000000 | Qz   | sr_h  | u_cont         | n(jFault_1)  // [6] Must be after [5]
@@ -111,8 +127,7 @@
 #define _i0eFetch   eFetch,  " Fr00  rep Read until d=mem[(rs1+ofs) & ~3u]",            8,Fetch,         isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2 )   // [4]] Must be at address after [3]
 
 #define _i0reserved i0reserv, "Not in use, reserved to allow LASTINCH",                 0,0xb4,          x42
-#define _i0unx0     i0unx0,  " Not in use",                                             0,-1,            x42
-#define _i0unx1     i0unx1,   "Not in use ",                                            0,-1,            x42
+
 
 /* We need to conway some information to C programs. What columns are to be
  * removed, and replaced with inserted Verilog code. Technically this is
@@ -141,7 +156,6 @@
 #define _i1eFetch   eFetch,  " Fr10  rep Read until d=mem[(rs1+ofs) & ~3u]",            8,Fetch,         isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(eFetch2 )  // [4]] Must be at address after [3]
 #define _i1eFetch2  eFetch2, " Fr10  Update ttime",                                     0,-1,            isr_none     | A_cycnt   | Wttime| Rrinst    | Qz   | sr_h  | u_cont         | n(eFetch3 )  // I wonder, perhaps this should be part of apair to allow for bus error detection?
 #define _i1eFetch3  eFetch3, " Fr10  Update minstret, Q=immediate. Use dinx",           0,-1,            isr_none     | A_add1    | Wrinst| RS1       | Qudec| sr_h  | use_dinx
-#define _i1unx0     i1unx0,   "Not in use ",                                            0,-1,            x42
 
 // bit 18 is control for cycnt, bit 30 is control for use_dinx
 // In this case we only replace bit 30
@@ -168,9 +182,7 @@
 #define _i2Fetch    Fetch ,  " Fr11  Read and latch instruction",                       2,-1,            isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR
 #define _i2Fetch2   Fetch2,  " Fr11  Update ttime. Update I. Q=immediate. Use dinx",    2,-1,            isr_none     | A_cycnt   | Wttime| Rrinst    | Qz   | sr_h  | u_cont         | n(eFetch3 )  // [5] Must be at even ucode adr. 
 #define _i2eFetch   eFetch,  " Fr11  rep Read until d=mem[(rs1+ofs) & ~3u]",            8,Fetch,         isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [4]] Must be at address after [3]. Fetch from SRAM
-#define _i2eFetch2  eFetch2, " Fr11  Not in use",                                       0,-1, x42
 #define _i2eFetch3  eFetch3, " Fr11  Write minstret. Update I. Q=immediate, use dinx",  0,-1,            isr_none     | A_add1    | Wrinst| RS1       | Qudec| sr_h  | use_dinx
-#define _i2unx0     i2unx0,  "       not in use ",                                      0,-1, x42
 
 //  bit 18 is control for cycnt, bit 30 is control for use_dinx
 //  In this case we only replace bit 30
@@ -193,7 +205,7 @@
 /* When RVC is implemented, I ran into a problem with unaligned 32-bit instructions.
  * The essential problem was that pc may be incremented to straddle the two words
  * that contain the 32-bit instruction, but then PC is too large (by 2) for
- * instructions that uses PC as an addres. This is at least AUIPC, BEQ,BNE, etc
+ * instructions that uses PC as an address. This is at least AUIPC, BEQ,BNE, etc
  */
 //                                                                                      Fixed/even       ISR          | ALU         Write   intern      Reg    Shreg   Ucode            Next
 //                                                                                      | Pair           action       | op          adr/en  read adr    op     op      operation        ucode
@@ -205,7 +217,7 @@
 #define _ic0straddle straddle," Fr00u IncPC, OpFetch",                                  0,-1,	         nxtSTB       | A_add2or4 | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetchu  )  // fittetesthere 2,-1
 #define _ic0Fetchu   Fetchu , " Fr00u Read and latch instruction",                      2,-1,	         isr_none     | A_passq   | Wnn   | rttime    | Qz   | sr_h  | u_io_i_latch   | n(Fetch2  )  // [3b] Must be at even ucode adr. Fetch from EBR. Write copy of PC to yy
 #define _ic0eFetchu  eFetchu, " Fr00u rep Read until d=mem[(rs1+ofs) & ~3u]",           8,Fetchu,	 isr_none     | A_passq   | Wnn   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [4b] Must be at address after [3b]. Fetch from SRAM
-#define _ic0reserved ic0reser," Fr00  Not in use, reserved to allow LASTINCH",          0,0xb4,          x42
+#define _ic0reserved ic0reser," Fr00  Not really used, reserved to allow LASTINCH",     0,0xb4,          x42
 #if ucodeopt_RVC == 1 && ucodeopt_HAS_MINSTRET == 0 && ucodeopt_HAS_EBR_MINSTRET == 0
 #define LASTINCH_REMOVECOLUMS ((1ull<<30) | (1ull<<18))
 #define LASTINCH_CODE "wire instr0100,instr1x110100;        \
@@ -230,43 +242,39 @@ assign d[30] = d[18];"
 #define _ic1straddle straddle," Fr10u IncPC, OpFetch",                                  0,-1,            nxtSTB       | A_add2or4 | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetchu  )  // I believe this comment to be wrong. [1] Must be at even ucode adr. Goes to either Fetchu or eFetchu. 
 #define _ic1Fetchu   Fetchu , " Fr10u Read and latch instruction",                      2,-1,            isr_none     | A_passq   | Wnn   | rttime    | Qz   | sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR. Write copy of PC to yy
 #define _ic1eFetchu  eFetchu, " Fr10u rep Read until d=mem[(rs1+ofs) & ~3u]",           8,Fetchu,        isr_none     | A_passq   | Wnn   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [4]] Must be at address after [3]. Fetch from SRAM
-//#define _ic1unx0     ic2unx0,  "      not in use",                                      0,-1,            x42
 #if ucodeopt_RVC == 1 && ucodeopt_HAS_MINSTRET == 1 && ucodeopt_HAS_EBR_MINSTRET == 0
 #define LASTINCH_REMOVECOLUMS 0
 #define LASTINCH_CODE ""
 #endif
 
+/* ===================== *
+ * HAS_EBR_MINSTRET = 1  *
+ * HAS_MINSTRET     = 1  *
+ * RVC              = 1  *
+ * ======================*/
+#define _ic2StdIncPc StdIncPc," Fr11  IncPC, OpFetch",                                  2,-1,            nxtSTB       | A_add2or4 | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch   )  // [1] Must be at even ucode adr, is followed by aFault. Goes to either Fetch or eFetch. 
+#define _ic2Fetch    Fetch ,  " Fr11  Read and latch instruction",                      2,-1,            isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR
+#define _ic2Fetch2   Fetch2,  " Fr11  Update ttime. Update I. Q=immediate. Use dinx",   2,-1,            isr_none     | A_cycnt   | Wttime| Rrinst    | Qz   | sr_h  | u_cont         | n(eFetch3 )  // [5] Must be at even ucode adr. Is followed by [6] (fetch access fault)
+#define _ic2eFetch   eFetch,  " Fr11  rep Read until d=mem[(rs1+ofs) & ~3u]",           8,Fetch,         isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [4]] Must be at address after [3]. Fetch from SRAM
+#define _ic2Fetch2u  Fetch2u, " Fr11  Update ttime. Update I. Q=immediate. Use dinx",   0,-1,            isr_none     | A_cycnt   | Wttime| RS1       | Qudec| sr_h  | use_dinx                      //  
+#define _ic2eFetch3  eFetch3, " Fr11  Write minstret. Update I. Q=immediate, use dinx", 0,-1,            isr_none     | A_add1    | Wrinst| RS1       | Qudec| sr_h  | use_dinx       | n(unalignd)  // At unaligned 32-bit instr goto unalignd, else done
+#define _ic2unalignd unalignd," Fr10u Unaligned pc, prep read high hword",              0,-1,            isr_none     | A_passq   | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(straddle)  // For unaligned 32-bit instr
 
-#if ucodeopt_HAS_MINSTRET == 1 && ucodeopt_HAS_EBR_MINSTRET == 0
-#if ucodeopt_RVC == 0
-#else
+// Here I know to have more work on aFault
+//efine _ic2straddle straddle," Fr10u IncPC, OpFetch",                                  2,-1,            nxtSTB       | A_add2or4 | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetchu  )  // [1] Must be at even ucode adr. Is followed by aFault copy. Goes to either Fetchu or eFetchu. 
+#define _ic2straddle straddle," Fr10u IncPC, OpFetch",                                  0,-1,            nxtSTB       | A_add2or4 | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetchu  )  // [1] Must be at even ucode adr. Is followed by aFault copy. Goes to either Fetchu or eFetchu. 
+
+#define _ic2Fetchu   Fetchu , " Fr10u Read and latch instruction",                      2,-1,            isr_none     | A_passq   | Wnn   | rttime    | Qz   | sr_h  | u_io_i_latch   | n(Fetch2u )  // [3] Must be at even ucode adr. Fetch from EBR. 
+#define _ic2eFetchu  eFetchu, " Fr10u rep Read until d=mem[(rs1+ofs) & ~3u]",           8,Fetchu,        isr_none     | A_passq   | Wnn   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2u )  // [4]] Must be at address after [3]. Fetch from SRAM
+
+#if ucodeopt_RVC == 1 && ucodeopt_HAS_MINSTRET == 1 && ucodeopt_HAS_EBR_MINSTRET == 1
+#define LASTINCH_REMOVECOLUMS 0
+#define LASTINCH_CODE ""
 #endif
-#elif ucodeopt_HAS_MINSTRET == 1 && ucodeopt_HAS_EBR_MINSTRET == 1
-
-#if ucodeopt_RVC == 0
-#else
-#define _StdIncPc StdIncPc," Fr11  IncPC, OpFetch",                                 work nxtSTB       | A_add2or4 | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch   )  // [1] Must be at even ucode adr. Goes to either Fetch or eFetch. 
-#define _Fetch    Fetch ,  " Fr11  Read and latch instruction",                     work isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [3] Must be at even ucode adr. Fetch from EBR
-#define _Fetch2   Fetch2,  " Fr11  Update ttime. Update I. Q=immediate. Use dinx",  work isr_none     | A_cycnt   | Wttime| Rrinst    | Qz   | sr_h  | u_cont         | n(eFetch3 )  // [5] Must be at even ucode adr. 
-#define _eFetch   eFetch,  " Fr11  rep Read until d=mem[(rs1+ofs) & ~3u]",          work isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  // [4]] Must be at address after [3]. Fetch from SRAM
-#define _eFetch2  _Fetch2u // Reused
-#define _Fetch2u  Fetch2u, " Fr11  Update ttime. Update I. Q=immediate. Use dinx",  work isr_none     | A_cycnt   | Wttime| RS1       | Qudec| sr_h  | use_dinx                      //  
-#define _eFetch3  eFetch3, " Fr11  Write minstret. Update I. Q=immediate, use dinx",work isr_none     | A_add1    | Wrinst| RS1       | Qudec| sr_h  | use_dinx       | n(unalignd)  // At unaligned 32-bit instr goto unalignd, else done
-
-#define _unalignd unalignd," Fr10u Unaligned pc, prep read high hword",             work isr_none     | A_passq   | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(straddle)  // For unaligned 32-bit instr
-#define _straddle straddle," Fr10u IncPC, OpFetch",                                 work nxtSTB       | A_add2or4 | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetchu  )  // [1] Must be at even ucode adr. Goes to either Fetchu or eFetchu. 
-#define _Fetchu   Fetchu , " Fr10u Read and latch instruction",                     work isr_none     | A_passq   | Wnn   | rttime    | Qz   | sr_h  | u_io_i_latch   | n(Fetch2u )  // [3] Must be at even ucode adr. Fetch from EBR. Write copy of PC to yy
-#define _eFetchu  eFetchu, " Fr10u rep Read until d=mem[(rs1+ofs) & ~3u]",          work isr_none     | A_passq   | Wnn   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2u )  // [4]] Must be at address after [3]. Fetch from SRAM
-#endif
-
-#else
-//#error Illegal combination ucodeopt_HAS_EBR_MINSTRET == 1 ucodeopt_HAS_MINSTRET = 0 encountered. Correct in midgetv_ucodeoptions.h
-#endif                                                                                                                                                               
-
 
 //                                                                                  Fixed/even       ISR          | ALU         Write   intern      Reg    Shreg   Ucode            Next
 //                                                                                  | Pair           action       | op          adr/en  read adr    op     op      operation        ucode
-#define _aFault   aFault,  " err   Load access fault. Faulting adr to mtval",       0,StdIncPc,      isr_none     | A_passq   | Wmtval| r00000000 | Qz   | sr_h  | u_cont         | n(aFault_1) // [2] Must be after [1]
+#define _aFault   aFault,  " err   Load access fault. Faulting adr to mtval",       8,StdIncPc,      isr_none     | A_passq   | Wmtval| r00000000 | Qz   | sr_h  | u_cont         | n(aFault_1) // [2] Must be after [1]
 #define _aFault_1 aFault_1,"       Q = 4",                                          0,-1,            isr_none     | A_add4w   | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(aFault_2)
 #define _aFault_2 aFault_2,"       Store 5 to mcause",                              0,-1,            isr_intoTrap | A_add1    | Wmcaus| Rpc       | Qx   | sr_h  | u_cont         | n(LDAF_3)
 //efine _LDAF_3   LDAF_3,  "       PC to mepc",                                     
@@ -344,19 +352,17 @@ assign d[30] = d[18];"
 #define _BLTU     BLTU,    "BLTU   Conditional Branch. Offset to Ryy",              1,0xd8,          isr_none     | A_passq   | Wyy   | RS2       | Qz   | sr_h  | u_cont         | n(condb_2 )  
 #define _BGEU     BGEU,    "BGEU   Conditional Branch. Offset to Ryy",              1,0xf8,          isr_none     | A_passq   | Wyy   | RS2       | Qz   | sr_h  | u_cont         | n(condb_2 )
 //
-#if ucodeopt_RVC == 0        
-#define _condb_2  condb_2, "       ~RS2 in Q",                                      0,-1,            isr_none     | A_nearXOR | Wnn   | RS1       | Qu   | sr_h  | u_cont         | n(condb_3 )  
-#define _condb_3  condb_3, "       Calculate RS1+~RS2+1",                           0,-1,            isr_none     | A_add1    | Wnn   | Rpc       | Qu   | sr_h  | u_cont         | n(condb_4 )  
-#define _condb_4  condb_4, "       Branch on condition",                            0,-1,            isr_none     | A_passd   | Wnn   | Ryy       | Qu   | sr_h  | usebcond       | n(condb_5 )  
-#define _condb_5  condb_5, "       Branch not taken.",                              2,-1,            nxtSTB       | A_passq4  | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch   )  /* Must be placed at even ucode adr. Goes to either Fetch or eFetch     */
-#define _condb_5t condb_5t,"       Branch taken.",                                  8,condb_5,       nxtSTB       | A_addDQ   | Wpc   | Ralu      | Qu   | sr_h  | wordaligned    | n(BrOpFet )  /* Must be placed at the next ucode adr */
-#else
-#define _condb_2  condb_2, "       ~RS2 in Q",                                      0,-1,	     isr_none     | A_nearXOR | Wnn   | RS1       | Qu   | sr_h  | u_cont         | n(condb_3 )  
-#define _condb_3  condb_3, "       Calculate RS1+~RS2+1",                           0,-1,	     isr_none     | A_add1    | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(condb_4 )  // next Get back the offset
-#define _condb_4  condb_4, "       Branch on condition",                            0,-1,	     isr_none     | A_passd   | Wnn   | Rjj       | Qu   | sr_h  | usebcond       | n(condb_5 )  // next get back PC for next consequtive instr
-#define _condb_5  condb_5, "       Branch not taken.",                              2,-1,	     isr_none     | A_xx      | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  /* Must be placed at even ucode adr. Goes to either Fetch or eFetch     */
-#define _condb_5t condb_5t,"       Branch taken.",                                  8,condb_5,	     nxtSTB       | A_addDQ   | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch   ) 
-#endif
+#define _x_condb_2  condb_2, "       ~RS2 in Q",                                      0,-1,            isr_none     | A_nearXOR | Wnn   | RS1       | Qu   | sr_h  | u_cont         | n(condb_3 )  
+#define _x_condb_3  condb_3, "       Calculate RS1+~RS2+1",                           0,-1,            isr_none     | A_add1    | Wnn   | Rpc       | Qu   | sr_h  | u_cont         | n(condb_4 )  
+#define _x_condb_4  condb_4, "       Branch on condition",                            0,-1,            isr_none     | A_passd   | Wnn   | Ryy       | Qu   | sr_h  | usebcond       | n(condb_5 )  
+#define _x_condb_5  condb_5, "       Branch not taken.",                              2,-1,            nxtSTB       | A_passq4  | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch   )  /* Must be placed at even ucode adr. Goes to either Fetch or eFetch     */
+#define _x_condb_5t condb_5t,"       Branch taken.",                                  8,condb_5,       nxtSTB       | A_addDQ   | Wpc   | Ralu      | Qu   | sr_h  | wordaligned    | n(BrOpFet )  /* Must be placed at the next ucode adr */
+
+#define _r_condb_2  condb_2, "       ~RS2 in Q",                                      0,-1,	     isr_none     | A_nearXOR | Wnn   | RS1       | Qu   | sr_h  | u_cont         | n(condb_3 )  
+#define _r_condb_3  condb_3, "       Calculate RS1+~RS2+1",                           0,-1,	     isr_none     | A_add1    | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(condb_4 )  // next Get back the offset
+#define _r_condb_4  condb_4, "       Branch on condition",                            0,-1,	     isr_none     | A_passd   | Wnn   | Rjj       | Qu   | sr_h  | usebcond       | n(condb_5 )  // next get back PC for next consequtive instr
+#define _r_condb_5  condb_5, "       Branch not taken.",                              2,-1,	     isr_none     | A_xx      | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  /* Must be placed at even ucode adr. Goes to either Fetch or eFetch     */
+#define _r_condb_5t condb_5t,"       Branch taken.",                                  8,condb_5,	     nxtSTB       | A_addDQ   | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch   ) 
 //
 //                                                                                      Fixed/even       ISR          | ALU         Write   intern      Reg    Shreg   Ucode            Next
 //                                                                                      | Pair           action       | op          adr/en  read adr    op     op      operation        ucode
@@ -366,12 +372,6 @@ assign d[30] = d[18];"
 #define _ixBAERR_2  BAERR_2, "       ~offset to Q. Prep read (origPC+offset)",          0,-1,            isr_none     | A_nearXOR | Wnn   | Rpc       | Qu   | sr_h  | u_cont         | n(BAERR_3)   
 #define _ixBAERR_3  BAERR_3, "       origPC to mepc. Prep read 0",                      0,-1,            isr_none     | A_add1    | Wmepc | r00000000 | Qx   | sr_h  | u_cont         | n(BAERR_4)   
 #define _ixBAERR_4  BAERR_4, "       Store 0 to mcause. Prep get trap entry pont",      0,-1,            isr_intoTrap | A_passd   | Wmcaus| rmtvec    | Qx   | sr_h  | u_cont         | n(JAL_3)   
-
-#define _icunx0     icunx0,   "Not in use ",                                            0,-1,            x42
-#define _icunx1     icunx1,   "Not in use ",                                            0,-1,            x42
-#define _icunx2     icunx2,   "Not in use ",                                            0,-1,            x42
-#define _icunx3     icunx3,   "Not in use ",                                            0,-1,            x42
-
 
 
 //
@@ -415,54 +415,39 @@ assign d[30] = d[18];"
 #define _LUI_0(x) _L ## x, "LUI    q = imm20",                                      1,x,             isr_none     | A_passq   | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  
 //                                                                                                                                                               
 #define _ADDI_0   ADDI_0,  "ADDI   Add immediate. rd =RS1+Iimm (or joined)",        1,0x04,          isr_none     | A_addDQ   | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  
-#if ucodeopt_RVC == 0
-#define _AUIPC_0(x) _L ## x,"AUIPC  q = imm20 (copy x/2)",                          1,x,             isr_none     | A_xx      | Wnn   | Rpc       | Qhld | sr_h  | u_cont         | n(ADDI_0)    
-#else
-#define _AUIPC_0(x) _L ## x,"AUIPC  q = imm20+2 or imm20+4  (copy x/2)",             1,x,             isr_none     | A_xx      | Wnn   | Rjj       | Qhld | sr_h  | u_cont         | n(ADDI_0)
-#endif
+
+#define _x_AUIPC_0(x) _L ## x,"AUIPC  q = imm20 (copy x/2)",                          1,x,             isr_none     | A_xx      | Wnn   | Rpc       | Qhld | sr_h  | u_cont         | n(ADDI_0)    
+#define _r_AUIPC_0(x) _L ## x,"AUIPC  q = imm20+2 or imm20+4  (copy x/2)",             1,x,             isr_none     | A_xx      | Wnn   | Rjj       | Qhld | sr_h  | u_cont         | n(ADDI_0)
 
 //                                                                                  Fixed/even       ISR          | ALU         Write   intern      Reg    Shreg   Ucode            Next
 //                                                                                  | Pair           action       | op          adr/en  read adr    op     op      operation        ucode
 #define _ADD_0    ADD_0,   "ADD    add     Addition Q = RS1",                       1,0x0c,          isr_none     | A_passd   | Wnn   | RS2       | Qu   | sr_h  | u_cont         | n(ADDI_0)    
 //                                                                                                                                                               
-#if ucodeopt_RVC == 0
 //             In first cycle, must use A_passq because alignment is                                                                                             
 //             determined from output of B. */                                                                                                                   
-#define _JAL_0(x) _L ## x, "JAL    J-imm is in q. Branch on alignfault",            1,x,             isr_none     | A_passq   | Wnn   | Rpc       | Qhld | sr_h  | wordaligned    | n(JAL_1)
-#else
-#define _JAL_0(x) _L ## x, "JAL    J-imm is in q.",                                 1,x,             isr_none     | A_passq   | Wnn   | Rjj       | Qhld | sr_h  | u_cont         | n(JAL_1)
-#endif
-#define _JAL_1    JAL_1,   "       Target adr to yy",                               2,-1,            isr_none     | A_addDQ   | Wyy   | Rpc       | Qz   | sr_h  | u_cont         | n(JAL_2)   /* Must be at even ucodeadr */  
-#define _JAL_2    JAL_2,   "       Return address to TRG",                          2,-1,            isr_none     | A_add2or4 | WTRG  | Ryy       | Qx   | sr_h  | u_cont         | n(JAL_3)   /* [qq] JAL_2 must be at even ucodeadr */
-#define _JAL_3    JAL_3,   "       PC+imm/trap entrypt to PC. OpFetch",             0,-1,            nxtSTB       | A_passd   | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch)   /* Goes to either Fetch or eFetch */
+#define _x_JAL_0(x) _L ## x, "JAL    J-imm is in q. Branch on alignfault",            1,x,             isr_none     | A_passq   | Wnn   | Rpc       | Qhld | sr_h  | wordaligned    | n(JAL_1)
+#define _x_JAL_1    JAL_1,   "       Target adr to yy",                               2,-1,            isr_none     | A_addDQ   | Wyy   | Rpc       | Qz   | sr_h  | u_cont         | n(JAL_2)   /* Must be at even ucodeadr */  
+#define _x_JAL_2    JAL_2,   "       Return address to TRG",                          2,-1,            isr_none     | A_add2or4 | WTRG  | Ryy       | Qx   | sr_h  | u_cont         | n(JAL_3)   /* [qq] JAL_2 must be at even ucodeadr */
+#define _r_JAL_0(x) _L ## x, "JAL    J-imm is in q.",                                 1,x,             isr_none     | A_passq   | Wnn   | Rjj       | Qhld | sr_h  | u_cont         | n(JAL_1)
+#define _r_JAL_1    JAL_1,   "       Target adr to yy",                               0,-1,            isr_none     | A_addDQ   | Wyy   | Rpc       | Qz   | sr_h  | u_cont         | n(JAL_2)   /* Must be at even ucodeadr */  
+#define _r_JAL_2    JAL_2,   "       Return address to TRG",                          0,-1,            isr_none     | A_add2or4 | WTRG  | Ryy       | Qx   | sr_h  | u_cont         | n(JAL_3)   /* [qq] JAL_2 must be at even ucodeadr */
+#define _JAL_3      JAL_3,   "       PC+imm/trap entrypt to PC. OpFetch",             0,-1,            nxtSTB       | A_passd   | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch)   /* Goes to either Fetch or eFetch */
 
-#if ucodeopt_RVC == 0
 //                                                                                                                                                               
 //             The first of these instructions must be placed directly                                                                                           
 //             following the JAL_1 instruction                                                                                                                   
-#define _JAERR_1  JAERR_1, " Err   JAL target adr misaligned, store to mtval",      8,JAL_1,         isr_none     | A_addDQ   | Wmtval| Rpc       | Qx   | sr_h  | u_cont         | n(JAERR_2)   
-#define _JAERR_2  JAERR_2, "       Store PC to mepc",                               0,-1,            isr_none     | A_passd   | Wmepc | r00000000 | Qx   | sr_h  | u_cont         | n(BAERR_4)   
-#else
-#define _JAERR_1  JAERR_1, "       Not in use",                                     0,-1, x42
-#define _JAERR_2  JAERR_2, "       Not in use",                                     0,-1, x42
-#endif
+#define _x_JAERR_1  JAERR_1, " Err   JAL target adr misaligned, store to mtval",      8,JAL_1,         isr_none     | A_addDQ   | Wmtval| Rpc       | Qx   | sr_h  | u_cont         | n(JAERR_2)   
+#define _x_JAERR_2  JAERR_2, "       Store PC to mepc",                               0,-1,            isr_none     | A_passd   | Wmepc | r00000000 | Qx   | sr_h  | u_cont         | n(BAERR_4)   
 //
-#define _JALR_0   JALR_0,  "JALR   jj=RS1+imm",                                     1,0x19,          isr_none     | A_addDQ   | Wjj   | r00000000 | Qz   | sr_h  | u_cont         | n(JALR_1)    
-#define _JALR_1   JALR_1,  "       Q=1",                                            0,-1,            isr_none     | A_add1    | Wnn   | Rjj       | Qu   | sr_h  | u_cont         | n(JALR_2)    
-#if ucodeopt_RVC == 0
-#define _JALR_2   JALR_2,  "       Q = (RS1+imn) & 0xfffffffe",                     0,-1,            isr_none     | A_nearAND | Wyy   | Rpc       | Qz   | sr_h  | wordaligned    | n(JAL_2)
-#else
-#define _JALR_2   JALR_2,  "       Q = (RS1+imn) & 0xfffffffe",                     0,-1,            isr_none     | A_nearAND | Wyy   | Rpc       | Qz   | sr_h  | u_cont         | n(JAL_2)
-#endif
+#define _JALR_0     JALR_0,  "JALR   jj=RS1+imm",                                     1,0x19,          isr_none     | A_addDQ   | Wjj   | r00000000 | Qz   | sr_h  | u_cont         | n(JALR_1)    
+#define _JALR_1     JALR_1,  "       Q=1",                                            0,-1,            isr_none     | A_add1    | Wnn   | Rjj       | Qu   | sr_h  | u_cont         | n(JALR_2)    
+#define _x_JALR_2   JALR_2,  "       Q = (RS1+imn) & 0xfffffffe",                     0,-1,            isr_none     | A_nearAND | Wyy   | Rpc       | Qz   | sr_h  | wordaligned    | n(JAL_2)
+#define _r_JALR_2   JALR_2,  "       Q = (RS1+imn) & 0xfffffffe",                     0,-1,            isr_none     | A_nearAND | Wyy   | Rpc       | Qz   | sr_h  | u_cont         | n(JAL_2)
 //                                                                                                                                                               
-#if ucodeopt_RVC == 0
 ///* The next instruction must follow JAL_2 (no typo) */                                                                                                         
-#define _JALRE1   JALRE1,  " err   Store pc to mepc",                               8,JAL_2,         isr_none     | A_passd   | Wmepc | Ryy       | Qx   | sr_h  | u_cont         | n(JALRE2)    // [rr] follows [qq]
-#define _JALRE2   JALRE2,  "       mtval is target",                                0,-1,            isr_none     | A_passd   | Wmtval| r00000000 | Qx   | sr_h  | u_cont         | n(BAERR_4)   
-#else
-#define _JALRE1   JALRE1,  "       Not in use",                                     0,-1, x42
-#define _JALRE2   JALRE2,  "       Not in use",                                     0,-1, x42
-#endif        
+#define _x_JALRE1   JALRE1,  " err   Store pc to mepc",                               8,JAL_2,         isr_none     | A_passd   | Wmepc | Ryy       | Qx   | sr_h  | u_cont         | n(JALRE2)    // [rr] follows [qq]
+#define _x_JALRE2   JALRE2,  "       mtval is target",                                0,-1,            isr_none     | A_passd   | Wmtval| r00000000 | Qx   | sr_h  | u_cont         | n(BAERR_4)   
+
 //                                                                                                                                                               
 #define _SLLI_0   SLLI_0,  "SLLI   Shift left immediate.",                          1,0x24,          isr_none     | A_passq   | Wnn   | RS1       | Qx   | srImm | u_cont         | n(SLLI_1)    
 #define _SLLI_1   SLLI_1,  "       Register to shift to Q (and TRG for shift 0)",   0,-1,            isr_none     | A_passd   | WTRG  | rFFFFFFFF | Qu   | srDec | u_cont         | n(SLLI_2  )  
@@ -576,6 +561,7 @@ assign d[30] = d[18];"
 //                                                                                  Fixed/even       ISR          | ALU         Write   intern      Reg    Shreg   Ucode            Next
 //                                                                                  | Pair           action       | op          adr/en  read adr    op     op      operation        ucode
 #define _ILLm0(i)  i,      "Illegal instruction seen (math)",                       4,-1,            isr_none     | A_xx      | Wnn   | r_xx      | Qx   | sr_h  | u_cont         | n(ILLe )
+#define _ILLmp(i)  i,      "Illegal instruction seen (math). Paired",               6,i,             isr_none     | A_xx      | Wnn   | r_xx      | Qx   | sr_h  | u_cont         | n(ILLe )
 #define _Mentry(i) i,      "Math entry point not used",                             1,i,             isr_none     | A_xx      | Wnn   | r_xx      | Qx   | sr_h  | u_cont         | n(ILLe )
 //                                                                   Used to flag illegals in decode
 #define _MULHU_0  _Mentry(MULHU_0 )                               // x
@@ -600,7 +586,7 @@ assign d[30] = d[18];"
 #define _DIVU_2   _ILLm0(DIVU_2   )                               // x
 #define _DIVU_3   _ILLm0(DIVU_3   ) // Paired with DIVU_4         // x
 #define _DIVU_4   _ILLm0(DIVU_4   )                               // x
-#define _DIVU_5   _ILLm0(DIVU_5   ) // Paired with LB_6           // x
+#define _DIVU_5   _ILLmp(DIVU_5   ) // Paired with LB_6           // x
 #define _REMU_0   _Mentry(REMU_0  )                               // x
 #define _REM_0    _Mentry(REM_0   )                               // x
 #define _DIV_0    _Mentry(DIV_0   )                               // x
@@ -653,7 +639,6 @@ assign d[30] = d[18];"
 #define _ILL_2    ILL_2,   "       Store 0 to mtval",                               0,-1,            isr_none     | A_passd   | Wmtval| r00000000 | Qz   | sr_h  | u_cont         | n(ILL_3)
 #define _ILL_3    ILL_3,   "       Q = 1",                                          0,-1,            isr_none     | A_a1      | Wnn   | r00000000 | Qu   | sr_h  | u_cont         | n(ILL_4)     
 #define _ILL_4    ILL_4,   "       Store 2 to mcause",                              0,-1,            isr_intoTrap | A_add1    | Wmcaus| rmtvec    | Qx   | sr_h  | u_cont         | n(JAL_3) 
-#define _ILL_5    ILL_5,   "       Not in use",                                     0,-1, x42
 //                                                                                                                                                               
 #define _FENCE(x) _L ## x, "FENCE  Prepare read PC (FENCE/FENCE.I)",                1,x,             isr_none     | A_xx      | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)
 #define FENCE _L0x03 // To continue ucode at FENCE
@@ -704,37 +689,34 @@ assign d[30] = d[18];"
 #define _CSRRWI_0 CSRRWI_0,"CSRRWI Decoded CSR adr in yy",                          1,0xbc,          isr_none     | A_passq   | Wyy   | r000000FF | Qz   | sr_h  | u_cont         | n(CSRRW_1)   
 #define _CSRRSI_0 CSRRSI_0,"CSRRSI Decoded CSR adr in yy",                          1,0xdc,          isr_none     | A_passq   | Wyy   | r000000FF | Qz   | sr_h  | u_cont         | n(CSRRW_1)   
 #define _CSRRCI_0 CSRRCI_0,"CSRRCI Decoded CSR adr in yy",                          1,0xfc,          isr_none     | A_passq   | Wyy   | r000000FF | Qz   | sr_h  | u_cont         | n(CSRRW_1)   
-#define _CSRRC_1  _CSRRW_4 // Reused CSRRC_1 ,"       Not in use",                                     unx           Cleanup this once ucode with consistency check is verified
-#define _CSRRWI_1 CSRRWI_1,"       Not in use",                                     0,-1, x42
 
 #define _CSRRCI_1 _ILL0b(CSRRCI_1) // Rename
 #define _CSRRS_1  _ILL0b(CSRRS_1) // Rename
 
-#if ucodeopt_RVC == 0        
 //                                                                                  Fixed/even       ISR          | ALU         Write   intern      Reg    Shreg   Ucode            Next
 //                                                                                  | Pair           action       | op          adr/en  read adr    op     op      operation        ucode
-#define _IJ_0     IJ_0,    "IJ     Jump to mem[(rs1+ofs)&~3u]. inCSR=0",            1,0x02,          isr_use_ij   | A_addDQ   | Wnn   | Ralu      | Qu   | sr_h  | hwordaligned   | n(IJ_1)
-#define _IJ_1     IJ_1,    "       Read until q=mem[(rs1+ofs)&~3u]",                2,-1,            isr_none     | A_passd   | Wnn   | rFFFFFFFF | Qs   | sr_h  | u_io_i         | n(IJ_2)     /* Must be placed at even ucode adr */
-#define _IJ_2     IJ_2,    "       Read word is to be masked with 2 lsb = 00",      0,-1,            isr_none     | A_passq   | Wyy   | r00000000 | Qz   | sr_h  | u_cont         | n(IJ_3)
-#define _IJ_3     IJ_3,    "       Construct Q = 3",                                0,-1,            isr_none     | A_add3w   | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(IJ_4)
-#define _IJ_4     IJ_4,    "       Mask and use as PC",                             0,-1,            nxtSTB       | A_nearAND | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch)    /* Goes to either Fetch or eFetch */
+#define _x_IJ_0     IJ_0,    "IJ     Jump to mem[(rs1+ofs)&~3u]. inCSR=0",            1,0x02,          isr_use_ij   | A_addDQ   | Wnn   | Ralu      | Qu   | sr_h  | hwordaligned   | n(IJ_1)
+#define _x_IJ_1     IJ_1,    "       Read until q=mem[(rs1+ofs)&~3u]",                2,-1,            isr_none     | A_passd   | Wnn   | rFFFFFFFF | Qs   | sr_h  | u_io_i         | n(IJ_2)     /* Must be placed at even ucode adr */
+#define _x_IJ_2     IJ_2,    "       Read word is to be masked with 2 lsb = 00",      0,-1,            isr_none     | A_passq   | Wyy   | r00000000 | Qz   | sr_h  | u_cont         | n(IJ_3)
+#define _x_IJ_3     IJ_3,    "       Construct Q = 3",                                0,-1,            isr_none     | A_add3w   | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(IJ_4)
+#define _x_IJ_4     IJ_4,    "       Mask and use as PC",                             0,-1,            nxtSTB       | A_nearAND | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch)    /* Goes to either Fetch or eFetch */
                                                                                                                                                                  
-#define _IJT_1    IJT_1,   "       Exit CSR, enter trap",                           8,IJ_1,          isr_none     | A_passd   | Wnn   | rFFFFFFFF | Qs   | sr_h  | u_io_i         | n(IJT_2)    /* Ajacent to IJ_1 */
-#define _IJT_2    IJT_2,   "       Read word is to be masked with ~3u",             0,-1,            isr_none     | A_passq   | Wyy   | r00000000 | Qz   | sr_h  | u_cont         | n(IJT_3)
-#define _IJT_3    IJT_3,   "       Construct Q = 3",                                0,-1,            isr_none     | A_add3w   | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(IJT_4)
-#define _IJT_4    IJT_4,   "       Mask and store to mepc and Q for read of instr", 0,-1,            nxtSTB       | A_nearAND | Wmepc | Ralu      | Qu   | sr_h  | u_cont         | n(ILL_2)     // Probable error here, we do not any longer write to mtval because the instricton we wanted to read may be unaligned
-#else
-#define _IJ_0     IJ_0,    "IJ     Jump to mem[(rs1+ofs)&~1u]. inCSR=0",            1,0x02,          isr_use_ij   | A_addDQ   | Wnn   | Ralu      | Qu   | sr_h  | hwordaligned   | n(IJ_1)
-#define _IJ_1     IJ_1,    "       Read until q=mem[(rs1+ofs)&~1u]",                2,-1,            isr_none     | A_passd   | Wnn   | rFFFFFFFF | Qs   | sr_h  | u_io_i         | n(IJ_2)     /* Must be placed at even ucode adr */
-#define _IJ_2     IJ_2,    "       Read word is to be masked with lsb = 0",         0,-1,            isr_none     | A_passq   | Wyy   | r00000000 | Qz   | sr_h  | u_cont         | n(IJ_3)
-#define _IJ_3     IJ_3,    "       Construct Q = 1",                                0,-1,            isr_none     | A_add1    | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(IJ_4)
-#define _IJ_4     IJ_4,    "       Mask and use as PC",                             0,-1,            nxtSTB       | A_nearAND | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch)    /* Goes to either Fetch or eFetch */
+#define _x_IJT_1    IJT_1,   "       Exit CSR, enter trap",                           8,IJ_1,          isr_none     | A_passd   | Wnn   | rFFFFFFFF | Qs   | sr_h  | u_io_i         | n(IJT_2)    /* Ajacent to IJ_1 */
+#define _x_IJT_2    IJT_2,   "       Read word is to be masked with ~3u",             0,-1,            isr_none     | A_passq   | Wyy   | r00000000 | Qz   | sr_h  | u_cont         | n(IJT_3)
+#define _x_IJT_3    IJT_3,   "       Construct Q = 3",                                0,-1,            isr_none     | A_add3w   | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(IJT_4)
+#define _x_IJT_4    IJT_4,   "       Mask and store to mepc and Q for read of instr", 0,-1,            nxtSTB       | A_nearAND | Wmepc | Ralu      | Qu   | sr_h  | u_cont         | n(ILL_2)     // Probable error here, we do not any longer write to mtval because the instricton we wanted to read may be unaligned
+
+#define _r_IJ_0     IJ_0,    "IJ     Jump to mem[(rs1+ofs)&~1u]. inCSR=0",            1,0x02,          isr_use_ij   | A_addDQ   | Wnn   | Ralu      | Qu   | sr_h  | hwordaligned   | n(IJ_1)
+#define _r_IJ_1     IJ_1,    "       Read until q=mem[(rs1+ofs)&~1u]",                2,-1,            isr_none     | A_passd   | Wnn   | rFFFFFFFF | Qs   | sr_h  | u_io_i         | n(IJ_2)     /* Must be placed at even ucode adr */
+#define _r_IJ_2     IJ_2,    "       Read word is to be masked with lsb = 0",         0,-1,            isr_none     | A_passq   | Wyy   | r00000000 | Qz   | sr_h  | u_cont         | n(IJ_3)
+#define _r_IJ_3     IJ_3,    "       Construct Q = 1",                                0,-1,            isr_none     | A_add1    | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(IJ_4)
+#define _r_IJ_4     IJ_4,    "       Mask and use as PC",                             0,-1,            nxtSTB       | A_nearAND | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch)    /* Goes to either Fetch or eFetch */
                                                                                                                                                                  
-#define _IJT_1    IJT_1,   "       Exit CSR, enter trap",                           8,IJ_1,          isr_none     | A_passd   | Wnn   | rFFFFFFFF | Qs   | sr_h  | u_io_i         | n(IJT_2)    /* Ajacent to IJ_1 */
-#define _IJT_2    IJT_2,   "       Read word is to be masked with ~1u",             0,-1,            isr_none     | A_passq   | Wyy   | r00000000 | Qz   | sr_h  | u_cont         | n(IJT_3)
-#define _IJT_3    IJT_3,   "       Construct Q = 1",                                0,-1,            isr_none     | A_add1    | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(IJT_4)
-#define _IJT_4    IJT_4,   "       Mask and store to mepc and Q for read of instr", 0,-1,            nxtSTB       | A_nearAND | Wmepc | Ralu      | Qu   | sr_h  | u_cont         | n(ILL_2)     
-#endif
+#define _r_IJT_1    IJT_1,   "       Exit CSR, enter trap",                           8,IJ_1,          isr_none     | A_passd   | Wnn   | rFFFFFFFF | Qs   | sr_h  | u_io_i         | n(IJT_2)    /* Ajacent to IJ_1 */
+#define _r_IJT_2    IJT_2,   "       Read word is to be masked with ~1u",             0,-1,            isr_none     | A_passq   | Wyy   | r00000000 | Qz   | sr_h  | u_cont         | n(IJT_3)
+#define _r_IJT_3    IJT_3,   "       Construct Q = 1",                                0,-1,            isr_none     | A_add1    | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(IJT_4)
+#define _r_IJT_4    IJT_4,   "       Mask and store to mepc and Q for read of instr", 0,-1,            nxtSTB       | A_nearAND | Wmepc | Ralu      | Qu   | sr_h  | u_cont         | n(ILL_2)     
+
 //
 #define _QINT_0   QINT_0,  "INT    Get current PC",                                 1,0xff,          isr_none     | A_xx      | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(QINT_1)
 #define _QINT_1   QINT_1,  "       Store pc to mepc.",                              0,-1,            isr_none     | A_passd   | Wmepc | r_xx      | Qz   | sr_h  | u_cont         | n(QINT_2)
@@ -794,42 +776,42 @@ assign d[30] = d[18];"
 //ORIGTAB  |      |      rv32i0              rv32i1              rv32i2              rv32im0             rv32im1             rv32im2             rv32ic0             rv32ic1             rv32ic2             rv32imc0            rv32imc1            rv32imc2              |    MASK        INSTR     HITNR        // ENTRYPOINT               This comment is important, used by midgetv_ucode_linepermutate to find this data.
 /* 00 */Y( 1,     0 , Z( _LB_0              ,_LB_0              ,_LB_0              ,_LB_0              ,_LB_0              ,_LB_0              ,_LB_0              ,_LB_0              ,_LB_0              ,_LB_0              ,_LB_0              ,_LB_0              ), 1, 0x0000707f, 0x00000003, (1<<22)    ) // LB                      
 /* 01 */Y( 0,     0 , Z( _LB_1              ,_LB_1              ,_LB_1              ,_LB_1              ,_LB_1              ,_LB_1              ,_LB_1              ,_LB_1              ,_LB_1              ,_LB_1              ,_LB_1              ,_LB_1              ), 0, 0xffffffff, 0x00000000, 0          )                            
-/* 02 */Y( 1,     0 , Z( _IJ_0              ,_IJ_0              ,_IJ_0              ,_IJ_0              ,_IJ_0              ,_IJ_0              ,_IJ_0              ,_IJ_0              ,_IJ_0              ,_IJ_0              ,_IJ_0              ,_IJ_0              ), 1, 0x0000707f, 0x0000000b, (1<<22)    ) // custom-0 instruction    
+/* 02 */Y( 1,     0 , Z( _x_IJ_0            ,_x_IJ_0            ,_x_IJ_0            ,_x_IJ_0            ,_x_IJ_0            ,_x_IJ_0            ,_r_IJ_0            ,_r_IJ_0            ,_r_IJ_0            ,_r_IJ_0            ,_r_IJ_0            ,_r_IJ_0            ), 1, 0x0000707f, 0x0000000b, (1<<22)    ) // custom-0 instruction    
 /* 03 */Y( 1,     0 , Z( _FENCE(0x03)       ,_FENCE(0x03)       ,_FENCE(0x03)       ,_FENCE(0x03)       ,_FENCE(0x03)       ,_FENCE(0x03)       ,_FENCE(0x03)       ,_FENCE(0x03)       ,_FENCE(0x03)       ,_FENCE(0x03)       ,_FENCE(0x03)       ,_FENCE(0x03)       ), 1, 0x0000707f, 0x0000000f, (1<<22)    ) // FENCE                   
 /* 04 */Y( 1,     0 , Z( _ADDI_0            ,_ADDI_0            ,_ADDI_0            ,_ADDI_0            ,_ADDI_0            ,_ADDI_0            ,_ADDI_0            ,_ADDI_0            ,_ADDI_0            ,_ADDI_0            ,_ADDI_0            ,_ADDI_0            ), 1, 0x0000707f, 0x00000013, (1<<22)    ) // ADDI                    
-/* 05 */Y( 1,     0 , Z( _AUIPC_0(0x05)     ,_AUIPC_0(0x05)     ,_AUIPC_0(0x05)     ,_AUIPC_0(0x05)     ,_AUIPC_0(0x05)     ,_AUIPC_0(0x05)     ,_AUIPC_0(0x05)     ,_AUIPC_0(0x05)     ,_AUIPC_0(0x05)     ,_AUIPC_0(0x05)     ,_AUIPC_0(0x05)     ,_AUIPC_0(0x05)     ), 1, 0x0000007f, 0x00000017, (1<<25)/2  ) // AUIPC 1/2               
+/* 05 */Y( 1,     0 , Z( _x_AUIPC_0(0x05)   ,_x_AUIPC_0(0x05)   ,_x_AUIPC_0(0x05)   ,_x_AUIPC_0(0x05)   ,_x_AUIPC_0(0x05)   ,_x_AUIPC_0(0x05)   ,_r_AUIPC_0(0x05)   ,_r_AUIPC_0(0x05)   ,_r_AUIPC_0(0x05)   ,_r_AUIPC_0(0x05)   ,_r_AUIPC_0(0x05)   ,_r_AUIPC_0(0x05)   ), 1, 0x0000007f, 0x00000017, (1<<25)/2  ) // AUIPC 1/2               
 /* 06 */Y( 0,     0 , Z( _LB_3              ,_LB_3              ,_LB_3              ,_LB_3              ,_LB_3              ,_LB_3              ,_LB_3              ,_LB_3              ,_LB_3              ,_LB_3              ,_LB_3              ,_LB_3              ), 0, 0xffffffff, 0x00000000, 0          ) //                         
 /* 07 */Y( 0,     0 , Z( _LB_4              ,_LB_4              ,_LB_4              ,_LB_4              ,_LB_4              ,_LB_4              ,_LB_4              ,_LB_4              ,_LB_4              ,_LB_4              ,_LB_4              ,_LB_4              ), 0, 0xffffffff, 0x00000000, 0          ) //                         
 /* 08 */Y( 1,     0 , Z( _SB_0(0x08)        ,_SB_0(0x08)        ,_SB_0(0x08)        ,_SB_0(0x08)        ,_SB_0(0x08)        ,_SB_0(0x08)        ,_SB_0(0x08)        ,_SB_0(0x08)        ,_SB_0(0x08)        ,_SB_0(0x08)        ,_SB_0(0x08)        ,_SB_0(0x08)        ), 1, 0x0000707f, 0x00000023, (1<<22)/2  ) // SB 1/2                  
 /* 09 */Y( 0,     0 , Z( _LB_5              ,_LB_5              ,_LB_5              ,_LB_5              ,_LB_5              ,_LB_5              ,_LB_5              ,_LB_5              ,_LB_5              ,_LB_5              ,_LB_5              ,_LB_5              ), 0, 0xffffffff, 0x00000000, 0          ) //                         
 /* 0a */Y( 1,     0 , Z( _SB_0(0x0a)        ,_SB_0(0x0a)        ,_SB_0(0x0a)        ,_SB_0(0x0a)        ,_SB_0(0x0a)        ,_SB_0(0x0a)        ,_SB_0(0x0a)        ,_SB_0(0x0a)        ,_SB_0(0x0a)        ,_SB_0(0x0a)        ,_SB_0(0x0a)        ,_SB_0(0x0a)        ), 1, 0x0000707f, 0x00000023, (1<<22)/2  ) // SB 2/2                  
-/* 0b */Y( 0,     0 , Z( _JALR_2            ,_JALR_2            ,_JALR_2            ,_JALR_2            ,_JALR_2            ,_JALR_2            ,_JALR_2            ,_JALR_2            ,_JALR_2            ,_JALR_2            ,_JALR_2            ,_JALR_2            ), 0, 0xffffffff, 0x00000000, 0          ) //                           
+/* 0b */Y( 0,     0 , Z( _x_JALR_2          ,_x_JALR_2          ,_x_JALR_2          ,_x_JALR_2          ,_x_JALR_2          ,_x_JALR_2          ,_r_JALR_2          ,_r_JALR_2          ,_r_JALR_2          ,_r_JALR_2          ,_r_JALR_2          ,_r_JALR_2          ), 0, 0xffffffff, 0x00000000, 0          ) //                           
 /* 0c */Y( 1,     0 , Z( _ADD_0             ,_ADD_0             ,_ADD_0             ,_ADD_0             ,_ADD_0             ,_ADD_0             ,_ADD_0             ,_ADD_0             ,_ADD_0             ,_ADD_0             ,_ADD_0             ,_ADD_0             ), 1, 0xfe00707f, 0x00000033, (1<<15)    ) // ADD                     
 /* 0d */Y( 1,     0 , Z( _MUL_0             ,_MUL_0             ,_MUL_0             ,_MUL_0             ,_MUL_0             ,_MUL_0             ,_MUL_0             ,_MUL_0             ,_MUL_0             ,_MUL_0             ,_MUL_0             ,_MUL_0             ), 1, 0xfe00707f, 0x02000033, (1<<15)    ) // MUL/LUI when no MUL
 /* 0e */Y( 1,     0 , Z( _SUB_0             ,_SUB_0             ,_SUB_0             ,_SUB_0             ,_SUB_0             ,_SUB_0             ,_SUB_0             ,_SUB_0             ,_SUB_0             ,_SUB_0             ,_SUB_0             ,_SUB_0             ), 1, 0xfe00707f, 0x40000033, (1<<15)    ) // SUB
 /* 0f */Y( 1,     0 , Z( _LUI_0(0x0f)       ,_LUI_0(0x0f)       ,_LUI_0(0x0f)       ,_LUI_0(0x0f)       ,_LUI_0(0x0f)       ,_LUI_0(0x0f)       ,_LUI_0(0x0f)       ,_LUI_0(0x0f)       ,_LUI_0(0x0f)       ,_LUI_0(0x0f)       ,_LUI_0(0x0f)       ,_LUI_0(0x0f)       ), 1, 0x0000007f, 0x00000037, (1<<25)/2  ) // LUI 1/2                 
 /* 10 */Y( 0,     0 , Z( _SUB_1             ,_SUB_1             ,_SUB_1             ,_SUB_1             ,_SUB_1             ,_SUB_1             ,_SUB_1             ,_SUB_1             ,_SUB_1             ,_SUB_1             ,_SUB_1             ,_SUB_1             ), 0, 0xffffffff, 0x00000000, 0          ) //                         
 /* 11 */Y( 0,     0 , Z( _AND_1             ,_AND_1             ,_AND_1             ,_AND_1             ,_AND_1             ,_AND_1             ,_AND_1             ,_AND_1             ,_AND_1             ,_AND_1             ,_AND_1             ,_AND_1             ), 0, 0xffffffff, 0x00000000, 0          ) //                         
-/* 12 */Y( 0,     0 , Z( _i0unx1            ,_i1unx0            ,_i2unx0            ,_LASTINCH          ,_LASTINCH          ,_LASTINCH          ,_ic0straddle       ,_ic1straddle           ,_LASTINCH          ,_LASTINCH          ,_LASTINCH          ,_LASTINCH          ), 0, 0xffffffff, 0x00000000, 0          ) //                         
-/* 13 */Y( 0,     0 , Z( _condb_2           ,_condb_2           ,_condb_2           ,_condb_2           ,_condb_2           ,_condb_2           ,_condb_2           ,_condb_2           ,_condb_2           ,_condb_2           ,_condb_2           ,_condb_2           ), 0, 0xffffffff, 0x00000000, 0          ) //                         
-/* 14 */Y( 0,     0 , Z( _condb_3           ,_condb_3           ,_condb_3           ,_condb_3           ,_condb_3           ,_condb_3           ,_condb_3           ,_condb_3           ,_condb_3           ,_condb_3           ,_condb_3           ,_condb_3           ), 0, 0xffffffff, 0x00000000, 0          ) //                         
-/* 15 */Y( 0,     0 , Z( _condb_4           ,_condb_4           ,_condb_4           ,_condb_4           ,_condb_4           ,_condb_4           ,_condb_4           ,_condb_4           ,_condb_4           ,_condb_4           ,_condb_4           ,_condb_4           ), 0, 0xffffffff, 0x00000000, 0          ) //                         
-/* 16 */Y( 0,  0x01 , Z( _condb_5           ,_condb_5           ,_condb_5           ,_condb_5           ,_condb_5           ,_condb_5           ,_condb_5           ,_condb_5           ,_condb_5           ,_condb_5           ,_condb_5           ,_condb_5           ), 0, 0xffffffff, 0x00000000, 0          ) //                         
-/* 17 */Y( 0,  0x01 , Z( _condb_5t          ,_condb_5t          ,_condb_5t          ,_condb_5t          ,_condb_5t          ,_condb_5t          ,_condb_5t          ,_condb_5t          ,_condb_5t          ,_condb_5t          ,_condb_5t          ,_condb_5t          ), 0, 0xffffffff, 0x00000000, 0          ) //                         
+/* 12 */Y( 0,     0 , Z( _unx12             ,_unx12             ,_unx12             ,_LASTINCH          ,_LASTINCH          ,_LASTINCH          ,_ic0straddle       ,_ic1straddle       ,_ic2straddle       ,_LASTINCH          ,_LASTINCH          ,_LASTINCH          ), 0, 0xffffffff, 0x00000000, 0          ) //                         
+/* 13 */Y( 0,     0 , Z( _x_condb_2         ,_x_condb_2         ,_x_condb_2         ,_x_condb_2         ,_x_condb_2         ,_x_condb_2         ,_r_condb_2         ,_r_condb_2         ,_r_condb_2         ,_r_condb_2         ,_r_condb_2         ,_r_condb_2         ), 0, 0xffffffff, 0x00000000, 0          ) //                         
+/* 14 */Y( 0,     0 , Z( _x_condb_3         ,_x_condb_3         ,_x_condb_3         ,_x_condb_3         ,_x_condb_3         ,_x_condb_3         ,_r_condb_3         ,_r_condb_3         ,_r_condb_3         ,_r_condb_3         ,_r_condb_3         ,_r_condb_3         ), 0, 0xffffffff, 0x00000000, 0          ) //                         
+/* 15 */Y( 0,     0 , Z( _x_condb_4         ,_x_condb_4         ,_x_condb_4         ,_x_condb_4         ,_x_condb_4         ,_x_condb_4         ,_r_condb_4         ,_r_condb_4         ,_r_condb_4         ,_r_condb_4         ,_r_condb_4         ,_r_condb_4         ), 0, 0xffffffff, 0x00000000, 0          ) //                         
+/* 16 */Y( 0,  0x01 , Z( _x_condb_5         ,_x_condb_5         ,_x_condb_5         ,_x_condb_5         ,_x_condb_5         ,_x_condb_5         ,_r_condb_5         ,_r_condb_5         ,_r_condb_5         ,_r_condb_5         ,_r_condb_5         ,_r_condb_5         ), 0, 0xffffffff, 0x00000000, 0          ) //                         
+/* 17 */Y( 0,  0x01 , Z( _x_condb_5t        ,_x_condb_5t        ,_x_condb_5t        ,_x_condb_5t        ,_x_condb_5t        ,_x_condb_5t        ,_r_condb_5t        ,_r_condb_5t        ,_r_condb_5t        ,_r_condb_5t        ,_r_condb_5t        ,_r_condb_5t        ), 0, 0xffffffff, 0x00000000, 0          ) //                         
 /* 18 */Y( 1,     0 , Z( _BEQ               ,_BEQ               ,_BEQ               ,_BEQ               ,_BEQ               ,_BEQ               ,_BEQ               ,_BEQ               ,_BEQ               ,_BEQ               ,_BEQ               ,_BEQ               ), 1, 0x0000707f, 0x00000063, (1<<22)    ) // BEQ                     
 /* 19 */Y( 1,     0 , Z( _JALR_0            ,_JALR_0            ,_JALR_0            ,_JALR_0            ,_JALR_0            ,_JALR_0            ,_JALR_0            ,_JALR_0            ,_JALR_0            ,_JALR_0            ,_JALR_0            ,_JALR_0            ), 1, 0x0000707f, 0x00000067, (1<<22)    ) // JALR                    
 /* 1a */Y( 0,     0 , Z( _ANDI_1            ,_ANDI_1            ,_ANDI_1            ,_ANDI_1            ,_ANDI_1            ,_ANDI_1            ,_ANDI_1            ,_ANDI_1            ,_ANDI_1            ,_ANDI_1            ,_ANDI_1            ,_ANDI_1            ), 0, 0xffffffff, 0x00000000, 0          ) //                         
-/* 1b */Y( 1,     0 , Z( _JAL_0(0x1b)       ,_JAL_0(0x1b)       ,_JAL_0(0x1b)       ,_JAL_0(0x1b)       ,_JAL_0(0x1b)       ,_JAL_0(0x1b)       ,_JAL_0(0x1b)       ,_JAL_0(0x1b)       ,_JAL_0(0x1b)       ,_JAL_0(0x1b)       ,_JAL_0(0x1b)       ,_JAL_0(0x1b)       ), 1, 0x0000007f, 0x0000006f, (1<<25)/4  ) // JAL 1/4                 
+/* 1b */Y( 1,     0 , Z( _x_JAL_0(0x1b)     ,_x_JAL_0(0x1b)     ,_x_JAL_0(0x1b)     ,_x_JAL_0(0x1b)     ,_x_JAL_0(0x1b)     ,_x_JAL_0(0x1b)     ,_r_JAL_0(0x1b)     ,_r_JAL_0(0x1b)     ,_r_JAL_0(0x1b)     ,_r_JAL_0(0x1b)     ,_r_JAL_0(0x1b)     ,_r_JAL_0(0x1b)     ), 1, 0x0000007f, 0x0000006f, (1<<25)/4  ) // JAL 1/4                 
 /* 1c */Y( 1,     0 , Z( _ECAL_BRK          ,_ECAL_BRK          ,_ECAL_BRK          ,_ECAL_BRK          ,_ECAL_BRK          ,_ECAL_BRK          ,_ECAL_BRK          ,_ECAL_BRK          ,_ECAL_BRK          ,_ECAL_BRK          ,_ECAL_BRK          ,_ECAL_BRK          ), 1, 0x0000707f, 0x00000073, (1<<12)    ) // ECALL/EBREAK/WFI/MRET   
 /* 1d */Y( 0,     0 , Z( _ORI_2             ,_ORI_2             ,_ORI_2             ,_ORI_2             ,_ORI_2             ,_ORI_2             ,_ORI_2             ,_ORI_2             ,_ORI_2             ,_ORI_2             ,_ORI_2             ,_ORI_2             ), 0, 0xffffffff, 0x00000000, 0          ) ///                           
 /* 1e */Y( 0,     0 , Z( _aFault_1          ,_aFault_1          ,_aFault_1          ,_aFault_1          ,_aFault_1          ,_aFault_1          ,_aFault_1          ,_aFault_1          ,_aFault_1          ,_aFault_1          ,_aFault_1          ,_aFault_1          ), 0, 0xffffffff, 0x00000000, 0          ) //                         
-/* 1f */Y( 0,     0 , Z( _IJ_2              ,_IJ_2              ,_IJ_2              ,_IJ_2              ,_IJ_2              ,_IJ_2              ,_IJ_2              ,_IJ_2              ,_IJ_2              ,_IJ_2              ,_IJ_2              ,_IJ_2              ), 0, 0xffffffff, 0x00000000, 0          ) //                         
+/* 1f */Y( 0,     0 , Z( _x_IJ_2            ,_x_IJ_2            ,_x_IJ_2            ,_x_IJ_2            ,_x_IJ_2            ,_x_IJ_2            ,_r_IJ_2            ,_r_IJ_2            ,_r_IJ_2            ,_r_IJ_2            ,_r_IJ_2            ,_r_IJ_2            ), 0, 0xffffffff, 0x00000000, 0          ) //                         
 /* 20 */Y( 1,     0 , Z( _LH_0              ,_LH_0              ,_LH_0              ,_LH_0              ,_LH_0              ,_LH_0              ,_LH_0              ,_LH_0              ,_LH_0              ,_LH_0              ,_LH_0              ,_LH_0              ), 1, 0x0000707f, 0x00001003, (1<<22)    ) // LH                      
 /* 21 */Y( 0,     0 , Z( _XORI_1            ,_XORI_1            ,_XORI_1            ,_XORI_1            ,_XORI_1            ,_XORI_1            ,_XORI_1            ,_XORI_1            ,_XORI_1            ,_XORI_1            ,_XORI_1            ,_XORI_1            ), 0, 0xffffffff, 0x00000000, 0          ) //                         
 /* 22 */Y( 0,     0 , Z( _MULHU_6           ,_MULHU_6           ,_MULHU_6           ,_MULHU_6           ,_MULHU_6           ,_MULHU_6           ,_MULHU_6           ,_MULHU_6           ,_MULHU_6           ,_MULHU_6           ,_MULHU_6           ,_MULHU_6           ), 2, 0x00400000, 0x00000000, 0          ) // illegal at entry. Can get here from OpCode close to "ij"
 /* 23 */Y( 1,     0 , Z( _FENCE(0x23)       ,_FENCE(0x23)       ,_FENCE(0x23)       ,_FENCE(0x23)       ,_FENCE(0x23)       ,_FENCE(0x23)       ,_FENCE(0x23)       ,_FENCE(0x23)       ,_FENCE(0x23)       ,_FENCE(0x23)       ,_FENCE(0x23)       ,_FENCE(0x23)       ), 1, 0x0000707f, 0x0000100f, (1<<22)    ) // FENCEI                  
 /* 24 */Y( 1,     0 , Z( _SLLI_0            ,_SLLI_0            ,_SLLI_0            ,_SLLI_0            ,_SLLI_0            ,_SLLI_0            ,_SLLI_0            ,_SLLI_0            ,_SLLI_0            ,_SLLI_0            ,_SLLI_0            ,_SLLI_0            ), 1, 0xfe00707f, 0x00001013, (1<<15)    ) // SLLI                    
-/* 25 */Y( 1,     0 , Z( _AUIPC_0(0x25)     ,_AUIPC_0(0x25)     ,_AUIPC_0(0x25)     ,_AUIPC_0(0x25)     ,_AUIPC_0(0x25)     ,_AUIPC_0(0x25)     ,_AUIPC_0(0x25)     ,_AUIPC_0(0x25)     ,_AUIPC_0(0x25)     ,_AUIPC_0(0x25)     ,_AUIPC_0(0x25)     ,_AUIPC_0(0x25)     ), 1, 0x0000007f, 0x00000017, (1<<25)/2  ) // AUIPC 2/2               
+/* 25 */Y( 1,     0 , Z( _x_AUIPC_0(0x25)   ,_x_AUIPC_0(0x25)   ,_x_AUIPC_0(0x25)   ,_x_AUIPC_0(0x25)   ,_x_AUIPC_0(0x25)   ,_x_AUIPC_0(0x25)   ,_r_AUIPC_0(0x25)   ,_r_AUIPC_0(0x25)   ,_r_AUIPC_0(0x25)   ,_r_AUIPC_0(0x25)   ,_r_AUIPC_0(0x25)   ,_r_AUIPC_0(0x25)   ), 1, 0x0000007f, 0x00000017, (1<<25)/2  ) // AUIPC 2/2               
 /* 26 */Y( 0,     0 , Z( _OR_1              ,_OR_1              ,_OR_1              ,_OR_1              ,_OR_1              ,_OR_1              ,_OR_1              ,_OR_1              ,_OR_1              ,_OR_1              ,_OR_1              ,_OR_1              ), 0, 0xffffffff, 0x00000000, 0          ) //                         
 /* 27 */Y( 0,     0 , Z( _OR_2              ,_OR_2              ,_OR_2              ,_OR_2              ,_OR_2              ,_OR_2              ,_OR_2              ,_OR_2              ,_OR_2              ,_OR_2              ,_OR_2              ,_OR_2              ), 0, 0xffffffff, 0x00000000, 0          ) //                         
 /* 28 */Y( 1,     0 , Z( _SH_0(0x28)        ,_SH_0(0x28)        ,_SH_0(0x28)        ,_SH_0(0x28)        ,_SH_0(0x28)        ,_SH_0(0x28)        ,_SH_0(0x28)        ,_SH_0(0x28)        ,_SH_0(0x28)        ,_SH_0(0x28)        ,_SH_0(0x28)        ,_SH_0(0x28)        ), 1, 0x0000707f, 0x00001023, (1<<22)/2  ) // SH 1/2                  
@@ -842,8 +824,8 @@ assign d[30] = d[18];"
 /* 2f */Y( 1,     0 , Z( _LUI_0(0x2f)       ,_LUI_0(0x2f)       ,_LUI_0(0x2f)       ,_LUI_0(0x2f)       ,_LUI_0(0x2f)       ,_LUI_0(0x2f)       ,_LUI_0(0x2f)       ,_LUI_0(0x2f)       ,_LUI_0(0x2f)       ,_LUI_0(0x2f)       ,_LUI_0(0x2f)       ,_LUI_0(0x2f)       ), 1, 0x0000007f, 0x00000037, (1<<25)/2  ) // LUI 2/2                 
 /* 30 */Y( 0,     0 , Z( _SLTIX_2           ,_SLTIX_2           ,_SLTIX_2           ,_SLTIX_2           ,_SLTIX_2           ,_SLTIX_2           ,_SLTIX_2           ,_SLTIX_2           ,_SLTIX_2           ,_SLTIX_2           ,_SLTIX_2           ,_SLTIX_2           ), 0, 0xffffffff, 0x00000000, 0          ) //                         
 /* 31 */Y( 0,     0 , Z( _SLTX_1            ,_SLTX_1            ,_SLTX_1            ,_SLTX_1            ,_SLTX_1            ,_SLTX_1            ,_SLTX_1            ,_SLTX_1            ,_SLTX_1            ,_SLTX_1            ,_SLTX_1            ,_SLTX_1            ), 0, 0xffffffff, 0x00000000, 0          ) //                         
-/* 32 */Y( 0,  0x02 , Z( _JAL_1             ,_JAL_1             ,_JAL_1             ,_JAL_1             ,_JAL_1             ,_JAL_1             ,_JAL_1             ,_JAL_1             ,_JAL_1             ,_JAL_1             ,_JAL_1             ,_JAL_1             ), 0, 0xffffffff, 0x00000000, 0          ) //                         
-/* 33 */Y( 0,  0x02 , Z( _JAERR_1           ,_JAERR_1           ,_JAERR_1           ,_JAERR_1           ,_JAERR_1           ,_JAERR_1           ,_JAERR_1           ,_JAERR_1           ,_JAERR_1           ,_JAERR_1           ,_JAERR_1           ,_JAERR_1           ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 32 */Y( 0,  0x02 , Z( _x_JAL_1           ,_x_JAL_1           ,_x_JAL_1           ,_x_JAL_1           ,_x_JAL_1           ,_x_JAL_1           ,_r_JAL_1           ,_r_JAL_1           ,_r_JAL_1           ,_r_JAL_1           ,_r_JAL_1           ,_r_JAL_1           ), 0, 0xffffffff, 0x00000000, 0          ) //                         
+/* 33 */Y( 0,  0x02 , Z( _x_JAERR_1         ,_x_JAERR_1         ,_x_JAERR_1         ,_x_JAERR_1         ,_x_JAERR_1         ,_x_JAERR_1         ,_unx33             ,_unx33             ,_unx33             ,_unx33             ,_unx33             ,_unx33             ), 0, 0xffffffff, 0x00000000, 0          ) //
 /* 34 */Y( 0,     0 , Z( _JAL_3             ,_JAL_3             ,_JAL_3             ,_JAL_3             ,_JAL_3             ,_JAL_3             ,_JAL_3             ,_JAL_3             ,_JAL_3             ,_JAL_3             ,_JAL_3             ,_JAL_3             ), 0, 0xffffffff, 0x00000000, 0          ) //
 /* 35 */Y( 0,     0 , Z( _SLLI_1            ,_SLLI_1            ,_SLLI_1            ,_SLLI_1            ,_SLLI_1            ,_SLLI_1            ,_SLLI_1            ,_SLLI_1            ,_SLLI_1            ,_SLLI_1            ,_SLLI_1            ,_SLLI_1            ), 0, 0xffffffff, 0x00000000, 0          ) //
 /* 36 */Y( 0,     0 , Z( _SLLI_2            ,_SLLI_2            ,_SLLI_2            ,_SLLI_2            ,_SLLI_2            ,_SLLI_2            ,_SLLI_2            ,_SLLI_2            ,_SLLI_2            ,_SLLI_2            ,_SLLI_2            ,_SLLI_2            ), 0, 0xffffffff, 0x00000000, 0          ) //
@@ -851,7 +833,7 @@ assign d[30] = d[18];"
 /* 38 */Y( 1,     0 , Z( _BNE               ,_BNE               ,_BNE               ,_BNE               ,_BNE               ,_BNE               ,_BNE               ,_BNE               ,_BNE               ,_BNE               ,_BNE               ,_BNE               ), 1, 0x0000707f, 0x00001063, (1<<22)    ) // BNE
 /* 39 */Y( 0,     0 , Z( _MULHU_7           ,_MULHU_7           ,_MULHU_7           ,_MULHU_7           ,_MULHU_7           ,_MULHU_7           ,_MULHU_7           ,_MULHU_7           ,_MULHU_7           ,_MULHU_7           ,_MULHU_7           ,_MULHU_7           ), 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "JALR"
 /* 3a */Y( 0,     0 , Z(  _SRxI_1           , _SRxI_1           , _SRxI_1           , _SRxI_1           , _SRxI_1           , _SRxI_1           , _SRxI_1           , _SRxI_1           , _SRxI_1           , _SRxI_1           , _SRxI_1           , _SRxI_1           ), 0, 0xffffffff, 0x00000000, 0          ) //
-/* 3b */Y( 1,     0 , Z( _JAL_0(0x3b)       ,_JAL_0(0x3b)       ,_JAL_0(0x3b)       ,_JAL_0(0x3b)       ,_JAL_0(0x3b)       ,_JAL_0(0x3b)       ,_JAL_0(0x3b)       ,_JAL_0(0x3b)       ,_JAL_0(0x3b)       ,_JAL_0(0x3b)       ,_JAL_0(0x3b)       ,_JAL_0(0x3b)       ), 1, 0x0000007f, 0x0000006f, (1<<25)/4  ) // JAL 2/4
+/* 3b */Y( 1,     0 , Z( _x_JAL_0(0x3b)     ,_x_JAL_0(0x3b)     ,_x_JAL_0(0x3b)     ,_x_JAL_0(0x3b)     ,_x_JAL_0(0x3b)     ,_x_JAL_0(0x3b)     ,_r_JAL_0(0x3b)     ,_r_JAL_0(0x3b)     ,_r_JAL_0(0x3b)     ,_r_JAL_0(0x3b)     ,_r_JAL_0(0x3b)     ,_r_JAL_0(0x3b)     ), 1, 0x0000007f, 0x0000006f, (1<<25)/4  ) // JAL 2/4
 /* 3c */Y( 1,     0 , Z( _CSRRW_0           ,_CSRRW_0           ,_CSRRW_0           ,_CSRRW_0           ,_CSRRW_0           ,_CSRRW_0           ,_CSRRW_0           ,_CSRRW_0           ,_CSRRW_0           ,_CSRRW_0           ,_CSRRW_0           ,_CSRRW_0           ), 1, 0x0000707f, 0x00001073, (1<<22)    ) // CSRRW
 /* 3d */Y( 0,     0 , Z( _SRxI_2            ,_SRxI_2            ,_SRxI_2            ,_SRxI_2            ,_SRxI_2            ,_SRxI_2            ,_SRxI_2            ,_SRxI_2            ,_SRxI_2            ,_SRxI_2            ,_SRxI_2            ,_SRxI_2            ), 0, 0xffffffff, 0x00000000, 0          ) //
 /* 3e */Y( 0,     0 , Z( _SLL_1             ,_SLL_1             ,_SLL_1             ,_SLL_1             ,_SLL_1             ,_SLL_1             ,_SLL_1             ,_SLL_1             ,_SLL_1             ,_SLL_1             ,_SLL_1             ,_SLL_1             ), 0, 0xffffffff, 0x00000000, 0          ) //
@@ -883,7 +865,7 @@ assign d[30] = d[18];"
 /* 58 */Y( 0,  0x08 , Z( _DIV_A             ,_DIV_A             ,_DIV_A             ,_DIV_A             ,_DIV_A             ,_DIV_A             ,_DIV_A             ,_DIV_A             ,_DIV_A             ,_DIV_A             ,_DIV_A             ,_DIV_A             ), 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "BEQ"
 /* 59 */Y( 0,  0x08 , Z( _DIV_B             ,_DIV_B             ,_DIV_B             ,_DIV_B             ,_DIV_B             ,_DIV_B             ,_DIV_B             ,_DIV_B             ,_DIV_B             ,_DIV_B             ,_DIV_B             ,_DIV_B             ), 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "JALR"
 /* 5a */Y( 0,     0 , Z( _SB_1              ,_SB_1              ,_SB_1              ,_SB_1              ,_SB_1              ,_SB_1              ,_SB_1              ,_SB_1              ,_SB_1              ,_SB_1              ,_SB_1              ,_SB_1              ), 0, 0xffffffff, 0x00000000, 0          ) //
-/* 5b */Y( 1,     0 , Z( _JAL_0(0x5b)       ,_JAL_0(0x5b)       ,_JAL_0(0x5b)       ,_JAL_0(0x5b)       ,_JAL_0(0x5b)       ,_JAL_0(0x5b)       ,_JAL_0(0x5b)       ,_JAL_0(0x5b)       ,_JAL_0(0x5b)       ,_JAL_0(0x5b)       ,_JAL_0(0x5b)       ,_JAL_0(0x5b)       ), 1, 0x0000007f, 0x0000006f, (1<<25)/4  ) // JAL 3/4
+/* 5b */Y( 1,     0 , Z( _x_JAL_0(0x5b)     ,_x_JAL_0(0x5b)     ,_x_JAL_0(0x5b)     ,_x_JAL_0(0x5b)     ,_x_JAL_0(0x5b)     ,_x_JAL_0(0x5b)     ,_r_JAL_0(0x5b)     ,_r_JAL_0(0x5b)     ,_r_JAL_0(0x5b)     ,_r_JAL_0(0x5b)     ,_r_JAL_0(0x5b)     ,_r_JAL_0(0x5b)     ), 1, 0x0000007f, 0x0000006f, (1<<25)/4  ) // JAL 3/4
 /* 5c */Y( 1,     0 , Z( _CSRRS_0           ,_CSRRS_0           ,_CSRRS_0           ,_CSRRS_0           ,_CSRRS_0           ,_CSRRS_0           ,_CSRRS_0           ,_CSRRS_0           ,_CSRRS_0           ,_CSRRS_0           ,_CSRRS_0           ,_CSRRS_0           ), 1, 0x0000707f, 0x00002073, (1<<22)    ) // CSRRS
 /* 5d */Y( 0,     0 , Z( _SB_2              ,_SB_2              ,_SB_2              ,_SB_2              ,_SB_2              ,_SB_2              ,_SB_2              ,_SB_2              ,_SB_2              ,_SB_2              ,_SB_2              ,_SB_2              ), 0, 0xffffffff, 0x00000000, 0          ) //
 /* 5e */Y( 0,  0x09 , Z( _LHU_1             ,_LHU_1             ,_LHU_1             ,_LHU_1             ,_LHU_1             ,_LHU_1             ,_LHU_1             ,_LHU_1             ,_LHU_1             ,_LHU_1             ,_LHU_1             ,_LHU_1             ), 0, 0xffffffff, 0x00000000, 0          ) //
@@ -907,27 +889,27 @@ assign d[30] = d[18];"
 /* 70 */Y( 0,  0x0d , Z( _LHU_2             ,_LHU_2             ,_LHU_2             ,_LHU_2             ,_LHU_2             ,_LHU_2             ,_LHU_2             ,_LHU_2             ,_LHU_2             ,_LHU_2             ,_LHU_2             ,_LHU_2             ), 0, 0xffffffff, 0x00000000, 0          ) //
 /* 71 */Y( 0,  0x0d , Z( _aFaultc           ,_aFaultc           ,_aFaultc           ,_aFaultc           ,_aFaultc           ,_aFaultc           ,_aFaultc           ,_aFaultc           ,_aFaultc           ,_aFaultc           ,_aFaultc           ,_aFaultc           ), 0, 0xffffffff, 0x00000000, 0          ) //
 /* 72 */Y( 0,     0 , Z( _LBU_3             ,_LBU_3             ,_LBU_3             ,_LBU_3             ,_LBU_3             ,_LBU_3             ,_LBU_3             ,_LBU_3             ,_LBU_3             ,_LBU_3             ,_LBU_3             ,_LBU_3             ), 0, 0xffffffff, 0x00000000, 0          ) //
-/* 73 */Y( 0,     0 , Z( _ixBAERR_1         ,_ixBAERR_1         ,_ixBAERR_1         ,_BAERR_1           ,_BAERR_1           ,_BAERR_1           ,_icunx2            ,_ic1unalignd       ,_BAERR_1           ,_BAERR_1           ,_BAERR_1           ,_BAERR_1           ), 0, 0xffffffff, 0x00000000, 0          ) //
-/* 74 */Y( 0,  0x0e , Z( _ixBrOpFet         ,_ixBrOpFet         ,_ixBrOpFet         ,_BrOpFet           ,_BrOpFet           ,_BrOpFet           ,_icunx0            ,_icunx0            ,_BrOpFet           ,_BrOpFet           ,_BrOpFet           ,_BrOpFet           ), 0, 0xffffffff, 0x00000000, 0          ) //
-/* 75 */Y( 0,  0x0e , Z( _ixBAlignEr        ,_ixBAlignEr        ,_ixBAlignEr        ,_BAlignEr          ,_BAlignEr          ,_BAlignEr          ,_icunx1            ,_icunx1            ,_BAlignEr          ,_BAlignEr          ,_BAlignEr          ,_BAlignEr          ), 0, 0xffffffff, 0x00000000, 0          ) //
-/* 76 */Y( 0,  0x92 , Z( _ixBAERR_2         ,_ixBAERR_2         ,_ixBAERR_2         ,_BAERR_2           ,_BAERR_2           ,_BAERR_2           ,_ic0Fetchu         ,_ic1Fetchu         ,_BAERR_2           ,_BAERR_2           ,_BAERR_2           ,_BAERR_2           ), 0, 0xffffffff, 0x00000000, 0          ) // // Paired due to use with RVC
-/* 77 */Y( 0,  0x92 , Z( _ixBAERR_3         ,_ixBAERR_3         ,_ixBAERR_3         ,_BAERR_3           ,_BAERR_3           ,_BAERR_3           ,_ic0eFetchu        ,_ic1eFetchu        ,_BAERR_3           ,_BAERR_3           ,_BAERR_3           ,_BAERR_3           ), 0, 0xffffffff, 0x00000000, 0          ) // // Paired due to use with RVC
+/* 73 */Y( 0,     0 , Z( _ixBAERR_1         ,_ixBAERR_1         ,_ixBAERR_1         ,_BAERR_1           ,_BAERR_1           ,_BAERR_1           ,_unx73             ,_ic1unalignd       ,_ic2unalignd       ,_BAERR_1           ,_BAERR_1           ,_BAERR_1           ), 0, 0xffffffff, 0x00000000, 0          ) //bro
+/* 74 */Y( 0,  0x0e , Z( _ixBrOpFet         ,_ixBrOpFet         ,_ixBrOpFet         ,_BrOpFet           ,_BrOpFet           ,_BrOpFet           ,_unx74             ,_unx74             ,_unx74             ,_BrOpFet           ,_BrOpFet           ,_BrOpFet           ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 75 */Y( 0,  0x0e , Z( _ixBAlignEr        ,_ixBAlignEr        ,_ixBAlignEr        ,_BAlignEr          ,_BAlignEr          ,_BAlignEr          ,_unx75             ,_unx75             ,_unx75             ,_BAlignEr          ,_BAlignEr          ,_BAlignEr          ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 76 */Y( 0,  0x92 , Z( _ixBAERR_2         ,_ixBAERR_2         ,_ixBAERR_2         ,_BAERR_2           ,_BAERR_2           ,_BAERR_2           ,_ic0Fetchu         ,_ic1Fetchu         ,_ic2Fetchu         ,_BAERR_2           ,_BAERR_2           ,_BAERR_2           ), 0, 0xffffffff, 0x00000000, 0          ) // // Paired due to use with RVC
+/* 77 */Y( 0,  0x92 , Z( _ixBAERR_3         ,_ixBAERR_3         ,_ixBAERR_3         ,_BAERR_3           ,_BAERR_3           ,_BAERR_3           ,_ic0eFetchu        ,_ic1eFetchu        ,_ic2eFetchu        ,_BAERR_3           ,_BAERR_3           ,_BAERR_3           ), 0, 0xffffffff, 0x00000000, 0          ) // // Paired due to use with RVC
 /* 78 */Y( 0,  0x0f , Z( _DIV_4             ,_DIV_4             ,_DIV_4             ,_DIV_4             ,_DIV_4             ,_DIV_4             ,_DIV_4             ,_DIV_4             ,_DIV_4             ,_DIV_4             ,_DIV_4             ,_DIV_4             ), 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "BEQ"
 /* 79 */Y( 0,  0x0f , Z( _DIV_5             ,_DIV_5             ,_DIV_5             ,_DIV_5             ,_DIV_5             ,_DIV_5             ,_DIV_5             ,_DIV_5             ,_DIV_5             ,_DIV_5             ,_DIV_5             ,_DIV_5             ), 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "JALR"
 /* 7a */Y( 0,     0 , Z( _SB_5              ,_SB_5              ,_SB_5              ,_SB_5              ,_SB_5              ,_SB_5              ,_SB_5              ,_SB_5              ,_SB_5              ,_SB_5              ,_SB_5              ,_SB_5              ), 0, 0xffffffff, 0x00000000, 0          ) //
-/* 7b */Y( 1,     0 , Z( _JAL_0(0x7b)       ,_JAL_0(0x7b)       ,_JAL_0(0x7b)       ,_JAL_0(0x7b)       ,_JAL_0(0x7b)       ,_JAL_0(0x7b)       ,_JAL_0(0x7b)       ,_JAL_0(0x7b)       ,_JAL_0(0x7b)       ,_JAL_0(0x7b)       ,_JAL_0(0x7b)       ,_JAL_0(0x7b)       ), 1, 0x0000007f, 0x0000006f, (1<<25)/4  ) // JAL 4/4
+/* 7b */Y( 1,     0 , Z( _x_JAL_0(0x7b)     ,_x_JAL_0(0x7b)     ,_x_JAL_0(0x7b)     ,_x_JAL_0(0x7b)     ,_x_JAL_0(0x7b)     ,_x_JAL_0(0x7b)     ,_r_JAL_0(0x7b)     ,_r_JAL_0(0x7b)     ,_r_JAL_0(0x7b)     ,_r_JAL_0(0x7b)     ,_r_JAL_0(0x7b)     ,_r_JAL_0(0x7b)     ), 1, 0x0000007f, 0x0000006f, (1<<25)/4  ) // JAL 4/4
 /* 7c */Y( 1,     0 , Z( _CSRRC_0           ,_CSRRC_0           ,_CSRRC_0           ,_CSRRC_0           ,_CSRRC_0           ,_CSRRC_0           ,_CSRRC_0           ,_CSRRC_0           ,_CSRRC_0           ,_CSRRC_0           ,_CSRRC_0           ,_CSRRC_0           ), 1, 0x0000707f, 0x00003073, (1<<22)    ) // CSRRC
-/* 7d */Y( 0,     0 , Z( _ixBAERR_4         ,_ixBAERR_4         ,_ixBAERR_4         ,_BAERR_4           ,_BAERR_4           ,_BAERR_4           ,_icunx3            ,_icunx3            ,_BAERR_4           ,_BAERR_4           ,_BAERR_4           ,_BAERR_4           ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 7d */Y( 0,     0 , Z( _ixBAERR_4         ,_ixBAERR_4         ,_ixBAERR_4         ,_BAERR_4           ,_BAERR_4           ,_BAERR_4           ,_unx7d             ,_unx7d             ,_unx7d             ,_BAERR_4           ,_BAERR_4           ,_BAERR_4           ), 0, 0xffffffff, 0x00000000, 0          ) //
 /* 7e */Y( 0,     0 , Z( _NMI_1             ,_NMI_1             ,_NMI_1             ,_NMI_1             ,_NMI_1             ,_NMI_1             ,_NMI_1             ,_NMI_1             ,_NMI_1             ,_NMI_1             ,_NMI_1             ,_NMI_1             ), 0, 0xffffffff, 0x00000000, 0          ) //
-/* 7f */Y( 0,     0 , Z( _JALRE2            ,_JALRE2            ,_JALRE2            ,_JALRE2            ,_JALRE2            ,_JALRE2            ,_JALRE2            ,_JALRE2            ,_JALRE2            ,_JALRE2            ,_JALRE2            ,_JALRE2            ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 7f */Y( 0,     0 , Z( _x_JALRE2          ,_x_JALRE2          ,_x_JALRE2          ,_x_JALRE2          ,_x_JALRE2          ,_x_JALRE2          ,_unx7f             ,_unx7f             ,_unx7f             ,_unx7f             ,_unx7f             ,_unx7f             ), 0, 0xffffffff, 0x00000000, 0          ) //
 /* 80 */Y( 1,     0 , Z( _LBU_0             ,_LBU_0             ,_LBU_0             ,_LBU_0             ,_LBU_0             ,_LBU_0             ,_LBU_0             ,_LBU_0             ,_LBU_0             ,_LBU_0             ,_LBU_0             ,_LBU_0             ), 1, 0x0000707f, 0x00004003, (1<<22)    ) // LBU
-/* 81 */Y( 0,     0 , Z( _JAERR_2           ,_JAERR_2           ,_JAERR_2           ,_JAERR_2           ,_JAERR_2           ,_JAERR_2           ,_JAERR_2           ,_JAERR_2           ,_JAERR_2           ,_JAERR_2           ,_JAERR_2           ,_JAERR_2           ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 81 */Y( 0,     0 , Z( _x_JAERR_2         ,_x_JAERR_2         ,_x_JAERR_2         ,_x_JAERR_2         ,_x_JAERR_2         ,_x_JAERR_2         ,_unx81             ,_unx81             ,_unx81             ,_unx81             ,_unx81             ,_unx81             ), 0, 0xffffffff, 0x00000000, 0          ) //
 /* 82 */Y( 0,  0x10 , Z( _DIV_1             ,_DIV_1             ,_DIV_1             ,_DIV_1             ,_DIV_1             ,_DIV_1             ,_DIV_1             ,_DIV_1             ,_DIV_1             ,_DIV_1             ,_DIV_1             ,_DIV_1             ), 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "ij"
 /* 83 */Y( 0,  0x10 , Z( _DIV_2             ,_DIV_2             ,_DIV_2             ,_DIV_2             ,_DIV_2             ,_DIV_2             ,_DIV_2             ,_DIV_2             ,_DIV_2             ,_DIV_2             ,_DIV_2             ,_DIV_2             ), 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to FENCE
 /* 84 */Y( 1,     0 , Z( _XORI_0            ,_XORI_0            ,_XORI_0            ,_XORI_0            ,_XORI_0            ,_XORI_0            ,_XORI_0            ,_XORI_0            ,_XORI_0            ,_XORI_0            ,_XORI_0            ,_XORI_0            ), 1, 0x0000707f, 0x00004013, (1<<22)    ) // XORI
 /* 85 */Y( 0,     0 , Z( _LBU_1             ,_LBU_1             ,_LBU_1             ,_LBU_1             ,_LBU_1             ,_LBU_1             ,_LBU_1             ,_LBU_1             ,_LBU_1             ,_LBU_1             ,_LBU_1             ,_LBU_1             ), 0, 0xffffffff, 0x00000000, 0          ) //
-/* 86 */Y( 0,  0x11 , Z( _JAL_2             ,_JAL_2             ,_JAL_2             ,_JAL_2             ,_JAL_2             ,_JAL_2             ,_JAL_2             ,_JAL_2             ,_JAL_2             ,_JAL_2             ,_JAL_2             ,_JAL_2             ), 0, 0xffffffff, 0x00000000, 0          ) //
-/* 87 */Y( 0,  0x11 , Z( _JALRE1            ,_JALRE1            ,_JALRE1            ,_JALRE1            ,_JALRE1            ,_JALRE1            ,_JALRE1            ,_JALRE1            ,_JALRE1            ,_JALRE1            ,_JALRE1            ,_JALRE1            ), 0, 0xffffffff, 0x00000000, 0          ) // 
+/* 86 */Y( 0,  0x11 , Z( _x_JAL_2           ,_x_JAL_2           ,_x_JAL_2           ,_x_JAL_2           ,_x_JAL_2           ,_x_JAL_2           ,_r_JAL_2           ,_r_JAL_2           ,_r_JAL_2           ,_r_JAL_2           ,_r_JAL_2           ,_r_JAL_2           ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 87 */Y( 0,  0x11 , Z( _x_JALRE1          ,_x_JALRE1          ,_x_JALRE1          ,_x_JALRE1          ,_x_JALRE1          ,_x_JALRE1          ,_unx87             ,_unx87             ,_unx87             ,_unx87             ,_unx87             ,_unx87             ), 0, 0xffffffff, 0x00000000, 0          ) // 
 /* 88 */Y( 0,  0x12 , Z( _DIV_E             ,_DIV_E             ,_DIV_E             ,_DIV_E             ,_DIV_E             ,_DIV_E             ,_DIV_E             ,_DIV_E             ,_DIV_E             ,_DIV_E             ,_DIV_E             ,_DIV_E             ), 2, 0x00200000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "SW"
 /* 89 */Y( 0,  0x12 , Z( _DIV_F             ,_DIV_F             ,_DIV_F             ,_DIV_F             ,_DIV_F             ,_DIV_F             ,_DIV_F             ,_DIV_F             ,_DIV_F             ,_DIV_F             ,_DIV_F             ,_DIV_F             ), 0, 0xffffffff, 0x00000000, 0          ) //                                                         
 /* 8a */Y( 0,  0x15 , Z( _DIVU_5            ,_DIVU_5            ,_DIVU_5            ,_DIVU_5            ,_DIVU_5            ,_DIVU_5            ,_DIVU_5            ,_DIVU_5            ,_DIVU_5            ,_DIVU_5            ,_DIVU_5            ,_DIVU_5            ), 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "SW" 
@@ -947,7 +929,7 @@ assign d[30] = d[18];"
 /* 98 */Y( 1,     0 , Z( _BLT               ,_BLT               ,_BLT               ,_BLT               ,_BLT               ,_BLT               ,_BLT               ,_BLT               ,_BLT               ,_BLT               ,_BLT               ,_BLT               ), 1, 0x0000707f, 0x00004063, (1<<22)    ) // BLT
 /* 99 */Y( 0,     0 , Z( _ILL_0(0x99)       ,_ILL_0(0x99)       ,_ILL_0(0x99)       ,_ILL_0(0x99)       ,_ILL_0(0x99)       ,_ILL_0(0x99)       ,_ILL_0(0x99)       ,_ILL_0(0x99)       ,_ILL_0(0x99)       ,_ILL_0(0x99)       ,_ILL_0(0x99)       ,_ILL_0(0x99)       ), 2, 0x00400000, 0x00000000, 0          ) // illegal Can get here from OpCode close to "JALR". 
 /* 9a */Y( 0,     0 , Z( _ECALL_6           ,_ECALL_6           ,_ECALL_6           ,_ECALL_6           ,_ECALL_6           ,_ECALL_6           ,_ECALL_6           ,_ECALL_6           ,_ECALL_6           ,_ECALL_6           ,_ECALL_6           ,_ECALL_6           ), 0, 0x00200000, 0x00000000, 0          ) // Must be even ucode adr for unknown reason [what2]
-/* 9b */Y( 0,     0 , Z( _ILL_5             ,_ILL_5             ,_ILL_5             ,_ILL_5             ,_ILL_5             ,_ILL_5             ,_ILL_5             ,_ILL_5             ,_ILL_5             ,_ILL_5             ,_ILL_5             ,_ILL_5             ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* 9b */Y( 0,     0 , Z( _unx9b             ,_unx9b             ,_unx9b             ,_unx9b             ,_unx9b             ,_unx9b             ,_unx9b             ,_unx9b             ,_unx9b             ,_unx9b             ,_unx9b             ,_unx9b             ), 0, 0xffffffff, 0x00000000, 0          ) //
 /* 9c */Y( 0,  0x14 , Z( _DIV_10            ,_DIV_10            ,_DIV_10            ,_DIV_10            ,_DIV_10            ,_DIV_10            ,_DIV_10            ,_DIV_10            ,_DIV_10            ,_DIV_10            ,_DIV_10            ,_DIV_10            ), 2, 0x00001000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "EBREAK/ECALL/CSR"
 /* 9d */Y( 0,  0x14 , Z( _DIV_11            ,_DIV_11            ,_DIV_11            ,_DIV_11            ,_DIV_11            ,_DIV_11            ,_DIV_11            ,_DIV_11            ,_DIV_11            ,_DIV_11            ,_DIV_11            ,_DIV_11            ), 0, 0xffffffff, 0x00000000, 0          ) //                                                                       
 /* 9e */Y( 0,     0 , Z( _SH_4              ,_SH_4              ,_SH_4              ,_SH_4              ,_SH_4              ,_SH_4              ,_SH_4              ,_SH_4              ,_SH_4              ,_SH_4              ,_SH_4              ,_SH_4              ), 0, 0xffffffff, 0x00000000, 0          ) //
@@ -970,27 +952,27 @@ assign d[30] = d[18];"
 /* af */Y( 0,     0 , Z( _MRET_4            ,_MRET_4            ,_MRET_4            ,_MRET_4            ,_MRET_4            ,_MRET_4            ,_MRET_4            ,_MRET_4            ,_MRET_4            ,_MRET_4            ,_MRET_4            ,_MRET_4            ), 0, 0xffffffff, 0x00000000, 0          ) // Reached with LAZY_DECODE==1. 
 /* b0 */Y( 0,     0 , Z( _CSRRW_3           ,_CSRRW_3           ,_CSRRW_3           ,_CSRRW_3           ,_CSRRW_3           ,_CSRRW_3           ,_CSRRW_3           ,_CSRRW_3           ,_CSRRW_3           ,_CSRRW_3           ,_CSRRW_3           ,_CSRRW_3           ), 0, 0xffffffff, 0x00000000, 0          ) //
 /* b1 */Y( 0,     0 , Z( _aF_SW_3           ,_aF_SW_3           ,_aF_SW_3           ,_aF_SW_3           ,_aF_SW_3           ,_aF_SW_3           ,_aF_SW_3           ,_aF_SW_3           ,_aF_SW_3           ,_aF_SW_3           ,_aF_SW_3           ,_aF_SW_3           ), 0, 0xffffffff, 0x00000000, 0          ) //
-/* b2 */Y( 0,     0 , Z( _CSRRC_1           ,_CSRRC_1           ,_CSRRC_1           ,_CSRRC_1           ,_CSRRC_1           ,_CSRRC_1           ,_CSRRC_1           ,_CSRRC_1           ,_CSRRC_1           ,_CSRRC_1           ,_CSRRC_1           ,_CSRRC_1           ), 0, 0xffffffff, 0x00000000, 0          ) //
-/* b3 */Y( 0,     0 , Z( _CSRRWI_1          ,_CSRRWI_1          ,_CSRRWI_1          ,_CSRRWI_1          ,_CSRRWI_1          ,_CSRRWI_1          ,_CSRRWI_1          ,_CSRRWI_1          ,_CSRRWI_1          ,_CSRRWI_1          ,_CSRRWI_1          ,_CSRRWI_1          ), 0, 0xffffffff, 0x00000000, 0          ) //
-/* b4 */Y( 0,     0 , Z( _i0reserved        ,_i1eFetch3         ,_i2eFetch3         ,_eFetch3           ,_eFetch3           ,_eFetch3           ,_ic0reserved       ,_ic1eFetch3        ,_eFetch3           ,_eFetch3           ,_eFetch3           ,_eFetch3           ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* b2 */Y( 0,     0 , Z( _CSRRW_4           ,_CSRRW_4           ,_CSRRW_4           ,_CSRRW_4           ,_CSRRW_4           ,_CSRRW_4           ,_CSRRW_4           ,_CSRRW_4           ,_CSRRW_4           ,_CSRRW_4           ,_CSRRW_4           ,_CSRRW_4           ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* b3 */Y( 0,     0 , Z( _unxb3             ,_unxb3             ,_unxb3             ,_unxb3             ,_unxb3             ,_unxb3             ,_unxb3             ,_unxb3             ,_unxb3             ,_unxb3             ,_unxb3             ,_unxb3             ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* b4 */Y( 0,     0 , Z( _i0reserved        ,_i1eFetch3         ,_i2eFetch3         ,_eFetch3           ,_eFetch3           ,_eFetch3           ,_ic0reserved       ,_ic1eFetch3        ,_ic2eFetch3        ,_eFetch3           ,_eFetch3           ,_eFetch3           ), 0, 0xffffffff, 0x00000000, 0          ) //
 /* b5 */Y( 0,     0 , Z( _SH_3              ,_SH_3              ,_SH_3              ,_SH_3              ,_SH_3              ,_SH_3              ,_SH_3              ,_SH_3              ,_SH_3              ,_SH_3              ,_SH_3              ,_SH_3              ), 0, 0xffffffff, 0x00000000, 0          ) //
 /* b6 */Y( 0,     0 , Z( _ECALL_5           ,_ECALL_5           ,_ECALL_5           ,_ECALL_5           ,_ECALL_5           ,_ECALL_5           ,_ECALL_5           ,_ECALL_5           ,_ECALL_5           ,_ECALL_5           ,_ECALL_5           ,_ECALL_5           ), 0, 0xffffffff, 0x00000000, 0          ) //
-/* b7 */Y( 0,     0 , Z( _IJ_3              ,_IJ_3              ,_IJ_3              ,_IJ_3              ,_IJ_3              ,_IJ_3              ,_IJ_3              ,_IJ_3              ,_IJ_3              ,_IJ_3              ,_IJ_3              ,_IJ_3              ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* b7 */Y( 0,     0 , Z( _x_IJ_3            ,_x_IJ_3            ,_x_IJ_3            ,_x_IJ_3            ,_x_IJ_3            ,_x_IJ_3            ,_r_IJ_3            ,_r_IJ_3            ,_r_IJ_3            ,_r_IJ_3            ,_r_IJ_3            ,_r_IJ_3            ), 0, 0xffffffff, 0x00000000, 0          ) //
 /* b8 */Y( 1,     0 , Z( _BGE               ,_BGE               ,_BGE               ,_BGE               ,_BGE               ,_BGE               ,_BGE               ,_BGE               ,_BGE               ,_BGE               ,_BGE               ,_BGE               ), 1, 0x0000707f, 0x00005063, (1<<22)    ) // BGE
 /* b9 */Y( 0,     0 , Z( _DIV_e             ,_DIV_e             ,_DIV_e             ,_DIV_e             ,_DIV_e             ,_DIV_e             ,_DIV_e             ,_DIV_e             ,_DIV_e             ,_DIV_e             ,_DIV_e             ,_DIV_e             ), 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "JALR".
 /* ba */Y( 0,     0 , Z( _LHU_3             ,_LHU_3             ,_LHU_3             ,_LHU_3             ,_LHU_3             ,_LHU_3             ,_LHU_3             ,_LHU_3             ,_LHU_3             ,_LHU_3             ,_LHU_3             ,_LHU_3             ), 0, 0xffffffff, 0x00000000, 0          ) // Must be even ucode adr for unknown reason. Must find owut this. Probably because MCLR was used prev cycle.
 /* bb */Y( 0,     0 , Z( _SH_2              ,_SH_2              ,_SH_2              ,_SH_2              ,_SH_2              ,_SH_2              ,_SH_2              ,_SH_2              ,_SH_2              ,_SH_2              ,_SH_2              ,_SH_2              ), 0, 0xffffffff, 0x00000000, 0          ) //
 /* bc */Y( 1,     0 , Z( _CSRRWI_0          ,_CSRRWI_0          ,_CSRRWI_0          ,_CSRRWI_0          ,_CSRRWI_0          ,_CSRRWI_0          ,_CSRRWI_0          ,_CSRRWI_0          ,_CSRRWI_0          ,_CSRRWI_0          ,_CSRRWI_0          ,_CSRRWI_0          ), 1, 0x0000707f, 0x00005073, (1<<22)    ) // CSRRWI
-/* bd */Y( 0,     0 , Z( _IJ_4              ,_IJ_4              ,_IJ_4              ,_IJ_4              ,_IJ_4              ,_IJ_4              ,_IJ_4              ,_IJ_4              ,_IJ_4              ,_IJ_4              ,_IJ_4              ,_IJ_4              ), 0, 0xffffffff, 0x00000000, 0          ) //
-/* be */Y( 0,  0x17 , Z( _IJ_1              ,_IJ_1              ,_IJ_1              ,_IJ_1              ,_IJ_1              ,_IJ_1              ,_IJ_1              ,_IJ_1              ,_IJ_1              ,_IJ_1              ,_IJ_1              ,_IJ_1              ), 0, 0xffffffff, 0x00000000, 0          ) //
-/* bf */Y( 0,  0x17 , Z( _IJT_1             ,_IJT_1             ,_IJT_1             ,_IJT_1             ,_IJT_1             ,_IJT_1             ,_IJT_1             ,_IJT_1             ,_IJT_1             ,_IJT_1             ,_IJT_1             ,_IJT_1             ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* bd */Y( 0,     0 , Z( _x_IJ_4            ,_x_IJ_4            ,_x_IJ_4            ,_x_IJ_4            ,_x_IJ_4            ,_x_IJ_4            ,_r_IJ_4            ,_r_IJ_4            ,_r_IJ_4            ,_r_IJ_4            ,_r_IJ_4            ,_r_IJ_4            ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* be */Y( 0,  0x17 , Z( _x_IJ_1            ,_x_IJ_1            ,_x_IJ_1            ,_x_IJ_1            ,_x_IJ_1            ,_x_IJ_1            ,_r_IJ_1            ,_r_IJ_1            ,_r_IJ_1            ,_r_IJ_1            ,_r_IJ_1            ,_r_IJ_1            ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* bf */Y( 0,  0x17 , Z( _x_IJT_1           ,_x_IJT_1           ,_x_IJT_1           ,_x_IJT_1           ,_x_IJT_1           ,_x_IJT_1           ,_r_IJT_1           ,_r_IJT_1           ,_r_IJT_1           ,_r_IJT_1           ,_r_IJT_1           ,_r_IJT_1           ), 0, 0xffffffff, 0x00000000, 0          ) //
 /* c0 */Y( 0,     0 , Z( _DIV_D             ,_DIV_D             ,_DIV_D             ,_DIV_D             ,_DIV_D             ,_DIV_D             ,_DIV_D             ,_DIV_D             ,_DIV_D             ,_DIV_D             ,_DIV_D             ,_DIV_D             ), 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "LW"
-/* c1 */Y( 0,     0 , Z( _IJT_2             ,_IJT_2             ,_IJT_2             ,_IJT_2             ,_IJT_2             ,_IJT_2             ,_IJT_2             ,_IJT_2             ,_IJT_2             ,_IJT_2             ,_IJT_2             ,_IJT_2             ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* c1 */Y( 0,     0 , Z( _x_IJT_2           ,_x_IJT_2           ,_x_IJT_2           ,_x_IJT_2           ,_x_IJT_2           ,_x_IJT_2           ,_r_IJT_2           ,_r_IJT_2           ,_r_IJT_2           ,_r_IJT_2           ,_r_IJT_2           ,_r_IJT_2           ), 0, 0xffffffff, 0x00000000, 0          ) //
 /* c2 */Y( 0,  0x18 , Z( _DIVU_3            ,_DIVU_3            ,_DIVU_3            ,_DIVU_3            ,_DIVU_3            ,_DIVU_3            ,_DIVU_3            ,_DIVU_3            ,_DIVU_3            ,_DIVU_3            ,_DIVU_3            ,_DIVU_3            ), 2, 0x00400000, 0x00000000, 0          ) // Illegal as entry. Can get here from OpCode close to "ij"
 /* c3 */Y( 0,  0x18,  Z( _DIVU_4            ,_DIVU_4            ,_DIVU_4            ,_DIVU_4            ,_DIVU_4            ,_DIVU_4            ,_DIVU_4            ,_DIVU_4            ,_DIVU_4            ,_DIVU_4            ,_DIVU_4            ,_DIVU_4            ), 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to FENCE. 
 /* c4 */Y( 1,     0 , Z( _ORI_0             ,_ORI_0             ,_ORI_0             ,_ORI_0             ,_ORI_0             ,_ORI_0             ,_ORI_0             ,_ORI_0             ,_ORI_0             ,_ORI_0             ,_ORI_0             ,_ORI_0             ), 1, 0x0000707f, 0x00006013, (1<<22)    ) // ORI                                                        
 /* c5 */Y( 0,     0 , Z( _MRET_5            ,_MRET_5            ,_MRET_5            ,_MRET_5            ,_MRET_5            ,_MRET_5            ,_MRET_5            ,_MRET_5            ,_MRET_5            ,_MRET_5            ,_MRET_5            ,_MRET_5            ), 0, 0xffffffff, 0x00000000, 0          ) //
-/* c6 */Y( 0,     0 , Z( _IJT_4             ,_IJT_4             ,_IJT_4             ,_IJT_4             ,_IJT_4             ,_IJT_4             ,_IJT_4             ,_IJT_4             ,_IJT_4             ,_IJT_4             ,_IJT_4             ,_IJT_4             ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* c6 */Y( 0,     0 , Z( _x_IJT_4           ,_x_IJT_4           ,_x_IJT_4           ,_x_IJT_4           ,_x_IJT_4           ,_x_IJT_4           ,_r_IJT_4           ,_r_IJT_4           ,_r_IJT_4           ,_r_IJT_4           ,_r_IJT_4           ,_r_IJT_4           ), 0, 0xffffffff, 0x00000000, 0          ) //
 /* c7 */Y( 0,     0 , Z( _QINT_1            ,_QINT_1            ,_QINT_1            ,_QINT_1            ,_QINT_1            ,_QINT_1            ,_QINT_1            ,_QINT_1            ,_QINT_1            ,_QINT_1            ,_QINT_1            ,_QINT_1            ), 0, 0xffffffff, 0x00000000, 0          ) //
 /* c8 */Y( 0,     0 , Z( _DIV_7             ,_DIV_7             ,_DIV_7             ,_DIV_7             ,_DIV_7             ,_DIV_7             ,_DIV_7             ,_DIV_7             ,_DIV_7             ,_DIV_7             ,_DIV_7             ,_DIV_7             ), 2, 0x00200000, 0x00000000, 0          ) // Illegal as entry. Can get here from OpCode close to "SW". DIV_7 must be even ucode adr (why?)
 /* c9 */Y( 0,     0 , Z( _MRET_2            ,_MRET_2            ,_MRET_2            ,_MRET_2            ,_MRET_2            ,_MRET_2            ,_MRET_2            ,_MRET_2            ,_MRET_2            ,_MRET_2            ,_MRET_2            ,_MRET_2            ), 0, 0xffffffff, 0x00000000, 0          ) //
@@ -1005,7 +987,7 @@ assign d[30] = d[18];"
 /* d2 */Y( 0,  0x1a , Z( _LB_2              ,_LB_2              ,_LB_2              ,_LB_2              ,_LB_2              ,_LB_2              ,_LB_2              ,_LB_2              ,_LB_2              ,_LB_2              ,_LB_2              ,_LB_2              ), 0, 0xffffffff, 0x00000000, 0          ) //
 /* d3 */Y( 0,  0x1a , Z( _aFaultd           ,_aFaultd           ,_aFaultd           ,_aFaultd           ,_aFaultd           ,_aFaultd           ,_aFaultd           ,_aFaultd           ,_aFaultd           ,_aFaultd           ,_aFaultd           ,_aFaultd           ), 0, 0xffffffff, 0x00000000, 0          ) //
 /* d4 */Y( 0,     0 , Z( _aFault_2          ,_aFault_2          ,_aFault_2          ,_aFault_2          ,_aFault_2          ,_aFault_2          ,_aFault_2          ,_aFault_2          ,_aFault_2          ,_aFault_2          ,_aFault_2          ,_aFault_2          ), 0, 0xffffffff, 0x00000000, 0          ) //
-/* d5 */Y( 0,     0 , Z( _i0unx0            ,_i1eFetch2         ,_i2eFetch2         ,_eFetch2           ,_eFetch2           ,_eFetch2           ,_ic0unalignd       ,_ic1eFetch2        ,_eFetch2           ,_eFetch2           ,_eFetch2           ,_eFetch2           ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* d5 */Y( 0,     0 , Z( _unxd5             ,_i1eFetch2         ,_unxd5             ,_eFetch2           ,_eFetch2           ,_eFetch2           ,_ic0unalignd       ,_ic1eFetch2        ,_ic2Fetch2u        ,_eFetch2           ,_eFetch2           ,_eFetch2           ), 0, 0xffffffff, 0x00000000, 0          ) //
 /* d6 */Y( 0,  0x1b , Z( _eILL0c            ,_eILL0c            ,_eILL0c            ,_eILL0c            ,_eILL0c            ,_eILL0c            ,_eILL0c            ,_eILL0c            ,_eILL0c            ,_eILL0c            ,_eILL0c            ,_eILL0c            ), 0, 0xffffffff, 0x00000000, 0          ) //
 /* d7 */Y( 0,  0x1b , Z( _ECALL_3           ,_ECALL_3           ,_ECALL_3           ,_ECALL_3           ,_ECALL_3           ,_ECALL_3           ,_ECALL_3           ,_ECALL_3           ,_ECALL_3           ,_ECALL_3           ,_ECALL_3           ,_ECALL_3           ), 0, 0xffffffff, 0x00000000, 0          ) //
 /* d8 */Y( 1,     0 , Z( _BLTU              ,_BLTU              ,_BLTU              ,_BLTU              ,_BLTU              ,_BLTU              ,_BLTU              ,_BLTU              ,_BLTU              ,_BLTU              ,_BLTU              ,_BLTU              ), 1, 0x0000707f, 0x00006063, (1<<22)    ) // BLTU
@@ -1014,18 +996,18 @@ assign d[30] = d[18];"
 /* db */Y( 0,     0 , Z( _jFault_1          ,_jFault_1          ,_jFault_1          ,_jFault_1          ,_jFault_1          ,_jFault_1          ,_jFault_1          ,_jFault_1          ,_jFault_1          ,_jFault_1          ,_jFault_1          ,_jFault_1          ), 0, 0xffffffff, 0x00000000, 0          ) //
 /* dc */Y( 1,     0 , Z( _CSRRSI_0          ,_CSRRSI_0          ,_CSRRSI_0          ,_CSRRSI_0          ,_CSRRSI_0          ,_CSRRSI_0          ,_CSRRSI_0          ,_CSRRSI_0          ,_CSRRSI_0          ,_CSRRSI_0          ,_CSRRSI_0          ,_CSRRSI_0          ), 1, 0x0000707f, 0x00006073, (1<<22)    ) // CSRRSI
 /* dd */Y( 0,     0 , Z( _aF_SW_1           ,_aF_SW_1           ,_aF_SW_1           ,_aF_SW_1           ,_aF_SW_1           ,_aF_SW_1           ,_aF_SW_1           ,_aF_SW_1           ,_aF_SW_1           ,_aF_SW_1           ,_aF_SW_1           ,_aF_SW_1           ), 0, 0xffffffff, 0x00000000, 0          ) //
-/* de */Y( 0,  0x1c , Z( _i0Fetch           ,_i1Fetch           ,_i2Fetch           ,_Fetch             ,_Fetch             ,_Fetch             ,_ic0Fetch          ,_ic1Fetch          ,_Fetch             ,_Fetch             ,_Fetch             ,_Fetch             ), 0, 0xffffffff, 0x00000000, 0          ) //
-/* df */Y( 0,  0x1c , Z( _i0eFetch          ,_i1eFetch          ,_i2eFetch          ,_eFetch            ,_eFetch            ,_eFetch            ,_ic0eFetch         ,_ic1eFetch         ,_eFetch            ,_eFetch            ,_eFetch            ,_eFetch            ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* de */Y( 0,  0x1c , Z( _i0Fetch           ,_i1Fetch           ,_i2Fetch           ,_Fetch             ,_Fetch             ,_Fetch             ,_ic0Fetch          ,_ic1Fetch          ,_ic2Fetch          ,_Fetch             ,_Fetch             ,_Fetch             ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* df */Y( 0,  0x1c , Z( _i0eFetch          ,_i1eFetch          ,_i2eFetch          ,_eFetch            ,_eFetch            ,_eFetch            ,_ic0eFetch         ,_ic1eFetch         ,_ic2eFetch         ,_eFetch            ,_eFetch            ,_eFetch            ), 0, 0xffffffff, 0x00000000, 0          ) //
 /* e0 */Y( 0,     0 , Z( _DIVU_1            ,_DIVU_1            ,_DIVU_1            ,_DIVU_1            ,_DIVU_1            ,_DIVU_1            ,_DIVU_1            ,_DIVU_1            ,_DIVU_1            ,_DIVU_1            ,_DIVU_1            ,_DIVU_1            ), 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "LW"
 /* e1 */Y( 0,     0 , Z( _ORI_1             ,_ORI_1             ,_ORI_1             ,_ORI_1             ,_ORI_1             ,_ORI_1             ,_ORI_1             ,_ORI_1             ,_ORI_1             ,_ORI_1             ,_ORI_1             ,_ORI_1             ), 0, 0xffffffff, 0x00000000, 0          ) //
 /* e2 */Y( 0,  0x1d , Z( _MUL_1             ,_MUL_1             ,_MUL_1             ,_MUL_1             ,_MUL_1             ,_MUL_1             ,_MUL_1             ,_MUL_1             ,_MUL_1             ,_MUL_1             ,_MUL_1             ,_MUL_1             ), 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "ij"
 /* e3 */Y( 0,  0x1d , Z( _MUL_3             ,_MUL_3             ,_MUL_3             ,_MUL_3             ,_MUL_3             ,_MUL_3             ,_MUL_3             ,_MUL_3             ,_MUL_3             ,_MUL_3             ,_MUL_3             ,_MUL_3             ), 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to FENCE
 /* e4 */Y( 1,     0 , Z( _ANDI_0            ,_ANDI_0            ,_ANDI_0            ,_ANDI_0            ,_ANDI_0            ,_ANDI_0            ,_ANDI_0            ,_ANDI_0            ,_ANDI_0            ,_ANDI_0            ,_ANDI_0            ,_ANDI_0            ), 1, 0x0000707f, 0x00007013, (1<<22)    ) // ANDI
 /* e5 */Y( 0,     0 , Z( _aF_SW_2           ,_aF_SW_2           ,_aF_SW_2           ,_aF_SW_2           ,_aF_SW_2           ,_aF_SW_2           ,_aF_SW_2           ,_aF_SW_2           ,_aF_SW_2           ,_aF_SW_2           ,_aF_SW_2           ,_aF_SW_2           ), 0, 0xffffffff, 0x00000000, 0          ) //
-/* e6 */Y( 0,  0x1e , Z( _i0StdIncPc        ,_i1StdIncPc        ,_i2StdIncPc        ,_StdIncPc          ,_StdIncPc          ,_StdIncPc          ,_ic0StdIncPc       ,_ic1StdIncPc       ,_StdIncPc          ,_StdIncPc          ,_StdIncPc          ,_StdIncPc          ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* e6 */Y( 0,  0x1e , Z( _i0StdIncPc        ,_i1StdIncPc        ,_i2StdIncPc        ,_StdIncPc          ,_StdIncPc          ,_StdIncPc          ,_ic0StdIncPc       ,_ic1StdIncPc       ,_ic2StdIncPc       ,_StdIncPc          ,_StdIncPc          ,_StdIncPc          ), 0, 0xffffffff, 0x00000000, 0          ) //
 /* e7 */Y( 0,  0x1e , Z( _aFault            ,_aFault            ,_aFault            ,_aFault            ,_aFault            ,_aFault            ,_aFault            ,_aFault            ,_aFault            ,_aFault            ,_aFault            ,_aFault            ), 0, 0xffffffff, 0x00000000, 0          ) //
 /* e8 */Y( 0,     0 , Z( _MUL_2             ,_MUL_2             ,_MUL_2             ,_MUL_2             ,_MUL_2             ,_MUL_2             ,_MUL_2             ,_MUL_2             ,_MUL_2             ,_MUL_2             ,_MUL_2             ,_MUL_2             ), 2, 0x00200000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "SW".
-/* e9 */Y( 0,     0 , Z( _IJT_3             ,_IJT_3             ,_IJT_3             ,_IJT_3             ,_IJT_3             ,_IJT_3             ,_IJT_3             ,_IJT_3             ,_IJT_3             ,_IJT_3             ,_IJT_3             ,_IJT_3             ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* e9 */Y( 0,     0 , Z( _x_IJT_3           ,_x_IJT_3           ,_x_IJT_3           ,_x_IJT_3           ,_x_IJT_3           ,_x_IJT_3           ,_r_IJT_3           ,_r_IJT_3           ,_r_IJT_3           ,_r_IJT_3           ,_r_IJT_3           ,_r_IJT_3           ), 0, 0xffffffff, 0x00000000, 0          ) //
 /* ea */Y( 0,     0 , Z( _MULHU_5           ,_MULHU_5           ,_MULHU_5           ,_MULHU_5           ,_MULHU_5           ,_MULHU_5           ,_MULHU_5           ,_MULHU_5           ,_MULHU_5           ,_MULHU_5           ,_MULHU_5           ,_MULHU_5           ), 2, 0x00200000, 0x00000000, 0          ) // (illegal) 
 /* eb */Y( 0,     0 , Z( _LH_3              ,_LH_3              ,_LH_3              ,_LH_3              ,_LH_3              ,_LH_3              ,_LH_3              ,_LH_3              ,_LH_3              ,_LH_3              ,_LH_3              ,_LH_3              ), 0, 0xffffffff, 0x00000000, 0          ) //
 /* ec */Y( 1,     0 , Z( _AND_0             ,_AND_0             ,_AND_0             ,_AND_0             ,_AND_0             ,_AND_0             ,_AND_0             ,_AND_0             ,_AND_0             ,_AND_0             ,_AND_0             ,_AND_0             ), 1, 0xfe00707f, 0x00007033, (1<<15)    ) // AND
@@ -1036,7 +1018,7 @@ assign d[30] = d[18];"
 /* f1 */Y( 0,  0x20 , Z( _aFaulte           ,_aFaulte           ,_aFaulte           ,_aFaulte           ,_aFaulte           ,_aFaulte           ,_aFaulte           ,_aFaulte           ,_aFaulte           ,_aFaulte           ,_aFaulte           ,_aFaulte           ), 0, 0xffffffff, 0x00000000, 0          ) //
 /* f2 */Y( 0,  0x21 , Z( _SW_2              ,_SW_2              ,_SW_2              ,_SW_2              ,_SW_2              ,_SW_2              ,_SW_2              ,_SW_2              ,_SW_2              ,_SW_2              ,_SW_2              ,_SW_2              ), 0, 0xffffffff, 0x00000000, 0          ) //
 /* f3 */Y( 0,  0x21 , Z( _aF_SW             ,_aF_SW             ,_aF_SW             ,_aF_SW             ,_aF_SW             ,_aF_SW             ,_aF_SW             ,_aF_SW             ,_aF_SW             ,_aF_SW             ,_aF_SW             ,_aF_SW             ), 0, 0xffffffff, 0x00000000, 0          ) //
-/* f4 */Y( 0,  0x22 , Z( _i0Fetch2          ,_i1Fetch2          ,_i2Fetch2          ,_Fetch2            ,_Fetch2            ,_Fetch2            ,_ic0Fetch2         ,_ic1Fetch2         ,_Fetch2            ,_Fetch2            ,_Fetch2            ,_Fetch2            ), 0, 0xffffffff, 0x00000000, 0          ) //
+/* f4 */Y( 0,  0x22 , Z( _i0Fetch2          ,_i1Fetch2          ,_i2Fetch2          ,_Fetch2            ,_Fetch2            ,_Fetch2            ,_ic0Fetch2         ,_ic1Fetch2         ,_ic2Fetch2         ,_Fetch2            ,_Fetch2            ,_Fetch2            ), 0, 0xffffffff, 0x00000000, 0          ) //
 /* f5 */Y( 0,  0x22 , Z( _jFault            ,_jFault            ,_jFault            ,_jFault            ,_jFault            ,_jFault            ,_jFault            ,_jFault            ,_jFault            ,_jFault            ,_jFault            ,_jFault            ), 0, 0xffffffff, 0x00000000, 0          ) //
 /* f6 */Y( 0,  0x23 , Z( _WFI_1             ,_WFI_1             ,_WFI_1             ,_WFI_1             ,_WFI_1             ,_WFI_1             ,_WFI_1             ,_WFI_1             ,_WFI_1             ,_WFI_1             ,_WFI_1             ,_WFI_1             ), 0, 0xffffffff, 0x00000000, 0          ) //
 /* f7 */Y( 0,  0x23 , Z( _EBREAK_1          ,_EBREAK_1          ,_EBREAK_1          ,_EBREAK_1          ,_EBREAK_1          ,_EBREAK_1          ,_EBREAK_1          ,_EBREAK_1          ,_EBREAK_1          ,_EBREAK_1          ,_EBREAK_1          ,_EBREAK_1          ), 0, 0xffffffff, 0x00000000, 0          ) //
