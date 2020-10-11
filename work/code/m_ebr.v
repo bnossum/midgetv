@@ -22,6 +22,7 @@
  * It seems that one should use RCLKE/WCLKE instead of RE/WE. As luck will have it, the bug is that
  * mem[0] is spuriously written by 0 between configuration and before the core is released. As luck 
  * will have it, mem[0] should **always** be 0 in midgetv, so I do not change anything now.
+ * Fixed Sept 2020.
  */
 module m_ebr
   # ( parameter EBRADRWIDTH = 8,

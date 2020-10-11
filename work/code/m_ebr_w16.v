@@ -58,11 +58,11 @@ module m_ebr_w16
             .WADDR  ( {3'b0,Wai}                    ),
             .RADDR  ( {3'b0,Rai}                    ),
             .RE     ( 1'b1                          ),
-            .WE     ( iwe                           ),
+            .WE     ( 1'b1                          ),
             .WCLK   ( clk                           ),
             .RCLK   ( clk                           ),
             .RCLKE  ( 1'b1                          ),
-            .WCLKE  ( 1'b1                          )
+            .WCLKE  ( iwe                           )
             /*AUTOINST*/);
          
       end else begin

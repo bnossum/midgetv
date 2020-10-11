@@ -567,11 +567,11 @@ module m_ebr_w8
             .WADDR  ( {2'b0,Wai[0],Wai[8:1]}        ), // Note mangling
             .RADDR  ( {2'b0,Rai[0],Rai[8:1]}        ), // Note mangling
             .RE     ( 1'b1                          ),
-            .WE     ( we                            ), // May perhaps save a lut. use .WE(iwe) .WCLKE(~bmask)
+            .WE     ( 1'b1                          ), // May perhaps save a lut. use .WE(iwe) .WCLKE(~bmask)
             .WCLK   ( clk                           ),
             .RCLK   ( clk                           ),
             .RCLKE  ( 1'b1                          ),
-            .WCLKE  ( 1'b1                          ) //  May perhaps save a lut. use .WE(iwe) .WCLKE(~bmask)
+            .WCLKE  ( we                            ) //  May perhaps save a lut. use .WE(iwe) .WCLKE(~bmask)
             /*AUTOINST*/);
          
       end else begin

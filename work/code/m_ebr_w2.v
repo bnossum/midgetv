@@ -550,11 +550,11 @@ module m_ebr_w2
       .WADDR  ( {Wai[2:0],Wai[10:3]}          ), // Note mangling
       .RADDR  ( {Rai[2:0],Rai[10:3]}          ), // Note mangling
       .RE     ( 1'b1                          ),
-      .WE     ( we                            ), 
+      .WE     ( 1'b1                          ), 
       .WCLK   ( clk                           ),
       .RCLK   ( clk                           ),
       .RCLKE  ( 1'b1                          ),
-      .WCLKE  ( 1'b1                          ) 
+      .WCLKE  ( we                            ) 
       /*AUTOINST*/);
    
 endmodule

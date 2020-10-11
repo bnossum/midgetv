@@ -561,11 +561,11 @@ module m_ebr_w4
             .WADDR  ( {1'b0,Wai[1:0],Wai[9:2]}      ), // Note mangling
             .RADDR  ( {1'b0,Rai[1:0],Rai[9:2]}      ), // Note mangling
             .RE     ( 1'b1                          ),
-            .WE     ( we                            ), 
+            .WE     ( 1'b1                          ), 
             .WCLK   ( clk                           ),
             .RCLK   ( clk                           ),
             .RCLKE  ( 1'b1                          ),
-            .WCLKE  ( 1'b1                          ) 
+            .WCLKE  ( we                            ) 
             /*AUTOINST*/);
 
       end else begin
