@@ -221,3 +221,18 @@
 //  ffffff82 (Q=0, rFFFFFF7F),(add3 ) CSRRSI                                        
 //  ffffff83 (Q=0, rFFFFFF7F),(add4 ) CSRRCI                                        
 //                                                                                  
+/* Before multiplication and division, I have
+   11 free locations, and 36 illegal entry points = 47 locations to play with.
+   Can get back following from stricter decoding:
+   AUIPC, SB, LUI, SH, SW one encoding each:  5 locations
+   JAL 3 locations
+   I must be able to specify mul/div in 47+8=55 ucode instructions.
+   Preferably in 47 ucode instructions
+
+   By changing loading of immediate to clear Q in opfetch for instructions XORI, AND, OR, XOR I save 1 ucode instr
+   for each, and also speeds up these instructions with 1 clock cycle.
+
+   Presently I have 47+3 = 50 instructions, and 57 entry points (not counting MULDIV and illegals=36)
+   Hence I average 5.12 unique ucode instructions per instruction.
+   If this is relevant for MULDIV I will need 8*5.12 = 41 ucode locations.
+   

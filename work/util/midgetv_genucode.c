@@ -164,7 +164,11 @@ void check_internal_consistency( void ) {
                                 ferr( "uinstr say fixed pos, but ucode appears at wrong location 0x%2.2x\n", k );
                         if ( ucodespeced_fixedeven[k+1] != 8 )
                                 ferr( "uinstr at even address 0x%2.2x, but next uinstr is not the second item of a pair\n", k );
-                        break;                                                        
+                        break;
+                case 18 :
+                        if ( k & 1 )
+                                ferr( "uinstr say at even address, but this is not the case. Error at 0x%2.2x\n", k );
+                        break;
                 case 4 :
                         ensure_k_at_illegal_at_entry_location(k);
                         break;
