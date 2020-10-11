@@ -1,0 +1,20 @@
+For icebreaker:
+---------------
+A snapshot 23 September 2020:
+         Synplify Pro                Lattice LSI                Yosys/Arachne-PNR
+rv32i:   395 logic cells 31.7 MHz    399 logic cells  23.6 MHz  436 logic cells  18.3 MHz
+rv32im:  468 logic cells 26.4 MHz    468 logic cells  26.4 MHz  499 logic cells  16.7 MHz
+rv32imc: 775 logic cells 27.4 Mhz    705 logic cells  23.5 MHz  668 logic cells  19.2 MHz
+...      761 
+...      789 lowlevel  m_alu_carryin 708
+...      756 highlevel m_alu_carryin 701   unknown why highlevel is smaller.
+opreg -> lowlevel ->                 700
+progressctrl -> lowlevel
+
+A snapshot 23 September 2020:
+rv32i    397                         385                        431
+rv32im   520(placer fails)           453                        495
+rv32imc  758                         693                        651
+         
+
+

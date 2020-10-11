@@ -96,9 +96,13 @@ int g_speclevel;
 
 
 // Can get up to 4 equations with 2 inputs.
+//SPECPACKET spec[20] = {
+//        {-1,2,6, ~0},
+//        {0, 3,6, ~0},
+//        {0,0,0,0}};
+
 SPECPACKET spec[20] = {
-        {-1,2,6, ~0},
-        {0, 3,6, ~0},
+        {-1,3,10, ~0},
         {0,0,0,0}};
 
 
