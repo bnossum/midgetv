@@ -607,14 +607,7 @@ assign d[30] = d[18];"
 #define _DIV_15   DIV_15,  "       RS2 < 0, RS1 < 0, yy is true result",            8,DIV_14,        isr_none     |MA_passd   | WTRG  | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  // Must follow DIV_14   
 
 
-//                                                                                  Fixed/even       ISR          | ALU         Write   intern      Reg    Shreg   Ucode            Next
-//                                                                                  | Pair           action       | op          adr/en  read adr    op     op      operation        ucode
-//#define _ILLm0(i)  i,      "Illegal instruction seen (math)",                       4,-1,            isr_none     | A_xx      | Wnn   | r_xx      | Qx   | sr_h  | u_cont         | n(ILLe )
-//#define _ILLmp(i)  i,      "Illegal instruction seen (math). Paired",               6,i,             isr_none     | A_xx      | Wnn   | r_xx      | Qx   | sr_h  | u_cont         | n(ILLe )
-//#define _Mentry(i) i,      "Math entry point not used",                             1,i,             isr_none     | A_xx      | Wnn   | r_xx      | Qx   | sr_h  | u_cont         | n(ILLe )
-//#else
-// Informative
-// Informative, use of MUL/DIV places when no MUL/DIV                Used to flag illegals in decode
+//   Informative, use of MUL/DIV places when no MUL/DIV                Used to flag illegals in decode
 //#define _MULHU_1  _ILL0b(MULHU_1  )                               // x
 //#define _MULHU_2  _ILLm0(MULHU_2  ) // Paired with MULHU_4        // x
 //#define _MULHU_3  _ILLm0(MULHU_3  )                               // x
@@ -744,27 +737,27 @@ assign d[30] = d[18];"
 
 //                                                                                  Fixed/even       ISR          | ALU         Write   intern      Reg    Shreg   Ucode            Next
 //                                                                                  | Pair           action       | op          adr/en  read adr    op     op      operation        ucode
-#define _x_IJ_0     IJ_0,    "IJ     Jump to mem[(rs1+ofs)&~3u]. inCSR=0",            1,0x02,          isr_use_ij   | A_addDQ   | Wnn   | Ralu      | Qu   | sr_h  | hwordaligned   | n(IJ_1)
-#define _x_IJ_1     IJ_1,    "       Read until q=mem[(rs1+ofs)&~3u]",                2,-1,            isr_none     | A_passd   | Wnn   | rFFFFFFFF | Qs   | sr_h  | u_io_i         | n(IJ_2)     /* Must be placed at even ucode adr */
-#define _x_IJ_2     IJ_2,    "       Read word is to be masked with 2 lsb = 00",      0,-1,            isr_none     | A_passq   | Wyy   | r00000000 | Qz   | sr_h  | u_cont         | n(IJ_3)
-#define _x_IJ_3     IJ_3,    "       Construct Q = 3",                                0,-1,            isr_none     | A_add3w   | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(IJ_4)
-#define _x_IJ_4     IJ_4,    "       Mask and use as PC",                             0,-1,            nxtSTB       | A_nearAND | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch)    /* Goes to either Fetch or eFetch */
-                                                                                                                                                                 
-#define _x_IJT_1    IJT_1,   "       Exit CSR, enter trap",                           8,IJ_1,          isr_none     | A_passd   | Wnn   | rFFFFFFFF | Qs   | sr_h  | u_io_i         | n(IJT_2)    /* Ajacent to IJ_1 */
-#define _x_IJT_2    IJT_2,   "       Read word is to be masked with ~3u",             0,-1,            isr_none     | A_passq   | Wyy   | r00000000 | Qz   | sr_h  | u_cont         | n(IJT_3)
-#define _x_IJT_3    IJT_3,   "       Construct Q = 3",                                0,-1,            isr_none     | A_add3w   | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(IJT_4)
-#define _x_IJT_4    IJT_4,   "       Mask and store to mepc and Q for read of instr", 0,-1,            nxtSTB       | A_nearAND | Wmepc | Ralu      | Qu   | sr_h  | u_cont         | n(ILL_2)     // Probable error here, we do not any longer write to mtval because the instricton we wanted to read may be unaligned
+#define _x_IJ_0   IJ_0,    "IJ     Jump to mem[(rs1+ofs)&~3u]. inCSR=0",            1,0x02,          isr_use_ij   | A_addDQ   | Wnn   | Ralu      | Qu   | sr_h  | hwordaligned   | n(IJ_1)
+#define _x_IJ_1   IJ_1,    "       Read until q=mem[(rs1+ofs)&~3u]",                2,-1,            isr_none     | A_passd   | Wnn   | rFFFFFFFF | Qs   | sr_h  | u_io_i         | n(IJ_2)     /* Must be placed at even ucode adr */
+#define _x_IJ_2   IJ_2,    "       Read word is to be masked with 2 lsb = 00",      0,-1,            isr_none     | A_passq   | Wyy   | r00000000 | Qz   | sr_h  | u_cont         | n(IJ_3)
+#define _x_IJ_3   IJ_3,    "       Construct Q = 3",                                0,-1,            isr_none     | A_add3w   | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(IJ_4)
+#define _x_IJ_4   IJ_4,    "       Mask and use as PC",                             0,-1,            nxtSTB       | A_nearAND | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch)    /* Goes to either Fetch or eFetch */
+                                                                                                                                                               
+#define _x_IJT_1  IJT_1,   "       Exit CSR, enter trap",                           8,IJ_1,          isr_none     | A_passd   | Wnn   | rFFFFFFFF | Qs   | sr_h  | u_io_i         | n(IJT_2)    /* Ajacent to IJ_1 */
+#define _x_IJT_2  IJT_2,   "       Read word is to be masked with ~3u",             0,-1,            isr_none     | A_passq   | Wyy   | r00000000 | Qz   | sr_h  | u_cont         | n(IJT_3)
+#define _x_IJT_3  IJT_3,   "       Construct Q = 3",                                0,-1,            isr_none     | A_add3w   | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(IJT_4)
+#define _x_IJT_4  IJT_4,   "       Mask and store to mepc and Q for read of instr", 0,-1,            nxtSTB       | A_nearAND | Wmepc | Ralu      | Qu   | sr_h  | u_cont         | n(ILL_2)     // Probable error here, we do not any longer write to mtval because the instricton we wanted to read may be unaligned
 
-#define _r_IJ_0     IJ_0,    "IJ     Jump to mem[(rs1+ofs)&~1u]. inCSR=0",            1,0x02,          isr_use_ij   | A_addDQ   | Wnn   | Ralu      | Qu   | sr_h  | hwordaligned   | n(IJ_1)
-#define _r_IJ_1     IJ_1,    "       Read until q=mem[(rs1+ofs)&~1u]",                2,-1,            isr_none     | A_passd   | Wnn   | rFFFFFFFF | Qs   | sr_h  | u_io_i         | n(IJ_2)     /* Must be placed at even ucode adr */
-#define _r_IJ_2     IJ_2,    "       Read word is to be masked with lsb = 0",         0,-1,            isr_none     | A_passq   | Wyy   | r00000000 | Qz   | sr_h  | u_cont         | n(IJ_3)
-#define _r_IJ_3     IJ_3,    "       Construct Q = 1",                                0,-1,            isr_none     | A_add1    | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(IJ_4)
-#define _r_IJ_4     IJ_4,    "       Mask and use as PC",                             0,-1,            nxtSTB       | A_nearAND | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch)    /* Goes to either Fetch or eFetch */
-                                                                                                                                                                 
-#define _r_IJT_1    IJT_1,   "       Exit CSR, enter trap",                           8,IJ_1,          isr_none     | A_passd   | Wnn   | rFFFFFFFF | Qs   | sr_h  | u_io_i         | n(IJT_2)    /* Ajacent to IJ_1 */
-#define _r_IJT_2    IJT_2,   "       Read word is to be masked with ~1u",             0,-1,            isr_none     | A_passq   | Wyy   | r00000000 | Qz   | sr_h  | u_cont         | n(IJT_3)
-#define _r_IJT_3    IJT_3,   "       Construct Q = 1",                                0,-1,            isr_none     | A_add1    | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(IJT_4)
-#define _r_IJT_4    IJT_4,   "       Mask and store to mepc and Q for read of instr", 0,-1,            nxtSTB       | A_nearAND | Wmepc | Ralu      | Qu   | sr_h  | u_cont         | n(ILL_2)     
+#define _r_IJ_0   IJ_0,    "IJ     Jump to mem[(rs1+ofs)&~1u]. inCSR=0",            1,0x02,          isr_use_ij   | A_addDQ   | Wnn   | Ralu      | Qu   | sr_h  | hwordaligned   | n(IJ_1)
+#define _r_IJ_1   IJ_1,    "       Read until q=mem[(rs1+ofs)&~1u]",                2,-1,            isr_none     | A_passd   | Wnn   | rFFFFFFFF | Qs   | sr_h  | u_io_i         | n(IJ_2)     /* Must be placed at even ucode adr */
+#define _r_IJ_2   IJ_2,    "       Read word is to be masked with lsb = 0",         0,-1,            isr_none     | A_passq   | Wyy   | r00000000 | Qz   | sr_h  | u_cont         | n(IJ_3)
+#define _r_IJ_3   IJ_3,    "       Construct Q = 1",                                0,-1,            isr_none     | A_add1    | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(IJ_4)
+#define _r_IJ_4   IJ_4,    "       Mask and use as PC",                             0,-1,            nxtSTB       | A_nearAND | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch)    /* Goes to either Fetch or eFetch */
+                                                                                                                                                               
+#define _r_IJT_1  IJT_1,   "       Exit CSR, enter trap",                           8,IJ_1,          isr_none     | A_passd   | Wnn   | rFFFFFFFF | Qs   | sr_h  | u_io_i         | n(IJT_2)    /* Ajacent to IJ_1 */
+#define _r_IJT_2  IJT_2,   "       Read word is to be masked with ~1u",             0,-1,            isr_none     | A_passq   | Wyy   | r00000000 | Qz   | sr_h  | u_cont         | n(IJT_3)
+#define _r_IJT_3  IJT_3,   "       Construct Q = 1",                                0,-1,            isr_none     | A_add1    | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(IJT_4)
+#define _r_IJT_4  IJT_4,   "       Mask and store to mepc and Q for read of instr", 0,-1,            nxtSTB       | A_nearAND | Wmepc | Ralu      | Qu   | sr_h  | u_cont         | n(ILL_2)     
 
 //
 #define _QINT_0   QINT_0,  "INT    Get current PC",                                 1,0xff,          isr_none     | A_xx      | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(QINT_1)
@@ -822,6 +815,7 @@ assign d[30] = d[18];"
 #endif
 //         Fixed  Paired
 //         spes   spec                                                                                                                                                                                                                                                     reachability
+//         |      |      free:50             free:49             free:50             free:4              free:3              free:4              free:57             free:54             free:55             free:10             free:9              free:9                |
 //ORIGTAB  |      |      rv32i0              rv32i1              rv32i2              rv32im0             rv32im1             rv32im2             rv32ic0             rv32ic1             rv32ic2             rv32imc0            rv32imc1            rv32imc2              |    MASK        INSTR     HITNR        // ENTRYPOINT               This comment is important, used by midgetv_ucode_linepermutate to find this data.
 /* 00 */Y( 1,     0 , Z( _LB_0              ,_LB_0              ,_LB_0              ,_LB_0              ,_LB_0              ,_LB_0              ,_LB_0              ,_LB_0              ,_LB_0              ,_LB_0              ,_LB_0              ,_LB_0              ), 1, 0x0000707f, 0x00000003, (1<<22)    ) // LB                      
 /* 01 */Y( 0,     0 , Z( _LB_1              ,_LB_1              ,_LB_1              ,_LB_1              ,_LB_1              ,_LB_1              ,_LB_1              ,_LB_1              ,_LB_1              ,_LB_1              ,_LB_1              ,_LB_1              ), 0, 0xffffffff, 0x00000000, 0          )                            

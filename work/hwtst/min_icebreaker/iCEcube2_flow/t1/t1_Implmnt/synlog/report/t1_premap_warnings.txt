@@ -1,0 +1,1 @@
+@W: MT529 :"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/min_icebreaker.v":222:3:222:8|Found inferred clock top|CLK which controls 129 sequential elements including i_BBUART.usartTX. This clock has no specified timing constraint which may prevent conversion of gated or generated clocks and may adversely impact design performance. 

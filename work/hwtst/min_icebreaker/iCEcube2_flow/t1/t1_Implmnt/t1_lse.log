@@ -1,0 +1,417 @@
+Copyright (c) 1991-1994 by NeoCAD Inc. All rights reserved.
+Copyright (c) 1995 AT&T Corp.   All rights reserved.
+Copyright (c) 1995-2001 Lucent Technologies Inc.  All rights reserved.
+Copyright (c) 2001 Agere Systems   All rights reserved.
+Copyright (c) 2002-2015 Lattice Semiconductor Corporation,  All rights reserved.
+Mon Oct 12 16:04:28 2020
+
+
+Command Line:  /home/bnossum/lscc/iCEcube2.2017.08/LSE/bin/lin64/synthesis -f t1_lse.prj 
+
+Synthesis options:
+The -a option is SBTiCE40UP.
+The -t option is SG48.
+The -d option is iCE40UP5K.
+                                                          
+
+##########################################################
+
+### Lattice Family : SBTiCE40UP
+
+### Device  : iCE40UP5K
+
+### Package : SG48
+
+### Number of Logic Cells: 5280
+
+### Number of RAM4k Blocks: 30
+
+### Number of DSP Blocks: 8
+
+### Number of PLLs: 1
+
+### Number of IO Pins: 21
+
+##########################################################
+
+                                                          
+
+Optimization goal = Area
+The -top option is not used.
+Target frequency = 1.000000 MHz.
+Maximum fanout = 10000.
+Timing path count = 3
+RWCheckOnRam = 0
+
+BRAM utilization = 100.000000 %
+DSP usage = true (default)
+DSP utilization = 100 % (default)
+fsm_encoding_style = auto
+resolve_mixed_drivers = 0
+fix_gated_clocks = 1
+
+Mux style = auto (Default)
+Use Carry Chain = true
+carry_chain_length = 0
+Loop Limit = 1950.
+Use IO Insertion = TRUE
+Use IO Reg = AUTO
+
+Resource Sharing = TRUE
+Propagate Constants = TRUE
+Remove Duplicate Registers = TRUE
+Output EDIF file name = t1_Implmnt/t1.edf.
+WARNING - synthesis: Option -force_gsr will be set to false when option -output_edif/-ngo are set
+ROM style = auto
+RAM style = auto
+The -comp option is FALSE.
+The -syn option is FALSE.
+-p /home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/iCEcube2_flow/t1 (searchpath added)
+Verilog design file = ../../min_icebreaker.v
+-sdc option: SDC file input not used.
+WARNING - synthesis: Setting top as the top-level module. To specify the top-level module explicitly, use the -top option.
+Technology check ok...
+
+Analyzing Verilog file /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/machxo2.v. VERI-1482
+Analyzing Verilog file /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v. VERI-1482
+Compile design.
+Compile Design Begin
+Analyzing Verilog file ../../min_icebreaker.v. VERI-1482
+INFO - synthesis: ../../min_icebreaker.v(14): analyzing included file ../../../../code/m_ice_shortcuts.v. VERI-1328
+INFO - synthesis: ../../min_icebreaker.v(15): analyzing included file ../../../../code/m_inputmux.v. VERI-1328
+INFO - synthesis: ../../min_icebreaker.v(16): analyzing included file ../../../../code/m_mimux.v. VERI-1328
+INFO - synthesis: ../../min_icebreaker.v(17): analyzing included file ../../../../code/m_alu_carryin.v. VERI-1328
+INFO - synthesis: ../../min_icebreaker.v(18): analyzing included file ../../../../code/m_alu.v. VERI-1328
+INFO - synthesis: ../../min_icebreaker.v(19): analyzing included file ../../../../code/m_immexp_zfind_q.v. VERI-1328
+INFO - synthesis: ../../min_icebreaker.v(20): analyzing included file ../../../../code/m_ram.v. VERI-1328
+INFO - synthesis: ../../min_icebreaker.v(21): analyzing included file ../../../../code/m_ram_a16.v. VERI-1328
+INFO - synthesis: ../../min_icebreaker.v(22): analyzing included file ../../../../code/m_ram_a17.v. VERI-1328
+INFO - synthesis: ../../min_icebreaker.v(23): analyzing included file ../../../../code/m_ebr.v. VERI-1328
+INFO - synthesis: ../../min_icebreaker.v(24): analyzing included file ../../../../code/m_ebr_w16.v. VERI-1328
+INFO - synthesis: ../../min_icebreaker.v(25): analyzing included file ../../../../code/m_ebr_w8.v. VERI-1328
+INFO - synthesis: ../../min_icebreaker.v(26): analyzing included file ../../../../code/m_ebr_w4.v. VERI-1328
+INFO - synthesis: ../../min_icebreaker.v(27): analyzing included file ../../../../code/m_ebr_w2.v. VERI-1328
+INFO - synthesis: ../../min_icebreaker.v(28): analyzing included file ../../../../code/m_rai.v. VERI-1328
+INFO - synthesis: ../../min_icebreaker.v(29): analyzing included file ../../../../code/m_wai.v. VERI-1328
+INFO - synthesis: ../../min_icebreaker.v(30): analyzing included file ../../../../code/m_opreg.v. VERI-1328
+INFO - synthesis: ../../min_icebreaker.v(31): analyzing included file ../../../../code/m_cyclecnt.v. VERI-1328
+INFO - synthesis: ../../min_icebreaker.v(32): analyzing included file ../../../../code/m_condcode.v. VERI-1328
+INFO - synthesis: ../../min_icebreaker.v(33): analyzing included file ../../../../code/m_shiftcounter.v. VERI-1328
+INFO - synthesis: ../../min_icebreaker.v(34): analyzing included file ../../../../code/m_status_and_interrupts.v. VERI-1328
+INFO - synthesis: ../../min_icebreaker.v(35): analyzing included file ../../../../code/m_ucode.v. VERI-1328
+INFO - synthesis: ../../min_icebreaker.v(36): analyzing included file ../../../../code/m_3ebr.v. VERI-1328
+INFO - synthesis: ../../../../code/m_3ebr.v(19): analyzing included file ../../../../code/../generated/ucodeinitval.hv. VERI-1328
+INFO - synthesis: ../../min_icebreaker.v(37): analyzing included file ../../../../generated/m_2ebr.v. VERI-1328
+INFO - synthesis: ../../min_icebreaker.v(38): analyzing included file ../../../../code/m_ucodepc.v. VERI-1328
+INFO - synthesis: ../../min_icebreaker.v(39): analyzing included file ../../../../code/m_progressctrl.v. VERI-1328
+INFO - synthesis: ../../min_icebreaker.v(40): analyzing included file ../../../../code/m_shlr.v. VERI-1328
+INFO - synthesis: ../../min_icebreaker.v(41): analyzing included file ../../../../code/m_RVC.v. VERI-1328
+INFO - synthesis: ../../min_icebreaker.v(42): analyzing included file ../../../../code/m_illegalop.v. VERI-1328
+INFO - synthesis: ../../min_icebreaker.v(43): analyzing included file ../../../../code/m_midgetv_core.v. VERI-1328
+INFO - synthesis: ../../../../code/m_midgetv_core.v(363): analyzing included file ../../../../code/../generated/midgetv_ucodeoptions.hv. VERI-1328
+INFO - synthesis: ../../min_icebreaker.v(167): analyzing included file ../../ice40loaderprog.hv. VERI-1328
+Analyzing Verilog file /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v. VERI-1482
+WARNING - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(79): assignment to input EVERI-1214
+WARNING - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(88): assignment to input EVERI-1214
+WARNING - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(98): assignment to input EVERI-1214
+WARNING - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(108): assignment to input EVERI-1214
+WARNING - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(118): assignment to input EVERI-1214
+WARNING - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(170): assignment to input EVERI-1214
+WARNING - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(179): assignment to input EVERI-1214
+WARNING - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(189): assignment to input EVERI-1214
+WARNING - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(199): assignment to input EVERI-1214
+WARNING - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(209): assignment to input EVERI-1214
+WARNING - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(3725): empty port in module declaration. VERI-1294
+Top module name (Verilog): top
+INFO - synthesis: ../../min_icebreaker.v(46): compiling module top. VERI-1018
+INFO - synthesis: ../../min_icebreaker.v(210): compiling module m_BBUART. VERI-1018
+INFO - synthesis: ../../min_icebreaker.v(237): compiling module m_LEDs. VERI-1018
+INFO - synthesis: ../../../../code/m_midgetv_core.v(364): compiling module m_midgetv_core_renamed_due_excessive_length_1. VERI-1018
+INFO - synthesis: ../../../../code/m_inputmux.v(22): compiling module m_inputmux(HIGHLEVEL=0,MTIMETAP_LOWLIM=14). VERI-1018
+INFO - synthesis: ../../../../code/m_mimux.v(16): compiling module m_mimux(HIGHLEVEL=0). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b0100000000). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(34): compiling module SB_DFF. VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b1111000011001010). VERI-1018
+INFO - synthesis: ../../../../code/m_cyclecnt.v(100): compiling module m_cyclecnt. VERI-1018
+INFO - synthesis: ../../../../code/m_ice_shortcuts.v(28): compiling module bn_lcy4_b(I=16'b1010101000100010). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b1010101000100010). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(15): compiling module SB_CARRY. VERI-1018
+INFO - synthesis: ../../../../code/m_ice_shortcuts.v(28): compiling module bn_lcy4_b(I=16'b01000001000). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b01000001000). VERI-1018
+INFO - synthesis: ../../../../code/m_ice_shortcuts.v(28): compiling module bn_lcy4_b(I=16'b1010101000000000). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b1010101000000000). VERI-1018
+INFO - synthesis: ../../../../code/m_ice_shortcuts.v(9): compiling module bn_l4(I=16'b1111111111110000). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b1111111111110000). VERI-1018
+INFO - synthesis: ../../../../code/m_ice_shortcuts.v(9): compiling module bn_l4(I=16'b1100101011001111). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b1100101011001111). VERI-1018
+INFO - synthesis: ../../../../code/m_ice_shortcuts.v(9): compiling module bn_l4(I=16'b1100101011001010). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b1100101011001010). VERI-1018
+INFO - synthesis: ../../../../code/m_alu_carryin.v(71): compiling module m_alu_carryin(HIGHLEVEL=0,MULDIV=0). VERI-1018
+INFO - synthesis: ../../../../code/m_ice_shortcuts.v(57): compiling module bn_lcy4v_b(I=16'b1111000010001000). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b1111000010001000). VERI-1018
+INFO - synthesis: ../../../../code/m_ice_shortcuts.v(57): compiling module bn_lcy4v_b(I=16'b1010101010101010). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b1010101010101010). VERI-1018
+INFO - synthesis: ../../../../code/m_alu.v(71): compiling module m_alu(MTIMETAP_LOWLIM=14). VERI-1018
+INFO - synthesis: ../../../../code/m_alu.v(222): compiling module m_alu_lowlevel(ALUWIDTH=32,MTIMETAP_LOWLIM=14). VERI-1018
+INFO - synthesis: ../../../../code/m_ice_shortcuts.v(9): compiling module bn_l4(I=16'b010010110100). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b010010110100). VERI-1018
+INFO - synthesis: ../../../../code/m_ice_shortcuts.v(18): compiling module bn_lcy4(I=16'b1100001101101001). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b1100001101101001). VERI-1018
+INFO - synthesis: ../../../../code/m_immexp_zfind_q.v(10): compiling module m_immexp_zfind_q. VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b1110111001000101). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b1111000011111111). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b01000011111111). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b1111001001010101). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b1000000110000001). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b1000001110000011). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b0101000101011). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b0101000101111). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b1100101000000000). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b1100101000001010). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b1111001000100000). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b1100111110100000). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b1100000010101010). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b1100000000001000). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b1111110010100000). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b1101110110101010). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b1010111111000000). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b1111111100000000). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b0111011101110111). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(85): compiling module SB_DFFESR. VERI-1018
+WARNING - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(88): net E is already driven by input port E. VDB-1003
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(86): driving port E is declared here. VDB-1020
+INFO - synthesis: ../../../../code/m_ebr.v(27): compiling module m_ebr_renamed_due_excessive_length_2. VERI-1018
+INFO - synthesis: ../../../../code/m_ebr_w16.v(9): compiling module m_ebr_w16_renamed_due_excessive_length_3. VERI-1018
+INFO - synthesis: ../../../../code/m_ebr_w8.v(8): compiling module m_ebr_w8_renamed_due_excessive_length_4. VERI-1018
+INFO - synthesis: ../../../../code/m_ebr_w4.v(8): compiling module m_ebr_w4_renamed_due_excessive_length_5. VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(464): compiling module SB_RAM40_4K_renamed_due_excessive_length_6. VERI-1018
+INFO - synthesis: ../../../../code/m_ebr_w4.v(8): compiling module m_ebr_w4_renamed_due_excessive_length_7. VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(464): compiling module SB_RAM40_4K_renamed_due_excessive_length_8. VERI-1018
+INFO - synthesis: ../../../../code/m_ebr_w8.v(8): compiling module m_ebr_w8_renamed_due_excessive_length_9. VERI-1018
+INFO - synthesis: ../../../../code/m_ebr_w4.v(8): compiling module m_ebr_w4_renamed_due_excessive_length_10. VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(464): compiling module SB_RAM40_4K_renamed_due_excessive_length_11. VERI-1018
+INFO - synthesis: ../../../../code/m_ebr_w4.v(8): compiling module m_ebr_w4_renamed_due_excessive_length_12. VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(464): compiling module SB_RAM40_4K_renamed_due_excessive_length_13. VERI-1018
+INFO - synthesis: ../../../../code/m_ebr_w16.v(9): compiling module m_ebr_w16_renamed_due_excessive_length_14. VERI-1018
+INFO - synthesis: ../../../../code/m_ebr_w8.v(8): compiling module m_ebr_w8_renamed_due_excessive_length_15. VERI-1018
+INFO - synthesis: ../../../../code/m_ebr_w4.v(8): compiling module m_ebr_w4_renamed_due_excessive_length_16. VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(464): compiling module SB_RAM40_4K_renamed_due_excessive_length_17. VERI-1018
+INFO - synthesis: ../../../../code/m_ebr_w4.v(8): compiling module m_ebr_w4_renamed_due_excessive_length_18. VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(464): compiling module SB_RAM40_4K_renamed_due_excessive_length_19. VERI-1018
+INFO - synthesis: ../../../../code/m_ebr_w8.v(8): compiling module m_ebr_w8_renamed_due_excessive_length_20. VERI-1018
+INFO - synthesis: ../../../../code/m_ebr_w4.v(8): compiling module m_ebr_w4_renamed_due_excessive_length_21. VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(464): compiling module SB_RAM40_4K_renamed_due_excessive_length_22. VERI-1018
+INFO - synthesis: ../../../../code/m_ebr_w4.v(8): compiling module m_ebr_w4_renamed_due_excessive_length_23. VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(464): compiling module SB_RAM40_4K_renamed_due_excessive_length_24. VERI-1018
+INFO - synthesis: ../../../../code/m_ram.v(72): compiling module m_ram(SRAMADRWIDTH=0). VERI-1018
+INFO - synthesis: ../../../../code/m_rai.v(52): compiling module m_rai(EBRADRWIDTH=10). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b011100000). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b1111111000001111). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b1110000011100000). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b1111110100000000). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b1000000010000000). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b1100101011110000). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b011001111). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b0100000001000). VERI-1018
+INFO - synthesis: ../../../../code/m_wai.v(39): compiling module m_wai(EBRADRWIDTH=10). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b1010101011100010). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b1100110011100010). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b011100010). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b1111001011111110). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b01000000010). VERI-1018
+INFO - synthesis: ../../../../code/m_RVC.v(152): compiling module m_RVC(RVC=0). VERI-1018
+INFO - synthesis: ../../../../code/m_opreg.v(32): compiling module m_opreg(RVC=0). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(76): compiling module SB_DFFE. VERI-1018
+WARNING - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(79): net E is already driven by input port E. VDB-1003
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(77): driving port E is declared here. VDB-1020
+INFO - synthesis: ../../../../code/m_condcode.v(8): compiling module m_condcode. VERI-1018
+INFO - synthesis: ../../../../code/m_shiftcounter.v(28): compiling module m_shiftcounter. VERI-1018
+INFO - synthesis: ../../../../code/m_ice_shortcuts.v(9): compiling module bn_l4(I=16'b010001000100010). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b010001000100010). VERI-1018
+INFO - synthesis: ../../../../code/m_ice_shortcuts.v(28): compiling module bn_lcy4_b(I=16'b1001001110000010). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b1001001110000010). VERI-1018
+INFO - synthesis: ../../../../code/m_ice_shortcuts.v(18): compiling module bn_lcy4(I=16'b1110001000101110). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b1110001000101110). VERI-1018
+INFO - synthesis: ../../../../code/m_ice_shortcuts.v(9): compiling module bn_l4(I=16'b010101010). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b010101010). VERI-1018
+INFO - synthesis: ../../../../code/m_progressctrl.v(8): compiling module m_progressctrl(MULDIV=0,MTIMETAP_LOWLIM=14,DISREGARD_WB4_3_55=1). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b1111111111111001). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b01001110). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b01001101). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b011011). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b010111). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b0111100001111). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b1110111011101110). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(95): compiling module SB_DFFESS. VERI-1018
+WARNING - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(98): net E is already driven by input port E. VDB-1003
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(96): driving port E is declared here. VDB-1020
+INFO - synthesis: ../../../../code/m_ucode.v(10): compiling module m_ucode. VERI-1018
+INFO - synthesis: ../../../../generated/m_2ebr.v(50): compiling module m_2ebr. VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(464): compiling module SB_RAM40_4K_renamed_due_excessive_length_25. VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(464): compiling module SB_RAM40_4K_renamed_due_excessive_length_26. VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b01100000000010). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b0110100000). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b010100000). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b01000000). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b1100000000000000). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b1110001111101111). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b01100). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b01000). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b0110001010000010). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b01010000000000). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b0100000000000010). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b0110000000000000). VERI-1018
+INFO - synthesis: ../../../../code/m_ice_shortcuts.v(38): compiling module bn_l4v(I=16'b010000). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b010000). VERI-1018
+INFO - synthesis: ../../../../code/m_ice_shortcuts.v(38): compiling module bn_l4v(I=16'b1000000000000000). VERI-1018
+INFO - synthesis: /home/bnossum/lscc/iCEcube2.2017.08/LSE/userware/unix/SYNTHESIS_HEADERS/sb_ice40.v(28): compiling module SB_LUT4(LUT_INIT=16'b1000000000000000). VERI-1018
+INFO - synthesis: ../../../../code/m_ucodepc.v(56): compiling module m_ucodepc(MULDIV=0). VERI-1018
+WARNING - synthesis: ../../../../code/m_ucodepc.v(143): expression size 32 truncated to fit in target size 1. VERI-1209
+INFO - synthesis: ../../../../code/m_illegalop.v(1): compiling module m_illegalop. VERI-1018
+INFO - synthesis: ../../../../code/m_shlr.v(31): compiling module m_shlr(MULDIV=0). VERI-1018
+Loading NGL library '/home/bnossum/lscc/iCEcube2.2017.08/LSE/xo2c00/data/xo2clib.ngl'...
+Loading NGL library '/home/bnossum/lscc/iCEcube2.2017.08/LSE/or5g00/data/orc5glib.ngl'...
+Top-level module name = top.
+WARNING - synthesis: Bit 0 of Register \inst_midgetv_core/inst_inputmux/genblk1.ireg is stuck at Zero
+WARNING - synthesis: Bit 1 of Register \inst_midgetv_core/inst_inputmux/genblk1.ireg is stuck at Zero
+WARNING - synthesis: Bit 2 of Register \inst_midgetv_core/inst_inputmux/genblk1.ireg is stuck at Zero
+WARNING - synthesis: Bit 3 of Register \inst_midgetv_core/inst_inputmux/genblk1.ireg is stuck at Zero
+WARNING - synthesis: Bit 4 of Register \inst_midgetv_core/inst_inputmux/genblk1.ireg is stuck at Zero
+WARNING - synthesis: Bit 5 of Register \inst_midgetv_core/inst_inputmux/genblk1.ireg is stuck at Zero
+WARNING - synthesis: Bit 6 of Register \inst_midgetv_core/inst_inputmux/genblk1.ireg is stuck at Zero
+WARNING - synthesis: Bit 7 of Register \inst_midgetv_core/inst_inputmux/genblk1.ireg is stuck at Zero
+WARNING - synthesis: Bit 8 of Register \inst_midgetv_core/inst_inputmux/genblk1.ireg is stuck at Zero
+WARNING - synthesis: Bit 9 of Register \inst_midgetv_core/inst_inputmux/genblk1.ireg is stuck at Zero
+WARNING - synthesis: Bit 10 of Register \inst_midgetv_core/inst_inputmux/genblk1.ireg is stuck at Zero
+WARNING - synthesis: Bit 11 of Register \inst_midgetv_core/inst_inputmux/genblk1.ireg is stuck at Zero
+WARNING - synthesis: Bit 12 of Register \inst_midgetv_core/inst_inputmux/genblk1.ireg is stuck at Zero
+WARNING - synthesis: Bit 13 of Register \inst_midgetv_core/inst_inputmux/genblk1.ireg is stuck at Zero
+WARNING - synthesis: Bit 14 of Register \inst_midgetv_core/inst_inputmux/genblk1.ireg is stuck at Zero
+WARNING - synthesis: Bit 15 of Register \inst_midgetv_core/inst_inputmux/genblk1.ireg is stuck at Zero
+WARNING - synthesis: Bit 16 of Register \inst_midgetv_core/inst_inputmux/genblk1.ireg is stuck at Zero
+WARNING - synthesis: Bit 17 of Register \inst_midgetv_core/inst_inputmux/genblk1.ireg is stuck at Zero
+WARNING - synthesis: Bit 18 of Register \inst_midgetv_core/inst_inputmux/genblk1.ireg is stuck at Zero
+WARNING - synthesis: Bit 19 of Register \inst_midgetv_core/inst_inputmux/genblk1.ireg is stuck at Zero
+WARNING - synthesis: Bit 20 of Register \inst_midgetv_core/inst_inputmux/genblk1.ireg is stuck at Zero
+WARNING - synthesis: Bit 21 of Register \inst_midgetv_core/inst_inputmux/genblk1.ireg is stuck at Zero
+WARNING - synthesis: Bit 22 of Register \inst_midgetv_core/inst_inputmux/genblk1.ireg is stuck at Zero
+WARNING - synthesis: Bit 24 of Register \inst_midgetv_core/inst_inputmux/genblk1.ireg is stuck at Zero
+WARNING - synthesis: Bit 25 of Register \inst_midgetv_core/inst_inputmux/genblk1.ireg is stuck at Zero
+WARNING - synthesis: Bit 26 of Register \inst_midgetv_core/inst_inputmux/genblk1.ireg is stuck at Zero
+WARNING - synthesis: Bit 27 of Register \inst_midgetv_core/inst_inputmux/genblk1.ireg is stuck at Zero
+WARNING - synthesis: Bit 28 of Register \inst_midgetv_core/inst_inputmux/genblk1.ireg is stuck at Zero
+WARNING - synthesis: Bit 29 of Register \inst_midgetv_core/inst_inputmux/genblk1.ireg is stuck at Zero
+WARNING - synthesis: Bit 30 of Register \inst_midgetv_core/inst_inputmux/genblk1.ireg is stuck at Zero
+WARNING - synthesis: Bit 31 of Register \inst_midgetv_core/inst_inputmux/genblk1.ireg is stuck at Zero
+
+
+
+Combinational loop found : 1
+
+	Net \inst_midgetv_core/B[3] 
+
+	Instance \inst_midgetv_core/inst_alu/genblk1.inst/b[3]/l 
+
+	Net \inst_midgetv_core/inst_alu/genblk1.inst/A[3] 
+
+	Instance \inst_midgetv_core/inst_alu/genblk1.inst/a[3]/l 
+
+	Net \inst_midgetv_core/Di[3] 
+
+	Instance \inst_midgetv_core/inst_mimux/genblk1.cmb[3] 
+
+Combinational loop found : 2
+
+	Net \inst_midgetv_core/inst_alu/genblk1.inst/A[27] 
+
+	Instance \inst_midgetv_core/inst_alu/genblk1.inst/a[27]/l 
+
+	Net \inst_midgetv_core/Di[27] 
+
+	Instance \inst_midgetv_core/inst_mimux/genblk1.cmb[27] 
+
+	Net \inst_midgetv_core/B[27] 
+
+	Instance \inst_midgetv_core/inst_alu/genblk1.inst/b[27]/l 
+
+Combinational loop found : 3
+
+	Net \inst_midgetv_core/inst_alu/genblk1.inst/A[21] 
+
+	Instance \inst_midgetv_core/inst_alu/genblk1.inst/a[21]/l 
+
+	Net \inst_midgetv_core/Di[21] 
+
+	Instance \inst_midgetv_core/inst_mimux/genblk1.cmb[21] 
+
+Combinational loop found : 4
+
+	Net \inst_midgetv_core/inst_alu/genblk1.inst/A[19] 
+
+	Instance \inst_midgetv_core/inst_alu/genblk1.inst/a[19]/l 
+
+	Net \inst_midgetv_core/Di[19] 
+
+	Instance \inst_midgetv_core/inst_mimux/genblk1.cmb[19] 
+
+Applying 1.000000 MHz constraint to all clocks
+
+Writing scf file : t1_Implmnt/t1.scf
+
+Results of NGD DRC are available in top_drc.log.
+
+################### Begin Area Report (top)######################
+Number of register bits => 99 of 5280 (1 % )
+SB_CARRY => 84
+SB_DFF => 19
+SB_DFFE => 39
+SB_DFFESR => 35
+SB_DFFESS => 4
+SB_DFFSR => 2
+SB_GB_IO => 1
+SB_IO => 6
+SB_LUT4 => 293
+SB_RAM40_4K => 10
+################### End Area Report ##################
+
+################### Begin Clock Report ######################
+Clock Nets
+Number of Clocks: 1
+  Net : CLK_c, loads : 92
+Clock Enable Nets
+Number of Clock Enables: 0
+Top 0 highest fanout Clock Enables:
+Highest fanout non-clock nets
+Top 10 highest fanout non-clock nets:
+  Net : inst_midgetv_core/inst_immexp_zfind_q/genblk1.nsa14_or_nCORERUNNING, loads : 33
+  Net : inst_midgetv_core/inst_progressctrl/enaQ, loads : 32
+  Net : inst_midgetv_core/inst_mimux/genblk1.sa00mod, loads : 32
+  Net : inst_midgetv_core/inst_ucode/genblk1.inst_2ebr/s_alu_2, loads : 30
+  Net : inst_midgetv_core/inst_ucode/genblk1.inst_2ebr/s_alu_1, loads : 30
+  Net : inst_midgetv_core/inst_ucode/genblk1.inst_2ebr/s_alu_0, loads : 30
+  Net : inst_midgetv_core/inst_ucode/genblk1.inst_2ebr/is_valid_instrhigh, loads : 30
+  Net : inst_midgetv_core/inst_immexp_zfind_q/genblk1.sa10, loads : 30
+  Net : inst_midgetv_core/inst_immexp_zfind_q/genblk1.sa09, loads : 23
+  Net : inst_midgetv_core/inst_ucode/genblk1.inst_2ebr/s_cyclecnt_0, loads : 22
+################### End Clock Report ##################
+
+Timing Report Summary
+--------------
+--------------------------------------------------------------------------------
+Constraint                              |   Constraint|       Actual|Levels
+--------------------------------------------------------------------------------
+                                        |             |             |
+create_clock -period 1000.000000 -name  |             |             |
+clk0 [get_nets CLK_c]                   |    1.000 MHz|   16.197 MHz|    39  
+                                        |             |             |
+--------------------------------------------------------------------------------
+
+
+All constraints were met.
+
+
+Peak Memory Usage: 173.152  MB
+
+--------------------------------------------------------------
+Elapsed CPU time for LSE flow : 8.488  secs
+--------------------------------------------------------------

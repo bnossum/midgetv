@@ -6,106 +6,45 @@
  * Automatically generated from ../code/ucode.h by ../util/midgetv_indirectEBR.c.
  * Do not edit
  */
-/* Using LUTSIZE=4. Using 2 EBRs. Initial table has 46 columns
- * Removed:  0000000000000000000000000000000000000000000000 These are removed from consideration, replaced with hand-crafted Verilog code in the output stage
- * Reserved: 0000000000000000000000000000000000000000000000 Columns to be represented directly, not part of optimalization
- * Total columns to represent in EBRs: 46
- * 203 distinct lines in remaining untreated columns
- * c45 c44 c43 c42 c41 c40 c39 c38 c37 c36 c35 c34 c33 c32 c31 c30 c29 c28 c27 c26 c25 c24 c23 c22 c21 c20 c19 c18 c17 c16 c15 c14 c13 c12 c11 c10  c9  c8  c7  c6  c5  c4  c3  c2  c1  c0 
- * 202 203 202 203 203 203 203 203 203 203 203 203 203 203 203 203 203 203 203 203 202 203 202 202 203 203 203 203 203 203 203 203 202 200 201 203 202 203 202 202 202 203 203 202 202 202  kill col 12  Tbl  45 cols 0000000000000000000000000000000001000000000000 has 200 unique lines.
- * 199 200 199 199 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 198 200 199 197 200 200 200 200 200 200 200 200 198     198 200 199 200 199 199 199 200 200 199 199 199  kill col 22  Tbl  44 cols 0000000000000000000000010000000001000000000000 has 197 unique lines.
- * 196 197 196 196 197 197 197 197 197 197 197 197 197 197 197 197 197 197 197 197 196 196 196     197 197 197 197 197 197 197 197 195     195 197 196 197 196 195 195 197 197 196 196 195  kill col 13  Tbl  43 cols 0000000000000000000000010000000011000000000000 has 195 unique lines.
- * 194 195 194 194 195 195 195 195 195 195 195 195 195 195 195 195 195 195 195 195 194 194 194     195 195 195 195 195 195 195 195         192 195 194 194 194 193 193 194 195 194 194 193  kill col 11  Tbl  42 cols 0000000000000000000000010000000011100000000000 has 192 unique lines.
- * 191 192 191 188 192 192 192 192 192 192 192 192 192 192 192 192 192 192 192 192 191 191 191     192 192 192 192 192 192 192 192             192 191 191 191 190 190 190 192 191 191 190  kill col 42  Tbl  41 cols 0001000000000000000000010000000011100000000000 has 188 unique lines.
- * 187 188 187     188 188 188 188 188 188 188 188 188 188 188 188 188 188 188 188 187 187 187     188 188 187 188 188 188 188 188             188 187 187 187 186 186 186 188 187 187 186  kill col  6  Tbl  40 cols 0001000000000000000000010000000011100001000000 has 186 unique lines.
- * 185 186 185     186 186 186 186 186 186 186 185 186 186 186 186 186 186 186 186 185 185 185     186 186 185 186 186 186 186 186             186 185 185 185     184 184 186 184 185 184  kill col  5  Tbl  39 cols 0001000000000000000000010000000011100001100000 has 184 unique lines.
- * 183 184 183     184 184 184 184 184 184 184 183 184 184 184 184 183 184 184 184 183 183 183     184 184 183 184 184 184 184 184             184 183 183 179         182 183 181 181 181  kill col  7  Tbl  38 cols 0001000000000000000000010000000011100011100000 has 179 unique lines.
- * 178 179 178     179 179 179 179 179 179 179 178 179 179 179 179 178 178 179 179 178 175 178     179 179 178 179 178 179 179 179             179 178 178             177 174 174 175 176  kill col  3  Tbl  37 cols 0001000000000000000000010000000011100011101000 has 174 unique lines.
- * 173 174 173     174 174 174 174 174 174 174 172 174 174 174 174 173 172 174 174 172 169 173     173 174 173 174 173 174 174 173             174 173 173             169     166 166 169  kill col  2  Tbl  36 cols 0001000000000000000000010000000011100011101100 has 166 unique lines.
- * 165 165 164     166 166 166 166 166 166 166 164 166 166 165 166 165 164 165 165 160 159 162     164 166 164 166 165 165 166 164             166 165 165             157         151 157  kill col  1  Tbl  35 cols 0001000000000000000000010000000011100011101110 has 151 unique lines.
- * 150 150 146     151 151 151 151 151 151 151 149 150 151 150 151 150 149 149 150 144 143 146     148 151 147 151 148 150 151 149             151 150 149             138             136  kill col  0  Tbl  34 cols 0001000000000000000000010000000011100011101111 has 136 unique lines.
- * 135 135 131     136 136 136 136 136 136 136 134 135 136 135 136 134 134 135 134 127 127 131     133 136 131 136 132 133 135 132             136 135 133             119                  kill col  4  Tbl  33 cols 0001000000000000000000010000000011100011111111 has 119 unique lines.
- * 118 118 112     119 119 119 119 119 119 119 115 118 118 118 119 116 116 118 117 110 109 111     113 119 114 119 114 116 118 114             119 118 114                                  kill col 24  Tbl  32 cols 0001000000000000000001010000000011100011111111 has 109 unique lines.
- * 108 107 103     109 109 109 109 108 109 109 105 108 108 108 109 106 107 108 107 100     101     103 109 104 109 104 103 108 104             109 108 103                                  kill col 25  Tbl  31 cols 0001000000000000000011010000000011100011111111 has 100 unique lines.
- *  99  98  94     100 100 100 100  99 100 100  96  99  99  99 100  97  99  98  98          89      94 100  95 100  95  93  99  95             100  99  94                                  kill col 23  Tbl  30 cols 0001000000000000000011110000000011100011111111 has  89 unique lines.
- *  88  87  83      88  89  89  89  88  89  89  85  88  88  87  89  86  88  86  87                  83  89  84  89  84  82  88  85              88  87  83                                  kill col 16  Tbl  29 cols 0001000000000000000011110000010011100011111111 has  82 unique lines.
- *  81  80  76      81  81  82  82  81  82  82  78  81  81  80  81  79  81  79  79                  75  81  75  82  77      81  78              81  80  76                                  kill col 21  Tbl  28 cols 0001000000000000000011111000010011100011111111 has  75 unique lines.
- *  74  73  69      74  74  75  75  74  75  75  71  74  74  73  74  73  74  72  72                      73  68  75  70      74  71              74  73  70                                  kill col 19  Tbl  27 cols 0001000000000000000011111010010011100011111111 has  68 unique lines.
- *  67  66  62      67  67  67  68  67  68  68  64  67  67  66  67  66  67  65  65                      66      68  63      67  65              67  66  64                                  kill col 43  Tbl  26 cols 0011000000000000000011111010010011100011111111 has  62 unique lines.
- *  61  59          61  61  61  62  61  62  62  58  61  61  60  61  60  61  59  59                      60      62  57      61  59              60  60  59                                  kill col 17  Tbl  25 cols 0011000000000000000011111010110011100011111111 has  57 unique lines.
- *  55  55          56  54  56  57  56  56  57  53  56  56  55  56  54  56  55  54                      55      57          56  54              55  55  54                                  kill col 34  Tbl  24 cols 0011000000010000000011111010110011100011111111 has  53 unique lines.
- *  51  51          52  50  52  53  52  52  53      52  52  51  52  51  52  51  50                      51      53          52  50              51  51  51                                  kill col 40  Tbl  23 cols 0011010000010000000011111010110011100011111111 has  50 unique lines.
- *  48  48          49      49  50  49  49  50      49  49  48  49  48  48  48  47                      48      50          49  47              48  48  48                                  kill col 26  Tbl  22 cols 0011010000010000000111111010110011100011111111 has  47 unique lines.
- *  45  45          45      45  47  46  46  47      46  46  45  45  44  43  44                          44      47          46  44              45  45  45                                  kill col 28  Tbl  21 cols 0011010000010000010111111010110011100011111111 has  43 unique lines.
- *  41  41          41      39  43  42  42  43      40  42  41  41  39      39                          40      42          42  41              41  41  41                                  kill col 39  Tbl  20 cols 0011011000010000010111111010110011100011111111 has  39 unique lines.
- *  37  37          36          38  38  38  39      36  38  37  37  33      35                          37      38          38  37              37  37  38                                  kill col 29  Tbl  19 cols 0011011000010000110111111010110011100011111111 has  33 unique lines.
- *  31  31          30          32  32  31  33      30  32  31  31          29                          31      32          32  32              31  31  32                                  kill col 27  Tbl  18 cols 0011011000010000111111111010110011100011111111 has  29 unique lines.
- *  27  27          27          28  28  27  29      26  28  27  27                                      27      28          28  28              27  27  28                                  kill col 33  Tbl  17 cols 0011011000011000111111111010110011100011111111 has  26 unique lines.
- *  25  24          24          25  25  24  25          25  24  24                                      24      25          25  25              24  24  25                                  kill col 44  Tbl  16 cols 0111011000011000111111111010110011100011111111 has  24 unique lines.
- *  23              22          23  23  22  23          23  22  22                                      22      23          23  23              22  22  23                                  kill col 41  Tbl  15 cols 0111111000011000111111111010110011100011111111 has  22 unique lines.
- *  21                          21  21  20  21          21  20  20                                      20      21          21  21              20  20  21                                  kill col 36  Tbl  14 cols 0111111001011000111111111010110011100011111111 has  20 unique lines.
- *  19                          19  18      19          19  18  18                                      18      19          19  19              18  18  19                                  kill col 37  Tbl  13 cols 0111111011011000111111111010110011100011111111 has  18 unique lines.
- *  17                          17          17          17  16  16                                      16      17          17  17              16  16  17                                  kill col 31  Tbl  12 cols 0111111011011010111111111010110011100011111111 has  16 unique lines.
-Possible good candidates for removal, columns : 9 10 14 20 30 
+/* Using LUTSIZE=4. Using 2 EBRs. Initial table has 42 columns
+ * Removed:  000000000001000000000001000000000000000000 These are removed from consideration, replaced with hand-crafted Verilog code in the output stage
+ * Reserved: 000000000000000000000000000000000000000000 Columns to be represented directly, not part of optimalization
+ * Total columns to represent in EBRs: 42
+ * 167 distinct lines in remaining untreated columns
+ * c41 c40 c39 c38 c37 c36 c35 c34 c33 c32 c31 c30 c29 c28 c27 c26 c25 c24 c23 c22 c21 c20 c19 c18 c17 c16 c15 c14 c13 c12 c11 c10  c9  c8  c7  c6  c5  c4  c3  c2  c1  c0 
+ * 167 167 167 167 167 167 167 167 167 167 167   x 167 167 166 167 166 167 167 166 167 167 166   x 167 167 167 167 164 163 166 167 166 167 166 166 166 167 167 166 167 166  kill col 12  Tbl  39 cols 000000000001000000000001000001000000000000 has 163 unique lines.
+ * 163 163 163 163 163 163 163 163 163 163 163   x 163 163 162 163 161 163 163 160 163 163 162   x 163 163 163 163 160     161 162 162 163 162 162 162 163 163 162 163 162  kill col 22  Tbl  38 cols 000000000001000000010001000001000000000000 has 160 unique lines.
+ * 160 160 160 160 160 160 160 160 160 160 160   x 160 160 159 160 159 160 160     160 160 159   x 160 160 160 160 157     158 159 159 160 159 158 158 160 160 159 160 158  kill col 13  Tbl  37 cols 000000000001000000010001000011000000000000 has 157 unique lines.
+ * 157 157 157 157 157 157 157 157 157 157 157   x 157 157 156 157 156 157 157     157 157 156   x 157 157 157 157         153 156 156 156 156 155 155 157 157 156 157 155  kill col 11  Tbl  36 cols 000000000001000000010001000011100000000000 has 153 unique lines.
+ * 153 153 153 153 153 153 153 153 153 153 153   x 153 153 152 153 152 153 153     153 153 151   x 153 153 153 153             152 152 152 152 151 151 152 153 152 153 151  kill col 19  Tbl  35 cols 000000000001000000010011000011100000000000 has 151 unique lines.
+ * 151 151 151 151 151 151 151 151 151 151 151   x 151 151 150 151 150 151 151     151 151       x 151 151 151 151             150 150 150 150 149 149 150 151 150 151 149  kill col  6  Tbl  34 cols 000000000001000000010011000011100001000000 has 149 unique lines.
+ * 149 149 149 149 149 149 149 148 149 149 149   x 149 149 148 149 148 149 149     149 149       x 149 149 149 149             148 148 148 148     147 147 149 147 149 147  kill col  5  Tbl  33 cols 000000000001000000010011000011100001100000 has 147 unique lines.
+ * 147 147 147 147 147 147 147 146 147 147 147   x 146 147 146 147 146 147 147     147 147       x 146 147 147 147             146 146 146 145         145 146 144 144 144  kill col  2  Tbl  32 cols 000000000001000000010011000011100001100100 has 144 unique lines.
+ * 144 144 144 144 144 144 144 143 144 144 144   x 143 144 143 144 142 144 144     144 144       x 143 142 144 144             143 143 143 140         140 141     141 139  kill col  0  Tbl  31 cols 000000000001000000010011000011100001100101 has 139 unique lines.
+ * 139 139 139 139 139 139 139 138 139 139 139   x 138 139 137 139 137 138 139     139 139       x 138 137 139 139             138 138 138 134         130 136     136      kill col  4  Tbl  30 cols 000000000001000000010011000011100001110101 has 130 unique lines.
+ * 130 130 130 130 130 130 130 128 130 130 130   x 129 129 127 130 126 128 129     130 130       x 129 128 130 130             129 129 129 123             124     123      kill col  7  Tbl  29 cols 000000000001000000010011000011100011110101 has 123 unique lines.
+ * 123 123 123 123 123 123 123 121 123 123 123   x 122 121 120 123 115 115 120     123 123       x 120 119 123 121             122 122 122                 114     111      kill col  1  Tbl  28 cols 000000000001000000010011000011100011110111 has 111 unique lines.
+ * 111 111 111 111 111 111 111 109 111 110 111   x 109 108 108 109 101 103 104     111 111       x 103 103 111 108             110 110 110                  92              kill col  3  Tbl  27 cols 000000000001000000010011000011100011111111 has  92 unique lines.
+ *  92  92  92  92  92  92  92  89  92  91  91   x  89  89  90  91  81  82  84      92  92       x  84  85  92  88              91  91  90                                  kill col 25  Tbl  26 cols 000000000001000010010011000011100011111111 has  81 unique lines.
+ *  81  81  81  81  81  81  81  78  80  80  79   x  78  79  79  80      72  71      81  81       x  73  74  80  76              80  80  79                                  kill col 23  Tbl  25 cols 000000000001000010110011000011100011111111 has  71 unique lines.
+ *  70  71  71  71  71  71  71  68  70  70  69   x  68  69  68  69      62          71  71       x  66  65  70  66              70  70  69                                  kill col 24  Tbl  24 cols 000000000001000011110011000011100011111111 has  62 unique lines.
+ *  61  62  61  62  61  62  62  59  61  61  60   x  59  61  59  60                  62  62       x  57  57  61  58              61  61  60                                  kill col 17  Tbl  23 cols 000000000001000011110011100011100011111111 has  57 unique lines.
+ *  56  56  56  57  56  56  57  54  56  56  55   x  53  55  55  54                  57  57       x      53  56  53              56  56  55                                  kill col 29  Tbl  22 cols 000000000001100011110011100011100011111111 has  53 unique lines.
+ *  52  52  49  53  52  52  53  51  52  52  51   x      51  50  49                  53  53       x      49  52  49              52  52  51                                  kill col 39  Tbl  21 cols 001000000001100011110011100011100011111111 has  49 unique lines.
+ *  48  47      49  48  48  49  47  48  48  47   x      45  44  44                  49  47       x      45  48  46              48  48  47                                  kill col 27  Tbl  20 cols 001000000001101011110011100011100011111111 has  44 unique lines.
+ *  43  40      44  43  43  44  42  43  43  42   x      40      39                  44  42       x      40  43  41              43  43  42                                  kill col 26  Tbl  19 cols 001000000001101111110011100011100011111111 has  39 unique lines.
+ *  38  35      39  38  38  39  37  38  38  37   x      34                          38  37       x      35  38  36              38  38  37                                  kill col 28  Tbl  18 cols 001000000001111111110011100011100011111111 has  34 unique lines.
+ *  32  29      34  33  33  34  32  32  33  31   x                                  33  31       x      30  33  32              33  33  32                                  kill col 40  Tbl  17 cols 011000000001111111110011100011100011111111 has  29 unique lines.
+ *  27          29  28  28  29  27  27  28  27   x                                  28  27       x      25  28  27              28  28  27                                  kill col 16  Tbl  16 cols 011000000001111111110011110011100011111111 has  25 unique lines.
+ *  23          24  24  23  25  23  23  24  23   x                                  23  22       x          24  24              24  24  23                                  kill col 20  Tbl  15 cols 011000000001111111110111110011100011111111 has  22 unique lines.
+ *  20          21  21  20  22  20  20  21  21   x                                  21           x          21  21              21  21  20                                  kill col 41  Tbl  14 cols 111000000001111111110111110011100011111111 has  20 unique lines.
+ *              19  19  18  20  18  18  19  19   x                                  19           x          19  19              19  19  18                                  kill col 36  Tbl  13 cols 111001000001111111110111110011100011111111 has  18 unique lines.
+ *              17  16      18  16  16  17  17   x                                  17           x          17  17              17  17  16                                  kill col 37  Tbl  12 cols 111011000001111111110111110011100011111111 has  16 unique lines.
+Possible good candidates for removal, columns : 8 14 33 34 
  *
- * Round 1: 1000000100100101000000000101001100011100000000  4 columns for indexes to table representing 12 original columns (uses 16 of 16 lines in indirect table).
- * Total columns to represent in EBRs: 38
- * 201 distinct lines in remaining untreated columns
- * c45 c44 c43 c42 c41 c40 c39 c38 c37 c36 c35 c34 c33 c32 c31 c30 c29 c28 c27 c26 c25 c24 c23 c22 c21 c20 c19 c18 c17 c16 c15 c14 c13 c12 c11 c10  c9  c8  c7  c6  c5  c4  c3  c2  c1  c0 
- *   x 201 198 201 201 201 201   x 201 201   x 201 201   x 201   x 201 201 201 201 200 201 200 200 201   x 199   x 201 201   x   x 200 198 199   x   x   x 200 200 200 201 201 200 200 200  kill col 43  Tbl  33 cols 1010000100100101000000000101001100011100000000 has 198 unique lines.
- *   x 198     198 198 198 198   x 198 198   x 198 198   x 198   x 198 198 198 198 197 198 197 197 198   x 195   x 198 198   x   x 197 195 196   x   x   x 197 197 197 198 198 197 197 197  kill col 19  Tbl  32 cols 1010000100100101000000000111001100011100000000 has 195 unique lines.
- *   x 195     195 195 195 195   x 195 195   x 195 195   x 195   x 195 195 195 195 194 195 194 194 195   x       x 195 195   x   x 194 192 193   x   x   x 194 194 194 195 195 194 194 194  kill col 12  Tbl  31 cols 1010000100100101000000000111001101011100000000 has 192 unique lines.
- *   x 192     191 192 192 192   x 192 192   x 192 192   x 192   x 192 192 192 192 190 192 191 189 192   x       x 192 192   x   x 190     190   x   x   x 191 191 191 192 192 191 191 191  kill col 22  Tbl  30 cols 1010000100100101000000010111001101011100000000 has 189 unique lines.
- *   x 189     188 189 189 189   x 189 189   x 189 189   x 189   x 189 189 189 189 188 188 188     189   x       x 189 189   x   x 186     187   x   x   x 188 187 187 189 189 188 188 187  kill col 13  Tbl  29 cols 1010000100100101000000010111001111011100000000 has 186 unique lines.
- *   x 186     185 186 186 186   x 186 186   x 186 186   x 186   x 186 186 186 186 185 185 185     186   x       x 186 186   x   x         183   x   x   x 185 184 184 185 186 185 185 184  kill col 11  Tbl  28 cols 1010000100100101000000010111001111111100000000 has 183 unique lines.
- *   x 183     178 183 183 183   x 183 183   x 183 183   x 183   x 183 183 183 183 182 182 182     183   x       x 183 181   x   x               x   x   x 182 180 181 181 183 182 181 181  kill col 42  Tbl  27 cols 1011000100100101000000010111001111111100000000 has 178 unique lines.
- *   x 178         178 178 178   x 178 178   x 178 178   x 178   x 178 178 178 178 177 177 177     178   x       x 178 176   x   x               x   x   x 177 175 174 176 178 176 176 175  kill col  5  Tbl  26 cols 1011000100100101000000010111001111111100100000 has 174 unique lines.
- *   x 174         174 174 174   x 174 174   x 174 174   x 174   x 174 174 174 174 173 172 171     174   x       x 174 170   x   x               x   x   x 167 171     171 172 170 169 170  kill col  7  Tbl  25 cols 1011000100100101000000010111001111111110100000 has 167 unique lines.
- *   x 167         167 167 167   x 167 167   x 167 166   x 167   x 167 166 167 167 165 159 165     167   x       x 166 163   x   x               x   x   x     164     163 159 161 160 163  kill col 24  Tbl  24 cols 1011000100100101000001010111001111111110100000 has 159 unique lines.
- *   x 159         159 159 159   x 159 159   x 159 158   x 159   x 159 157 159 159 155     155     159   x       x 158 153   x   x               x   x   x     155     153 150 151 152 155  kill col  3  Tbl  23 cols 1011000100100101000001010111001111111110101000 has 150 unique lines.
- *   x 149         150 150 150   x 150 150   x 150 149   x 150   x 150 146 150 150 144     146     147   x       x 149 141   x   x               x   x   x     144     142     140 138 144  kill col  1  Tbl  22 cols 1011000100100101000001010111001111111110101010 has 138 unique lines.
- *   x 136         138 137 138   x 138 138   x 138 137   x 138   x 138 134 138 137 130     132     134   x       x 137 128   x   x               x   x   x     127     128     127     125  kill col  0  Tbl  21 cols 1011000100100101000001010111001111111110101011 has 125 unique lines.
- *   x 123         125 124 125   x 125 125   x 124 122   x 125   x 125 122 124 121 113     118     121   x       x 123 113   x   x               x   x   x     111     112     109          kill col  2  Tbl  20 cols 1011000100100101000001010111001111111110101111 has 109 unique lines.
- *   x 106         109 108 109   x 109 109   x 106 105   x 109   x 107 106 108 106  96      99     105   x       x 103  98   x   x               x   x   x      86      89                  kill col  6  Tbl  19 cols 1011000100100101000001010111001111111111101111 has  86 unique lines.
- *   x  82          86  85  86   x  85  86   x  84  82   x  85   x  84  83  85  82  76      79      81   x       x  81  76   x   x               x   x   x              68                  kill col  4  Tbl  18 cols 1011000100100101000001010111001111111111111111 has  68 unique lines.
- *   x  65          68  67  68   x  67  68   x  65  65   x  66   x  65  66  66  64  61      62      63   x       x  61  60   x   x               x   x   x                                  kill col 16  Tbl  17 cols 1011000100100101000001010111011111111111111111 has  60 unique lines.
- *   x  56          60  59  60   x  59  60   x  57  58   x  57   x  57  56  57  55  53      54      56   x       x  51       x   x               x   x   x                                  kill col 17  Tbl  16 cols 1011000100100101000001010111111111111111111111 has  51 unique lines.
- *   x  48          51  49  51   x  50  51   x  48  49   x  48   x  47  47  48  47  45      46      48   x       x           x   x               x   x   x                                  kill col 25  Tbl  15 cols 1011000100100101000011010111111111111111111111 has  45 unique lines.
- *   x  42          45  43  45   x  44  45   x  42  42   x  42   x  40  42  42  40          38      41   x       x           x   x               x   x   x                                  kill col 23  Tbl  14 cols 1011000100100101000011110111111111111111111111 has  38 unique lines.
- *   x  36          37  35  37   x  37  37   x  35  35   x  35   x  33  34  34  33                  34   x       x           x   x               x   x   x                                  kill col 29  Tbl  13 cols 1011000100100101100011110111111111111111111111 has  33 unique lines.
- *   x  31          32  30  29   x  32  32   x  31  30   x  30   x      27  29  28                  29   x       x           x   x               x   x   x                                  kill col 28  Tbl  12 cols 1011000100100101110011110111111111111111111111 has  27 unique lines.
- *   x  25          26  23  21   x  26  25   x  25  25   x  24   x          25  24                  24   x       x           x   x               x   x   x                                  kill col 39  Tbl  11 cols 1011001100100101110011110111111111111111111111 has  21 unique lines.
- *   x  19          19  18       x  20  19   x  20  20   x  19   x          19  17                  19   x       x           x   x               x   x   x                                  kill col 26  Tbl  10 cols 1011001100100101110111110111111111111111111111 has  17 unique lines.
- *   x  15          15  15       x  16  15   x  16  16   x  14   x          15                      15   x       x           x   x               x   x   x                                  kill col 31  Tbl   9 cols 1011001100100111110111110111111111111111111111 has  14 unique lines.
- *
- * Round 2: 0100110011011000001000001000000000000000000000  4 columns for indexes to table representing  9 original columns (uses 14 of 16 lines in indirect table).
- * Total columns to represent in EBRs: 33
- * 200 distinct lines in remaining untreated columns
- * c45 c44 c43 c42 c41 c40 c39 c38 c37 c36 c35 c34 c33 c32 c31 c30 c29 c28 c27 c26 c25 c24 c23 c22 c21 c20 c19 c18 c17 c16 c15 c14 c13 c12 c11 c10  c9  c8  c7  c6  c5  c4  c3  c2  c1  c0 
- *   x   x 197 200   x   x 200   x   x   x   x   x   x   x 200   x 200 200   x 199 198 200 198 199   x   x 198   x 200 200   x   x 199 197 198   x   x   x 199 198 199 200 200 199 198 199  kill col 43  Tbl  24 cols 1110110111111101001000001101001100011100000000 has 197 unique lines.
- *   x   x     197   x   x 197   x   x   x   x   x   x   x 197   x 197 197   x 196 195 197 195 196   x   x 194   x 197 197   x   x 196 194 195   x   x   x 196 195 196 197 197 196 195 196  kill col 19  Tbl  23 cols 1110110111111101001000001111001100011100000000 has 194 unique lines.
- *   x   x     194   x   x 194   x   x   x   x   x   x   x 194   x 194 194   x 193 192 194 192 193   x   x       x 194 194   x   x 193 191 192   x   x   x 193 192 193 194 194 193 192 193  kill col 12  Tbl  22 cols 1110110111111101001000001111001101011100000000 has 191 unique lines.
- *   x   x     190   x   x 191   x   x   x   x   x   x   x 191   x 191 191   x 190 188 191 189 188   x   x       x 191 191   x   x 189     189   x   x   x 190 189 190 191 191 190 189 190  kill col 25  Tbl  21 cols 1110110111111101001010001111001101011100000000 has 188 unique lines.
- *   x   x     187   x   x 188   x   x   x   x   x   x   x 188   x 188 188   x 187     188 185 185   x   x       x 188 188   x   x 186     186   x   x   x 187 186 187 188 188 187 186 187  kill col 23  Tbl  20 cols 1110110111111101001010101111001101011100000000 has 185 unique lines.
- *   x   x     184   x   x 185   x   x   x   x   x   x   x 185   x 185 185   x 184     185     182   x   x       x 185 185   x   x 183     183   x   x   x 183 183 184 184 185 183 183 184  kill col 22  Tbl  19 cols 1110110111111101001010111111001101011100000000 has 182 unique lines.
- *   x   x     181   x   x 182   x   x   x   x   x   x   x 182   x 182 182   x 181     181           x   x       x 182 182   x   x 179     180   x   x   x 180 179 179 180 181 180 178 180  kill col  1  Tbl  18 cols 1110110111111101001010111111001101011100000010 has 178 unique lines.
- *   x   x     177   x   x 178   x   x   x   x   x   x   x 178   x 178 178   x 177     176           x   x       x 178 177   x   x 175     176   x   x   x 176 172 172 175 172 176     174  kill col  6  Tbl  17 cols 1110110111111101001010111111001101011101000010 has 172 unique lines.
- *   x   x     170   x   x 172   x   x   x   x   x   x   x 172   x 172 172   x 170     167           x   x       x 172 169   x   x 168     168   x   x   x 169     165 164 163 167     164  kill col  3  Tbl  16 cols 1110110111111101001010111111001101011101001010 has 163 unique lines.
- *   x   x     161   x   x 163   x   x   x   x   x   x   x 163   x 163 163   x 161     154           x   x       x 162 158   x   x 157     155   x   x   x 157     151 150     152     149  kill col  0  Tbl  15 cols 1110110111111101001010111111001101011101001011 has 149 unique lines.
- *   x   x     146   x   x 149   x   x   x   x   x   x   x 148   x 149 147   x 146     136           x   x       x 147 141   x   x 141     139   x   x   x 135     134 129     130          kill col  4  Tbl  14 cols 1110110111111101001010111111001101011101011011 has 129 unique lines.
- *   x   x     124   x   x 129   x   x   x   x   x   x   x 127   x 128 127   x 124     115           x   x       x 124 118   x   x 118     117   x   x   x 111     112         110          kill col  2  Tbl  13 cols 1110110111111101001010111111001101011101011111 has 110 unique lines.
- *   x   x     104   x   x 109   x   x   x   x   x   x   x 108   x 107 107   x 105      96           x   x       x 103  99   x   x  98      98   x   x   x  90      91                      kill col  7  Tbl  12 cols 1110110111111101001010111111001101011111011111 has  90 unique lines.
- *   x   x      83   x   x  89   x   x   x   x   x   x   x  86   x  86  86   x  85      76           x   x       x  78  77   x   x  77      80   x   x   x          67                      kill col  5  Tbl  11 cols 1110110111111101001010111111001101011111111111 has  67 unique lines.
- *   x   x      58   x   x  66   x   x   x   x   x   x   x  64   x  60  62   x  60      55           x   x       x  58  56   x   x  54      59   x   x   x                                  kill col 13  Tbl  10 cols 1110110111111101001010111111001111011111111111 has  54 unique lines.
- *   x   x      46   x   x  53   x   x   x   x   x   x   x  51   x  49  49   x  46      43           x   x       x  45  45   x   x          44   x   x   x                                  kill col 24  Tbl   9 cols 1110110111111101001011111111001111011111111111 has  43 unique lines.
- *   x   x      37   x   x  42   x   x   x   x   x   x   x  40   x  37  39   x  35                   x   x       x  33  32   x   x          35   x   x   x                                  kill col 16  Tbl   8 cols 1110110111111101001011111111011111011111111111 has  32 unique lines.
- *   x   x      27   x   x  30   x   x   x   x   x   x   x  28   x  27  27   x  26                   x   x       x  24       x   x          24   x   x   x                                  kill col 17  Tbl   7 cols 1110110111111101001011111111111111011111111111 has  24 unique lines.
- *   x   x      18   x   x  21   x   x   x   x   x   x   x  20   x  19  18   x  19                   x   x       x           x   x          17   x   x   x                                  kill col 11  Tbl   6 cols 1110110111111101001011111111111111111111111111 has  17 unique lines.
- *   x   x      12   x   x  15   x   x   x   x   x   x   x  13   x  14  13   x  13                   x   x       x           x   x               x   x   x                                  kill col 42  Tbl   5 cols 1111110111111101001011111111111111111111111111 has  12 unique lines.
- *
- * Round 3: 0000001000000010110100000000000000000000000000  4 columns for indexes to table representing  5 original columns (uses 12 of 16 lines in indirect table).
- * Direct:  0011000000000000000011110010110011100011111111 20 columns
- * Success. Use 2 EBRs, 26 LUTs.
+ * Round 1: 000100111110000000001000001100011100000000  4 columns for indexes to table representing 12 original columns (uses 16 of 16 lines in indirect table).
+ * Direct:  111011000000111111110110110011100011111111 28 columns
+ * Success. Use 2 EBRs, 12 LUTs.
  */
 
 module m_2ebr
@@ -118,299 +57,297 @@ module m_2ebr
 /* verilator lint_on UNOPTFLAT */
    );
    /*
-    *                      indirect_index 2
-    *                      | indirect_index 1
-    * inx         next     | | indirect index 0
-    * || ucode    ucode    | | | direct representation
-    * 00 LB_0     LB_1     0 0 0 01110111110000000001| LB     Load byte. q = rdadr=RS1+0fs
-    * 01 LB_1     LB_2     0 1 1 00101111100111010010|        Read until q=mem[rs1+ofs) & ~3u]
-    * 02 IJ_0     IJ_1     1 2 2 01110111110010111110| IJ     Jump to mem[(rs1+ofs)&~1u]. inCSR=0
-    * 03 _L0x03   StdIncPc 0 3 2 000010x10xxx11100110| FENCE  Prepare read PC (FENCE/FENCE.I)
-    * 04 ADDI_0   StdIncPc 2 3 2 01001011010011100110| ADDI   Add immediate. rd =RS1+Iimm (or joined)
-    * 05 _L0x05   ADDI_0   0 3 2 000000x01xxx00000100| AUIPC  q = imm20+2 or imm20+4  (copy x/2)
-    * 06 LB_3     LB_4     0 3 2 00011011101000000111|        q = ~mem[rs1+ofs]
-    * 07 LB_4     LB_5     0 3 2 00010111101100001001|        q = (uint8_t) mem[rs1+Iimm]
-    * 08 _L0x08   SB_1     3 3 0 01111011110001011010| SB     Store byte. wjj=wradr=RS1+Simm
-    * 09 LB_5     LB_6     0 3 2 00010111100010001011|        q = D^0xffffffff^q = D^0x80
-    * 0a _L0x0a   SB_1     3 3 0 01111011110001011010| SB     Store byte. wjj=wradr=RS1+Simm
-    * 0b JALR_2   JAL_2    4 3 2 00001011001110000110|        Q = (RS1+imn) & 0xfffffffe
-    * 0c ADD_0    ADDI_0   0 3 2 00111011100100000100| ADD    add     Addition Q = RS1
-    * 0d MUL_0    MUL_1    0 3 2 101110x10xxx11100010| MUL    Store rs1 tp rM. Next read rs2. Q clear
-    * 0e SUB_0    SUB_1    0 3 2 001110x10xxx00010000| SUB    Subtraction
-    * 0f _L0x0f   StdIncPc 2 3 2 00001011011011100110| LUI    q = imm20
-    * 10 SUB_1    LB_6     0 3 2 00111111100010001011|        Q = ~RS2
-    * 11 AND_1    ANDI_1   0 3 2 00111011100000011010|        RS1^0xffffffff to Q
-    * 12 straddle Fetchu   3 4 3 11110100110001110110|  Fr10u IncPC, OpFetch
-    * 13 condb_2  condb_3  0 3 2 00111111100000010100|        ~RS2 in Q
-    * 14 condb_3  condb_4  0 3 4 01110011110000010101|        Calculate RS1+~RS2+1
-    * 15 condb_4  condb_5  0 3 5 00000011100100010110|        Branch on condition
-    * 16 condb_5  StdIncPc 0 3 2 000010x10xxx11100110|        Branch not taken.
-    * 17 condb_5t Fetch    3 4 2 01110110110011011110|        Branch taken.
-    * 18 BEQ      condb_2  4 3 2 00111011011000010011| BEQ    Conditional Branch. Offset to Ryy
-    * 19 JALR_0   JALR_1   3 3 2 01101011010001000001| JALR   jj=RS1+imm
-    * 1a ANDI_1   StdIncPc 2 3 2 00001011001111100110|        rd = Iimm & RS1
-    * 1b _L0x1b   JAL_1    0 3 2 00000010111000110010| JAL    J-imm is in q.
-    * 1c ECAL_BRK ECAL_RET 1 3 2 00101110111010100110| ECALL/EBREAK  Select ECALL/(U/S/M)RET or EBREAK/WFI
-    * 1d ORI_2    StdIncPc 2 3 2 00001011011111100110|        rd = Iimm | RS1
-    * 1e aFault_1 aFault_2 0 3 4 11101001110011010100|        Q = 4
-    * 1f IJ_2     IJ_3     4 3 2 00101011011010110111|        Read word is to be masked with lsb = 0
-    * 20 LH_0     LH_1     5 0 0 01110111110001010010| LH     Load hword. Q = rdadr=RS1+Iimm.
-    * 21 XORI_1   StdIncPc 2 3 2 00001011000011100110|        rd = Iimm ^ RS1
-    * 22 MULHU_6  MULHU_7  0 3 6 00101011110000111001|        Q <= rM[0] ? Q+Ryy : Q. Prepare last shr/sar
-    * 23 _L0x23   StdIncPc 0 3 2 000010x10xxx11100110| FENCE  Prepare read PC (FENCE/FENCE.I)
-    * 24 SLLI_0   SLLI_1   0 5 0 00111110x11000110101| SLLI   Shift left immediate.
-    * 25 _L0x25   ADDI_0   0 3 2 000000x01xxx00000100| AUIPC  q = imm20+2 or imm20+4  (copy x/2)
-    * 26 OR_1     OR_2     3 3 2 00111011000000100111|        RS1^0xffffffff to jj
-    * 27 OR_2     ORI_2    0 3 2 01000011110000011101|        Q = rs2
-    * 28 _L0x28   SH_1     6 3 0 01111011110010010110| SH     Store halfword. jjw=wradr=RS1+Simm
-    * 29 XOR_1    XORI_1   0 3 2 00111011100000100001|        Q = RS1^0xFFFFFFFF
-    * 2a _L0x2a   SH_1     6 3 0 01111011110010010110| SH     Store halfword. jjw=wradr=RS1+Simm
-    * 2b SLTIX_1  SLTIX_2  0 3 4 01xxxx11010000110000|        RS1 - imm / RS1 - RS2
-    * 2c SLL_0    SLL_1    0 3 2 001110x0xxxx00111110| SLL    Shift left
-    * 2d MULH_0   MULH_1   0 5 2 00101011100101101010| MULH   Store rs1 to Q. Prep read 0, shcnt--
-    * 2e MULHU_1  MULHU_2  3 3 2 10111111011001000010|        rM<=RS2,  Rjj<=Q=0. next read RS1. 
-    * 2f _L0x2f   StdIncPc 2 3 2 00001011011011100110| LUI    q = imm20
-    * 30 SLTIX_2  StdIncPc 2 3 7 00001011011011100110|        Registered ALU flag to rd
-    * 31 SLTX_1   SLTIX_1  0 3 2 00111111100000101011|        ~rs2 to Q
-    * 32 JAL_1    JAL_2    4 3 2 01001011010010000110|        Target adr to yy
-    * 33 unx33             7 5 0 00xxxxxxxxxxxxxxxxxx| 33: Not in use 
-    * 34 JAL_3    Fetch    3 4 2 00110110100111011110|        PC+imm/trap entrypt to PC. OpFetch
-    * 35 SLLI_1   SLLI_2   2 5 2 00101111100100110110|        Register to shift to Q (and TRG for shift 0)
-    * 36 SLLI_2   _L0x03   2 6 2 00101111110100000011|        Repeat Q = Q+Q until shregcnt == 0
-    * 37 ECALL_2  ECALL_3  8 3 5 00xxxx11000111010111|        mepc = pc, prep store 0 to mtval
-    * 38 BNE      condb_2  4 3 2 00111011011000010011| BNE    Conditional Branch. Offset to Ryy
-    * 39 MULHU_7  StdIncPc 2 3 2 10001011000111100110|        Last shift.
-    * 3a SRxI_1   SRxI_2   2 5 6 00101011100100111101|        Register to shift to Q
-    * 3b _L0x3b   JAL_1    0 3 2 00000010111000110010| JAL    J-imm is in q.
-    * 3c CSRRW_0  CSRRW_1  4 3 2 00011011011001001001| CSRRW  Decoded CSR adr in yy
-    * 3d SRxI_2   _L0x03   2 6 6 00101011100100000011|        Repeat Q >>= 1 until shregcnt == 0
-    * 3e SLL_1    SLLI_1   0 5 0 00111110x00100110101|        Shiftamount was in low 5 bits of RS2
-    * 3f SRx_1    SRxI_1   0 5 0 00111110x00100111010|        Shiftamount in low 5 bits of RS2
-    * 40 LW_0     LW_1     1 0 8 01110111110001010000| LW     Load word. Q=yy=rdadr=RS1+Iimm
-    * 41 JALR_1   JALR_2   0 3 4 01000011110000001011|        Q=1
-    * 42 MULHU_2  MULHU_3  0 5 6 00101011110001100000|        Q <= rM[0] ? Q+rs1 : Q. Prepare shr/sar
-    * 43 MULHU_4  MULHU_5  0 3 2 00000010100011101010|        Prepare read Rjj.
-    * 44 SLTI_0   SLTIX_1  0 3 2 00111111101000101011| SLTI   Set less than immediate (signed)
-    * 45 WFI_3    WFI_4    0 3 4 01101011110001100101|        More check offset
-    * 46 ILL_1    ILL_2    8 3 2 00101010x00101000111|        Store PC to mepc
-    * 47 ILL_2    ILL_3    8 7 2 00101011000110001111|        Store 0 to mtval
-    * 48 _L0x48   SW_1     1 8 8 01111011110001100110| SW     Store word. Q=wradr=RS1+Simm
-    * 49 CSRRW_1  CSRRW_2  0 3 4 01000011110001001011|        Construct PC storage adr
-    * 4a _L0x4a   SW_1     1 8 8 01111011110001100110| SW     Store word. Q=wradr=RS1+Simm
-    * 4b CSRRW_2  CSRRW_3  9 9 2 00101010100110110000|        Write PC to 0x100 start Prep emulation entrypt
-    * 4c SLT_0    SLTX_1   0 3 2 001110x10xxx00110001| SLT    Set less than (signed)
-    * 4d MULHSU_0 MULHU_1  4 5 2 00111011000100101110| MULHSU Signed rs1 to Ryy, nxt rd rs2. Q=0, shcnt--
-    * 4e eILL0b   ILLe     0 3 2 00xxxxx0xxxx11111110| Illegal instruction seen
-    * 4f MRET_8   StdIncPc 0 3 4 01101011110011100110|        Prep +4
-    * 50 LW_1     StdIncPc 2 1 9 00101111000111100110|        Read until d=mem[(rs1+ofs) & ~3u]
-    * 51 LDAF_LW  LDAF_a   8 7 2 00101010111011011010|  err   LD AlignFault. Faulting adr to mtval
-    * 52 LH_1     LH_2     0 1 1 00101111100101010100|        Read until q=mem[(rs1+ofs) & ~3u]
-    * 53 LDAF_LH  LDAF_a   8 7 2 00101010111011011010|  err   LD AlignFault. Faulting adr to mtval
-    * 54 LH_2     LH_3     0 6 6 00101011100111101011|        Repeat shr until shreg = 0 (0, 8 or 16 times)
-    * 55 aFaultb  aFault_1 8 7 2 00101011011000011110|  err   LH Load access fault. Faulting adr to mtval
-    * 56 LH_4     LH_5     0 3 2 00100011101101010111|        q = (uint16_t) mem[rs1+Iimm]
-    * 57 LH_5     LB_6     0 3 2 00100011100010001011|        q = D^0xffffffff^q = D ^ 0x00008000
-    * 58 DIV_A    DIV_C    0 3 6 11101111100101101110|        Transfer rM to rDee
-    * 59 DIV_B    DIV_10   4 3 2 00111111011010011100|        REM = Q to yy
-    * 5a SB_1     SB_2     4 5 2 00101111100101011101|        Write d to Q and yy (for sh 0). Prep shift
-    * 5b _L0x5b   JAL_1    0 3 2 00000010111000110010| JAL    J-imm is in q.
-    * 5c CSRRS_0  CSRRW_1  4 3 2 00011011011001001001| CSRRS  Decoded CSR adr in yy
-    * 5d SB_2     SB_3     4 6 2 00101111110111111011|        Repeat shl until shreg = 0 (0,8,16 or 24 times)
-    * 5e LHU_1    LHU_2    0 1 1 00101111100101110000|        Read until q=mem[(rs1+ofs) & ~3u]
-    * 5f LDAF_LHU LDAF_a   8 7 2 00101010111011011010|  err   LD AlignFault. Faulting adr to mtval
-    * 60 MULHU_3  MULHU_2  0 3 2 10111111100101000010|        Shift Q and rM. Prepare read rs1
-    * 61 EBRKWFI2 EBREAK_1 3 3 5 00011011001011110111| EBREAK/WFI2 Select EBREAK or WFI
-    * 62 DIV_8    DIV_7    0 5 4 01101111110011001000|        Conditionally subtract rs2. Update M[0]
-    * 63 DIV_9    DIV_A    0 a 4 01101111110001011000|        Last Cond. -rs2. Upd M[0]. Branch on INSTR[13]
-    * 64 SLTIU_0  SLTIX_1  0 3 2 00111111101000101011| SLTIU  Set less than immediate (unsigned)
-    * 65 WFI_4    WFI_5    0 3 5 000010x10xxx11101111|        Prepare read PC
-    * 66 SW_1     SW_2     9 7 2 00111010100111110010|        Write d to a+k until accepted
-    * 67 SW_E1SWE SW_E2    8 7 2 00001010x11010010011|        Store faulting address alignment to mtval
-    * 68 DIV_12   StdIncPc 2 3 2 00001011000111100110|        RS2 > 0, RS1 >= 0, yy is true result
-    * 69 DIV_13   LB_6     0 3 2 00101011100010001011|        RS2 > 0, RS1 < 0, change sign yy
-    * 6a MULH_1   MULH_2   4 3 2 00101011000011111001|        Store ~rs1 to Ryy. Prep construct 1.
-    * 6b SB_4     SB_5     0 b 2 00110011100101111010|        Address back to Q. Prepare get item to write
-    * 6c SLTU_0   SLTX_1   0 3 2 001110x10xxx00110001| SLTU   Set less than (unsigned)
-    * 6d MULHU_0  MULHU_1  4 5 2 00111011000100101110| MULHU  Store rs1 to Ryy. Next read rs2. Q=0, shcnt--
-    * 6e DIV_C    DIV_e    4 3 2 00111010100110111001|        rM to yy. Q=ffffffff
-    * 6f MRET_6   MRET_7   0 3 4 01xxxx11110011001111|        ~302 + origImm + 1 for branch decision
-    * 70 LHU_2    LHU_3    0 6 6 00101011100110111010|        Repeat shr until shreg = 0 (0, 8 or 16 times)
-    * 71 aFaultc  aFault_1 8 7 2 00101011011000011110|  err   LHU Load access fault. Faulting adr to mtval
-    * 72 LBU_3    ANDI_1   0 3 2 00011011101000011010|        Invert q. Prepare read mask
-    * 73 unalignd straddle 0 3 2 00001011011000010010|  Fr10u Unaligned pc, prep read high hword
-    * 74 unx74             7 5 0 00xxxxxxxxxxxxxxxxxx| 74: Not in use 
-    * 75 unx75             7 5 0 00xxxxxxxxxxxxxxxxxx| 75: Not in use 
-    * 76 Fetchu   Fetch2u  0 3 a 00001111011011010101|  Fr10u Read and latch instruction
-    * 77 eFetchu  Fetch2u  0 1 b 00101111011011010101|  Fr10u rep Read until d=mem[(rs1+ofs) & ~3u]
-    * 78 DIV_4    DIV_6    4 3 2 00000011011010101010|        ~abs(divisor) to yy
-    * 79 DIV_5    DIV_3    0 3 4 11101011110010101000|        Kluge to let add1 work in DIV instr
-    * 7a SB_5     SW_2     7 7 2 00110010100111110010|        Write d to a+k until accepted
-    * 7b _L0x7b   JAL_1    0 3 2 00000010111000110010| JAL    J-imm is in q.
-    * 7c CSRRC_0  CSRRW_1  4 3 2 00011011011001001001| CSRRC  Decoded CSR adr in yy
-    * 7d unx7d             7 5 0 00xxxxxxxxxxxxxxxxxx| 7d: Not in use 
-    * 7e NMI_1    NMI_2    8 3 2 00xxxx11000110010000|        Store pc to mepc.
-    * 7f unx7f             7 5 0 00xxxxxxxxxxxxxxxxxx| 7f: Not in use 
-    * 80 LBU_0    LBU_1    0 0 0 01110111110010000101| LBU    Load unsigned byte. Q = rdadr=RS1+Iimm.
-    * 81 unx81             7 5 0 00xxxxxxxxxxxxxxxxxx| 81: Not in use 
-    * 82 DIV_1    DIV_3    3 3 2 00111011000010101000|        jj=abs(RS1). Next handle divisor
-    * 83 DIV_2    DIV_1    0 3 2 01101011110010000010|        Dividend negative, make RS1-1
-    * 84 XORI_0   XORI_1   0 3 2 00111111101000100001| XORI   Xor immediate. Q=~Iimm
-    * 85 LBU_1    LBU_2    0 1 1 00101111100111110000|        Read until q=mem[(rs1+ofs) & ~3u]
-    * 86 JAL_2    JAL_3    2 3 3 11110000x10000110100|        Return address to TRG
-    * 87 unx87             7 5 0 00xxxxxxxxxxxxxxxxxx| 87: Not in use 
-    * 88 DIV_E    DIV_10   0 a 2 101111x0xxxx10011100|        RS2 != 0. Check signs
-    * 89 DIV_F    StdIncPc 2 3 2 00001011011011100110|        RS2 == 0, return 0xffffffff
-    * 8a DIVU_5   ANDI_1   0 3 6 111011x10xxx00011010|        Transfer rM to rDee
-    * 8b LB_6     StdIncPc 2 3 4 11001011010011100110|        WTRG=(D^0x80)+0xFFFFFF7F+1=(D^0x80)-0x80
-    * 8c XOR_0    XOR_1    0 3 2 001111x10xxx00101001| XOR    xor
-    * 8d DIV_0    DIV_1    0 c 2 10101111100110000010| DIV    Branch on sign dividend RS1
-    * 8e _LCSRRS_1 ILLe     0 3 2 00xxxxx0xxxx11111110| Illegal instruction seen
-    * 8f ILL_3    ILL_4    0 3 4 00101011110010101001|        Q = 1
-    * 90 NMI_2    JAL_3    8 d 2 00010011011000110100|        mtval = 0.
-    * 91 LDAF_2   LDAF_3   4 d 4 11001000x10010010010|        Store 4 to mcause
-    * 92 LDAF_3   JAL_3    8 3 2 00100110x00100110100|        PC to mepc
-    * 93 SW_E2    SW_E3    8 3 2 00101111000110010101|        Store address that faulted
-    * 94 SW_E4    JAL_3    4 d 2 00100110x10100110100|        Store 6 to mcause
-    * 95 SW_E3    SW_E4    0 3 4 11101101110010010100|        Q = 3
-    * 96 SH_1     SH_2     4 5 2 00101111100110111011|        Write d to Q and yy (for sh 0). Prep shift
-    * 97 SW_E1SWH SW_E2    8 7 2 00001010x11010010011|        Store faulting address alignment to mtval
-    * 98 BLT      condb_2  4 3 2 00111011011000010011| BLT    Conditional Branch. Offset to Ryy
-    * 99 _L0x99   ILLe     0 3 2 00xxxxx0xxxx11111110| Illegal instruction seen (at illegal entrypt)
-    * 9a ECALL_6  JAL_3    4 d 2 01100100x10000110100|        mcause = 11
-    * 9b unx9b             7 5 0 00xxxxxxxxxxxxxxxxxx| 9b: Not in use 
-    * 9c DIV_10   DIV_12   0 a 2 10110011000101101000|        RS2 > 0. Branch on sign of RS1
-    * 9d DIV_11   DIV_14   0 a 2 10110011000110100010|        RS2 < 0. Branch on sign of RS1
-    * 9e SH_4     SH_5     a 8 2 00110011100110011111|        Address back to Q. Prepare get item to write
-    * 9f SH_5     SW_2     9 3 2 00110010100111110010|        Write d to a+k until accepted
-    * a0 LHU_0    LHU_1    5 0 0 01110111110001011110| LHU    Load unsigned hword. Q = rdadr=RS1+Iimm
-    * a1 ECALL_4  ECALL_5  0 3 4 11101001110010110110|        Q = 4
-    * a2 DIV_14   LB_6     0 3 2 00101011100010001011|        RS2 < 0, RS1 >= 0, change sign yy
-    * a3 DIV_15   StdIncPc 2 3 2 00001011000111100110|        RS2 < 0, RS1 < 0, yy is true result
-    * a4 SRxI_0   SRxI_1   0 5 0 00111110x11000111010| SRxI   Shift Right immediate (both logic/arith here)
-    * a5 MRET_3   MRET_4   0 3 4 01011011110010101111|        0x102 + 0xff + 1 = 0x202
-    * a6 ECAL_RET ECALL_1  1 3 8 00101110111011010000| ECALL/(U/S/M)RET Select ECALL or (U/S/M)RET
-    * a7 EBRKWFI1 EBRKWFI2 0 3 2 01xxxx11110001100001| EBREAK/WFI1 Prepare select EBREAK or WFI
-    * a8 DIV_3    DIV_4    0 a 2 10101011100001111000|        Branch on sign divisor RS2
-    * a9 ILL_4    JAL_3    4 d 4 01100110x10000110100|        Store 2 to mcause
-    * aa DIV_6    DIV_7    0 3 2 101011x10xxx11001000|        Write M. Prepare shift
-    * ab EBREAK_2 ECALL_6  8 3 2 00101011000110011010|        pc to mepc
-    * ac _L0xac   SRx_1    0 3 2 001110x0xxxx00111111| SRx    Shift Right (both SRL and SRA)
-    * ad DIVU_0   DIVU_1   0 5 2 101110x10xxx11100000| DIVU   Store rs1 to rM. Q=0. Prepare invert rs2
-    * ae _L0xae   SRx_1    0 3 2 001110x0xxxx00111111| SRx    Shift Right (both SRL and SRA)
-    * af MRET_4   MRET_5   0 3 4 01xxxx11110011000101|        0x202 + 0xff + 1 = 0x302
-    * b0 CSRRW_3  CSRRW_4  0 3 4 11101001110010110010|        Prep emulation entrypt 0x108, here Q to 0x104
-    * b1 aF_SW_3  LDAF_3   4 d 2 01001000x10010010010|        Store 7 to mcause
-    * b2 CSRRW_4  Fetch    3 4 4 11110100110011011110|        IncPC, OpFetch, but force +4
-    * b3 unxb3             7 5 0 00xxxxxxxxxxxxxxxxxx| b3: Not in use 
-    * b4 eFetch3  unalignd b 3 c 01111111110001110011|  Fr11  Write minstret. Update I. Q=immediate, use dinx
-    * b5 SH_3     SH_4     0 3 2 00000011011010011110|        Prepare get back address to use 
-    * b6 ECALL_5  ECALL_6  0 3 4 11101001110010011010|        Q = 8
-    * b7 IJ_3     IJ_4     0 3 4 01110011110010111101|        Construct Q = 1
-    * b8 BGE      condb_2  4 3 2 00111011011000010011| BGE    Conditional Branch. Offset to Ryy
-    * b9 DIV_e    DIV_D    0 3 4 00110011100011000000|        Calc carry of RS2+0xFFFFFFFF
-    * ba LHU_3    ANDI_1   0 3 2 00011111101000011010|        Invert q. Prepare read mask
-    * bb SH_2     SH_3     4 6 2 00101111110110110101|        Repeat shl until shreg = 0 (0,8 or 24 times)
-    * bc CSRRWI_0 CSRRW_1  4 3 2 00011011011001001001| CSRRWI Decoded CSR adr in yy
-    * bd IJ_4     Fetch    3 4 2 00110110101111011110|        Mask and use as PC
-    * be IJ_1     IJ_2     0 1 2 00101111100100011111|        Read until q=mem[(rs1+ofs)&~1u]
-    * bf IJT_1    IJT_2    0 1 2 00101111100111000001|        Exit CSR, enter trap
-    * c0 DIV_D    DIV_E    0 3 5 00111011100110001000|        Is RS2 == 0?
-    * c1 IJT_2    IJT_3    4 3 2 00101011011011101001|        Read word is to be masked with ~1u
-    * c2 DIVU_3   DIVU_2   0 5 4 01101111110011001010|        Conditionally subtract rs2. Update M[0]
-    * c3 DIVU_4   DIVU_5   0 a 4 01101111110010001010|        Last Cond. -rs2. Upd M[0]. Branch on INSTR[13]
-    * c4 ORI_0    ORI_1    3 3 2 00111111001011100001| ORI    Or immediate. jj=~Iimm
-    * c5 MRET_5   MRET_6   0 3 2 00000011101001101111|        ~302
-    * c6 IJT_4    ILL_2    8 0 2 00110111101101000111|        Mask and store to mepc and Q for read of instr
-    * c7 QINT_1   QINT_2   8 3 2 00xxxx11000111001011|        Store pc to mepc.
-    * c8 DIV_7    DIV_8    0 3 d 10110011110101100010|        Shift (Q,M) left. Prepare unsigned sub
-    * c9 MRET_2   MRET_3   0 3 2 01011001110010100101|        0xff+3 = 0x102
-    * ca DIVU_2   DIVU_3   0 3 d 10110011110111000010|        Shift (Q,M) left. Prepare unsigned sub
-    * cb QINT_2   StdIncPc 8 d 2 00010011011011100110|        mtval = 0.
-    * cc OR_0     OR_1     0 3 2 001111x10xxx00100110| OR     or
-    * cd REM_0    DIV_1    0 c 2 10101111100110000010| REM    Branch on sign dividend RS1
-    * ce _LCSRRCI_1 ILLe     0 3 2 00xxxxx0xxxx11111110| Illegal instruction seen
-    * cf MRET_7   MRET_8   0 3 5 000110x10xxx01001111|        Prepare emulation entry point 0x104
-    * d0 ECALL_1  ECALL_2  0 3 4 01001011110000110111| ECALL  Verify Imm==0x000
-    * d1 MRET_1   MRET_2   3 3 2 00011011011011001001| MRET   First save Imm, start build constant for check
-    * d2 LB_2     LB_3     0 6 6 00101011100100000110|        Repeat shr until shreg == 0 (0,8,16,24 times)
-    * d3 aFaultd  aFault_1 8 7 2 00101011011000011110|  err   LB Load access fault. Faulting adr to mtval
-    * d4 aFault_2 LDAF_3   4 d 4 01001010x10010010010|        Store 5 to mcause
-    * d5 Fetch2u           b 7 e 01111111110000000000|  Fr11  Update ttime. Update I. Q=immediate. Use dinx
-    * d6 eILL0c   ILLe     0 3 2 00xxxxx0xxxx11111110| Illegal instruction seen
-    * d7 ECALL_3  ECALL_4  8 7 2 00101011011010100001|        mtval = 0, now start the chore of 11 to mcause
-    * d8 BLTU     condb_2  4 3 2 00111011011000010011| BLTU   Conditional Branch. Offset to Ryy
-    * d9 MULH_3   MULHU_2  0 3 2 101111x10xxx01000010|        rM<=RS2, Q = 0. next read RS1. Join.
-    * da LDAF_a   LDAF_2   0 3 2 001010x10xxx10010001|        Extra cycle after error detected write mtval
-    * db jFault_1 LDAF_3   4 7 4 01001010x10010010010|        Store 1 to mcause
-    * dc CSRRSI_0 CSRRW_1  4 3 2 00011011011001001001| CSRRSI Decoded CSR adr in yy
-    * dd aF_SW_1  aF_SW_2  8 7 2 00101011011011100101|  err   SW Store access fault. Faulting adr to mtval
-    * de Fetch    Fetch2   3 1 b 00101111011011110100|  Fr11  Read and latch instruction
-    * df eFetch   Fetch2   3 1 b 00101111011011110100|  Fr11  rep Read until d=mem[(rs1+ofs) & ~3u]
-    * e0 DIVU_1   DIVU_2   4 3 2 00101111000011001010|        Store inverted rs2 to yy. Prepare shift
-    * e1 ORI_1    ORI_2    0 3 2 00000011100100011101|        Q = RS1
-    * e2 MUL_1    MUL_2    0 5 6 00101011110011101000|        Q <= rM[0] ? Q+rs2 : Q. Prepare shr/sar
-    * e3 MUL_3    ANDI_1   0 3 6 111011x10xxx00011010|        Transfer rM to rDee
-    * e4 ANDI_0   ANDI_1   0 3 2 00111111101000011010| ANDI   And immediate. Q=~Iimm
-    * e5 aF_SW_2  aF_SW_3  0 3 4 11101001110010110001|        Q = 4
-    * e6 StdIncPc Fetch    3 4 3 11110100110011011110|  Fr11  IncPC, OpFetch
-    * e7 aFault   aFault_1 8 7 2 00101011011000011110|  err   Load access fault. Faulting adr to mtval
-    * e8 MUL_2    MUL_1    0 3 2 10111011100111100010|        Shift Q and rM. Prepare read rs2
-    * e9 IJT_3    IJT_4    0 3 4 01110011110011000110|        Construct Q = 1
-    * ea MULHU_5  MULHU_6  0 3 2 00110011110000100010|        Q <= rM[0] ? Q+Rjj : Q. Prepare read Ryy
-    * eb LH_3     LH_4     0 3 2 00011111101001010110|        q = ~mem[rs1+ofs]
-    * ec AND_0    AND_1    0 3 2 001111x10xxx00010001| AND    And 
-    * ed REMU_0   DIVU_1   0 5 2 101110x10xxx11100000| REMU   Store dividend to rM. Prepare read divisor.Q=0
-    * ee eILL0a   ILLe     0 3 2 00xxxxx0xxxx11111110| Illegal instruction seen
-    * ef WFI_5    Fetch    3 4 4 11110100110011011110|        IncPC, OpFetch
-    * f0 LBU_2    LBU_3    0 6 6 00101011100101110010|        Repeat shr until shreg = 0 (0, 8 or 16 times)
-    * f1 aFaulte  aFault_1 8 7 2 00101011011000011110|  err   LBU Load access fault. Faulting adr to mtval
-    * f2 SW_2     StdIncPc 0 3 2 000010x10xxx11100110|        Prepare read PC
-    * f3 aF_SW    aF_SW_1  0 3 2 00xxxxx01xxx11011101|  err   SW/SH/SB access fault. Rest to set SEL_O=4'hf
-    * f4 Fetch2   eFetch3  b 7 f 01000111010010110100|  Fr11  Update ttime. Update I. Q=immediate. Use dinx
-    * f5 jFault   jFault_1 8 7 2 00101011011011011011|  err   Fetch access fault. Faulting adr to mtval
-    * f6 WFI_1    WFI_2    0 3 4 11000001110011111010| WFI    To check offset
-    * f7 EBREAK_1 EBREAK_2 8 7 2 00001011011010101011| EBREAK mepc = pc, store 0 to mtval
-    * f8 BGEU     condb_2  4 3 2 00111011011000010011| BGEU   Conditional Branch. Offset to Ryy
-    * f9 MULH_2   MULH_3   3 3 4 01111011010011011001|        Store 1 to Rjj. next read rs2, Q=0
-    * fa WFI_2    WFI_3    0 3 4 01101011110001000101|        Check offset
-    * fb SB_3     SB_4     0 3 2 00000011011001101011|        Prepare get back address to use 
-    * fc CSRRCI_0 CSRRW_1  4 3 2 00011011011001001001| CSRRCI Decoded CSR adr in yy
-    * fd NMI_0    NMI_1    0 3 2 000010x10xxx01111110| NMI    Get current PC
-    * fe ILLe     ILL_1    0 3 2 000010x0xxxx01000110| Illegal
-    * ff QINT_0   QINT_1   0 3 2 000010x10xxx11000111| INT    Get current PC
+    * inx         next     indirect index 0
+    * || ucode    ucode    | direct representation
+    * 00 LB_0     LB_1     0 0110000001101011110000000001| LB     Load byte. q = rdadr=RS1+0fs
+    * 01 LB_1     LB_2     1 0010000001011111100111010010|        Read until q=mem[rs1+ofs) & ~3u]
+    * 02 IJ_0     IJ_1     2 0010100001101111110010111110| IJ     Jump to mem[(rs1+ofs)&~3u]. inCSR=0
+    * 03 _L0x03   StdIncPc 0 00100000000101x10xxx11100110| FENCE  Prepare read PC (FENCE/FENCE.I)
+    * 04 ADDI_0   StdIncPc 0 0000001000010111010011100110| ADDI   Add immediate. rd =RS1+Iimm (or joined)
+    * 05 _L0x05   ADDI_0   0 00100000000101x01xxx00000100| AUIPC  q = imm20 (copy x/2)
+    * 06 LB_3     LB_4     0 0010000000110111101000000111|        q = ~mem[rs1+ofs]
+    * 07 LB_4     LB_5     0 0010000000101111101100001001|        q = (uint8_t) mem[rs1+Iimm]
+    * 08 _L0x08   SB_1     0 0000010001110011110001011010| SB     Store byte. wjj=wradr=RS1+Simm
+    * 09 LB_5     LB_6     0 0010000000101111100010001011|        q = D^0xffffffff^q = D^0x80
+    * 0a _L0x0a   SB_1     0 0000010001110011110001011010| SB     Store byte. wjj=wradr=RS1+Simm
+    * 0b JALR_2   JAL_2    3 0000011000010111001110000110|        Q = (RS1+imn) & 0xfffffffe
+    * 0c ADD_0    ADDI_0   0 0010000001110111100100000100| ADD    add     Addition Q = RS1
+    * 0d _L0x0d   StdIncPc 0 0000001000010111011011100110| LUI    q = imm20
+    * 0e SUB_0    SUB_1    0 00100000011101x10xxx00010000| SUB    Subtraction
+    * 0f _L0x0f   StdIncPc 0 0000001000010111011011100110| LUI    q = imm20
+    * 10 SUB_1    LB_6     0 0010000001111111100010001011|        Q = ~RS2
+    * 11 AND_1    ANDI_1   0 0010000001110111100000011010|        RS1^0xffffffff to Q
+    * 12 unx12             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| 12: Not in use 
+    * 13 condb_2  condb_3  0 0010000001111111100000010100|        ~RS2 in Q
+    * 14 condb_3  condb_4  5 0010000000010111110000010101|        Calculate RS1+~RS2+1
+    * 15 condb_4  condb_5  6 0010000001100111100100010110|        Branch on condition
+    * 16 condb_5  Fetch    7 0100010101101100111011011110|        Branch not taken.
+    * 17 condb_5t BrOpFet  3 0100010101101111110001110100|        Branch taken.
+    * 18 BEQ      condb_2  0 0000011001110111011000010011| BEQ    Conditional Branch. Offset to Ryy
+    * 19 JALR_0   JALR_1   0 0000010001010111010001000001| JALR   jj=RS1+imm
+    * 1a ANDI_1   StdIncPc 0 0000001000010111001111100110|        rd = Iimm & RS1
+    * 1b _L0x1b   JAL_1    3 0010000000010110111000110010| JAL    J-imm is in q. Branch on alignfault
+    * 1c ECAL_BRK ECAL_RET 2 0010000001011110111010100110| ECALL/EBREAK  Select ECALL/(U/S/M)RET or EBREAK/WFI
+    * 1d ORI_2    StdIncPc 0 0000001000010111011111100110|        rd = Iimm | RS1
+    * 1e aFault_1 aFault_2 5 0010000001010101110011010100|        Q = 4
+    * 1f IJ_2     IJ_3     0 0000011001010111011010110111|        Read word is to be masked with 2 lsb = 00
+    * 20 LH_0     LH_1     2 0100011001101011110001010010| LH     Load hword. Q = rdadr=RS1+Iimm.
+    * 21 XORI_1   StdIncPc 0 0000001000010111000011100110|        rd = Iimm ^ RS1
+    * 22 unx22             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| 22: Not in use 
+    * 23 _L0x23   StdIncPc 0 00100000000101x10xxx11100110| FENCE  Prepare read PC (FENCE/FENCE.I)
+    * 24 SLLI_0   SLLI_1   4 0010000001111010x11000110101| SLLI   Shift left immediate.
+    * 25 _L0x25   ADDI_0   0 00100000000101x01xxx00000100| AUIPC  q = imm20 (copy x/2)
+    * 26 OR_1     OR_2     0 0000010001110111000000100111|        RS1^0xffffffff to jj
+    * 27 OR_2     ORI_2    0 0010000000000111110000011101|        Q = rs2
+    * 28 _L0x28   SH_1     2 0000010001110011110010010110| SH     Store halfword. jjw=wradr=RS1+Simm
+    * 29 XOR_1    XORI_1   0 0010000001110111100000100001|        Q = RS1^0xFFFFFFFF
+    * 2a _L0x2a   SH_1     2 0000010001110011110010010110| SH     Store halfword. jjw=wradr=RS1+Simm
+    * 2b SLTIX_1  SLTIX_2  5 001000000xxxx111010000110000|        RS1 - imm / RS1 - RS2
+    * 2c SLL_0    SLL_1    0 00100000011101x0xxxx00111110| SLL    Shift left
+    * 2d _L0x2d   StdIncPc 0 0000001000010111011011100110| LUI    q = imm20
+    * 2e unx2e             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| 2e: Not in use 
+    * 2f _L0x2f   StdIncPc 0 0000001000010111011011100110| LUI    q = imm20
+    * 30 SLTIX_2  StdIncPc 8 0000001000010111011011100110|        Registered ALU flag to rd
+    * 31 SLTX_1   SLTIX_1  0 0010000001111111100000101011|        ~rs2 to Q
+    * 32 JAL_1    JAL_2    0 0000011000010111010010000110|        Target adr to yy
+    * 33 JAERR_1  JAERR_2  0 0000011110010110x10010000001|  Err   JAL target adr misaligned, store to mtval
+    * 34 JAL_3    Fetch    9 0100010101101110100111011110|        PC+imm/trap entrypt to PC. OpFetch
+    * 35 SLLI_1   SLLI_2   4 0000001001011111100100110110|        Register to shift to Q (and TRG for shift 0)
+    * 36 SLLI_2   _L0x03   a 0000001001011111110100000011|        Repeat Q = Q+Q until shregcnt == 0
+    * 37 ECALL_2  ECALL_3  6 000001101xxxx111000111010111|        mepc = pc, prep store 0 to mtval
+    * 38 BNE      condb_2  0 0000011001110111011000010011| BNE    Conditional Branch. Offset to Ryy
+    * 39 unx39             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| 39: Not in use 
+    * 3a SRxI_1   SRxI_2   b 0000001001010111100100111101|        Register to shift to Q
+    * 3b _L0x3b   JAL_1    3 0010000000010110111000110010| JAL    J-imm is in q. Branch on alignfault
+    * 3c CSRRW_0  CSRRW_1  0 0000011000110111011001001001| CSRRW  Decoded CSR adr in yy
+    * 3d SRxI_2   _L0x03   c 0000001001010111100100000011|        Repeat Q >>= 1 until shregcnt == 0
+    * 3e SLL_1    SLLI_1   4 0010000001111010x00100110101|        Shiftamount was in low 5 bits of RS2
+    * 3f SRx_1    SRxI_1   4 0010000001111010x00100111010|        Shiftamount in low 5 bits of RS2
+    * 40 LW_0     LW_1     3 0110000001101111110001010000| LW     Load word. Q=yy=rdadr=RS1+Iimm
+    * 41 JALR_1   JALR_2   5 0010000000000111110000001011|        Q=1
+    * 42 unx42             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| 42: Not in use 
+    * 43 unx43             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| 43: Not in use 
+    * 44 SLTI_0   SLTIX_1  0 0010000001111111101000101011| SLTI   Set less than immediate (signed)
+    * 45 WFI_3    WFI_4    5 0010000001010111110001100101|        More check offset
+    * 46 ILL_1    ILL_2    0 0000011011010110x00101000111|        Store PC to mepc
+    * 47 ILL_2    ILL_3    0 0000011111010111000110001111|        Store 0 to mtval
+    * 48 _L0x48   SW_1     3 1110000001110111110001100110| SW     Store word. Q=wradr=RS1+Simm
+    * 49 CSRRW_1  CSRRW_2  5 0010000000000111110001001011|        Construct PC storage adr
+    * 4a _L0x4a   SW_1     3 1110000001110111110001100110| SW     Store word. Q=wradr=RS1+Simm
+    * 4b CSRRW_2  CSRRW_3  0 0001000111010110100110110000|        Write PC to 0x100 start Prep emulation entrypt
+    * 4c SLT_0    SLTX_1   0 00100000011101x10xxx00110001| SLT    Set less than (signed)
+    * 4d unx4d             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| 4d: Not in use 
+    * 4e eILL0b   ILLe     0 001000000xxxx1x0xxxx11111110| Illegal instruction seen
+    * 4f MRET_8   StdIncPc 5 0010000001010111110011100110|        Prep +4
+    * 50 LW_1     StdIncPc d 0000001001011111000111100110|        Read until d=mem[(rs1+ofs) & ~3u]
+    * 51 LDAF_LW  LDAF_a   0 0000011111010110111011011010|  err   LD AlignFault. Faulting adr to mtval
+    * 52 LH_1     LH_2     1 0010000001011111100101010100|        Read until q=mem[(rs1+ofs) & ~3u]
+    * 53 LDAF_LH  LDAF_a   0 0000011111010110111011011010|  err   LD AlignFault. Faulting adr to mtval
+    * 54 LH_2     LH_3     c 0010000001010111100111101011|        Repeat shr until shreg = 0 (0, 8 or 16 times)
+    * 55 aFaultb  aFault_1 0 0000011111010111011000011110|  err   LH Load access fault. Faulting adr to mtval
+    * 56 LH_4     LH_5     0 0010000001000111101101010111|        q = (uint16_t) mem[rs1+Iimm]
+    * 57 LH_5     LB_6     0 0010000001000111100010001011|        q = D^0xffffffff^q = D ^ 0x00008000
+    * 58 unx58             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| 58: Not in use 
+    * 59 unx59             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| 59: Not in use 
+    * 5a SB_1     SB_2     4 0000011001011111100101011101|        Write d to Q and yy (for sh 0). Prep shift
+    * 5b _L0x5b   JAL_1    3 0010000000010110111000110010| JAL    J-imm is in q. Branch on alignfault
+    * 5c CSRRS_0  CSRRW_1  0 0000011000110111011001001001| CSRRS  Decoded CSR adr in yy
+    * 5d SB_2     SB_3     a 0000011001011111110111111011|        Repeat shl until shreg = 0 (0,8,16 or 24 times)
+    * 5e LHU_1    LHU_2    1 0010000001011111100101110000|        Read until q=mem[(rs1+ofs) & ~3u]
+    * 5f LDAF_LHU LDAF_a   0 0000011111010110111011011010|  err   LD AlignFault. Faulting adr to mtval
+    * 60 unx60             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| 60: Not in use 
+    * 61 EBRKWFI2 EBREAK_1 6 0000010000110111001011110111| EBREAK/WFI2 Select EBREAK or WFI
+    * 62 unx62             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| 62: Not in use 
+    * 63 unx63             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| 63: Not in use 
+    * 64 SLTIU_0  SLTIX_1  0 0010000001111111101000101011| SLTIU  Set less than immediate (unsigned)
+    * 65 WFI_4    WFI_5    6 00100000000101x10xxx11101111|        Prepare read PC
+    * 66 SW_1     SW_2     0 0000000111110110100111110010|        Write d to a+k until accepted
+    * 67 SW_E1SWE SW_E2    0 0000011110010110x11010010011|        Store faulting address alignment to mtval
+    * 68 unx68             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| 68: Not in use 
+    * 69 unx69             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| 69: Not in use 
+    * 6a unx6a             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| 6a: Not in use 
+    * 6b SB_4     SB_5     0 1110000101100111100101111010|        Address back to Q. Prepare get item to write
+    * 6c SLTU_0   SLTX_1   0 00100000011101x10xxx00110001| SLTU   Set less than (unsigned)
+    * 6d unx6d             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| 6d: Not in use 
+    * 6e unx6e             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| 6e: Not in use 
+    * 6f MRET_6   MRET_7   5 001000000xxxx111110011001111|        ~302 + origImm + 1 for branch decision
+    * 70 LHU_2    LHU_3    c 0010000001010111100110111010|        Repeat shr until shreg = 0 (0, 8 or 16 times)
+    * 71 aFaultc  aFault_1 0 0000011111010111011000011110|  err   LHU Load access fault. Faulting adr to mtval
+    * 72 LBU_3    ANDI_1   0 0010000000110111101000011010|        Invert q. Prepare read mask
+    * 73 BAERR_1  BAERR_2  0 0000011111100111000101110110|        Faultadr to mtval. Prepare get offset
+    * 74 BrOpFet  Fetch2   e 0010000001011111000111110100| NewOp2 Read until instruction latched
+    * 75 BAlignEr BAERR_1  0 00100000000101x0xxxx01110011|  Err   Branch target instruction address misaligned
+    * 76 BAERR_2  BAERR_3  0 0010000000010111100001110111|        ~offset to Q. Prep read (origPC+offset)
+    * 77 BAERR_3  BAERR_4  5 0000011011010110x10001111101|        origPC to mepc. Prep read 0
+    * 78 unx78             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| 78: Not in use 
+    * 79 unx79             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| 79: Not in use 
+    * 7a SB_5     SW_2     0 0000000101100110100111110010|        Write d to a+k until accepted
+    * 7b _L0x7b   JAL_1    3 0010000000010110111000110010| JAL    J-imm is in q. Branch on alignfault
+    * 7c CSRRC_0  CSRRW_1  0 0000011000110111011001001001| CSRRC  Decoded CSR adr in yy
+    * 7d BAERR_4  JAL_3    0 0001111101001110x00100110100|        Store 0 to mcause. Prep get trap entry pont
+    * 7e NMI_1    NMI_2    0 000001101xxxx111000110010000|        Store pc to mepc.
+    * 7f JALRE2   BAERR_4  0 0000011111010110x00101111101|        mtval is target
+    * 80 LBU_0    LBU_1    0 0110000001101011110010000101| LBU    Load unsigned byte. Q = rdadr=RS1+Iimm.
+    * 81 JAERR_2  BAERR_4  0 0000011011010110x00101111101|        Store PC to mepc
+    * 82 unx82             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| 82: Not in use 
+    * 83 unx83             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| 83: Not in use 
+    * 84 XORI_0   XORI_1   0 0010000001111111101000100001| XORI   Xor immediate. Q=~Iimm
+    * 85 LBU_1    LBU_2    1 0010000001011111100111110000|        Read until q=mem[(rs1+ofs) & ~3u]
+    * 86 JAL_2    JAL_3    5 0000001001100100x10000110100|        Return address to TRG
+    * 87 JALRE1   JALRE2   0 0000011011100110x00101111111|  err   Store pc to mepc
+    * 88 unx88             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| 88: Not in use 
+    * 89 unx89             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| 89: Not in use 
+    * 8a unx8a             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| 8a: Not in use 
+    * 8b LB_6     StdIncPc 5 0000001000010111010011100110|        WTRG=(D^0x80)+0xFFFFFF7F+1=(D^0x80)-0x80
+    * 8c XOR_0    XOR_1    0 00100000011111x10xxx00101001| XOR    xor
+    * 8d unx8d             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| 8d: Not in use 
+    * 8e _LCSRRS_1 ILLe     0 001000000xxxx1x0xxxx11111110| Illegal instruction seen
+    * 8f ILL_3    ILL_4    5 0010000001010111110010101001|        Q = 1
+    * 90 NMI_2    JAL_3    0 0001111110100111011000110100|        mtval = 0.
+    * 91 LDAF_2   LDAF_3   5 0001111100010100x10010010010|        Store 4 to mcause
+    * 92 LDAF_3   JAL_3    0 0000011011001110x00100110100|        PC to mepc
+    * 93 SW_E2    SW_E3    0 0000011011011111000110010101|        Store address that faulted
+    * 94 SW_E4    JAL_3    0 0001111101001110x10100110100|        Store 6 to mcause
+    * 95 SW_E3    SW_E4    5 0010000001011101110010010100|        Q = 3
+    * 96 SH_1     SH_2     4 0000011001011111100110111011|        Write d to Q and yy (for sh 0). Prep shift
+    * 97 SW_E1SWH SW_E2    0 0000011110010110x11010010011|        Store faulting address alignment to mtval
+    * 98 BLT      condb_2  0 0000011001110111011000010011| BLT    Conditional Branch. Offset to Ryy
+    * 99 _L0x99   ILLe     0 001000000xxxx1x0xxxx11111110| Illegal instruction seen (at illegal entrypt)
+    * 9a ECALL_6  JAL_3    0 0001111101001100x10000110100|        mcause = 11
+    * 9b unx9b             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| 9b: Not in use 
+    * 9c unx9c             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| 9c: Not in use 
+    * 9d unx9d             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| 9d: Not in use 
+    * 9e SH_4     SH_5     0 1110000011100111100110011111|        Address back to Q. Prepare get item to write
+    * 9f SH_5     SW_2     0 0000000011100110100111110010|        Write d to a+k until accepted
+    * a0 LHU_0    LHU_1    2 0100011001101011110001011110| LHU    Load unsigned hword. Q = rdadr=RS1+Iimm
+    * a1 ECALL_4  ECALL_5  5 0010000001010101110010110110|        Q = 4
+    * a2 unxa2             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| a2: Not in use 
+    * a3 unxa3             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| a3: Not in use 
+    * a4 SRxI_0   SRxI_1   4 0010000001111010x11000111010| SRxI   Shift Right immediate (both logic/arith here)
+    * a5 MRET_3   MRET_4   5 0010000000110111110010101111|        0x102 + 0xff + 1 = 0x202
+    * a6 ECAL_RET ECALL_1  3 0010000001011110111011010000| ECALL/(U/S/M)RET Select ECALL or (U/S/M)RET
+    * a7 EBRKWFI1 EBRKWFI2 0 001000000xxxx111110001100001| EBREAK/WFI1 Prepare select EBREAK or WFI
+    * a8 unxa8             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| a8: Not in use 
+    * a9 ILL_4    JAL_3    5 0001111101001110x10000110100|        Store 2 to mcause
+    * aa unxaa             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| aa: Not in use 
+    * ab EBREAK_2 ECALL_6  0 0000011011010111000110011010|        pc to mepc
+    * ac _L0xac   SRx_1    0 00100000011101x0xxxx00111111| SRx    Shift Right (both SRL and SRA)
+    * ad unxad             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| ad: Not in use 
+    * ae _L0xae   SRx_1    0 00100000011101x0xxxx00111111| SRx    Shift Right (both SRL and SRA)
+    * af MRET_4   MRET_5   5 001000000xxxx111110011000101|        0x202 + 0xff + 1 = 0x302
+    * b0 CSRRW_3  CSRRW_4  5 0010000001010101110010110010|        Prep emulation entrypt 0x108, here Q to 0x104
+    * b1 aF_SW_3  LDAF_3   0 0001111100010100x10010010010|        Store 7 to mcause
+    * b2 CSRRW_4  Fetch    7 0100010101101100110011011110|        IncPC, OpFetch, but force +4
+    * b3 unxb3             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| b3: Not in use 
+    * b4 i0reserv          4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| Not in use, reserved to allow LASTINCH
+    * b5 SH_3     SH_4     0 0010000000000111011010011110|        Prepare get back address to use 
+    * b6 ECALL_5  ECALL_6  5 0010000001010101110010011010|        Q = 8
+    * b7 IJ_3     IJ_4     0 0010000001100101110010111101|        Construct Q = 3
+    * b8 BGE      condb_2  0 0000011001110111011000010011| BGE    Conditional Branch. Offset to Ryy
+    * b9 unxb9             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| b9: Not in use 
+    * ba LHU_3    ANDI_1   0 0010000000111111101000011010|        Invert q. Prepare read mask
+    * bb SH_2     SH_3     a 0000011001011111110110110101|        Repeat shl until shreg = 0 (0,8 or 24 times)
+    * bc CSRRWI_0 CSRRW_1  0 0000011000110111011001001001| CSRRWI Decoded CSR adr in yy
+    * bd IJ_4     Fetch    9 0100010101101110101111011110|        Mask and use as PC
+    * be IJ_1     IJ_2     9 0010000001011111100100011111|        Read until q=mem[(rs1+ofs)&~3u]
+    * bf IJT_1    IJT_2    9 0010000001011111100111000001|        Exit CSR, enter trap
+    * c0 unxc0             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| c0: Not in use 
+    * c1 IJT_2    IJT_3    0 0000011001010111011011101001|        Read word is to be masked with ~3u
+    * c2 unxc2             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| c2: Not in use 
+    * c3 unxc3             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| c3: Not in use 
+    * c4 ORI_0    ORI_1    0 0000010001111111001011100001| ORI    Or immediate. jj=~Iimm
+    * c5 MRET_5   MRET_6   0 0010000000000111101001101111|        ~302
+    * c6 IJT_4    ILL_2    0 0100011011101111101101000111|        Mask and store to mepc and Q for read of instr
+    * c7 QINT_1   QINT_2   0 000001101xxxx111000111001011|        Store pc to mepc.
+    * c8 unxc8             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| c8: Not in use 
+    * c9 MRET_2   MRET_3   0 0010000000110101110010100101|        0xff+3 = 0x102
+    * ca unxca             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| ca: Not in use 
+    * cb QINT_2   StdIncPc 0 0001111110100111011011100110|        mtval = 0.
+    * cc OR_0     OR_1     0 00100000011111x10xxx00100110| OR     or
+    * cd unxcd             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| cd: Not in use 
+    * ce _LCSRRCI_1 ILLe     0 001000000xxxx1x0xxxx11111110| Illegal instruction seen
+    * cf MRET_7   MRET_8   6 00100000001101x10xxx01001111|        Prepare emulation entry point 0x104
+    * d0 ECALL_1  ECALL_2  5 0010000000010111110000110111| ECALL  Verify Imm==0x000
+    * d1 MRET_1   MRET_2   0 0000010000110111011011001001| MRET   First save Imm, start build constant for check
+    * d2 LB_2     LB_3     c 0010000001010111100100000110|        Repeat shr until shreg == 0 (0,8,16,24 times)
+    * d3 aFaultd  aFault_1 0 0000011111010111011000011110|  err   LB Load access fault. Faulting adr to mtval
+    * d4 aFault_2 LDAF_3   5 0001111100010110x10010010010|        Store 5 to mcause
+    * d5 unxd5             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| d5: Not in use
+    * d6 eILL0c   ILLe     0 001000000xxxx1x0xxxx11111110| Illegal instruction seen
+    * d7 ECALL_3  ECALL_4  0 0000011111010111011010100001|        mtval = 0, now start the chore of 11 to mcause
+    * d8 BLTU     condb_2  0 0000011001110111011000010011| BLTU   Conditional Branch. Offset to Ryy
+    * d9 unxd9             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| d9: Not in use
+    * da LDAF_a   LDAF_2   0 00100000010101x10xxx10010001|        Extra cycle after error detected write mtval
+    * db jFault_1 LDAF_3   5 0000011100010110x10010010010|        Store 1 to mcause
+    * dc CSRRSI_0 CSRRW_1  0 0000011000110111011001001001| CSRRSI Decoded CSR adr in yy
+    * dd aF_SW_1  aF_SW_2  0 0000011111010111011011100101|  err   SW Store access fault. Faulting adr to mtval
+    * de Fetch    Fetch2   f 0000010000011111011011110100|  Fr00  Read and latch instruction
+    * df eFetch   Fetch2   e 0000010001011111011011110100|  Fr00  rep Read until d=mem[(rs1+ofs) & ~3u]
+    * e0 unxe0             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| e0: Not in use
+    * e1 ORI_1    ORI_2    0 0010000000000111100100011101|        Q = RS1
+    * e2 unxe2             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| e2: Not in use
+    * e3 unxe3             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| e3: Not in use
+    * e4 ANDI_0   ANDI_1   0 0010000001111111101000011010| ANDI   And immediate. Q=~Iimm
+    * e5 aF_SW_2  aF_SW_3  5 0010000001010101110010110001|        Q = 4
+    * e6 StdIncPc Fetch    7 0100010101101100110011011110|  Fr00  IncPC, OpFetch
+    * e7 aFault   aFault_1 0 0000011111010111011000011110|  err   Load access fault. Faulting adr to mtval
+    * e8 unxe8             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| e8: Not in use
+    * e9 IJT_3    IJT_4    0 0010000001100101110011000110|        Construct Q = 3
+    * ea unxea             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| ea: Not in use
+    * eb LH_3     LH_4     0 0010000000111111101001010110|        q = ~mem[rs1+ofs]
+    * ec AND_0    AND_1    0 00100000011111x10xxx00010001| AND    And 
+    * ed unxed             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| ed: Not in use
+    * ee eILL0a   ILLe     0 001000000xxxx1x0xxxx11111110| Illegal instruction seen
+    * ef WFI_5    Fetch    7 0100010101101100110011011110|        IncPC, OpFetch
+    * f0 LBU_2    LBU_3    c 0010000001010111100101110010|        Repeat shr until shreg = 0 (0, 8 or 16 times)
+    * f1 aFaulte  aFault_1 0 0000011111010111011000011110|  err   LBU Load access fault. Faulting adr to mtval
+    * f2 SW_2     StdIncPc 0 00100000000101x10xxx11100110|        Prepare read PC
+    * f3 aF_SW    aF_SW_1  0 001000000xxxx1x01xxx11011101|  err   SW/SH/SB access fault. Rest to set SEL_O=4'hf
+    * f4 Fetch2            0 0000010111111111110000000000|  Fr00  Update ttime. Update I. Q=immediate. Use dinx
+    * f5 jFault   jFault_1 0 0000011111010111011011011011|  err   Fetch access fault. Faulting adr to mtval
+    * f6 WFI_1    WFI_2    5 0010000000000101110011111010| WFI    To check offset
+    * f7 EBREAK_1 EBREAK_2 0 0000011110010111011010101011| EBREAK mepc = pc, store 0 to mtval
+    * f8 BGEU     condb_2  0 0000011001110111011000010011| BGEU   Conditional Branch. Offset to Ryy
+    * f9 unxf9             4 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| f9: Not in use
+    * fa WFI_2    WFI_3    5 0010000001010111110001000101|        Check offset
+    * fb SB_3     SB_4     0 0010000000000111011001101011|        Prepare get back address to use 
+    * fc CSRRCI_0 CSRRW_1  0 0000011000110111011001001001| CSRRCI Decoded CSR adr in yy
+    * fd NMI_0    NMI_1    0 00100000000101x10xxx01111110| NMI    Get current PC
+    * fe ILLe     ILL_1    0 00100000000101x0xxxx01000110| Illegal
+    * ff QINT_0   QINT_1   0 00100000000101x10xxx11000111| INT    Get current PC
     */
-   localparam u0_0 = 256'hb6e6901090e2b904b386bc5a788bbc5a7b09ba070804b4e690e67cbef9d27c01;
-   localparam u0_1 = 256'hb6b79cd4b7e6eea62e32b3e6b441b6136cde90e639163c15f8144c76b81af88b;
-   localparam u0_2 = 256'hb6e6f642b96a803e3430bc96b821bc963c1db0270804e63590e6bc39b0e67c52;
-   localparam u0_3 = 256'he13ae135b903b6492e32b93db1e6b61331d7fd03f93669de0000b486f82bb6e6;
-   localparam u0_4 = 256'hbce600feb12e9031a9b0bc663c4bbc66b18fa147bc65fa2b28eabc603c0b7c50;
-   localparam u0_5 = 256'haedaf970fdfbb6492e32f95df69cf96e388b3b57b61eb9ebaedaf954aedaf1e6;
-   localparam u0_6 = 256'h3ccfa9b9b12e9031397ab0f9b88bb1e6a693a9f290effa2bfc58fcc8b2f7f942;
-   localparam u0_7 = 256'h000031900000b6492e3229f2bca836aaf6d5f6d500000000b612ba1ab61eb9ba;
-   localparam u0_8 = 256'hbca900fef982d029b4e6d01ab6e6c09c00000434f9f0fa21bc82b0a800007c85;
-   localparam u0_9 = 256'h29f2399f31a231680000443400feb613a693f9bbdc946534f195613484923634;
-   localparam u0_A = 256'h3cc5803f90e0803fb19ad0c86434b8783c61eed0bcafe63ab1e6b88b9cb67c5e;
-   localparam u0_B = 256'hf9c1f91f6bdeb649fdb5fa1a38c0b6133cbd9c9a369efc7300004cde84929cb2;
-   localparam u0_C = 256'h904f00fef982d02636e63dc29ca53d6231cb7b473a6ff2e1fc8afccab6e9b988;
-   localparam u0_D = 256'hf6f4f6f4b6e5b649a4929091d042b613b6a100fefc00a492b61eb906b6c9bc37;
-   localparam u0_E = 256'h4cde00fe90e0d011fa563c223cc6b9e2b61e4cde9cb1fa1ad01abce8391df0ca;
-   localparam u0_F = 256'h90c78046907eb649366bbc45b4d9b613b6ab1cfab6db74b408dd90e6b61eb972;
-   localparam u1_0 = 256'h23200323032b0323432033070321330703210321032023240320122701120007;
-   localparam u1_1 = 256'h4322034e23201322032023203326432334270320035003470323343f03230323;
-   localparam u1_2 = 256'h2320332b05220323034463070323630703243323032005030320036223205007;
-   localparam u1_3 = 256'h0503050326624321032025622328432383502622252234237500432403232370;
-   localparam u1_4 = 256'h0346032045230323992218870344188787228322034603230320056203441087;
-   localparam u1_5 = 256'h8722011246224321032045224323036e03220322872206628722011287222192;
-   localparam u1_6 = 256'h03444323452303230b2343220322232087209723035003230a4605463351032b;
-   localparam u1_7 = 256'h750083207500432103207723034e432001b203a0750075000320032187220662;
-   localparam u1_8 = 256'h034203200c2a0323234c036e23200a2b7500233f011203230326332375000007;
-   localparam u1_9 = 256'h9323a8230a2b0a2b75004d260320432387204522034e4d22832283224d4c8d21;
-   localparam u1_A = 256'h03440323052b03238322032a4d460a2a032413820345050323200322034e5007;
-   localparam u1_B = 256'h012201223423432146220321034343230347034e0320b3c77500344f4d24034e;
-   localparam u1_C = 256'h035103200c2a03238d2103db032503db83208023032033230a46054643220353;
-   localparam u1_D = 256'h31b231b28722432147440322032b432387220320b7e74d448722066233210344;
-   localparam u1_E = 256'h344f0320052b0323032103230347032b8722343f034e0323036e056203204322;
-   localparam u1_F = 256'h032003200320432103200346334743238720034c8722b7f40320032087220662;
+   localparam u0_0 = 256'h76e6501076e6790473863c5af88b3c5afb097a07480474e650e6fcbef9d2bc01;
+   localparam u0_1 = 256'h76b75cd477e6eea66e3273e674417613fc74cede79167c15f8140000781af88b;
+   localparam u0_2 = 256'h76e6000076e6403e74303c9678213c967c1d70274804a63550e6000070e6bc52;
+   localparam u0_3 = 256'ha13aa135790376496e32793d0000761371d7fd03f936e9de64817486f82b76e6;
+   localparam u0_4 = 256'h7ce640fe0000503169b07c667c4b7c66718f61477c65fa2b000000007c0bfc50;
+   localparam u0_5 = 256'h6edaf970fdfb76496e32f95d00000000788b7b57761e79eb6edaf9546edaf1e6;
+   localparam u0_6 = 256'h7ccf000000005031797a000000000000669369f250effa2b0000000072f70000;
+   localparam u0_7 = 256'h617d7190e13476496e3269f200000000647d78774073f1f471767a1a761e79ba;
+   localparam u0_8 = 256'h7ca940fe0000d02974e6000000000000617f4434f9f0fa2100000000617dbc85;
+   localparam u0_9 = 256'h69f2799f000000000000c43440fe76136693f9bbdc94e534f195e13444927634;
+   localparam u0_A = 256'h7cc5403f0000403f719a0000e43400007c61eed07cafa63a000000005cb6bc5e;
+   localparam u0_B = 256'hf9c1f91febde7649fdb5fa1a000076135cbd5c9a769e00000000ccde44925cb2;
+   localparam u0_C = 256'h504f40fe0000d02676e600005ca5000071cbfb477a6ff2e10000000076e90000;
+   localparam u0_D = 256'hf6f4f6f476e57649649250910000761376a140fe00006492761e790676c97c37;
+   localparam u0_E = 256'hccde40fe0000d011fa5600005cc60000761eccde5cb1fa1a00000000791d0000;
+   localparam u0_F = 256'h50c74046507e7649766b7c450000761376ab5cfa76dbfc0048dd50e6761e7972;
+   localparam u1_0 = 256'h0021020700210207306100470202004702020203020100210201228612050606;
+   localparam u1_1 = 256'h0065520500212205320100210045006734567456620652010207400002070207;
+   localparam u1_2 = 256'h0021400000210207520020470207204702000047020142070201400000212466;
+   localparam u1_3 = 256'h42074207c02500633201b025400000676068a025402594560079006102078021;
+   localparam u1_4 = 256'h5205020040000207011d3e0752003e07007d006d520502074000400052003606;
+   localparam u1_5 = 256'h007d1205a0650063320140654000400002040204007dc205007d1205007dd025;
+   localparam u1_6 = 256'h52004000400002070e164000400040000079001f620102074000400060434000;
+   localparam u1_7 = 256'h007d006801f400633201001640004000506d02010201e205007e0203007dc205;
+   localparam u1_8 = 256'h52050200400002075021400040004000006e50261205020740004000006d0606;
+   localparam u1_9 = 256'h000e0e0e40004000400001f40200006700794065520501f4006d006c51f101fa;
+   localparam u1_A = 256'h5200020740000207006d400051f4400002003205520342074000400052052466;
+   localparam u1_B = 256'h9205920594560063a06502034000006702065205020040004000745601f15205;
+   localparam u1_C = 256'h620302004000020701fa4000020340000068046e020000474000400000654000;
+   localparam u1_D = 256'he045f041007d00635071020540000067007d0200400051f1007dc20500435201;
+   localparam u1_E = 256'h74560200400002070203400002064000007d7456520502074000400002004000;
+   localparam u1_F = 256'h0201020102010063020052054000006700795200007d005f02000201007dc205;
    wire [31:0]   indir;
 `ifdef verilator
    /* verilator lint_off UNUSED */
@@ -473,41 +410,38 @@ module m_2ebr
    assign d[16] = indir[11];
    assign d[17] = indir[12];
    assign d[19] = indir[13];
-   assign d[22] = indir[14];
-   assign d[23] = indir[15];
-   assign d[24] = indir[16];
-   assign d[25] = indir[17];
-   assign d[42] = indir[18];
-   assign d[43] = indir[19];
-   // replaces = 1000000100100101000000000101001100011100000000
-   SB_LUT4 #(.LUT_INIT(16'h0042)) cmb_d08(.O(d[8]),.I3(indir[23]),.I2(indir[22]),.I1(indir[21]),.I0(indir[20]));
-   SB_LUT4 #(.LUT_INIT(16'h1098)) cmb_d09(.O(d[9]),.I3(indir[23]),.I2(indir[22]),.I1(indir[21]),.I0(indir[20]));
-   SB_LUT4 #(.LUT_INIT(16'h3018)) cmb_d10(.O(d[10]),.I3(indir[23]),.I2(indir[22]),.I1(indir[21]),.I0(indir[20]));
-   SB_LUT4 #(.LUT_INIT(16'h0020)) cmb_d14(.O(d[14]),.I3(indir[23]),.I2(indir[22]),.I1(indir[21]),.I0(indir[20]));
-   SB_LUT4 #(.LUT_INIT(16'h0c00)) cmb_d15(.O(d[15]),.I3(indir[23]),.I2(indir[22]),.I1(indir[21]),.I0(indir[20]));
-   SB_LUT4 #(.LUT_INIT(16'hc000)) cmb_d18(.O(d[18]),.I3(indir[23]),.I2(indir[22]),.I1(indir[21]),.I0(indir[20]));
-   SB_LUT4 #(.LUT_INIT(16'hfffe)) cmb_d20(.O(d[20]),.I3(indir[23]),.I2(indir[22]),.I1(indir[21]),.I0(indir[20]));
-   SB_LUT4 #(.LUT_INIT(16'h5000)) cmb_d30(.O(d[30]),.I3(indir[23]),.I2(indir[22]),.I1(indir[21]),.I0(indir[20]));
-   SB_LUT4 #(.LUT_INIT(16'h0100)) cmb_d32(.O(d[32]),.I3(indir[23]),.I2(indir[22]),.I1(indir[21]),.I0(indir[20]));
-   SB_LUT4 #(.LUT_INIT(16'h0802)) cmb_d35(.O(d[35]),.I3(indir[23]),.I2(indir[22]),.I1(indir[21]),.I0(indir[20]));
-   SB_LUT4 #(.LUT_INIT(16'h0a00)) cmb_d38(.O(d[38]),.I3(indir[23]),.I2(indir[22]),.I1(indir[21]),.I0(indir[20]));
-   SB_LUT4 #(.LUT_INIT(16'h0008)) cmb_d45(.O(d[45]),.I3(indir[23]),.I2(indir[22]),.I1(indir[21]),.I0(indir[20]));
-   // replaces = 0100110011011000001000001000000000000000000000
-   SB_LUT4 #(.LUT_INIT(16'h2f9f)) cmb_d21(.O(d[21]),.I3(indir[27]),.I2(indir[26]),.I1(indir[25]),.I0(indir[24]));
-   SB_LUT4 #(.LUT_INIT(16'h2a90)) cmb_d27(.O(d[27]),.I3(indir[27]),.I2(indir[26]),.I1(indir[25]),.I0(indir[24]));
-   SB_LUT4 #(.LUT_INIT(16'h0012)) cmb_d33(.O(d[33]),.I3(indir[27]),.I2(indir[26]),.I1(indir[25]),.I0(indir[24]));
-   SB_LUT4 #(.LUT_INIT(16'h0040)) cmb_d34(.O(d[34]),.I3(indir[27]),.I2(indir[26]),.I1(indir[25]),.I0(indir[24]));
-   SB_LUT4 #(.LUT_INIT(16'h2004)) cmb_d36(.O(d[36]),.I3(indir[27]),.I2(indir[26]),.I1(indir[25]),.I0(indir[24]));
-   SB_LUT4 #(.LUT_INIT(16'h2200)) cmb_d37(.O(d[37]),.I3(indir[27]),.I2(indir[26]),.I1(indir[25]),.I0(indir[24]));
-   SB_LUT4 #(.LUT_INIT(16'h0911)) cmb_d40(.O(d[40]),.I3(indir[27]),.I2(indir[26]),.I1(indir[25]),.I0(indir[24]));
-   SB_LUT4 #(.LUT_INIT(16'h0900)) cmb_d41(.O(d[41]),.I3(indir[27]),.I2(indir[26]),.I1(indir[25]),.I0(indir[24]));
-   SB_LUT4 #(.LUT_INIT(16'h1400)) cmb_d44(.O(d[44]),.I3(indir[27]),.I2(indir[26]),.I1(indir[25]),.I0(indir[24]));
-   // replaces = 0000001000000010110100000000000000000000000000
-   SB_LUT4 #(.LUT_INIT(16'h0f00)) cmb_d26(.O(d[26]),.I3(indir[31]),.I2(indir[30]),.I1(indir[29]),.I0(indir[28]));
-   SB_LUT4 #(.LUT_INIT(16'h0134)) cmb_d28(.O(d[28]),.I3(indir[31]),.I2(indir[30]),.I1(indir[29]),.I0(indir[28]));
-   SB_LUT4 #(.LUT_INIT(16'h0978)) cmb_d29(.O(d[29]),.I3(indir[31]),.I2(indir[30]),.I1(indir[29]),.I0(indir[28]));
-   SB_LUT4 #(.LUT_INIT(16'h0062)) cmb_d31(.O(d[31]),.I3(indir[31]),.I2(indir[30]),.I1(indir[29]),.I0(indir[28]));
-   SB_LUT4 #(.LUT_INIT(16'h0403)) cmb_d39(.O(d[39]),.I3(indir[31]),.I2(indir[30]),.I1(indir[29]),.I0(indir[28]));
+   assign d[20] = indir[14];
+   assign d[22] = indir[15];
+   assign d[23] = indir[16];
+   assign d[24] = indir[17];
+   assign d[25] = indir[18];
+   assign d[26] = indir[19];
+   assign d[27] = indir[20];
+   assign d[28] = indir[21];
+   assign d[29] = indir[22];
+   assign d[36] = indir[23];
+   assign d[37] = indir[24];
+   assign d[39] = indir[25];
+   assign d[40] = indir[26];
+   assign d[41] = indir[27];
+   // replaces = 000100111110000000001000001100011100000000
+   SB_LUT4 #(.LUT_INIT(16'h1802)) cmb_d08(.O(d[8]),.I3(indir[31]),.I2(indir[30]),.I1(indir[29]),.I0(indir[28]));
+   SB_LUT4 #(.LUT_INIT(16'h01a0)) cmb_d09(.O(d[9]),.I3(indir[31]),.I2(indir[30]),.I1(indir[29]),.I0(indir[28]));
+   SB_LUT4 #(.LUT_INIT(16'h00a0)) cmb_d10(.O(d[10]),.I3(indir[31]),.I2(indir[30]),.I1(indir[29]),.I0(indir[28]));
+   SB_LUT4 #(.LUT_INIT(16'h0040)) cmb_d14(.O(d[14]),.I3(indir[31]),.I2(indir[30]),.I1(indir[29]),.I0(indir[28]));
+   SB_LUT4 #(.LUT_INIT(16'hc000)) cmb_d15(.O(d[15]),.I3(indir[31]),.I2(indir[30]),.I1(indir[29]),.I0(indir[28]));
+   SB_LUT4 #(.LUT_INIT(16'he3ef)) cmb_d21(.O(d[21]),.I3(indir[31]),.I2(indir[30]),.I1(indir[29]),.I0(indir[28]));
+   SB_LUT4 #(.LUT_INIT(16'h000c)) cmb_d31(.O(d[31]),.I3(indir[31]),.I2(indir[30]),.I1(indir[29]),.I0(indir[28]));
+   SB_LUT4 #(.LUT_INIT(16'h0008)) cmb_d32(.O(d[32]),.I3(indir[31]),.I2(indir[30]),.I1(indir[29]),.I0(indir[28]));
+   SB_LUT4 #(.LUT_INIT(16'h6282)) cmb_d33(.O(d[33]),.I3(indir[31]),.I2(indir[30]),.I1(indir[29]),.I0(indir[28]));
+   SB_LUT4 #(.LUT_INIT(16'h1400)) cmb_d34(.O(d[34]),.I3(indir[31]),.I2(indir[30]),.I1(indir[29]),.I0(indir[28]));
+   SB_LUT4 #(.LUT_INIT(16'h4002)) cmb_d35(.O(d[35]),.I3(indir[31]),.I2(indir[30]),.I1(indir[29]),.I0(indir[28]));
+   SB_LUT4 #(.LUT_INIT(16'h6000)) cmb_d38(.O(d[38]),.I3(indir[31]),.I2(indir[30]),.I1(indir[29]),.I0(indir[28]));
+   assign d[42] = 1'b0;
+   assign d[43] = 1'b0;
+   assign d[44] = 1'b0;
+   assign d[45] = 1'b0;
    assign d[46] = 1'b0;
    assign d[47] = 1'b0;
+wire instr0100,instr1x110100;            bn_l4v #(.I(16'h0010)) leq0100(     .o(instr0100),     .i({minx[3:0]}));    bn_l4v #(.I(16'h8000)) leq1x110100( .o(instr1x110100), .i({minx[7],minx[5:4],instr0100}));    SB_DFFE reg_d18( .Q(d[18]), .C(clk), .E(progress_ucode), .D(instr1x110100));    assign d[30] = d[18];
 endmodule

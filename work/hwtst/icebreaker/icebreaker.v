@@ -50,7 +50,8 @@ module top
       IWIDTH             = 32, 
       NO_CYCLECNT        = 0, 
       MTIMETAP           = 0,//16, 
-      HIGHLEVEL          = 0
+      HIGHLEVEL          = 0,
+      DAT_I_ZERO_WHEN_INACTIVE = 1
       )
    (
     input  CLK,
@@ -174,9 +175,6 @@ module top
       .CLK_I                            (CLK_I),
       .meta_usartRX                     (meta_usartRX));
 
-   
-   /* The program to include will usually be specified in a Makefile. 
-    */
 `ifndef defaulticeprog 
  `define defaulticeprog "ice40loaderprog.hv" 
 `endif 
@@ -190,6 +188,7 @@ module top
        .NO_CYCLECNT        ( NO_CYCLECNT        ),
        .MTIMETAP           ( MTIMETAP           ),
        .HIGHLEVEL          ( HIGHLEVEL          ),
+       .DAT_I_ZERO_WHEN_INACTIVE( DAT_I_ZERO_WHEN_INACTIVE ),
        .prg00(prg00),       .prg01(prg01),       .prg02(prg02),       .prg03(prg03),
        .prg04(prg04),       .prg05(prg05),       .prg06(prg06),       .prg07(prg07),
        .prg08(prg08),       .prg09(prg09),       .prg0A(prg0A),       .prg0B(prg0B),

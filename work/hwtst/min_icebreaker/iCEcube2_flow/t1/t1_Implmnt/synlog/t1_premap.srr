@@ -1,0 +1,71 @@
+# Mon Oct 12 12:21:43 2020
+
+Synopsys Lattice Technology Pre-mapping, Version maplat, Build 1612R, Built Dec  5 2016 09:30:53
+Copyright (C) 1994-2016 Synopsys, Inc. All rights reserved. This Synopsys software and all associated documentation are proprietary to Synopsys, Inc. and may only be used pursuant to the terms and conditions of a written license agreement with Synopsys, Inc. All other use, reproduction, modification, or distribution of the Synopsys software or the associated documentation is strictly prohibited.
+Product Version L-2016.09L+ice40
+
+Mapper Startup Complete (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 98MB peak: 99MB)
+
+@A: MF827 |No constraint file specified.
+@L: /home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/iCEcube2_flow/t1/t1_Implmnt/t1_scck.rpt 
+Printing clock  summary report in "/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/iCEcube2_flow/t1/t1_Implmnt/t1_scck.rpt" file 
+@N: MF248 |Running in 64-bit mode.
+@N: MF666 |Clock conversion enabled. (Command "set_option -fix_gated_and_generated_clocks 1" in the project file.)
+
+Design Input Complete (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 107MB peak: 111MB)
+
+
+Mapper Initialization Complete (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 107MB peak: 111MB)
+
+
+Start loading timing files (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 108MB peak: 111MB)
+
+
+Finished loading timing files (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 108MB peak: 111MB)
+
+@N: BN115 :"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/../../code/m_midgetv_core.v":926:3:926:10|Removing instance inst_ram (in view: work.m_midgetv_core_Z17(verilog)) of type view:work.m_ram_0s_0s(verilog) because it does not drive other instances.
+@N: BN115 :"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/../../code/m_midgetv_core.v":1258:5:1258:13|Removing instance inst_shlr (in view: work.m_midgetv_core_Z17(verilog)) of type view:work.m_shlr_32s_0s_1s(verilog) because it does not drive other instances.
+@N: BN362 :"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/../../code/m_progressctrl.v":233:9:233:14|Removing sequential instance genblk4\.rctrlreg_we (in view: work.m_progressctrl_Z16(verilog)) of type view:PrimLib.sdffre(prim) because it does not drive other instances.
+@N: BN362 :"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/../../code/m_progressctrl.v":137:19:137:25|Removing sequential instance blka\.r_asel0 (in view: work.m_progressctrl_Z16(verilog)) of type view:sb_ice.SB_DFFESR(PRIM) because it does not drive other instances.
+@N: BN362 :"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/../../code/m_progressctrl.v":138:19:138:25|Removing sequential instance blka\.r_asel1 (in view: work.m_progressctrl_Z16(verilog)) of type view:sb_ice.SB_DFFESR(PRIM) because it does not drive other instances.
+@N: BN362 :"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/../../code/m_progressctrl.v":139:19:139:25|Removing sequential instance blka\.r_asel2 (in view: work.m_progressctrl_Z16(verilog)) of type view:sb_ice.SB_DFFESR(PRIM) because it does not drive other instances.
+@N: BN362 :"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/../../code/m_opreg.v":62:17:62:23|Removing sequential instance genblk1\.OpC15_0\[1\] (in view: work.m_opreg_0s_0s(verilog)) of type view:sb_ice.SB_DFFE(PRIM) because it does not drive other instances.
+ICG Latch Removal Summary:
+Number of ICG latches removed:	0
+Number of ICG latches not removed:	0
+syn_allowed_resources : blockrams=30  set on top level netlist top
+
+Finished netlist restructuring (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 138MB peak: 140MB)
+
+
+
+Clock Summary
+*****************
+
+Start       Requested     Requested     Clock        Clock                     Clock
+Clock       Frequency     Period        Type         Group                     Load 
+------------------------------------------------------------------------------------
+System      148.6 MHz     6.730         system       system_clkgroup           0    
+top|CLK     124.4 MHz     8.040         inferred     Autoconstr_clkgroup_0     129  
+====================================================================================
+
+@W: MT529 :"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/min_icebreaker.v":222:3:222:8|Found inferred clock top|CLK which controls 129 sequential elements including i_BBUART.usartTX. This clock has no specified timing constraint which may prevent conversion of gated or generated clocks and may adversely impact design performance. 
+
+Finished Pre Mapping Phase.
+@N: BN225 |Writing default property annotation file /home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/iCEcube2_flow/t1/t1_Implmnt/t1.sap.
+
+Starting constraint checker (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 137MB peak: 140MB)
+
+None
+None
+
+Finished constraint checker (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 137MB peak: 140MB)
+
+Pre-mapping successful!
+
+At Mapper Exit (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 52MB peak: 140MB)
+
+Process took 0h:00m:01s realtime, 0h:00m:01s cputime
+# Mon Oct 12 12:21:43 2020
+
+###########################################################]

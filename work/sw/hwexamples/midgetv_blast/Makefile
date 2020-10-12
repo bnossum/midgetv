@@ -15,7 +15,8 @@ all:	$(OBJ)/mb.lst \
 	../../../hwtst/upduino2/ice40loaderprog.hv \
 	../../../hwtst/max_upduino2/ice40loaderprog.hv \
 	../../../hwtst/max_iceblink40-hx1k/ice40loaderprog.hv \
-	../../../hwtst/icebreaker/ice40loaderprog.hv 
+	../../../hwtst/icebreaker/ice40loaderprog.hv \
+	../../../hwtst/min_icebreaker/ice40loaderprog.hv \
 
 ../../../hwtst/upduino2/ice40loaderprog.hv: $(OBJ)/mb.bin 
 	../../../bin/midgetv_bin2ebr < $< > $@
@@ -28,6 +29,10 @@ all:	$(OBJ)/mb.lst \
 
 ../../../hwtst/icebreaker/ice40loaderprog.hv: $(OBJ)/mb.bin 
 	../../../bin/midgetv_bin2ebr < $< > $@
+
+../../../hwtst/min_icebreaker/ice40loaderprog.hv: $(OBJ)/mb.bin 
+	../../../bin/midgetv_bin2ebr -i $< > $@
+
 
 # .SECONDARY:
 
@@ -70,5 +75,6 @@ clean:
 	../../../hwtst/upduino2/ice40loaderprog.hv \
 	../../../hwtst/max_upduino2/ice40loaderprog.hv \
 	../../../hwtst/max_iceblink40-hx1k/ice40loaderprog.hv \
-	../../../hwtst/icebreaker/ice40loaderprog.hv 
+	../../../hwtst/icebreaker/ice40loaderprog.hv \
+	../../../hwtst/min_icebreaker/ice40loaderprog.hv \
 

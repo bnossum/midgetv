@@ -1,0 +1,34 @@
+# For midgetv.
+# Copyright: Baard Nossum
+# For licence, see LICENCE.TXT
+
+# For a 12 MHz clock, the maximum reliable bitrate is 57600 bps
+# Min bitrate that worked was 4800. Don't know why
+MIDGETV_BITRATE      ?= 57600
+MIDGETV_SERIALDEVICE ?= /dev/ttyUSB1
+
+comprog ?= $(TARGETDIR)/$(RISCV_TARGET)/sig_from_board.sh
+
+RUN_TARGET=\
+	stty -F $(MIDGETV_SERIALDEVICE) $(MIDGETV_BITRATE); \
+	cat $(*).elf.bin > $(MIDGETV_SERIALDEVICE); \
+	timeout 10s bash $(comprog) \
+        $(MIDGETV_SERIALDEVICE) > $(*).signature.output;
+
+RISCV_PREFIX   ?= riscv32-unknown-elf-
+RISCV_GCC      ?= $(RISCV_PREFIX)gcc
+RISCV_OBJDUMP  ?= $(RISCV_PREFIX)objdump
+RISCV_OBJCOPY  ?= $(RISCV_PREFIX)objcopy
+
+RISCV_GCC_OPTS ?= -static -mcmodel=medany -fvisibility=hidden -nostdlib  -nostartfiles 
+
+COMPILE_TARGET=\
+    $$(RISCV_GCC) $(1) $$(RISCV_GCC_OPTS) \
+        -I$(RISCV_COMPLIANCE_ROOTDIR)/riscv-test-env/ \
+        -I$(RISCV_COMPLIANCE_ROOTDIR)/riscv-test-env/p/ \
+        -I$(TARGETDIR)/$(RISCV_TARGET)/ \
+	-T$(TARGETDIR)/$(RISCV_TARGET)/link.ld  $$(<) \
+        -o $$(@); \
+	$$(RISCV_OBJCOPY) -O binary $$(@) $$(@).bin; \
+	$$(RISCV_OBJDUMP) --full-contents -x -M numeric,no-aliases -D $$(@) > $$(@).lst; \
+

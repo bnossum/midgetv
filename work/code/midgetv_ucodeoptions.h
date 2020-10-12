@@ -28,8 +28,8 @@
  *
  * However, the most tested configureation is with MINSTRET included.
  */
-#define ucodeopt_HAS_MINSTRET     1
-#define ucodeopt_HAS_EBR_MINSTRET 1
+#define ucodeopt_HAS_MINSTRET     0
+#define ucodeopt_HAS_EBR_MINSTRET 0
 
 
 /* Midgetv can optionally include instructions MUL, MULH, MULHSU, MULHU,
@@ -38,10 +38,10 @@
  * easy to get away from the occational multiplication or divisions. In the
  * spirit of midgetv, the focus is on implementation size.
  */
-#define ucodeopt_MULDIV           1
+#define ucodeopt_MULDIV           0
  
 /* Midgetv can optionally include the “C” Standard Extension for
  * Compressed Instructions, Version 2.0
  */
-#define ucodeopt_RVC              1
+#define ucodeopt_RVC              0
 

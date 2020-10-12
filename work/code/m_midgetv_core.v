@@ -462,8 +462,8 @@ module m_midgetv_core
     * 
     */
    localparam LAZY_DECODE        =  0;
-   localparam ALUWIDTH           = 32;
-   localparam DISREGARD_WB4_3_55 =  0;
+   localparam DISREGARD_WB4_3_55 =  1;
+   localparam ALUWIDTH           = 32; // Never change
    localparam MTIMETAP_LOWLIM    = 14; // Only location where this value is really to be set 
    localparam NO_UCODEOPT        =  0; // Only set to 1 during debugging
    
@@ -734,7 +734,7 @@ module m_midgetv_core
                 .MULDIV(                   MULDIV                   ),
                 .DAT_I_ZERO_WHEN_INACTIVE( DAT_I_ZERO_WHEN_INACTIVE ),
                 .IWIDTH(                   IWIDTH                   ), 
-                .SRAMADRWIDTH(             SRAMADRWIDTH             ), 
+                .SRAMADRWIDTH(             SRAMADRWIDTH             ),
                 .MTIMETAP(                 MTIMETAP                 ),
                 .MTIMETAP_LOWLIM(          MTIMETAP_LOWLIM          )) 
    inst_inputmux
@@ -920,7 +920,9 @@ module m_midgetv_core
     *          Midgetv require a read latency of 1 cycle or higher. Hence this is not
     *          a full Wishbone interface.
     */
-   m_ram  #(.HIGHLEVEL(HIGHLEVEL), .SRAMADRWIDTH(SRAMADRWIDTH)) 
+   m_ram  #(.HIGHLEVEL(HIGHLEVEL), 
+            .SRAMADRWIDTH(SRAMADRWIDTH) 
+            ) 
    inst_ram
      (// Outputs
       .DAT_O                              (Dsram[31:0]),
@@ -1057,7 +1059,7 @@ module m_midgetv_core
                     .DISREGARD_WB4_3_55( DISREGARD_WB4_3_55 ),
                     .NO_CYCLECNT(        NO_CYCLECNT        ),
                     .MTIMETAP(           MTIMETAP           ),
-                    .SRAMADRWIDTH(       SRAMADRWIDTH       ),
+                    .SRAMADRWIDTH(       SRAMADRWIDTH       ), 
                     .MTIMETAP_LOWLIM(    MTIMETAP_LOWLIM    )) 
    inst_progressctrl
      (// Inputs      

@@ -1,0 +1,7 @@
+OUTPUT TX 	 location (15, 0, 0) 	 9 	 SB_LVCMOS
+INPUT  RX 	 location (13, 0, 1) 	 6 	 SB_LVCMOS
+OUTPUT LED4 	 location (19, 31, 0) 	 23 	 SB_LVCMOS
+OUTPUT LED3 	 location (19, 31, 1) 	 25 	 SB_LVCMOS
+OUTPUT LED2 	 location (18, 31, 1) 	 27 	 SB_LVCMOS
+OUTPUT LED1 	 location (18, 31, 0) 	 26 	 SB_LVCMOS
+INPUT  CLK 	 location (12, 31, 1) 	 35 	 SB_LVCMOS

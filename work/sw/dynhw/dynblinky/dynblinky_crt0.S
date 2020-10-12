@@ -26,12 +26,13 @@ InternalISR:
         li      x1,LEDREG
         sw      x3,0(x1)                // To LEDs
         addi    x3,x3,1
-2:      addi    x1,x1,0x7FF             // Reise for delay loop
+2:      addi    x1,x1,0x3FF             // Reise for delay loop
         bgt     x1,x0,2b
         j       1b
         
         # =============================================================================
 _start:
+        li      x2,0x200
         la      x1,StartTrap            // Initiate mtvec
         sw      x1,%lo(__mtvec)(x0)
         la      x1,NMI                  // Set up the internal ISR handle

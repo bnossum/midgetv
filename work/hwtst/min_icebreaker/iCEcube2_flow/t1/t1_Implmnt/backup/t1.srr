@@ -1,0 +1,73 @@
+#Build: Synplify Pro L-2016.09L+ice40, Build 077R, Dec  2 2016
+#install: /home/bnossum/lscc/iCEcube2.2017.08/synpbase
+#OS: Linux 
+#Hostname: x230b
+
+# Mon Oct 12 08:28:35 2020
+
+#Implementation: t1_Implmnt
+
+Synopsys HDL Compiler, version comp2016q3p1, Build 141R, built Dec  5 2016
+@N|Running in 64-bit mode
+Copyright (C) 1994-2016 Synopsys, Inc. All rights reserved. This Synopsys software and all associated documentation are proprietary to Synopsys, Inc. and may only be used pursuant to the terms and conditions of a written license agreement with Synopsys, Inc. All other use, reproduction, modification, or distribution of the Synopsys software or the associated documentation is strictly prohibited.
+
+Synopsys Verilog Compiler, version comp2016q3p1, Build 141R, built Dec  5 2016
+@N|Running in 64-bit mode
+Copyright (C) 1994-2016 Synopsys, Inc. All rights reserved. This Synopsys software and all associated documentation are proprietary to Synopsys, Inc. and may only be used pursuant to the terms and conditions of a written license agreement with Synopsys, Inc. All other use, reproduction, modification, or distribution of the Synopsys software or the associated documentation is strictly prohibited.
+
+Running on host :x230b
+@I::"/home/bnossum/lscc/iCEcube2.2017.08/synpbase/lib/generic/sb_ice40.v" (library work)
+@I::"/home/bnossum/lscc/iCEcube2.2017.08/synpbase/lib/vlog/hypermods.v" (library __hyper__lib__)
+@I::"/home/bnossum/lscc/iCEcube2.2017.08/synpbase/lib/vlog/umr_capim.v" (library snps_haps)
+@I::"/home/bnossum/lscc/iCEcube2.2017.08/synpbase/lib/vlog/scemi_objects.v" (library snps_haps)
+@I::"/home/bnossum/lscc/iCEcube2.2017.08/synpbase/lib/vlog/scemi_pipes.svh" (library snps_haps)
+@I::"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/min_icebreaker.v" (library work)
+@I:"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/min_icebreaker.v":"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/../../code/m_ice_shortcuts.v" (library work)
+@I:"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/min_icebreaker.v":"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/../../code/m_inputmux.v" (library work)
+@I:"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/min_icebreaker.v":"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/../../code/m_mimux.v" (library work)
+@I:"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/min_icebreaker.v":"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/../../code/m_alu_carryin.v" (library work)
+@I:"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/min_icebreaker.v":"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/../../code/m_alu.v" (library work)
+@I:"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/min_icebreaker.v":"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/../../code/m_immexp_zfind_q.v" (library work)
+@I:"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/min_icebreaker.v":"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/../../code/m_ram.v" (library work)
+@I:"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/min_icebreaker.v":"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/../../code/m_ram_a16.v" (library work)
+@I:"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/min_icebreaker.v":"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/../../code/m_ram_a17.v" (library work)
+@I:"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/min_icebreaker.v":"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/../../code/m_ebr.v" (library work)
+@I:"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/min_icebreaker.v":"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/../../code/m_ebr_w16.v" (library work)
+@I:"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/min_icebreaker.v":"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/../../code/m_ebr_w8.v" (library work)
+@I:"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/min_icebreaker.v":"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/../../code/m_ebr_w4.v" (library work)
+@I:"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/min_icebreaker.v":"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/../../code/m_ebr_w2.v" (library work)
+@I:"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/min_icebreaker.v":"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/../../code/m_rai.v" (library work)
+@I:"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/min_icebreaker.v":"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/../../code/m_wai.v" (library work)
+@I:"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/min_icebreaker.v":"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/../../code/m_opreg.v" (library work)
+@I:"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/min_icebreaker.v":"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/../../code/m_cyclecnt.v" (library work)
+@I:"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/min_icebreaker.v":"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/../../code/m_condcode.v" (library work)
+@I:"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/min_icebreaker.v":"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/../../code/m_shiftcounter.v" (library work)
+@I:"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/min_icebreaker.v":"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/../../code/m_status_and_interrupts.v" (library work)
+@I:"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/min_icebreaker.v":"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/../../code/m_ucode.v" (library work)
+@I:"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/min_icebreaker.v":"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/../../code/m_3ebr.v" (library work)
+@I:"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/../../code/m_3ebr.v":"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/../../code/../generated/ucodeinitval.hv" (library work)
+@I:"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/min_icebreaker.v":"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/../../generated/m_2ebr.v" (library work)
+@I:"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/min_icebreaker.v":"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/../../code/m_ucodepc.v" (library work)
+@I:"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/min_icebreaker.v":"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/../../code/m_progressctrl.v" (library work)
+@I:"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/min_icebreaker.v":"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/../../code/m_shlr.v" (library work)
+@I:"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/min_icebreaker.v":"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/../../code/m_RVC.v" (library work)
+@I:"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/min_icebreaker.v":"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/../../code/m_illegalop.v" (library work)
+@I:"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/min_icebreaker.v":"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/../../code/m_midgetv_core.v" (library work)
+@I:"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/../../code/m_midgetv_core.v":"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/../../code/../generated/midgetv_ucodeoptions.hv" (library work)
+@E: CG426 :"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/min_icebreaker.v":89:9:89:12|Assignment target LED1 must be of type reg or genvar
+@E: CG426 :"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/min_icebreaker.v":90:9:90:12|Assignment target LED2 must be of type reg or genvar
+@E: CG426 :"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/min_icebreaker.v":91:9:91:12|Assignment target LED3 must be of type reg or genvar
+@E: CG426 :"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/min_icebreaker.v":93:6:93:9|Assignment target LED4 must be of type reg or genvar
+@E: CS187 :"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/min_icebreaker.v":179:0:179:5|Expecting endmodule
+@I:"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/min_icebreaker.v":"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/ice40loaderprog.hv" (library work)
+@E: CS219 :"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/ice40loaderprog.hv":4:0:4:9|Expecting one of the keywords module, primitive or macromodule
+6 syntax errors
+Process took 0h:00m:01s realtime, 0h:00m:01s cputime
+# Mon Oct 12 08:28:36 2020
+
+###########################################################]
+@END
+Process took 0h:00m:01s realtime, 0h:00m:01s cputime
+# Mon Oct 12 08:28:36 2020
+
+###########################################################]

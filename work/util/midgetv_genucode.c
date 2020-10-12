@@ -775,11 +775,12 @@ int shoehorn( int col, int relevantinputs, int maxnrhigh, int minnrhigh, char *e
                 if ( populate_rest(    newline, processedline, col, bitstouseasindex, &lutspaceused, &lutval ) == -1 ) goto TryNext;
                 
                 seenanycandidate++;
-                printf( "\n * Candidate function %4.4x, used %4.4x, inputs %2.2x\n", lutval, lutspaceused, bitstouseasindex );
-                print_input_as_comment( 1, entrypoint, sampleinstruction, newline, processedline );
+                //printf( "\n * Candidate function %4.4x, used %4.4x, inputs %2.2x\n", lutval, lutspaceused, bitstouseasindex );
+                //print_input_as_comment( 1, entrypoint, sampleinstruction, newline, processedline );
         TryNext:
                 ;
         }
+        printf( "%2d candidate%c\n", seenanycandidate, seenanycandidate == 1 ? ' ' : 's' );
         return seenanycandidate;
 }
 

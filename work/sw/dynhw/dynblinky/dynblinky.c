@@ -14,7 +14,7 @@ int main( void ) {
         int i = 0;
         
         while (1) {
-                LED->D = ++i & 2;
+                LED->D = ++i;
                 cywait(0x10000);
                 LED->D = 0;
                 cywait(0x40000);

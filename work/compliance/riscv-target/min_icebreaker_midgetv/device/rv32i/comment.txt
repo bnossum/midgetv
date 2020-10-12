@@ -1,0 +1,16 @@
+# Arguments for RISCV_GCC:
+# Here I stumble along. 
+# riscvOVP: RISCV_GCC_OPTS ?= -static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles $(RVTEST_DEFINES)
+# midgetv:  RISCV_GCC_OPTS ?= -I ./ -I ../../../inc/ -I $(COMPLIACE_SOURCE) -I $(COMPLIANCE_TEST_ENV)
+# -march=rv32i         Vital. Architecture is determined from Makefile in subdirectory of "riscv-test-suite", hence must NOT be specified here
+# -mabi=ilp32          Vital. ABI is determined from Makefile in subdirectory of "riscv-test-suite", hence must NOT be specified here
+# -static              Static linking
+# -mcmdel=medlow       Code model is 32-bit address space
+# -fvisibility=hidden  This has to do with dynamic linkage. It ensures global symbols are not available for linking. Should be superfluent because -static is specified? Can not hurt?
+# -nostdlib            We do not use standard libraries for linking
+# -nostartfiles        We have our own crt0.S
+# Now for the include path:
+# -I$(ROOTDIR)/riscv-test-env/                    give access to "riscv_test_macros.h"
+# -I$(ROOTDIR)/riscv-test-env/p/                  give access to "riscv-test.h" 
+# -I$(TARGETDIR)/$(RISCV_TARGET)/                 give access to "compliance_test.h" and "compliance_io.h" and other include files specifically for midgetv
+# -T$(TARGETDIR)/$(RISCV_TARGET)/link.ld  $$(<)   Linker file specific to midgetv. We can not use the default in -T$(ROOTDIR)/riscv-test-env/p/link.ld $$(<) 
