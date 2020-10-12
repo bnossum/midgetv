@@ -1,2 +1,0 @@
-@E: CG791 :"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/min_icebreaker.v":185:51:185:51|Could not resolve hierarchical name 'dbga[31:0]'.
-

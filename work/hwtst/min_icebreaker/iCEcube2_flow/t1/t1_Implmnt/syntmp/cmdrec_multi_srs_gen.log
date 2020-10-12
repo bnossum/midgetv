@@ -1,7 +1,0 @@
-/home/bnossum/lscc/iCEcube2.2017.08/synpbase/bin/syn_nfilter  -link  -multisrs  /home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/iCEcube2_flow/t1/t1_Implmnt/synwork/t1_comp.srs  -osyn  /home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/iCEcube2_flow/t1/t1_Implmnt/synwork/t1_mult.srs  -log  /home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/iCEcube2_flow/t1/t1_Implmnt/synlog/t1_multi_srs_gen.srr 
-rc:0 success:1 runtime:1
-file:/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/iCEcube2_flow/t1/t1_Implmnt/synwork/t1_comp.srs|io:i|time:1602498101|size:99647|exec:0
-file:/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/iCEcube2_flow/t1/t1_Implmnt/synwork/t1_mult.srs|io:o|time:1602498103|size:7979|exec:0
-file:/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/iCEcube2_flow/t1/t1_Implmnt/synlog/t1_multi_srs_gen.srr|io:o|time:1602498103|size:854|exec:0
-file:/home/bnossum/lscc/iCEcube2.2017.08/synpbase/linux_a_64/syn_nfilter|io:i|time:1527863117|size:11473624|exec:1
-file:/home/bnossum/lscc/iCEcube2.2017.08/synpbase/bin/syn_nfilter|io:i|time:1527864176|size:368|exec:1

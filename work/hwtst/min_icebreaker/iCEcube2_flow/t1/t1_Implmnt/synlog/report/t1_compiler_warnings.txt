@@ -1,2 +1,0 @@
-@W: CS263 :"/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/min_icebreaker.v":184:41:184:44|Port-width mismatch for port DAT_I. The port definition is 32 bits, but the actual port connection bit width is 1. Adjust either the definition or the instantiation of this port.
-

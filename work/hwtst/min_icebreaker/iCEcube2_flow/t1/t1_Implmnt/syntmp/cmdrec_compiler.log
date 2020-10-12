@@ -1,8 +1,0 @@
-/home/bnossum/lscc/iCEcube2.2017.08/synpbase/bin/c_hdl  -osyn  /home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/iCEcube2_flow/t1/t1_Implmnt/synwork/t1_comp.srs  -hdllog  /home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/iCEcube2_flow/t1/t1_Implmnt/synlog/t1_compiler.srr  -encrypt  -mp  4  -verification_mode 0  -verilog  -prodtype  synplify_pro  -primux -fixsmult -infer_seqShift -ice -sdff_counter -nram -divnmod -nostructver   -I /home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/iCEcube2_flow/t1/  -I /home/bnossum/lscc/iCEcube2.2017.08/synpbase/lib   -v2001  -devicelib  /home/bnossum/lscc/iCEcube2.2017.08/synpbase/lib/generic/sb_ice40.v  -encrypt  -pro  -dmgen  /home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/iCEcube2_flow/t1/t1_Implmnt/dm  -ui -fid2 -ram -sharing on -ll 2000 -autosm  -lib work /home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/min_icebreaker.v 
-rc:0 success:1 runtime:2
-file:/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/iCEcube2_flow/t1/t1_Implmnt/synwork/t1_comp.srs|io:o|time:1602498101|size:99647|exec:0
-file:/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/iCEcube2_flow/t1/t1_Implmnt/synlog/t1_compiler.srr|io:o|time:1602498101|size:428151|exec:0
-file:/home/bnossum/lscc/iCEcube2.2017.08/synpbase/lib/generic/sb_ice40.v|io:i|time:1527863115|size:220434|exec:0
-file:/home/bnossum/GITSTUFF/GIT/midgetv/work/hwtst/min_icebreaker/min_icebreaker.v|io:i|time:1602496739|size:9744|exec:0
-file:/home/bnossum/lscc/iCEcube2.2017.08/synpbase/linux_a_64/c_hdl|io:i|time:1527863115|size:5690328|exec:1
-file:/home/bnossum/lscc/iCEcube2.2017.08/synpbase/bin/c_hdl|io:i|time:1527864231|size:367|exec:1
