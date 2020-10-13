@@ -79,7 +79,7 @@ ContinueTrap:
         
 UnexpectedTrap:
         // Use main program stack in this test, sloppy, will regret it!
-        sw      ra,%lo(_ex_rrs1)(x0)
+        sw      ra,%lo(_ex_rrs1)(x0)        
         la      a0,preambletxt
         jal     puts
         lw      a0,__mcause(x0)                 
@@ -143,7 +143,8 @@ UnexpectedTrapRVC:
         jal     puthex32
         lw      ra,%lo(_ex_rrs1)(x0)
         j       ContinueTrapRVC
-
+        
+        
 preambletxt:
         .string "\n mcause:"
 mtvaltxt:
@@ -191,7 +192,7 @@ _start:
         // Here only if RVC not implemented
         sw      a0,Coretype,t0
 
-        // Instal a more complete trap handler
+        // Instal a more complete trap handler for all but RVC
         la      x1,TrapHandle           // Initiate mtvec
         j       1f
         
@@ -202,7 +203,7 @@ UnalignedInstr:
         ori     a0,a0,2
         sw      a0,Coretype,t0
       
-        // Now instal a more complete trap handler
+        // Now instal a more complete trap handler for RVC
         la      x1,TrapHandleRVC        // Initiate mtvec
 1:      sw      x1,%lo(__mtvec)(x0)
         tail     main
@@ -220,22 +221,37 @@ testbed32:
         ret
         
         # =============================================================================
-/////////////////////////////////////////////////////////////////////////////
 /* Bitbang a character to the USART                
  * At entry:
  * ra   Return address
  * a0   character to output
  * At exit:
- *      a0,t0,t1 corrupted
+ * a0   corrupted
  * Requires: 
+ *    sp legal and 2 free words of stack.
  *    mcycle implemented
  *    bitrate present in 0x000000e8
+ *
+ * As a convenience, a '\n' may be output as '\r\n'
  */
         .global putchar
 putchar: 
+        addi    sp,sp,-8
+        sw      t0,0(sp)                // Store t0
+        sw      t1,4(sp)                // Store t1
         slli    a0,a0,1                 // c <<= 1
         andi    a0,a0,1023              // c |= 0x3ff;
         ori     a0,a0,512               // c |= 0x200;
+#if DOS_CRLF                
+        li      t1,512 + 20             // Outputs '\n' ?
+        bne     t1,a0,1f                // No
+
+        li      a0,13                   // '\r'
+        mv      t1,ra                   // save
+        jal     ra,putchar              // Recurse
+        mv      ra,t1                   // restore
+        li      a0,512 + 20             // restore
+#endif        
 1:      
         lw      t0,0xe8(x0)             // __freefornow_e8(x0) is bitrate
         slli    t0,t0,4                 // t = bitrate*16;
@@ -256,6 +272,11 @@ putchar:
         lw      t0,0x8c(x0)             // tt = mcycle;;
         bltu    t0,t1,3b                // if ( mcycle < b ) goto L3;
         bne     a0,x0,2b                // if ( c ) goto L2;
+putchar_tail2:                 
+        lw      t1,4(sp)                // Restore t1
+putchar_tail1:         
+        lw      t0,0(sp)                // Restore t0
+        addi    sp,sp,8                 // Restore SP
         jalr    x0,0(ra)                // Return
 
 /* Write a string to the UART
@@ -264,20 +285,51 @@ putchar:
  * ra   Return address
  * a0   Points to string to output
  * At exit:
- * ra,a0,t0,t1,t2,t3   corrupted
+ * a0   corrupted
  * Requires: 
- *      sp legal and +2 free words of stack.
+ *    sp legal and +2 free words of stack.
  */
         .global puts
-puts:
-        mv      t3,ra                   // Save return address
-        mv      t2,a0                   // char *p = s;  
+puts:         
+        addi    sp,sp,-8                // Make space to store registers used
+        sw      t0,0(sp)                // Store t0
+        sw      ra,4(sp)                // Store return adrress
+        mv      t0,a0                   // char *p = s;  
         j       2f                      // do {
-1:      jal     ra,putchar              //     bn_asm_putchar(c); // Corrupts a0,t0,t1
-        addi    t2,t2,1                 //     s++;
-2:      lbu     a0,0(t2)                //     c = *s;
+1:      jal     ra,putchar              //     bn_asm_putchar(c);
+        addi    t0,t0,1                 //     s++;
+2:      lbu     a0,0(t0)                //     c = *s;
         bne     a0,x0,1b                // } while ( c );
-        jalr    x0,0(t3)                // Return
+        lw      ra,4(sp)                // Restore return address
+        lw      t0,0(sp)                // Restore t0
+        addi    sp,sp,8                 // Restore sp
+        jalr    x0,0(ra)                // Return
+
+
+        .global puthex32
+puthex32:       
+// In:   a0 value to write
+//       ra Return address        
+        addi    sp,sp,-12
+        sw      t0,0(sp)
+        sw      t1,4(sp)
+        sw      ra,8(sp)
+        mv      t0,a0
+        li      t1,28
+1:      srl     a0,t0,t1
+        andi    a0,a0,0xf        
+        li      ra,10
+        blt     a0,ra,2f
+        addi    a0,a0,'a'-'0'-10
+2:      addi    a0,a0,'0'
+        jal     ra,putchar
+        addi    t1,t1,-4
+        bge     t1,x0,1b
+        lw      ra,8(sp)
+        lw      t1,4(sp)
+        lw      t0,0(sp)
+        addi    sp,sp,12
+        ret
 
 
 /* Get a character from the UART with timeout
@@ -335,27 +387,4 @@ getchar:
         blt     a0,x0,1b
         jalr    x0,0(t5)
 
-/* Write a 32-bit hexadesimal number to the UART
- * At entry:
- * ra   Return address
- * a0   Timeout in cycles        
- * At exit:
- *      Corrupts ra,a0,t0,t1,t2,t3,t4
- */        
-        .global puthex32
-puthex32:       
-        addi    sp,sp,-12
-        mv      t4,ra
-        mv      t2,a0
-        li      t3,28
-1:      srl     a0,t2,t3
-        andi    a0,a0,0xf        
-        li      ra,10
-        blt     a0,ra,2f
-        addi    a0,a0,'a'-'0'-10
-2:      addi    a0,a0,'0'
-        jal     ra,putchar      // Corrupts a0,t0,t1
-        addi    t3,t3,-4
-        bge     t3,x0,1b
-        jalr    x0,0(t4)
 

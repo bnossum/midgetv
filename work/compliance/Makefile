@@ -13,7 +13,7 @@ comma:= ,
 space:= $(empty) $(empty)
 
 export RISCV_COMPLIANCE_ROOTDIR ?= ../../../riscv-compliance
-export RISCV_TARGET       ?= min_icebreaker_midgetv
+export RISCV_TARGET       ?= icebreaker_midgetv
 export RISCV_DEVICE       ?= rv32i
 export RISCV_PREFIX       ?= riscv32-unknown-elf-
 export RISCV_TARGET_FLAGS ?=

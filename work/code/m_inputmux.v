@@ -94,7 +94,7 @@ module m_inputmux
          assign theio = DAT_I;
          
       end else if ( INPUTMUXTYPE == 1 ) begin
-         /* Multiplier present. No SRAM, mo system registers.
+         /* Multiplier present. No SRAM, no system registers.
           *
           * STB_O ------------+               
           * DAT_I -----------|1\         __   
@@ -138,10 +138,14 @@ module m_inputmux
        
     end else if ( INPUTMUXTYPE == 3 ) begin
        
+       wire [31:0] a;
+       reg [31:0]  ireg;
+       wire        STB_O_or_ReadM = STB_O | (clrM & ceM);
+
        if ( DAT_I_ZERO_WHEN_INACTIVE ) begin
           /* SRAM and multiplier both present. No system registers.
            * When DAT_I is inactive, it is zero. Note that this depends on the 
-           * external INTERCON module.
+           * external INTERCON module. 
            *
            * STB_O_or_readM ---+               
            *             __    |
@@ -150,19 +154,13 @@ module m_inputmux
            * Dsram     -------|0/        >  |  
            *                corerunning -E__|  
            * 
-           * Total size: 66 SB_LUT4
+           * The lsb must be treated differently - MULDIVREG[0] is 1'b1 when idle.
+           * 
            */
-          wire STB_O_or_ReadM = STB_O | (clrM & ceM);
-          
-          wire [31:0] a;
-          reg [31:0]  ireg;
-          assign a = STB_O_or_ReadM ? (edati[31:0] | MULDIVREG) : Dsram;
-          always @(posedge clk)
-            if ( corerunning )
-              ireg <= a;
-          assign erDee = {zeros[32:IWIDTH],ireg};
-          assign sysregack = 0;
-          assign theio = a;
+          assign a[31:1] = STB_O_or_ReadM ? (edati[31:1] | MULDIVREG[31:1]) : Dsram[31:1];
+          wire b0;
+          assign b0 = STB_O ? edati[0] : MULDIVREG[0];
+          assign a[0] = STB_O_or_ReadM ? b0 : Dsram[0];
        end else begin
           /* SRAM and multiplier both present. No system registers.
            * When DAT_I is inactive, we know nothing about the value of DAT_I,
@@ -178,20 +176,17 @@ module m_inputmux
            * 
            * Total size: IWIDTH+66 SB_LUT4
            */
-          wire STB_O_or_ReadM = STB_O | (clrM & ceM);
-          
-          wire [31:0] a;
           wire [31:0] b;
-          reg [31:0]  ireg;
           assign b = STB_O ? edati[31:0] : MULDIVREG;
-          assign a = STB_O_or_ReadM ? b : Dsram;
-          always @(posedge clk)
-            if ( corerunning )
-              ireg <= a;
-          assign erDee = {zeros[32:IWIDTH],ireg};
-          assign sysregack = 0;
-          assign theio = a;
+          assign a = STB_O_or_ReadM ? b : Dsram;          
        end
+       always @(posedge clk)
+         if ( corerunning )
+           ireg <= a;
+       assign erDee = {zeros[32:IWIDTH],ireg};
+       assign sysregack = 0;
+       assign theio = a;
+       
     end else if ( INPUTMUXTYPE == 4 ) begin
        /* System registers, but no sram nor multipliers.
         */
@@ -334,6 +329,7 @@ module m_inputmux
            *                corerunning -E__|  
            * 
            */
+          ProbableErrorHere SeeOtherCaseWith_DAT_I_ZERO_WHEN_INACTIVE();
           reg [31:0] a;
           reg        tmpsysregack;
           reg [31:0] ireg;

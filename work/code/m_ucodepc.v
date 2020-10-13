@@ -140,7 +140,7 @@ module m_ucodepc
    //wire is_lui = INSTR[6:2] == 5'b01101; Simplified because main_illegal covers 
    wire is_lui = INSTR[5:4] == 2'b11 & INSTR[2] == 1'b1;
 
-   assign dinx[1] = is_lui ? 1 : ((~INSTR[6]&INSTR[5])&INSTR[30]) | ((~(~INSTR[6]&INSTR[5]))&INSTR[3]);
+   assign dinx[1] = is_lui ? 1'b1 : ((~INSTR[6]&INSTR[5])&INSTR[30]) | ((~(~INSTR[6]&INSTR[5]))&INSTR[3]);
    assign dinx[2] = INSTR[4];
    assign dinx[3] = INSTR[5];
    assign dinx[4] = INSTR[6];

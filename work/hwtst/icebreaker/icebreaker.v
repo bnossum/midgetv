@@ -51,7 +51,7 @@ module top
       NO_CYCLECNT        = 0, 
       MTIMETAP           = 0,//16, 
       HIGHLEVEL          = 0,
-      DAT_I_ZERO_WHEN_INACTIVE = 1
+      DAT_I_ZERO_WHEN_INACTIVE = 0
       )
    (
     input  CLK,
@@ -85,7 +85,7 @@ module top
    //wire                 willbestart;
    
    assign start = 1'b1;       
-   localparam USE_PLL = 0;
+   localparam USE_PLL = 1;
    generate
       if ( USE_PLL == 0  ) begin
          assign CLK_I = CLK;

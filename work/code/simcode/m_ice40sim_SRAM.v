@@ -13,11 +13,7 @@
 module m_ice40sim_SRAM
   # ( parameter
       SRAMADRWIDTH       = 16,  
-      SIMEBRADRWIDTH     =  8, 
-      IWIDTH             = 32, 
-      NO_CYCLECNT        = 0, 
-      MTIMETAP           = 14, 
-      HIGHLEVEL          = 0
+      SIMEBRADRWIDTH     =  8
       )
    (
     input CLK_I, // Toggled from verilator
@@ -29,11 +25,7 @@ module m_ice40sim_SRAM
    m_ice40sim_EBRonly
      #(
        .SRAMADRWIDTH       ( SRAMADRWIDTH        ),
-       .SIMEBRADRWIDTH     ( SIMEBRADRWIDTH      ),
-       .IWIDTH             ( IWIDTH              ),
-       .NO_CYCLECNT        ( NO_CYCLECNT         ),
-       .MTIMETAP           ( MTIMETAP            ),
-       .HIGHLEVEL          ( HIGHLEVEL           )
+       .SIMEBRADRWIDTH     ( SIMEBRADRWIDTH      )
        )
    inst_ice40sim_EBRonly
      (/*AUTOINST*/

@@ -183,12 +183,6 @@ module m_status_and_interrupts
    reg           r_incsr;
 
    assign m_status_and_interrupts_killwarnings = &B | &DAT_O | &ADR_O;
-`ifdef verilator   
-   function [12:0] get_interruptinfo;
-      // verilator public
-     get_interruptinfo = {msie,msip,mtie,mtip,meie,meip,mtimeincie,mtimeincip,mrinstretie,mrinstretip,mpie,mie,r_incsr};
-   endfunction
-`endif
    
    generate
       if ( HIGHLEVEL ) begin

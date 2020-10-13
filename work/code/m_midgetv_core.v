@@ -723,7 +723,7 @@ module m_midgetv_core
     * in use in certain configurations. I can not find any
     * better way to disable warnings than the following:
     */
-   assign midgetv_core_killwarnings = sa38 & sa39 | meip | FUNC7[6] | &FUNC7[4:0];
+   assign midgetv_core_killwarnings = sa38 & sa39 | meip | FUNC7[6] | &FUNC7[4:0] | alu_minstretofl | alu_tapout | ctrlreg_we;
 
    /* -----------------------------------------------------------------------------
     * Datapath
@@ -1195,6 +1195,7 @@ module m_midgetv_core
     * If MTIMETAP < MTIMETAP_LOWLIM, we have a minimal system, and no 
     * interrupts. Else I implement registers mip, mie, and mstatus.
     */
+   wire                 thedbg_r_incsr;
    generate
       if ( MTIMETAP >= MTIMETAP_LOWLIM ) begin
          m_status_and_interrupts  
@@ -1229,6 +1230,7 @@ module m_midgetv_core
             .sa39                       (sa39),
             .meip                       (meip),
             .ctrlreg_we                 (ctrlreg_we));
+         // assign thedbg_r_incsr = dbg_r_incsr; // Todo - let out r_incsr named as dbg_r_incsr from inst_status_and_interrupts
       end else begin
          
          assign qualint = 1'b0; // Smallest midgetv has no interrupts
@@ -1245,10 +1247,17 @@ module m_midgetv_core
          assign mtimeincie  = 1'b0;             
          assign mtimeincip  = 1'b0;             
          assign mtip        = 1'b0;                   
-
+         
          assign m_status_and_interrupts_killwarnings = 1'b0; // Keep SymplifyPro happy
+         assign thedbg_r_incsr = 1'b0;
       end
    endgenerate
+`ifdef verilator   
+   function [12:0] get_interruptinfo;
+      // verilator public
+     get_interruptinfo = {msie,msip,mtie,mtip,meie,meip,mtimeincie,mtimeincip,mrinstretie,mrinstretip,mpie,mie,thedbg_r_incsr};
+   endfunction
+`endif
 
    /* Multiply and Divide instructions are optionally supported
     */

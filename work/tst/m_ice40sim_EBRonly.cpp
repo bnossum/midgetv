@@ -380,7 +380,7 @@ void simprintf( uint32_t cy, Vm_ice40sim_EBRonly *tb ) {
         g_info.dbg_stb_ack    = STARTOFHIER->inst_progressctrl->get_dbg_stb_ack();
         g_info.stb_ack        = STARTOFHIER->get_stb_ack();
 //        g_info.inexplicable   = STARTOFHIER->inst_inputmux->get_inexpliccableerror();
-        g_info.interruptinfo  = STARTOFHIER->genblk3__DOT__inst_status_and_interrupts->get_interruptinfo();
+        g_info.interruptinfo  = STARTOFHIER->get_interruptinfo();
         g_info.sel_O          = STARTOFHIER->get_SEL_O();
         g_info.enaQ           = STARTOFHIER->get_enaQ();
         g_info.nclearQ        = STARTOFHIER->get_nclearQ();

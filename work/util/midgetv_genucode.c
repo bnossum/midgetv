@@ -150,6 +150,7 @@ void check_internal_consistency( void ) {
                         if ( tbl_fixedposspec[k] != 1 )
                                 ferr( "uinstr say fixed pos, but table say not. Mismatch at 0x%2.2x\n", k );
                 case 17 :
+                case 31 :
                         if ( ucodespeced_pair_or_pos[k] != k )
                                 ferr( "uinstr say fixed pos, but instruction at wrong location 0x%2.2x\n", k );
                         break;
@@ -722,7 +723,10 @@ void print_input_as_comment( int modified, char *entrypoint[256], uint32_t sampl
 
 
 ///////////////////////////////////////////////////////////////////////////////
-int shoehorn( int col, int relevantinputs, int maxnrhigh, int minnrhigh, char *entrypoint[256], uint32_t sampleinstruction[256], int newline[256] ) {
+int shoehorn( int col, int relevantinputs, int maxnrhigh, int minnrhigh,
+              char *entrypoint[256] __attribute__ ((unused)),
+              uint32_t sampleinstruction[256] __attribute__ ((unused)),
+              int newline[256] ) {
         int bitstouseasindex;
         int seenanycandidate = 0;
         

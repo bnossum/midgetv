@@ -13,7 +13,6 @@ module m_progressctrl
     input        corerunning, //    Avoid writing of registers when we are not running
     input        RST_I, //          Non-maskable interrupt
     input        ACK_I, //          Acknowledge from I/O device.
-    input        sysregack, //      Acknowledge from system registers (if MTIMETAP >= MTIMETAP_LOWLIM)
     input        sram_ack, //       Acknowledge from SRAM (if SRAMADRWIDTH != 0)
     input        sa15, //           Part of enable for Q
     input        sa27,sa26, //      Controls EBR write address mux
@@ -30,6 +29,7 @@ module m_progressctrl
     input [31:0] B, //              Do we access SRAM or I/O? Also used when RVC included
     input        buserror, //       When we have bus error we must have forward progress in ucode
     /* verilator lint_off UNUSED */
+    input        sysregack, //      Acknowledge from system registers (if MTIMETAP >= MTIMETAP_LOWLIM)
     input        sa12, //           Capturing the instruction
     input [17:0] Di, //             To find out if an instruction is RVC
     input        alu_carryout, //   For DIV

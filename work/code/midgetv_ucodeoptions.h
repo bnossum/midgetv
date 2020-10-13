@@ -38,10 +38,10 @@
  * easy to get away from the occational multiplication or divisions. In the
  * spirit of midgetv, the focus is on implementation size.
  */
-#define ucodeopt_MULDIV           0
+#define ucodeopt_MULDIV           1
  
 /* Midgetv can optionally include the “C” Standard Extension for
  * Compressed Instructions, Version 2.0
  */
-#define ucodeopt_RVC              0
+#define ucodeopt_RVC              1
 

@@ -14,8 +14,9 @@ module m_ice40sim_EBRonly
       SIMEBRADRWIDTH     = 9,  // Corresponding macro in m_ice4sim_EBRonly.cpp MUST match this.
       IWIDTH             = 32, 
       NO_CYCLECNT        = 0, 
-      MTIMETAP           = 14, 
-      HIGHLEVEL          = 0
+      MTIMETAP           = 0, //14, 
+      HIGHLEVEL          = 0,
+      DAT_I_ZERO_WHEN_INACTIVE = 1
       )
    (
     input CLK_I, // Toggled from verilator
@@ -77,6 +78,7 @@ module m_ice40sim_EBRonly
        .IWIDTH            ( IWIDTH             ),
        .NO_CYCLECNT       ( NO_CYCLECNT        ),
        .MTIMETAP          ( MTIMETAP           ),
+       .DAT_I_ZERO_WHEN_INACTIVE(DAT_I_ZERO_WHEN_INACTIVE),
        .HIGHLEVEL         ( HIGHLEVEL          ),
        .prg00(prg00),       .prg01(prg01),       .prg02(prg02),       .prg03(prg03),
        .prg04(prg04),       .prg05(prg05),       .prg06(prg06),       .prg07(prg07),
@@ -104,7 +106,15 @@ module m_ice40sim_EBRonly
       .start                            (start));
 
    wire                 ACK_I = ACK_I_simple_wbone | ACK_I_dyn_wbone;
-   wire [31:0]          DAT_I = ACK_I_simple_wbone ? DAT_I_simple_wbone : DAT_I_dyn_wbone;
+   wire [31:0]          DAT_I;
+
+   generate
+      if ( DAT_I_ZERO_WHEN_INACTIVE ) begin
+         assign DAT_I = ACK_I_simple_wbone ? DAT_I_simple_wbone : ACK_I_dyn_wbone ? DAT_I_dyn_wbone : 32'h0;
+      end else begin
+         assign DAT_I = ACK_I_simple_wbone ? DAT_I_simple_wbone : DAT_I_dyn_wbone;
+      end
+   endgenerate
    
    // Address decode of wishbone register: 0b01100xxx_xxxxxxxx_xxxxxxxx_xxxxx1xx
    // and dynamic wishbone register:       0b01100xxx_xxxxxxxx_xxxxxxxx_xxx1xxxx

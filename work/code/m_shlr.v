@@ -74,7 +74,7 @@ module m_shlr
             
             always @(posedge clk)
               if ( ceM ) 
-                rM[ALUWIDTH-1:1] <= clrM ? 0 : cmbMmost;
+                rM[ALUWIDTH-1:1] <= clrM ? 31'h0 : cmbMmost;
             
             always @(posedge clk)
               rM[0] <= cmbMlsb;

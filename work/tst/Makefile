@@ -21,7 +21,7 @@ VERILATORFLAGS = -Wall -v m_ice_shortcuts.v $(VERILATORINCLUDES) -Mdir $(OBJDIR)
 #	m_bmask_emask m_condcode 
 
 
-//MY = m_tb_inputmux
+tmpMY = m_ice40sim_EBRonly m_ice40sim_SRAM
 
 MY = m_ice40sim_EBRonly m_ice40sim_SRAM \
 	m_ucodepc \
@@ -36,7 +36,7 @@ MY = m_ice40sim_EBRonly m_ice40sim_SRAM \
 #m_ice40sim_SRAM4_EBR16  \
 #	m_ucodepc m_alu
 
-TARGETS:=$(foreach i,$(MY),$(BINDIR)/$(i).bin)
+TARGETS:=$(foreach i,$(tmpMY),$(BINDIR)/$(i).bin)
 
 #u
 # I do not really master the build process of Verilator.

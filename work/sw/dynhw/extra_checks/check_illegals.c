@@ -64,6 +64,40 @@ void dump( uint32_t *p, uint32_t len ) {
 }
 
 /////////////////////////////////////////////////////////////////////////////
+// A debug help
+void show_ucodeinx( uint32_t op, int ismuldiv ) {
+        int i0,i1,i2,i3,i4,i5,i6,i7;
+
+        if ( ismuldiv ) {
+                i0 = (((op>>4)&7) == 0b011 && ((op>>2) & 1) == 0) ? ((op>>25)&1) : ((op>>2)&1);
+        } else {
+                i0 = ((op>>2)&1);
+        }
+        int is_lui = (((op>>4) & 3) == 0b11 && ((op>>2) & 1) == 1) ? 1 : 0;
+        i1 = is_lui ? 1 :
+                ((1^((op>>6)&1)) & ((op>>5)&1) & ((op>>30)&1)) |
+                ((1^(1^((op>>6)&1))) & ((op>>3)&1));
+        i2 = ((op>>4)&1);
+        i3 = ((op>>5)&1);
+        i4 = ((op>>6)&1);
+        i5 = ((op>>12)&1);
+        i6 = ((op>>13)&1) & (((op>>2)&7) != 0b101); // Oops mixing logical and bitwise ops.
+        i7 = ((op>>14)&1) & (((op>>2)&7) != 0b101) & (((op>>2)&15) != 0b1011);// Oops mixing logical and bitwise ops.
+        int i = (i7<<7) |
+                (i6<<6) |
+                (i5<<5) |
+                (i4<<4) |
+                (i3<<3) |
+                (i2<<2) |
+                (i1<<1) |
+                (i0<<0);
+        puts( "inx=" );
+        puthex32(i);
+        puts( " " );
+}
+
+
+/////////////////////////////////////////////////////////////////////////////
 /* What to expect:
  *         Program option for checking
  * Core    i    C    m    c      Note
@@ -204,23 +238,24 @@ int main( void ) {
                 //NrGood=0x0d8a8004 NrBad=0x3275c07d sum=0x40004081                  
                 
                 opcode++;
+                // puthex32( opcode ); putchar( ' ' );
         } while ( opcode < 0x10000 );
         inRVC = 0;
 
         
         puts( "\nCheck 32-bit instructions. Wait for 64x64 characters\n" );
         opcode = 0;        
-        //opcode = 0x42000033;
         
         opcode |= 3; // Easy to forget that low 2 msb must be set.
         do {
-//                puthex32( opcode ); 
+                //puthex32( opcode ); putchar( ' ' );
+                //show_ucodeinx(opcode,muldiv);
                 switch ( opcode & 0b1111111 ) {
                 case 0b0000011 :
                         switch ( (opcode>>12) & 0b111 ) {
                         case 0b000 : P("LB"); goto Legal;
                         case 0b001 : P("LH"); goto Legal;
-                        case 0b010 : P("LW"); goto Legal;
+                        case 0b010 : P("LW"); goto Legal;                        
                         case 0b011 : goto Illegal;
                         case 0b100 : P("LBU"); goto Legal;
                         case 0b101 : P("LHU"); goto Legal;
@@ -351,7 +386,6 @@ int main( void ) {
                 
         Illegal:
                 P("Err");
-                //puts( ":Test " );
                 nrillegal++;
                 *LED = 1;
                 /* Any illegal code should result in a trap
@@ -361,11 +395,8 @@ int main( void ) {
                 testbed32();
                 goto L;
                 
-//        IgnoreIllegal:
-                
         Legal:
                 P("Ok");
-                //puts( ":Skip " );
                 nrgood++;
                 *LED = 2;
         L:
@@ -385,8 +416,10 @@ int main( void ) {
                         */
                 }
                 
-                if ( nrillegal != nrillegaltraps )
+                if ( nrillegal != nrillegaltraps ) {
+                        puts( "FAIL detected" );
                         goto Fatal;
+                }
 
                 opcode += 4;
                 if ( !fulltest ) {
@@ -419,6 +452,7 @@ int main( void ) {
 
 Fatal:
         puts( "Fail detected" );
+        *LED = 2;
         if ( inRVC )
                 puts( " in RVC" );
         puts(". Opcode now =" );
