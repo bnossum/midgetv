@@ -1,3 +1,5 @@
+Program superseded by test on hardware.
+
         # Check illegal encoding in instructions
 	#   funct7         rs2    rs1    funct3 rd           opcode   Instruction
 	#   0000000,       shamt, rs1,   001,   rd,          0010011  slli     
