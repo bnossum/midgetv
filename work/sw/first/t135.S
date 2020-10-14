@@ -31,13 +31,30 @@ StartTrap:
 6:      simerr  6
 7:      simerr  7
 
+NoRVCimp:
+        lw      x1,%lo(__mepc)(x0)
+        addi    x1,x1,4
+        sw      x1,%lo(__mepc)(x0)
+        mret
+        
 #ifndef onlyEBR
         .section .text
 #endif
+
+FakeSuccess:
+        simend
+        
 atest:  .word 0xbadbabe
         .equ ATEST , atest
         
 _start:
+        // First find out if RVC is implemented. If it is, we report "success"
+        la      x1,NoRVCimp
+        sw      x1,%lo(__mtvec)(x0)
+        .hword  0x4081          // C.LI x1,0
+        .hword  0x4081          // C.LI x1,0
+        beq     x1,x0,FakeSuccess
+        
         la      x1,StartTrap
         sw      x1,%lo(__mtvec)(x0)   
 Offending:

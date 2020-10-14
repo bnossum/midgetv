@@ -763,7 +763,7 @@ assign d[30] = d[18];"
 #define _x_IJT_1  IJT_1,   "       Exit CSR, enter trap",                           8,IJ_1,          isr_none     | A_passd   | Wnn   | rFFFFFFFF | Qs   | sr_h  | u_io_i         | n(IJT_2)    /* Ajacent to IJ_1 */
 #define _x_IJT_2  IJT_2,   "       Read word is to be masked with ~3u",             0,-1,            isr_none     | A_passq   | Wyy   | r00000000 | Qz   | sr_h  | u_cont         | n(IJT_3)
 #define _x_IJT_3  IJT_3,   "       Construct Q = 3",                                0,-1,            isr_none     | A_add3w   | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(IJT_4)
-#define _x_IJT_4  IJT_4,   "       Mask and store to mepc and Q for read of instr", 0,-1,            isr_none       | A_nearAND | Wmepc | r00000000 | Qu   | sr_h  | u_cont         | n(ILL_2)    /* We will write 0 to mtval */
+#define _x_IJT_4  IJT_4,   "       Mask and store to mepc and Q for read of instr", 0,-1,            isr_none     | A_nearAND | Wmepc | r00000000 | Qu   | sr_h  | u_cont         | n(ILL_2)    /* We will write 0 to mtval */
 
 #define _r_IJ_0   IJ_0,    "IJ     Jump to mem[(rs1+ofs)&~1u]. inCSR=0",            1,0x02,          isr_use_ij   | A_addDQ   | Wnn   | Ralu      | Qu   | sr_h  | hwordaligned   | n(IJ_1)
 #define _r_IJ_1   IJ_1,    "       Read until q=mem[(rs1+ofs)&~1u]",                2,-1,            isr_none     | A_passd   | Wnn   | rFFFFFFFF | Qs   | sr_h  | u_io_i         | n(IJ_2)     /* Must be placed at even ucode adr */
@@ -774,7 +774,7 @@ assign d[30] = d[18];"
 #define _r_IJT_1  IJT_1,   "       Exit CSR, enter trap",                           8,IJ_1,          isr_none     | A_passd   | Wnn   | rFFFFFFFF | Qs   | sr_h  | u_io_i         | n(IJT_2)    /* Ajacent to IJ_1 */
 #define _r_IJT_2  IJT_2,   "       Read word is to be masked with ~1u",             0,-1,            isr_none     | A_passq   | Wyy   | r00000000 | Qz   | sr_h  | u_cont         | n(IJT_3)
 #define _r_IJT_3  IJT_3,   "       Construct Q = 1",                                0,-1,            isr_none     | A_add1    | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(IJT_4)
-#define _r_IJT_4  IJT_4,   "       Mask and store to mepc and Q for read of instr", 0,-1,            nxtSTB       | A_nearAND | Wmepc | r00000000 | Qu   | sr_h  | u_cont         | n(ILL_2)     
+#define _r_IJT_4  IJT_4,   "       Mask and store to mepc and Q for read of instr", 0,-1,            isr_none     | A_nearAND | Wmepc | r00000000 | Qu   | sr_h  | u_cont         | n(ILL_2)     
 
 //
 #define _QINT_0   QINT_0,  "INT    Get current PC",                                 1,0xff,          isr_none     | A_xx      | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(QINT_1)
@@ -830,6 +830,7 @@ assign d[30] = d[18];"
 #  endif
 # endif
 #endif
+
 //    Fixed Paired
 //     spes spec                                                                                                                                                                                                                                                             reachability
 //        |    |     free:50          free:49          free:50          free:4           free:3           free:4           free:57          free:54          free:55          free:10          free:9           free:9            |
@@ -839,7 +840,7 @@ assign d[30] = d[18];"
 /* 02 */Y(1,   0, Z(_x_IJ_0         ,_x_IJ_0         ,_x_IJ_0         ,_x_IJ_0         ,_x_IJ_0         ,_x_IJ_0         ,_r_IJ_0         ,_r_IJ_0         ,_r_IJ_0         ,_r_IJ_0         ,_r_IJ_0         ,_r_IJ_0         ), 1, 0x0000707f, 0x0000000b, (1<<22)    ) // custom-0 instruction    
 /* 03 */Y(1,   0, _FENCE(0x03)                                                                                                                                                                                                  , 1, 0x0000707f, 0x0000000f, (1<<22)    ) // FENCE                   
 /* 04 */Y(1,   0, _ADDI_0                                                                                                                                                                                                       , 1, 0x0000707f, 0x00000013, (1<<22)    ) // ADDI                    
-/* 05 */Y(1,   0, _x_AUIPC_0(0x05)                                                                                                                                                                                              , 1, 0x0000007f, 0x00000017, (1<<25)/2  ) // AUIPC 1/2               
+/* 05 */Y(1,   0, Z(_x_AUIPC_0(0x05),_x_AUIPC_0(0x05),_x_AUIPC_0(0x05),_x_AUIPC_0(0x05),_x_AUIPC_0(0x05),_x_AUIPC_0(0x05),_r_AUIPC_0(0x05),_r_AUIPC_0(0x05),_r_AUIPC_0(0x05),_r_AUIPC_0(0x05),_r_AUIPC_0(0x05),_r_AUIPC_0(0x05)), 1, 0x0000007f, 0x00000017, (1<<25)/2  ) // AUIPC 1/2               
 /* 06 */Y(0,   0, _LB_3                                                                                                                                                                                                         , 0, 0xffffffff, 0x00000000, 0          ) //                         
 /* 07 */Y(0,   0, _LB_4                                                                                                                                                                                                         , 0, 0xffffffff, 0x00000000, 0          ) //                         
 /* 08 */Y(1,   0, _SB_0(0x08)                                                                                                                                                                                                   , 1, 0x0000707f, 0x00000023, (1<<22)/2  ) // SB 1/2                  
@@ -1017,7 +1018,7 @@ assign d[30] = d[18];"
 /* b4 */Y(0,   0, Z(_i0reserved     ,_i1eFetch3      ,_i2eFetch3      ,_i0reserved     ,_i1eFetch3      ,_i2eFetch3      ,_ic0reserved    ,_ic1eFetch3     ,_ic2eFetch3     ,_ic0reserved    ,_ic1eFetch3     ,_ic2eFetch3     ), 0, 0xffffffff, 0x00000000, 0          ) //
 /* b5 */Y(0,   0, _SH_3                                                                                                                                                                                                         , 0, 0xffffffff, 0x00000000, 0          ) //
 /* b6 */Y(0,   0, _ECALL_5                                                                                                                                                                                                      , 0, 0xffffffff, 0x00000000, 0          ) //
-/* b7 */Y(0,   0, _x_IJ_3                                                                                                                                                                                                       , 0, 0xffffffff, 0x00000000, 0          ) //
+/* b7 */Y(0,   0, Z(_x_IJ_3         ,_x_IJ_3         ,_x_IJ_3         ,_x_IJ_3         ,_x_IJ_3         ,_x_IJ_3         ,_r_IJ_3         ,_r_IJ_3         ,_r_IJ_3         ,_r_IJ_3         ,_r_IJ_3         ,_r_IJ_3         ), 0, 0xffffffff, 0x00000000, 0          ) //
 /* b8 */Y(1,   0, _BGE                                                                                                                                                                                                          , 1, 0x0000707f, 0x00005063, (1<<22)    ) // BGE
 /* b9 */Y(0,   0, Z(_unxb9          ,_unxb9          ,_unxb9          ,_DIV_e          ,_DIV_e          ,_DIV_e          ,_unxb9          ,_unxb9          ,_unxb9          ,_DIV_e          ,_DIV_e          ,_DIV_e          ), 2, 0x00400000, 0x00000000, 0          ) // illegal as entry. Can get here from OpCode close to "JALR".
 /* ba */Y(0,   0, _LHU_3                                                                                                                                                                                                        , 0, 0xffffffff, 0x00000000, 0          ) // Must be even ucode adr for unknown reason. Must find owut this. Probably because MCLR was used prev cycle.
@@ -1090,7 +1091,5 @@ assign d[30] = d[18];"
 /* fd */Y(1,   0, _NMI_0                                                                                                                                                                                                        , 3, 0xffffffff, 0x00000000, 0          ) // Reserved for NMI
 /* fe */Y(1,   0, _ILLe                                                                                                                                                                                                         , 2, 0x2af56000, 0x00000000, 0          ) // Reserved for illegals
 /* ff */Y(1,   0, _QINT_0                                                                                                                                                                                                       , 3, 0xffffffff, 0x00000000, 0          ) // Reserved for qualified interrupt
-
-
 
 #include "ucode_constantundef.h"
