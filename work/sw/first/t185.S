@@ -1,4 +1,4 @@
-        # Check unaligned sw, sh to  output port
+        # Check unaligned sw, sh to output port
         # =============================================================================
 #include "midgetv.inc"
 #include "midgetv_minimal_csr.S"
@@ -23,6 +23,8 @@ _start:
         // test unaligned SH
         li      x1,LEDREG+1
         li      x2,0x0123
+.global TstUnalignedSH
+TstUnalignedSH:
         sh      x2,0(x1)
         lw      x6,0(x5)
         bne     x6,x4,WroteAfterAll
@@ -32,7 +34,6 @@ _start:
         sw      x2,0(x1)
         lw      x6,0(x5)
         bne     x6,x4,WroteAfterAll
-simend        
 
         addi    x1,x1,1
         addi    x2,x2,1
@@ -52,7 +53,7 @@ simend
         // Exception handler
 _trap_handler:
         // Accept exceptions with combinations
-        // x1             x2          Case
+        // x1         x2          Case
         // LEDREG+1   0x00000123  A
         // LEDREG+1   0x76543210  B
         // LEDREG+2   0x76543211  C

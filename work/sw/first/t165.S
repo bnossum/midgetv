@@ -5,9 +5,17 @@
         
         .globl _start
         # =============================================================================
-StartTrap:
-        simerr  1
-
+        // This trap handle to see if this midgetv has no system registers.
+NoSysRegTrap:  
+        lw      x1,%lo(__mcause)(x0)
+        li      x31,5
+        bne     x1,x31,5f      // ? Don't understand this
+        // No system registers, so test
+        // can not be performed.
+        // Fake success.
+        simend
+5:      simerr  5
+        
         # =============================================================================
 NMI:
         simerr  99
@@ -46,8 +54,10 @@ InternalISR:
 #endif
 _start:
         li      x31,0xbabe
-        la      x1,StartTrap            // Initiate mtvec
+        la      x1,NoSysRegTrap         // Initiate mtvec
         sw      x1,%lo(__mtvec)(x0)
+        li      x3,__read_mstatus       // Check to see if 
+        lw      x4,0(x3)                // system registers implemented
 
         la      x1,NMI                  // Set up the internal ISR handle
         sw      x1,%lo(__rNMI_IIV)(x0)

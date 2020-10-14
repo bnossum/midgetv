@@ -67,10 +67,13 @@ _start:
         lw      x11,%lo(__mtvec)(x0)
         bne     x3,x11,8b                       // Updated to 0x78?
         
-        // Check misa
+        // Check misa, sloppy test, allow both with and without RVC
         li      x22,0x40800100        
         csrrw   x1,misa,x3
+        beq     x1,x22,22f
+        li      x22,0x40800104
         bne     x1,x22,9b
+22:
         lw      x11,%lo(__misa)(x0)
         bne     x3,x11,10b
         
