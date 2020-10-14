@@ -200,6 +200,7 @@ DoCSRS:
         j       Join_from_CSRS          // 
 
 UnsupportedCSR:
+        sw      x0,%lo(__mtval)(x0)     //
         li      rtmp,0                  // 
         j       RestoreWorkingRegisters // 
         

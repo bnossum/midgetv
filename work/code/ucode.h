@@ -417,27 +417,27 @@ assign d[30] = d[18];"
 #define _BLTU     BLTU,    "BLTU   Conditional Branch. Offset to Ryy",              1,0xd8,          isr_none     | A_passq   | Wyy   | RS2       | Qz   | sr_h  | u_cont         | n(condb_2 )  
 #define _BGEU     BGEU,    "BGEU   Conditional Branch. Offset to Ryy",              1,0xf8,          isr_none     | A_passq   | Wyy   | RS2       | Qz   | sr_h  | u_cont         | n(condb_2 )
 //
-#define _x_condb_2  condb_2, "       ~RS2 in Q",                                      0,-1,            isr_none     | A_nearXOR | Wnn   | RS1       | Qu   | sr_h  | u_cont         | n(condb_3 )  
-#define _x_condb_3  condb_3, "       Calculate RS1+~RS2+1",                           0,-1,            isr_none     | A_add1    | Wnn   | Rpc       | Qu   | sr_h  | u_cont         | n(condb_4 )  
-#define _x_condb_4  condb_4, "       Branch on condition",                            0,-1,            isr_none     | A_passd   | Wnn   | Ryy       | Qu   | sr_h  | usebcond       | n(condb_5 )  
-#define _x_condb_5  condb_5, "       Branch not taken.",                              2,-1,            nxtSTB       | A_passq4  | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch   )  /* Must be placed at even ucode adr. Goes to either Fetch or eFetch     */
-#define _x_condb_5t condb_5t,"       Branch taken.",                                  8,condb_5,       nxtSTB       | A_addDQ   | Wpc   | Ralu      | Qu   | sr_h  | wordaligned    | n(BrOpFet )  /* Must be placed at the next ucode adr */
-
-#define _r_condb_2  condb_2, "       ~RS2 in Q",                                      0,-1,	     isr_none     | A_nearXOR | Wnn   | RS1       | Qu   | sr_h  | u_cont         | n(condb_3 )  
-#define _r_condb_3  condb_3, "       Calculate RS1+~RS2+1",                           0,-1,	     isr_none     | A_add1    | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(condb_4 )  // next Get back the offset
-#define _r_condb_4  condb_4, "       Branch on condition",                            0,-1,	     isr_none     | A_passd   | Wnn   | Rjj       | Qu   | sr_h  | usebcond       | n(condb_5 )  // next get back PC for next consequtive instr
-#define _r_condb_5  condb_5, "       Branch not taken.",                              2,-1,	     isr_none     | A_xx      | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  /* Must be placed at even ucode adr. Goes to either Fetch or eFetch     */
-#define _r_condb_5t condb_5t,"       Branch taken.",                                  8,condb_5,	     nxtSTB       | A_addDQ   | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch   ) 
+#define _x_condb_2  condb_2, "       ~RS2 in Q",                                    0,-1,            isr_none     | A_nearXOR | Wnn   | RS1       | Qu   | sr_h  | u_cont         | n(condb_3 )  
+#define _x_condb_3  condb_3, "       Calculate RS1+~RS2+1",                         0,-1,            isr_none     | A_add1    | Wnn   | Rpc       | Qu   | sr_h  | u_cont         | n(condb_4 )  
+#define _x_condb_4  condb_4, "       Branch on condition",                          0,-1,            isr_none     | A_passd   | Wnn   | Ryy       | Qu   | sr_h  | usebcond       | n(condb_5 )  
+#define _x_condb_5  condb_5, "       Branch not taken.",                            2,-1,            nxtSTB       | A_passq4  | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch   )  /* Must be placed at even ucode adr. Goes to either Fetch or eFetch     */
+#define _x_condb_5t condb_5t,"       Branch taken.",                                8,condb_5,       nxtSTB       | A_addDQ   | Wpc   | Ralu      | Qu   | sr_h  | wordaligned    | n(BrOpFet )  /* Must be placed at the next ucode adr */
+                                                                              
+#define _r_condb_2  condb_2, "       ~RS2 in Q",                                    0,-1,	     isr_none     | A_nearXOR | Wnn   | RS1       | Qu   | sr_h  | u_cont         | n(condb_3 )  
+#define _r_condb_3  condb_3, "       Calculate RS1+~RS2+1",                         0,-1,	     isr_none     | A_add1    | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(condb_4 )  // next Get back the offset
+#define _r_condb_4  condb_4, "       Branch on condition",                          0,-1,	     isr_none     | A_passd   | Wnn   | Rjj       | Qu   | sr_h  | usebcond       | n(condb_5 )  // next get back PC for next consequtive instr
+#define _r_condb_5  condb_5, "       Branch not taken.",                            2,-1,	     isr_none     | A_xx      | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(StdIncPc)  /* Must be placed at even ucode adr. Goes to either Fetch or eFetch     */
+#define _r_condb_5t condb_5t,"       Branch taken.",                                8,condb_5,       nxtSTB       | A_addDQ   | Wpc   | Ralu      | Qeu  | sr_h  | u_cont         | n(Fetch   ) 
 //
-//                                                                                      Fixed/even       ISR          | ALU         Write   intern      Reg    Shreg   Ucode            Next
-//                                                                                      | Pair           action       | op          adr/en  read adr    op     op      operation        ucode
-//efine _ixBrOpFet  BrOpFet ,"NewOp2 Read until instruction latched",                   2,-1,            isr_none     | A_passd   | Wnn   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  /* Must be placed at even ucode adr     */ 
-#define _ixBrOpFet  BrOpFet ,"NewOp2 Read until instruction latched",                   2,-1,            isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  /* Must be placed at even ucode adr     */ 
-#define _ixBAlignEr BAlignEr," Err   Branch target instruction address misaligned",     8,BrOpFet,       isr_none     | A_xx      | Wnn   | Rpc       | Qx   | sr_h  | u_cont         | n(BAERR_1)   /* Must be placed at the next ucode adr */
-#define _ixBAERR_1  BAERR_1, "       Faultadr to mtval. Prepare get offset",            0,-1,            isr_none     | A_passd   | Wmtval| Ryy       | Qz   | sr_h  | u_cont         | n(BAERR_2)   
-#define _ixBAERR_2  BAERR_2, "       ~offset to Q. Prep read (origPC+offset)",          0,-1,            isr_none     | A_nearXOR | Wnn   | Rpc       | Qu   | sr_h  | u_cont         | n(BAERR_3)   
-#define _ixBAERR_3  BAERR_3, "       origPC to mepc. Prep read 0",                      0,-1,            isr_none     | A_add1    | Wmepc | r00000000 | Qx   | sr_h  | u_cont         | n(BAERR_4)   
-#define _ixBAERR_4  BAERR_4, "       Store 0 to mcause. Prep get trap entry pont",      0,-1,            isr_intoTrap | A_passd   | Wmcaus| rmtvec    | Qx   | sr_h  | u_cont         | n(JAL_3)   
+//                                                                                  Fixed/even       ISR          | ALU         Write   intern      Reg    Shreg   Ucode            Next
+//                                                                                  | Pair           action       | op          adr/en  read adr    op     op      operation        ucode
+//efine _ixBrOpFet  BrOpFet ,"NewOp2 Read until instruction latched",               2,-1,            isr_none     | A_passd   | Wnn   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  /* Must be placed at even ucode adr     */ 
+#define _ixBrOpFet  BrOpFet ,"NewOp2 Read until instruction latched",               2,-1,            isr_none     | A_passq   | Wjj   | rHorTtime | Qcndz| sr_h  | u_io_i_latch   | n(Fetch2  )  /* Must be placed at even ucode adr     */ 
+#define _ixBAlignEr BAlignEr," Err   Branch target instruction address misaligned", 8,BrOpFet,       isr_none     | A_xx      | Wnn   | Rpc       | Qx   | sr_h  | u_cont         | n(BAERR_1)   /* Must be placed at the next ucode adr */
+#define _ixBAERR_1  BAERR_1, "       Faultadr to mtval. Prepare get offset",        0,-1,            isr_none     | A_passd   | Wmtval| Ryy       | Qz   | sr_h  | u_cont         | n(BAERR_2)   
+#define _ixBAERR_2  BAERR_2, "       ~offset to Q. Prep read (origPC+offset)",      0,-1,            isr_none     | A_nearXOR | Wnn   | Rpc       | Qu   | sr_h  | u_cont         | n(BAERR_3)   
+#define _ixBAERR_3  BAERR_3, "       origPC to mepc. Prep read 0",                  0,-1,            isr_none     | A_add1    | Wmepc | r00000000 | Qx   | sr_h  | u_cont         | n(BAERR_4)   
+#define _ixBAERR_4  BAERR_4, "       Store 0 to mcause. Prep get trap entry pont",  0,-1,            isr_intoTrap | A_passd   | Wmcaus| rmtvec    | Qx   | sr_h  | u_cont         | n(JAL_3)   
 
 
 //
@@ -763,7 +763,7 @@ assign d[30] = d[18];"
 #define _x_IJT_1  IJT_1,   "       Exit CSR, enter trap",                           8,IJ_1,          isr_none     | A_passd   | Wnn   | rFFFFFFFF | Qs   | sr_h  | u_io_i         | n(IJT_2)    /* Ajacent to IJ_1 */
 #define _x_IJT_2  IJT_2,   "       Read word is to be masked with ~3u",             0,-1,            isr_none     | A_passq   | Wyy   | r00000000 | Qz   | sr_h  | u_cont         | n(IJT_3)
 #define _x_IJT_3  IJT_3,   "       Construct Q = 3",                                0,-1,            isr_none     | A_add3w   | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(IJT_4)
-#define _x_IJT_4  IJT_4,   "       Mask and store to mepc and Q for read of instr", 0,-1,            nxtSTB       | A_nearAND | Wmepc | Ralu      | Qu   | sr_h  | u_cont         | n(ILL_2)     // Probable error here, we do not any longer write to mtval because the instricton we wanted to read may be unaligned
+#define _x_IJT_4  IJT_4,   "       Mask and store to mepc and Q for read of instr", 0,-1,            isr_none       | A_nearAND | Wmepc | r00000000 | Qu   | sr_h  | u_cont         | n(ILL_2)    /* We will write 0 to mtval */
 
 #define _r_IJ_0   IJ_0,    "IJ     Jump to mem[(rs1+ofs)&~1u]. inCSR=0",            1,0x02,          isr_use_ij   | A_addDQ   | Wnn   | Ralu      | Qu   | sr_h  | hwordaligned   | n(IJ_1)
 #define _r_IJ_1   IJ_1,    "       Read until q=mem[(rs1+ofs)&~1u]",                2,-1,            isr_none     | A_passd   | Wnn   | rFFFFFFFF | Qs   | sr_h  | u_io_i         | n(IJ_2)     /* Must be placed at even ucode adr */
@@ -774,7 +774,7 @@ assign d[30] = d[18];"
 #define _r_IJT_1  IJT_1,   "       Exit CSR, enter trap",                           8,IJ_1,          isr_none     | A_passd   | Wnn   | rFFFFFFFF | Qs   | sr_h  | u_io_i         | n(IJT_2)    /* Ajacent to IJ_1 */
 #define _r_IJT_2  IJT_2,   "       Read word is to be masked with ~1u",             0,-1,            isr_none     | A_passq   | Wyy   | r00000000 | Qz   | sr_h  | u_cont         | n(IJT_3)
 #define _r_IJT_3  IJT_3,   "       Construct Q = 1",                                0,-1,            isr_none     | A_add1    | Wnn   | Ryy       | Qu   | sr_h  | u_cont         | n(IJT_4)
-#define _r_IJT_4  IJT_4,   "       Mask and store to mepc and Q for read of instr", 0,-1,            nxtSTB       | A_nearAND | Wmepc | Ralu      | Qu   | sr_h  | u_cont         | n(ILL_2)     
+#define _r_IJT_4  IJT_4,   "       Mask and store to mepc and Q for read of instr", 0,-1,            nxtSTB       | A_nearAND | Wmepc | r00000000 | Qu   | sr_h  | u_cont         | n(ILL_2)     
 
 //
 #define _QINT_0   QINT_0,  "INT    Get current PC",                                 1,0xff,          isr_none     | A_xx      | Wnn   | Rpc       | Qz   | sr_h  | u_cont         | n(QINT_1)

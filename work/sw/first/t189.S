@@ -18,13 +18,9 @@ StartTrap:
         li      x2,2
         bne     x1,x2,2f
         
-        // Check that mtval contains the expected illegal instruction
-        la      x1,TheIllegals
-        sll     x2,x31,2
-        add     x1,x1,x2
-        lw      x1,0(x1)
+        // Check that mtval contains 0
         lw      x2,%lo(__mtval)(x0)
-        bne     x1,x2,3f
+        bne     x0,x2,3f
         simend
 2:      simerr 0x22
 3:      simerr 0x23
@@ -32,6 +28,7 @@ StartTrap:
         # =============================================================================
 _start:
         la      x1,StartTrap
+        sw      x1,%lo(__mtval)(x0)     // Soil __mtval to see that the trap clears it
         sw      x1,%lo(__mtvec)(x0)
 
         la      x1,NMI                  // Set up the internal ISR handle

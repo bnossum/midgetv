@@ -26,6 +26,7 @@ FaultingInstr:
         // -----------------------------------------------------------------------------
         // Exception handler
 _trap_handler:
+
         // mepce should be address of faulting instr
         csrr    x30,mepc
         la      x1,FaultingInstr
@@ -36,10 +37,9 @@ _trap_handler:
         li      x2,2
         bne     x29,x2,3f
 
-        // mtval should be the instruction at FaultingAdr
-        lw      x3,0(x1)
+        // mtval should be 0
         csrr    x4,mtval
-        bne     x3,x4,4f
+        bne     x0,x4,4f
         
         simend
 

@@ -207,7 +207,7 @@
  * c3 _L0xc3     fe ILLe       0010000000000000xxxx11x00x00xxxxx0  Not in use (illegal as entry)                           0000600f close to fence
  * c4 ORI_0      e1 ORI_1      0000000000001000111111101000010xx0 ORI    Or immediate. jj=~Iimm                            00006013 ori     
  * c5 MRET_5     6f MRET_6     0010000000000000000011101100010xx0        ~302                                              00000000 
- * c6 IJT_4      47 ILL_2      0100000000001101110111101100011xx0        Mask and store to mepc and Q for read of instr    00000000 
+ * c6 IJT_4      47 ILL_2      0000000000001101101011101100011xx0        Mask and store to mepc and Q for read of instr    00000000 
  * c7 QINT_1     cb QINT_2     0000000000001101xxxx11101000001xx0        Store pc to mepc.                                 00000000 
  * c8 _L0xc8     fe ILLe       0010000000000000xxxx11x00x00xxxxx0  Not in use (illegal as entry)                           00006023 close to store
  * c9 MRET_2     a5 MRET_3     0010000000000000011011001100100000        0xff+3 = 0x102                                    00000000 
@@ -268,7 +268,7 @@
  */
 /* Col   x   1   0
  *  41  16   4 236  1 candidate 
- *  40  16  17 223 Can not simplify, can't represent fixed locations and pairs with any less than 5 bits of the index
+ *  40  16  16 224 Can not simplify, can't represent fixed locations and pairs with any less than 5 bits of the index
  *  39  16 139 101 Can not simplify, can't represent fixed locations with any less than 8 bits of the index
  *  38  16   3 237 13 candidates
  *  37  16  10 230 64 candidates
@@ -285,9 +285,9 @@ Can not simplify, no legal mapping
  *  27  16  40 200  5 candidates
  *  26  16  36 204  5 candidates
  *  25  65 126  65 Can not simplify, can't represent fixed locations with any less than 8 bits of the index
- *  24  65  82 109 Can not simplify, can't represent fixed locations with any less than 8 bits of the index
- *  23  65 148  43  4 candidates
- *  22  65  59 132 Can not simplify, can't represent fixed locations with any less than 7 bits of the index
+ *  24  65  81 110 Can not simplify, can't represent fixed locations with any less than 8 bits of the index
+ *  23  65 149  42  4 candidates
+ *  22  65  58 133 Can not simplify, can't represent fixed locations with any less than 7 bits of the index
  *  21  16 224  16 Can not simplify, can't represent fixed locations with any less than 5 bits of the index
  *  20  16 228  12 Can not simplify, can't represent fixed locations with any less than 7 bits of the index
  *  19  79 159  18 Can not simplify, can't represent fixed locations with any less than 8 bits of the index
@@ -339,7 +339,7 @@ localparam u1_8 = 256'h02bb0030000003f210ba0030000000303738133002fb03fb003000303
 localparam u1_9 = 256'h0739073b0000003000003a70003033ba3cb832db02f33a7836fa367838b03d3a;
 localparam u1_A = 256'h003b03b0000003b036ba00303a780030003b82f901bb03c80030003002b3b36b;
 localparam u1_B = 256'h02fb02fb2b7931ba32db01fb003033ba033302b3003a000000002b7138b002b3;
-localparam u1_C = 256'h01b20030000003f23d3a003001b30030343a377b003b23fa0030003032ba0030;
+localparam u1_C = 256'h01b20030000003f23d3a003001b30030343a36bb003b23fa0030003032ba0030;
 localparam u1_D = 256'h22fa20fa3eba31ba38b802b2003033ba3eba0030000038b83eba029b21ba00bb;
 localparam u1_E = 256'h2b710030000003f201fb0030033300303eba2b7102b303fb00300030003b0030;
 localparam u1_F = 256'h00b200b000b231ba003a02bb003033ba3cba00333eba6fff003100b23eba029b;
@@ -355,7 +355,7 @@ localparam u2_8 = 256'h00800080000000800c0000800000008000002c00008a0080008000800
 localparam u2_9 = 256'h00000380000000800000043000800000000000000c800030000000000c300030;
 localparam u2_A = 256'h048000800000008000000080043000800480008104800080008000800c800500;
 localparam u2_B = 256'h0082008201020000000400800080000004800c800080000000000d0204300c80;
-localparam u2_C = 256'h0080008000000080003000800480008000000100008000000080008000000080;
+localparam u2_C = 256'h0080008000000080003000800480008000000000008000000080008000000080;
 localparam u2_D = 256'h004a000000000000040000800080000000000080000004300000008400000480;
 localparam u2_E = 256'h0d02008000000080008000800480008000000d020c8000800080008000800080;
 localparam u2_F = 256'h0080008000800000008004800080000000000c80000004000080008000000084;
