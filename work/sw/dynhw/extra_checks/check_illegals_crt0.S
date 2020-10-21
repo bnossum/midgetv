@@ -179,6 +179,9 @@ _start:
         sw      x10,0xe8(x0);           // Transfer bitrate back to expected location after loading
         li      x2,0xfffffffc           // Initiate stack pointer
 
+//        jal     x1,ExtraTest1
+BackAgain:
+        
         la      x1,NMI                  // Set up the internal ISR handle (not used)
         sw      x1,%lo(__rNMI_IIV)(x0)
 
@@ -208,6 +211,16 @@ UnalignedInstr:
 1:      sw      x1,%lo(__mtvec)(x0)
         tail     main
 
+        # =============================================================================
+        # At some stage I had a problem with jal
+        #
+ExtraTest2:
+        jal     x0,BackAgain
+        nop
+        
+ExtraTest1:
+        jal     x0,ExtraTest2
+        
         # =============================================================================
         .global testbed16
 testbed16:
