@@ -18,3 +18,37 @@ rv32imc  758                         693                        651
          
 
 
+               
+
+
+Priority Exception Code  Description                          
+Highest  3               Instruction address breakpoint       What is this?
+         12              Instruction page fault               Not relevant, midgetv does not implement Supervisor mode
+         1               Instruction access fault             Midgetv has no PMA or PMP. it does, however recognize bus-timeout. See [1] below
+         2               Illegal instruction                  
+         0               Instruction address misaligned       
+         8, 9, 11        Environment call                     
+         3               Environment break                    
+         3               Load/Store/AMO address breakpoint    
+         6               Store/AMO address misaligned         
+         4               Load address misaligned              
+         15              Store/AMO page fault                 
+         13              Load page fault                      
+         7               Store/AMO access fault               
+Lowest   5               Load access fault                    
+
+
+[1]:
+
+
+ECALL / EBREAK should not increment minstret CSR
+
+
+Wpc has side effect, pc1 mirrors pc[1], effect critical.
+
+
+
+
+
+
+
