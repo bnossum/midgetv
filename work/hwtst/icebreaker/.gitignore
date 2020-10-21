@@ -4,4 +4,6 @@ hardware.bin
 hardware.blif
 iCEcube2_flow/
 ice40loaderprog.hv
+icebreaker_placeroute.log
+icebreaker_synth.log
 
