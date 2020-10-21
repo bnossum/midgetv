@@ -67,13 +67,18 @@
     LOCAL_IO_WRITE_STR(_STR);           \
     LOCAL_IO_POP(_SP);                  \
 
+        
 #define LOCAL_IO_PUSH(_SP)                      \
+    .option push;                               \
+    .option norvc;                              \
     sw          sp,LOCAL_IO_SP_STORAGE,_SP;     \
     la          sp, _IO_STACK_ENTRYPT;          \
     sw          ra, ( 0*4 )(sp);                \
     sw          a0, ( 1*4 )(sp);                \
 
+        
 #define LOCAL_IO_POP(_SP)               \
+    .option pop;                        \
     la          sp, _IO_STACK_ENTRYPT;  \
     lw          ra, ( 0*4 )(sp);        \
     lw          a0, ( 1*4 )(sp);        \

@@ -38,7 +38,6 @@ _start:                                         	\
         sw      x10,0xe8(x0);                   	\
         li      x2,0xfffffffc;                          \
         call    FN_WaitForGo;                           \
-
         
 #define RV_COMPLIANCE_CODE_END                                                \
         RVTEST_CODE_END                                                       \
@@ -72,8 +71,9 @@ _start:                                         	\
          
 /*         
    Microcode of midgetv rely on some locations in EBRram.
-*/        
-        
+*/
+        .option push
+        .option norvc
         .section .magicconstants, "a"
 
 __mepc:         .word 0xdeadbabe
@@ -581,6 +581,6 @@ mb_src:
 .word  0x00550533, 0x00555513, 0xffa50513, 0x00351293   // 0160
 .word  0x00a282b3, 0x0ea02423, 0xebdff06f               // 0170
         
-
+        .option pop
 
 #endif // _COMPLIANCE_TEST_H
