@@ -42,9 +42,15 @@
 `include "../../code/m_illegalop.v"
 `include "../../code/m_midgetv_core.v"
 
-
+// 0010 no luck
+// 0011 no luck
+// 1000 no luck
 module top
   # ( parameter
+      MULDIV             = 1,
+      RVC                = 0,
+      HAS_MINSTRET       = 1,
+      HAS_EBR_MINSTRET   = 0,
       SRAMADRWIDTH       = 16,
       FORCEEBRADRWIDTH   = 9, 
       IWIDTH             = 32, 
@@ -182,6 +188,10 @@ module top
    
    m_midgetv_core
      #(
+       .MULDIV             ( MULDIV             ),
+       .RVC                ( RVC                ),
+       .HAS_MINSTRET       ( HAS_MINSTRET       ),
+       .HAS_EBR_MINSTRET   ( HAS_EBR_MINSTRET   ),
        .SRAMADRWIDTH       ( SRAMADRWIDTH       ),
        .EBRADRWIDTH        ( FORCEEBRADRWIDTH   ),
        .IWIDTH             ( IWIDTH             ),
@@ -375,8 +385,8 @@ endmodule
  *     sudo iceprog hardware.bin
  * 
  * Other useful commands:
- * arachne-pnr -d 1k -P vq100 -p iceblink40-hx1k.pcf -o hardware.asc hardware.blif
- * icetime -d hx1k hardware.asc 
+ # arachne-pnr -d 5k -P sg48 -p icebreaker.pcf -o hardware.asc hardware.blif
+ # icetime -d up5k hardware.asc
  */
 // Local Variables:
 // verilog-library-directories:("." "../../code" "../../obj_dir"  )
