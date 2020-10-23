@@ -6,7 +6,8 @@
  * We undefine the short defines that has been used in this file
  */
 #undef Y
-#undef X
+//#undef X  following generation of all midgetv variants, the X macro must be valid for multiple inclusions of ucode.h
+#undef Z
 #undef XX
 #undef I 
 #undef II 
@@ -74,7 +75,7 @@
 #undef OOOxx
 #undef Ox 
 #undef Oxxx 
-#undef x 
+//#undef x  following generation of all midgetv variants, the x (unknown value in ctrleq) must be valid for multiple inclusions of ucode.h
 #undef xI 
 #undef xO 
 #undef xx 
@@ -82,4 +83,5 @@
 #undef xxxx 
 #undef xxxxx 
 
-
+#undef extCbase
+#undef extMbase
