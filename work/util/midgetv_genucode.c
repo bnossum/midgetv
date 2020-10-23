@@ -14,55 +14,57 @@
 
 #define ferr(...) exit( fprintf(stderr,"%s:%d:", __FILE__, __LINE__ )+fprintf(stderr, __VA_ARGS__))
 
-// Defeat quoting system of some shells
+//// Defeat quoting system of some shells
+//#define fname STR(nakedfname)
 #define STRX(x) # x
 #define STR(x) STRX(x)
-#define fname STR(nakedfname)
+#define CATX(x,y) x ## y
+#define CAT(x,y) CATX(x,y)
 
+/* Formerly this utility generated one module, now we generate all variants in parallel */
+#define NRVARIANTS 16
 
 /* The specification is in ucode.h.
  */
 typedef enum {
-#define X(label,txt,ty,pos,def,reachability,mask,instr,nrhit) label,
-#include fname
-        _LEND
+#define X(label,txt,ty,pos,def,reachability,mask,instr,nrhit) CAT(CAT(CAT(v,ALL_MIDGETVVARIANTS),_),label),
+#include "iterate_ucodeversions.h"
+        _LENDx16
 } LABELS;
 
 // Number of equations from specification file. 
-#define NREQATIONS MIDGETV_UCODE_NREQ
+//#define NREQATIONS MIDGETV_UCODE_NREQ
+int nrequations[NRVARIANTS] = MIDGETV_UCODE_NREQ;
+#define MAXNREQUATIONS 48 // Max for 3 EBR's, design limit.
 
 
-char *labeltext[256] = {
+char *labeltext[256*NRVARIANTS] = {
 #define X(label,txt,ty,pos,def,reachability,mask,instr,nrhit) STR(label),
-#include fname
+#include "iterate_ucodeversions.h"
 };
 
-char *ucodestr[256] = {
+
+char *ucodestr[256*NRVARIANTS] = {
 #define X(label,txt,ty,pos,def,reachability,mask,instr,nrhit) txt,
-#include fname
+#include "iterate_ucodeversions.h"
 };
 
-uint64_t ucode0[256] = {
+uint64_t ucode0[256*NRVARIANTS] = {
 #define x 0b0ull
 #define X(label,txt,ty,pos,def,reachability,mask,instr,nrhit) def,
-#include fname
+#include "iterate_ucodeversions.h"
 };
 
-uint64_t ucode1[256] = {
+uint64_t ucode1[256*NRVARIANTS] = {
 #define x 0b1ull
 #define X(label,txt,ty,pos,def,reachability,mask,instr,nrhit) def,
-#include fname
+#include "iterate_ucodeversions.h"
 };
 
-#ifndef STRIPCOLUMNS
-#define STRIPCOLUMNS 0
-#endif
 
-int statistics_on_unknown[NREQATIONS];
-int statistics_on_high[NREQATIONS];
-int statistics_on_low[NREQATIONS];
-
-
+int statistics_on_unknown[MAXNREQUATIONS*NRVARIANTS];
+int statistics_on_high[MAXNREQUATIONS*NRVARIANTS];
+int statistics_on_low[MAXNREQUATIONS*NRVARIANTS];
 
 /////////////////////////////////////////////////////////////////////////////
 /* September 2020
@@ -72,24 +74,30 @@ int statistics_on_low[NREQATIONS];
    Eventually, the specifications located in the Y macros will be
    removed.
  */
-int tbl_fixedposspec[256] = {
+int tbl_fixedposspec[256*NRVARIANTS] = {
 #define Y(fixedpos, paired, ...) fixedpos,
-#include fname
+#define X(label,txt,ty,pos,def,reachability,mask,instr,nrhit)
+#include "iterate_ucodeversions.h"
 };
 
-int tbl_pairedspec[256] = {
+int tbl_pairedspec[256*NRVARIANTS] = {
 #define Y(fixedpos, paired, ...) paired,
-#include fname
+#define X(label,txt,ty,pos,def,reachability,mask,instr,nrhit)
+#include "iterate_ucodeversions.h"
 };
 
-int ucodespeced_fixedeven[256] = {
+int ucodespeced_fixedeven[256*NRVARIANTS] = {
 #define X(label,txt,ty,pos,def,reachability,mask,instr,nrhit) ty,
-#include fname
+#include "iterate_ucodeversions.h"
 };
-        
-int ucodespeced_pair_or_pos[256] = {
-#define X(label,txt,ty,pos,def,reachability,mask,instr,nrhit) pos,
-#include fname
+
+
+#include "stupidlabels.h"
+
+int ucodespeced_pair_or_pos[256*NRVARIANTS] = {
+//#define X(label,txt,ty,pos,def,reachability,mask,instr,nrhit) pos,
+#define X(label,txt,ty,pos,def,reachability,mask,instr,nrhit) CAT(CAT(CAT(v,ALL_MIDGETVVARIANTS),_),pos),
+#include "iterate_ucodeversions.h"
 };
 
 
@@ -138,54 +146,62 @@ void ensure_k_at_illegal_at_entry_location( int k ) {
 
 /////////////////////////////////////////////////////////////////////////////
 void check_internal_consistency( void ) {
+        int v;
         int k;
 
-        for ( k = 0; k < 256; k++ ) {
-                switch ( ucodespeced_fixedeven[k]) {
-                case 0 : 
-                        if ( tbl_fixedposspec[k] != 0 )
-                                ferr( "uinstr say freely pos, but table say not. Mismatch at 0x%2.2x\n", k );
-                        break;
-                case 1 :
-                        if ( tbl_fixedposspec[k] != 1 )
-                                ferr( "uinstr say fixed pos, but table say not. Mismatch at 0x%2.2x\n", k );
-                case 17 :
-                case 31 :
-                        if ( ucodespeced_pair_or_pos[k] != k )
-                                ferr( "uinstr say fixed pos, but instruction at wrong location 0x%2.2x\n", k );
-                        break;
-                        
-                case 6 : // This item is both to be in a range, and is also the first of a pair
-                        ensure_k_at_illegal_at_entry_location(k);
-                        // Fallthrough
-                case 2 :
-                        if ( k & 1 )
-                                ferr( "uinstr say at even address, but this is not the case. Error at 0x%2.2x\n", k );
-                        if ( ucodespeced_pair_or_pos[k] != -1 && ucodespeced_pair_or_pos[k] != k )
-                                ferr( "uinstr say fixed pos, but ucode appears at wrong location 0x%2.2x\n", k );
-                        if ( ucodespeced_fixedeven[k+1] != 8 )
-                                ferr( "uinstr at even address 0x%2.2x, but next uinstr is not the second item of a pair\n", k );
-                        break;
-                case 18 :
-                        if ( k & 1 )
-                                ferr( "uinstr say at even address, but this is not the case. Error at 0x%2.2x\n", k );
-                        break;
-                case 4 :
-                        ensure_k_at_illegal_at_entry_location(k);
-                        break;
-                case 5 :break;
-                case 8 :
-                        if ( tbl_pairedspec[k] == 0 )
-                                ferr( "ucode instr say paired, but table contradicts at 0x%2.2x\n", k );
-                        if ( (k & 1) == 0 )
-                                ferr( "The second item in a pair must be at an odd address. Error at 0x%2.2x\n", k );
-                        if ( ucodespeced_fixedeven[k-1] != 2 && ucodespeced_fixedeven[k-1] != 6 )
-                                ferr( "A second item in a pair is not proceeded by a first item. Error at 0x%2.2x\n", k );
-                        break;
-                default: ferr( "Que?\n" );
+        for ( v = 0; v < 16; v++ ) {
+                if ( (v & 3) == 1 )
+                        continue;
+
+                for ( k = 0; k < 256; k++ ) {
+                        switch ( ucodespeced_fixedeven[v*256+k]) {
+                        case 0 : 
+                                if ( tbl_fixedposspec[k] != 0 )
+                                        ferr( "uinstr say freely pos, but table say not. Mismatch at 0x%2.2x\n", k );
+                                break;
+                        case 1 :
+                                if ( tbl_fixedposspec[k] != 1 )
+                                        ferr( "uinstr say fixed pos, but table say not. Mismatch at v=%d, inx=0x%2.2x\n", v, k );
+                        case 17 :
+                        case 31 :
+                                if ( ucodespeced_pair_or_pos[v*256+k] != v*256+k )
+                                        ferr( "uinstr say fixed pos, but instruction at wrong location 0x%2.2x\n", k );
+                                break;
+                                
+                        case 6 : // This item is both to be in a range, and is also the first of a pair
+                                ensure_k_at_illegal_at_entry_location(k);
+                                // Fallthrough
+                        case 2 :
+                                if ( k & 1 )
+                                        ferr( "uinstr say at even address, but this is not the case. Error at 0x%2.2x\n", k );
+                                if ( ucodespeced_pair_or_pos[v*256+k] != -1 && ucodespeced_pair_or_pos[v*256+k] != v*256+k )
+                                        ferr( "uinstr say fixed pos, but ucode appears at wrong location. v=%d inx=0x%2.2x\n", v, k );
+                                if ( ucodespeced_fixedeven[v*256+k+1] != 8 )
+                                        ferr( "v=%d: uinstr at even address 0x%2.2x, but next uinstr is not the second item of a pair\n", v, k );
+                                break;
+                        case 18 :
+                                if ( k & 1 )
+                                        ferr( "uinstr say at even address, but this is not the case. Error at 0x%2.2x\n", k );
+                                break;
+                        case 4 :
+                                ensure_k_at_illegal_at_entry_location(k);
+                                break;
+                        case 5 :break;
+                        case 8 :
+                                if ( tbl_pairedspec[k] == 0 )
+                                        ferr( "ucode instr say paired, but table contradicts at 0x%2.2x\n", k );
+                                if ( (k & 1) == 0 )
+                                        ferr( "The second item in a pair must be at an odd address. Error at 0x%2.2x\n", k );
+                                if ( ucodespeced_fixedeven[v*256+k-1] != 2 && ucodespeced_fixedeven[v*256+k-1] != 6 )
+                                        ferr( "A second item in a pair is not proceeded by a first item. Error at v=%d, k=0x%2.2x\n", v, k );
+                                break;
+                        default: ferr( "Que?\n" );
+                        }
                 }
         }
 }
+
+#if 0 ///////////////// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 /////////////////////////////////////////////////////////////////////////////
 int simplify( uint32_t value[], uint32_t valid[], int usedinputs, const int debug ) {
@@ -643,85 +659,6 @@ int populate_rest( int newline[256], int processedline[256], int col, int bitsto
         return 0;
 }
 
-/////////////////////////////////////////////////////////////////////////////
-void print_input_as_comment( int modified, char *entrypoint[256], uint32_t sampleinstruction[256], int newline[256], int processedline[256] ) {
-        int k;
-        printf( " *                             Microcode instruction\n" );
-        printf( " * uPC           next uPC      " );
-        for ( k = NREQATIONS-1; k >= 10; k-- )
-                printf( "%d", k / 10 );
-        printf( "\n" );
-        printf( " * || label      || next label " );
-        for ( k = NREQATIONS-1; k >= 8; k-- )
-                printf( "%d", k % 10 );
-        printf( " Purpose                                                  Simulated entrypoint\n" );
-        printf( " * -- ---------- -- ---------- %.*s --------------"
-                "------------------------------------------ -----------\n", NREQATIONS-8, "---------------------------------------" );
-
-
-        for ( k = 0; k < 256; k++ ) { 
-                printf( " * %2.2x ", k );
-                int index;
-
-
-                if ( modified ) {
-                        index = newline[k];
-                } else {
-                        index = k;
-                }
-
-                printf( "%-10s ", labeltext[index] );
-
-                // Next is a bit difficult, because the instruction has not been updated
-                // This part of the code is untested, because I never get to the point
-                // where this simplification is possible
-                int next;
-                if ( modified == 0 ) {
-                        next = ( ucode0[k] & 255);
-                } else {
-                        next = ( ucode0[k] & 255);
-                        /* This is in the original table. so 
-                           at line next in the original table we have the
-                           right successor. 
-                           Find that successor in the new table.
-                           
-                        */
-                        
-                        //printf( "orgigtbl next = 0x%2.2x ", next );
-                        next = processedline[next]; // This is where the line now is
-                }
-                if ( next ) {
-                        if ( modified == 0 ) {
-                                printf( "%2.2x %-10s ", next, labeltext[next] );
-                        } else {
-                                printf( "%2.2x %-10s ", next, labeltext[next] );
-                        }
-                } else {
-                        printf( "   (use dinx) " );
-                }
-                
-                //printf( "%16.16" PRIx64 " ", ucode[k]);
-                for ( int i = NREQATIONS-1; i >= 0; i-- ) {                        
-                        int b_a = (( ucode0[index] >>i) & 1);
-                        int b_b = (( ucode1[index] >>i) & 1);
-                        if ( i >= 8 )
-                                printf( "%c", b_a == b_b ? '0'+b_a : 'x' );
-
-                        statistics_on_unknown[i] += (b_a^b_b);
-                        statistics_on_high[i]    += (b_a == b_b) ? b_a   : 0;
-                        statistics_on_low[i]     += (b_a == b_b) ? b_a^1 : 0;
-                }
-                printf( " " );
-                
-                printf( "%-56s " , ucodestr[index] );
-
-                // These informative fields are not affected by any mapping
-                printf( "%8.8x ", sampleinstruction[k] );
-                printf( "%s\n" , entrypoint[k] ? entrypoint[k] : "");
-        }
-}
-
-
 ///////////////////////////////////////////////////////////////////////////////
 int shoehorn( int col, int relevantinputs, int maxnrhigh, int minnrhigh,
               char *entrypoint[256] __attribute__ ((unused)),
@@ -809,6 +746,74 @@ int need_index0_due_to_pairs( int col ) {
         return 0;
 }
 
+#endif  ///////////////// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+/////////////////////////////////////////////////////////////////////////////
+void print_input_as_comment( int v, char *entrypoint[256], uint32_t sampleinstruction[256] ) {
+        int k;
+
+        printf( "/*\n" );
+        k = printf(" * =================================================\n" );
+        k -= printf( " * * Version %d. %s%s%s%s",
+                     v,
+                     (v & 8) ?  "RVC " : "",
+                     (v & 4) ?  "MULDIV " : "",
+                     (v & 2) ?  "MINSTRET " : "",
+                     (v & 1) ?  "EBR_MINSTRET " : "");
+        printf( "%*s*\n",k-2, " ");
+        printf( " * =================================================\n" );
+        printf( " *                             Microcode instruction\n" );
+        printf( " * uPC           next uPC      " );
+        for ( k = nrequations[v]-1; k >= 10; k-- )
+                printf( "%d", k / 10 );
+        printf( "\n" );
+        printf( " * || label      || next label " );
+        for ( k = nrequations[v]-1; k >= 8; k-- )
+                printf( "%d", k % 10 );
+        printf( " Purpose                                                  Simulated entrypoint\n" );
+        printf( " * -- ---------- -- ---------- %.*s --------------"
+                "------------------------------------------ -----------\n", nrequations[v]-8, "---------------------------------------" );
+
+
+        for ( k = 0; k < 256; k++ ) { 
+                printf( " * %2.2x ", k );
+                int index;
+                index = 256*v+k;
+                printf( "%-10s ", labeltext[index] );
+
+                // Next is a bit difficult, because the instruction has not been updated
+                int next;
+                next = ( ucode0[256*v+k] & 255);
+                if ( next ) {
+                        printf( "%2.2x %-10s ", next, labeltext[256*v+next] );
+                } else {
+                        printf( "   (use dinx) " );
+                }
+                
+                //printf( "%16.16" PRIx64 " ", ucode[k]);
+                for ( int i = nrequations[v]-1; i >= 0; i-- ) {                        
+                        int b_a = (( ucode0[index] >>i) & 1);
+                        int b_b = (( ucode1[index] >>i) & 1);
+                        if ( i >= 8 )
+                                printf( "%c", b_a == b_b ? '0'+b_a : 'x' );
+
+                        statistics_on_unknown[i] += (b_a^b_b);
+                        statistics_on_high[i]    += (b_a == b_b) ? b_a   : 0;
+                        statistics_on_low[i]     += (b_a == b_b) ? b_a^1 : 0;
+                }
+                printf( " " );
+                
+                printf( "%-56s " , ucodestr[index] );
+
+                // Informative fields
+                printf( "%8.8x ", sampleinstruction[k] );
+                printf( "%s\n" , entrypoint[k] ? entrypoint[k] : "");
+        }
+        printf( " */\n" );
+}
+
+
+
 /////////////////////////////////////////////////////////////////////////////
 void generate_headerfile( const char *progname, char *entrypoint[256], uint32_t sampleinstruction[256] ) {
         int k,kk,j;
@@ -818,91 +823,117 @@ void generate_headerfile( const char *progname, char *entrypoint[256], uint32_t 
                 "/* -------------------------------------"
                 "----------------------------------------\n"
                 " * Part of midgetv\n"
-                " * 2019. Copyright B. Nossum.\n"
+                " * 2019-2020. Copyright B. Nossum.\n"
                 " * For licence, see LICENCE\n"
                 " * -------------------------------------"
                 "----------------------------------------\n"
                 " * Automaticaly generated by %s (based on %s).\n"
-                " * Do not edit.\n", progname, fname );
+                " * Do not edit.\n"
+                " */\n", progname, fname );
 
-        print_input_as_comment( 0, entrypoint, sampleinstruction, NULL, NULL ); 
-        printf( " */\n" );
-
-#if 1
-        // A lot of work for nothing.
-        // Formerly I could save by manipulating the location of lines
-        // can't any more.
-        
-        int newline[256];
-        // As a help for later optimalization, print statistics and
-        // a small analysis
-        printf( "/* Col   x   1   0\n" );
-        for ( int i = NREQATIONS-1; i >= 0; i-- ) {
-                printf( " * %3d %3d %3d %3d ", i,
-                        statistics_on_unknown[i],
-                        statistics_on_high[i],
-                        statistics_on_low[i] );
-                int maxnrhigh = statistics_on_high[i] + statistics_on_unknown[i];
-                int minnrhigh = statistics_on_high[i];
-                // Find smallest multiple of 16 that is >= minnrhigh
-                int s;
-                if ( (minnrhigh & 15) == 0 ) {
-                        s = minnrhigh;
-                } else {
-                        s = (minnrhigh | 15)+1;
-                }
-                if ( s > maxnrhigh ) {
-                        printf( "Can not simplify, can't possibly represent between %d and %d high values with only 4 bits index\n", minnrhigh, maxnrhigh );
+        int v;
+        for ( v = 0; v < 16; v++ ) {
+                if ( (v & 3) == 1 )
                         continue;
-                } 
-                /* The numbers of '1' and '0' can be expressed by a 4-input LUT.
-                   Lets make a test function that is correct in fixed positions,
-                   but don't care otherwise. See if that function can be expressed
-                   by a 4-input LUT with 4 bits of the index as select signals
-                */
-                int relevantinputs = potential_4(i);
-                int nrrelevantinputs = __builtin_popcount(relevantinputs);
-                if ( nrrelevantinputs > 4 ) {
-                        printf( "Can not simplify, can't represent fixed locations with any less than %d bits of the index\n", nrrelevantinputs );
-                        continue;
-                }
+                
+                print_input_as_comment( v, entrypoint, sampleinstruction ); 
 
-                if ( (relevantinputs & 1) == 0 && need_index0_due_to_pairs(i) ) {
-                        if ( nrrelevantinputs > 3 ) {
-                                printf( "Can not simplify, can't represent fixed locations and pairs with any less than 5 bits of the index\n" );
+#if 0
+                //
+                // Code removed when I decided to make all microcodeversions in parallel.
+                //
+                
+                // A lot of work for nothing.
+                // Formerly I could save by manipulating the location of lines
+                // can't any more.
+                
+                int newline[256];
+                // As a help for later optimalization, print statistics and
+                // a small analysis
+                printf( "/* Col   x   1   0\n" );
+                for ( int i = NREQATIONS-1; i >= 0; i-- ) {
+                        printf( " * %3d %3d %3d %3d ", i,
+                                statistics_on_unknown[i],
+                                statistics_on_high[i],
+                                statistics_on_low[i] );
+                        int maxnrhigh = statistics_on_high[i] + statistics_on_unknown[i];
+                        int minnrhigh = statistics_on_high[i];
+                        // Find smallest multiple of 16 that is >= minnrhigh
+                        int s;
+                        if ( (minnrhigh & 15) == 0 ) {
+                                s = minnrhigh;
+                        } else {
+                                s = (minnrhigh | 15)+1;
+                        }
+                        if ( s > maxnrhigh ) {
+                                printf( "Can not simplify, can't possibly represent between %d and %d high values with only 4 bits index\n", minnrhigh, maxnrhigh );
+                                continue;
+                        } 
+                        /* The numbers of '1' and '0' can be expressed by a 4-input LUT.
+                           Lets make a test function that is correct in fixed positions,
+                           but don't care otherwise. See if that function can be expressed
+                           by a 4-input LUT with 4 bits of the index as select signals
+                        */
+                        int relevantinputs = potential_4(i);
+                        int nrrelevantinputs = __builtin_popcount(relevantinputs);
+                        if ( nrrelevantinputs > 4 ) {
+                                printf( "Can not simplify, can't represent fixed locations with any less than %d bits of the index\n", nrrelevantinputs );
                                 continue;
                         }
-                        relevantinputs |= 1;
+                        
+                        if ( (relevantinputs & 1) == 0 && need_index0_due_to_pairs(i) ) {
+                                if ( nrrelevantinputs > 3 ) {
+                                        printf( "Can not simplify, can't represent fixed locations and pairs with any less than 5 bits of the index\n" );
+                                        continue;
+                                }
+                                relevantinputs |= 1;
+                        }
+                        
+                        if ( shoehorn(i,relevantinputs,maxnrhigh,minnrhigh,entrypoint,sampleinstruction,newline) == 0 ) {
+                                printf( "Can not simplify, no legal mapping\n" );
+                                continue;
+                        }
+                        //printf( "Candidate, use inputs " );
+                        //VECTORPRI( (uint32_t *)&relevantinputs, 8 );
+                        //printf( "\n" );
                 }
-                                        
-                if ( shoehorn(i,relevantinputs,maxnrhigh,minnrhigh,entrypoint,sampleinstruction,newline) == 0 ) {
-                        printf( "Can not simplify, no legal mapping\n" );
-                        continue;
-                }
-                //printf( "Candidate, use inputs " );
-                //VECTORPRI( (uint32_t *)&relevantinputs, 8 );
-                //printf( "\n" );
-        }
-        printf( " */\n" );
+                printf( " */\n" );
 #endif
-        
-        // Convert the 256 deep 64 bit wide ucode to
-        // 4 256 deep 16 bit wide, this is a simple slicing.
-        for ( kk = 0; kk < 4; kk++ ) 
-                for ( k = 0; k < 256; k++ ) 
-                        rom[kk][k] = (ucode0[k] >> (16*kk)) & 0xffff;
-
-        // Write out each of the ROMs in use with 16 entries in each INIT_x
+                
+                
+                // Convert the 256 deep 64 bit wide ucode to
+                // 4 256 deep 16 bit wide, this is a simple slicing.
+                for ( kk = 0; kk < 4; kk++ ) 
+                        for ( k = 0; k < 256; k++ ) 
+                                rom[kk][k] = (ucode0[256*v+k] >> (16*kk)) & 0xffff;
+                
+                // Write out each of the ROMs in use with 16 entries in each INIT_x
 #define NRROMS 3        
+                for ( kk = 0; kk < NRROMS; kk++ ) {
+                        for ( k = 0; k < 16; k++ ) {
+                                printf( "localparam v%d_u%d_%X = 256'h", v, kk, k );
+                                for ( j = 15; j >= 0; j-- ) 
+                                        printf( "%4.4x", rom[kk][k*16+j] );
+                                printf( ";\n" );
+                        }
+                }
+                
+        }
+
+        // Save some manual typing in Verilog
         for ( kk = 0; kk < NRROMS; kk++ ) {
                 for ( k = 0; k < 16; k++ ) {
-                        printf( "localparam u%d_%X = 256'h", kk, k );
-                        for ( j = 15; j >= 0; j-- ) 
-                                printf( "%4.4x", rom[kk][k*16+j] );
-                        printf( ";\n" );
+                        printf( "localparam u%d_%X = ", kk, k );
+                        for ( v = 0; v < 16; v++ ) {
+                                if ( (v & 3) == 1 )
+                                        continue;
+                                printf( "(UCODETYPE == %d) ? v%d_u%d_%X : ", v, v, kk, k );
+                        }
+                        printf( "0;\n" );
                 }
         }
 }        
+
 
 /////////////////////////////////////////////////////////////////////////////
 /*
@@ -1085,7 +1116,7 @@ int main( int argc __attribute__((unused)), char *argv[] ) {
         
         simulate_decode(entrypoint,sampleinstruction);
         
-        if ( _LEND != 256 )
+        if ( _LENDx16 != 256*16 )
                 ferr( "Wrong number of microcode instructions\n" );
 
         check_internal_consistency();
@@ -1093,3 +1124,4 @@ int main( int argc __attribute__((unused)), char *argv[] ) {
         
         return 0;
 }
+

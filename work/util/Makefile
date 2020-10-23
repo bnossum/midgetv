@@ -1,8 +1,9 @@
 #-----------------------------------------------------------------------------
 # Part of midgetv
-# 2019. Copyright B. Nossum.
+# 2020-2019. Copyright B. Nossum.
 # For licence, see LICENCE
 # -----------------------------------------------------------------------------
+# Cleanup needed. Many older, abandonned programs here
 
 TRG := ../bin/midgetv_bin2ebr ../bin/midgetv_genucode  ../bin/midgetv_indirectEBR \
 	../bin/iceblinkcom  ../bin/midgetv_prepare_defines 
@@ -16,7 +17,7 @@ all:$(TRG)
 	gcc -Wall -Wextra -I /usr/include/libusb-1.0  -o $@ $< -lusb-1.0
 
 ../bin/midgetv_genucode:../util/midgetv_genucode.c ../util/bnvector.c 
-	gcc -g -Wall -Wextra -Dnakedfname=../code/ucode.h -o $@ $^ 
+	gcc -g -Wall -Wextra -o $@ $^ 
 
 ../bin/midgetv_genucode := ../code/ucode.h
 
@@ -24,10 +25,10 @@ all:$(TRG)
 	gcc -Wall -Wextra -o $@ $< 
 
 ../bin/midgetv_indirectEBR:midgetv_indirectEBR.c bnvector.c 
-	gcc -O3 -Wall -Wextra -Dnakedfname=../code/ucode.h -o $@ $^ 
+	gcc -O3 -Wall -Wextra -o $@ $^ 
 
 ../bin/midgetv_ucode_linepermutate:midgetv_ucode_linepermutate.c bnvector.c 
-	gcc -O3 -Wall -Wextra -Dnakedfname=../code/ucode.h -o $@ $^ 
+	gcc -O3 -Wall -Wextra  -o $@ $^ 
 
 #../bin/midgetv_tablefold:midgetv_tablefold.c ../code/ucode.h
 #	gcc -Wall -Wextra -O3 -Dnakedfname=../code/ucode.h -o $@ $< 

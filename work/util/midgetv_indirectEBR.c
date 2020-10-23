@@ -3,6 +3,11 @@
  * 2019-2020. Copyright B. Nossum.
  * For licence, see LICENCE
  * -----------------------------------------------------------------------------
+
+
+ NEED A CLEANUP. Leaks memory
+
+
  * This is an utility to reduce the number of columns that needs to be stored
  * in EBR. Overall description is simply given by an example.
  *
@@ -40,7 +45,8 @@
 // Defeat quoting system of some shells
 #define STRX(x) # x
 #define STR(x) STRX(x)
-#define fname STR(nakedfname)
+#define CATX(x,y) x ## y
+#define CAT(x,y) CATX(x,y)
 
 /////////////////////////////////////////////////////////////////////////////
 typedef struct {
@@ -51,97 +57,76 @@ typedef struct {
 /////////////////////////////////////////////////////////////////////////////
 // Definitions to work from
 //
+#define NRVARIANTS 16
 
 // Data input makes use of labels, define them
 typedef enum {
-#define X(label,txt,ty,pos,def,reachability,mask,instr,nrhit) label,
-#include fname
-        _LEND
+#define X(label,txt,ty,pos,def,reachability,mask,instr,nrhit) CAT(CAT(CAT(v,ALL_MIDGETVVARIANTS),_),label),
+#include "iterate_ucodeversions.h"
+        _LENDx16
 } LABELS;
 
-#define NREQATIONS MIDGETV_UCODE_NREQ
+//#define NREQATIONS MIDGETV_UCODE_NREQ
+#define MAXNREQUATIONS 48
+int nrequations[NRVARIANTS] = MIDGETV_UCODE_NREQ;
 #define LUTSIZE 4
 #define NREBR   2
-#define NRCOLUMNS NREQATIONS
-#define COLUMNMASK ((1uLL<<(MIDGETV_UCODE_NREQ))-1)
+#define NRCOLUMNS(v) nrequations[v]
+#define COLUMNMASK(v) ((1uLL<<(nrequations[v]))-1)
 
 // This table is essentially the data to be selected from the 8-bit
 // index
-uint64_t ucode0[256] = {
+uint64_t ucode0[256*NRVARIANTS] = {
 #define x 0b0ull
 #define X(label,txt,ty,pos,def,reachability,mask,instr,nrhit) def,
-#include fname
+#include "iterate_ucodeversions.h"
 };
 
-// Some of the items in the table are don't care
-uint64_t ucode1[256] = {
+uint64_t ucode1[256*NRVARIANTS] = {
 #define x 0b1ull
 #define X(label,txt,ty,pos,def,reachability,mask,instr,nrhit) def,
-#include fname
+#include "iterate_ucodeversions.h"
 };
 
-// Some input lines must be mapped to the same output line That is,
-// the lines are fixed.
-uint32_t fixpos[256] = {
-#define Y(fixedpos,paired,...) fixedpos,
-#include fname
+
+char *tbltxt[256*NRVARIANTS] = {
+#define X(label,txt,ty,pos,def,reachability,mask,instr,nrhit) txt,
+#include "iterate_ucodeversions.h"
 };
 
-// Some lines (none of the fixed lines) must appear on consequtive
-// output lines. Such pairs must be placed on output pairs where the
-// first line in the pair has an index xxxxxxx0. i, e, imagine a pair
-// on input lines 14 and 15. A possible mapping would be to output
-// lines 146 147.  155, 156 would be illegal.
-uint32_t pairedpos[256] = {
-#define Y(fixedpos,paired,...) paired,
-#include fname
-};
-
-const char *tbltxt[256] = {
-#define X(label,text,ty,pos,value,reachability,mask,instr,nrhit) text,
-#include fname
-};
-
-char *labeltext[256] = {
+char *labeltext[256*NRVARIANTS] = {
 #define X(label,txt,ty,pos,def,reachability,mask,instr,nrhit) STR(label),
-#include fname
+#include "iterate_ucodeversions.h"
 };
 
-#define X(...)
-#include fname
-char *removecolumns_codereplacement = LASTINCH_CODE;
+// Some klunky handcoding
+uint64_t LASTINCH_REMOVECOLUMS[NRVARIANTS] = {
+        v0_LASTINCH_REMOVECOLUMS, 0,  v2_LASTINCH_REMOVECOLUMS,  v3_LASTINCH_REMOVECOLUMS,
+        v0_LASTINCH_REMOVECOLUMS, 0,  v2_LASTINCH_REMOVECOLUMS,  v3_LASTINCH_REMOVECOLUMS,
+        v8_LASTINCH_REMOVECOLUMS, 0, v10_LASTINCH_REMOVECOLUMS, v11_LASTINCH_REMOVECOLUMS,
+        v8_LASTINCH_REMOVECOLUMS, 0, v10_LASTINCH_REMOVECOLUMS, v11_LASTINCH_REMOVECOLUMS,
+};
 
-        
-//char *removecolumns_codereplacement =
-//#if ucodeopt_HAS_MINSTRET == 0 && ucodeopt_HAS_EBR_MINSTRET == 0
-//# if ucodeopt_RVC == 0
-//#  define LASTINCH_REMOVECOLUMS i0LASTINCH_REMOVECOLUMS        
-//#  define i0XXLASTINCH(...) __VA_ARGS__
-//#  define im0XXLASTINCH(...) __VA_ARGS__
-//# else
-//#  define LASTINCH_REMOVECOLUMS ic0LASTINCH_REMOVECOLUMS        
-//#  define ic0XXLASTINCH(...) __VA_ARGS__
-//#  define imc0XXLASTINCH(...) __VA_ARGS__
-//# endif
-//#elif ucodeopt_HAS_MINSTRET == 1 && ucodeopt_HAS_EBR_MINSTRET == 0
-//# if ucodeopt_RVC == 0
-//#  define LASTINCH_REMOVECOLUMS i1LASTINCH_REMOVECOLUMS        
-//#  define i1XXLASTINCH(...) __VA_ARGS__
-//#  define im1XXLASTINCH(...) __VA_ARGS__
-//# else
-//#  define LASTINCH_REMOVECOLUMS ic1LASTINCH_REMOVECOLUMS        
-//#  define ic1XXLASTINCH(...) __VA_ARGS__
-//#  define imc1XXLASTINCH(...) __VA_ARGS__
-//# endif
-//#endif
-//#define X(...)
-//#include fname
-//        ;
+char *v0_lastinch_code  = v0_LASTINCH_CODE;
+char *v2_lastinch_code  = v2_LASTINCH_CODE;
+char *v3_lastinch_code  = v3_LASTINCH_CODE;
+char *v8_lastinch_code  = v8_LASTINCH_CODE;
+char *v10_lastinch_code = v10_LASTINCH_CODE;
+char *v11_lastinch_code = v11_LASTINCH_CODE;
+
+char *removecolumns_codereplacement[NRVARIANTS] = {
+        v0_LASTINCH_CODE, NULL, v2_LASTINCH_CODE, v3_LASTINCH_CODE,
+        v0_LASTINCH_CODE, NULL, v2_LASTINCH_CODE, v3_LASTINCH_CODE,
+        v8_LASTINCH_CODE, NULL, v10_LASTINCH_CODE, v11_LASTINCH_CODE,
+        v8_LASTINCH_CODE, NULL, v10_LASTINCH_CODE, v11_LASTINCH_CODE,
+};
+
         
 FILE *fo;
+TBL ctbl; // Must move and pass as proper parameter.
 
 /////////////////////////////////////////////////////////////////////////////
-void printf_preamble( void ) {
+void printf_preamble( int optionsused ) {
         printf( 
                 "/* -----------------------------------------------------------------------------\n"
                 " * Part of midgetv\n"
@@ -149,13 +134,20 @@ void printf_preamble( void ) {
                 " * For licence, see LICENCE\n"
                 " * -----------------------------------------------------------------------------\n"
                 " * Automatically generated from %s by %s.\n"
-                " * Do not edit\n"
-                " */\n", fname, __FILE__ );
+                " * Do not edit.\n"
+                " * Optiones for this variant:\n", fname, __FILE__ );
+        printf( " *   %s\n *   %s\n *   %s\n */\n",
+                optionsused & 8 ? "RVC included" : "No RVC",
+                optionsused & 4 ? "MULDIV included" : "No MULDIV",
+                (optionsused & 3) == 0 ? "minstret not implemented" :
+                (optionsused & 3) == 2 ? "minstret for instructions in SRAM" :
+                (optionsused & 3) == 3 ? "minstret for instructions in SRAM and EBR" :
+                "internal error" );                
 }
 
 
 /////////////////////////////////////////////////////////////////////////////
-TBL *initiate( void ) {
+TBL *initiate( int v ) {
         TBL *tblp;
         int64_t i;
         
@@ -164,8 +156,8 @@ TBL *initiate( void ) {
 
         // Now fill in the entire input table
         for ( i = 0; i < 256; i++ ) {                
-                tblp->a[i] = ucode0[i];
-                tblp->v[i] = (ucode1[i]^ucode0[i]^~0uLL) & COLUMNMASK;
+                tblp->a[i] = ucode0[256*v+i];
+                tblp->v[i] = (ucode1[256*v+i]^ucode0[256*v+i]^~0uLL) & COLUMNMASK(v);
         }
         return tblp;
 }
@@ -173,7 +165,7 @@ TBL *initiate( void ) {
 /////////////////////////////////////////////////////////////////////////////
 /* Actually a bit to strict.
  */
-int nrdistinctlines( int indirinx[], int usedindexes[], TBL *tp, uint64_t maskedcolumns ) {
+int nrdistinctlines( int v, int indirinx[], int usedindexes[], TBL *tp, uint64_t maskedcolumns ) {
         int j,k,kk;
         int distinct = 0;
         int aj,ak;
@@ -182,7 +174,7 @@ int nrdistinctlines( int indirinx[], int usedindexes[], TBL *tp, uint64_t masked
         for ( j = 0; j < 256; j++ ) {
                 // Can line j be matched by any line already used?
                 for ( k = 0; k < distinct; k++ ) {
-                        for ( kk = 0; kk < NRCOLUMNS; kk++ ) {
+                        for ( kk = 0; kk < NRCOLUMNS(v); kk++ ) {
                                 if ( (maskedcolumns>>kk) & 1)
                                         continue;
                                 aj = ((tp->a[j] >> kk) & 1);
@@ -195,7 +187,7 @@ int nrdistinctlines( int indirinx[], int usedindexes[], TBL *tp, uint64_t masked
                                 if ( aj != ak )
                                         break;  // line and j does not match
                         }
-                        if ( kk == NRCOLUMNS )
+                        if ( kk == NRCOLUMNS(v) )
                                 break; // Line j matches allready seen k
                 }
                 indirinx[j] = k;
@@ -208,19 +200,19 @@ int nrdistinctlines( int indirinx[], int usedindexes[], TBL *tp, uint64_t masked
 }
 
 /////////////////////////////////////////////////////////////////////////////
-uint64_t process( TBL *tp, uint64_t maskedcolumns, int firstremoveinx ) {
+uint64_t process( int v, TBL *tp, uint64_t maskedcolumns, int firstremoveinx ) {
         int m, a, j, mi = 0;
         uint64_t originalremoved = maskedcolumns;
         int usedindexes[256];
         int indirinx[256];
         uint64_t accumulatedcandidates = 0;
         
-        m = nrdistinctlines( indirinx, usedindexes, tp, maskedcolumns );
+        m = nrdistinctlines( v, indirinx, usedindexes, tp, maskedcolumns );
 //        if ( m < (1<<LUTSIZE) ) 
 //                ferr( "Should not be here, only %d disinct lines left in untreated columns\n", m );
 
         fprintf( fo, " * %d distinct lines in remaining untreated columns\n * ", m );
-        for ( j = NRCOLUMNS-1; j >= 0; j-- ) { 
+        for ( j = NRCOLUMNS(v)-1; j >= 0; j-- ) { 
 //        for ( j = 0; j < NRCOLUMNS; j++ ) { 
                 if (  j > 9 ) {
                         fprintf( fo, "c" );
@@ -237,7 +229,7 @@ uint64_t process( TBL *tp, uint64_t maskedcolumns, int firstremoveinx ) {
          * columns until the table of unmasked columns has no
          * more than (1<<LUTSIZE) lines.
          */
-        while ( (m  = nrdistinctlines( indirinx, usedindexes, tp, maskedcolumns )) > (1<<LUTSIZE)) {
+        while ( (m  = nrdistinctlines( v, indirinx, usedindexes, tp, maskedcolumns )) > (1<<LUTSIZE)) {
                 int ma,nrcandidates;
                 uint64_t newcandidates = 0;
 
@@ -248,7 +240,7 @@ uint64_t process( TBL *tp, uint64_t maskedcolumns, int firstremoveinx ) {
                         ma = -1;
                         nrcandidates = 1;
                         fprintf( fo, " * " );
-                        for ( j = NRCOLUMNS-1; j >= 0; j-- ) {
+                        for ( j = NRCOLUMNS(v)-1; j >= 0; j-- ) {
                                 if ( maskedcolumns & (1uLL << j ) ) {
                                         if (originalremoved & (1uLL << j ) ) {
                                                 fprintf( fo, "  x " );
@@ -257,7 +249,7 @@ uint64_t process( TBL *tp, uint64_t maskedcolumns, int firstremoveinx ) {
                                         }
                                         continue;
                                 }
-                                a = nrdistinctlines( indirinx, usedindexes, tp, maskedcolumns | (1uLL<<j));
+                                a = nrdistinctlines( v, indirinx, usedindexes, tp, maskedcolumns | (1uLL<<j));
                                 fprintf( fo, "%3d ", a );
                                 
                                 /*
@@ -282,9 +274,9 @@ uint64_t process( TBL *tp, uint64_t maskedcolumns, int firstremoveinx ) {
                 fprintf( fo, " kill col %2d  ", mi );
                 maskedcolumns |= (1uLL<<mi);
                 
-                fprintf( fo, "Tbl %3d cols ", NRCOLUMNS - __builtin_popcountl(maskedcolumns) );
-                FVECTORPRI( fo, (uint32_t *)&maskedcolumns, NRCOLUMNS );
-                int ndl = nrdistinctlines( indirinx, usedindexes, tp, maskedcolumns);
+                fprintf( fo, "Tbl %3d cols ", NRCOLUMNS(v) - __builtin_popcountl(maskedcolumns) );
+                FVECTORPRI( fo, (uint32_t *)&maskedcolumns, NRCOLUMNS(v) );
+                int ndl = nrdistinctlines( v, indirinx, usedindexes, tp, maskedcolumns);
                 fprintf( fo, " has %3d unique lines.\n", ndl );
                 
                 accumulatedcandidates |= newcandidates;
@@ -308,7 +300,7 @@ uint64_t process( TBL *tp, uint64_t maskedcolumns, int firstremoveinx ) {
 
 /////////////////////////////////////////////////////////////////////////////
 // Just an experiment to see what happens if we first remove a certain column
-uint64_t megaprocess( TBL *tp, uint64_t maskedcolumns, int round __attribute__ ((unused)) ) {
+uint64_t megaprocess( int v, TBL *tp, uint64_t maskedcolumns, int round __attribute__ ((unused)) ) {
         uint64_t newmasked;
 
 //        if ( round == 0 ) {
@@ -316,7 +308,7 @@ uint64_t megaprocess( TBL *tp, uint64_t maskedcolumns, int round __attribute__ (
 //        } else {
 //                newmasked = process( tp, maskedcolumns, -1 );
 //        }
-        newmasked = process( tp, maskedcolumns, -1 );
+        newmasked = process( v, tp, maskedcolumns, -1 );
         return newmasked;
 }
 
@@ -333,18 +325,19 @@ uint64_t inpow2( int a, ... ) {
         return v;
 }
 
-/////////////////////////////////////////////////////////////////////////////
-TBL ctbl;
+
 // Give back untouched columns out. Here the bonus columns are included
-uint64_t make_compressed_table( TBL *tblp,       // Original
-                            uint64_t replaces[],
-                            uint64_t direct, // Bitmask of untouched columns - in.
-                            int bonus,//        Can squeeze in a number of columns due to vacancies
-                            int rounds, //      Each round need LUTSIZE index bits
-                            int nrebr,//        Will always be 2. Limited effort to make this general
-                            int lutsize, //     Will always be 4. Limited effort to make this general
-                            int indirinx[16][256], //
-                            uint32_t lutval[20][NREQATIONS] //
+uint64_t make_compressed_table(
+        int variant,     // Variant
+        TBL *tblp,       // Original
+        uint64_t replaces[],
+        uint64_t direct, // Bitmask of untouched columns - in.
+        int bonus,//        Can squeeze in a number of columns due to vacancies
+        int rounds, //      Each round need LUTSIZE index bits
+        int nrebr,//        Will always be 2. Limited effort to make this general
+        int lutsize, //     Will always be 4. Limited effort to make this general
+        int indirinx[16][256], //
+        uint32_t lutval[20][MAXNREQUATIONS] //
         ) {
         int buggerall = 0;
         int k,j;
@@ -357,7 +350,7 @@ uint64_t make_compressed_table( TBL *tblp,       // Original
         for ( k = 0; k < 256; k++ ) {
                 int jj = 0;
                 int bb = bonus;
-                for ( j = 0; j < NREQATIONS; j++ ) {
+                for ( j = 0; j < nrequations[variant]; j++ ) {
                         if ( ( (direct >> j) & 1 ) || bb ) {
                                 ctbl.a[k] |=  (((tblp->a[k] >> j) & 1) << jj);
                                 ctbl.v[k] |=  (((tblp->v[k] >> j) & 1) << jj);
@@ -390,10 +383,10 @@ uint64_t make_compressed_table( TBL *tblp,       // Original
                 }
         }
 
-        uint32_t lutbittouched[20][NREQATIONS];
+        uint32_t lutbittouched[20][MAXNREQUATIONS];
         int c;
         for ( i = 0; i < rounds; i++ ) {
-                for ( c = 0; c < NREQATIONS; c++ ) {
+                for ( c = 0; c < nrequations[variant]; c++ ) {
                         lutval[i][c] = 0;
                         lutbittouched[i][c] = 0;
                         if ( (replaces[i] >> c) & 1 ) {
@@ -431,10 +424,12 @@ uint64_t make_compressed_table( TBL *tblp,       // Original
 
 /////////////////////////////////////////////////////////////////////////////
 void printf_result(
+        int variant,
         uint64_t replaces[],
         int rounds, int nrebr, int lutsize, uint64_t direct,
-        uint32_t lutval[20][NREQATIONS],
-        uint32_t removecolumns
+        uint32_t lutval[20][MAXNREQUATIONS],
+        uint32_t removecolumns,
+        char *removecolumns_codereplacement
         ) {
         int k,j;
 
@@ -443,7 +438,7 @@ void printf_result(
                 ferr( "Extend code\n" );
 
 
-        printf( "module m_2ebr\n" );
+        printf( "module v%d_m_2ebr\n", variant );
         printf( "  (\n" );
         printf( "   input         clk,\n" );
         printf( "   input [7:0]   minx,\n" );
@@ -476,10 +471,10 @@ void printf_result(
         for ( k = 0; k < 256; k++ ) {
 //        for ( k = 0; k < 25; k++ ) {
                 printf( "    * %2.2x ", k );
-                printf( "%-8s ", labeltext[k] );
-                int next = ( ucode0[k] & 255);
+                printf( "%-8s ", labeltext[256*variant+k] );
+                int next = ( ucode0[256*variant+k] & 255);
                 if ( next ) {
-                        printf( "%-8s ", labeltext[next] );
+                        printf( "%-8s ", labeltext[256*variant+next] );
                 } else {
                         printf( "         " );
                 }
@@ -498,7 +493,7 @@ void printf_result(
                 }
 
                 
-                printf( "| %s\n" , tbltxt[k] );
+                printf( "| %s\n" , tbltxt[256*variant+k] );
         }
         printf( "    */\n" );
 
@@ -573,7 +568,7 @@ void printf_result(
 
         // Assign columns that remain in table. 'x' goes to '0'.
         int jj = 0;
-        for ( j = 0; j < NREQATIONS; j++ ) {
+        for ( j = 0; j < nrequations[variant]; j++ ) {
                 if ( (direct >> j) & 1 ) {
                         printf( "   assign d[%d] = indir[%d];\n", j, jj );
                         jj++;
@@ -583,8 +578,8 @@ void printf_result(
         int kluge = 32 - rounds*lutsize;
         int i;
         for ( i = 0; i < rounds; i++ ) {
-                fprintf( fo, "   // replaces = " ); FVECTORPRI( fo, (uint32_t *)&replaces[i], NRCOLUMNS ); fprintf( fo, "\n" );
-                for ( j = 0; j < NREQATIONS; j++ ) {
+                fprintf( fo, "   // replaces = " ); FVECTORPRI( fo, (uint32_t *)&replaces[i], NRCOLUMNS(variant) ); fprintf( fo, "\n" );
+                for ( j = 0; j < nrequations[variant]; j++ ) {
                         if ( (replaces[i] >> j) & 1) {
                                 printf( "   SB_LUT4 #(.LUT_INIT(16'h%4.4x)) cmb_d%2.2d(.O(d[%d]),.I3(indir[%d]),.I2(indir[%d]),.I1(indir[%d]),.I0(indir[%d]));\n",
                                         lutval[i][j], j, j, kluge+3, kluge+2, kluge+1, kluge+0 );
@@ -593,7 +588,7 @@ void printf_result(
                 kluge += 4;
         }
 
-        for ( i = NREQATIONS; i < 48; i++ ) 
+        for ( i = nrequations[variant]; i < 48; i++ ) 
                 printf( "   assign d[%d] = 1'b0;\n", i );
 
 
@@ -606,112 +601,116 @@ void printf_result(
 
 /////////////////////////////////////////////////////////////////////////////
 int main( void ) {
-        TBL *tblp;
-        uint64_t maskedcolumns = 0;
-        int rounds = 0;
-        int fails = 0;
-        
-        tblp = initiate();
-        fo = stdout;
-        //if ( ( fo = fopen("/dev/null","w")) == NULL ) ferr( "Que?\n" );
-        
-        printf_preamble();
-        fprintf( fo, "/* Using LUTSIZE=%d. Using %d EBR%s Initial table has %d columns\n", LUTSIZE, NREBR, NREBR == 1 ? "." : "s.", NRCOLUMNS );
-        uint64_t newmaskedcolumns;
-        uint64_t removecolumns = 0;
-        uint64_t reservedcolumns = 0;
-        
-        //removecolumns   = inpow2( 6, 7, 10, 22, 27, 29, 30, 33, -1 ); // Result out of investigate14. Can represent these columns by combinations
-//38 35 32 31 30 25 21 15 14 10 9 bad
-//        removecolumns = inpow2(41,38,-1);
-//        removecolumns = inpow2( 30, 18, -1);
-//        reservedcolumns = inpow2( 18, -1); // Column should be represented directly         
+        int v;
 
-//        removecolumns = inpow2( 30, 18, -1);
-
-        /* ucode.h informs us if any of the columns are handled separately.
-         * This works together with a macro that inserts Verilog code into 
-         * the output from this program.
-         */
-        removecolumns = LASTINCH_REMOVECOLUMS;
-
-        // Check against impossible startcondition
-        if ( removecolumns & reservedcolumns )
-                ferr( "Conflict between removecolumns and reservedcolumns, at least one column is listed in both\n" );
-        
-        int nrremoved = __builtin_popcountll(removecolumns);
-        maskedcolumns = removecolumns;
-        fprintf( fo, " * Removed:  " );
-        FVECTORPRI( fo, (uint32_t *)&removecolumns, NRCOLUMNS );
-        fprintf( fo, " These are removed from consideration, replaced with hand-crafted Verilog code in the output stage\n" );
-        fprintf( fo, " * Reserved: " );
-        FVECTORPRI( fo, (uint32_t *)&reservedcolumns, NRCOLUMNS );
-        fprintf( fo, " Columns to be represented directly, not part of optimalization\n" );
-        maskedcolumns |= reservedcolumns;
-
-        int ttt = NRCOLUMNS - nrremoved;
-        int cccnr = 0;
-        uint64_t  ccc = 0;
-        int extra_column_for_indexes  = 0;
-        int saved_columns_by_indirect = 0;
-        int usedindexes[16][256];
-        int indirinx[16][256];
-        uint64_t replaces[16];
-        
-        while (1) {
-                fprintf( fo, " * Total columns to represent in EBRs: %d\n", NRCOLUMNS + extra_column_for_indexes - saved_columns_by_indirect );
-                newmaskedcolumns = megaprocess( tblp, maskedcolumns, rounds );
-                rounds++;
-                uint64_t tablewithcolumns = (~newmaskedcolumns & ~maskedcolumns) & COLUMNMASK;
-                int      replaces_nrcolumns = __builtin_popcountll(tablewithcolumns);
-                if ( replaces_nrcolumns <= LUTSIZE ) {
-                        fprintf( fo, "No gain, replaces %d or less columns with %d columns as index\n", LUTSIZE, LUTSIZE );
-                        fails = 1;
-                        break;
-                }
-                maskedcolumns |= (~newmaskedcolumns & COLUMNMASK);
+        for ( v = 0; v < NRVARIANTS; v++ ) {
+                if ( (v & 3) == 1 )
+                        continue;
                 
-                fprintf( fo, " *\n * Round %d: ", rounds);
-                extra_column_for_indexes += LUTSIZE;
-                saved_columns_by_indirect += replaces_nrcolumns;
-                //fprintf( fo, "[MAD %d %d]", saved_columns_by_indirect, replaces_nrcolumns );
-
-                replaces[rounds-1] = tablewithcolumns;
-                FVECTORPRI( fo, (uint32_t *)&tablewithcolumns, NRCOLUMNS );                
-                int ndl = nrdistinctlines(indirinx[rounds-1], usedindexes[rounds-1],tblp,newmaskedcolumns);
-                fprintf( fo, " %2d columns for indexes to table representing %2d original columns (uses %d of %d lines in indirect table).\n",
-                         LUTSIZE, replaces_nrcolumns, ndl, (1<<LUTSIZE) );
+                TBL *tblp;
+                uint64_t maskedcolumns = 0;
+                int rounds = 0;
+                int fails = 0;
                 
-                ttt = ttt - replaces_nrcolumns + LUTSIZE;
-                if ( ttt <= 16*NREBR ) {
-                        fprintf( fo, " * Direct:  " );
-                        ccc = (~maskedcolumns & COLUMNMASK) | reservedcolumns;
-                        cccnr = __builtin_popcountll( ccc );
-                        FVECTORPRI( fo, (uint32_t *)&ccc, NRCOLUMNS );
-                        fprintf( fo, " %2d columns\n", cccnr );
-                        break;
+                tblp = initiate(v);
+                fo = stdout;
+                //if ( ( fo = fopen("/dev/null","w")) == NULL ) ferr( "Que?\n" );
+                
+                printf_preamble(v);
+                fprintf( fo, "/* Using LUTSIZE=%d. Using %d EBR%s Initial table has %d columns\n", LUTSIZE, NREBR, NREBR == 1 ? "." : "s.", NRCOLUMNS(v) );
+                uint64_t newmaskedcolumns;
+                uint64_t removecolumns = 0;
+                uint64_t reservedcolumns = 0;
+                
+                /* ucode.h informs us if any of the columns are handled separately.
+                 * This works together with a macro that inserts Verilog code into 
+                 * the output from this program.
+                 */
+                removecolumns = LASTINCH_REMOVECOLUMS[v];
+                
+                // Check against impossible startcondition
+                if ( removecolumns & reservedcolumns )
+                        ferr( "Conflict between removecolumns and reservedcolumns, at least one column is listed in both\n" );
+                
+                int nrremoved = __builtin_popcountll(removecolumns);
+                maskedcolumns = removecolumns;
+                fprintf( fo, " * Removed:  " );
+                FVECTORPRI( fo, (uint32_t *)&removecolumns, NRCOLUMNS(v) );
+                fprintf( fo, " These are removed from consideration, replaced with hand-crafted Verilog code in the output stage\n" );
+                fprintf( fo, " * Reserved: " );
+                FVECTORPRI( fo, (uint32_t *)&reservedcolumns, NRCOLUMNS(v) );
+                fprintf( fo, " Columns to be represented directly, not part of optimalization\n" );
+                maskedcolumns |= reservedcolumns;
+                
+                int ttt = NRCOLUMNS(v) - nrremoved;
+                int cccnr = 0;
+                uint64_t  ccc = 0;
+                int extra_column_for_indexes  = 0;
+                int saved_columns_by_indirect = 0;
+                int usedindexes[16][256];
+                int indirinx[16][256];
+                uint64_t replaces[16];
+
+                for ( int i = 0; i < 256; i++ ) {
+                        ctbl.a[i] = 0;
+                        ctbl.v[i] = 0;
                 }
-        } 
-        if ( fails ) {
-                fprintf( fo, "Failed\n" );
-        } else {
-                int underutilization = 16*NREBR - ttt;
-                if ( underutilization < 0 )
-                        ferr( "Something is seriously wrong\n" );
-                if ( underutilization > 0 )
-                        fprintf( fo, " * Can even chose %d more column%s to be represented directly.\n", underutilization, underutilization == 1 ? "" : "s" );
-                fprintf( fo, " * Success. Use %d %s", NREBR, NREBR < 2 ? "EBR" : "EBRs" );
-                if ( LUTSIZE > 4 ) {
-                        fprintf( fo, ".\n" );
+                
+                while (1) {
+                        fprintf( fo, " * Total columns to represent in EBRs: %d\n", NRCOLUMNS(v) + extra_column_for_indexes - saved_columns_by_indirect );
+                        newmaskedcolumns = megaprocess( v, tblp, maskedcolumns, rounds );
+                        rounds++;
+                        uint64_t tablewithcolumns = (~newmaskedcolumns & ~maskedcolumns) & COLUMNMASK(v);
+                        int      replaces_nrcolumns = __builtin_popcountll(tablewithcolumns);
+                        if ( replaces_nrcolumns <= LUTSIZE ) {
+                                fprintf( fo, "No gain, replaces %d or less columns with %d columns as index\n", LUTSIZE, LUTSIZE );
+                                fails = 1;
+                                break;
+                        }
+                        maskedcolumns |= (~newmaskedcolumns & COLUMNMASK(v));
+                        
+                        fprintf( fo, " *\n * Round %d: ", rounds);
+                        extra_column_for_indexes += LUTSIZE;
+                        saved_columns_by_indirect += replaces_nrcolumns;
+                        //fprintf( fo, "[MAD %d %d]", saved_columns_by_indirect, replaces_nrcolumns );
+                        
+                        replaces[rounds-1] = tablewithcolumns;
+                        FVECTORPRI( fo, (uint32_t *)&tablewithcolumns, NRCOLUMNS(v) );                
+                        int ndl = nrdistinctlines(v,indirinx[rounds-1], usedindexes[rounds-1],tblp,newmaskedcolumns);
+                        fprintf( fo, " %2d columns for indexes to table representing %2d original columns (uses %d of %d lines in indirect table).\n",
+                                 LUTSIZE, replaces_nrcolumns, ndl, (1<<LUTSIZE) );
+                        
+                        ttt = ttt - replaces_nrcolumns + LUTSIZE;
+                        if ( ttt <= 16*NREBR ) {
+                                fprintf( fo, " * Direct:  " );
+                                ccc = (~maskedcolumns & COLUMNMASK(v)) | reservedcolumns;
+                                cccnr = __builtin_popcountll( ccc );
+                                FVECTORPRI( fo, (uint32_t *)&ccc, NRCOLUMNS(v) );
+                                fprintf( fo, " %2d columns\n", cccnr );
+                                break;
+                        }
+                } 
+                if ( fails ) {
+                        fprintf( fo, "Failed\n" );
                 } else {
-                        fprintf( fo, ", %d LUTs.\n", saved_columns_by_indirect-underutilization );
+                        int underutilization = 16*NREBR - ttt;
+                        if ( underutilization < 0 )
+                                ferr( "Something is seriously wrong\n" );
+                        if ( underutilization > 0 )
+                                fprintf( fo, " * Can even chose %d more column%s to be represented directly.\n", underutilization, underutilization == 1 ? "" : "s" );
+                        fprintf( fo, " * Success. Use %d %s", NREBR, NREBR < 2 ? "EBR" : "EBRs" );
+                        if ( LUTSIZE > 4 ) {
+                                fprintf( fo, ".\n" );
+                        } else {
+                                fprintf( fo, ", %d LUTs.\n", saved_columns_by_indirect-underutilization );
+                        }
+                        fprintf( fo, " */\n\n" );
+                        
+                        uint32_t lutval[20][MAXNREQUATIONS];
+                        uint64_t direct_out;
+                        direct_out = make_compressed_table(v,tblp,replaces,ccc,underutilization,rounds,NREBR,LUTSIZE, indirinx, lutval );
+                        printf_result(v,replaces, rounds,NREBR,LUTSIZE, direct_out, lutval, removecolumns, removecolumns_codereplacement[v] );
                 }
-                fprintf( fo, " */\n\n" );
-
-                uint32_t lutval[20][NREQATIONS];
-                uint64_t direct_out;
-                direct_out = make_compressed_table(tblp,replaces,ccc,underutilization,rounds,NREBR,LUTSIZE, indirinx, lutval );
-                printf_result(replaces, rounds,NREBR,LUTSIZE, direct_out, lutval, removecolumns );
         }
         return 0;
 }
