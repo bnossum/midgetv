@@ -360,13 +360,12 @@ DAT_I[31:0] ------------|or|-|\   ___  rDee                      |
  *                                  RST_I         RST_I
  */
 
-`include "../generated/midgetv_ucodeoptions.hv"
 module m_midgetv_core
   # ( parameter 
-      ucodeopt_HAS_MINSTRET       = `ucodeopt_HAS_MINSTRET,
-      ucodeopt_HAS_EBR_MINSTRET   = `ucodeopt_HAS_EBR_MINSTRET,
-      RVC                = `ucodeopt_RVC,
-      MULDIV             = `ucodeopt_MULDIV,
+      HAS_MINSTRET       =  0,
+      HAS_EBR_MINSTRET   =  0,
+      RVC                =  0,
+      MULDIV             =  0,
       SRAMADRWIDTH       =  0,  
       EBRADRWIDTH        =  8, 
       IWIDTH             =  8, 
@@ -834,8 +833,8 @@ module m_midgetv_core
       .s_alu_carryin                    (s_alu_carryin[1:0]));
 
    m_alu #(.HIGHLEVEL(                 HIGHLEVEL       ), 
-           .ucodeopt_HAS_MINSTRET(     ucodeopt_HAS_MINSTRET     ),
-           .ucodeopt_HAS_EBR_MINSTRET( ucodeopt_HAS_EBR_MINSTRET ),
+           .HAS_MINSTRET(              HAS_MINSTRET     ),
+           .HAS_EBR_MINSTRET(          HAS_EBR_MINSTRET ),
            .ALUWIDTH(                  ALUWIDTH        ),
            .MTIMETAP(                  MTIMETAP        ),
            .MTIMETAP_LOWLIM(           MTIMETAP_LOWLIM )
@@ -1090,7 +1089,6 @@ module m_midgetv_core
       .corerunning                      (corerunning),
       .RST_I                            (RST_I),
       .ACK_I                            (ACK_I),
-      .sysregack                        (sysregack),
       .sram_ack                         (sram_ack),
       .sa15                             (sa15),
       .sa27                             (sa27),
@@ -1108,6 +1106,7 @@ module m_midgetv_core
       .rlastshift                       (rlastshift),
       .B                                (B[31:0]),
       .buserror                         (buserror),
+      .sysregack                        (sysregack),
       .sa12                             (sa12),
       .Di                               (Di[17:0]),
       .ceM                              (ceM),
@@ -1118,50 +1117,55 @@ module m_midgetv_core
       .sa22                             (sa22),
       .sa23                             (sa23));
    
-   m_ucode #(.NO_UCODEOPT(NO_UCODEOPT),.MULDIV(MULDIV), .RVC(RVC))
-     inst_ucode
-       (/*AUTOINST*/
-        // Outputs
-        .sa00                           (sa00),
-        .s_alu_carryin                  (s_alu_carryin[1:0]),
-        .s_alu                          (s_alu[2:0]),
-        .s_shift                        (s_shift[1:0]),
-        .s_cyclecnt                     (s_cyclecnt[1:0]),
-        .sa11                           (sa11),
-        .sa12                           (sa12),
-        .sa14                           (sa14),
-        .sa15                           (sa15),
-        .sa20                           (sa20),
-        .sa21                           (sa21),
-        .sa22                           (sa22),
-        .sa23                           (sa23),
-        .sa24                           (sa24),
-        .sa25                           (sa25),
-        .sa26                           (sa26),
-        .sa27                           (sa27),
-        .sa28                           (sa28),
-        .sa29                           (sa29),
-        .sa30                           (sa30),
-        .sa32                           (sa32),
-        .sa33                           (sa33),
-        .sa34                           (sa34),
-        .sa37                           (sa37),
-        .sa38                           (sa38),
-        .sa39                           (sa39),
-        .sa40                           (sa40),
-        .sa41                           (sa41),
-        .sa42                           (sa42),
-        .sa43                           (sa43),
-        .clrM                           (clrM),
-        .ceM                            (ceM),
-        .potentialMODbranch             (potentialMODbranch),
-        .ctrl_pcinc_by_2                (ctrl_pcinc_by_2),
-        .rinx                           (rinx[7:0]),
-        .ucode_killwarnings             (ucode_killwarnings),
-        // Inputs
-        .clk                            (clk),
-        .minx                           (minx[7:0]),
-        .progress_ucode                 (progress_ucode));
+   m_ucode #(.NO_UCODEOPT(NO_UCODEOPT),
+             .MULDIV(MULDIV), 
+             .RVC(RVC),            
+             .HAS_MINSTRET(     HAS_MINSTRET     ),
+             .HAS_EBR_MINSTRET( HAS_EBR_MINSTRET )
+             )
+   inst_ucode
+     (/*AUTOINST*/
+      // Outputs
+      .sa00                             (sa00),
+      .s_alu_carryin                    (s_alu_carryin[1:0]),
+      .s_alu                            (s_alu[2:0]),
+      .s_shift                          (s_shift[1:0]),
+      .s_cyclecnt                       (s_cyclecnt[1:0]),
+      .sa11                             (sa11),
+      .sa12                             (sa12),
+      .sa14                             (sa14),
+      .sa15                             (sa15),
+      .sa20                             (sa20),
+      .sa21                             (sa21),
+      .sa22                             (sa22),
+      .sa23                             (sa23),
+      .sa24                             (sa24),
+      .sa25                             (sa25),
+      .sa26                             (sa26),
+      .sa27                             (sa27),
+      .sa28                             (sa28),
+      .sa29                             (sa29),
+      .sa30                             (sa30),
+      .sa32                             (sa32),
+      .sa33                             (sa33),
+      .sa34                             (sa34),
+      .sa37                             (sa37),
+      .sa38                             (sa38),
+      .sa39                             (sa39),
+      .sa40                             (sa40),
+      .sa41                             (sa41),
+      .sa42                             (sa42),
+      .sa43                             (sa43),
+      .clrM                             (clrM),
+      .ceM                              (ceM),
+      .potentialMODbranch               (potentialMODbranch),
+      .ctrl_pcinc_by_2                  (ctrl_pcinc_by_2),
+      .rinx                             (rinx[7:0]),
+      .ucode_killwarnings               (ucode_killwarnings),
+      // Inputs
+      .clk                              (clk),
+      .minx                             (minx[7:0]),
+      .progress_ucode                   (progress_ucode));
 
    m_ucodepc #(.LAZY_DECODE(LAZY_DECODE), .MULDIV(MULDIV), .RVC(RVC))
      inst_ucodepc
@@ -1200,8 +1204,8 @@ module m_midgetv_core
       if ( MTIMETAP >= MTIMETAP_LOWLIM ) begin
          m_status_and_interrupts  
            #(.HIGHLEVEL(HIGHLEVEL),
-             .ucodeopt_HAS_MINSTRET(     ucodeopt_HAS_MINSTRET     ),
-             .ucodeopt_HAS_EBR_MINSTRET( ucodeopt_HAS_EBR_MINSTRET )
+             .HAS_MINSTRET(     HAS_MINSTRET     ),
+             .HAS_EBR_MINSTRET( HAS_EBR_MINSTRET )
              )
          inst_status_and_interrupts
            (/*AUTOINST*/

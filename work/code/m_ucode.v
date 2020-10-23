@@ -10,7 +10,10 @@
 module m_ucode
   # ( parameter NO_UCODEOPT = 0,
       parameter MULDIV = 0,
-      parameter RVC = 0)
+      parameter RVC = 0,
+      parameter HAS_MINSTRET = 0,
+      parameter HAS_EBR_MINSTRET = 0
+      )
    (
     input        clk,
     input [7:0]  minx,
@@ -37,6 +40,11 @@ module m_ucode
       get_sa = d;
    endfunction
 `endif
+   localparam UCODETYPE =
+                         (RVC    ? 8 : 0 ) +
+                         (MULDIV ? 4 : 0 ) +
+                         (HAS_MINSTRET ? 2 : 0 ) +
+                         (HAS_EBR_MINSTRET ? 1 : 0 );
    
    /*AUTOWIRE*/
    // Beginning of automatic wires (for undeclared instantiated-module outputs)
@@ -44,7 +52,7 @@ module m_ucode
    // End of automatics
    generate
       if ( NO_UCODEOPT == 1 ) begin
-         m_3ebr inst_3ebr
+         m_3ebr #(.UCODETYPE(UCODETYPE)) inst_3ebr
            (/*AUTOINST*/
             // Outputs
             .d                          (d[47:0]),
@@ -53,15 +61,116 @@ module m_ucode
             .minx                       (minx[7:0]),
             .progress_ucode             (progress_ucode));
       end else begin
-         m_2ebr inst_2ebr
-           (/*AUTOINST*/
-            // Outputs
-            .d                          (d[47:0]),
-            // Inputs
-            .clk                        (clk),
-            .minx                       (minx[7:0]),
-            .progress_ucode             (progress_ucode));
-      end      
+         if ( UCODETYPE == 4'b0000 ) begin
+            v0_m_2ebr inst_2ebr
+              (/*AUTOINST*/
+               // Outputs
+               .d                       (d[47:0]),
+               // Inputs
+               .clk                     (clk),
+               .minx                    (minx[7:0]),
+               .progress_ucode          (progress_ucode));
+         end else if ( UCODETYPE == 4'b0010 ) begin
+            v2_m_2ebr inst_2ebr
+              (/*AUTOINST*/
+               // Outputs
+               .d                       (d[47:0]),
+               // Inputs
+               .clk                     (clk),
+               .minx                    (minx[7:0]),
+               .progress_ucode          (progress_ucode));
+         end else if ( UCODETYPE == 4'b0011 ) begin
+            v3_m_2ebr inst_2ebr
+              (/*AUTOINST*/
+               // Outputs
+               .d                       (d[47:0]),
+               // Inputs
+               .clk                     (clk),
+               .minx                    (minx[7:0]),
+               .progress_ucode          (progress_ucode));
+         end else if ( UCODETYPE == 4'b0100 ) begin
+            v4_m_2ebr inst_2ebr
+              (/*AUTOINST*/
+               // Outputs
+               .d                       (d[47:0]),
+               // Inputs
+               .clk                     (clk),
+               .minx                    (minx[7:0]),
+               .progress_ucode          (progress_ucode));
+         end else if ( UCODETYPE == 4'b0110 ) begin
+            v6_m_2ebr inst_2ebr
+              (/*AUTOINST*/
+               // Outputs
+               .d                       (d[47:0]),
+               // Inputs
+               .clk                     (clk),
+               .minx                    (minx[7:0]),
+               .progress_ucode          (progress_ucode));
+         end else if ( UCODETYPE == 4'b0111 ) begin
+            v7_m_2ebr inst_2ebr
+              (/*AUTOINST*/
+               // Outputs
+               .d                       (d[47:0]),
+               // Inputs
+               .clk                     (clk),
+               .minx                    (minx[7:0]),
+               .progress_ucode          (progress_ucode));
+         end else if ( UCODETYPE == 4'b1000 ) begin
+            v8_m_2ebr inst_2ebr
+              (/*AUTOINST*/
+               // Outputs
+               .d                       (d[47:0]),
+               // Inputs
+               .clk                     (clk),
+               .minx                    (minx[7:0]),
+               .progress_ucode          (progress_ucode));
+         end else if ( UCODETYPE == 4'b1010 ) begin
+            v10_m_2ebr inst_2ebr
+              (/*AUTOINST*/
+               // Outputs
+               .d                       (d[47:0]),
+               // Inputs
+               .clk                     (clk),
+               .minx                    (minx[7:0]),
+               .progress_ucode          (progress_ucode));
+         end else if ( UCODETYPE == 4'b1011 ) begin
+            v11_m_2ebr inst_2ebr
+              (/*AUTOINST*/
+               // Outputs
+               .d                       (d[47:0]),
+               // Inputs
+               .clk                     (clk),
+               .minx                    (minx[7:0]),
+               .progress_ucode          (progress_ucode));
+         end else if ( UCODETYPE == 4'b1100 ) begin
+            v12_m_2ebr inst_2ebr
+              (/*AUTOINST*/
+               // Outputs
+               .d                       (d[47:0]),
+               // Inputs
+               .clk                     (clk),
+               .minx                    (minx[7:0]),
+               .progress_ucode          (progress_ucode));
+         end else if ( UCODETYPE == 4'b1110 ) begin
+            v14_m_2ebr inst_2ebr
+              (/*AUTOINST*/
+               // Outputs
+               .d                       (d[47:0]),
+               // Inputs
+               .clk                     (clk),
+               .minx                    (minx[7:0]),
+               .progress_ucode          (progress_ucode));
+         end else if ( UCODETYPE == 4'b1111 ) begin
+            v15_m_2ebr inst_2ebr
+              (/*AUTOINST*/
+               // Outputs
+               .d                       (d[47:0]),
+               // Inputs
+               .clk                     (clk),
+               .minx                    (minx[7:0]),
+               .progress_ucode          (progress_ucode));         
+         end
+      end
    endgenerate
    
    assign rinx = d[7:0];
@@ -116,5 +225,6 @@ endmodule
 
 // Local Variables:
 // verilog-library-directories:("." "../obj_dir" "../generated/" )
+// verilog-library-files:("../generated/m_2ebr.v" )
 // verilog-library-extensions:(".v" )
 // End:

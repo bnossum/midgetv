@@ -148,9 +148,10 @@
  * 
  */
 module m_status_and_interrupts
-  # ( parameter HIGHLEVEL = 1,
-      ucodeopt_HAS_MINSTRET = 0,
-      ucodeopt_HAS_EBR_MINSTRET = 0      
+  # ( parameter 
+      HIGHLEVEL = 1,
+      HAS_MINSTRET = 0,
+      HAS_EBR_MINSTRET = 0      
       )
    (
     /* verilator lint_off UNUSED */
@@ -202,7 +203,7 @@ module m_status_and_interrupts
           * When user code write minstreth, minstretip is cleared
           */
          wire       the_r_minstrethip;
-         if ( ucodeopt_HAS_EBR_MINSTRET || ucodeopt_HAS_EBR_MINSTRET ) begin
+         if ( HAS_EBR_MINSTRET || HAS_EBR_MINSTRET ) begin
             reg        r_minstrethip;
             wire       write_to_minstreth = ctrlreg_we & ADR_O[14];
             wire       cmb_minstrethip = (alu_minstretofl | r_minstrethip ) & ~write_to_minstreth;
@@ -379,7 +380,7 @@ module m_status_and_interrupts
 //         always @(posedge clk)         
 //           r_minstrethip <= cmb_minstrethip;
          wire r_minstrethip;
-         if ( ucodeopt_HAS_EBR_MINSTRET || ucodeopt_HAS_EBR_MINSTRET ) begin
+         if ( HAS_EBR_MINSTRET || HAS_EBR_MINSTRET ) begin
             wire cmb_minstrethip;
             SB_LUT4 #(.LUT_INIT(16'h0eee)) minstrethip_l( .O(cmb_minstrethip), .I3(ctrlreg_we), .I2(ADR_O[14]), .I1(r_minstrethip), .I0(alu_minstretofl));         
             SB_DFF minstrethip_reg( .Q(r_minstrethip), .C(clk), .D(cmb_minstrethip) );

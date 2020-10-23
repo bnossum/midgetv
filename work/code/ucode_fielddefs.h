@@ -172,5 +172,9 @@
 #define isr_intoTrap  ( II << 36 ) // MPIE = MIE; MIE = 0;
 #define isr_xx        ( xx << 36 )
 
+/* Formerly:
 #define n(x) (((uint64_t)x) & 255 ) 
+*/
+#define n(x) ((uint64_t)CAT(CAT(CAT(v,ALL_MIDGETVVARIANTS),_),x) & 255) 
+
 

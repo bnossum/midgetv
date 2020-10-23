@@ -8,7 +8,7 @@
  * simulate this theoretic case either.
  */
 module m_3ebr
-  # (  parameter EXPERIMENT_AVOID_EBR = 0 )
+  # (  parameter UCODETYPE = 0, EXPERIMENT_AVOID_EBR = 0 )
   (
    input         clk,
    input [7:0]   minx,
