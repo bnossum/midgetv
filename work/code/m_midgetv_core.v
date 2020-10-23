@@ -362,18 +362,18 @@ DAT_I[31:0] ------------|or|-|\   ___  rDee                      |
 
 module m_midgetv_core
   # ( parameter 
-      HAS_MINSTRET       =  0,
-      HAS_EBR_MINSTRET   =  0,
-      RVC                =  0,
-      MULDIV             =  0,
-      SRAMADRWIDTH       =  0,  
-      EBRADRWIDTH        =  8, 
-      IWIDTH             =  8, 
-      NO_CYCLECNT        =  0, 
-      MTIMETAP           =  0, 
-      HIGHLEVEL          =  0, 
+      HAS_MINSTRET             = 0,
+      HAS_EBR_MINSTRET         = 0,
+      RVC                      = 0,
+      MULDIV                   = 0,
+      SRAMADRWIDTH             = 0,  
+      EBRADRWIDTH              = 8, 
+      IWIDTH                   = 8, 
+      NO_CYCLECNT              = 0, 
+      MTIMETAP                 = 0, 
+      HIGHLEVEL                = 0, 
       DAT_I_ZERO_WHEN_INACTIVE = 0,
-      DBGA               =  0, // Only set to 1 during debugging
+      DBGA                     = 0, // Only set to 1 during debugging
 
       parameter [4095:0] prg00 = 4096'h0, // | 
       parameter [4095:0] prg01 = 4096'h0, // | Always specified by module

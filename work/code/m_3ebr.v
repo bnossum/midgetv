@@ -2,7 +2,7 @@
  * Part of midgetv
  * 2019. Copyright B. Nossum.
  * For licence, see LICENCE
- * -----------------------------------------------------------------------------
+ * -----------------------------------------------------------------------------ehdr
  * Simply 3 EBRs used as a ROM for control equations. We could in theory use 
  * logic instead but that is a terrible idea. Note. Verilator not able to 
  * simulate this theoretic case either.

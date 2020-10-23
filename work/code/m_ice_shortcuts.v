@@ -1,8 +1,8 @@
 /* -----------------------------------------------------------------------------
  * Part of midgetv
- * 2019. Copyright B. Nossum.
+ * 2019-2020. Copyright B. Nossum.
  * For licence, see LICENCE
- * -----------------------------------------------------------------------------
+ * -----------------------------------------------------------------------------ehdr
  * Constructs to try to get cleaner code
  */
 /* verilator lint_off DECLFILENAME */
@@ -65,3 +65,9 @@ module bn_lcy4v_b
    SB_CARRY y(.CO(co),              .CI(ci),   .I1(i[2]), .I0(i[1]));
 endmodule
 
+
+// Local Variables:
+// verilog-library-files:("../generated/m_2ebr.v" )
+// verilog-library-directories:("." "sb_sim_rtl" )
+// verilog-library-extensions:(".v" )
+// End:

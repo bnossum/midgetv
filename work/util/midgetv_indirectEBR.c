@@ -132,7 +132,7 @@ void printf_preamble( int optionsused ) {
                 " * Part of midgetv\n"
                 " * 2019-2020. Copyright B. Nossum.\n"
                 " * For licence, see LICENCE\n"
-                " * -----------------------------------------------------------------------------\n"
+                " * -----------------------------------------------------------------------------ehdr\n"
                 " * Automatically generated from %s by %s.\n"
                 " * Do not edit.\n"
                 " * Optiones for this variant:\n", fname, __FILE__ );

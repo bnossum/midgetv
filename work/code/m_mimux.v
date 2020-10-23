@@ -2,7 +2,7 @@
  * Part of midgetv
  * 2019-2020. Copyright B. Nossum.
  * For licence, see LICENCE
- * ----------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------ehdr
  * This is the fundamental input multiplexer, which is the last part of the 
  * inputmux
  * 

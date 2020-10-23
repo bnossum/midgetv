@@ -2,7 +2,7 @@
  * Part of midgetv
  * 2019. Copyright B. Nossum.
  * For licence, see LICENCE
- * -----------------------------------------------------------------------------
+ * -----------------------------------------------------------------------------ehdr
  * The operation register is simply 32 flip-flops with clock enable.
  * If we play our cards right, these registers are co-located with
  * the input mux LUTs. A requirement is then that chained LUTs are

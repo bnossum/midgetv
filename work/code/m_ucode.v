@@ -2,7 +2,7 @@
  * Part of midgetv
  * 2019. Copyright B. Nossum.
  * For licence, see LICENCE
- * -----------------------------------------------------------------------------
+ * -----------------------------------------------------------------------------ehdr
  * ucode holds the microcode of midgetv in three EBRs, or two EBRs and some logic.
  * This module is a wrapper to assign control lines to a distinct data out of EBR.
  * 

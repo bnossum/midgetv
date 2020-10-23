@@ -1,8 +1,8 @@
 /* -----------------------------------------------------------------------------
  * Part of midgetv
- * 2019. Copyright B. Nossum.
+ * 2019-2020. Copyright B. Nossum.
  * For licence, see LICENCE
- * ----------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------ehdr
  *
  * For multiply and divide.
  * Fun fact. Lattice do highlevel synthesis in 35 LUTs, while Synplify uses 95.

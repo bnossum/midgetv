@@ -2,7 +2,7 @@
  * Part of midgetv
  * 2019. Copyright B. Nossum.
  * For licence, see LICENCE
- * -----------------------------------------------------------------------------
+ * -----------------------------------------------------------------------------ehdr
  * midgetv has no barrel shifter, shifting is done in microcode.
  * Here is the logic for the shift counter - a 5-bit down counter. 
  * 

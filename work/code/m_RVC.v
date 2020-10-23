@@ -2,7 +2,7 @@
  * Part of midgetv
  * 2020-2019. Copyright B. Nossum.
  * For licence, see LICENCE
- * ----------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------ehdr
   
  Midgetv ignores all hints, and reserved instructions execute something. All
  floating point instructions are illegal. 

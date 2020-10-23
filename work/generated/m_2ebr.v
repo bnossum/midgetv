@@ -2,7 +2,7 @@
  * Part of midgetv
  * 2019-2020. Copyright B. Nossum.
  * For licence, see LICENCE
- * -----------------------------------------------------------------------------
+ * -----------------------------------------------------------------------------ehdr
  * Automatically generated from ../code/ucode.h by midgetv_indirectEBR.c.
  * Do not edit.
  * Optiones for this variant:
@@ -453,7 +453,7 @@ endmodule
  * Part of midgetv
  * 2019-2020. Copyright B. Nossum.
  * For licence, see LICENCE
- * -----------------------------------------------------------------------------
+ * -----------------------------------------------------------------------------ehdr
  * Automatically generated from ../code/ucode.h by midgetv_indirectEBR.c.
  * Do not edit.
  * Optiones for this variant:
@@ -936,7 +936,7 @@ endmodule
  * Part of midgetv
  * 2019-2020. Copyright B. Nossum.
  * For licence, see LICENCE
- * -----------------------------------------------------------------------------
+ * -----------------------------------------------------------------------------ehdr
  * Automatically generated from ../code/ucode.h by midgetv_indirectEBR.c.
  * Do not edit.
  * Optiones for this variant:
@@ -1388,7 +1388,7 @@ endmodule
  * Part of midgetv
  * 2019-2020. Copyright B. Nossum.
  * For licence, see LICENCE
- * -----------------------------------------------------------------------------
+ * -----------------------------------------------------------------------------ehdr
  * Automatically generated from ../code/ucode.h by midgetv_indirectEBR.c.
  * Do not edit.
  * Optiones for this variant:
@@ -1875,7 +1875,7 @@ endmodule
  * Part of midgetv
  * 2019-2020. Copyright B. Nossum.
  * For licence, see LICENCE
- * -----------------------------------------------------------------------------
+ * -----------------------------------------------------------------------------ehdr
  * Automatically generated from ../code/ucode.h by midgetv_indirectEBR.c.
  * Do not edit.
  * Optiones for this variant:
@@ -2363,7 +2363,7 @@ endmodule
  * Part of midgetv
  * 2019-2020. Copyright B. Nossum.
  * For licence, see LICENCE
- * -----------------------------------------------------------------------------
+ * -----------------------------------------------------------------------------ehdr
  * Automatically generated from ../code/ucode.h by midgetv_indirectEBR.c.
  * Do not edit.
  * Optiones for this variant:
@@ -2850,7 +2850,7 @@ endmodule
  * Part of midgetv
  * 2019-2020. Copyright B. Nossum.
  * For licence, see LICENCE
- * -----------------------------------------------------------------------------
+ * -----------------------------------------------------------------------------ehdr
  * Automatically generated from ../code/ucode.h by midgetv_indirectEBR.c.
  * Do not edit.
  * Optiones for this variant:
@@ -3331,7 +3331,7 @@ endmodule
  * Part of midgetv
  * 2019-2020. Copyright B. Nossum.
  * For licence, see LICENCE
- * -----------------------------------------------------------------------------
+ * -----------------------------------------------------------------------------ehdr
  * Automatically generated from ../code/ucode.h by midgetv_indirectEBR.c.
  * Do not edit.
  * Optiones for this variant:
@@ -3816,7 +3816,7 @@ endmodule
  * Part of midgetv
  * 2019-2020. Copyright B. Nossum.
  * For licence, see LICENCE
- * -----------------------------------------------------------------------------
+ * -----------------------------------------------------------------------------ehdr
  * Automatically generated from ../code/ucode.h by midgetv_indirectEBR.c.
  * Do not edit.
  * Optiones for this variant:
@@ -4301,7 +4301,7 @@ endmodule
  * Part of midgetv
  * 2019-2020. Copyright B. Nossum.
  * For licence, see LICENCE
- * -----------------------------------------------------------------------------
+ * -----------------------------------------------------------------------------ehdr
  * Automatically generated from ../code/ucode.h by midgetv_indirectEBR.c.
  * Do not edit.
  * Optiones for this variant:
@@ -4789,7 +4789,7 @@ endmodule
  * Part of midgetv
  * 2019-2020. Copyright B. Nossum.
  * For licence, see LICENCE
- * -----------------------------------------------------------------------------
+ * -----------------------------------------------------------------------------ehdr
  * Automatically generated from ../code/ucode.h by midgetv_indirectEBR.c.
  * Do not edit.
  * Optiones for this variant:
@@ -5307,7 +5307,7 @@ endmodule
  * Part of midgetv
  * 2019-2020. Copyright B. Nossum.
  * For licence, see LICENCE
- * -----------------------------------------------------------------------------
+ * -----------------------------------------------------------------------------ehdr
  * Automatically generated from ../code/ucode.h by midgetv_indirectEBR.c.
  * Do not edit.
  * Optiones for this variant:

@@ -2,7 +2,7 @@
  * Part of midgetv
  * 2019. Copyright B. Nossum.
  * For licence, see LICENCE
- * -----------------------------------------------------------------------------
+ * -----------------------------------------------------------------------------ehdr
  * The input mux selects between:
  *   o 32 bit output from a SRAM (or cache or whatever)
  *   o a data input port

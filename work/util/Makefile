@@ -6,7 +6,8 @@
 # Cleanup needed. Many older, abandonned programs here
 
 TRG := ../bin/midgetv_bin2ebr ../bin/midgetv_genucode  ../bin/midgetv_indirectEBR \
-	../bin/iceblinkcom  ../bin/midgetv_prepare_defines 
+	../bin/iceblinkcom  ../bin/midgetv_prepare_defines \
+	../bin/make_monolithic
 
 
 # ../bin/midgetv_tablefold ../bin/midgetv_ucode_linepermutate
@@ -25,6 +26,9 @@ all:$(TRG)
 	gcc -Wall -Wextra -o $@ $< 
 
 ../bin/midgetv_indirectEBR:midgetv_indirectEBR.c bnvector.c 
+	gcc -O3 -Wall -Wextra -o $@ $^ 
+
+../bin/make_monolithic:make_monolithic.c
 	gcc -O3 -Wall -Wextra -o $@ $^ 
 
 ../bin/midgetv_ucode_linepermutate:midgetv_ucode_linepermutate.c bnvector.c 

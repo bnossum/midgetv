@@ -2,7 +2,7 @@
  * Part of midgetv
  * 2019. Copyright B. Nossum.
  * For licence, see LICENCE
- * -----------------------------------------------------------------------------
+ * -----------------------------------------------------------------------------ehdr
  * Immediate operand expander, zero-finder, and working register ADR_O.
  * The high level code seems to work, but is some 60 LUTs larger than 
  * the low level code of 49 LUTs.

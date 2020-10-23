@@ -7,40 +7,7 @@
  * 
  */
 
-/*
- *  I do not stomach to list all these files in a Makefile
- */
-
-`include "../../code/m_ice_shortcuts.v"
-`include "../../code/m_inputmux.v"
-`include "../../code/m_mimux.v"
-`include "../../code/m_alu_carryin.v"
-`include "../../code/m_alu.v"
-`include "../../code/m_immexp_zfind_q.v"
-`include "../../code/m_ram.v"
-`include "../../code/m_ram_a16.v"
-`include "../../code/m_ram_a17.v"
-`include "../../code/m_ebr.v"
-`include "../../code/m_ebr_w16.v"
-`include "../../code/m_ebr_w8.v"
-`include "../../code/m_ebr_w4.v"
-`include "../../code/m_ebr_w2.v"
-`include "../../code/m_rai.v"
-`include "../../code/m_wai.v"
-`include "../../code/m_opreg.v"
-`include "../../code/m_cyclecnt.v"
-`include "../../code/m_condcode.v"
-`include "../../code/m_shiftcounter.v"
-`include "../../code/m_status_and_interrupts.v"
-`include "../../code/m_ucode.v" 
-`include "../../code/m_3ebr.v"
-`include "../../generated/m_2ebr.v"
-`include "../../code/m_ucodepc.v"
-`include "../../code/m_progressctrl.v"
-`include "../../code/m_shlr.v"
-`include "../../code/m_RVC.v"
-`include "../../code/m_illegalop.v"
-`include "../../code/m_midgetv_core.v"
+`include "../../midgetv.v"
 
 // 0010 no luck
 // 0011 no luck
@@ -91,7 +58,7 @@ module top
    //wire                 willbestart;
    
    assign start = 1'b1;       
-   localparam USE_PLL = 0;
+   localparam USE_PLL = 1;
    generate
       if ( USE_PLL == 0  ) begin
          assign CLK_I = CLK;

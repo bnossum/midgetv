@@ -2,7 +2,7 @@
  * Part of midgetv
  * 2019. Copyright B. Nossum.
  * For licence, see LICENCE
- * -----------------------------------------------------------------------------
+ * -----------------------------------------------------------------------------ehdr
  * 
  * If we have MTIMETAP >= MTIMETAP_LOWLIM, interrupts and mtime is implemented 
  * in midgetv. From user code, the following holds:

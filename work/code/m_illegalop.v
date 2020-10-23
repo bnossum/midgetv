@@ -1,3 +1,9 @@
+/* -----------------------------------------------------------------------------
+ * Part of midgetv
+ * 2019-202. Copyright B. Nossum.
+ * For licence, see LICENCE
+ * -----------------------------------------------------------------------------ehdr
+ */
 module m_illegalop
   # ( parameter LAZY_DECODE = 0, MULDIV = 0
       )

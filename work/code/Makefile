@@ -10,9 +10,14 @@
 GEN_DIR := ../generated
 BIN_DIR := ../bin
 
-TRG := $(GEN_DIR)/ucodeinitval.hv $(GEN_DIR)/m_2ebr.v $(GEN_DIR)/midgetv_ucodeoptions.hv
+TRG := $(GEN_DIR)/m_2ebr.v $(GEN_DIR)/midgetv_ucodeoptions.hv 
 
-all: $(TRG)
+# $(GEN_DIR)/ucodeinitval.hv 
+
+all: ../midgetv.v $(TRG)
+
+../midgetv.v:$(TRG)
+	$(BIN_DIR)/make_monolithic > $@
 
 $(GEN_DIR)/m_2ebr.v:$(BIN_DIR)/midgetv_indirectEBR ../code/ucode.h
 	$(BIN_DIR)/midgetv_indirectEBR > $@

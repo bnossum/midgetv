@@ -2,7 +2,7 @@
  * Part of midgetv
  * 2019. Copyright B. Nossum.
  * For licence, see LICENCE
- * -----------------------------------------------------------------------------
+ * -----------------------------------------------------------------------------ehdr
  * We must be able to read the registers, and internal working
  * variables and magical constants. We must also be able to execute 
  * in this Blockram, this is the home of my Bootloader.

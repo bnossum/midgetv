@@ -2,7 +2,7 @@
  * Part of midgetv
  * 2019. Copyright B. Nossum.
  * For licence, see LICENCE
- * -----------------------------------------------------------------------------
+ * -----------------------------------------------------------------------------ehdr
  * EBR holds constants, registers, and code. This is a wrapper,
  * EBRADRWIDTH  EBRs  Organization   Gives     Capacity  WRITE/READ mode
  *  8           2     16 x  8 *  2   32 x  8   1 kiB     0

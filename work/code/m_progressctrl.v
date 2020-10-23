@@ -2,7 +2,7 @@
  * Part of midgetv
  * 2019. Copyright B. Nossum.
  * For licence, see LICENCE
- * ----------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------ehdr
  * This module is actually several smallish modules in one.
  */
 module m_progressctrl

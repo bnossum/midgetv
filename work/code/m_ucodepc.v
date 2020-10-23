@@ -2,7 +2,7 @@
  * Part of midgetv
  * 2019. Copyright B. Nossum.
  * For licence, see LICENCE
- * -----------------------------------------------------------------------------
+ * -----------------------------------------------------------------------------ehdr
  * Instruction decode is preformed in this module. 
  * Experiments with a lowlevel version did not give any gain in size.
  * However:

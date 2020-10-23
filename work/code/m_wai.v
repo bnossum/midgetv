@@ -2,7 +2,7 @@
  * Part of midgetv
  * 2019. Copyright B. Nossum.
  * For licence, see LICENCE
- * -----------------------------------------------------------------------------
+ * -----------------------------------------------------------------------------ehdr
  * Lsb write adr is a mux from Q (for WAE/WAQ/WAQH/WAQB), the values
  * in TRG[4:0], and fixed addresses. 
  *

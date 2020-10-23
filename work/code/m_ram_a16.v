@@ -2,7 +2,7 @@
  * Part of midgetv
  * 2019. Copyright B. Nossum.
  * For licence, see LICENCE
- * -----------------------------------------------------------------------------
+ * -----------------------------------------------------------------------------ehdr
  * 64 KiB ram using two SB_SPRAM256KA.
  * The highlevel version can be used in simulations to test out different 
  * read/write latencies.

@@ -3,7 +3,7 @@
  * Part of midgetv
  * 2019. Copyright B. Nossum.
  * For licence, see LICENCE
- * -----------------------------------------------------------------------------
+ * -----------------------------------------------------------------------------ehdr
  * 
  * The alu carry input. It must be selectable. raluF is used by slt(u), slti(u)
  * instructions. alu_carryin must be put on the carry chain.
