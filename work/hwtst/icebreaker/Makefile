@@ -1,7 +1,7 @@
 all:hardware.bin
 
-#YOSYS=yosys
-YOSYS=/home/bnossum/.apio/packages/toolchain-icestorm/bin/yosys
+YOSYS=yosys
+#YOSYS=/home/bnossum/.apio/packages/toolchain-icestorm/bin/yosys
 
 icebreaker.json:icebreaker.v
 	$(YOSYS) -p 'synth_ice40 -json icebreaker.json' icebreaker.v > icebreaker_synth.log

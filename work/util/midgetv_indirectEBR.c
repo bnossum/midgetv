@@ -469,7 +469,6 @@ void printf_result(
         printf( "direct representation\n" );
         
         for ( k = 0; k < 256; k++ ) {
-//        for ( k = 0; k < 25; k++ ) {
                 printf( "    * %2.2x ", k );
                 printf( "%-8s ", labeltext[256*variant+k] );
                 int next = ( ucode0[256*variant+k] & 255);
@@ -485,7 +484,7 @@ void printf_result(
 
                         printf( "%x ", a);
                 }                
-                for ( j = 31 - rounds*lutsize; j >= 0; j-- ) {
+                for ( j = 31; j >= rounds*lutsize; j-- ) {
                         int a = (( ctbl.a[k] >>j) & 1);
                         int v = (( ctbl.v[k] >>j) & 1);
                         

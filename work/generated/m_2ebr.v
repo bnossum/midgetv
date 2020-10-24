@@ -3,7 +3,7 @@
  * 2019-2020. Copyright B. Nossum.
  * For licence, see LICENCE
  * -----------------------------------------------------------------------------ehdr
- * Automatically generated from ../code/ucode.h by midgetv_indirectEBR.c.
+ * Automatically generated from ../code/ucode.h by ../util/midgetv_indirectEBR.c.
  * Do not edit.
  * Optiones for this variant:
  *   No RVC
@@ -63,262 +63,262 @@ module v0_m_2ebr
    /*
     * inx         next     indirect index 0
     * || ucode    ucode    | direct representation
-    * 00 LB_0     LB_1     0 0110000001101011110000000001| LB     Load byte. q = rdadr=RS1+0fs
-    * 01 LB_1     LB_2     1 0010000001011111100111010010|        Read until q=mem[rs1+ofs) & ~3u]
-    * 02 IJ_0     IJ_1     2 0110100001101111110010111110| IJ     Jump to mem[(rs1+ofs)&~3u]. inCSR=0
-    * 03 _L0x03   StdIncPc 0 00100000000101x10xxx11100110| FENCE  Prepare read PC (FENCE/FENCE.I)
-    * 04 ADDI_0   StdIncPc 0 0000001000010111010011100110| ADDI   Add immediate. rd =RS1+Iimm (or joined)
-    * 05 _L0x05   ADDI_0   0 00100000000101x01xxx00000100| AUIPC  q = imm20 (copy x/2)
-    * 06 LB_3     LB_4     0 0010000000110111101000000111|        q = ~mem[rs1+ofs]
-    * 07 LB_4     LB_5     0 0010000000101111101100001001|        q = (uint8_t) mem[rs1+Iimm]
-    * 08 _L0x08   SB_1     0 0000010001110011110001011010| SB     Store byte. wjj=wradr=RS1+Simm
-    * 09 LB_5     LB_6     0 0010000000101111100010001011|        q = D^0xffffffff^q = D^0x80
-    * 0a _L0x0a   SB_1     0 0000010001110011110001011010| SB     Store byte. wjj=wradr=RS1+Simm
-    * 0b JALR_2   JAL_2    3 0000011000010111001110000110|        Q = (RS1+imn) & 0xfffffffe
-    * 0c ADD_0    ADDI_0   0 0010000001110111100100000100| ADD    add     Addition Q = RS1
-    * 0d _L0x0d   StdIncPc 0 0000001000010111011011100110| LUI    q = imm20
-    * 0e SUB_0    SUB_1    0 00100000011101x10xxx00010000| SUB    Subtraction
-    * 0f _L0x0f   StdIncPc 0 0000001000010111011011100110| LUI    q = imm20
-    * 10 SUB_1    LB_6     0 0010000001111111100010001011|        Q = ~RS2
-    * 11 AND_1    ANDI_1   0 0010000001110111100000011010|        RS1^0xffffffff to Q
-    * 12 _L0x12   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * 13 condb_2  condb_3  0 0010000001111111100000010100|        ~RS2 in Q
-    * 14 condb_3  condb_4  4 0010000000010111110000010101|        Calculate RS1+~RS2+1
-    * 15 condb_4  condb_5  5 0000010001100111100100010110|        Branch on condition
-    * 16 condb_5  Fetch    6 0100010101101100111011011110|        Branch not taken.
-    * 17 condb_5t BrOpFet  3 0100010101101111110001110100|        Branch taken.
-    * 18 BEQ      condb_2  0 0000011001110111011000010011| BEQ    Conditional Branch. Offset to Ryy
-    * 19 JALR_0   JALR_1   0 0000011001010111010001000001| JALR   yy=RS1+imm
-    * 1a ANDI_1   StdIncPc 0 0000001000010111001111100110|        rd = Iimm & RS1
-    * 1b _L0x1b   JAL_1    3 0010000000010110111000110010| JAL    J-imm is in q. Branch on alignfault
-    * 1c ECAL_BRK ECAL_RET 2 0010000001011110111010100110| ECALL/EBREAK  Select ECALL/(U/S/M)RET or EBREAK/WFI
-    * 1d ORI_2    StdIncPc 0 0000001000010111011111100110|        rd = Iimm | RS1
-    * 1e aFault_1 aFault_2 4 0010000001010101110011010100|        Q = 4
-    * 1f IJ_2     IJ_3     0 0000011001010111011010110111|        Read word is to be masked with 2 lsb = 00
-    * 20 LH_0     LH_1     2 0100011001101011110001010010| LH     Load hword. Q = rdadr=RS1+Iimm.
-    * 21 XORI_1   StdIncPc 0 0000001000010111000011100110|        rd = Iimm ^ RS1
-    * 22 _L0x22   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * 23 _L0x23   StdIncPc 0 00100000000101x10xxx11100110| FENCE  Prepare read PC (FENCE/FENCE.I)
-    * 24 SLLI_0   SLLI_1   7 0010000001111010x11000110101| SLLI   Shift left immediate.
-    * 25 _L0x25   ADDI_0   0 00100000000101x01xxx00000100| AUIPC  q = imm20 (copy x/2)
-    * 26 OR_1     OR_2     0 0000010001110111000000100111|        RS1^0xffffffff to jj
-    * 27 OR_2     ORI_2    0 0010000000000111110000011101|        Q = rs2
-    * 28 _L0x28   SH_1     2 0000010001110011110010010110| SH     Store halfword. jjw=wradr=RS1+Simm
-    * 29 XOR_1    XORI_1   0 0010000001110111100000100001|        Q = RS1^0xFFFFFFFF
-    * 2a _L0x2a   SH_1     2 0000010001110011110010010110| SH     Store halfword. jjw=wradr=RS1+Simm
-    * 2b SLTIX_1  SLTIX_2  4 001000000xxxx111010000110000|        RS1 - imm / RS1 - RS2
-    * 2c SLL_0    SLL_1    0 00100000011101x0xxxx00111110| SLL    Shift left
-    * 2d _L0x2d   StdIncPc 0 0000001000010111011011100110| LUI    q = imm20
-    * 2e unx2e             7 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| 2e: Not in use 
-    * 2f _L0x2f   StdIncPc 0 0000001000010111011011100110| LUI    q = imm20
-    * 30 SLTIX_2  StdIncPc 8 0000001000010111011011100110|        Registered ALU flag to rd
-    * 31 SLTX_1   SLTIX_1  0 0010000001111111100000101011|        ~rs2 to Q
-    * 32 JAL_1    JAL_2    0 0000011000010111010010000110|        Target adr to yy
-    * 33 JAERR_1  JAERR_2  0 0000011110010110x10010000001|  Err   JAL target adr misaligned, store to mtval
-    * 34 JAL_3    Fetch    9 0100010101101110100111011110|        PC+imm/trap entrypt to PC. OpFetch
-    * 35 SLLI_1   SLLI_2   7 0000001001011111100100110110|        Register to shift to Q (and TRG for shift 0)
-    * 36 SLLI_2   _L0x03   a 0000001001011111110100000011|        Repeat Q = Q+Q until shregcnt == 0
-    * 37 ECALL_2  ECALL_3  5 000001101xxxx111000111010111|        mepc = pc, prep store 0 to mtval
-    * 38 BNE      condb_2  0 0000011001110111011000010011| BNE    Conditional Branch. Offset to Ryy
-    * 39 _L0x39   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * 3a SRxI_1   SRxI_2   b 0000001001010111100100111101|        Register to shift to Q
-    * 3b _L0x3b   JAL_1    3 0010000000010110111000110010| JAL    J-imm is in q. Branch on alignfault
-    * 3c CSRRW_0  CSRRW_1  0 0000011000110111011001001001| CSRRW  Decoded CSR adr in yy
-    * 3d SRxI_2   _L0x03   c 0000001001010111100100000011|        Repeat Q >>= 1 until shregcnt == 0
-    * 3e SLL_1    SLLI_1   7 0010000001111010x00100110101|        Shiftamount was in low 5 bits of RS2
-    * 3f SRx_1    SRxI_1   7 0010000001111010x00100111010|        Shiftamount in low 5 bits of RS2
-    * 40 LW_0     LW_1     3 0110000001101111110001010000| LW     Load word. Q=yy=rdadr=RS1+Iimm
-    * 41 JALR_1   JALR_2   4 0010000001100111110000001011|        Q=1
-    * 42 _L0x42   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * 43 _L0x43   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * 44 SLTI_0   SLTIX_1  0 0010000001111111101000101011| SLTI   Set less than immediate (signed)
-    * 45 WFI_3    WFI_4    4 0010000001010111110001100101|        Chk ofs. Now 0x104. Prep +1, so ~ofs+0x105
-    * 46 ILL_1    ILL_2    0 0000011011010110x00101000111|        Store PC to mepc
-    * 47 ILL_2    ILL_3    0 0000011111010111000110001111|        Store 0 to mtval
-    * 48 _L0x48   SW_1     3 1110000001110111110001100110| SW     Store word. Q=wradr=RS1+Simm
-    * 49 CSRRW_1  CSRRW_2  4 0010000000010111110001001011|        Construct PC storage adr
-    * 4a _L0x4a   SW_1     3 1110000001110111110001100110| SW     Store word. Q=wradr=RS1+Simm
-    * 4b CSRRW_2  CSRRW_3  0 0001000111010110100110110001|        Write PC to 0x100 start Prep emulation entrypt
-    * 4c SLT_0    SLTX_1   0 00100000011101x10xxx00110001| SLT    Set less than (signed)
-    * 4d unx4d             7 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| 4d: Not in use 
-    * 4e eILL0b   ILLe     0 001000000xxxx1x0xxxx11111110| Illegal instruction seen
-    * 4f MRET_8   StdIncPc 4 0010000001010111110011100110|        Prep +4
-    * 50 LW_1     StdIncPc d 0000001001011111000111100110|        Read until d=mem[(rs1+ofs) & ~3u]
-    * 51 LDAF_LW  LDAF_a   0 0000011111010110111011011010|  err   LD AlignFault. Faulting adr to mtval
-    * 52 LH_1     LH_2     1 0010000001011111100101010100|        Read until q=mem[(rs1+ofs) & ~3u]
-    * 53 LDAF_LH  LDAF_a   0 0000011111010110111011011010|  err   LD AlignFault. Faulting adr to mtval
-    * 54 LH_2     LH_3     c 0010000001010111100111101011|        Repeat shr until shreg = 0 (0, 8 or 16 times)
-    * 55 aFaultb  aFault_1 0 0000011111010111011000011110|  err   LH Load access fault. Faulting adr to mtval
-    * 56 LH_4     LH_5     0 0010000001000111101101010111|        q = (uint16_t) mem[rs1+Iimm]
-    * 57 LH_5     LB_6     0 0010000001000111100010001011|        q = D^0xffffffff^q = D ^ 0x00008000
-    * 58 _L0x58   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * 59 _L0x59   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * 5a SB_1     SB_2     7 0000011001011111100101011101|        Write d to Q and yy (for sh 0). Prep shift
-    * 5b _L0x5b   JAL_1    3 0010000000010110111000110010| JAL    J-imm is in q. Branch on alignfault
-    * 5c CSRRS_0  CSRRW_1  0 0000011000110111011001001001| CSRRS  Decoded CSR adr in yy
-    * 5d SB_2     SB_3     a 0000011001011111110111111011|        Repeat shl until shreg = 0 (0,8,16 or 24 times)
-    * 5e LHU_1    LHU_2    1 0010000001011111100101110000|        Read until q=mem[(rs1+ofs) & ~3u]
-    * 5f LDAF_LHU LDAF_a   0 0000011111010110111011011010|  err   LD AlignFault. Faulting adr to mtval
-    * 60 _L0x60   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * 61 EBRKWFI2 EBREAK_1 5 0000010000110111001011110111| EBREAK/WFI2 Select EBREAK or WFI
-    * 62 _L0x62   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * 63 _L0x63   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * 64 SLTIU_0  SLTIX_1  0 0010000001111111101000101011| SLTIU  Set less than immediate (unsigned)
-    * 65 WFI_4    WFI_5    5 00100000000101x10xxx11101111|        Prepare read PC
-    * 66 SW_1     SW_2     0 0000000111110110100111110010|        Write d to a+k until accepted
-    * 67 SW_E1SWE SW_E2    0 0000011110010110x11010010011|        Store faulting address alignment to mtval
-    * 68 _L0x68   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * 69 unx69             7 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| 69: Not in use 
-    * 6a _L0x6a   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * 6b SB_4     SB_5     0 1110000101100111100101111010|        Address back to Q. Prepare get item to write
-    * 6c SLTU_0   SLTX_1   0 00100000011101x10xxx00110001| SLTU   Set less than (unsigned)
-    * 6d unx6d             7 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| 6d: Not in use 
-    * 6e unx6e             7 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| 6e: Not in use 
-    * 6f MRET_6   MRET_7   4 001000000xxxx111110011001111|        ~302 + origImm + 1 for branch decision
-    * 70 LHU_2    LHU_3    c 0010000001010111100110111010|        Repeat shr until shreg = 0 (0, 8 or 16 times)
-    * 71 aFaultc  aFault_1 0 0000011111010111011000011110|  err   LHU Load access fault. Faulting adr to mtval
-    * 72 LBU_3    ANDI_1   0 0010000000110111101000011010|        Invert q. Prepare read mask
-    * 73 BAERR_1  BAERR_2  0 0000011111100111000101110110|        Faultadr to mtval. Prepare get offset
-    * 74 BrOpFet  Fetch2   e 0010000001011111011011110100| NewOp2 Read until instruction latched
-    * 75 BAlignEr BAERR_1  0 00100000000101x0xxxx01110011|  Err   Branch target instruction address misaligned
-    * 76 BAERR_2  BAERR_3  0 0010000000010111100001110111|        ~offset to Q. Prep read (origPC+offset)
-    * 77 BAERR_3  BAERR_4  4 0000011011010110x10001111101|        origPC to mepc. Prep read 0
-    * 78 _L0x78   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * 79 _L0x79   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * 7a SB_5     SW_2     0 0000000101100110100111110010|        Write d to a+k until accepted
-    * 7b _L0x7b   JAL_1    3 0010000000010110111000110010| JAL    J-imm is in q. Branch on alignfault
-    * 7c CSRRC_0  CSRRW_1  0 0000011000110111011001001001| CSRRC  Decoded CSR adr in yy
-    * 7d BAERR_4  JAL_3    0 0001111101001110x00100110100|        Store 0 to mcause. Prep get trap entry pont
-    * 7e NMI_1    NMI_2    0 000001101xxxx111000110010000|        Store pc to mepc.
-    * 7f JALRE2   BAERR_4  0 0000011111010110x00101111101|        mtval is target
-    * 80 LBU_0    LBU_1    0 0110000001101011110010000101| LBU    Load unsigned byte. Q = rdadr=RS1+Iimm.
-    * 81 JAERR_2  BAERR_4  0 0000011011010110x00101111101|        Store PC to mepc
-    * 82 _L0x82   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * 83 _L0x83   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * 84 XORI_0   XORI_1   0 0010000001111111101000100001| XORI   Xor immediate. Q=~Iimm
-    * 85 LBU_1    LBU_2    1 0010000001011111100111110000|        Read until q=mem[(rs1+ofs) & ~3u]
-    * 86 JAL_2    JAL_25   4 0000001000010100x10010011110|        Return address to TRG
-    * 87 JALRE1   JALRE2   0 0000011011100110x00101111111|  err   Store pc to mepc
-    * 88 _L0x88   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * 89 unx89             7 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| 89: Not in use 
-    * 8a _L0x8a   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * 8b LB_6     StdIncPc 4 0000001000010111010011100110|        WTRG=(D^0x80)+0xFFFFFF7F+1=(D^0x80)-0x80
-    * 8c XOR_0    XOR_1    0 00100000011111x10xxx00101001| XOR    xor
-    * 8d unx8d             7 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| 8d: Not in use 
-    * 8e _LCSRRS_1 ILLe     0 001000000xxxx1x0xxxx11111110| Illegal instruction seen
-    * 8f ILL_3    ILL_4    4 0010000001010111110010101001|        Q = 1
-    * 90 NMI_2    JAL_3    0 0001111110100111011000110100|        mtval = 0.
-    * 91 LDAF_2   LDAF_3   4 0001111100010100x10010010010|        Store 4 to mcause
-    * 92 LDAF_3   JAL_3    0 0000011011001110x00100110100|        PC to mepc
-    * 93 SW_E2    SW_E3    0 0000011011011111000110010101|        Store address that faulted
-    * 94 SW_E4    JAL_3    0 0001111101001110x10100110100|        Store 6 to mcause
-    * 95 SW_E3    SW_E4    4 0010000001011101110010010100|        Q = 3
-    * 96 SH_1     SH_2     7 0000011001011111100110111011|        Write d to Q and yy (for sh 0). Prep shift
-    * 97 SW_E1SWH SW_E2    0 0000011110010110x11010010011|        Store faulting address alignment to mtval
-    * 98 BLT      condb_2  0 0000011001110111011000010011| BLT    Conditional Branch. Offset to Ryy
-    * 99 _L0x99   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * 9a ECALL_6  JAL_3    0 0001111101001100x10000110100|        mcause = 11
-    * 9b SH_4     SH_5     0 1110000011100111100110011111|        Address back to Q. Prepare get item to write
-    * 9c _L0x9c   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * 9d unx9d             7 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| 9d: Not in use 
-    * 9e JAL_25   JAL_3    0 0000010001100110x00100110100|        Instr. adr. to jj in case of access error
-    * 9f SH_5     SW_2     0 0000000011100110100111110010|        Write d to a+k until accepted
-    * a0 LHU_0    LHU_1    2 0100011001101011110001011110| LHU    Load unsigned hword. Q = rdadr=RS1+Iimm
-    * a1 ECALL_4  ECALL_5  4 0010000001010101110010110110|        Q = 4
-    * a2 _L0xa2   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * a3 _L0xa3   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * a4 SRxI_0   SRxI_1   7 0010000001111010x11000111010| SRxI   Shift Right immediate (both logic/arith here)
-    * a5 MRET_3   MRET_4   4 0010000000110111110010101111|        0x102 + 0xff + 1 = 0x202
-    * a6 ECAL_RET ECALL_1  3 0010000001011110111011010000| ECALL/(U/S/M)RET Select ECALL or (U/S/M)RET
-    * a7 EBRKWFI1 EBRKWFI2 0 001000000xxxx111110001100001| EBREAK/WFI1 Prepare select EBREAK or WFI
-    * a8 _L0xa8   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * a9 ILL_4    JAL_3    4 0001111101001110x10000110100|        Store 2 to mcause
-    * aa _L0xaa   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * ab EBREAK_2 ECALL_6  0 0000011011010111000110011010|        pc to mepc
-    * ac _L0xac   SRx_1    0 00100000011101x0xxxx00111111| SRx    Shift Right (both SRL and SRA)
-    * ad unxad             7 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| ad: Not in use 
-    * ae _L0xae   SRx_1    0 00100000011101x0xxxx00111111| SRx    Shift Right (both SRL and SRA)
-    * af MRET_4   MRET_5   4 001000000xxxx111110011000101|        0x202 + 0xff + 1 = 0x302
-    * b0 aF_SW_3  LDAF_3   0 0001111100010100x10010010010|        Store 7 to mcause
-    * b1 CSRRW_3  CSRRW_4  4 0010000001010101110010110010|        Prep emulation entrypt 0x108, here Q to 0x104
-    * b2 CSRRW_4  Fetch    6 0100010001101100110011011110|        IncPC, OpFetch, but force +4
-    * b3 unxb3             7 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| b3: Not in use 
-    * b4 i0reserv          7 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| Not in use, reserved to allow LASTINCH
-    * b5 SH_3     SH_4     0 0010000000000111011010011011|        Prepare get back address to use 
-    * b6 ECALL_5  ECALL_6  4 0010000001010101110010011010|        Q = 8
-    * b7 IJ_3     IJ_4     0 0010000001100101110010111101|        Construct Q = 3
-    * b8 BGE      condb_2  0 0000011001110111011000010011| BGE    Conditional Branch. Offset to Ryy
-    * b9 _L0xb9   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * ba LHU_3    ANDI_1   0 0010000000111111101000011010|        Invert q. Prepare read mask
-    * bb SH_2     SH_3     a 0000011001011111110110110101|        Repeat shl until shreg = 0 (0,8 or 24 times)
-    * bc CSRRWI_0 CSRRW_1  0 0000011000110111011001001001| CSRRWI Decoded CSR adr in yy
-    * bd IJ_4     Fetch    9 0110000001101110101111011110|        Mask and use as PC
-    * be IJ_1     IJ_2     9 0010000001011111100100011111|        Read until q=mem[(rs1+ofs)&~3u]
-    * bf IJT_1    IJT_2    9 0010000001011111100111000001|        Exit CSR, enter trap
-    * c0 _L0xc0   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * c1 IJT_2    IJT_3    0 0000011001010111011011101001|        Read word is to be masked with ~3u
-    * c2 _L0xc2   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * c3 _L0xc3   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * c4 ORI_0    ORI_1    0 0000010001111111001011100001| ORI    Or immediate. jj=~Iimm
-    * c5 MRET_5   MRET_6   0 0010000000000111101001101111|        ~302
-    * c6 IJT_4    ILL_2    0 0000011011010111101101000111|        Mask and store to mepc and Q for read of instr
-    * c7 QINT_1   QINT_2   0 000001101xxxx111000111001011|        Store pc to mepc.
-    * c8 _L0xc8   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * c9 MRET_2   MRET_3   0 0010000000110101110010100101|        0xff+3 = 0x102
-    * ca _L0xca   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * cb QINT_2   StdIncPc 0 0001111110100111011011100110|        mtval = 0.
-    * cc OR_0     OR_1     0 00100000011111x10xxx00100110| OR     or
-    * cd unxcd             7 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| cd: Not in use 
-    * ce _LCSRRCI_1 ILLe     0 001000000xxxx1x0xxxx11111110| Illegal instruction seen
-    * cf MRET_7   MRET_8   5 00100000001101x10xxx01001111|        Prepare emulation entry point 0x104
-    * d0 ECALL_1  ECALL_2  4 0010000000010111110000110111| ECALL  Verify Imm==0x000
-    * d1 MRET_1   MRET_2   0 0000010000110111011011001001| MRET   First save Imm, start build constant for check
-    * d2 LB_2     LB_3     c 0010000001010111100100000110|        Repeat shr until shreg == 0 (0,8,16,24 times)
-    * d3 aFaultd  aFault_1 0 0000011111010111011000011110|  err   LB Load access fault. Faulting adr to mtval
-    * d4 aFault_2 LDAF_3   4 0001111100010110x10010010010|        Store 5 to mcause
-    * d5 unxd5             7 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| d5: Not in use
-    * d6 eILL0c   ILLe     0 001000000xxxx1x0xxxx11111110| Illegal instruction seen
-    * d7 ECALL_3  ECALL_4  0 0000011111010111011010100001|        mtval = 0, now start the chore of 11 to mcause
-    * d8 BLTU     condb_2  0 0000011001110111011000010011| BLTU   Conditional Branch. Offset to Ryy
-    * d9 _L0xd9   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * da LDAF_a   LDAF_2   0 00100000010101x10xxx10010001|        Extra cycle after error detected write mtval
-    * db jFault_1 LDAF_3   4 0000011100000110x10010010010|        Store 1 to mcause
-    * dc CSRRSI_0 CSRRW_1  0 0000011000110111011001001001| CSRRSI Decoded CSR adr in yy
-    * dd aF_SW_1  aF_SW_2  0 0000011111010111011011100101|  err   SW Store access fault. Faulting adr to mtval
-    * de Fetch    Fetch2   f 0000010100011111011011110100|  Fr00  Read and latch instruction
-    * df eFetch   Fetch2   e 0000010101011111011011110100|  Fr00  rep Read until d=mem[(rs1+ofs) & ~3u]
-    * e0 _L0xe0   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * e1 ORI_1    ORI_2    0 0010000000000111100100011101|        Q = RS1
-    * e2 _L0xe2   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * e3 _L0xe3   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * e4 ANDI_0   ANDI_1   0 0010000001111111101000011010| ANDI   And immediate. Q=~Iimm
-    * e5 aF_SW_2  aF_SW_3  4 0010000001010101110010110000|        Q = 4
-    * e6 StdIncPc Fetch    6 0100010001101100110011011110|  Fr00  IncPC, OpFetch
-    * e7 aFault   aFault_1 0 0000011111010111011000011110|  err   Load access fault. Faulting adr to mtval
-    * e8 _L0xe8   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * e9 IJT_3    IJT_4    0 0010000001100101110011000110|        Construct Q = 3
-    * ea _L0xea   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * eb LH_3     LH_4     0 0010000000111111101001010110|        q = ~mem[rs1+ofs]
-    * ec AND_0    AND_1    0 00100000011111x10xxx00010001| AND    And 
-    * ed unxed             7 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| ed: Not in use
-    * ee eILL0a   ILLe     0 001000000xxxx1x0xxxx11111110| Illegal instruction seen
-    * ef WFI_5    Fetch    6 0100010101101100110011011110|        IncPC, OpFetch
-    * f0 LBU_2    LBU_3    c 0010000001010111100101110010|        Repeat shr until shreg = 0 (0, 8 or 16 times)
-    * f1 aFaulte  aFault_1 0 0000011111010111011000011110|  err   LBU Load access fault. Faulting adr to mtval
-    * f2 SW_2     StdIncPc 0 00100000000101x10xxx11100110|        Prepare read PC
-    * f3 aF_SW    aF_SW_1  0 001000000xxxx1x01xxx11011101|  err   SW/SH/SB access fault. Rest to set SEL_O=4'hf
-    * f4 Fetch2            0 0000010111111111110000000000|  Fr00  Update ttime. Update I. Q=immediate. Use dinx
-    * f5 jFault   jFault_1 0 0000011111010111011011011011|  err   Fetch access fault. Faulting adr to mtval
-    * f6 WFI_1    WFI_2    4 0010000000000101110011111010| WFI    Chk offset=0x105. Now=0xff. Prep 0xff+4 = 0x103
-    * f7 EBREAK_1 EBREAK_2 0 0000011110010111011010101011| EBREAK mepc = pc, store 0 to mtval
-    * f8 BGEU     condb_2  0 0000011001110111011000010011| BGEU   Conditional Branch. Offset to Ryy
-    * f9 _L0xf9   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * fa WFI_2    WFI_3    4 0010000001010111110001000101|        Chk ofs. Now 0x103. Prep +1+~ofs, so ~ofs+0x104
-    * fb SB_3     SB_4     0 0010000000000111011001101011|        Prepare get back address to use 
-    * fc CSRRCI_0 CSRRW_1  0 0000011000110111011001001001| CSRRCI Decoded CSR adr in yy
-    * fd NMI_0    NMI_1    0 00100000000101x10xxx01111110| NMI    Get current PC
-    * fe ILLe     ILL_1    0 00100000000101x0xxxx01000110| Illegal
-    * ff QINT_0   QINT_1   0 00100000000101x10xxx11000111| INT    Get current PC
+    * 00 LB_0     LB_1     0 0000011000000110101111000000| LB     Load byte. q = rdadr=RS1+0fs
+    * 01 LB_1     LB_2     1 0001001000000101111110011101|        Read until q=mem[rs1+ofs) & ~3u]
+    * 02 IJ_0     IJ_1     2 0010011010000110111111001011| IJ     Jump to mem[(rs1+ofs)&~3u]. inCSR=0
+    * 03 _L0x03   StdIncPc 0 000000100000000101x10xxx1110| FENCE  Prepare read PC (FENCE/FENCE.I)
+    * 04 ADDI_0   StdIncPc 0 0000000000100001011101001110| ADDI   Add immediate. rd =RS1+Iimm (or joined)
+    * 05 _L0x05   ADDI_0   0 000000100000000101x01xxx0000| AUIPC  q = imm20 (copy x/2)
+    * 06 LB_3     LB_4     0 0000001000000011011110100000|        q = ~mem[rs1+ofs]
+    * 07 LB_4     LB_5     0 0000001000000010111110110000|        q = (uint8_t) mem[rs1+Iimm]
+    * 08 _L0x08   SB_1     0 0000000001000111001111000101| SB     Store byte. wjj=wradr=RS1+Simm
+    * 09 LB_5     LB_6     0 0000001000000010111110001000|        q = D^0xffffffff^q = D^0x80
+    * 0a _L0x0a   SB_1     0 0000000001000111001111000101| SB     Store byte. wjj=wradr=RS1+Simm
+    * 0b JALR_2   JAL_2    3 0011000001100001011100111000|        Q = (RS1+imn) & 0xfffffffe
+    * 0c ADD_0    ADDI_0   0 0000001000000111011110010000| ADD    add     Addition Q = RS1
+    * 0d _L0x0d   StdIncPc 0 0000000000100001011101101110| LUI    q = imm20
+    * 0e SUB_0    SUB_1    0 000000100000011101x10xxx0001| SUB    Subtraction
+    * 0f _L0x0f   StdIncPc 0 0000000000100001011101101110| LUI    q = imm20
+    * 10 SUB_1    LB_6     0 0000001000000111111110001000|        Q = ~RS2
+    * 11 AND_1    ANDI_1   0 0000001000000111011110000001|        RS1^0xffffffff to Q
+    * 12 _L0x12   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * 13 condb_2  condb_3  0 0000001000000111111110000001|        ~RS2 in Q
+    * 14 condb_3  condb_4  4 0100001000000001011111000001|        Calculate RS1+~RS2+1
+    * 15 condb_4  condb_5  5 0101000001000110011110010001|        Branch on condition
+    * 16 condb_5  Fetch    6 0110010001010110110011101101|        Branch not taken.
+    * 17 condb_5t BrOpFet  3 0011010001010110111111000111|        Branch taken.
+    * 18 BEQ      condb_2  0 0000000001100111011101100001| BEQ    Conditional Branch. Offset to Ryy
+    * 19 JALR_0   JALR_1   0 0000000001100101011101000100| JALR   yy=RS1+imm
+    * 1a ANDI_1   StdIncPc 0 0000000000100001011100111110|        rd = Iimm & RS1
+    * 1b _L0x1b   JAL_1    3 0011001000000001011011100011| JAL    J-imm is in q. Branch on alignfault
+    * 1c ECAL_BRK ECAL_RET 2 0010001000000101111011101010| ECALL/EBREAK  Select ECALL/(U/S/M)RET or EBREAK/WFI
+    * 1d ORI_2    StdIncPc 0 0000000000100001011101111110|        rd = Iimm | RS1
+    * 1e aFault_1 aFault_2 4 0100001000000101010111001101|        Q = 4
+    * 1f IJ_2     IJ_3     0 0000000001100101011101101011|        Read word is to be masked with 2 lsb = 00
+    * 20 LH_0     LH_1     2 0010010001100110101111000101| LH     Load hword. Q = rdadr=RS1+Iimm.
+    * 21 XORI_1   StdIncPc 0 0000000000100001011100001110|        rd = Iimm ^ RS1
+    * 22 _L0x22   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * 23 _L0x23   StdIncPc 0 000000100000000101x10xxx1110| FENCE  Prepare read PC (FENCE/FENCE.I)
+    * 24 SLLI_0   SLLI_1   7 01110010000001111010x1100011| SLLI   Shift left immediate.
+    * 25 _L0x25   ADDI_0   0 000000100000000101x01xxx0000| AUIPC  q = imm20 (copy x/2)
+    * 26 OR_1     OR_2     0 0000000001000111011100000010|        RS1^0xffffffff to jj
+    * 27 OR_2     ORI_2    0 0000001000000000011111000001|        Q = rs2
+    * 28 _L0x28   SH_1     2 0010000001000111001111001001| SH     Store halfword. jjw=wradr=RS1+Simm
+    * 29 XOR_1    XORI_1   0 0000001000000111011110000010|        Q = RS1^0xFFFFFFFF
+    * 2a _L0x2a   SH_1     2 0010000001000111001111001001| SH     Store halfword. jjw=wradr=RS1+Simm
+    * 2b SLTIX_1  SLTIX_2  4 0100001000000xxxx11101000011|        RS1 - imm / RS1 - RS2
+    * 2c SLL_0    SLL_1    0 000000100000011101x0xxxx0011| SLL    Shift left
+    * 2d _L0x2d   StdIncPc 0 0000000000100001011101101110| LUI    q = imm20
+    * 2e unx2e             7 0111xxxxxxxxxxxxxxxxxxxxxxxx| 2e: Not in use 
+    * 2f _L0x2f   StdIncPc 0 0000000000100001011101101110| LUI    q = imm20
+    * 30 SLTIX_2  StdIncPc 8 1000000000100001011101101110|        Registered ALU flag to rd
+    * 31 SLTX_1   SLTIX_1  0 0000001000000111111110000010|        ~rs2 to Q
+    * 32 JAL_1    JAL_2    0 0000000001100001011101001000|        Target adr to yy
+    * 33 JAERR_1  JAERR_2  0 00000000011110010110x1001000|  Err   JAL target adr misaligned, store to mtval
+    * 34 JAL_3    Fetch    9 1001010001010110111010011101|        PC+imm/trap entrypt to PC. OpFetch
+    * 35 SLLI_1   SLLI_2   7 0111000000100101111110010011|        Register to shift to Q (and TRG for shift 0)
+    * 36 SLLI_2   _L0x03   a 1010000000100101111111010000|        Repeat Q = Q+Q until shregcnt == 0
+    * 37 ECALL_2  ECALL_3  5 0101000001101xxxx11100011101|        mepc = pc, prep store 0 to mtval
+    * 38 BNE      condb_2  0 0000000001100111011101100001| BNE    Conditional Branch. Offset to Ryy
+    * 39 _L0x39   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * 3a SRxI_1   SRxI_2   b 1011000000100101011110010011|        Register to shift to Q
+    * 3b _L0x3b   JAL_1    3 0011001000000001011011100011| JAL    J-imm is in q. Branch on alignfault
+    * 3c CSRRW_0  CSRRW_1  0 0000000001100011011101100100| CSRRW  Decoded CSR adr in yy
+    * 3d SRxI_2   _L0x03   c 1100000000100101011110010000|        Repeat Q >>= 1 until shregcnt == 0
+    * 3e SLL_1    SLLI_1   7 01110010000001111010x0010011|        Shiftamount was in low 5 bits of RS2
+    * 3f SRx_1    SRxI_1   7 01110010000001111010x0010011|        Shiftamount in low 5 bits of RS2
+    * 40 LW_0     LW_1     3 0011011000000110111111000101| LW     Load word. Q=yy=rdadr=RS1+Iimm
+    * 41 JALR_1   JALR_2   4 0100001000000110011111000000|        Q=1
+    * 42 _L0x42   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * 43 _L0x43   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * 44 SLTI_0   SLTIX_1  0 0000001000000111111110100010| SLTI   Set less than immediate (signed)
+    * 45 WFI_3    WFI_4    4 0100001000000101011111000110|        Chk ofs. Now 0x104. Prep +1, so ~ofs+0x105
+    * 46 ILL_1    ILL_2    0 00000000011011010110x0010100|        Store PC to mepc
+    * 47 ILL_2    ILL_3    0 0000000001111101011100011000|        Store 0 to mtval
+    * 48 _L0x48   SW_1     3 0011111000000111011111000110| SW     Store word. Q=wradr=RS1+Simm
+    * 49 CSRRW_1  CSRRW_2  4 0100001000000001011111000100|        Construct PC storage adr
+    * 4a _L0x4a   SW_1     3 0011111000000111011111000110| SW     Store word. Q=wradr=RS1+Simm
+    * 4b CSRRW_2  CSRRW_3  0 0000000100011101011010011011|        Write PC to 0x100 start Prep emulation entrypt
+    * 4c SLT_0    SLTX_1   0 000000100000011101x10xxx0011| SLT    Set less than (signed)
+    * 4d unx4d             7 0111xxxxxxxxxxxxxxxxxxxxxxxx| 4d: Not in use 
+    * 4e eILL0b   ILLe     0 0000001000000xxxx1x0xxxx1111| Illegal instruction seen
+    * 4f MRET_8   StdIncPc 4 0100001000000101011111001110|        Prep +4
+    * 50 LW_1     StdIncPc d 1101000000100101111100011110|        Read until d=mem[(rs1+ofs) & ~3u]
+    * 51 LDAF_LW  LDAF_a   0 0000000001111101011011101101|  err   LD AlignFault. Faulting adr to mtval
+    * 52 LH_1     LH_2     1 0001001000000101111110010101|        Read until q=mem[(rs1+ofs) & ~3u]
+    * 53 LDAF_LH  LDAF_a   0 0000000001111101011011101101|  err   LD AlignFault. Faulting adr to mtval
+    * 54 LH_2     LH_3     c 1100001000000101011110011110|        Repeat shr until shreg = 0 (0, 8 or 16 times)
+    * 55 aFaultb  aFault_1 0 0000000001111101011101100001|  err   LH Load access fault. Faulting adr to mtval
+    * 56 LH_4     LH_5     0 0000001000000100011110110101|        q = (uint16_t) mem[rs1+Iimm]
+    * 57 LH_5     LB_6     0 0000001000000100011110001000|        q = D^0xffffffff^q = D ^ 0x00008000
+    * 58 _L0x58   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * 59 _L0x59   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * 5a SB_1     SB_2     7 0111000001100101111110010101|        Write d to Q and yy (for sh 0). Prep shift
+    * 5b _L0x5b   JAL_1    3 0011001000000001011011100011| JAL    J-imm is in q. Branch on alignfault
+    * 5c CSRRS_0  CSRRW_1  0 0000000001100011011101100100| CSRRS  Decoded CSR adr in yy
+    * 5d SB_2     SB_3     a 1010000001100101111111011111|        Repeat shl until shreg = 0 (0,8,16 or 24 times)
+    * 5e LHU_1    LHU_2    1 0001001000000101111110010111|        Read until q=mem[(rs1+ofs) & ~3u]
+    * 5f LDAF_LHU LDAF_a   0 0000000001111101011011101101|  err   LD AlignFault. Faulting adr to mtval
+    * 60 _L0x60   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * 61 EBRKWFI2 EBREAK_1 5 0101000001000011011100101111| EBREAK/WFI2 Select EBREAK or WFI
+    * 62 _L0x62   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * 63 _L0x63   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * 64 SLTIU_0  SLTIX_1  0 0000001000000111111110100010| SLTIU  Set less than immediate (unsigned)
+    * 65 WFI_4    WFI_5    5 010100100000000101x10xxx1110|        Prepare read PC
+    * 66 SW_1     SW_2     0 0000000000011111011010011111|        Write d to a+k until accepted
+    * 67 SW_E1SWE SW_E2    0 00000000011110010110x1101001|        Store faulting address alignment to mtval
+    * 68 _L0x68   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * 69 unx69             7 0111xxxxxxxxxxxxxxxxxxxxxxxx| 69: Not in use 
+    * 6a _L0x6a   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * 6b SB_4     SB_5     0 0000111000010110011110010111|        Address back to Q. Prepare get item to write
+    * 6c SLTU_0   SLTX_1   0 000000100000011101x10xxx0011| SLTU   Set less than (unsigned)
+    * 6d unx6d             7 0111xxxxxxxxxxxxxxxxxxxxxxxx| 6d: Not in use 
+    * 6e unx6e             7 0111xxxxxxxxxxxxxxxxxxxxxxxx| 6e: Not in use 
+    * 6f MRET_6   MRET_7   4 0100001000000xxxx11111001100|        ~302 + origImm + 1 for branch decision
+    * 70 LHU_2    LHU_3    c 1100001000000101011110011011|        Repeat shr until shreg = 0 (0, 8 or 16 times)
+    * 71 aFaultc  aFault_1 0 0000000001111101011101100001|  err   LHU Load access fault. Faulting adr to mtval
+    * 72 LBU_3    ANDI_1   0 0000001000000011011110100001|        Invert q. Prepare read mask
+    * 73 BAERR_1  BAERR_2  0 0000000001111110011100010111|        Faultadr to mtval. Prepare get offset
+    * 74 BrOpFet  Fetch2   e 1110001000000101111101101111| NewOp2 Read until instruction latched
+    * 75 BAlignEr BAERR_1  0 000000100000000101x0xxxx0111|  Err   Branch target instruction address misaligned
+    * 76 BAERR_2  BAERR_3  0 0000001000000001011110000111|        ~offset to Q. Prep read (origPC+offset)
+    * 77 BAERR_3  BAERR_4  4 01000000011011010110x1000111|        origPC to mepc. Prep read 0
+    * 78 _L0x78   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * 79 _L0x79   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * 7a SB_5     SW_2     0 0000000000010110011010011111|        Write d to a+k until accepted
+    * 7b _L0x7b   JAL_1    3 0011001000000001011011100011| JAL    J-imm is in q. Branch on alignfault
+    * 7c CSRRC_0  CSRRW_1  0 0000000001100011011101100100| CSRRC  Decoded CSR adr in yy
+    * 7d BAERR_4  JAL_3    0 00000001111101001110x0010011|        Store 0 to mcause. Prep get trap entry pont
+    * 7e NMI_1    NMI_2    0 0000000001101xxxx11100011001|        Store pc to mepc.
+    * 7f JALRE2   BAERR_4  0 00000000011111010110x0010111|        mtval is target
+    * 80 LBU_0    LBU_1    0 0000011000000110101111001000| LBU    Load unsigned byte. Q = rdadr=RS1+Iimm.
+    * 81 JAERR_2  BAERR_4  0 00000000011011010110x0010111|        Store PC to mepc
+    * 82 _L0x82   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * 83 _L0x83   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * 84 XORI_0   XORI_1   0 0000001000000111111110100010| XORI   Xor immediate. Q=~Iimm
+    * 85 LBU_1    LBU_2    1 0001001000000101111110011111|        Read until q=mem[(rs1+ofs) & ~3u]
+    * 86 JAL_2    JAL_25   4 01000000001000010100x1001001|        Return address to TRG
+    * 87 JALRE1   JALRE2   0 00000000011011100110x0010111|  err   Store pc to mepc
+    * 88 _L0x88   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * 89 unx89             7 0111xxxxxxxxxxxxxxxxxxxxxxxx| 89: Not in use 
+    * 8a _L0x8a   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * 8b LB_6     StdIncPc 4 0100000000100001011101001110|        WTRG=(D^0x80)+0xFFFFFF7F+1=(D^0x80)-0x80
+    * 8c XOR_0    XOR_1    0 000000100000011111x10xxx0010| XOR    xor
+    * 8d unx8d             7 0111xxxxxxxxxxxxxxxxxxxxxxxx| 8d: Not in use 
+    * 8e _LCSRRS_1 ILLe     0 0000001000000xxxx1x0xxxx1111| Illegal instruction seen
+    * 8f ILL_3    ILL_4    4 0100001000000101011111001010|        Q = 1
+    * 90 NMI_2    JAL_3    0 0000000111111010011101100011|        mtval = 0.
+    * 91 LDAF_2   LDAF_3   4 01000001111100010100x1001001|        Store 4 to mcause
+    * 92 LDAF_3   JAL_3    0 00000000011011001110x0010011|        PC to mepc
+    * 93 SW_E2    SW_E3    0 0000000001101101111100011001|        Store address that faulted
+    * 94 SW_E4    JAL_3    0 00000001111101001110x1010011|        Store 6 to mcause
+    * 95 SW_E3    SW_E4    4 0100001000000101110111001001|        Q = 3
+    * 96 SH_1     SH_2     7 0111000001100101111110011011|        Write d to Q and yy (for sh 0). Prep shift
+    * 97 SW_E1SWH SW_E2    0 00000000011110010110x1101001|        Store faulting address alignment to mtval
+    * 98 BLT      condb_2  0 0000000001100111011101100001| BLT    Conditional Branch. Offset to Ryy
+    * 99 _L0x99   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * 9a ECALL_6  JAL_3    0 00000001111101001100x1000011|        mcause = 11
+    * 9b SH_4     SH_5     0 0000111000001110011110011001|        Address back to Q. Prepare get item to write
+    * 9c _L0x9c   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * 9d unx9d             7 0111xxxxxxxxxxxxxxxxxxxxxxxx| 9d: Not in use 
+    * 9e JAL_25   JAL_3    0 00000000010001100110x0010011|        Instr. adr. to jj in case of access error
+    * 9f SH_5     SW_2     0 0000000000001110011010011111|        Write d to a+k until accepted
+    * a0 LHU_0    LHU_1    2 0010010001100110101111000101| LHU    Load unsigned hword. Q = rdadr=RS1+Iimm
+    * a1 ECALL_4  ECALL_5  4 0100001000000101010111001011|        Q = 4
+    * a2 _L0xa2   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * a3 _L0xa3   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * a4 SRxI_0   SRxI_1   7 01110010000001111010x1100011| SRxI   Shift Right immediate (both logic/arith here)
+    * a5 MRET_3   MRET_4   4 0100001000000011011111001010|        0x102 + 0xff + 1 = 0x202
+    * a6 ECAL_RET ECALL_1  3 0011001000000101111011101101| ECALL/(U/S/M)RET Select ECALL or (U/S/M)RET
+    * a7 EBRKWFI1 EBRKWFI2 0 0000001000000xxxx11111000110| EBREAK/WFI1 Prepare select EBREAK or WFI
+    * a8 _L0xa8   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * a9 ILL_4    JAL_3    4 01000001111101001110x1000011|        Store 2 to mcause
+    * aa _L0xaa   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * ab EBREAK_2 ECALL_6  0 0000000001101101011100011001|        pc to mepc
+    * ac _L0xac   SRx_1    0 000000100000011101x0xxxx0011| SRx    Shift Right (both SRL and SRA)
+    * ad unxad             7 0111xxxxxxxxxxxxxxxxxxxxxxxx| ad: Not in use 
+    * ae _L0xae   SRx_1    0 000000100000011101x0xxxx0011| SRx    Shift Right (both SRL and SRA)
+    * af MRET_4   MRET_5   4 0100001000000xxxx11111001100|        0x202 + 0xff + 1 = 0x302
+    * b0 aF_SW_3  LDAF_3   0 00000001111100010100x1001001|        Store 7 to mcause
+    * b1 CSRRW_3  CSRRW_4  4 0100001000000101010111001011|        Prep emulation entrypt 0x108, here Q to 0x104
+    * b2 CSRRW_4  Fetch    6 0110010001000110110011001101|        IncPC, OpFetch, but force +4
+    * b3 unxb3             7 0111xxxxxxxxxxxxxxxxxxxxxxxx| b3: Not in use 
+    * b4 i0reserv          7 0111xxxxxxxxxxxxxxxxxxxxxxxx| Not in use, reserved to allow LASTINCH
+    * b5 SH_3     SH_4     0 0000001000000000011101101001|        Prepare get back address to use 
+    * b6 ECALL_5  ECALL_6  4 0100001000000101010111001001|        Q = 8
+    * b7 IJ_3     IJ_4     0 0000001000000110010111001011|        Construct Q = 3
+    * b8 BGE      condb_2  0 0000000001100111011101100001| BGE    Conditional Branch. Offset to Ryy
+    * b9 _L0xb9   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * ba LHU_3    ANDI_1   0 0000001000000011111110100001|        Invert q. Prepare read mask
+    * bb SH_2     SH_3     a 1010000001100101111111011011|        Repeat shl until shreg = 0 (0,8 or 24 times)
+    * bc CSRRWI_0 CSRRW_1  0 0000000001100011011101100100| CSRRWI Decoded CSR adr in yy
+    * bd IJ_4     Fetch    9 1001011000000110111010111101|        Mask and use as PC
+    * be IJ_1     IJ_2     9 1001001000000101111110010001|        Read until q=mem[(rs1+ofs)&~3u]
+    * bf IJT_1    IJT_2    9 1001001000000101111110011100|        Exit CSR, enter trap
+    * c0 _L0xc0   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * c1 IJT_2    IJT_3    0 0000000001100101011101101110|        Read word is to be masked with ~3u
+    * c2 _L0xc2   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * c3 _L0xc3   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * c4 ORI_0    ORI_1    0 0000000001000111111100101110| ORI    Or immediate. jj=~Iimm
+    * c5 MRET_5   MRET_6   0 0000001000000000011110100110|        ~302
+    * c6 IJT_4    ILL_2    0 0000000001101101011110110100|        Mask and store to mepc and Q for read of instr
+    * c7 QINT_1   QINT_2   0 0000000001101xxxx11100011100|        Store pc to mepc.
+    * c8 _L0xc8   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * c9 MRET_2   MRET_3   0 0000001000000011010111001010|        0xff+3 = 0x102
+    * ca _L0xca   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * cb QINT_2   StdIncPc 0 0000000111111010011101101110|        mtval = 0.
+    * cc OR_0     OR_1     0 000000100000011111x10xxx0010| OR     or
+    * cd unxcd             7 0111xxxxxxxxxxxxxxxxxxxxxxxx| cd: Not in use 
+    * ce _LCSRRCI_1 ILLe     0 0000001000000xxxx1x0xxxx1111| Illegal instruction seen
+    * cf MRET_7   MRET_8   5 010100100000001101x10xxx0100|        Prepare emulation entry point 0x104
+    * d0 ECALL_1  ECALL_2  4 0100001000000001011111000011| ECALL  Verify Imm==0x000
+    * d1 MRET_1   MRET_2   0 0000000001000011011101101100| MRET   First save Imm, start build constant for check
+    * d2 LB_2     LB_3     c 1100001000000101011110010000|        Repeat shr until shreg == 0 (0,8,16,24 times)
+    * d3 aFaultd  aFault_1 0 0000000001111101011101100001|  err   LB Load access fault. Faulting adr to mtval
+    * d4 aFault_2 LDAF_3   4 01000001111100010110x1001001|        Store 5 to mcause
+    * d5 unxd5             7 0111xxxxxxxxxxxxxxxxxxxxxxxx| d5: Not in use
+    * d6 eILL0c   ILLe     0 0000001000000xxxx1x0xxxx1111| Illegal instruction seen
+    * d7 ECALL_3  ECALL_4  0 0000000001111101011101101010|        mtval = 0, now start the chore of 11 to mcause
+    * d8 BLTU     condb_2  0 0000000001100111011101100001| BLTU   Conditional Branch. Offset to Ryy
+    * d9 _L0xd9   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * da LDAF_a   LDAF_2   0 000000100000010101x10xxx1001|        Extra cycle after error detected write mtval
+    * db jFault_1 LDAF_3   4 01000000011100000110x1001001|        Store 1 to mcause
+    * dc CSRRSI_0 CSRRW_1  0 0000000001100011011101100100| CSRRSI Decoded CSR adr in yy
+    * dd aF_SW_1  aF_SW_2  0 0000000001111101011101101110|  err   SW Store access fault. Faulting adr to mtval
+    * de Fetch    Fetch2   f 1111000001010001111101101111|  Fr00  Read and latch instruction
+    * df eFetch   Fetch2   e 1110000001010101111101101111|  Fr00  rep Read until d=mem[(rs1+ofs) & ~3u]
+    * e0 _L0xe0   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * e1 ORI_1    ORI_2    0 0000001000000000011110010001|        Q = RS1
+    * e2 _L0xe2   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * e3 _L0xe3   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * e4 ANDI_0   ANDI_1   0 0000001000000111111110100001| ANDI   And immediate. Q=~Iimm
+    * e5 aF_SW_2  aF_SW_3  4 0100001000000101010111001011|        Q = 4
+    * e6 StdIncPc Fetch    6 0110010001000110110011001101|  Fr00  IncPC, OpFetch
+    * e7 aFault   aFault_1 0 0000000001111101011101100001|  err   Load access fault. Faulting adr to mtval
+    * e8 _L0xe8   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * e9 IJT_3    IJT_4    0 0000001000000110010111001100|        Construct Q = 3
+    * ea _L0xea   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * eb LH_3     LH_4     0 0000001000000011111110100101|        q = ~mem[rs1+ofs]
+    * ec AND_0    AND_1    0 000000100000011111x10xxx0001| AND    And 
+    * ed unxed             7 0111xxxxxxxxxxxxxxxxxxxxxxxx| ed: Not in use
+    * ee eILL0a   ILLe     0 0000001000000xxxx1x0xxxx1111| Illegal instruction seen
+    * ef WFI_5    Fetch    6 0110010001010110110011001101|        IncPC, OpFetch
+    * f0 LBU_2    LBU_3    c 1100001000000101011110010111|        Repeat shr until shreg = 0 (0, 8 or 16 times)
+    * f1 aFaulte  aFault_1 0 0000000001111101011101100001|  err   LBU Load access fault. Faulting adr to mtval
+    * f2 SW_2     StdIncPc 0 000000100000000101x10xxx1110|        Prepare read PC
+    * f3 aF_SW    aF_SW_1  0 0000001000000xxxx1x01xxx1101|  err   SW/SH/SB access fault. Rest to set SEL_O=4'hf
+    * f4 Fetch2            0 0000000001011111111111000000|  Fr00  Update ttime. Update I. Q=immediate. Use dinx
+    * f5 jFault   jFault_1 0 0000000001111101011101101101|  err   Fetch access fault. Faulting adr to mtval
+    * f6 WFI_1    WFI_2    4 0100001000000000010111001111| WFI    Chk offset=0x105. Now=0xff. Prep 0xff+4 = 0x103
+    * f7 EBREAK_1 EBREAK_2 0 0000000001111001011101101010| EBREAK mepc = pc, store 0 to mtval
+    * f8 BGEU     condb_2  0 0000000001100111011101100001| BGEU   Conditional Branch. Offset to Ryy
+    * f9 _L0xf9   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * fa WFI_2    WFI_3    4 0100001000000101011111000100|        Chk ofs. Now 0x103. Prep +1+~ofs, so ~ofs+0x104
+    * fb SB_3     SB_4     0 0000001000000000011101100110|        Prepare get back address to use 
+    * fc CSRRCI_0 CSRRW_1  0 0000000001100011011101100100| CSRRCI Decoded CSR adr in yy
+    * fd NMI_0    NMI_1    0 000000100000000101x10xxx0111| NMI    Get current PC
+    * fe ILLe     ILL_1    0 000000100000000101x0xxxx0100| Illegal
+    * ff QINT_0   QINT_1   0 000000100000000101x10xxx1100| INT    Get current PC
     */
    localparam u0_0 = 256'h76e6501076e6790473863c5af88b3c5afb097a07480474e650e6fcbef9d2bc01;
    localparam u0_1 = 256'h76b75cd477e6eea66e3273e674417613fc74cede79167c15f81440fe781af88b;
@@ -454,7 +454,7 @@ endmodule
  * 2019-2020. Copyright B. Nossum.
  * For licence, see LICENCE
  * -----------------------------------------------------------------------------ehdr
- * Automatically generated from ../code/ucode.h by midgetv_indirectEBR.c.
+ * Automatically generated from ../code/ucode.h by ../util/midgetv_indirectEBR.c.
  * Do not edit.
  * Optiones for this variant:
  *   No RVC
@@ -544,262 +544,262 @@ module v2_m_2ebr
     *                      indirect_index 1
     * inx         next     | indirect index 0
     * || ucode    ucode    | | direct representation
-    * 00 LB_0     LB_1     0 0 100011011110000000000001| LB     Load byte. q = rdadr=RS1+0fs
-    * 01 LB_1     LB_2     1 1 1000101111001xx111010010|        Read until q=mem[rs1+ofs) & ~3u]
-    * 02 IJ_0     IJ_1     2 2 100011011110000010111110| IJ     Jump to mem[(rs1+ofs)&~3u]. inCSR=0
-    * 03 _L0x03   StdIncPc 3 0 10000010x1xxxxx011100110| FENCE  Prepare read PC (FENCE/FENCE.I)
-    * 04 ADDI_0   StdIncPc 4 0 000000101110000011100110| ADDI   Add immediate. rd =RS1+Iimm (or joined)
-    * 05 _L0x05   ADDI_0   1 0 10000010x0xxxxx000000100| AUIPC  q = imm20 (copy x/2)
-    * 06 LB_3     LB_4     1 0 1000011011010xx000000111|        q = ~mem[rs1+ofs]
-    * 07 LB_4     LB_5     1 0 1000010111011xx000001001|        q = (uint8_t) mem[rs1+Iimm]
-    * 08 _L0x08   SB_1     5 0 010011101110000001011010| SB     Store byte. wjj=wradr=RS1+Simm
-    * 09 LB_5     LB_6     1 0 1000010111000xx010001011|        q = D^0xffffffff^q = D^0x80
-    * 0a _L0x0a   SB_1     5 0 010011101110000001011010| SB     Store byte. wjj=wradr=RS1+Simm
-    * 0b JALR_2   JAL_2    4 3 0100001011011xx010000110|        Q = (RS1+imn) & 0xfffffffe
-    * 0c ADD_0    ADDI_0   1 0 1000111011001xx000000100| ADD    add     Addition Q = RS1
-    * 0d _L0x0d   StdIncPc 4 0 000000101111000011100110| LUI    q = imm20
-    * 0e SUB_0    SUB_1    3 0 10001110x1xxxxx000010000| SUB    Subtraction
-    * 0f _L0x0f   StdIncPc 4 0 000000101111000011100110| LUI    q = imm20
-    * 10 SUB_1    LB_6     1 0 1000111111000xx010001011|        Q = ~RS2
-    * 11 AND_1    ANDI_1   1 0 1000111011000xx000011010|        RS1^0xffffffff to Q
-    * 12 _L0x12   ILLe     3 0 1000xxxxx0xxxxx011111110|  Not in use (illegal as entry)
-    * 13 condb_2  condb_3  1 0 1000111111000xx000010100|        ~RS2 in Q
-    * 14 condb_3  condb_4  1 4 100000101110011000010101|        Calculate RS1+~RS2+1
-    * 15 condb_4  condb_5  1 5 0100110011001xx000010110|        Branch on condition
-    * 16 condb_5  Fetch    6 6 011011010011011011011110|        Branch not taken.
-    * 17 condb_5t BrOpFet  6 3 011011011110000001110100|        Branch taken.
-    * 18 BEQ      condb_2  4 0 010011101111000000010011| BEQ    Conditional Branch. Offset to Ryy
-    * 19 JALR_0   JALR_1   4 0 010010101110000001000001| JALR   yy=RS1+imm
-    * 1a ANDI_1   StdIncPc 4 0 0000001011011xx011100110|        rd = Iimm & RS1
-    * 1b _L0x1b   JAL_1    1 3 100000101011000000110010| JAL    J-imm is in q. Branch on alignfault
-    * 1c ECAL_BRK ECAL_RET 1 2 100010111011000010100110| ECALL/EBREAK  Select ECALL/(U/S/M)RET or EBREAK/WFI
-    * 1d ORI_2    StdIncPc 4 0 000000101111100011100110|        rd = Iimm | RS1
-    * 1e aFault_1 aFault_2 1 4 100010100110011011010100|        Q = 4
-    * 1f IJ_2     IJ_3     4 0 010010101111000010110111|        Read word is to be masked with 2 lsb = 00
-    * 20 LH_0     LH_1     7 2 010011011110000001010010| LH     Load hword. Q = rdadr=RS1+Iimm.
-    * 21 XORI_1   StdIncPc 4 0 0000001011000xx011100110|        rd = Iimm ^ RS1
-    * 22 _L0x22   ILLe     3 0 1000xxxxx0xxxxx011111110|  Not in use (illegal as entry)
-    * 23 _L0x23   StdIncPc 3 0 10000010x1xxxxx011100110| FENCE  Prepare read PC (FENCE/FENCE.I)
-    * 24 SLLI_0   SLLI_1   8 7 100011111011000000110101| SLLI   Shift left immediate.
-    * 25 _L0x25   ADDI_0   1 0 10000010x0xxxxx000000100| AUIPC  q = imm20 (copy x/2)
-    * 26 OR_1     OR_2     3 0 0100111011000xx000100111|        RS1^0xffffffff to jj
-    * 27 OR_2     ORI_2    1 0 100000001110000000011101|        Q = rs2
-    * 28 _L0x28   SH_1     5 2 010011101110000010010110| SH     Store halfword. jjw=wradr=RS1+Simm
-    * 29 XOR_1    XORI_1   1 0 1000111011000xx000100001|        Q = RS1^0xFFFFFFFF
-    * 2a _L0x2a   SH_1     5 2 010011101110000010010110| SH     Store halfword. jjw=wradr=RS1+Simm
-    * 2b SLTIX_1  SLTIX_2  3 4 1000xxxx1110011000110000|        RS1 - imm / RS1 - RS2
-    * 2c SLL_0    SLL_1    3 0 10001110x0xxxxx000111110| SLL    Shift left
-    * 2d _L0x2d   StdIncPc 4 0 000000101111000011100110| LUI    q = imm20
-    * 2e unx2e             8 7 xxxxxxxxxxxxxxxxxxxxxxxx| 2e: Not in use 
-    * 2f _L0x2f   StdIncPc 4 0 000000101111000011100110| LUI    q = imm20
-    * 30 SLTIX_2  StdIncPc 4 8 000000101111001011100110|        Registered ALU flag to rd
-    * 31 SLTX_1   SLTIX_1  1 0 1000111111000xx000101011|        ~rs2 to Q
-    * 32 JAL_1    JAL_2    4 0 010000101110000010000110|        Target adr to yy
-    * 33 JAERR_1  JAERR_2  4 0 011100101010000010000001|  Err   JAL target adr misaligned, store to mtval
-    * 34 JAL_3    Fetch    6 9 0110110110001xx011011110|        PC+imm/trap entrypt to PC. OpFetch
-    * 35 SLLI_1   SLLI_2   9 7 0000101111001xx000110110|        Register to shift to Q (and TRG for shift 0)
-    * 36 SLLI_2   _L0x03   a 7 000010111110100000000011|        Repeat Q = Q+Q until shregcnt == 0
-    * 37 ECALL_2  ECALL_3  4 5 0101xxxx11001xx011010111|        mepc = pc, prep store 0 to mtval
-    * 38 BNE      condb_2  4 0 010011101111000000010011| BNE    Conditional Branch. Offset to Ryy
-    * 39 _L0x39   ILLe     3 0 1000xxxxx0xxxxx011111110|  Not in use (illegal as entry)
-    * 3a SRxI_1   SRxI_2   9 a 0000101011001xx100111101|        Register to shift to Q
-    * 3b _L0x3b   JAL_1    1 3 100000101011000000110010| JAL    J-imm is in q. Branch on alignfault
-    * 3c CSRRW_0  CSRRW_1  4 0 010001101111000001001001| CSRRW  Decoded CSR adr in yy
-    * 3d SRxI_2   _L0x03   a a 0000101011001xx100000011|        Repeat Q >>= 1 until shregcnt == 0
-    * 3e SLL_1    SLLI_1   8 7 1000111110001xx000110101|        Shiftamount was in low 5 bits of RS2
-    * 3f SRx_1    SRxI_1   8 7 1000111110001xx000111010|        Shiftamount in low 5 bits of RS2
-    * 40 LW_0     LW_1     6 3 100011011110000001010000| LW     Load word. Q=yy=rdadr=RS1+Iimm
-    * 41 JALR_1   JALR_2   1 4 100011001110011000001011|        Q=1
-    * 42 _L0x42   ILLe     3 0 1000xxxxx0xxxxx011111110|  Not in use (illegal as entry)
-    * 43 _L0x43   ILLe     3 0 1000xxxxx0xxxxx011111110|  Not in use (illegal as entry)
-    * 44 SLTI_0   SLTIX_1  1 0 1000111111010xx000101011| SLTI   Set less than immediate (signed)
-    * 45 WFI_3    WFI_4    1 4 100010101110011001100101|        Chk ofs. Now 0x104. Prep +1, so ~ofs+0x105
-    * 46 ILL_1    ILL_2    4 0 0101101010001xx001000111|        Store PC to mepc
-    * 47 ILL_2    ILL_3    4 0 0111101011001xx010001111|        Store 0 to mtval
-    * 48 _L0x48   SW_1     b 3 100011101110000001100110| SW     Store word. Q=wradr=RS1+Simm
-    * 49 CSRRW_1  CSRRW_2  1 4 100000101110011001001011|        Construct PC storage adr
-    * 4a _L0x4a   SW_1     b 3 100011101110000001100110| SW     Store word. Q=wradr=RS1+Simm
-    * 4b CSRRW_2  CSRRW_3  c 0 0011101010001xx010110001|        Write PC to 0x100 start Prep emulation entrypt
-    * 4c SLT_0    SLTX_1   3 0 10001110x1xxxxx000110001| SLT    Set less than (signed)
-    * 4d unx4d             8 7 xxxxxxxxxxxxxxxxxxxxxxxx| 4d: Not in use 
-    * 4e eILL0b   ILLe     3 0 1000xxxxx0xxxxx011111110| Illegal instruction seen
-    * 4f MRET_8   StdIncPc 1 4 100010101110011011100110|        Prep +4
-    * 50 LW_1     StdIncPc 4 b 0000101111001xx011100110|        Read until d=mem[(rs1+ofs) & ~3u]
-    * 51 LDAF_LW  LDAF_a   9 0 011110101011000011011010|  err   LD AlignFault. Faulting adr to mtval
-    * 52 LH_1     LH_2     1 1 1000101111001xx101010100|        Read until q=mem[(rs1+ofs) & ~3u]
-    * 53 LDAF_LH  LDAF_a   9 0 011110101011000011011010|  err   LD AlignFault. Faulting adr to mtval
-    * 54 LH_2     LH_3     d a 1000101011001xx111101011|        Repeat shr until shreg = 0 (0, 8 or 16 times)
-    * 55 aFaultb  aFault_1 4 0 011110101111000000011110|  err   LH Load access fault. Faulting adr to mtval
-    * 56 LH_4     LH_5     1 0 1000100011011xx001010111|        q = (uint16_t) mem[rs1+Iimm]
-    * 57 LH_5     LB_6     1 0 1000100011000xx010001011|        q = D^0xffffffff^q = D ^ 0x00008000
-    * 58 _L0x58   ILLe     3 0 1000xxxxx0xxxxx011111110|  Not in use (illegal as entry)
-    * 59 _L0x59   ILLe     3 0 1000xxxxx0xxxxx011111110|  Not in use (illegal as entry)
-    * 5a SB_1     SB_2     9 7 0100101111001xx001011101|        Write d to Q and yy (for sh 0). Prep shift
-    * 5b _L0x5b   JAL_1    1 3 100000101011000000110010| JAL    J-imm is in q. Branch on alignfault
-    * 5c CSRRS_0  CSRRW_1  4 0 010001101111000001001001| CSRRS  Decoded CSR adr in yy
-    * 5d SB_2     SB_3     a 7 010010111110100011111011|        Repeat shl until shreg = 0 (0,8,16 or 24 times)
-    * 5e LHU_1    LHU_2    1 1 1000101111001xx101110000|        Read until q=mem[(rs1+ofs) & ~3u]
-    * 5f LDAF_LHU LDAF_a   9 0 011110101011000011011010|  err   LD AlignFault. Faulting adr to mtval
-    * 60 _L0x60   ILLe     3 0 1000xxxxx0xxxxx011111110|  Not in use (illegal as entry)
-    * 61 EBRKWFI2 EBREAK_1 3 5 0100011011010xx011110111| EBREAK/WFI2 Select EBREAK or WFI
-    * 62 _L0x62   ILLe     3 0 1000xxxxx0xxxxx011111110|  Not in use (illegal as entry)
-    * 63 _L0x63   ILLe     3 0 1000xxxxx0xxxxx011111110|  Not in use (illegal as entry)
-    * 64 SLTIU_0  SLTIX_1  1 0 1000111111010xx000101011| SLTIU  Set less than immediate (unsigned)
-    * 65 WFI_4    WFI_5    3 5 10000010x1xxxxx011101111|        Prepare read PC
-    * 66 SW_1     SW_2     1 0 0011111010001xx011110010|        Write d to a+k until accepted
-    * 67 SW_E1SWE SW_E2    4 0 011100101011000010010011|        Store faulting address alignment to mtval
-    * 68 _L0x68   ILLe     3 0 1000xxxxx0xxxxx011111110|  Not in use (illegal as entry)
-    * 69 unx69             8 7 xxxxxxxxxxxxxxxxxxxxxxxx| 69: Not in use 
-    * 6a _L0x6a   ILLe     3 0 1000xxxxx0xxxxx011111110|  Not in use (illegal as entry)
-    * 6b SB_4     SB_5     b 0 1010110011001xx001111010|        Address back to Q. Prepare get item to write
-    * 6c SLTU_0   SLTX_1   3 0 10001110x1xxxxx000110001| SLTU   Set less than (unsigned)
-    * 6d unx6d             8 7 xxxxxxxxxxxxxxxxxxxxxxxx| 6d: Not in use 
-    * 6e unx6e             8 7 xxxxxxxxxxxxxxxxxxxxxxxx| 6e: Not in use 
-    * 6f MRET_6   MRET_7   1 4 1000xxxx1110011011001111|        ~302 + origImm + 1 for branch decision
-    * 70 LHU_2    LHU_3    d a 1000101011001xx110111010|        Repeat shr until shreg = 0 (0, 8 or 16 times)
-    * 71 aFaultc  aFault_1 4 0 011110101111000000011110|  err   LHU Load access fault. Faulting adr to mtval
-    * 72 LBU_3    ANDI_1   1 0 1000011011010xx000011010|        Invert q. Prepare read mask
-    * 73 BAERR_1  BAERR_2  4 0 0111110011001xx001110110|        Faultadr to mtval. Prepare get offset
-    * 74 BrOpFet  Fetch2   3 c 100010111111000011110100| NewOp2 Read until instruction latched
-    * 75 BAlignEr BAERR_1  3 0 10000010x0xxxxx001110011|  Err   Branch target instruction address misaligned
-    * 76 BAERR_2  BAERR_3  1 0 1000001011000xx001110111|        ~offset to Q. Prep read (origPC+offset)
-    * 77 BAERR_3  BAERR_4  4 4 010110101010011001111101|        origPC to mepc. Prep read 0
-    * 78 _L0x78   ILLe     3 0 1000xxxxx0xxxxx011111110|  Not in use (illegal as entry)
-    * 79 _L0x79   ILLe     3 0 1000xxxxx0xxxxx011111110|  Not in use (illegal as entry)
-    * 7a SB_5     SW_2     1 0 0010110010001xx011110010|        Write d to a+k until accepted
-    * 7b _L0x7b   JAL_1    1 3 100000101011000000110010| JAL    J-imm is in q. Branch on alignfault
-    * 7c CSRRC_0  CSRRW_1  4 0 010001101111000001001001| CSRRC  Decoded CSR adr in yy
-    * 7d BAERR_4  JAL_3    e 0 0110100110001xx000110100|        Store 0 to mcause. Prep get trap entry pont
-    * 7e NMI_1    NMI_2    4 0 0101xxxx11001xx010010000|        Store pc to mepc.
-    * 7f JALRE2   BAERR_4  4 0 0111101010001xx001111101|        mtval is target
-    * 80 LBU_0    LBU_1    0 0 100011011110000010000101| LBU    Load unsigned byte. Q = rdadr=RS1+Iimm.
-    * 81 JAERR_2  BAERR_4  4 0 0101101010001xx001111101|        Store PC to mepc
-    * 82 _L0x82   ILLe     3 0 1000xxxxx0xxxxx011111110|  Not in use (illegal as entry)
-    * 83 _L0x83   ILLe     3 0 1000xxxxx0xxxxx011111110|  Not in use (illegal as entry)
-    * 84 XORI_0   XORI_1   1 0 1000111111010xx000100001| XORI   Xor immediate. Q=~Iimm
-    * 85 LBU_1    LBU_2    1 1 1000101111001xx111110000|        Read until q=mem[(rs1+ofs) & ~3u]
-    * 86 JAL_2    JAL_25   4 4 000000100010011010011110|        Return address to TRG
-    * 87 JALRE1   JALRE2   4 0 0101110010001xx001111111|  err   Store pc to mepc
-    * 88 _L0x88   ILLe     3 0 1000xxxxx0xxxxx011111110|  Not in use (illegal as entry)
-    * 89 unx89             8 7 xxxxxxxxxxxxxxxxxxxxxxxx| 89: Not in use 
-    * 8a _L0x8a   ILLe     3 0 1000xxxxx0xxxxx011111110|  Not in use (illegal as entry)
-    * 8b LB_6     StdIncPc 4 4 000000101110011011100110|        WTRG=(D^0x80)+0xFFFFFF7F+1=(D^0x80)-0x80
-    * 8c XOR_0    XOR_1    3 0 10001111x1xxxxx000101001| XOR    xor
-    * 8d unx8d             8 7 xxxxxxxxxxxxxxxxxxxxxxxx| 8d: Not in use 
-    * 8e _LCSRRS_1 ILLe     3 0 1000xxxxx0xxxxx011111110| Illegal instruction seen
-    * 8f ILL_3    ILL_4    1 4 100010101110011010101001|        Q = 1
-    * 90 NMI_2    JAL_3    e 0 011101001111000000110100|        mtval = 0.
-    * 91 LDAF_2   LDAF_3   e 4 011000100010011010010010|        Store 4 to mcause
-    * 92 LDAF_3   JAL_3    4 0 0101100110001xx000110100|        PC to mepc
-    * 93 SW_E2    SW_E3    4 0 0101101111001xx010010101|        Store address that faulted
-    * 94 SW_E4    JAL_3    e 0 011010011010100000110100|        Store 6 to mcause
-    * 95 SW_E3    SW_E4    1 4 100010110110011010010100|        Q = 3
-    * 96 SH_1     SH_2     9 7 0100101111001xx010111011|        Write d to Q and yy (for sh 0). Prep shift
-    * 97 SW_E1SWH SW_E2    4 0 011100101011000010010011|        Store faulting address alignment to mtval
-    * 98 BLT      condb_2  4 0 010011101111000000010011| BLT    Conditional Branch. Offset to Ryy
-    * 99 _L0x99   ILLe     3 0 1000xxxxx0xxxxx011111110|  Not in use (illegal as entry)
-    * 9a ECALL_6  JAL_3    e 0 011010010010000000110100|        mcause = 11
-    * 9b SH_4     SH_5     b 0 1001110011001xx010011111|        Address back to Q. Prepare get item to write
-    * 9c _L0x9c   ILLe     3 0 1000xxxxx0xxxxx011111110|  Not in use (illegal as entry)
-    * 9d unx9d             8 7 xxxxxxxxxxxxxxxxxxxxxxxx| 9d: Not in use 
-    * 9e JAL_25   JAL_3    3 0 0100110010001xx000110100|        Instr. adr. to jj in case of access error
-    * 9f SH_5     SW_2     1 0 0001110010001xx011110010|        Write d to a+k until accepted
-    * a0 LHU_0    LHU_1    7 2 010011011110000001011110| LHU    Load unsigned hword. Q = rdadr=RS1+Iimm
-    * a1 ECALL_4  ECALL_5  1 4 100010100110011010110110|        Q = 4
-    * a2 _L0xa2   ILLe     3 0 1000xxxxx0xxxxx011111110|  Not in use (illegal as entry)
-    * a3 _L0xa3   ILLe     3 0 1000xxxxx0xxxxx011111110|  Not in use (illegal as entry)
-    * a4 SRxI_0   SRxI_1   8 7 100011111011000000111010| SRxI   Shift Right immediate (both logic/arith here)
-    * a5 MRET_3   MRET_4   1 4 100001101110011010101111|        0x102 + 0xff + 1 = 0x202
-    * a6 ECAL_RET ECALL_1  1 3 100010111011000011010000| ECALL/(U/S/M)RET Select ECALL or (U/S/M)RET
-    * a7 EBRKWFI1 EBRKWFI2 1 0 1000xxxx1110000001100001| EBREAK/WFI1 Prepare select EBREAK or WFI
-    * a8 _L0xa8   ILLe     3 0 1000xxxxx0xxxxx011111110|  Not in use (illegal as entry)
-    * a9 ILL_4    JAL_3    e 4 011010011010011000110100|        Store 2 to mcause
-    * aa _L0xaa   ILLe     3 0 1000xxxxx0xxxxx011111110|  Not in use (illegal as entry)
-    * ab EBREAK_2 ECALL_6  4 0 0101101011001xx010011010|        pc to mepc
-    * ac _L0xac   SRx_1    3 0 10001110x0xxxxx000111111| SRx    Shift Right (both SRL and SRA)
-    * ad unxad             8 7 xxxxxxxxxxxxxxxxxxxxxxxx| ad: Not in use 
-    * ae _L0xae   SRx_1    3 0 10001110x0xxxxx000111111| SRx    Shift Right (both SRL and SRA)
-    * af MRET_4   MRET_5   1 4 1000xxxx1110011011000101|        0x202 + 0xff + 1 = 0x302
-    * b0 aF_SW_3  LDAF_3   e 0 011000100010000010010010|        Store 7 to mcause
-    * b1 CSRRW_3  CSRRW_4  1 4 100010100110011010110010|        Prep emulation entrypt 0x108, here Q to 0x104
-    * b2 CSRRW_4  Fetch    6 6 010011010010011011011110|        IncPC, OpFetch, but force +4
-    * b3 unxb3             8 7 xxxxxxxxxxxxxxxxxxxxxxxx| b3: Not in use 
-    * b4 eFetch3           1 4 010111111110011000000000|  Fr10  Update minstret, Q=immediate. Use dinx
-    * b5 SH_3     SH_4     3 0 100000001111000010011011|        Prepare get back address to use 
-    * b6 ECALL_5  ECALL_6  1 4 100010100110011010011010|        Q = 8
-    * b7 IJ_3     IJ_4     1 0 100011000110000010111101|        Construct Q = 3
-    * b8 BGE      condb_2  4 0 010011101111000000010011| BGE    Conditional Branch. Offset to Ryy
-    * b9 _L0xb9   ILLe     3 0 1000xxxxx0xxxxx011111110|  Not in use (illegal as entry)
-    * ba LHU_3    ANDI_1   1 0 1000011111010xx000011010|        Invert q. Prepare read mask
-    * bb SH_2     SH_3     a 7 010010111110100010110101|        Repeat shl until shreg = 0 (0,8 or 24 times)
-    * bc CSRRWI_0 CSRRW_1  4 0 010001101111000001001001| CSRRWI Decoded CSR adr in yy
-    * bd IJ_4     Fetch    6 9 1000110110011xx011011110|        Mask and use as PC
-    * be IJ_1     IJ_2     1 9 1000101111001xx000011111|        Read until q=mem[(rs1+ofs)&~3u]
-    * bf IJT_1    IJT_2    1 9 1000101111001xx011000001|        Exit CSR, enter trap
-    * c0 _L0xc0   ILLe     3 0 1000xxxxx0xxxxx011111110|  Not in use (illegal as entry)
-    * c1 IJT_2    IJT_3    4 0 010010101111000011101001|        Read word is to be masked with ~3u
-    * c2 _L0xc2   ILLe     3 0 1000xxxxx0xxxxx011111110|  Not in use (illegal as entry)
-    * c3 _L0xc3   ILLe     3 0 1000xxxxx0xxxxx011111110|  Not in use (illegal as entry)
-    * c4 ORI_0    ORI_1    3 0 0100111111010xx011100001| ORI    Or immediate. jj=~Iimm
-    * c5 MRET_5   MRET_6   1 0 1000000011010xx001101111|        ~302
-    * c6 IJT_4    ILL_2    9 0 0101101011011xx001000111|        Mask and store to mepc and Q for read of instr
-    * c7 QINT_1   QINT_2   4 0 0101xxxx11001xx011001011|        Store pc to mepc.
-    * c8 _L0xc8   ILLe     3 0 1000xxxxx0xxxxx011111110|  Not in use (illegal as entry)
-    * c9 MRET_2   MRET_3   1 0 100001100110000010100101|        0xff+3 = 0x102
-    * ca _L0xca   ILLe     3 0 1000xxxxx0xxxxx011111110|  Not in use (illegal as entry)
-    * cb QINT_2   StdIncPc e 0 011101001111000011100110|        mtval = 0.
-    * cc OR_0     OR_1     3 0 10001111x1xxxxx000100110| OR     or
-    * cd unxcd             8 7 xxxxxxxxxxxxxxxxxxxxxxxx| cd: Not in use 
-    * ce _LCSRRCI_1 ILLe     3 0 1000xxxxx0xxxxx011111110| Illegal instruction seen
-    * cf MRET_7   MRET_8   3 5 10000110x1xxxxx001001111|        Prepare emulation entry point 0x104
-    * d0 ECALL_1  ECALL_2  1 4 100000101110011000110111| ECALL  Verify Imm==0x000
-    * d1 MRET_1   MRET_2   3 0 010001101111000011001001| MRET   First save Imm, start build constant for check
-    * d2 LB_2     LB_3     d a 1000101011001xx100000110|        Repeat shr until shreg == 0 (0,8,16,24 times)
-    * d3 aFaultd  aFault_1 4 0 011110101111000000011110|  err   LB Load access fault. Faulting adr to mtval
-    * d4 aFault_2 LDAF_3   e 4 011000101010011010010010|        Store 5 to mcause
-    * d5 eFetch2  eFetch3  3 d 011100011110000010110100|  Fr10  Update ttime
-    * d6 eILL0c   ILLe     3 0 1000xxxxx0xxxxx011111110| Illegal instruction seen
-    * d7 ECALL_3  ECALL_4  4 0 011110101111000010100001|        mtval = 0, now start the chore of 11 to mcause
-    * d8 BLTU     condb_2  4 0 010011101111000000010011| BLTU   Conditional Branch. Offset to Ryy
-    * d9 _L0xd9   ILLe     3 0 1000xxxxx0xxxxx011111110|  Not in use (illegal as entry)
-    * da LDAF_a   LDAF_2   3 0 10001010x1xxxxx010010001|        Extra cycle after error detected write mtval
-    * db jFault_1 LDAF_3   4 4 011000001010011010010010|        Store 1 to mcause
-    * dc CSRRSI_0 CSRRW_1  4 0 010001101111000001001001| CSRRSI Decoded CSR adr in yy
-    * dd aF_SW_1  aF_SW_2  4 0 011110101111000011100101|  err   SW Store access fault. Faulting adr to mtval
-    * de Fetch    Fetch2   3 e 011000111111000011110100|  Fr10  Read and latch instruction
-    * df eFetch   eFetch2  3 c 011010111111000011010101|  Fr10  rep Read until d=mem[(rs1+ofs) & ~3u]
-    * e0 _L0xe0   ILLe     3 0 1000xxxxx0xxxxx011111110|  Not in use (illegal as entry)
-    * e1 ORI_1    ORI_2    1 0 1000000011001xx000011101|        Q = RS1
-    * e2 _L0xe2   ILLe     3 0 1000xxxxx0xxxxx011111110|  Not in use (illegal as entry)
-    * e3 _L0xe3   ILLe     3 0 1000xxxxx0xxxxx011111110|  Not in use (illegal as entry)
-    * e4 ANDI_0   ANDI_1   1 0 1000111111010xx000011010| ANDI   And immediate. Q=~Iimm
-    * e5 aF_SW_2  aF_SW_3  1 4 100010100110011010110000|        Q = 4
-    * e6 StdIncPc Fetch    6 6 010011010010011011011110|  Fr10  IncPC, OpFetch
-    * e7 aFault   aFault_1 4 0 011110101111000000011110|  err   Load access fault. Faulting adr to mtval
-    * e8 _L0xe8   ILLe     3 0 1000xxxxx0xxxxx011111110|  Not in use (illegal as entry)
-    * e9 IJT_3    IJT_4    1 0 100011000110000011000110|        Construct Q = 3
-    * ea _L0xea   ILLe     3 0 1000xxxxx0xxxxx011111110|  Not in use (illegal as entry)
-    * eb LH_3     LH_4     1 0 1000011111010xx001010110|        q = ~mem[rs1+ofs]
-    * ec AND_0    AND_1    3 0 10001111x1xxxxx000010001| AND    And 
-    * ed unxed             8 7 xxxxxxxxxxxxxxxxxxxxxxxx| ed: Not in use
-    * ee eILL0a   ILLe     3 0 1000xxxxx0xxxxx011111110| Illegal instruction seen
-    * ef WFI_5    Fetch    6 6 011011010010011011011110|        IncPC, OpFetch
-    * f0 LBU_2    LBU_3    d a 1000101011001xx101110010|        Repeat shr until shreg = 0 (0, 8 or 16 times)
-    * f1 aFaulte  aFault_1 4 0 011110101111000000011110|  err   LBU Load access fault. Faulting adr to mtval
-    * f2 SW_2     StdIncPc 3 0 10000010x1xxxxx011100110|        Prepare read PC
-    * f3 aF_SW    aF_SW_1  1 0 1000xxxxx0xxxxx011011101|  err   SW/SH/SB access fault. Rest to set SEL_O=4'hf
-    * f4 Fetch2            1 d 011111111110000000000000|  Fr10  Update ttime. Update I. Q=immediate. Use dinx
-    * f5 jFault   jFault_1 4 0 011110101111000011011011|  err   Fetch access fault. Faulting adr to mtval
-    * f6 WFI_1    WFI_2    1 4 100000000110011011111010| WFI    Chk offset=0x105. Now=0xff. Prep 0xff+4 = 0x103
-    * f7 EBREAK_1 EBREAK_2 4 0 011100101111000010101011| EBREAK mepc = pc, store 0 to mtval
-    * f8 BGEU     condb_2  4 0 010011101111000000010011| BGEU   Conditional Branch. Offset to Ryy
-    * f9 _L0xf9   ILLe     3 0 1000xxxxx0xxxxx011111110|  Not in use (illegal as entry)
-    * fa WFI_2    WFI_3    1 4 100010101110011001000101|        Chk ofs. Now 0x103. Prep +1+~ofs, so ~ofs+0x104
-    * fb SB_3     SB_4     3 0 100000001111000001101011|        Prepare get back address to use 
-    * fc CSRRCI_0 CSRRW_1  4 0 010001101111000001001001| CSRRCI Decoded CSR adr in yy
-    * fd NMI_0    NMI_1    3 0 10000010x1xxxxx001111110| NMI    Get current PC
-    * fe ILLe     ILL_1    3 0 10000010x0xxxxx001000110| Illegal
-    * ff QINT_0   QINT_1   3 0 10000010x1xxxxx011000111| INT    Get current PC
+    * 00 LB_0     LB_1     0 0 000000001000110111100000| LB     Load byte. q = rdadr=RS1+0fs
+    * 01 LB_1     LB_2     1 1 000100011000101111001xx1|        Read until q=mem[rs1+ofs) & ~3u]
+    * 02 IJ_0     IJ_1     2 2 001000101000110111100000| IJ     Jump to mem[(rs1+ofs)&~3u]. inCSR=0
+    * 03 _L0x03   StdIncPc 3 0 0011000010000010x1xxxxx0| FENCE  Prepare read PC (FENCE/FENCE.I)
+    * 04 ADDI_0   StdIncPc 4 0 010000000000001011100000| ADDI   Add immediate. rd =RS1+Iimm (or joined)
+    * 05 _L0x05   ADDI_0   1 0 0001000010000010x0xxxxx0| AUIPC  q = imm20 (copy x/2)
+    * 06 LB_3     LB_4     1 0 000100001000011011010xx0|        q = ~mem[rs1+ofs]
+    * 07 LB_4     LB_5     1 0 000100001000010111011xx0|        q = (uint8_t) mem[rs1+Iimm]
+    * 08 _L0x08   SB_1     5 0 010100000100111011100000| SB     Store byte. wjj=wradr=RS1+Simm
+    * 09 LB_5     LB_6     1 0 000100001000010111000xx0|        q = D^0xffffffff^q = D^0x80
+    * 0a _L0x0a   SB_1     5 0 010100000100111011100000| SB     Store byte. wjj=wradr=RS1+Simm
+    * 0b JALR_2   JAL_2    4 3 010000110100001011011xx0|        Q = (RS1+imn) & 0xfffffffe
+    * 0c ADD_0    ADDI_0   1 0 000100001000111011001xx0| ADD    add     Addition Q = RS1
+    * 0d _L0x0d   StdIncPc 4 0 010000000000001011110000| LUI    q = imm20
+    * 0e SUB_0    SUB_1    3 0 0011000010001110x1xxxxx0| SUB    Subtraction
+    * 0f _L0x0f   StdIncPc 4 0 010000000000001011110000| LUI    q = imm20
+    * 10 SUB_1    LB_6     1 0 000100001000111111000xx0|        Q = ~RS2
+    * 11 AND_1    ANDI_1   1 0 000100001000111011000xx0|        RS1^0xffffffff to Q
+    * 12 _L0x12   ILLe     3 0 001100001000xxxxx0xxxxx0|  Not in use (illegal as entry)
+    * 13 condb_2  condb_3  1 0 000100001000111111000xx0|        ~RS2 in Q
+    * 14 condb_3  condb_4  1 4 000101001000001011100110|        Calculate RS1+~RS2+1
+    * 15 condb_4  condb_5  1 5 000101010100110011001xx0|        Branch on condition
+    * 16 condb_5  Fetch    6 6 011001100110110100110110|        Branch not taken.
+    * 17 condb_5t BrOpFet  6 3 011000110110110111100000|        Branch taken.
+    * 18 BEQ      condb_2  4 0 010000000100111011110000| BEQ    Conditional Branch. Offset to Ryy
+    * 19 JALR_0   JALR_1   4 0 010000000100101011100000| JALR   yy=RS1+imm
+    * 1a ANDI_1   StdIncPc 4 0 010000000000001011011xx0|        rd = Iimm & RS1
+    * 1b _L0x1b   JAL_1    1 3 000100111000001010110000| JAL    J-imm is in q. Branch on alignfault
+    * 1c ECAL_BRK ECAL_RET 1 2 000100101000101110110000| ECALL/EBREAK  Select ECALL/(U/S/M)RET or EBREAK/WFI
+    * 1d ORI_2    StdIncPc 4 0 010000000000001011111000|        rd = Iimm | RS1
+    * 1e aFault_1 aFault_2 1 4 000101001000101001100110|        Q = 4
+    * 1f IJ_2     IJ_3     4 0 010000000100101011110000|        Read word is to be masked with 2 lsb = 00
+    * 20 LH_0     LH_1     7 2 011100100100110111100000| LH     Load hword. Q = rdadr=RS1+Iimm.
+    * 21 XORI_1   StdIncPc 4 0 010000000000001011000xx0|        rd = Iimm ^ RS1
+    * 22 _L0x22   ILLe     3 0 001100001000xxxxx0xxxxx0|  Not in use (illegal as entry)
+    * 23 _L0x23   StdIncPc 3 0 0011000010000010x1xxxxx0| FENCE  Prepare read PC (FENCE/FENCE.I)
+    * 24 SLLI_0   SLLI_1   8 7 100001111000111110110000| SLLI   Shift left immediate.
+    * 25 _L0x25   ADDI_0   1 0 0001000010000010x0xxxxx0| AUIPC  q = imm20 (copy x/2)
+    * 26 OR_1     OR_2     3 0 001100000100111011000xx0|        RS1^0xffffffff to jj
+    * 27 OR_2     ORI_2    1 0 000100001000000011100000|        Q = rs2
+    * 28 _L0x28   SH_1     5 2 010100100100111011100000| SH     Store halfword. jjw=wradr=RS1+Simm
+    * 29 XOR_1    XORI_1   1 0 000100001000111011000xx0|        Q = RS1^0xFFFFFFFF
+    * 2a _L0x2a   SH_1     5 2 010100100100111011100000| SH     Store halfword. jjw=wradr=RS1+Simm
+    * 2b SLTIX_1  SLTIX_2  3 4 001101001000xxxx11100110|        RS1 - imm / RS1 - RS2
+    * 2c SLL_0    SLL_1    3 0 0011000010001110x0xxxxx0| SLL    Shift left
+    * 2d _L0x2d   StdIncPc 4 0 010000000000001011110000| LUI    q = imm20
+    * 2e unx2e             8 7 10000111xxxxxxxxxxxxxxxx| 2e: Not in use 
+    * 2f _L0x2f   StdIncPc 4 0 010000000000001011110000| LUI    q = imm20
+    * 30 SLTIX_2  StdIncPc 4 8 010010000000001011110010|        Registered ALU flag to rd
+    * 31 SLTX_1   SLTIX_1  1 0 000100001000111111000xx0|        ~rs2 to Q
+    * 32 JAL_1    JAL_2    4 0 010000000100001011100000|        Target adr to yy
+    * 33 JAERR_1  JAERR_2  4 0 010000000111001010100000|  Err   JAL target adr misaligned, store to mtval
+    * 34 JAL_3    Fetch    6 9 011010010110110110001xx0|        PC+imm/trap entrypt to PC. OpFetch
+    * 35 SLLI_1   SLLI_2   9 7 100101110000101111001xx0|        Register to shift to Q (and TRG for shift 0)
+    * 36 SLLI_2   _L0x03   a 7 101001110000101111101000|        Repeat Q = Q+Q until shregcnt == 0
+    * 37 ECALL_2  ECALL_3  4 5 010001010101xxxx11001xx0|        mepc = pc, prep store 0 to mtval
+    * 38 BNE      condb_2  4 0 010000000100111011110000| BNE    Conditional Branch. Offset to Ryy
+    * 39 _L0x39   ILLe     3 0 001100001000xxxxx0xxxxx0|  Not in use (illegal as entry)
+    * 3a SRxI_1   SRxI_2   9 a 100110100000101011001xx1|        Register to shift to Q
+    * 3b _L0x3b   JAL_1    1 3 000100111000001010110000| JAL    J-imm is in q. Branch on alignfault
+    * 3c CSRRW_0  CSRRW_1  4 0 010000000100011011110000| CSRRW  Decoded CSR adr in yy
+    * 3d SRxI_2   _L0x03   a a 101010100000101011001xx1|        Repeat Q >>= 1 until shregcnt == 0
+    * 3e SLL_1    SLLI_1   8 7 100001111000111110001xx0|        Shiftamount was in low 5 bits of RS2
+    * 3f SRx_1    SRxI_1   8 7 100001111000111110001xx0|        Shiftamount in low 5 bits of RS2
+    * 40 LW_0     LW_1     6 3 011000111000110111100000| LW     Load word. Q=yy=rdadr=RS1+Iimm
+    * 41 JALR_1   JALR_2   1 4 000101001000110011100110|        Q=1
+    * 42 _L0x42   ILLe     3 0 001100001000xxxxx0xxxxx0|  Not in use (illegal as entry)
+    * 43 _L0x43   ILLe     3 0 001100001000xxxxx0xxxxx0|  Not in use (illegal as entry)
+    * 44 SLTI_0   SLTIX_1  1 0 000100001000111111010xx0| SLTI   Set less than immediate (signed)
+    * 45 WFI_3    WFI_4    1 4 000101001000101011100110|        Chk ofs. Now 0x104. Prep +1, so ~ofs+0x105
+    * 46 ILL_1    ILL_2    4 0 010000000101101010001xx0|        Store PC to mepc
+    * 47 ILL_2    ILL_3    4 0 010000000111101011001xx0|        Store 0 to mtval
+    * 48 _L0x48   SW_1     b 3 101100111000111011100000| SW     Store word. Q=wradr=RS1+Simm
+    * 49 CSRRW_1  CSRRW_2  1 4 000101001000001011100110|        Construct PC storage adr
+    * 4a _L0x4a   SW_1     b 3 101100111000111011100000| SW     Store word. Q=wradr=RS1+Simm
+    * 4b CSRRW_2  CSRRW_3  c 0 110000000011101010001xx0|        Write PC to 0x100 start Prep emulation entrypt
+    * 4c SLT_0    SLTX_1   3 0 0011000010001110x1xxxxx0| SLT    Set less than (signed)
+    * 4d unx4d             8 7 10000111xxxxxxxxxxxxxxxx| 4d: Not in use 
+    * 4e eILL0b   ILLe     3 0 001100001000xxxxx0xxxxx0| Illegal instruction seen
+    * 4f MRET_8   StdIncPc 1 4 000101001000101011100110|        Prep +4
+    * 50 LW_1     StdIncPc 4 b 010010110000101111001xx0|        Read until d=mem[(rs1+ofs) & ~3u]
+    * 51 LDAF_LW  LDAF_a   9 0 100100000111101010110000|  err   LD AlignFault. Faulting adr to mtval
+    * 52 LH_1     LH_2     1 1 000100011000101111001xx1|        Read until q=mem[(rs1+ofs) & ~3u]
+    * 53 LDAF_LH  LDAF_a   9 0 100100000111101010110000|  err   LD AlignFault. Faulting adr to mtval
+    * 54 LH_2     LH_3     d a 110110101000101011001xx1|        Repeat shr until shreg = 0 (0, 8 or 16 times)
+    * 55 aFaultb  aFault_1 4 0 010000000111101011110000|  err   LH Load access fault. Faulting adr to mtval
+    * 56 LH_4     LH_5     1 0 000100001000100011011xx0|        q = (uint16_t) mem[rs1+Iimm]
+    * 57 LH_5     LB_6     1 0 000100001000100011000xx0|        q = D^0xffffffff^q = D ^ 0x00008000
+    * 58 _L0x58   ILLe     3 0 001100001000xxxxx0xxxxx0|  Not in use (illegal as entry)
+    * 59 _L0x59   ILLe     3 0 001100001000xxxxx0xxxxx0|  Not in use (illegal as entry)
+    * 5a SB_1     SB_2     9 7 100101110100101111001xx0|        Write d to Q and yy (for sh 0). Prep shift
+    * 5b _L0x5b   JAL_1    1 3 000100111000001010110000| JAL    J-imm is in q. Branch on alignfault
+    * 5c CSRRS_0  CSRRW_1  4 0 010000000100011011110000| CSRRS  Decoded CSR adr in yy
+    * 5d SB_2     SB_3     a 7 101001110100101111101000|        Repeat shl until shreg = 0 (0,8,16 or 24 times)
+    * 5e LHU_1    LHU_2    1 1 000100011000101111001xx1|        Read until q=mem[(rs1+ofs) & ~3u]
+    * 5f LDAF_LHU LDAF_a   9 0 100100000111101010110000|  err   LD AlignFault. Faulting adr to mtval
+    * 60 _L0x60   ILLe     3 0 001100001000xxxxx0xxxxx0|  Not in use (illegal as entry)
+    * 61 EBRKWFI2 EBREAK_1 3 5 001101010100011011010xx0| EBREAK/WFI2 Select EBREAK or WFI
+    * 62 _L0x62   ILLe     3 0 001100001000xxxxx0xxxxx0|  Not in use (illegal as entry)
+    * 63 _L0x63   ILLe     3 0 001100001000xxxxx0xxxxx0|  Not in use (illegal as entry)
+    * 64 SLTIU_0  SLTIX_1  1 0 000100001000111111010xx0| SLTIU  Set less than immediate (unsigned)
+    * 65 WFI_4    WFI_5    3 5 0011010110000010x1xxxxx0|        Prepare read PC
+    * 66 SW_1     SW_2     1 0 000100000011111010001xx0|        Write d to a+k until accepted
+    * 67 SW_E1SWE SW_E2    4 0 010000000111001010110000|        Store faulting address alignment to mtval
+    * 68 _L0x68   ILLe     3 0 001100001000xxxxx0xxxxx0|  Not in use (illegal as entry)
+    * 69 unx69             8 7 10000111xxxxxxxxxxxxxxxx| 69: Not in use 
+    * 6a _L0x6a   ILLe     3 0 001100001000xxxxx0xxxxx0|  Not in use (illegal as entry)
+    * 6b SB_4     SB_5     b 0 101100001010110011001xx0|        Address back to Q. Prepare get item to write
+    * 6c SLTU_0   SLTX_1   3 0 0011000010001110x1xxxxx0| SLTU   Set less than (unsigned)
+    * 6d unx6d             8 7 10000111xxxxxxxxxxxxxxxx| 6d: Not in use 
+    * 6e unx6e             8 7 10000111xxxxxxxxxxxxxxxx| 6e: Not in use 
+    * 6f MRET_6   MRET_7   1 4 000101001000xxxx11100110|        ~302 + origImm + 1 for branch decision
+    * 70 LHU_2    LHU_3    d a 110110101000101011001xx1|        Repeat shr until shreg = 0 (0, 8 or 16 times)
+    * 71 aFaultc  aFault_1 4 0 010000000111101011110000|  err   LHU Load access fault. Faulting adr to mtval
+    * 72 LBU_3    ANDI_1   1 0 000100001000011011010xx0|        Invert q. Prepare read mask
+    * 73 BAERR_1  BAERR_2  4 0 010000000111110011001xx0|        Faultadr to mtval. Prepare get offset
+    * 74 BrOpFet  Fetch2   3 c 001111001000101111110000| NewOp2 Read until instruction latched
+    * 75 BAlignEr BAERR_1  3 0 0011000010000010x0xxxxx0|  Err   Branch target instruction address misaligned
+    * 76 BAERR_2  BAERR_3  1 0 000100001000001011000xx0|        ~offset to Q. Prep read (origPC+offset)
+    * 77 BAERR_3  BAERR_4  4 4 010001000101101010100110|        origPC to mepc. Prep read 0
+    * 78 _L0x78   ILLe     3 0 001100001000xxxxx0xxxxx0|  Not in use (illegal as entry)
+    * 79 _L0x79   ILLe     3 0 001100001000xxxxx0xxxxx0|  Not in use (illegal as entry)
+    * 7a SB_5     SW_2     1 0 000100000010110010001xx0|        Write d to a+k until accepted
+    * 7b _L0x7b   JAL_1    1 3 000100111000001010110000| JAL    J-imm is in q. Branch on alignfault
+    * 7c CSRRC_0  CSRRW_1  4 0 010000000100011011110000| CSRRC  Decoded CSR adr in yy
+    * 7d BAERR_4  JAL_3    e 0 111000000110100110001xx0|        Store 0 to mcause. Prep get trap entry pont
+    * 7e NMI_1    NMI_2    4 0 010000000101xxxx11001xx0|        Store pc to mepc.
+    * 7f JALRE2   BAERR_4  4 0 010000000111101010001xx0|        mtval is target
+    * 80 LBU_0    LBU_1    0 0 000000001000110111100000| LBU    Load unsigned byte. Q = rdadr=RS1+Iimm.
+    * 81 JAERR_2  BAERR_4  4 0 010000000101101010001xx0|        Store PC to mepc
+    * 82 _L0x82   ILLe     3 0 001100001000xxxxx0xxxxx0|  Not in use (illegal as entry)
+    * 83 _L0x83   ILLe     3 0 001100001000xxxxx0xxxxx0|  Not in use (illegal as entry)
+    * 84 XORI_0   XORI_1   1 0 000100001000111111010xx0| XORI   Xor immediate. Q=~Iimm
+    * 85 LBU_1    LBU_2    1 1 000100011000101111001xx1|        Read until q=mem[(rs1+ofs) & ~3u]
+    * 86 JAL_2    JAL_25   4 4 010001000000001000100110|        Return address to TRG
+    * 87 JALRE1   JALRE2   4 0 010000000101110010001xx0|  err   Store pc to mepc
+    * 88 _L0x88   ILLe     3 0 001100001000xxxxx0xxxxx0|  Not in use (illegal as entry)
+    * 89 unx89             8 7 10000111xxxxxxxxxxxxxxxx| 89: Not in use 
+    * 8a _L0x8a   ILLe     3 0 001100001000xxxxx0xxxxx0|  Not in use (illegal as entry)
+    * 8b LB_6     StdIncPc 4 4 010001000000001011100110|        WTRG=(D^0x80)+0xFFFFFF7F+1=(D^0x80)-0x80
+    * 8c XOR_0    XOR_1    3 0 0011000010001111x1xxxxx0| XOR    xor
+    * 8d unx8d             8 7 10000111xxxxxxxxxxxxxxxx| 8d: Not in use 
+    * 8e _LCSRRS_1 ILLe     3 0 001100001000xxxxx0xxxxx0| Illegal instruction seen
+    * 8f ILL_3    ILL_4    1 4 000101001000101011100110|        Q = 1
+    * 90 NMI_2    JAL_3    e 0 111000000111010011110000|        mtval = 0.
+    * 91 LDAF_2   LDAF_3   e 4 111001000110001000100110|        Store 4 to mcause
+    * 92 LDAF_3   JAL_3    4 0 010000000101100110001xx0|        PC to mepc
+    * 93 SW_E2    SW_E3    4 0 010000000101101111001xx0|        Store address that faulted
+    * 94 SW_E4    JAL_3    e 0 111000000110100110101000|        Store 6 to mcause
+    * 95 SW_E3    SW_E4    1 4 000101001000101101100110|        Q = 3
+    * 96 SH_1     SH_2     9 7 100101110100101111001xx0|        Write d to Q and yy (for sh 0). Prep shift
+    * 97 SW_E1SWH SW_E2    4 0 010000000111001010110000|        Store faulting address alignment to mtval
+    * 98 BLT      condb_2  4 0 010000000100111011110000| BLT    Conditional Branch. Offset to Ryy
+    * 99 _L0x99   ILLe     3 0 001100001000xxxxx0xxxxx0|  Not in use (illegal as entry)
+    * 9a ECALL_6  JAL_3    e 0 111000000110100100100000|        mcause = 11
+    * 9b SH_4     SH_5     b 0 101100001001110011001xx0|        Address back to Q. Prepare get item to write
+    * 9c _L0x9c   ILLe     3 0 001100001000xxxxx0xxxxx0|  Not in use (illegal as entry)
+    * 9d unx9d             8 7 10000111xxxxxxxxxxxxxxxx| 9d: Not in use 
+    * 9e JAL_25   JAL_3    3 0 001100000100110010001xx0|        Instr. adr. to jj in case of access error
+    * 9f SH_5     SW_2     1 0 000100000001110010001xx0|        Write d to a+k until accepted
+    * a0 LHU_0    LHU_1    7 2 011100100100110111100000| LHU    Load unsigned hword. Q = rdadr=RS1+Iimm
+    * a1 ECALL_4  ECALL_5  1 4 000101001000101001100110|        Q = 4
+    * a2 _L0xa2   ILLe     3 0 001100001000xxxxx0xxxxx0|  Not in use (illegal as entry)
+    * a3 _L0xa3   ILLe     3 0 001100001000xxxxx0xxxxx0|  Not in use (illegal as entry)
+    * a4 SRxI_0   SRxI_1   8 7 100001111000111110110000| SRxI   Shift Right immediate (both logic/arith here)
+    * a5 MRET_3   MRET_4   1 4 000101001000011011100110|        0x102 + 0xff + 1 = 0x202
+    * a6 ECAL_RET ECALL_1  1 3 000100111000101110110000| ECALL/(U/S/M)RET Select ECALL or (U/S/M)RET
+    * a7 EBRKWFI1 EBRKWFI2 1 0 000100001000xxxx11100000| EBREAK/WFI1 Prepare select EBREAK or WFI
+    * a8 _L0xa8   ILLe     3 0 001100001000xxxxx0xxxxx0|  Not in use (illegal as entry)
+    * a9 ILL_4    JAL_3    e 4 111001000110100110100110|        Store 2 to mcause
+    * aa _L0xaa   ILLe     3 0 001100001000xxxxx0xxxxx0|  Not in use (illegal as entry)
+    * ab EBREAK_2 ECALL_6  4 0 010000000101101011001xx0|        pc to mepc
+    * ac _L0xac   SRx_1    3 0 0011000010001110x0xxxxx0| SRx    Shift Right (both SRL and SRA)
+    * ad unxad             8 7 10000111xxxxxxxxxxxxxxxx| ad: Not in use 
+    * ae _L0xae   SRx_1    3 0 0011000010001110x0xxxxx0| SRx    Shift Right (both SRL and SRA)
+    * af MRET_4   MRET_5   1 4 000101001000xxxx11100110|        0x202 + 0xff + 1 = 0x302
+    * b0 aF_SW_3  LDAF_3   e 0 111000000110001000100000|        Store 7 to mcause
+    * b1 CSRRW_3  CSRRW_4  1 4 000101001000101001100110|        Prep emulation entrypt 0x108, here Q to 0x104
+    * b2 CSRRW_4  Fetch    6 6 011001100100110100100110|        IncPC, OpFetch, but force +4
+    * b3 unxb3             8 7 10000111xxxxxxxxxxxxxxxx| b3: Not in use 
+    * b4 eFetch3           1 4 000101000101111111100110|  Fr10  Update minstret, Q=immediate. Use dinx
+    * b5 SH_3     SH_4     3 0 001100001000000011110000|        Prepare get back address to use 
+    * b6 ECALL_5  ECALL_6  1 4 000101001000101001100110|        Q = 8
+    * b7 IJ_3     IJ_4     1 0 000100001000110001100000|        Construct Q = 3
+    * b8 BGE      condb_2  4 0 010000000100111011110000| BGE    Conditional Branch. Offset to Ryy
+    * b9 _L0xb9   ILLe     3 0 001100001000xxxxx0xxxxx0|  Not in use (illegal as entry)
+    * ba LHU_3    ANDI_1   1 0 000100001000011111010xx0|        Invert q. Prepare read mask
+    * bb SH_2     SH_3     a 7 101001110100101111101000|        Repeat shl until shreg = 0 (0,8 or 24 times)
+    * bc CSRRWI_0 CSRRW_1  4 0 010000000100011011110000| CSRRWI Decoded CSR adr in yy
+    * bd IJ_4     Fetch    6 9 011010011000110110011xx0|        Mask and use as PC
+    * be IJ_1     IJ_2     1 9 000110011000101111001xx0|        Read until q=mem[(rs1+ofs)&~3u]
+    * bf IJT_1    IJT_2    1 9 000110011000101111001xx0|        Exit CSR, enter trap
+    * c0 _L0xc0   ILLe     3 0 001100001000xxxxx0xxxxx0|  Not in use (illegal as entry)
+    * c1 IJT_2    IJT_3    4 0 010000000100101011110000|        Read word is to be masked with ~3u
+    * c2 _L0xc2   ILLe     3 0 001100001000xxxxx0xxxxx0|  Not in use (illegal as entry)
+    * c3 _L0xc3   ILLe     3 0 001100001000xxxxx0xxxxx0|  Not in use (illegal as entry)
+    * c4 ORI_0    ORI_1    3 0 001100000100111111010xx0| ORI    Or immediate. jj=~Iimm
+    * c5 MRET_5   MRET_6   1 0 000100001000000011010xx0|        ~302
+    * c6 IJT_4    ILL_2    9 0 100100000101101011011xx0|        Mask and store to mepc and Q for read of instr
+    * c7 QINT_1   QINT_2   4 0 010000000101xxxx11001xx0|        Store pc to mepc.
+    * c8 _L0xc8   ILLe     3 0 001100001000xxxxx0xxxxx0|  Not in use (illegal as entry)
+    * c9 MRET_2   MRET_3   1 0 000100001000011001100000|        0xff+3 = 0x102
+    * ca _L0xca   ILLe     3 0 001100001000xxxxx0xxxxx0|  Not in use (illegal as entry)
+    * cb QINT_2   StdIncPc e 0 111000000111010011110000|        mtval = 0.
+    * cc OR_0     OR_1     3 0 0011000010001111x1xxxxx0| OR     or
+    * cd unxcd             8 7 10000111xxxxxxxxxxxxxxxx| cd: Not in use 
+    * ce _LCSRRCI_1 ILLe     3 0 001100001000xxxxx0xxxxx0| Illegal instruction seen
+    * cf MRET_7   MRET_8   3 5 0011010110000110x1xxxxx0|        Prepare emulation entry point 0x104
+    * d0 ECALL_1  ECALL_2  1 4 000101001000001011100110| ECALL  Verify Imm==0x000
+    * d1 MRET_1   MRET_2   3 0 001100000100011011110000| MRET   First save Imm, start build constant for check
+    * d2 LB_2     LB_3     d a 110110101000101011001xx1|        Repeat shr until shreg == 0 (0,8,16,24 times)
+    * d3 aFaultd  aFault_1 4 0 010000000111101011110000|  err   LB Load access fault. Faulting adr to mtval
+    * d4 aFault_2 LDAF_3   e 4 111001000110001010100110|        Store 5 to mcause
+    * d5 eFetch2  eFetch3  3 d 001111010111000111100000|  Fr10  Update ttime
+    * d6 eILL0c   ILLe     3 0 001100001000xxxxx0xxxxx0| Illegal instruction seen
+    * d7 ECALL_3  ECALL_4  4 0 010000000111101011110000|        mtval = 0, now start the chore of 11 to mcause
+    * d8 BLTU     condb_2  4 0 010000000100111011110000| BLTU   Conditional Branch. Offset to Ryy
+    * d9 _L0xd9   ILLe     3 0 001100001000xxxxx0xxxxx0|  Not in use (illegal as entry)
+    * da LDAF_a   LDAF_2   3 0 0011000010001010x1xxxxx0|        Extra cycle after error detected write mtval
+    * db jFault_1 LDAF_3   4 4 010001000110000010100110|        Store 1 to mcause
+    * dc CSRRSI_0 CSRRW_1  4 0 010000000100011011110000| CSRRSI Decoded CSR adr in yy
+    * dd aF_SW_1  aF_SW_2  4 0 010000000111101011110000|  err   SW Store access fault. Faulting adr to mtval
+    * de Fetch    Fetch2   3 e 001111100110001111110000|  Fr10  Read and latch instruction
+    * df eFetch   eFetch2  3 c 001111000110101111110000|  Fr10  rep Read until d=mem[(rs1+ofs) & ~3u]
+    * e0 _L0xe0   ILLe     3 0 001100001000xxxxx0xxxxx0|  Not in use (illegal as entry)
+    * e1 ORI_1    ORI_2    1 0 000100001000000011001xx0|        Q = RS1
+    * e2 _L0xe2   ILLe     3 0 001100001000xxxxx0xxxxx0|  Not in use (illegal as entry)
+    * e3 _L0xe3   ILLe     3 0 001100001000xxxxx0xxxxx0|  Not in use (illegal as entry)
+    * e4 ANDI_0   ANDI_1   1 0 000100001000111111010xx0| ANDI   And immediate. Q=~Iimm
+    * e5 aF_SW_2  aF_SW_3  1 4 000101001000101001100110|        Q = 4
+    * e6 StdIncPc Fetch    6 6 011001100100110100100110|  Fr10  IncPC, OpFetch
+    * e7 aFault   aFault_1 4 0 010000000111101011110000|  err   Load access fault. Faulting adr to mtval
+    * e8 _L0xe8   ILLe     3 0 001100001000xxxxx0xxxxx0|  Not in use (illegal as entry)
+    * e9 IJT_3    IJT_4    1 0 000100001000110001100000|        Construct Q = 3
+    * ea _L0xea   ILLe     3 0 001100001000xxxxx0xxxxx0|  Not in use (illegal as entry)
+    * eb LH_3     LH_4     1 0 000100001000011111010xx0|        q = ~mem[rs1+ofs]
+    * ec AND_0    AND_1    3 0 0011000010001111x1xxxxx0| AND    And 
+    * ed unxed             8 7 10000111xxxxxxxxxxxxxxxx| ed: Not in use
+    * ee eILL0a   ILLe     3 0 001100001000xxxxx0xxxxx0| Illegal instruction seen
+    * ef WFI_5    Fetch    6 6 011001100110110100100110|        IncPC, OpFetch
+    * f0 LBU_2    LBU_3    d a 110110101000101011001xx1|        Repeat shr until shreg = 0 (0, 8 or 16 times)
+    * f1 aFaulte  aFault_1 4 0 010000000111101011110000|  err   LBU Load access fault. Faulting adr to mtval
+    * f2 SW_2     StdIncPc 3 0 0011000010000010x1xxxxx0|        Prepare read PC
+    * f3 aF_SW    aF_SW_1  1 0 000100001000xxxxx0xxxxx0|  err   SW/SH/SB access fault. Rest to set SEL_O=4'hf
+    * f4 Fetch2            1 d 000111010111111111100000|  Fr10  Update ttime. Update I. Q=immediate. Use dinx
+    * f5 jFault   jFault_1 4 0 010000000111101011110000|  err   Fetch access fault. Faulting adr to mtval
+    * f6 WFI_1    WFI_2    1 4 000101001000000001100110| WFI    Chk offset=0x105. Now=0xff. Prep 0xff+4 = 0x103
+    * f7 EBREAK_1 EBREAK_2 4 0 010000000111001011110000| EBREAK mepc = pc, store 0 to mtval
+    * f8 BGEU     condb_2  4 0 010000000100111011110000| BGEU   Conditional Branch. Offset to Ryy
+    * f9 _L0xf9   ILLe     3 0 001100001000xxxxx0xxxxx0|  Not in use (illegal as entry)
+    * fa WFI_2    WFI_3    1 4 000101001000101011100110|        Chk ofs. Now 0x103. Prep +1+~ofs, so ~ofs+0x104
+    * fb SB_3     SB_4     3 0 001100001000000011110000|        Prepare get back address to use 
+    * fc CSRRCI_0 CSRRW_1  4 0 010000000100011011110000| CSRRCI Decoded CSR adr in yy
+    * fd NMI_0    NMI_1    3 0 0011000010000010x1xxxxx0| NMI    Get current PC
+    * fe ILLe     ILL_1    3 0 0011000010000010x0xxxxx0| Illegal
+    * ff QINT_0   QINT_1   3 0 0011000010000010x1xxxxx0| INT    Get current PC
     */
    localparam u0_0 = 256'hf0e64010f0e6c804d886e05ac08be05ad809d0070004e0e640e6e0bec9d2e001;
    localparam u0_1 = 256'hf0b766d4f8e6b0a6b032d8e6e041f013e07436dec816e615c01400fec01ac08b;
@@ -937,7 +937,7 @@ endmodule
  * 2019-2020. Copyright B. Nossum.
  * For licence, see LICENCE
  * -----------------------------------------------------------------------------ehdr
- * Automatically generated from ../code/ucode.h by midgetv_indirectEBR.c.
+ * Automatically generated from ../code/ucode.h by ../util/midgetv_indirectEBR.c.
  * Do not edit.
  * Optiones for this variant:
  *   No RVC
@@ -997,262 +997,262 @@ module v3_m_2ebr
    /*
     * inx         next     indirect index 0
     * || ucode    ucode    | direct representation
-    * 00 LB_0     LB_1     0 0110000001101011110000000001| LB     Load byte. q = rdadr=RS1+0fs
-    * 01 LB_1     LB_2     1 0010000001011111100111010010|        Read until q=mem[rs1+ofs) & ~3u]
-    * 02 IJ_0     IJ_1     2 0110100001101111110010111110| IJ     Jump to mem[(rs1+ofs)&~3u]. inCSR=0
-    * 03 _L0x03   StdIncPc 0 00100000000101x10xxx11100110| FENCE  Prepare read PC (FENCE/FENCE.I)
-    * 04 ADDI_0   StdIncPc 0 0000001000010111010011100110| ADDI   Add immediate. rd =RS1+Iimm (or joined)
-    * 05 _L0x05   ADDI_0   0 00100000000101x01xxx00000100| AUIPC  q = imm20 (copy x/2)
-    * 06 LB_3     LB_4     0 0010000000110111101000000111|        q = ~mem[rs1+ofs]
-    * 07 LB_4     LB_5     0 0010000000101111101100001001|        q = (uint8_t) mem[rs1+Iimm]
-    * 08 _L0x08   SB_1     0 0000010001110011110001011010| SB     Store byte. wjj=wradr=RS1+Simm
-    * 09 LB_5     LB_6     0 0010000000101111100010001011|        q = D^0xffffffff^q = D^0x80
-    * 0a _L0x0a   SB_1     0 0000010001110011110001011010| SB     Store byte. wjj=wradr=RS1+Simm
-    * 0b JALR_2   JAL_2    3 0000011000010111001110000110|        Q = (RS1+imn) & 0xfffffffe
-    * 0c ADD_0    ADDI_0   0 0010000001110111100100000100| ADD    add     Addition Q = RS1
-    * 0d _L0x0d   StdIncPc 0 0000001000010111011011100110| LUI    q = imm20
-    * 0e SUB_0    SUB_1    0 00100000011101x10xxx00010000| SUB    Subtraction
-    * 0f _L0x0f   StdIncPc 0 0000001000010111011011100110| LUI    q = imm20
-    * 10 SUB_1    LB_6     0 0010000001111111100010001011|        Q = ~RS2
-    * 11 AND_1    ANDI_1   0 0010000001110111100000011010|        RS1^0xffffffff to Q
-    * 12 _L0x12   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * 13 condb_2  condb_3  0 0010000001111111100000010100|        ~RS2 in Q
-    * 14 condb_3  condb_4  4 0010000000010111110000010101|        Calculate RS1+~RS2+1
-    * 15 condb_4  condb_5  5 0000010001100111100100010110|        Branch on condition
-    * 16 condb_5  Fetch    6 0100010101101100111011011110|        Branch not taken.
-    * 17 condb_5t BrOpFet  3 0100010101101111110001110100|        Branch taken.
-    * 18 BEQ      condb_2  0 0000011001110111011000010011| BEQ    Conditional Branch. Offset to Ryy
-    * 19 JALR_0   JALR_1   0 0000011001010111010001000001| JALR   yy=RS1+imm
-    * 1a ANDI_1   StdIncPc 0 0000001000010111001111100110|        rd = Iimm & RS1
-    * 1b _L0x1b   JAL_1    3 0010000000010110111000110010| JAL    J-imm is in q. Branch on alignfault
-    * 1c ECAL_BRK ECAL_RET 2 0010000001011110111010100110| ECALL/EBREAK  Select ECALL/(U/S/M)RET or EBREAK/WFI
-    * 1d ORI_2    StdIncPc 0 0000001000010111011111100110|        rd = Iimm | RS1
-    * 1e aFault_1 aFault_2 4 0010000001010101110011010100|        Q = 4
-    * 1f IJ_2     IJ_3     0 0000011001010111011010110111|        Read word is to be masked with 2 lsb = 00
-    * 20 LH_0     LH_1     2 0100011001101011110001010010| LH     Load hword. Q = rdadr=RS1+Iimm.
-    * 21 XORI_1   StdIncPc 0 0000001000010111000011100110|        rd = Iimm ^ RS1
-    * 22 _L0x22   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * 23 _L0x23   StdIncPc 0 00100000000101x10xxx11100110| FENCE  Prepare read PC (FENCE/FENCE.I)
-    * 24 SLLI_0   SLLI_1   7 0010000001111010x11000110101| SLLI   Shift left immediate.
-    * 25 _L0x25   ADDI_0   0 00100000000101x01xxx00000100| AUIPC  q = imm20 (copy x/2)
-    * 26 OR_1     OR_2     0 0000010001110111000000100111|        RS1^0xffffffff to jj
-    * 27 OR_2     ORI_2    0 0010000000000111110000011101|        Q = rs2
-    * 28 _L0x28   SH_1     2 0000010001110011110010010110| SH     Store halfword. jjw=wradr=RS1+Simm
-    * 29 XOR_1    XORI_1   0 0010000001110111100000100001|        Q = RS1^0xFFFFFFFF
-    * 2a _L0x2a   SH_1     2 0000010001110011110010010110| SH     Store halfword. jjw=wradr=RS1+Simm
-    * 2b SLTIX_1  SLTIX_2  4 001000000xxxx111010000110000|        RS1 - imm / RS1 - RS2
-    * 2c SLL_0    SLL_1    0 00100000011101x0xxxx00111110| SLL    Shift left
-    * 2d _L0x2d   StdIncPc 0 0000001000010111011011100110| LUI    q = imm20
-    * 2e unx2e             7 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| 2e: Not in use 
-    * 2f _L0x2f   StdIncPc 0 0000001000010111011011100110| LUI    q = imm20
-    * 30 SLTIX_2  StdIncPc 8 0000001000010111011011100110|        Registered ALU flag to rd
-    * 31 SLTX_1   SLTIX_1  0 0010000001111111100000101011|        ~rs2 to Q
-    * 32 JAL_1    JAL_2    0 0000011000010111010010000110|        Target adr to yy
-    * 33 JAERR_1  JAERR_2  0 0000011110010110x10010000001|  Err   JAL target adr misaligned, store to mtval
-    * 34 JAL_3    Fetch    9 0100010101101110100111011110|        PC+imm/trap entrypt to PC. OpFetch
-    * 35 SLLI_1   SLLI_2   7 0000001001011111100100110110|        Register to shift to Q (and TRG for shift 0)
-    * 36 SLLI_2   _L0x03   a 0000001001011111110100000011|        Repeat Q = Q+Q until shregcnt == 0
-    * 37 ECALL_2  ECALL_3  5 000001101xxxx111000111010111|        mepc = pc, prep store 0 to mtval
-    * 38 BNE      condb_2  0 0000011001110111011000010011| BNE    Conditional Branch. Offset to Ryy
-    * 39 _L0x39   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * 3a SRxI_1   SRxI_2   b 0000001001010111100100111101|        Register to shift to Q
-    * 3b _L0x3b   JAL_1    3 0010000000010110111000110010| JAL    J-imm is in q. Branch on alignfault
-    * 3c CSRRW_0  CSRRW_1  0 0000011000110111011001001001| CSRRW  Decoded CSR adr in yy
-    * 3d SRxI_2   _L0x03   c 0000001001010111100100000011|        Repeat Q >>= 1 until shregcnt == 0
-    * 3e SLL_1    SLLI_1   7 0010000001111010x00100110101|        Shiftamount was in low 5 bits of RS2
-    * 3f SRx_1    SRxI_1   7 0010000001111010x00100111010|        Shiftamount in low 5 bits of RS2
-    * 40 LW_0     LW_1     3 0110000001101111110001010000| LW     Load word. Q=yy=rdadr=RS1+Iimm
-    * 41 JALR_1   JALR_2   4 0010000001100111110000001011|        Q=1
-    * 42 _L0x42   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * 43 _L0x43   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * 44 SLTI_0   SLTIX_1  0 0010000001111111101000101011| SLTI   Set less than immediate (signed)
-    * 45 WFI_3    WFI_4    4 0010000001010111110001100101|        Chk ofs. Now 0x104. Prep +1, so ~ofs+0x105
-    * 46 ILL_1    ILL_2    0 0000011011010110x00101000111|        Store PC to mepc
-    * 47 ILL_2    ILL_3    0 0000011111010111000110001111|        Store 0 to mtval
-    * 48 _L0x48   SW_1     3 1110000001110111110001100110| SW     Store word. Q=wradr=RS1+Simm
-    * 49 CSRRW_1  CSRRW_2  4 0010000000010111110001001011|        Construct PC storage adr
-    * 4a _L0x4a   SW_1     3 1110000001110111110001100110| SW     Store word. Q=wradr=RS1+Simm
-    * 4b CSRRW_2  CSRRW_3  0 0001000111010110100110110001|        Write PC to 0x100 start Prep emulation entrypt
-    * 4c SLT_0    SLTX_1   0 00100000011101x10xxx00110001| SLT    Set less than (signed)
-    * 4d unx4d             7 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| 4d: Not in use 
-    * 4e eILL0b   ILLe     0 001000000xxxx1x0xxxx11111110| Illegal instruction seen
-    * 4f MRET_8   StdIncPc 4 0010000001010111110011100110|        Prep +4
-    * 50 LW_1     StdIncPc d 0000001001011111000111100110|        Read until d=mem[(rs1+ofs) & ~3u]
-    * 51 LDAF_LW  LDAF_a   0 0000011111010110111011011010|  err   LD AlignFault. Faulting adr to mtval
-    * 52 LH_1     LH_2     1 0010000001011111100101010100|        Read until q=mem[(rs1+ofs) & ~3u]
-    * 53 LDAF_LH  LDAF_a   0 0000011111010110111011011010|  err   LD AlignFault. Faulting adr to mtval
-    * 54 LH_2     LH_3     c 0010000001010111100111101011|        Repeat shr until shreg = 0 (0, 8 or 16 times)
-    * 55 aFaultb  aFault_1 0 0000011111010111011000011110|  err   LH Load access fault. Faulting adr to mtval
-    * 56 LH_4     LH_5     0 0010000001000111101101010111|        q = (uint16_t) mem[rs1+Iimm]
-    * 57 LH_5     LB_6     0 0010000001000111100010001011|        q = D^0xffffffff^q = D ^ 0x00008000
-    * 58 _L0x58   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * 59 _L0x59   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * 5a SB_1     SB_2     7 0000011001011111100101011101|        Write d to Q and yy (for sh 0). Prep shift
-    * 5b _L0x5b   JAL_1    3 0010000000010110111000110010| JAL    J-imm is in q. Branch on alignfault
-    * 5c CSRRS_0  CSRRW_1  0 0000011000110111011001001001| CSRRS  Decoded CSR adr in yy
-    * 5d SB_2     SB_3     a 0000011001011111110111111011|        Repeat shl until shreg = 0 (0,8,16 or 24 times)
-    * 5e LHU_1    LHU_2    1 0010000001011111100101110000|        Read until q=mem[(rs1+ofs) & ~3u]
-    * 5f LDAF_LHU LDAF_a   0 0000011111010110111011011010|  err   LD AlignFault. Faulting adr to mtval
-    * 60 _L0x60   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * 61 EBRKWFI2 EBREAK_1 5 0000010000110111001011110111| EBREAK/WFI2 Select EBREAK or WFI
-    * 62 _L0x62   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * 63 _L0x63   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * 64 SLTIU_0  SLTIX_1  0 0010000001111111101000101011| SLTIU  Set less than immediate (unsigned)
-    * 65 WFI_4    WFI_5    5 00100000000101x10xxx11101111|        Prepare read PC
-    * 66 SW_1     SW_2     0 0000000111110110100111110010|        Write d to a+k until accepted
-    * 67 SW_E1SWE SW_E2    0 0000011110010110x11010010011|        Store faulting address alignment to mtval
-    * 68 _L0x68   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * 69 unx69             7 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| 69: Not in use 
-    * 6a _L0x6a   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * 6b SB_4     SB_5     0 1110000101100111100101111010|        Address back to Q. Prepare get item to write
-    * 6c SLTU_0   SLTX_1   0 00100000011101x10xxx00110001| SLTU   Set less than (unsigned)
-    * 6d unx6d             7 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| 6d: Not in use 
-    * 6e unx6e             7 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| 6e: Not in use 
-    * 6f MRET_6   MRET_7   4 001000000xxxx111110011001111|        ~302 + origImm + 1 for branch decision
-    * 70 LHU_2    LHU_3    c 0010000001010111100110111010|        Repeat shr until shreg = 0 (0, 8 or 16 times)
-    * 71 aFaultc  aFault_1 0 0000011111010111011000011110|  err   LHU Load access fault. Faulting adr to mtval
-    * 72 LBU_3    ANDI_1   0 0010000000110111101000011010|        Invert q. Prepare read mask
-    * 73 BAERR_1  BAERR_2  0 0000011111100111000101110110|        Faultadr to mtval. Prepare get offset
-    * 74 BrOpFet  Fetch2   e 0010000001011111011011110100| NewOp2 Read until instruction latched
-    * 75 BAlignEr BAERR_1  0 00100000000101x0xxxx01110011|  Err   Branch target instruction address misaligned
-    * 76 BAERR_2  BAERR_3  0 0010000000010111100001110111|        ~offset to Q. Prep read (origPC+offset)
-    * 77 BAERR_3  BAERR_4  4 0000011011010110x10001111101|        origPC to mepc. Prep read 0
-    * 78 _L0x78   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * 79 _L0x79   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * 7a SB_5     SW_2     0 0000000101100110100111110010|        Write d to a+k until accepted
-    * 7b _L0x7b   JAL_1    3 0010000000010110111000110010| JAL    J-imm is in q. Branch on alignfault
-    * 7c CSRRC_0  CSRRW_1  0 0000011000110111011001001001| CSRRC  Decoded CSR adr in yy
-    * 7d BAERR_4  JAL_3    0 0001111101001110x00100110100|        Store 0 to mcause. Prep get trap entry pont
-    * 7e NMI_1    NMI_2    0 000001101xxxx111000110010000|        Store pc to mepc.
-    * 7f JALRE2   BAERR_4  0 0000011111010110x00101111101|        mtval is target
-    * 80 LBU_0    LBU_1    0 0110000001101011110010000101| LBU    Load unsigned byte. Q = rdadr=RS1+Iimm.
-    * 81 JAERR_2  BAERR_4  0 0000011011010110x00101111101|        Store PC to mepc
-    * 82 _L0x82   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * 83 _L0x83   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * 84 XORI_0   XORI_1   0 0010000001111111101000100001| XORI   Xor immediate. Q=~Iimm
-    * 85 LBU_1    LBU_2    1 0010000001011111100111110000|        Read until q=mem[(rs1+ofs) & ~3u]
-    * 86 JAL_2    JAL_25   4 0000001000010100x10010011110|        Return address to TRG
-    * 87 JALRE1   JALRE2   0 0000011011100110x00101111111|  err   Store pc to mepc
-    * 88 _L0x88   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * 89 unx89             7 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| 89: Not in use 
-    * 8a _L0x8a   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * 8b LB_6     StdIncPc 4 0000001000010111010011100110|        WTRG=(D^0x80)+0xFFFFFF7F+1=(D^0x80)-0x80
-    * 8c XOR_0    XOR_1    0 00100000011111x10xxx00101001| XOR    xor
-    * 8d unx8d             7 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| 8d: Not in use 
-    * 8e _LCSRRS_1 ILLe     0 001000000xxxx1x0xxxx11111110| Illegal instruction seen
-    * 8f ILL_3    ILL_4    4 0010000001010111110010101001|        Q = 1
-    * 90 NMI_2    JAL_3    0 0001111110100111011000110100|        mtval = 0.
-    * 91 LDAF_2   LDAF_3   4 0001111100010100x10010010010|        Store 4 to mcause
-    * 92 LDAF_3   JAL_3    0 0000011011001110x00100110100|        PC to mepc
-    * 93 SW_E2    SW_E3    0 0000011011011111000110010101|        Store address that faulted
-    * 94 SW_E4    JAL_3    0 0001111101001110x10100110100|        Store 6 to mcause
-    * 95 SW_E3    SW_E4    4 0010000001011101110010010100|        Q = 3
-    * 96 SH_1     SH_2     7 0000011001011111100110111011|        Write d to Q and yy (for sh 0). Prep shift
-    * 97 SW_E1SWH SW_E2    0 0000011110010110x11010010011|        Store faulting address alignment to mtval
-    * 98 BLT      condb_2  0 0000011001110111011000010011| BLT    Conditional Branch. Offset to Ryy
-    * 99 _L0x99   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * 9a ECALL_6  JAL_3    0 0001111101001100x10000110100|        mcause = 11
-    * 9b SH_4     SH_5     0 1110000011100111100110011111|        Address back to Q. Prepare get item to write
-    * 9c _L0x9c   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * 9d unx9d             7 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| 9d: Not in use 
-    * 9e JAL_25   JAL_3    0 0000010001100110x00100110100|        Instr. adr. to jj in case of access error
-    * 9f SH_5     SW_2     0 0000000011100110100111110010|        Write d to a+k until accepted
-    * a0 LHU_0    LHU_1    2 0100011001101011110001011110| LHU    Load unsigned hword. Q = rdadr=RS1+Iimm
-    * a1 ECALL_4  ECALL_5  4 0010000001010101110010110110|        Q = 4
-    * a2 _L0xa2   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * a3 _L0xa3   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * a4 SRxI_0   SRxI_1   7 0010000001111010x11000111010| SRxI   Shift Right immediate (both logic/arith here)
-    * a5 MRET_3   MRET_4   4 0010000000110111110010101111|        0x102 + 0xff + 1 = 0x202
-    * a6 ECAL_RET ECALL_1  3 0010000001011110111011010000| ECALL/(U/S/M)RET Select ECALL or (U/S/M)RET
-    * a7 EBRKWFI1 EBRKWFI2 0 001000000xxxx111110001100001| EBREAK/WFI1 Prepare select EBREAK or WFI
-    * a8 _L0xa8   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * a9 ILL_4    JAL_3    4 0001111101001110x10000110100|        Store 2 to mcause
-    * aa _L0xaa   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * ab EBREAK_2 ECALL_6  0 0000011011010111000110011010|        pc to mepc
-    * ac _L0xac   SRx_1    0 00100000011101x0xxxx00111111| SRx    Shift Right (both SRL and SRA)
-    * ad unxad             7 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| ad: Not in use 
-    * ae _L0xae   SRx_1    0 00100000011101x0xxxx00111111| SRx    Shift Right (both SRL and SRA)
-    * af MRET_4   MRET_5   4 001000000xxxx111110011000101|        0x202 + 0xff + 1 = 0x302
-    * b0 aF_SW_3  LDAF_3   0 0001111100010100x10010010010|        Store 7 to mcause
-    * b1 CSRRW_3  CSRRW_4  4 0010000001010101110010110010|        Prep emulation entrypt 0x108, here Q to 0x104
-    * b2 CSRRW_4  Fetch    6 0100010001101100110011011110|        IncPC, OpFetch, but force +4
-    * b3 unxb3             7 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| b3: Not in use 
-    * b4 eFetch3           4 0000010011111111110000000000|  Fr11  Write minstret. Update I. Q=immediate, use dinx
-    * b5 SH_3     SH_4     0 0010000000000111011010011011|        Prepare get back address to use 
-    * b6 ECALL_5  ECALL_6  4 0010000001010101110010011010|        Q = 8
-    * b7 IJ_3     IJ_4     0 0010000001100101110010111101|        Construct Q = 3
-    * b8 BGE      condb_2  0 0000011001110111011000010011| BGE    Conditional Branch. Offset to Ryy
-    * b9 _L0xb9   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * ba LHU_3    ANDI_1   0 0010000000111111101000011010|        Invert q. Prepare read mask
-    * bb SH_2     SH_3     a 0000011001011111110110110101|        Repeat shl until shreg = 0 (0,8 or 24 times)
-    * bc CSRRWI_0 CSRRW_1  0 0000011000110111011001001001| CSRRWI Decoded CSR adr in yy
-    * bd IJ_4     Fetch    9 0110000001101110101111011110|        Mask and use as PC
-    * be IJ_1     IJ_2     9 0010000001011111100100011111|        Read until q=mem[(rs1+ofs)&~3u]
-    * bf IJT_1    IJT_2    9 0010000001011111100111000001|        Exit CSR, enter trap
-    * c0 _L0xc0   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * c1 IJT_2    IJT_3    0 0000011001010111011011101001|        Read word is to be masked with ~3u
-    * c2 _L0xc2   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * c3 _L0xc3   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * c4 ORI_0    ORI_1    0 0000010001111111001011100001| ORI    Or immediate. jj=~Iimm
-    * c5 MRET_5   MRET_6   0 0010000000000111101001101111|        ~302
-    * c6 IJT_4    ILL_2    0 0000011011010111101101000111|        Mask and store to mepc and Q for read of instr
-    * c7 QINT_1   QINT_2   0 000001101xxxx111000111001011|        Store pc to mepc.
-    * c8 _L0xc8   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * c9 MRET_2   MRET_3   0 0010000000110101110010100101|        0xff+3 = 0x102
-    * ca _L0xca   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * cb QINT_2   StdIncPc 0 0001111110100111011011100110|        mtval = 0.
-    * cc OR_0     OR_1     0 00100000011111x10xxx00100110| OR     or
-    * cd unxcd             7 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| cd: Not in use 
-    * ce _LCSRRCI_1 ILLe     0 001000000xxxx1x0xxxx11111110| Illegal instruction seen
-    * cf MRET_7   MRET_8   5 00100000001101x10xxx01001111|        Prepare emulation entry point 0x104
-    * d0 ECALL_1  ECALL_2  4 0010000000010111110000110111| ECALL  Verify Imm==0x000
-    * d1 MRET_1   MRET_2   0 0000010000110111011011001001| MRET   First save Imm, start build constant for check
-    * d2 LB_2     LB_3     c 0010000001010111100100000110|        Repeat shr until shreg == 0 (0,8,16,24 times)
-    * d3 aFaultd  aFault_1 0 0000011111010111011000011110|  err   LB Load access fault. Faulting adr to mtval
-    * d4 aFault_2 LDAF_3   4 0001111100010110x10010010010|        Store 5 to mcause
-    * d5 unxd5             7 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| d5: Not in use
-    * d6 eILL0c   ILLe     0 001000000xxxx1x0xxxx11111110| Illegal instruction seen
-    * d7 ECALL_3  ECALL_4  0 0000011111010111011010100001|        mtval = 0, now start the chore of 11 to mcause
-    * d8 BLTU     condb_2  0 0000011001110111011000010011| BLTU   Conditional Branch. Offset to Ryy
-    * d9 _L0xd9   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * da LDAF_a   LDAF_2   0 00100000010101x10xxx10010001|        Extra cycle after error detected write mtval
-    * db jFault_1 LDAF_3   4 0000011100000110x10010010010|        Store 1 to mcause
-    * dc CSRRSI_0 CSRRW_1  0 0000011000110111011001001001| CSRRSI Decoded CSR adr in yy
-    * dd aF_SW_1  aF_SW_2  0 0000011111010111011011100101|  err   SW Store access fault. Faulting adr to mtval
-    * de Fetch    Fetch2   e 0000010101011111011011110100|  Fr11  Read and latch instruction
-    * df eFetch   Fetch2   e 0000010101011111011011110100|  Fr11  rep Read until d=mem[(rs1+ofs) & ~3u]
-    * e0 _L0xe0   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * e1 ORI_1    ORI_2    0 0010000000000111100100011101|        Q = RS1
-    * e2 _L0xe2   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * e3 _L0xe3   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * e4 ANDI_0   ANDI_1   0 0010000001111111101000011010| ANDI   And immediate. Q=~Iimm
-    * e5 aF_SW_2  aF_SW_3  4 0010000001010101110010110000|        Q = 4
-    * e6 StdIncPc Fetch    6 0100010001101100110011011110|  Fr11  IncPC, OpFetch
-    * e7 aFault   aFault_1 0 0000011111010111011000011110|  err   Load access fault. Faulting adr to mtval
-    * e8 _L0xe8   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * e9 IJT_3    IJT_4    0 0010000001100101110011000110|        Construct Q = 3
-    * ea _L0xea   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * eb LH_3     LH_4     0 0010000000111111101001010110|        q = ~mem[rs1+ofs]
-    * ec AND_0    AND_1    0 00100000011111x10xxx00010001| AND    And 
-    * ed unxed             7 xxxxxxxxxxxxxxxxxxxxxxxxxxxx| ed: Not in use
-    * ee eILL0a   ILLe     0 001000000xxxx1x0xxxx11111110| Illegal instruction seen
-    * ef WFI_5    Fetch    6 0100010101101100110011011110|        IncPC, OpFetch
-    * f0 LBU_2    LBU_3    c 0010000001010111100101110010|        Repeat shr until shreg = 0 (0, 8 or 16 times)
-    * f1 aFaulte  aFault_1 0 0000011111010111011000011110|  err   LBU Load access fault. Faulting adr to mtval
-    * f2 SW_2     StdIncPc 0 00100000000101x10xxx11100110|        Prepare read PC
-    * f3 aF_SW    aF_SW_1  0 001000000xxxx1x01xxx11011101|  err   SW/SH/SB access fault. Rest to set SEL_O=4'hf
-    * f4 Fetch2   eFetch3  f 0000010110001111010010110100|  Fr11  Update ttime. Update I. Q=immediate. Use dinx
-    * f5 jFault   jFault_1 0 0000011111010111011011011011|  err   Fetch access fault. Faulting adr to mtval
-    * f6 WFI_1    WFI_2    4 0010000000000101110011111010| WFI    Chk offset=0x105. Now=0xff. Prep 0xff+4 = 0x103
-    * f7 EBREAK_1 EBREAK_2 0 0000011110010111011010101011| EBREAK mepc = pc, store 0 to mtval
-    * f8 BGEU     condb_2  0 0000011001110111011000010011| BGEU   Conditional Branch. Offset to Ryy
-    * f9 _L0xf9   ILLe     0 001000000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * fa WFI_2    WFI_3    4 0010000001010111110001000101|        Chk ofs. Now 0x103. Prep +1+~ofs, so ~ofs+0x104
-    * fb SB_3     SB_4     0 0010000000000111011001101011|        Prepare get back address to use 
-    * fc CSRRCI_0 CSRRW_1  0 0000011000110111011001001001| CSRRCI Decoded CSR adr in yy
-    * fd NMI_0    NMI_1    0 00100000000101x10xxx01111110| NMI    Get current PC
-    * fe ILLe     ILL_1    0 00100000000101x0xxxx01000110| Illegal
-    * ff QINT_0   QINT_1   0 00100000000101x10xxx11000111| INT    Get current PC
+    * 00 LB_0     LB_1     0 0000011000000110101111000000| LB     Load byte. q = rdadr=RS1+0fs
+    * 01 LB_1     LB_2     1 0001001000000101111110011101|        Read until q=mem[rs1+ofs) & ~3u]
+    * 02 IJ_0     IJ_1     2 0010011010000110111111001011| IJ     Jump to mem[(rs1+ofs)&~3u]. inCSR=0
+    * 03 _L0x03   StdIncPc 0 000000100000000101x10xxx1110| FENCE  Prepare read PC (FENCE/FENCE.I)
+    * 04 ADDI_0   StdIncPc 0 0000000000100001011101001110| ADDI   Add immediate. rd =RS1+Iimm (or joined)
+    * 05 _L0x05   ADDI_0   0 000000100000000101x01xxx0000| AUIPC  q = imm20 (copy x/2)
+    * 06 LB_3     LB_4     0 0000001000000011011110100000|        q = ~mem[rs1+ofs]
+    * 07 LB_4     LB_5     0 0000001000000010111110110000|        q = (uint8_t) mem[rs1+Iimm]
+    * 08 _L0x08   SB_1     0 0000000001000111001111000101| SB     Store byte. wjj=wradr=RS1+Simm
+    * 09 LB_5     LB_6     0 0000001000000010111110001000|        q = D^0xffffffff^q = D^0x80
+    * 0a _L0x0a   SB_1     0 0000000001000111001111000101| SB     Store byte. wjj=wradr=RS1+Simm
+    * 0b JALR_2   JAL_2    3 0011000001100001011100111000|        Q = (RS1+imn) & 0xfffffffe
+    * 0c ADD_0    ADDI_0   0 0000001000000111011110010000| ADD    add     Addition Q = RS1
+    * 0d _L0x0d   StdIncPc 0 0000000000100001011101101110| LUI    q = imm20
+    * 0e SUB_0    SUB_1    0 000000100000011101x10xxx0001| SUB    Subtraction
+    * 0f _L0x0f   StdIncPc 0 0000000000100001011101101110| LUI    q = imm20
+    * 10 SUB_1    LB_6     0 0000001000000111111110001000|        Q = ~RS2
+    * 11 AND_1    ANDI_1   0 0000001000000111011110000001|        RS1^0xffffffff to Q
+    * 12 _L0x12   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * 13 condb_2  condb_3  0 0000001000000111111110000001|        ~RS2 in Q
+    * 14 condb_3  condb_4  4 0100001000000001011111000001|        Calculate RS1+~RS2+1
+    * 15 condb_4  condb_5  5 0101000001000110011110010001|        Branch on condition
+    * 16 condb_5  Fetch    6 0110010001010110110011101101|        Branch not taken.
+    * 17 condb_5t BrOpFet  3 0011010001010110111111000111|        Branch taken.
+    * 18 BEQ      condb_2  0 0000000001100111011101100001| BEQ    Conditional Branch. Offset to Ryy
+    * 19 JALR_0   JALR_1   0 0000000001100101011101000100| JALR   yy=RS1+imm
+    * 1a ANDI_1   StdIncPc 0 0000000000100001011100111110|        rd = Iimm & RS1
+    * 1b _L0x1b   JAL_1    3 0011001000000001011011100011| JAL    J-imm is in q. Branch on alignfault
+    * 1c ECAL_BRK ECAL_RET 2 0010001000000101111011101010| ECALL/EBREAK  Select ECALL/(U/S/M)RET or EBREAK/WFI
+    * 1d ORI_2    StdIncPc 0 0000000000100001011101111110|        rd = Iimm | RS1
+    * 1e aFault_1 aFault_2 4 0100001000000101010111001101|        Q = 4
+    * 1f IJ_2     IJ_3     0 0000000001100101011101101011|        Read word is to be masked with 2 lsb = 00
+    * 20 LH_0     LH_1     2 0010010001100110101111000101| LH     Load hword. Q = rdadr=RS1+Iimm.
+    * 21 XORI_1   StdIncPc 0 0000000000100001011100001110|        rd = Iimm ^ RS1
+    * 22 _L0x22   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * 23 _L0x23   StdIncPc 0 000000100000000101x10xxx1110| FENCE  Prepare read PC (FENCE/FENCE.I)
+    * 24 SLLI_0   SLLI_1   7 01110010000001111010x1100011| SLLI   Shift left immediate.
+    * 25 _L0x25   ADDI_0   0 000000100000000101x01xxx0000| AUIPC  q = imm20 (copy x/2)
+    * 26 OR_1     OR_2     0 0000000001000111011100000010|        RS1^0xffffffff to jj
+    * 27 OR_2     ORI_2    0 0000001000000000011111000001|        Q = rs2
+    * 28 _L0x28   SH_1     2 0010000001000111001111001001| SH     Store halfword. jjw=wradr=RS1+Simm
+    * 29 XOR_1    XORI_1   0 0000001000000111011110000010|        Q = RS1^0xFFFFFFFF
+    * 2a _L0x2a   SH_1     2 0010000001000111001111001001| SH     Store halfword. jjw=wradr=RS1+Simm
+    * 2b SLTIX_1  SLTIX_2  4 0100001000000xxxx11101000011|        RS1 - imm / RS1 - RS2
+    * 2c SLL_0    SLL_1    0 000000100000011101x0xxxx0011| SLL    Shift left
+    * 2d _L0x2d   StdIncPc 0 0000000000100001011101101110| LUI    q = imm20
+    * 2e unx2e             7 0111xxxxxxxxxxxxxxxxxxxxxxxx| 2e: Not in use 
+    * 2f _L0x2f   StdIncPc 0 0000000000100001011101101110| LUI    q = imm20
+    * 30 SLTIX_2  StdIncPc 8 1000000000100001011101101110|        Registered ALU flag to rd
+    * 31 SLTX_1   SLTIX_1  0 0000001000000111111110000010|        ~rs2 to Q
+    * 32 JAL_1    JAL_2    0 0000000001100001011101001000|        Target adr to yy
+    * 33 JAERR_1  JAERR_2  0 00000000011110010110x1001000|  Err   JAL target adr misaligned, store to mtval
+    * 34 JAL_3    Fetch    9 1001010001010110111010011101|        PC+imm/trap entrypt to PC. OpFetch
+    * 35 SLLI_1   SLLI_2   7 0111000000100101111110010011|        Register to shift to Q (and TRG for shift 0)
+    * 36 SLLI_2   _L0x03   a 1010000000100101111111010000|        Repeat Q = Q+Q until shregcnt == 0
+    * 37 ECALL_2  ECALL_3  5 0101000001101xxxx11100011101|        mepc = pc, prep store 0 to mtval
+    * 38 BNE      condb_2  0 0000000001100111011101100001| BNE    Conditional Branch. Offset to Ryy
+    * 39 _L0x39   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * 3a SRxI_1   SRxI_2   b 1011000000100101011110010011|        Register to shift to Q
+    * 3b _L0x3b   JAL_1    3 0011001000000001011011100011| JAL    J-imm is in q. Branch on alignfault
+    * 3c CSRRW_0  CSRRW_1  0 0000000001100011011101100100| CSRRW  Decoded CSR adr in yy
+    * 3d SRxI_2   _L0x03   c 1100000000100101011110010000|        Repeat Q >>= 1 until shregcnt == 0
+    * 3e SLL_1    SLLI_1   7 01110010000001111010x0010011|        Shiftamount was in low 5 bits of RS2
+    * 3f SRx_1    SRxI_1   7 01110010000001111010x0010011|        Shiftamount in low 5 bits of RS2
+    * 40 LW_0     LW_1     3 0011011000000110111111000101| LW     Load word. Q=yy=rdadr=RS1+Iimm
+    * 41 JALR_1   JALR_2   4 0100001000000110011111000000|        Q=1
+    * 42 _L0x42   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * 43 _L0x43   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * 44 SLTI_0   SLTIX_1  0 0000001000000111111110100010| SLTI   Set less than immediate (signed)
+    * 45 WFI_3    WFI_4    4 0100001000000101011111000110|        Chk ofs. Now 0x104. Prep +1, so ~ofs+0x105
+    * 46 ILL_1    ILL_2    0 00000000011011010110x0010100|        Store PC to mepc
+    * 47 ILL_2    ILL_3    0 0000000001111101011100011000|        Store 0 to mtval
+    * 48 _L0x48   SW_1     3 0011111000000111011111000110| SW     Store word. Q=wradr=RS1+Simm
+    * 49 CSRRW_1  CSRRW_2  4 0100001000000001011111000100|        Construct PC storage adr
+    * 4a _L0x4a   SW_1     3 0011111000000111011111000110| SW     Store word. Q=wradr=RS1+Simm
+    * 4b CSRRW_2  CSRRW_3  0 0000000100011101011010011011|        Write PC to 0x100 start Prep emulation entrypt
+    * 4c SLT_0    SLTX_1   0 000000100000011101x10xxx0011| SLT    Set less than (signed)
+    * 4d unx4d             7 0111xxxxxxxxxxxxxxxxxxxxxxxx| 4d: Not in use 
+    * 4e eILL0b   ILLe     0 0000001000000xxxx1x0xxxx1111| Illegal instruction seen
+    * 4f MRET_8   StdIncPc 4 0100001000000101011111001110|        Prep +4
+    * 50 LW_1     StdIncPc d 1101000000100101111100011110|        Read until d=mem[(rs1+ofs) & ~3u]
+    * 51 LDAF_LW  LDAF_a   0 0000000001111101011011101101|  err   LD AlignFault. Faulting adr to mtval
+    * 52 LH_1     LH_2     1 0001001000000101111110010101|        Read until q=mem[(rs1+ofs) & ~3u]
+    * 53 LDAF_LH  LDAF_a   0 0000000001111101011011101101|  err   LD AlignFault. Faulting adr to mtval
+    * 54 LH_2     LH_3     c 1100001000000101011110011110|        Repeat shr until shreg = 0 (0, 8 or 16 times)
+    * 55 aFaultb  aFault_1 0 0000000001111101011101100001|  err   LH Load access fault. Faulting adr to mtval
+    * 56 LH_4     LH_5     0 0000001000000100011110110101|        q = (uint16_t) mem[rs1+Iimm]
+    * 57 LH_5     LB_6     0 0000001000000100011110001000|        q = D^0xffffffff^q = D ^ 0x00008000
+    * 58 _L0x58   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * 59 _L0x59   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * 5a SB_1     SB_2     7 0111000001100101111110010101|        Write d to Q and yy (for sh 0). Prep shift
+    * 5b _L0x5b   JAL_1    3 0011001000000001011011100011| JAL    J-imm is in q. Branch on alignfault
+    * 5c CSRRS_0  CSRRW_1  0 0000000001100011011101100100| CSRRS  Decoded CSR adr in yy
+    * 5d SB_2     SB_3     a 1010000001100101111111011111|        Repeat shl until shreg = 0 (0,8,16 or 24 times)
+    * 5e LHU_1    LHU_2    1 0001001000000101111110010111|        Read until q=mem[(rs1+ofs) & ~3u]
+    * 5f LDAF_LHU LDAF_a   0 0000000001111101011011101101|  err   LD AlignFault. Faulting adr to mtval
+    * 60 _L0x60   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * 61 EBRKWFI2 EBREAK_1 5 0101000001000011011100101111| EBREAK/WFI2 Select EBREAK or WFI
+    * 62 _L0x62   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * 63 _L0x63   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * 64 SLTIU_0  SLTIX_1  0 0000001000000111111110100010| SLTIU  Set less than immediate (unsigned)
+    * 65 WFI_4    WFI_5    5 010100100000000101x10xxx1110|        Prepare read PC
+    * 66 SW_1     SW_2     0 0000000000011111011010011111|        Write d to a+k until accepted
+    * 67 SW_E1SWE SW_E2    0 00000000011110010110x1101001|        Store faulting address alignment to mtval
+    * 68 _L0x68   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * 69 unx69             7 0111xxxxxxxxxxxxxxxxxxxxxxxx| 69: Not in use 
+    * 6a _L0x6a   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * 6b SB_4     SB_5     0 0000111000010110011110010111|        Address back to Q. Prepare get item to write
+    * 6c SLTU_0   SLTX_1   0 000000100000011101x10xxx0011| SLTU   Set less than (unsigned)
+    * 6d unx6d             7 0111xxxxxxxxxxxxxxxxxxxxxxxx| 6d: Not in use 
+    * 6e unx6e             7 0111xxxxxxxxxxxxxxxxxxxxxxxx| 6e: Not in use 
+    * 6f MRET_6   MRET_7   4 0100001000000xxxx11111001100|        ~302 + origImm + 1 for branch decision
+    * 70 LHU_2    LHU_3    c 1100001000000101011110011011|        Repeat shr until shreg = 0 (0, 8 or 16 times)
+    * 71 aFaultc  aFault_1 0 0000000001111101011101100001|  err   LHU Load access fault. Faulting adr to mtval
+    * 72 LBU_3    ANDI_1   0 0000001000000011011110100001|        Invert q. Prepare read mask
+    * 73 BAERR_1  BAERR_2  0 0000000001111110011100010111|        Faultadr to mtval. Prepare get offset
+    * 74 BrOpFet  Fetch2   e 1110001000000101111101101111| NewOp2 Read until instruction latched
+    * 75 BAlignEr BAERR_1  0 000000100000000101x0xxxx0111|  Err   Branch target instruction address misaligned
+    * 76 BAERR_2  BAERR_3  0 0000001000000001011110000111|        ~offset to Q. Prep read (origPC+offset)
+    * 77 BAERR_3  BAERR_4  4 01000000011011010110x1000111|        origPC to mepc. Prep read 0
+    * 78 _L0x78   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * 79 _L0x79   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * 7a SB_5     SW_2     0 0000000000010110011010011111|        Write d to a+k until accepted
+    * 7b _L0x7b   JAL_1    3 0011001000000001011011100011| JAL    J-imm is in q. Branch on alignfault
+    * 7c CSRRC_0  CSRRW_1  0 0000000001100011011101100100| CSRRC  Decoded CSR adr in yy
+    * 7d BAERR_4  JAL_3    0 00000001111101001110x0010011|        Store 0 to mcause. Prep get trap entry pont
+    * 7e NMI_1    NMI_2    0 0000000001101xxxx11100011001|        Store pc to mepc.
+    * 7f JALRE2   BAERR_4  0 00000000011111010110x0010111|        mtval is target
+    * 80 LBU_0    LBU_1    0 0000011000000110101111001000| LBU    Load unsigned byte. Q = rdadr=RS1+Iimm.
+    * 81 JAERR_2  BAERR_4  0 00000000011011010110x0010111|        Store PC to mepc
+    * 82 _L0x82   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * 83 _L0x83   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * 84 XORI_0   XORI_1   0 0000001000000111111110100010| XORI   Xor immediate. Q=~Iimm
+    * 85 LBU_1    LBU_2    1 0001001000000101111110011111|        Read until q=mem[(rs1+ofs) & ~3u]
+    * 86 JAL_2    JAL_25   4 01000000001000010100x1001001|        Return address to TRG
+    * 87 JALRE1   JALRE2   0 00000000011011100110x0010111|  err   Store pc to mepc
+    * 88 _L0x88   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * 89 unx89             7 0111xxxxxxxxxxxxxxxxxxxxxxxx| 89: Not in use 
+    * 8a _L0x8a   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * 8b LB_6     StdIncPc 4 0100000000100001011101001110|        WTRG=(D^0x80)+0xFFFFFF7F+1=(D^0x80)-0x80
+    * 8c XOR_0    XOR_1    0 000000100000011111x10xxx0010| XOR    xor
+    * 8d unx8d             7 0111xxxxxxxxxxxxxxxxxxxxxxxx| 8d: Not in use 
+    * 8e _LCSRRS_1 ILLe     0 0000001000000xxxx1x0xxxx1111| Illegal instruction seen
+    * 8f ILL_3    ILL_4    4 0100001000000101011111001010|        Q = 1
+    * 90 NMI_2    JAL_3    0 0000000111111010011101100011|        mtval = 0.
+    * 91 LDAF_2   LDAF_3   4 01000001111100010100x1001001|        Store 4 to mcause
+    * 92 LDAF_3   JAL_3    0 00000000011011001110x0010011|        PC to mepc
+    * 93 SW_E2    SW_E3    0 0000000001101101111100011001|        Store address that faulted
+    * 94 SW_E4    JAL_3    0 00000001111101001110x1010011|        Store 6 to mcause
+    * 95 SW_E3    SW_E4    4 0100001000000101110111001001|        Q = 3
+    * 96 SH_1     SH_2     7 0111000001100101111110011011|        Write d to Q and yy (for sh 0). Prep shift
+    * 97 SW_E1SWH SW_E2    0 00000000011110010110x1101001|        Store faulting address alignment to mtval
+    * 98 BLT      condb_2  0 0000000001100111011101100001| BLT    Conditional Branch. Offset to Ryy
+    * 99 _L0x99   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * 9a ECALL_6  JAL_3    0 00000001111101001100x1000011|        mcause = 11
+    * 9b SH_4     SH_5     0 0000111000001110011110011001|        Address back to Q. Prepare get item to write
+    * 9c _L0x9c   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * 9d unx9d             7 0111xxxxxxxxxxxxxxxxxxxxxxxx| 9d: Not in use 
+    * 9e JAL_25   JAL_3    0 00000000010001100110x0010011|        Instr. adr. to jj in case of access error
+    * 9f SH_5     SW_2     0 0000000000001110011010011111|        Write d to a+k until accepted
+    * a0 LHU_0    LHU_1    2 0010010001100110101111000101| LHU    Load unsigned hword. Q = rdadr=RS1+Iimm
+    * a1 ECALL_4  ECALL_5  4 0100001000000101010111001011|        Q = 4
+    * a2 _L0xa2   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * a3 _L0xa3   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * a4 SRxI_0   SRxI_1   7 01110010000001111010x1100011| SRxI   Shift Right immediate (both logic/arith here)
+    * a5 MRET_3   MRET_4   4 0100001000000011011111001010|        0x102 + 0xff + 1 = 0x202
+    * a6 ECAL_RET ECALL_1  3 0011001000000101111011101101| ECALL/(U/S/M)RET Select ECALL or (U/S/M)RET
+    * a7 EBRKWFI1 EBRKWFI2 0 0000001000000xxxx11111000110| EBREAK/WFI1 Prepare select EBREAK or WFI
+    * a8 _L0xa8   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * a9 ILL_4    JAL_3    4 01000001111101001110x1000011|        Store 2 to mcause
+    * aa _L0xaa   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * ab EBREAK_2 ECALL_6  0 0000000001101101011100011001|        pc to mepc
+    * ac _L0xac   SRx_1    0 000000100000011101x0xxxx0011| SRx    Shift Right (both SRL and SRA)
+    * ad unxad             7 0111xxxxxxxxxxxxxxxxxxxxxxxx| ad: Not in use 
+    * ae _L0xae   SRx_1    0 000000100000011101x0xxxx0011| SRx    Shift Right (both SRL and SRA)
+    * af MRET_4   MRET_5   4 0100001000000xxxx11111001100|        0x202 + 0xff + 1 = 0x302
+    * b0 aF_SW_3  LDAF_3   0 00000001111100010100x1001001|        Store 7 to mcause
+    * b1 CSRRW_3  CSRRW_4  4 0100001000000101010111001011|        Prep emulation entrypt 0x108, here Q to 0x104
+    * b2 CSRRW_4  Fetch    6 0110010001000110110011001101|        IncPC, OpFetch, but force +4
+    * b3 unxb3             7 0111xxxxxxxxxxxxxxxxxxxxxxxx| b3: Not in use 
+    * b4 eFetch3           4 0100000001001111111111000000|  Fr11  Write minstret. Update I. Q=immediate, use dinx
+    * b5 SH_3     SH_4     0 0000001000000000011101101001|        Prepare get back address to use 
+    * b6 ECALL_5  ECALL_6  4 0100001000000101010111001001|        Q = 8
+    * b7 IJ_3     IJ_4     0 0000001000000110010111001011|        Construct Q = 3
+    * b8 BGE      condb_2  0 0000000001100111011101100001| BGE    Conditional Branch. Offset to Ryy
+    * b9 _L0xb9   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * ba LHU_3    ANDI_1   0 0000001000000011111110100001|        Invert q. Prepare read mask
+    * bb SH_2     SH_3     a 1010000001100101111111011011|        Repeat shl until shreg = 0 (0,8 or 24 times)
+    * bc CSRRWI_0 CSRRW_1  0 0000000001100011011101100100| CSRRWI Decoded CSR adr in yy
+    * bd IJ_4     Fetch    9 1001011000000110111010111101|        Mask and use as PC
+    * be IJ_1     IJ_2     9 1001001000000101111110010001|        Read until q=mem[(rs1+ofs)&~3u]
+    * bf IJT_1    IJT_2    9 1001001000000101111110011100|        Exit CSR, enter trap
+    * c0 _L0xc0   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * c1 IJT_2    IJT_3    0 0000000001100101011101101110|        Read word is to be masked with ~3u
+    * c2 _L0xc2   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * c3 _L0xc3   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * c4 ORI_0    ORI_1    0 0000000001000111111100101110| ORI    Or immediate. jj=~Iimm
+    * c5 MRET_5   MRET_6   0 0000001000000000011110100110|        ~302
+    * c6 IJT_4    ILL_2    0 0000000001101101011110110100|        Mask and store to mepc and Q for read of instr
+    * c7 QINT_1   QINT_2   0 0000000001101xxxx11100011100|        Store pc to mepc.
+    * c8 _L0xc8   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * c9 MRET_2   MRET_3   0 0000001000000011010111001010|        0xff+3 = 0x102
+    * ca _L0xca   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * cb QINT_2   StdIncPc 0 0000000111111010011101101110|        mtval = 0.
+    * cc OR_0     OR_1     0 000000100000011111x10xxx0010| OR     or
+    * cd unxcd             7 0111xxxxxxxxxxxxxxxxxxxxxxxx| cd: Not in use 
+    * ce _LCSRRCI_1 ILLe     0 0000001000000xxxx1x0xxxx1111| Illegal instruction seen
+    * cf MRET_7   MRET_8   5 010100100000001101x10xxx0100|        Prepare emulation entry point 0x104
+    * d0 ECALL_1  ECALL_2  4 0100001000000001011111000011| ECALL  Verify Imm==0x000
+    * d1 MRET_1   MRET_2   0 0000000001000011011101101100| MRET   First save Imm, start build constant for check
+    * d2 LB_2     LB_3     c 1100001000000101011110010000|        Repeat shr until shreg == 0 (0,8,16,24 times)
+    * d3 aFaultd  aFault_1 0 0000000001111101011101100001|  err   LB Load access fault. Faulting adr to mtval
+    * d4 aFault_2 LDAF_3   4 01000001111100010110x1001001|        Store 5 to mcause
+    * d5 unxd5             7 0111xxxxxxxxxxxxxxxxxxxxxxxx| d5: Not in use
+    * d6 eILL0c   ILLe     0 0000001000000xxxx1x0xxxx1111| Illegal instruction seen
+    * d7 ECALL_3  ECALL_4  0 0000000001111101011101101010|        mtval = 0, now start the chore of 11 to mcause
+    * d8 BLTU     condb_2  0 0000000001100111011101100001| BLTU   Conditional Branch. Offset to Ryy
+    * d9 _L0xd9   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * da LDAF_a   LDAF_2   0 000000100000010101x10xxx1001|        Extra cycle after error detected write mtval
+    * db jFault_1 LDAF_3   4 01000000011100000110x1001001|        Store 1 to mcause
+    * dc CSRRSI_0 CSRRW_1  0 0000000001100011011101100100| CSRRSI Decoded CSR adr in yy
+    * dd aF_SW_1  aF_SW_2  0 0000000001111101011101101110|  err   SW Store access fault. Faulting adr to mtval
+    * de Fetch    Fetch2   e 1110000001010101111101101111|  Fr11  Read and latch instruction
+    * df eFetch   Fetch2   e 1110000001010101111101101111|  Fr11  rep Read until d=mem[(rs1+ofs) & ~3u]
+    * e0 _L0xe0   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * e1 ORI_1    ORI_2    0 0000001000000000011110010001|        Q = RS1
+    * e2 _L0xe2   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * e3 _L0xe3   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * e4 ANDI_0   ANDI_1   0 0000001000000111111110100001| ANDI   And immediate. Q=~Iimm
+    * e5 aF_SW_2  aF_SW_3  4 0100001000000101010111001011|        Q = 4
+    * e6 StdIncPc Fetch    6 0110010001000110110011001101|  Fr11  IncPC, OpFetch
+    * e7 aFault   aFault_1 0 0000000001111101011101100001|  err   Load access fault. Faulting adr to mtval
+    * e8 _L0xe8   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * e9 IJT_3    IJT_4    0 0000001000000110010111001100|        Construct Q = 3
+    * ea _L0xea   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * eb LH_3     LH_4     0 0000001000000011111110100101|        q = ~mem[rs1+ofs]
+    * ec AND_0    AND_1    0 000000100000011111x10xxx0001| AND    And 
+    * ed unxed             7 0111xxxxxxxxxxxxxxxxxxxxxxxx| ed: Not in use
+    * ee eILL0a   ILLe     0 0000001000000xxxx1x0xxxx1111| Illegal instruction seen
+    * ef WFI_5    Fetch    6 0110010001010110110011001101|        IncPC, OpFetch
+    * f0 LBU_2    LBU_3    c 1100001000000101011110010111|        Repeat shr until shreg = 0 (0, 8 or 16 times)
+    * f1 aFaulte  aFault_1 0 0000000001111101011101100001|  err   LBU Load access fault. Faulting adr to mtval
+    * f2 SW_2     StdIncPc 0 000000100000000101x10xxx1110|        Prepare read PC
+    * f3 aF_SW    aF_SW_1  0 0000001000000xxxx1x01xxx1101|  err   SW/SH/SB access fault. Rest to set SEL_O=4'hf
+    * f4 Fetch2   eFetch3  f 1111000001011000111101001011|  Fr11  Update ttime. Update I. Q=immediate. Use dinx
+    * f5 jFault   jFault_1 0 0000000001111101011101101101|  err   Fetch access fault. Faulting adr to mtval
+    * f6 WFI_1    WFI_2    4 0100001000000000010111001111| WFI    Chk offset=0x105. Now=0xff. Prep 0xff+4 = 0x103
+    * f7 EBREAK_1 EBREAK_2 0 0000000001111001011101101010| EBREAK mepc = pc, store 0 to mtval
+    * f8 BGEU     condb_2  0 0000000001100111011101100001| BGEU   Conditional Branch. Offset to Ryy
+    * f9 _L0xf9   ILLe     0 0000001000000xxxx1x0xxxx1111|  Not in use (illegal as entry)
+    * fa WFI_2    WFI_3    4 0100001000000101011111000100|        Chk ofs. Now 0x103. Prep +1+~ofs, so ~ofs+0x104
+    * fb SB_3     SB_4     0 0000001000000000011101100110|        Prepare get back address to use 
+    * fc CSRRCI_0 CSRRW_1  0 0000000001100011011101100100| CSRRCI Decoded CSR adr in yy
+    * fd NMI_0    NMI_1    0 000000100000000101x10xxx0111| NMI    Get current PC
+    * fe ILLe     ILL_1    0 000000100000000101x0xxxx0100| Illegal
+    * ff QINT_0   QINT_1   0 000000100000000101x10xxx1100| INT    Get current PC
     */
    localparam u0_0 = 256'h76e6501076e6790473863c5af88b3c5afb097a07480474e650e6fcbef9d2bc01;
    localparam u0_1 = 256'h76b75cd477e6eea66e3273e674417613fc74cede79167c15f81440fe781af88b;
@@ -1389,7 +1389,7 @@ endmodule
  * 2019-2020. Copyright B. Nossum.
  * For licence, see LICENCE
  * -----------------------------------------------------------------------------ehdr
- * Automatically generated from ../code/ucode.h by midgetv_indirectEBR.c.
+ * Automatically generated from ../code/ucode.h by ../util/midgetv_indirectEBR.c.
  * Do not edit.
  * Optiones for this variant:
  *   No RVC
@@ -1484,262 +1484,262 @@ module v4_m_2ebr
     *                      indirect_index 1
     * inx         next     | indirect index 0
     * || ucode    ucode    | | direct representation
-    * 00 LB_0     LB_1     0 0 011000110111110000000001| LB     Load byte. q = rdadr=RS1+0fs
-    * 01 LB_1     LB_2     1 1 001000101111100111010010|        Read until q=mem[rs1+ofs) & ~3u]
-    * 02 IJ_0     IJ_1     2 2 011000110111110010111110| IJ     Jump to mem[(rs1+ofs)&~3u]. inCSR=0
-    * 03 _L0x03   StdIncPc 1 3 0010000010x10xxx11100110| FENCE  Prepare read PC (FENCE/FENCE.I)
-    * 04 ADDI_0   StdIncPc 1 3 010010001011010011100110| ADDI   Add immediate. rd =RS1+Iimm (or joined)
-    * 05 _L0x05   ADDI_0   1 3 0010000010x01xxx00000100| AUIPC  q = imm20 (copy x/2)
-    * 06 LB_3     LB_4     1 3 001000011011101000000111|        q = ~mem[rs1+ofs]
-    * 07 LB_4     LB_5     1 3 001000010111101100001001|        q = (uint8_t) mem[rs1+Iimm]
-    * 08 _L0x08   SB_1     1 0 010100111011110001011010| SB     Store byte. wjj=wradr=RS1+Simm
-    * 09 LB_5     LB_6     1 3 001000010111100010001011|        q = D^0xffffffff^q = D^0x80
-    * 0a _L0x0a   SB_1     1 0 010100111011110001011010| SB     Store byte. wjj=wradr=RS1+Simm
-    * 0b JALR_2   JAL_2    1 4 000110001011001110000110|        Q = (RS1+imn) & 0xfffffffe
-    * 0c ADD_0    ADDI_0   1 3 001000111011100100000100| ADD    add     Addition Q = RS1
-    * 0d MUL_0    MUL_1    1 3 1010001110x10xxx11100010| MUL    Store rs1 tp rM. Next read rs2. Q clear
-    * 0e SUB_0    SUB_1    1 3 0010001110x10xxx00010000| SUB    Subtraction
-    * 0f _L0x0f   StdIncPc 1 3 000010001011011011100110| LUI    q = imm20
-    * 10 SUB_1    LB_6     1 3 001000111111100010001011|        Q = ~RS2
-    * 11 AND_1    ANDI_1   1 3 001000111011100000011010|        RS1^0xffffffff to Q
-    * 12 _L0x12   ILLe     1 3 001000xxxxx0xxxx11111110|  Not in use (illegal as entry)
-    * 13 condb_2  condb_3  1 3 001000111111100000010100|        ~RS2 in Q
-    * 14 condb_3  condb_4  1 5 011000001011110000010101|        Calculate RS1+~RS2+1
-    * 15 condb_4  condb_5  1 6 000100110011100100010110|        Branch on condition
-    * 16 condb_5  Fetch    0 7 000101110100111011011110|        Branch not taken.
-    * 17 condb_5t BrOpFet  0 4 010101110111110001110100|        Branch taken.
-    * 18 BEQ      condb_2  1 3 000110111011011000010011| BEQ    Conditional Branch. Offset to Ryy
-    * 19 JALR_0   JALR_1   1 3 010110101011010001000001| JALR   yy=RS1+imm
-    * 1a ANDI_1   StdIncPc 1 3 000010001011001111100110|        rd = Iimm & RS1
-    * 1b _L0x1b   JAL_1    1 4 001000001010111000110010| JAL    J-imm is in q. Branch on alignfault
-    * 1c ECAL_BRK ECAL_RET 1 2 001000101110111010100110| ECALL/EBREAK  Select ECALL/(U/S/M)RET or EBREAK/WFI
-    * 1d ORI_2    StdIncPc 1 3 000010001011011111100110|        rd = Iimm | RS1
-    * 1e aFault_1 aFault_2 1 5 111000101001110011010100|        Q = 4
-    * 1f IJ_2     IJ_3     1 3 000110101011011010110111|        Read word is to be masked with 2 lsb = 00
-    * 20 LH_0     LH_1     0 8 010110110111110001010010| LH     Load hword. Q = rdadr=RS1+Iimm.
-    * 21 XORI_1   StdIncPc 1 3 000010001011000011100110|        rd = Iimm ^ RS1
-    * 22 MULHU_6  MULHU_7  1 9 001000101011110000111001|        Q <= rM[0] ? Q+Ryy : Q. Prepare last shr/sar
-    * 23 _L0x23   StdIncPc 1 3 0010000010x10xxx11100110| FENCE  Prepare read PC (FENCE/FENCE.I)
-    * 24 SLLI_0   SLLI_1   3 0 001000111110x11000110101| SLLI   Shift left immediate.
-    * 25 _L0x25   ADDI_0   1 3 0010000010x01xxx00000100| AUIPC  q = imm20 (copy x/2)
-    * 26 OR_1     OR_2     1 3 000100111011000000100111|        RS1^0xffffffff to jj
-    * 27 OR_2     ORI_2    1 3 011000000011110000011101|        Q = rs2
-    * 28 _L0x28   SH_1     1 8 010100111011110010010110| SH     Store halfword. jjw=wradr=RS1+Simm
-    * 29 XOR_1    XORI_1   1 3 001000111011100000100001|        Q = RS1^0xFFFFFFFF
-    * 2a _L0x2a   SH_1     1 8 010100111011110010010110| SH     Store halfword. jjw=wradr=RS1+Simm
-    * 2b SLTIX_1  SLTIX_2  1 5 011000xxxx11010000110000|        RS1 - imm / RS1 - RS2
-    * 2c SLL_0    SLL_1    1 3 0010001110x0xxxx00111110| SLL    Shift left
-    * 2d MULH_0   MULH_1   3 3 001000101011100101101010| MULH   Store rs1 to Q. Prep read 0, shcnt--
-    * 2e MULHU_1  MULHU_2  1 3 100100111111011001000010|        rM<=RS2,  Rjj<=Q=0. next read RS1. 
-    * 2f _L0x2f   StdIncPc 1 3 000010001011011011100110| LUI    q = imm20
-    * 30 SLTIX_2  StdIncPc 1 a 000010001011011011100110|        Registered ALU flag to rd
-    * 31 SLTX_1   SLTIX_1  1 3 001000111111100000101011|        ~rs2 to Q
-    * 32 JAL_1    JAL_2    1 3 010110001011010010000110|        Target adr to yy
-    * 33 JAERR_1  JAERR_2  4 3 010111001010x10010000001|  Err   JAL target adr misaligned, store to mtval
-    * 34 JAL_3    Fetch    0 b 000101110110100111011110|        PC+imm/trap entrypt to PC. OpFetch
-    * 35 SLLI_1   SLLI_2   3 3 000010101111100100110110|        Register to shift to Q (and TRG for shift 0)
-    * 36 SLLI_2   _L0x03   5 3 000010101111110100000011|        Repeat Q = Q+Q until shregcnt == 0
-    * 37 ECALL_2  ECALL_3  4 6 000110xxxx11000111010111|        mepc = pc, prep store 0 to mtval
-    * 38 BNE      condb_2  1 3 000110111011011000010011| BNE    Conditional Branch. Offset to Ryy
-    * 39 MULHU_7  StdIncPc 1 3 100010001011000111100110|        Last shift.
-    * 3a SRxI_1   SRxI_2   3 9 000010101011100100111101|        Register to shift to Q
-    * 3b _L0x3b   JAL_1    1 4 001000001010111000110010| JAL    J-imm is in q. Branch on alignfault
-    * 3c CSRRW_0  CSRRW_1  1 3 000110011011011001001001| CSRRW  Decoded CSR adr in yy
-    * 3d SRxI_2   _L0x03   5 9 000010101011100100000011|        Repeat Q >>= 1 until shregcnt == 0
-    * 3e SLL_1    SLLI_1   3 0 001000111110x00100110101|        Shiftamount was in low 5 bits of RS2
-    * 3f SRx_1    SRxI_1   3 0 001000111110x00100111010|        Shiftamount in low 5 bits of RS2
-    * 40 LW_0     LW_1     0 4 011000110111110001010000| LW     Load word. Q=yy=rdadr=RS1+Iimm
-    * 41 JALR_1   JALR_2   1 5 011000110011110000001011|        Q=1
-    * 42 MULHU_2  MULHU_3  3 9 001000101011110001100000|        Q <= rM[0] ? Q+rs1 : Q. Prepare shr/sar
-    * 43 MULHU_4  MULHU_5  1 3 001000000010100011101010|        Prepare read Rjj.
-    * 44 SLTI_0   SLTIX_1  1 3 001000111111101000101011| SLTI   Set less than immediate (signed)
-    * 45 WFI_3    WFI_4    1 5 011000101011110001100101|        Chk ofs. Now 0x104. Prep +1, so ~ofs+0x105
-    * 46 ILL_1    ILL_2    4 3 000110101010x00101000111|        Store PC to mepc
-    * 47 ILL_2    ILL_3    4 3 000111101011000110001111|        Store 0 to mtval
-    * 48 _L0x48   SW_1     6 4 011000111011110001100110| SW     Store word. Q=wradr=RS1+Simm
-    * 49 CSRRW_1  CSRRW_2  1 5 011000001011110001001011|        Construct PC storage adr
-    * 4a _L0x4a   SW_1     6 4 011000111011110001100110| SW     Store word. Q=wradr=RS1+Simm
-    * 4b CSRRW_2  CSRRW_3  7 3 000001101010100110110001|        Write PC to 0x100 start Prep emulation entrypt
-    * 4c SLT_0    SLTX_1   1 3 0010001110x10xxx00110001| SLT    Set less than (signed)
-    * 4d MULHSU_0 MULHU_1  3 3 000110111011000100101110| MULHSU Signed rs1 to Ryy, nxt rd rs2. Q=0, shcnt--
-    * 4e eILL0b   ILLe     1 3 001000xxxxx0xxxx11111110| Illegal instruction seen
-    * 4f MRET_8   StdIncPc 1 5 011000101011110011100110|        Prep +4
-    * 50 LW_1     StdIncPc 1 c 000010101111000111100110|        Read until d=mem[(rs1+ofs) & ~3u]
-    * 51 LDAF_LW  LDAF_a   4 3 000111101010111011011010|  err   LD AlignFault. Faulting adr to mtval
-    * 52 LH_1     LH_2     1 1 001000101111100101010100|        Read until q=mem[(rs1+ofs) & ~3u]
-    * 53 LDAF_LH  LDAF_a   4 3 000111101010111011011010|  err   LD AlignFault. Faulting adr to mtval
-    * 54 LH_2     LH_3     5 9 001000101011100111101011|        Repeat shr until shreg = 0 (0, 8 or 16 times)
-    * 55 aFaultb  aFault_1 4 3 000111101011011000011110|  err   LH Load access fault. Faulting adr to mtval
-    * 56 LH_4     LH_5     1 3 001000100011101101010111|        q = (uint16_t) mem[rs1+Iimm]
-    * 57 LH_5     LB_6     1 3 001000100011100010001011|        q = D^0xffffffff^q = D ^ 0x00008000
-    * 58 DIV_A    DIV_C    1 9 111000101111100101101110|        Transfer rM to rDee
-    * 59 DIV_B    DIV_10   1 3 000110111111011010011100|        REM = Q to yy
-    * 5a SB_1     SB_2     3 3 000110101111100101011101|        Write d to Q and yy (for sh 0). Prep shift
-    * 5b _L0x5b   JAL_1    1 4 001000001010111000110010| JAL    J-imm is in q. Branch on alignfault
-    * 5c CSRRS_0  CSRRW_1  1 3 000110011011011001001001| CSRRS  Decoded CSR adr in yy
-    * 5d SB_2     SB_3     5 3 000110101111110111111011|        Repeat shl until shreg = 0 (0,8,16 or 24 times)
-    * 5e LHU_1    LHU_2    1 1 001000101111100101110000|        Read until q=mem[(rs1+ofs) & ~3u]
-    * 5f LDAF_LHU LDAF_a   4 3 000111101010111011011010|  err   LD AlignFault. Faulting adr to mtval
-    * 60 MULHU_3  MULHU_2  1 3 101000111111100101000010|        Shift Q and rM. Prepare read rs1
-    * 61 EBRKWFI2 EBREAK_1 1 6 000100011011001011110111| EBREAK/WFI2 Select EBREAK or WFI
-    * 62 DIV_8    DIV_7    3 5 011000101111110011001000|        Conditionally subtract rs2. Update M[0]
-    * 63 DIV_9    DIV_A    8 5 011000101111110001011000|        Last Cond. -rs2. Upd M[0]. Branch on INSTR[13]
-    * 64 SLTIU_0  SLTIX_1  1 3 001000111111101000101011| SLTIU  Set less than immediate (unsigned)
-    * 65 WFI_4    WFI_5    1 6 0010000010x10xxx11101111|        Prepare read PC
-    * 66 SW_1     SW_2     4 3 000001111010100111110010|        Write d to a+k until accepted
-    * 67 SW_E1SWE SW_E2    4 3 000111001010x11010010011|        Store faulting address alignment to mtval
-    * 68 DIV_12   StdIncPc 1 3 000010001011000111100110|        RS2 > 0, RS1 >= 0, yy is true result
-    * 69 DIV_13   LB_6     1 3 001000101011100010001011|        RS2 > 0, RS1 < 0, change sign yy
-    * 6a MULH_1   MULH_2   1 3 000110101011000011111001|        Store ~rs1 to Ryy. Prep construct 1.
-    * 6b SB_4     SB_5     6 3 001001110011100101111010|        Address back to Q. Prepare get item to write
-    * 6c SLTU_0   SLTX_1   1 3 0010001110x10xxx00110001| SLTU   Set less than (unsigned)
-    * 6d MULHU_0  MULHU_1  3 3 000110111011000100101110| MULHU  Store rs1 to Ryy. Next read rs2. Q=0, shcnt--
-    * 6e DIV_C    DIV_e    1 3 000110111010100110111001|        rM to yy. Q=ffffffff
-    * 6f MRET_6   MRET_7   1 5 011000xxxx11110011001111|        ~302 + origImm + 1 for branch decision
-    * 70 LHU_2    LHU_3    5 9 001000101011100110111010|        Repeat shr until shreg = 0 (0, 8 or 16 times)
-    * 71 aFaultc  aFault_1 4 3 000111101011011000011110|  err   LHU Load access fault. Faulting adr to mtval
-    * 72 LBU_3    ANDI_1   1 3 001000011011101000011010|        Invert q. Prepare read mask
-    * 73 BAERR_1  BAERR_2  4 3 000111110011000101110110|        Faultadr to mtval. Prepare get offset
-    * 74 BrOpFet  Fetch2   1 d 001000101111011011110100| NewOp2 Read until instruction latched
-    * 75 BAlignEr BAERR_1  1 3 0010000010x0xxxx01110011|  Err   Branch target instruction address misaligned
-    * 76 BAERR_2  BAERR_3  1 3 001000001011100001110111|        ~offset to Q. Prep read (origPC+offset)
-    * 77 BAERR_3  BAERR_4  4 5 010110101010x10001111101|        origPC to mepc. Prep read 0
-    * 78 DIV_4    DIV_6    1 3 000110000011011010101010|        ~abs(divisor) to yy
-    * 79 DIV_5    DIV_3    1 5 111000101011110010101000|        Kluge to let add1 work in DIV instr
-    * 7a SB_5     SW_2     1 3 000001110010100111110010|        Write d to a+k until accepted
-    * 7b _L0x7b   JAL_1    1 4 001000001010111000110010| JAL    J-imm is in q. Branch on alignfault
-    * 7c CSRRC_0  CSRRW_1  1 3 000110011011011001001001| CSRRC  Decoded CSR adr in yy
-    * 7d BAERR_4  JAL_3    9 3 000111100110x00100110100|        Store 0 to mcause. Prep get trap entry pont
-    * 7e NMI_1    NMI_2    4 3 000110xxxx11000110010000|        Store pc to mepc.
-    * 7f JALRE2   BAERR_4  4 3 000111101010x00101111101|        mtval is target
-    * 80 LBU_0    LBU_1    0 0 011000110111110010000101| LBU    Load unsigned byte. Q = rdadr=RS1+Iimm.
-    * 81 JAERR_2  BAERR_4  4 3 000110101010x00101111101|        Store PC to mepc
-    * 82 DIV_1    DIV_3    1 3 000100111011000010101000|        jj=abs(RS1). Next handle divisor
-    * 83 DIV_2    DIV_1    1 3 011000101011110010000010|        Dividend negative, make RS1-1
-    * 84 XORI_0   XORI_1   1 3 001000111111101000100001| XORI   Xor immediate. Q=~Iimm
-    * 85 LBU_1    LBU_2    1 1 001000101111100111110000|        Read until q=mem[(rs1+ofs) & ~3u]
-    * 86 JAL_2    JAL_25   1 5 110010001000x10010011110|        Return address to TRG
-    * 87 JALRE1   JALRE2   4 3 000110110010x00101111111|  err   Store pc to mepc
-    * 88 DIV_E    DIV_10   8 3 1010001111x0xxxx10011100|        RS2 != 0. Check signs
-    * 89 DIV_F    StdIncPc 1 3 000010001011011011100110|        RS2 == 0, return 0xffffffff
-    * 8a DIVU_5   ANDI_1   1 9 1110001011x10xxx00011010|        Transfer rM to rDee
-    * 8b LB_6     StdIncPc 1 5 110010001011010011100110|        WTRG=(D^0x80)+0xFFFFFF7F+1=(D^0x80)-0x80
-    * 8c XOR_0    XOR_1    1 3 0010001111x10xxx00101001| XOR    xor
-    * 8d DIV_0    DIV_1    a 3 101000101111100110000010| DIV    Branch on sign dividend RS1
-    * 8e _LCSRRS_1 ILLe     1 3 001000xxxxx0xxxx11111110| Illegal instruction seen
-    * 8f ILL_3    ILL_4    1 5 001000101011110010101001|        Q = 1
-    * 90 NMI_2    JAL_3    b 3 000111010011011000110100|        mtval = 0.
-    * 91 LDAF_2   LDAF_3   9 5 110111001000x10010010010|        Store 4 to mcause
-    * 92 LDAF_3   JAL_3    4 3 000110100110x00100110100|        PC to mepc
-    * 93 SW_E2    SW_E3    4 3 000110101111000110010101|        Store address that faulted
-    * 94 SW_E4    JAL_3    9 3 000111100110x10100110100|        Store 6 to mcause
-    * 95 SW_E3    SW_E4    1 5 111000101101110010010100|        Q = 3
-    * 96 SH_1     SH_2     3 3 000110101111100110111011|        Write d to Q and yy (for sh 0). Prep shift
-    * 97 SW_E1SWH SW_E2    4 3 000111001010x11010010011|        Store faulting address alignment to mtval
-    * 98 BLT      condb_2  1 3 000110111011011000010011| BLT    Conditional Branch. Offset to Ryy
-    * 99 _L0x99   ILLe     1 3 001000xxxxx0xxxx11111110|  Not in use (illegal as entry)
-    * 9a ECALL_6  JAL_3    9 3 010111100100x10000110100|        mcause = 11
-    * 9b SH_4     SH_5     c 3 001000110011100110011111|        Address back to Q. Prepare get item to write
-    * 9c DIV_10   DIV_12   8 3 101000110011000101101000|        RS2 > 0. Branch on sign of RS1
-    * 9d DIV_11   DIV_14   8 3 101000110011000110100010|        RS2 < 0. Branch on sign of RS1
-    * 9e JAL_25   JAL_3    1 3 000100110010x00100110100|        Instr. adr. to jj in case of access error
-    * 9f SH_5     SW_2     4 3 000000110010100111110010|        Write d to a+k until accepted
-    * a0 LHU_0    LHU_1    0 8 010110110111110001011110| LHU    Load unsigned hword. Q = rdadr=RS1+Iimm
-    * a1 ECALL_4  ECALL_5  1 5 111000101001110010110110|        Q = 4
-    * a2 DIV_14   LB_6     1 3 001000101011100010001011|        RS2 < 0, RS1 >= 0, change sign yy
-    * a3 DIV_15   StdIncPc 1 3 000010001011000111100110|        RS2 < 0, RS1 < 0, yy is true result
-    * a4 SRxI_0   SRxI_1   3 0 001000111110x11000111010| SRxI   Shift Right immediate (both logic/arith here)
-    * a5 MRET_3   MRET_4   1 5 011000011011110010101111|        0x102 + 0xff + 1 = 0x202
-    * a6 ECAL_RET ECALL_1  1 4 001000101110111011010000| ECALL/(U/S/M)RET Select ECALL or (U/S/M)RET
-    * a7 EBRKWFI1 EBRKWFI2 1 3 011000xxxx11110001100001| EBREAK/WFI1 Prepare select EBREAK or WFI
-    * a8 DIV_3    DIV_4    8 3 101000101011100001111000|        Branch on sign divisor RS2
-    * a9 ILL_4    JAL_3    9 5 010111100110x10000110100|        Store 2 to mcause
-    * aa DIV_6    DIV_7    1 3 1010001011x10xxx11001000|        Write M. Prepare shift
-    * ab EBREAK_2 ECALL_6  4 3 000110101011000110011010|        pc to mepc
-    * ac _L0xac   SRx_1    1 3 0010001110x0xxxx00111111| SRx    Shift Right (both SRL and SRA)
-    * ad DIVU_0   DIVU_1   3 3 1010001110x10xxx11100000| DIVU   Store rs1 to rM. Q=0. Prepare invert rs2
-    * ae _L0xae   SRx_1    1 3 0010001110x0xxxx00111111| SRx    Shift Right (both SRL and SRA)
-    * af MRET_4   MRET_5   1 5 011000xxxx11110011000101|        0x202 + 0xff + 1 = 0x302
-    * b0 aF_SW_3  LDAF_3   9 3 010111001000x10010010010|        Store 7 to mcause
-    * b1 CSRRW_3  CSRRW_4  1 5 111000101001110010110010|        Prep emulation entrypt 0x108, here Q to 0x104
-    * b2 CSRRW_4  Fetch    0 7 110100110100110011011110|        IncPC, OpFetch, but force +4
-    * b3 unxb3             3 0 00xxxxxxxxxxxxxxxxxxxxxx| b3: Not in use 
-    * b4 i0reserv          3 0 00xxxxxxxxxxxxxxxxxxxxxx| Not in use, reserved to allow LASTINCH
-    * b5 SH_3     SH_4     1 3 001000000011011010011011|        Prepare get back address to use 
-    * b6 ECALL_5  ECALL_6  1 5 111000101001110010011010|        Q = 8
-    * b7 IJ_3     IJ_4     1 3 011000110001110010111101|        Construct Q = 3
-    * b8 BGE      condb_2  1 3 000110111011011000010011| BGE    Conditional Branch. Offset to Ryy
-    * b9 DIV_e    DIV_D    1 5 001000110011100011000000|        Calc carry of RS2+0xFFFFFFFF
-    * ba LHU_3    ANDI_1   1 3 001000011111101000011010|        Invert q. Prepare read mask
-    * bb SH_2     SH_3     5 3 000110101111110110110101|        Repeat shl until shreg = 0 (0,8 or 24 times)
-    * bc CSRRWI_0 CSRRW_1  1 3 000110011011011001001001| CSRRWI Decoded CSR adr in yy
-    * bd IJ_4     Fetch    0 b 001000110110101111011110|        Mask and use as PC
-    * be IJ_1     IJ_2     1 b 001000101111100100011111|        Read until q=mem[(rs1+ofs)&~3u]
-    * bf IJT_1    IJT_2    1 b 001000101111100111000001|        Exit CSR, enter trap
-    * c0 DIV_D    DIV_E    1 6 001000111011100110001000|        Is RS2 == 0?
-    * c1 IJT_2    IJT_3    1 3 000110101011011011101001|        Read word is to be masked with ~3u
-    * c2 DIVU_3   DIVU_2   3 5 011000101111110011001010|        Conditionally subtract rs2. Update M[0]
-    * c3 DIVU_4   DIVU_5   8 5 011000101111110010001010|        Last Cond. -rs2. Upd M[0]. Branch on INSTR[13]
-    * c4 ORI_0    ORI_1    1 3 000100111111001011100001| ORI    Or immediate. jj=~Iimm
-    * c5 MRET_5   MRET_6   1 3 001000000011101001101111|        ~302
-    * c6 IJT_4    ILL_2    4 3 000110101011101101000111|        Mask and store to mepc and Q for read of instr
-    * c7 QINT_1   QINT_2   4 3 000110xxxx11000111001011|        Store pc to mepc.
-    * c8 DIV_7    DIV_8    1 e 101000110011110101100010|        Shift (Q,M) left. Prepare unsigned sub
-    * c9 MRET_2   MRET_3   1 3 011000011001110010100101|        0xff+3 = 0x102
-    * ca DIVU_2   DIVU_3   1 e 101000110011110111000010|        Shift (Q,M) left. Prepare unsigned sub
-    * cb QINT_2   StdIncPc b 3 000111010011011011100110|        mtval = 0.
-    * cc OR_0     OR_1     1 3 0010001111x10xxx00100110| OR     or
-    * cd REM_0    DIV_1    a 3 101000101111100110000010| REM    Branch on sign dividend RS1
-    * ce _LCSRRCI_1 ILLe     1 3 001000xxxxx0xxxx11111110| Illegal instruction seen
-    * cf MRET_7   MRET_8   1 6 0010000110x10xxx01001111|        Prepare emulation entry point 0x104
-    * d0 ECALL_1  ECALL_2  1 5 011000001011110000110111| ECALL  Verify Imm==0x000
-    * d1 MRET_1   MRET_2   1 3 000100011011011011001001| MRET   First save Imm, start build constant for check
-    * d2 LB_2     LB_3     5 9 001000101011100100000110|        Repeat shr until shreg == 0 (0,8,16,24 times)
-    * d3 aFaultd  aFault_1 4 3 000111101011011000011110|  err   LB Load access fault. Faulting adr to mtval
-    * d4 aFault_2 LDAF_3   9 5 010111001010x10010010010|        Store 5 to mcause
-    * d5 unxd5             3 0 00xxxxxxxxxxxxxxxxxxxxxx| d5: Not in use
-    * d6 eILL0c   ILLe     1 3 001000xxxxx0xxxx11111110| Illegal instruction seen
-    * d7 ECALL_3  ECALL_4  4 3 000111101011011010100001|        mtval = 0, now start the chore of 11 to mcause
-    * d8 BLTU     condb_2  1 3 000110111011011000010011| BLTU   Conditional Branch. Offset to Ryy
-    * d9 MULH_3   MULHU_2  1 3 1010001111x10xxx01000010|        rM<=RS2, Q = 0. next read RS1. Join.
-    * da LDAF_a   LDAF_2   1 3 0010001010x10xxx10010001|        Extra cycle after error detected write mtval
-    * db jFault_1 LDAF_3   1 5 010111000010x10010010010|        Store 1 to mcause
-    * dc CSRRSI_0 CSRRW_1  1 3 000110011011011001001001| CSRRSI Decoded CSR adr in yy
-    * dd aF_SW_1  aF_SW_2  4 3 000111101011011011100101|  err   SW Store access fault. Faulting adr to mtval
-    * de Fetch    Fetch2   1 f 000101001111011011110100|  Fr00  Read and latch instruction
-    * df eFetch   Fetch2   1 d 000101101111011011110100|  Fr00  rep Read until d=mem[(rs1+ofs) & ~3u]
-    * e0 DIVU_1   DIVU_2   1 3 000110101111000011001010|        Store inverted rs2 to yy. Prepare shift
-    * e1 ORI_1    ORI_2    1 3 001000000011100100011101|        Q = RS1
-    * e2 MUL_1    MUL_2    3 9 001000101011110011101000|        Q <= rM[0] ? Q+rs2 : Q. Prepare shr/sar
-    * e3 MUL_3    ANDI_1   1 9 1110001011x10xxx00011010|        Transfer rM to rDee
-    * e4 ANDI_0   ANDI_1   1 3 001000111111101000011010| ANDI   And immediate. Q=~Iimm
-    * e5 aF_SW_2  aF_SW_3  1 5 111000101001110010110000|        Q = 4
-    * e6 StdIncPc Fetch    0 7 110100110100110011011110|  Fr00  IncPC, OpFetch
-    * e7 aFault   aFault_1 4 3 000111101011011000011110|  err   Load access fault. Faulting adr to mtval
-    * e8 MUL_2    MUL_1    1 3 101000111011100111100010|        Shift Q and rM. Prepare read rs2
-    * e9 IJT_3    IJT_4    1 3 011000110001110011000110|        Construct Q = 3
-    * ea MULHU_5  MULHU_6  1 3 001000110011110000100010|        Q <= rM[0] ? Q+Rjj : Q. Prepare read Ryy
-    * eb LH_3     LH_4     1 3 001000011111101001010110|        q = ~mem[rs1+ofs]
-    * ec AND_0    AND_1    1 3 0010001111x10xxx00010001| AND    And 
-    * ed REMU_0   DIVU_1   3 3 1010001110x10xxx11100000| REMU   Store dividend to rM. Prepare read divisor.Q=0
-    * ee eILL0a   ILLe     1 3 001000xxxxx0xxxx11111110| Illegal instruction seen
-    * ef WFI_5    Fetch    0 7 110101110100110011011110|        IncPC, OpFetch
-    * f0 LBU_2    LBU_3    5 9 001000101011100101110010|        Repeat shr until shreg = 0 (0, 8 or 16 times)
-    * f1 aFaulte  aFault_1 4 3 000111101011011000011110|  err   LBU Load access fault. Faulting adr to mtval
-    * f2 SW_2     StdIncPc 1 3 0010000010x10xxx11100110|        Prepare read PC
-    * f3 aF_SW    aF_SW_1  1 3 001000xxxxx01xxx11011101|  err   SW/SH/SB access fault. Rest to set SEL_O=4'hf
-    * f4 Fetch2            4 3 010101111111110000000000|  Fr00  Update ttime. Update I. Q=immediate. Use dinx
-    * f5 jFault   jFault_1 4 3 000111101011011011011011|  err   Fetch access fault. Faulting adr to mtval
-    * f6 WFI_1    WFI_2    1 5 111000000001110011111010| WFI    Chk offset=0x105. Now=0xff. Prep 0xff+4 = 0x103
-    * f7 EBREAK_1 EBREAK_2 4 3 000111001011011010101011| EBREAK mepc = pc, store 0 to mtval
-    * f8 BGEU     condb_2  1 3 000110111011011000010011| BGEU   Conditional Branch. Offset to Ryy
-    * f9 MULH_2   MULH_3   1 5 010100111011010011011001|        Store 1 to Rjj. next read rs2, Q=0
-    * fa WFI_2    WFI_3    1 5 011000101011110001000101|        Chk ofs. Now 0x103. Prep +1+~ofs, so ~ofs+0x104
-    * fb SB_3     SB_4     1 3 001000000011011001101011|        Prepare get back address to use 
-    * fc CSRRCI_0 CSRRW_1  1 3 000110011011011001001001| CSRRCI Decoded CSR adr in yy
-    * fd NMI_0    NMI_1    1 3 0010000010x10xxx01111110| NMI    Get current PC
-    * fe ILLe     ILL_1    1 3 0010000010x0xxxx01000110| Illegal
-    * ff QINT_0   QINT_1   1 3 0010000010x10xxx11000111| INT    Get current PC
+    * 00 LB_0     LB_1     0 0 000000000110001101111100| LB     Load byte. q = rdadr=RS1+0fs
+    * 01 LB_1     LB_2     1 1 000100010010001011111001|        Read until q=mem[rs1+ofs) & ~3u]
+    * 02 IJ_0     IJ_1     2 2 001000100110001101111100| IJ     Jump to mem[(rs1+ofs)&~3u]. inCSR=0
+    * 03 _L0x03   StdIncPc 1 3 000100110010000010x10xxx| FENCE  Prepare read PC (FENCE/FENCE.I)
+    * 04 ADDI_0   StdIncPc 1 3 000100110100100010110100| ADDI   Add immediate. rd =RS1+Iimm (or joined)
+    * 05 _L0x05   ADDI_0   1 3 000100110010000010x01xxx| AUIPC  q = imm20 (copy x/2)
+    * 06 LB_3     LB_4     1 3 000100110010000110111010|        q = ~mem[rs1+ofs]
+    * 07 LB_4     LB_5     1 3 000100110010000101111011|        q = (uint8_t) mem[rs1+Iimm]
+    * 08 _L0x08   SB_1     1 0 000100000101001110111100| SB     Store byte. wjj=wradr=RS1+Simm
+    * 09 LB_5     LB_6     1 3 000100110010000101111000|        q = D^0xffffffff^q = D^0x80
+    * 0a _L0x0a   SB_1     1 0 000100000101001110111100| SB     Store byte. wjj=wradr=RS1+Simm
+    * 0b JALR_2   JAL_2    1 4 000101000001100010110011|        Q = (RS1+imn) & 0xfffffffe
+    * 0c ADD_0    ADDI_0   1 3 000100110010001110111001| ADD    add     Addition Q = RS1
+    * 0d MUL_0    MUL_1    1 3 000100111010001110x10xxx| MUL    Store rs1 tp rM. Next read rs2. Q clear
+    * 0e SUB_0    SUB_1    1 3 000100110010001110x10xxx| SUB    Subtraction
+    * 0f _L0x0f   StdIncPc 1 3 000100110000100010110110| LUI    q = imm20
+    * 10 SUB_1    LB_6     1 3 000100110010001111111000|        Q = ~RS2
+    * 11 AND_1    ANDI_1   1 3 000100110010001110111000|        RS1^0xffffffff to Q
+    * 12 _L0x12   ILLe     1 3 00010011001000xxxxx0xxxx|  Not in use (illegal as entry)
+    * 13 condb_2  condb_3  1 3 000100110010001111111000|        ~RS2 in Q
+    * 14 condb_3  condb_4  1 5 000101010110000010111100|        Calculate RS1+~RS2+1
+    * 15 condb_4  condb_5  1 6 000101100001001100111001|        Branch on condition
+    * 16 condb_5  Fetch    0 7 000001110001011101001110|        Branch not taken.
+    * 17 condb_5t BrOpFet  0 4 000001000101011101111100|        Branch taken.
+    * 18 BEQ      condb_2  1 3 000100110001101110110110| BEQ    Conditional Branch. Offset to Ryy
+    * 19 JALR_0   JALR_1   1 3 000100110101101010110100| JALR   yy=RS1+imm
+    * 1a ANDI_1   StdIncPc 1 3 000100110000100010110011|        rd = Iimm & RS1
+    * 1b _L0x1b   JAL_1    1 4 000101000010000010101110| JAL    J-imm is in q. Branch on alignfault
+    * 1c ECAL_BRK ECAL_RET 1 2 000100100010001011101110| ECALL/EBREAK  Select ECALL/(U/S/M)RET or EBREAK/WFI
+    * 1d ORI_2    StdIncPc 1 3 000100110000100010110111|        rd = Iimm | RS1
+    * 1e aFault_1 aFault_2 1 5 000101011110001010011100|        Q = 4
+    * 1f IJ_2     IJ_3     1 3 000100110001101010110110|        Read word is to be masked with 2 lsb = 00
+    * 20 LH_0     LH_1     0 8 000010000101101101111100| LH     Load hword. Q = rdadr=RS1+Iimm.
+    * 21 XORI_1   StdIncPc 1 3 000100110000100010110000|        rd = Iimm ^ RS1
+    * 22 MULHU_6  MULHU_7  1 9 000110010010001010111100|        Q <= rM[0] ? Q+Ryy : Q. Prepare last shr/sar
+    * 23 _L0x23   StdIncPc 1 3 000100110010000010x10xxx| FENCE  Prepare read PC (FENCE/FENCE.I)
+    * 24 SLLI_0   SLLI_1   3 0 00110000001000111110x110| SLLI   Shift left immediate.
+    * 25 _L0x25   ADDI_0   1 3 000100110010000010x01xxx| AUIPC  q = imm20 (copy x/2)
+    * 26 OR_1     OR_2     1 3 000100110001001110110000|        RS1^0xffffffff to jj
+    * 27 OR_2     ORI_2    1 3 000100110110000000111100|        Q = rs2
+    * 28 _L0x28   SH_1     1 8 000110000101001110111100| SH     Store halfword. jjw=wradr=RS1+Simm
+    * 29 XOR_1    XORI_1   1 3 000100110010001110111000|        Q = RS1^0xFFFFFFFF
+    * 2a _L0x2a   SH_1     1 8 000110000101001110111100| SH     Store halfword. jjw=wradr=RS1+Simm
+    * 2b SLTIX_1  SLTIX_2  1 5 00010101011000xxxx110100|        RS1 - imm / RS1 - RS2
+    * 2c SLL_0    SLL_1    1 3 000100110010001110x0xxxx| SLL    Shift left
+    * 2d MULH_0   MULH_1   3 3 001100110010001010111001| MULH   Store rs1 to Q. Prep read 0, shcnt--
+    * 2e MULHU_1  MULHU_2  1 3 000100111001001111110110|        rM<=RS2,  Rjj<=Q=0. next read RS1. 
+    * 2f _L0x2f   StdIncPc 1 3 000100110000100010110110| LUI    q = imm20
+    * 30 SLTIX_2  StdIncPc 1 a 000110100000100010110110|        Registered ALU flag to rd
+    * 31 SLTX_1   SLTIX_1  1 3 000100110010001111111000|        ~rs2 to Q
+    * 32 JAL_1    JAL_2    1 3 000100110101100010110100|        Target adr to yy
+    * 33 JAERR_1  JAERR_2  4 3 01000011010111001010x100|  Err   JAL target adr misaligned, store to mtval
+    * 34 JAL_3    Fetch    0 b 000010110001011101101001|        PC+imm/trap entrypt to PC. OpFetch
+    * 35 SLLI_1   SLLI_2   3 3 001100110000101011111001|        Register to shift to Q (and TRG for shift 0)
+    * 36 SLLI_2   _L0x03   5 3 010100110000101011111101|        Repeat Q = Q+Q until shregcnt == 0
+    * 37 ECALL_2  ECALL_3  4 6 01000110000110xxxx110001|        mepc = pc, prep store 0 to mtval
+    * 38 BNE      condb_2  1 3 000100110001101110110110| BNE    Conditional Branch. Offset to Ryy
+    * 39 MULHU_7  StdIncPc 1 3 000100111000100010110001|        Last shift.
+    * 3a SRxI_1   SRxI_2   3 9 001110010000101010111001|        Register to shift to Q
+    * 3b _L0x3b   JAL_1    1 4 000101000010000010101110| JAL    J-imm is in q. Branch on alignfault
+    * 3c CSRRW_0  CSRRW_1  1 3 000100110001100110110110| CSRRW  Decoded CSR adr in yy
+    * 3d SRxI_2   _L0x03   5 9 010110010000101010111001|        Repeat Q >>= 1 until shregcnt == 0
+    * 3e SLL_1    SLLI_1   3 0 00110000001000111110x001|        Shiftamount was in low 5 bits of RS2
+    * 3f SRx_1    SRxI_1   3 0 00110000001000111110x001|        Shiftamount in low 5 bits of RS2
+    * 40 LW_0     LW_1     0 4 000001000110001101111100| LW     Load word. Q=yy=rdadr=RS1+Iimm
+    * 41 JALR_1   JALR_2   1 5 000101010110001100111100|        Q=1
+    * 42 MULHU_2  MULHU_3  3 9 001110010010001010111100|        Q <= rM[0] ? Q+rs1 : Q. Prepare shr/sar
+    * 43 MULHU_4  MULHU_5  1 3 000100110010000000101000|        Prepare read Rjj.
+    * 44 SLTI_0   SLTIX_1  1 3 000100110010001111111010| SLTI   Set less than immediate (signed)
+    * 45 WFI_3    WFI_4    1 5 000101010110001010111100|        Chk ofs. Now 0x104. Prep +1, so ~ofs+0x105
+    * 46 ILL_1    ILL_2    4 3 01000011000110101010x001|        Store PC to mepc
+    * 47 ILL_2    ILL_3    4 3 010000110001111010110001|        Store 0 to mtval
+    * 48 _L0x48   SW_1     6 4 011001000110001110111100| SW     Store word. Q=wradr=RS1+Simm
+    * 49 CSRRW_1  CSRRW_2  1 5 000101010110000010111100|        Construct PC storage adr
+    * 4a _L0x4a   SW_1     6 4 011001000110001110111100| SW     Store word. Q=wradr=RS1+Simm
+    * 4b CSRRW_2  CSRRW_3  7 3 011100110000011010101001|        Write PC to 0x100 start Prep emulation entrypt
+    * 4c SLT_0    SLTX_1   1 3 000100110010001110x10xxx| SLT    Set less than (signed)
+    * 4d MULHSU_0 MULHU_1  3 3 001100110001101110110001| MULHSU Signed rs1 to Ryy, nxt rd rs2. Q=0, shcnt--
+    * 4e eILL0b   ILLe     1 3 00010011001000xxxxx0xxxx| Illegal instruction seen
+    * 4f MRET_8   StdIncPc 1 5 000101010110001010111100|        Prep +4
+    * 50 LW_1     StdIncPc 1 c 000111000000101011110001|        Read until d=mem[(rs1+ofs) & ~3u]
+    * 51 LDAF_LW  LDAF_a   4 3 010000110001111010101110|  err   LD AlignFault. Faulting adr to mtval
+    * 52 LH_1     LH_2     1 1 000100010010001011111001|        Read until q=mem[(rs1+ofs) & ~3u]
+    * 53 LDAF_LH  LDAF_a   4 3 010000110001111010101110|  err   LD AlignFault. Faulting adr to mtval
+    * 54 LH_2     LH_3     5 9 010110010010001010111001|        Repeat shr until shreg = 0 (0, 8 or 16 times)
+    * 55 aFaultb  aFault_1 4 3 010000110001111010110110|  err   LH Load access fault. Faulting adr to mtval
+    * 56 LH_4     LH_5     1 3 000100110010001000111011|        q = (uint16_t) mem[rs1+Iimm]
+    * 57 LH_5     LB_6     1 3 000100110010001000111000|        q = D^0xffffffff^q = D ^ 0x00008000
+    * 58 DIV_A    DIV_C    1 9 000110011110001011111001|        Transfer rM to rDee
+    * 59 DIV_B    DIV_10   1 3 000100110001101111110110|        REM = Q to yy
+    * 5a SB_1     SB_2     3 3 001100110001101011111001|        Write d to Q and yy (for sh 0). Prep shift
+    * 5b _L0x5b   JAL_1    1 4 000101000010000010101110| JAL    J-imm is in q. Branch on alignfault
+    * 5c CSRRS_0  CSRRW_1  1 3 000100110001100110110110| CSRRS  Decoded CSR adr in yy
+    * 5d SB_2     SB_3     5 3 010100110001101011111101|        Repeat shl until shreg = 0 (0,8,16 or 24 times)
+    * 5e LHU_1    LHU_2    1 1 000100010010001011111001|        Read until q=mem[(rs1+ofs) & ~3u]
+    * 5f LDAF_LHU LDAF_a   4 3 010000110001111010101110|  err   LD AlignFault. Faulting adr to mtval
+    * 60 MULHU_3  MULHU_2  1 3 000100111010001111111001|        Shift Q and rM. Prepare read rs1
+    * 61 EBRKWFI2 EBREAK_1 1 6 000101100001000110110010| EBREAK/WFI2 Select EBREAK or WFI
+    * 62 DIV_8    DIV_7    3 5 001101010110001011111100|        Conditionally subtract rs2. Update M[0]
+    * 63 DIV_9    DIV_A    8 5 100001010110001011111100|        Last Cond. -rs2. Upd M[0]. Branch on INSTR[13]
+    * 64 SLTIU_0  SLTIX_1  1 3 000100110010001111111010| SLTIU  Set less than immediate (unsigned)
+    * 65 WFI_4    WFI_5    1 6 000101100010000010x10xxx|        Prepare read PC
+    * 66 SW_1     SW_2     4 3 010000110000011110101001|        Write d to a+k until accepted
+    * 67 SW_E1SWE SW_E2    4 3 01000011000111001010x110|        Store faulting address alignment to mtval
+    * 68 DIV_12   StdIncPc 1 3 000100110000100010110001|        RS2 > 0, RS1 >= 0, yy is true result
+    * 69 DIV_13   LB_6     1 3 000100110010001010111000|        RS2 > 0, RS1 < 0, change sign yy
+    * 6a MULH_1   MULH_2   1 3 000100110001101010110000|        Store ~rs1 to Ryy. Prep construct 1.
+    * 6b SB_4     SB_5     6 3 011000110010011100111001|        Address back to Q. Prepare get item to write
+    * 6c SLTU_0   SLTX_1   1 3 000100110010001110x10xxx| SLTU   Set less than (unsigned)
+    * 6d MULHU_0  MULHU_1  3 3 001100110001101110110001| MULHU  Store rs1 to Ryy. Next read rs2. Q=0, shcnt--
+    * 6e DIV_C    DIV_e    1 3 000100110001101110101001|        rM to yy. Q=ffffffff
+    * 6f MRET_6   MRET_7   1 5 00010101011000xxxx111100|        ~302 + origImm + 1 for branch decision
+    * 70 LHU_2    LHU_3    5 9 010110010010001010111001|        Repeat shr until shreg = 0 (0, 8 or 16 times)
+    * 71 aFaultc  aFault_1 4 3 010000110001111010110110|  err   LHU Load access fault. Faulting adr to mtval
+    * 72 LBU_3    ANDI_1   1 3 000100110010000110111010|        Invert q. Prepare read mask
+    * 73 BAERR_1  BAERR_2  4 3 010000110001111100110001|        Faultadr to mtval. Prepare get offset
+    * 74 BrOpFet  Fetch2   1 d 000111010010001011110110| NewOp2 Read until instruction latched
+    * 75 BAlignEr BAERR_1  1 3 000100110010000010x0xxxx|  Err   Branch target instruction address misaligned
+    * 76 BAERR_2  BAERR_3  1 3 000100110010000010111000|        ~offset to Q. Prep read (origPC+offset)
+    * 77 BAERR_3  BAERR_4  4 5 01000101010110101010x100|        origPC to mepc. Prep read 0
+    * 78 DIV_4    DIV_6    1 3 000100110001100000110110|        ~abs(divisor) to yy
+    * 79 DIV_5    DIV_3    1 5 000101011110001010111100|        Kluge to let add1 work in DIV instr
+    * 7a SB_5     SW_2     1 3 000100110000011100101001|        Write d to a+k until accepted
+    * 7b _L0x7b   JAL_1    1 4 000101000010000010101110| JAL    J-imm is in q. Branch on alignfault
+    * 7c CSRRC_0  CSRRW_1  1 3 000100110001100110110110| CSRRC  Decoded CSR adr in yy
+    * 7d BAERR_4  JAL_3    9 3 10010011000111100110x001|        Store 0 to mcause. Prep get trap entry pont
+    * 7e NMI_1    NMI_2    4 3 01000011000110xxxx110001|        Store pc to mepc.
+    * 7f JALRE2   BAERR_4  4 3 01000011000111101010x001|        mtval is target
+    * 80 LBU_0    LBU_1    0 0 000000000110001101111100| LBU    Load unsigned byte. Q = rdadr=RS1+Iimm.
+    * 81 JAERR_2  BAERR_4  4 3 01000011000110101010x001|        Store PC to mepc
+    * 82 DIV_1    DIV_3    1 3 000100110001001110110000|        jj=abs(RS1). Next handle divisor
+    * 83 DIV_2    DIV_1    1 3 000100110110001010111100|        Dividend negative, make RS1-1
+    * 84 XORI_0   XORI_1   1 3 000100110010001111111010| XORI   Xor immediate. Q=~Iimm
+    * 85 LBU_1    LBU_2    1 1 000100010010001011111001|        Read until q=mem[(rs1+ofs) & ~3u]
+    * 86 JAL_2    JAL_25   1 5 00010101110010001000x100|        Return address to TRG
+    * 87 JALRE1   JALRE2   4 3 01000011000110110010x001|  err   Store pc to mepc
+    * 88 DIV_E    DIV_10   8 3 100000111010001111x0xxxx|        RS2 != 0. Check signs
+    * 89 DIV_F    StdIncPc 1 3 000100110000100010110110|        RS2 == 0, return 0xffffffff
+    * 8a DIVU_5   ANDI_1   1 9 000110011110001011x10xxx|        Transfer rM to rDee
+    * 8b LB_6     StdIncPc 1 5 000101011100100010110100|        WTRG=(D^0x80)+0xFFFFFF7F+1=(D^0x80)-0x80
+    * 8c XOR_0    XOR_1    1 3 000100110010001111x10xxx| XOR    xor
+    * 8d DIV_0    DIV_1    a 3 101000111010001011111001| DIV    Branch on sign dividend RS1
+    * 8e _LCSRRS_1 ILLe     1 3 00010011001000xxxxx0xxxx| Illegal instruction seen
+    * 8f ILL_3    ILL_4    1 5 000101010010001010111100|        Q = 1
+    * 90 NMI_2    JAL_3    b 3 101100110001110100110110|        mtval = 0.
+    * 91 LDAF_2   LDAF_3   9 5 10010101110111001000x100|        Store 4 to mcause
+    * 92 LDAF_3   JAL_3    4 3 01000011000110100110x001|        PC to mepc
+    * 93 SW_E2    SW_E3    4 3 010000110001101011110001|        Store address that faulted
+    * 94 SW_E4    JAL_3    9 3 10010011000111100110x101|        Store 6 to mcause
+    * 95 SW_E3    SW_E4    1 5 000101011110001011011100|        Q = 3
+    * 96 SH_1     SH_2     3 3 001100110001101011111001|        Write d to Q and yy (for sh 0). Prep shift
+    * 97 SW_E1SWH SW_E2    4 3 01000011000111001010x110|        Store faulting address alignment to mtval
+    * 98 BLT      condb_2  1 3 000100110001101110110110| BLT    Conditional Branch. Offset to Ryy
+    * 99 _L0x99   ILLe     1 3 00010011001000xxxxx0xxxx|  Not in use (illegal as entry)
+    * 9a ECALL_6  JAL_3    9 3 10010011010111100100x100|        mcause = 11
+    * 9b SH_4     SH_5     c 3 110000110010001100111001|        Address back to Q. Prepare get item to write
+    * 9c DIV_10   DIV_12   8 3 100000111010001100110001|        RS2 > 0. Branch on sign of RS1
+    * 9d DIV_11   DIV_14   8 3 100000111010001100110001|        RS2 < 0. Branch on sign of RS1
+    * 9e JAL_25   JAL_3    1 3 00010011000100110010x001|        Instr. adr. to jj in case of access error
+    * 9f SH_5     SW_2     4 3 010000110000001100101001|        Write d to a+k until accepted
+    * a0 LHU_0    LHU_1    0 8 000010000101101101111100| LHU    Load unsigned hword. Q = rdadr=RS1+Iimm
+    * a1 ECALL_4  ECALL_5  1 5 000101011110001010011100|        Q = 4
+    * a2 DIV_14   LB_6     1 3 000100110010001010111000|        RS2 < 0, RS1 >= 0, change sign yy
+    * a3 DIV_15   StdIncPc 1 3 000100110000100010110001|        RS2 < 0, RS1 < 0, yy is true result
+    * a4 SRxI_0   SRxI_1   3 0 00110000001000111110x110| SRxI   Shift Right immediate (both logic/arith here)
+    * a5 MRET_3   MRET_4   1 5 000101010110000110111100|        0x102 + 0xff + 1 = 0x202
+    * a6 ECAL_RET ECALL_1  1 4 000101000010001011101110| ECALL/(U/S/M)RET Select ECALL or (U/S/M)RET
+    * a7 EBRKWFI1 EBRKWFI2 1 3 00010011011000xxxx111100| EBREAK/WFI1 Prepare select EBREAK or WFI
+    * a8 DIV_3    DIV_4    8 3 100000111010001010111000|        Branch on sign divisor RS2
+    * a9 ILL_4    JAL_3    9 5 10010101010111100110x100|        Store 2 to mcause
+    * aa DIV_6    DIV_7    1 3 000100111010001011x10xxx|        Write M. Prepare shift
+    * ab EBREAK_2 ECALL_6  4 3 010000110001101010110001|        pc to mepc
+    * ac _L0xac   SRx_1    1 3 000100110010001110x0xxxx| SRx    Shift Right (both SRL and SRA)
+    * ad DIVU_0   DIVU_1   3 3 001100111010001110x10xxx| DIVU   Store rs1 to rM. Q=0. Prepare invert rs2
+    * ae _L0xae   SRx_1    1 3 000100110010001110x0xxxx| SRx    Shift Right (both SRL and SRA)
+    * af MRET_4   MRET_5   1 5 00010101011000xxxx111100|        0x202 + 0xff + 1 = 0x302
+    * b0 aF_SW_3  LDAF_3   9 3 10010011010111001000x100|        Store 7 to mcause
+    * b1 CSRRW_3  CSRRW_4  1 5 000101011110001010011100|        Prep emulation entrypt 0x108, here Q to 0x104
+    * b2 CSRRW_4  Fetch    0 7 000001111101001101001100|        IncPC, OpFetch, but force +4
+    * b3 unxb3             3 0 0011000000xxxxxxxxxxxxxx| b3: Not in use 
+    * b4 i0reserv          3 0 0011000000xxxxxxxxxxxxxx| Not in use, reserved to allow LASTINCH
+    * b5 SH_3     SH_4     1 3 000100110010000000110110|        Prepare get back address to use 
+    * b6 ECALL_5  ECALL_6  1 5 000101011110001010011100|        Q = 8
+    * b7 IJ_3     IJ_4     1 3 000100110110001100011100|        Construct Q = 3
+    * b8 BGE      condb_2  1 3 000100110001101110110110| BGE    Conditional Branch. Offset to Ryy
+    * b9 DIV_e    DIV_D    1 5 000101010010001100111000|        Calc carry of RS2+0xFFFFFFFF
+    * ba LHU_3    ANDI_1   1 3 000100110010000111111010|        Invert q. Prepare read mask
+    * bb SH_2     SH_3     5 3 010100110001101011111101|        Repeat shl until shreg = 0 (0,8 or 24 times)
+    * bc CSRRWI_0 CSRRW_1  1 3 000100110001100110110110| CSRRWI Decoded CSR adr in yy
+    * bd IJ_4     Fetch    0 b 000010110010001101101011|        Mask and use as PC
+    * be IJ_1     IJ_2     1 b 000110110010001011111001|        Read until q=mem[(rs1+ofs)&~3u]
+    * bf IJT_1    IJT_2    1 b 000110110010001011111001|        Exit CSR, enter trap
+    * c0 DIV_D    DIV_E    1 6 000101100010001110111001|        Is RS2 == 0?
+    * c1 IJT_2    IJT_3    1 3 000100110001101010110110|        Read word is to be masked with ~3u
+    * c2 DIVU_3   DIVU_2   3 5 001101010110001011111100|        Conditionally subtract rs2. Update M[0]
+    * c3 DIVU_4   DIVU_5   8 5 100001010110001011111100|        Last Cond. -rs2. Upd M[0]. Branch on INSTR[13]
+    * c4 ORI_0    ORI_1    1 3 000100110001001111110010| ORI    Or immediate. jj=~Iimm
+    * c5 MRET_5   MRET_6   1 3 000100110010000000111010|        ~302
+    * c6 IJT_4    ILL_2    4 3 010000110001101010111011|        Mask and store to mepc and Q for read of instr
+    * c7 QINT_1   QINT_2   4 3 01000011000110xxxx110001|        Store pc to mepc.
+    * c8 DIV_7    DIV_8    1 e 000111101010001100111101|        Shift (Q,M) left. Prepare unsigned sub
+    * c9 MRET_2   MRET_3   1 3 000100110110000110011100|        0xff+3 = 0x102
+    * ca DIVU_2   DIVU_3   1 e 000111101010001100111101|        Shift (Q,M) left. Prepare unsigned sub
+    * cb QINT_2   StdIncPc b 3 101100110001110100110110|        mtval = 0.
+    * cc OR_0     OR_1     1 3 000100110010001111x10xxx| OR     or
+    * cd REM_0    DIV_1    a 3 101000111010001011111001| REM    Branch on sign dividend RS1
+    * ce _LCSRRCI_1 ILLe     1 3 00010011001000xxxxx0xxxx| Illegal instruction seen
+    * cf MRET_7   MRET_8   1 6 000101100010000110x10xxx|        Prepare emulation entry point 0x104
+    * d0 ECALL_1  ECALL_2  1 5 000101010110000010111100| ECALL  Verify Imm==0x000
+    * d1 MRET_1   MRET_2   1 3 000100110001000110110110| MRET   First save Imm, start build constant for check
+    * d2 LB_2     LB_3     5 9 010110010010001010111001|        Repeat shr until shreg == 0 (0,8,16,24 times)
+    * d3 aFaultd  aFault_1 4 3 010000110001111010110110|  err   LB Load access fault. Faulting adr to mtval
+    * d4 aFault_2 LDAF_3   9 5 10010101010111001010x100|        Store 5 to mcause
+    * d5 unxd5             3 0 0011000000xxxxxxxxxxxxxx| d5: Not in use
+    * d6 eILL0c   ILLe     1 3 00010011001000xxxxx0xxxx| Illegal instruction seen
+    * d7 ECALL_3  ECALL_4  4 3 010000110001111010110110|        mtval = 0, now start the chore of 11 to mcause
+    * d8 BLTU     condb_2  1 3 000100110001101110110110| BLTU   Conditional Branch. Offset to Ryy
+    * d9 MULH_3   MULHU_2  1 3 000100111010001111x10xxx|        rM<=RS2, Q = 0. next read RS1. Join.
+    * da LDAF_a   LDAF_2   1 3 000100110010001010x10xxx|        Extra cycle after error detected write mtval
+    * db jFault_1 LDAF_3   1 5 00010101010111000010x100|        Store 1 to mcause
+    * dc CSRRSI_0 CSRRW_1  1 3 000100110001100110110110| CSRRSI Decoded CSR adr in yy
+    * dd aF_SW_1  aF_SW_2  4 3 010000110001111010110110|  err   SW Store access fault. Faulting adr to mtval
+    * de Fetch    Fetch2   1 f 000111110001010011110110|  Fr00  Read and latch instruction
+    * df eFetch   Fetch2   1 d 000111010001011011110110|  Fr00  rep Read until d=mem[(rs1+ofs) & ~3u]
+    * e0 DIVU_1   DIVU_2   1 3 000100110001101011110000|        Store inverted rs2 to yy. Prepare shift
+    * e1 ORI_1    ORI_2    1 3 000100110010000000111001|        Q = RS1
+    * e2 MUL_1    MUL_2    3 9 001110010010001010111100|        Q <= rM[0] ? Q+rs2 : Q. Prepare shr/sar
+    * e3 MUL_3    ANDI_1   1 9 000110011110001011x10xxx|        Transfer rM to rDee
+    * e4 ANDI_0   ANDI_1   1 3 000100110010001111111010| ANDI   And immediate. Q=~Iimm
+    * e5 aF_SW_2  aF_SW_3  1 5 000101011110001010011100|        Q = 4
+    * e6 StdIncPc Fetch    0 7 000001111101001101001100|  Fr00  IncPC, OpFetch
+    * e7 aFault   aFault_1 4 3 010000110001111010110110|  err   Load access fault. Faulting adr to mtval
+    * e8 MUL_2    MUL_1    1 3 000100111010001110111001|        Shift Q and rM. Prepare read rs2
+    * e9 IJT_3    IJT_4    1 3 000100110110001100011100|        Construct Q = 3
+    * ea MULHU_5  MULHU_6  1 3 000100110010001100111100|        Q <= rM[0] ? Q+Rjj : Q. Prepare read Ryy
+    * eb LH_3     LH_4     1 3 000100110010000111111010|        q = ~mem[rs1+ofs]
+    * ec AND_0    AND_1    1 3 000100110010001111x10xxx| AND    And 
+    * ed REMU_0   DIVU_1   3 3 001100111010001110x10xxx| REMU   Store dividend to rM. Prepare read divisor.Q=0
+    * ee eILL0a   ILLe     1 3 00010011001000xxxxx0xxxx| Illegal instruction seen
+    * ef WFI_5    Fetch    0 7 000001111101011101001100|        IncPC, OpFetch
+    * f0 LBU_2    LBU_3    5 9 010110010010001010111001|        Repeat shr until shreg = 0 (0, 8 or 16 times)
+    * f1 aFaulte  aFault_1 4 3 010000110001111010110110|  err   LBU Load access fault. Faulting adr to mtval
+    * f2 SW_2     StdIncPc 1 3 000100110010000010x10xxx|        Prepare read PC
+    * f3 aF_SW    aF_SW_1  1 3 00010011001000xxxxx01xxx|  err   SW/SH/SB access fault. Rest to set SEL_O=4'hf
+    * f4 Fetch2            4 3 010000110101011111111100|  Fr00  Update ttime. Update I. Q=immediate. Use dinx
+    * f5 jFault   jFault_1 4 3 010000110001111010110110|  err   Fetch access fault. Faulting adr to mtval
+    * f6 WFI_1    WFI_2    1 5 000101011110000000011100| WFI    Chk offset=0x105. Now=0xff. Prep 0xff+4 = 0x103
+    * f7 EBREAK_1 EBREAK_2 4 3 010000110001110010110110| EBREAK mepc = pc, store 0 to mtval
+    * f8 BGEU     condb_2  1 3 000100110001101110110110| BGEU   Conditional Branch. Offset to Ryy
+    * f9 MULH_2   MULH_3   1 5 000101010101001110110100|        Store 1 to Rjj. next read rs2, Q=0
+    * fa WFI_2    WFI_3    1 5 000101010110001010111100|        Chk ofs. Now 0x103. Prep +1+~ofs, so ~ofs+0x104
+    * fb SB_3     SB_4     1 3 000100110010000000110110|        Prepare get back address to use 
+    * fc CSRRCI_0 CSRRW_1  1 3 000100110001100110110110| CSRRCI Decoded CSR adr in yy
+    * fd NMI_0    NMI_1    1 3 000100110010000010x10xxx| NMI    Get current PC
+    * fe ILLe     ILL_1    1 3 000100110010000010x0xxxx| Illegal
+    * ff QINT_0   QINT_1   1 3 000100110010000010x10xxx| INT    Get current PC
     */
    localparam u0_0 = 256'hb6e6901090e2b904b386bc5a788bbc5a7b09ba078804b4e690e67cbef9d27c01;
    localparam u0_1 = 256'hb6b79cd4b7e6eea6ae32b3e6b441b6137c744ede3916bc15f81400feb81af88b;
@@ -1876,7 +1876,7 @@ endmodule
  * 2019-2020. Copyright B. Nossum.
  * For licence, see LICENCE
  * -----------------------------------------------------------------------------ehdr
- * Automatically generated from ../code/ucode.h by midgetv_indirectEBR.c.
+ * Automatically generated from ../code/ucode.h by ../util/midgetv_indirectEBR.c.
  * Do not edit.
  * Optiones for this variant:
  *   No RVC
@@ -1971,262 +1971,262 @@ module v6_m_2ebr
     *                      indirect_index 1
     * inx         next     | indirect index 0
     * || ucode    ucode    | | direct representation
-    * 00 LB_0     LB_1     0 0 010001101111110000000001| LB     Load byte. q = rdadr=RS1+0fs
-    * 01 LB_1     LB_2     1 1 001001011111100111010010|        Read until q=mem[rs1+ofs) & ~3u]
-    * 02 IJ_0     IJ_1     2 2 010001101111110010111110| IJ     Jump to mem[(rs1+ofs)&~3u]. inCSR=0
-    * 03 _L0x03   StdIncPc 1 3 0000000101x10xxx11100110| FENCE  Prepare read PC (FENCE/FENCE.I)
-    * 04 ADDI_0   StdIncPc 3 3 010000010111010011100110| ADDI   Add immediate. rd =RS1+Iimm (or joined)
-    * 05 _L0x05   ADDI_0   1 3 0000000101x01xxx00000100| AUIPC  q = imm20 (copy x/2)
-    * 06 LB_3     LB_4     1 3 000000110111101000000111|        q = ~mem[rs1+ofs]
-    * 07 LB_4     LB_5     1 3 000000101111101100001001|        q = (uint8_t) mem[rs1+Iimm]
-    * 08 _L0x08   SB_1     4 0 010001110111110001011010| SB     Store byte. wjj=wradr=RS1+Simm
-    * 09 LB_5     LB_6     1 3 000000101111100010001011|        q = D^0xffffffff^q = D^0x80
-    * 0a _L0x0a   SB_1     4 0 010001110111110001011010| SB     Store byte. wjj=wradr=RS1+Simm
-    * 0b JALR_2   JAL_2    5 4 000000010111001110000110|        Q = (RS1+imn) & 0xfffffffe
-    * 0c ADD_0    ADDI_0   1 3 000001110111100100000100| ADD    add     Addition Q = RS1
-    * 0d MUL_0    MUL_1    1 3 1000011101x10xxx11100010| MUL    Store rs1 tp rM. Next read rs2. Q clear
-    * 0e SUB_0    SUB_1    1 3 0000011101x10xxx00010000| SUB    Subtraction
-    * 0f _L0x0f   StdIncPc 3 3 000000010111011011100110| LUI    q = imm20
-    * 10 SUB_1    LB_6     1 3 000001111111100010001011|        Q = ~RS2
-    * 11 AND_1    ANDI_1   1 3 000001110111100000011010|        RS1^0xffffffff to Q
-    * 12 _L0x12   ILLe     1 3 00000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * 13 condb_2  condb_3  1 3 000001111111100000010100|        ~RS2 in Q
-    * 14 condb_3  condb_4  1 5 010000010111110000010101|        Calculate RS1+~RS2+1
-    * 15 condb_4  condb_5  4 6 000001100111100100010110|        Branch on condition
-    * 16 condb_5  Fetch    6 5 001101101100111011011110|        Branch not taken.
-    * 17 condb_5t BrOpFet  6 4 010101101111110001110100|        Branch taken.
-    * 18 BEQ      condb_2  5 3 000001110111011000010011| BEQ    Conditional Branch. Offset to Ryy
-    * 19 JALR_0   JALR_1   5 3 010001010111010001000001| JALR   yy=RS1+imm
-    * 1a ANDI_1   StdIncPc 3 3 000000010111001111100110|        rd = Iimm & RS1
-    * 1b _L0x1b   JAL_1    1 4 000000010110111000110010| JAL    J-imm is in q. Branch on alignfault
-    * 1c ECAL_BRK ECAL_RET 1 2 000001011110111010100110| ECALL/EBREAK  Select ECALL/(U/S/M)RET or EBREAK/WFI
-    * 1d ORI_2    StdIncPc 3 3 000000010111011111100110|        rd = Iimm | RS1
-    * 1e aFault_1 aFault_2 1 5 110001010101110011010100|        Q = 4
-    * 1f IJ_2     IJ_3     5 3 000001010111011010110111|        Read word is to be masked with 2 lsb = 00
-    * 20 LH_0     LH_1     7 7 010001101111110001010010| LH     Load hword. Q = rdadr=RS1+Iimm.
-    * 21 XORI_1   StdIncPc 3 3 000000010111000011100110|        rd = Iimm ^ RS1
-    * 22 MULHU_6  MULHU_7  1 8 000001010111110000111001|        Q <= rM[0] ? Q+Ryy : Q. Prepare last shr/sar
-    * 23 _L0x23   StdIncPc 1 3 0000000101x10xxx11100110| FENCE  Prepare read PC (FENCE/FENCE.I)
-    * 24 SLLI_0   SLLI_1   1 0 000001111010x11000110101| SLLI   Shift left immediate.
-    * 25 _L0x25   ADDI_0   1 3 0000000101x01xxx00000100| AUIPC  q = imm20 (copy x/2)
-    * 26 OR_1     OR_2     4 3 000001110111000000100111|        RS1^0xffffffff to jj
-    * 27 OR_2     ORI_2    1 3 010000000111110000011101|        Q = rs2
-    * 28 _L0x28   SH_1     4 7 010001110111110010010110| SH     Store halfword. jjw=wradr=RS1+Simm
-    * 29 XOR_1    XORI_1   1 3 000001110111100000100001|        Q = RS1^0xFFFFFFFF
-    * 2a _L0x2a   SH_1     4 7 010001110111110010010110| SH     Store halfword. jjw=wradr=RS1+Simm
-    * 2b SLTIX_1  SLTIX_2  1 5 01000xxxx111010000110000|        RS1 - imm / RS1 - RS2
-    * 2c SLL_0    SLL_1    1 3 0000011101x0xxxx00111110| SLL    Shift left
-    * 2d MULH_0   MULH_1   1 3 000001010011100101101010| MULH   Store rs1 to Q. Prep read 0, shcnt--
-    * 2e MULHU_1  MULHU_2  4 3 100001111111011001000010|        rM<=RS2,  Rjj<=Q=0. next read RS1. 
-    * 2f _L0x2f   StdIncPc 3 3 000000010111011011100110| LUI    q = imm20
-    * 30 SLTIX_2  StdIncPc 3 9 000000010111011011100110|        Registered ALU flag to rd
-    * 31 SLTX_1   SLTIX_1  1 3 000001111111100000101011|        ~rs2 to Q
-    * 32 JAL_1    JAL_2    5 3 010000010111010010000110|        Target adr to yy
-    * 33 JAERR_1  JAERR_2  5 3 010110010110x10010000001|  Err   JAL target adr misaligned, store to mtval
-    * 34 JAL_3    Fetch    6 3 001101101110100111011110|        PC+imm/trap entrypt to PC. OpFetch
-    * 35 SLLI_1   SLLI_2   3 3 000001011011100100110110|        Register to shift to Q (and TRG for shift 0)
-    * 36 SLLI_2   _L0x03   8 3 000001011011110100000011|        Repeat Q = Q+Q until shregcnt == 0
-    * 37 ECALL_2  ECALL_3  5 6 00001xxxx111000111010111|        mepc = pc, prep store 0 to mtval
-    * 38 BNE      condb_2  5 3 000001110111011000010011| BNE    Conditional Branch. Offset to Ryy
-    * 39 MULHU_7  StdIncPc 3 3 100000010111000111100110|        Last shift.
-    * 3a SRxI_1   SRxI_2   3 8 000001010011100100111101|        Register to shift to Q
-    * 3b _L0x3b   JAL_1    1 4 000000010110111000110010| JAL    J-imm is in q. Branch on alignfault
-    * 3c CSRRW_0  CSRRW_1  5 3 000000110111011001001001| CSRRW  Decoded CSR adr in yy
-    * 3d SRxI_2   _L0x03   8 8 000001010011100100000011|        Repeat Q >>= 1 until shregcnt == 0
-    * 3e SLL_1    SLLI_1   1 0 000001111010x00100110101|        Shiftamount was in low 5 bits of RS2
-    * 3f SRx_1    SRxI_1   1 0 000001111010x00100111010|        Shiftamount in low 5 bits of RS2
-    * 40 LW_0     LW_1     0 4 010001101111110001010000| LW     Load word. Q=yy=rdadr=RS1+Iimm
-    * 41 JALR_1   JALR_2   1 5 010001100111110000001011|        Q=1
-    * 42 MULHU_2  MULHU_3  1 8 000001010011110001100000|        Q <= rM[0] ? Q+rs1 : Q. Prepare shr/sar
-    * 43 MULHU_4  MULHU_5  1 3 000000000110100011101010|        Prepare read Rjj.
-    * 44 SLTI_0   SLTIX_1  1 3 000001111111101000101011| SLTI   Set less than immediate (signed)
-    * 45 WFI_3    WFI_4    1 5 010001010111110001100101|        Chk ofs. Now 0x104. Prep +1, so ~ofs+0x105
-    * 46 ILL_1    ILL_2    5 3 000011010110x00101000111|        Store PC to mepc
-    * 47 ILL_2    ILL_3    5 3 000111010111000110001111|        Store 0 to mtval
-    * 48 _L0x48   SW_1     9 4 010001110111110001100110| SW     Store word. Q=wradr=RS1+Simm
-    * 49 CSRRW_1  CSRRW_2  1 5 010000010111110001001011|        Construct PC storage adr
-    * 4a _L0x4a   SW_1     9 4 010001110111110001100110| SW     Store word. Q=wradr=RS1+Simm
-    * 4b CSRRW_2  CSRRW_3  a 3 000111010110100110110001|        Write PC to 0x100 start Prep emulation entrypt
-    * 4c SLT_0    SLTX_1   1 3 0000011101x10xxx00110001| SLT    Set less than (signed)
-    * 4d MULHSU_0 MULHU_1  5 3 000001110011000100101110| MULHSU Signed rs1 to Ryy, nxt rd rs2. Q=0, shcnt--
-    * 4e eILL0b   ILLe     1 3 00000xxxx1x0xxxx11111110| Illegal instruction seen
-    * 4f MRET_8   StdIncPc 1 5 010001010111110011100110|        Prep +4
-    * 50 LW_1     StdIncPc 3 a 001001011111000111100110|        Read until d=mem[(rs1+ofs) & ~3u]
-    * 51 LDAF_LW  LDAF_a   5 3 000111010110111011011010|  err   LD AlignFault. Faulting adr to mtval
-    * 52 LH_1     LH_2     1 1 001001011111100101010100|        Read until q=mem[(rs1+ofs) & ~3u]
-    * 53 LDAF_LH  LDAF_a   5 3 000111010110111011011010|  err   LD AlignFault. Faulting adr to mtval
-    * 54 LH_2     LH_3     b 8 000001010011100111101011|        Repeat shr until shreg = 0 (0, 8 or 16 times)
-    * 55 aFaultb  aFault_1 5 3 000111010111011000011110|  err   LH Load access fault. Faulting adr to mtval
-    * 56 LH_4     LH_5     1 3 000001000111101101010111|        q = (uint16_t) mem[rs1+Iimm]
-    * 57 LH_5     LB_6     1 3 000001000111100010001011|        q = D^0xffffffff^q = D ^ 0x00008000
-    * 58 DIV_A    DIV_C    1 8 110001011111100101101110|        Transfer rM to rDee
-    * 59 DIV_B    DIV_10   5 3 000001111111011010011100|        REM = Q to yy
-    * 5a SB_1     SB_2     5 3 000001011011100101011101|        Write d to Q and yy (for sh 0). Prep shift
-    * 5b _L0x5b   JAL_1    1 4 000000010110111000110010| JAL    J-imm is in q. Branch on alignfault
-    * 5c CSRRS_0  CSRRW_1  5 3 000000110111011001001001| CSRRS  Decoded CSR adr in yy
-    * 5d SB_2     SB_3     c 3 000001011011110111111011|        Repeat shl until shreg = 0 (0,8,16 or 24 times)
-    * 5e LHU_1    LHU_2    1 1 001001011111100101110000|        Read until q=mem[(rs1+ofs) & ~3u]
-    * 5f LDAF_LHU LDAF_a   5 3 000111010110111011011010|  err   LD AlignFault. Faulting adr to mtval
-    * 60 MULHU_3  MULHU_2  1 3 100001111111100101000010|        Shift Q and rM. Prepare read rs1
-    * 61 EBRKWFI2 EBREAK_1 4 6 000000110111001011110111| EBREAK/WFI2 Select EBREAK or WFI
-    * 62 DIV_8    DIV_7    1 5 010001011011110011001000|        Conditionally subtract rs2. Update M[0]
-    * 63 DIV_9    DIV_A    d 5 010001011111110001011000|        Last Cond. -rs2. Upd M[0]. Branch on INSTR[13]
-    * 64 SLTIU_0  SLTIX_1  1 3 000001111111101000101011| SLTIU  Set less than immediate (unsigned)
-    * 65 WFI_4    WFI_5    1 6 0000000101x10xxx11101111|        Prepare read PC
-    * 66 SW_1     SW_2     e 3 000111110110100111110010|        Write d to a+k until accepted
-    * 67 SW_E1SWE SW_E2    5 3 000110010110x11010010011|        Store faulting address alignment to mtval
-    * 68 DIV_12   StdIncPc 3 3 000000010111000111100110|        RS2 > 0, RS1 >= 0, yy is true result
-    * 69 DIV_13   LB_6     1 3 000001010111100010001011|        RS2 > 0, RS1 < 0, change sign yy
-    * 6a MULH_1   MULH_2   5 3 000001010111000011111001|        Store ~rs1 to Ryy. Prep construct 1.
-    * 6b SB_4     SB_5     9 3 000101100111100101111010|        Address back to Q. Prepare get item to write
-    * 6c SLTU_0   SLTX_1   1 3 0000011101x10xxx00110001| SLTU   Set less than (unsigned)
-    * 6d MULHU_0  MULHU_1  5 3 000001110011000100101110| MULHU  Store rs1 to Ryy. Next read rs2. Q=0, shcnt--
-    * 6e DIV_C    DIV_e    5 3 000001110110100110111001|        rM to yy. Q=ffffffff
-    * 6f MRET_6   MRET_7   1 5 01000xxxx111110011001111|        ~302 + origImm + 1 for branch decision
-    * 70 LHU_2    LHU_3    b 8 000001010011100110111010|        Repeat shr until shreg = 0 (0, 8 or 16 times)
-    * 71 aFaultc  aFault_1 5 3 000111010111011000011110|  err   LHU Load access fault. Faulting adr to mtval
-    * 72 LBU_3    ANDI_1   1 3 000000110111101000011010|        Invert q. Prepare read mask
-    * 73 BAERR_1  BAERR_2  5 3 000111100111000101110110|        Faultadr to mtval. Prepare get offset
-    * 74 BrOpFet  Fetch2   1 b 001001011111011011110100| NewOp2 Read until instruction latched
-    * 75 BAlignEr BAERR_1  1 3 0000000101x0xxxx01110011|  Err   Branch target instruction address misaligned
-    * 76 BAERR_2  BAERR_3  1 3 000000010111100001110111|        ~offset to Q. Prep read (origPC+offset)
-    * 77 BAERR_3  BAERR_4  5 5 010011010110x10001111101|        origPC to mepc. Prep read 0
-    * 78 DIV_4    DIV_6    5 3 000000000111011010101010|        ~abs(divisor) to yy
-    * 79 DIV_5    DIV_3    1 5 110001010111110010101000|        Kluge to let add1 work in DIV instr
-    * 7a SB_5     SW_2     e 3 000101100110100111110010|        Write d to a+k until accepted
-    * 7b _L0x7b   JAL_1    1 4 000000010110111000110010| JAL    J-imm is in q. Branch on alignfault
-    * 7c CSRRC_0  CSRRW_1  5 3 000000110111011001001001| CSRRC  Decoded CSR adr in yy
-    * 7d BAERR_4  JAL_3    f 3 000101001110x00100110100|        Store 0 to mcause. Prep get trap entry pont
-    * 7e NMI_1    NMI_2    5 3 00001xxxx111000110010000|        Store pc to mepc.
-    * 7f JALRE2   BAERR_4  5 3 000111010110x00101111101|        mtval is target
-    * 80 LBU_0    LBU_1    0 0 010001101111110010000101| LBU    Load unsigned byte. Q = rdadr=RS1+Iimm.
-    * 81 JAERR_2  BAERR_4  5 3 000011010110x00101111101|        Store PC to mepc
-    * 82 DIV_1    DIV_3    4 3 000001110111000010101000|        jj=abs(RS1). Next handle divisor
-    * 83 DIV_2    DIV_1    1 3 010001010111110010000010|        Dividend negative, make RS1-1
-    * 84 XORI_0   XORI_1   1 3 000001111111101000100001| XORI   Xor immediate. Q=~Iimm
-    * 85 LBU_1    LBU_2    1 1 001001011111100111110000|        Read until q=mem[(rs1+ofs) & ~3u]
-    * 86 JAL_2    JAL_25   3 5 110000010100x10010011110|        Return address to TRG
-    * 87 JALRE1   JALRE2   5 3 000011100110x00101111111|  err   Store pc to mepc
-    * 88 DIV_E    DIV_10   d 3 1000011111x0xxxx10011100|        RS2 != 0. Check signs
-    * 89 DIV_F    StdIncPc 3 3 000000010111011011100110|        RS2 == 0, return 0xffffffff
-    * 8a DIVU_5   ANDI_1   1 8 1100010111x10xxx00011010|        Transfer rM to rDee
-    * 8b LB_6     StdIncPc 3 5 110000010111010011100110|        WTRG=(D^0x80)+0xFFFFFF7F+1=(D^0x80)-0x80
-    * 8c XOR_0    XOR_1    1 3 0000011111x10xxx00101001| XOR    xor
-    * 8d DIV_0    DIV_1    d 3 100001011011100110000010| DIV    Branch on sign dividend RS1
-    * 8e _LCSRRS_1 ILLe     1 3 00000xxxx1x0xxxx11111110| Illegal instruction seen
-    * 8f ILL_3    ILL_4    1 5 000001010111110010101001|        Q = 1
-    * 90 NMI_2    JAL_3    f 3 000110100111011000110100|        mtval = 0.
-    * 91 LDAF_2   LDAF_3   f 5 110100010100x10010010010|        Store 4 to mcause
-    * 92 LDAF_3   JAL_3    5 3 000011001110x00100110100|        PC to mepc
-    * 93 SW_E2    SW_E3    5 3 000011011111000110010101|        Store address that faulted
-    * 94 SW_E4    JAL_3    f 3 000101001110x10100110100|        Store 6 to mcause
-    * 95 SW_E3    SW_E4    1 5 110001011101110010010100|        Q = 3
-    * 96 SH_1     SH_2     5 3 000001011011100110111011|        Write d to Q and yy (for sh 0). Prep shift
-    * 97 SW_E1SWH SW_E2    5 3 000110010110x11010010011|        Store faulting address alignment to mtval
-    * 98 BLT      condb_2  5 3 000001110111011000010011| BLT    Conditional Branch. Offset to Ryy
-    * 99 _L0x99   ILLe     1 3 00000xxxx1x0xxxx11111110|  Not in use (illegal as entry)
-    * 9a ECALL_6  JAL_3    f 3 010101001100x10000110100|        mcause = 11
-    * 9b SH_4     SH_5     9 3 000011100111100110011111|        Address back to Q. Prepare get item to write
-    * 9c DIV_10   DIV_12   d 3 100001100111000101101000|        RS2 > 0. Branch on sign of RS1
-    * 9d DIV_11   DIV_14   d 3 100001100111000110100010|        RS2 < 0. Branch on sign of RS1
-    * 9e JAL_25   JAL_3    4 3 000001100110x00100110100|        Instr. adr. to jj in case of access error
-    * 9f SH_5     SW_2     e 3 000011100110100111110010|        Write d to a+k until accepted
-    * a0 LHU_0    LHU_1    7 7 010001101111110001011110| LHU    Load unsigned hword. Q = rdadr=RS1+Iimm
-    * a1 ECALL_4  ECALL_5  1 5 110001010101110010110110|        Q = 4
-    * a2 DIV_14   LB_6     1 3 000001010111100010001011|        RS2 < 0, RS1 >= 0, change sign yy
-    * a3 DIV_15   StdIncPc 3 3 000000010111000111100110|        RS2 < 0, RS1 < 0, yy is true result
-    * a4 SRxI_0   SRxI_1   1 0 000001111010x11000111010| SRxI   Shift Right immediate (both logic/arith here)
-    * a5 MRET_3   MRET_4   1 5 010000110111110010101111|        0x102 + 0xff + 1 = 0x202
-    * a6 ECAL_RET ECALL_1  1 4 000001011110111011010000| ECALL/(U/S/M)RET Select ECALL or (U/S/M)RET
-    * a7 EBRKWFI1 EBRKWFI2 1 3 01000xxxx111110001100001| EBREAK/WFI1 Prepare select EBREAK or WFI
-    * a8 DIV_3    DIV_4    d 3 100001010111100001111000|        Branch on sign divisor RS2
-    * a9 ILL_4    JAL_3    f 5 010101001110x10000110100|        Store 2 to mcause
-    * aa DIV_6    DIV_7    1 3 1000010111x10xxx11001000|        Write M. Prepare shift
-    * ab EBREAK_2 ECALL_6  5 3 000011010111000110011010|        pc to mepc
-    * ac _L0xac   SRx_1    1 3 0000011101x0xxxx00111111| SRx    Shift Right (both SRL and SRA)
-    * ad DIVU_0   DIVU_1   1 3 1000011100x10xxx11100000| DIVU   Store rs1 to rM. Q=0. Prepare invert rs2
-    * ae _L0xae   SRx_1    1 3 0000011101x0xxxx00111111| SRx    Shift Right (both SRL and SRA)
-    * af MRET_4   MRET_5   1 5 01000xxxx111110011000101|        0x202 + 0xff + 1 = 0x302
-    * b0 aF_SW_3  LDAF_3   f 3 010100010100x10010010010|        Store 7 to mcause
-    * b1 CSRRW_3  CSRRW_4  1 5 110001010101110010110010|        Prep emulation entrypt 0x108, here Q to 0x104
-    * b2 CSRRW_4  Fetch    6 5 111001101100110011011110|        IncPC, OpFetch, but force +4
-    * b3 unxb3             e 0 00xxxxxxxxxxxxxxxxxxxxxx| b3: Not in use 
-    * b4 eFetch3           4 5 010011111111110000000000|  Fr10  Update minstret, Q=immediate. Use dinx
-    * b5 SH_3     SH_4     1 3 000000000111011010011011|        Prepare get back address to use 
-    * b6 ECALL_5  ECALL_6  1 5 110001010101110010011010|        Q = 8
-    * b7 IJ_3     IJ_4     1 3 010001100101110010111101|        Construct Q = 3
-    * b8 BGE      condb_2  5 3 000001110111011000010011| BGE    Conditional Branch. Offset to Ryy
-    * b9 DIV_e    DIV_D    1 5 000001100111100011000000|        Calc carry of RS2+0xFFFFFFFF
-    * ba LHU_3    ANDI_1   1 3 000000111111101000011010|        Invert q. Prepare read mask
-    * bb SH_2     SH_3     c 3 000001011011110110110101|        Repeat shl until shreg = 0 (0,8 or 24 times)
-    * bc CSRRWI_0 CSRRW_1  5 3 000000110111011001001001| CSRRWI Decoded CSR adr in yy
-    * bd IJ_4     Fetch    0 3 001001101110101111011110|        Mask and use as PC
-    * be IJ_1     IJ_2     1 3 001001011111100100011111|        Read until q=mem[(rs1+ofs)&~3u]
-    * bf IJT_1    IJT_2    1 3 001001011111100111000001|        Exit CSR, enter trap
-    * c0 DIV_D    DIV_E    1 6 000001110111100110001000|        Is RS2 == 0?
-    * c1 IJT_2    IJT_3    5 3 000001010111011011101001|        Read word is to be masked with ~3u
-    * c2 DIVU_3   DIVU_2   1 5 010001011011110011001010|        Conditionally subtract rs2. Update M[0]
-    * c3 DIVU_4   DIVU_5   d 5 010001011111110010001010|        Last Cond. -rs2. Upd M[0]. Branch on INSTR[13]
-    * c4 ORI_0    ORI_1    4 3 000001111111001011100001| ORI    Or immediate. jj=~Iimm
-    * c5 MRET_5   MRET_6   1 3 000000000111101001101111|        ~302
-    * c6 IJT_4    ILL_2    5 3 000011010111101101000111|        Mask and store to mepc and Q for read of instr
-    * c7 QINT_1   QINT_2   5 3 00001xxxx111000111001011|        Store pc to mepc.
-    * c8 DIV_7    DIV_8    1 c 100001100111110101100010|        Shift (Q,M) left. Prepare unsigned sub
-    * c9 MRET_2   MRET_3   1 3 010000110101110010100101|        0xff+3 = 0x102
-    * ca DIVU_2   DIVU_3   1 c 100001100111110111000010|        Shift (Q,M) left. Prepare unsigned sub
-    * cb QINT_2   StdIncPc f 3 000110100111011011100110|        mtval = 0.
-    * cc OR_0     OR_1     1 3 0000011111x10xxx00100110| OR     or
-    * cd REM_0    DIV_1    d 3 100001011011100110000010| REM    Branch on sign dividend RS1
-    * ce _LCSRRCI_1 ILLe     1 3 00000xxxx1x0xxxx11111110| Illegal instruction seen
-    * cf MRET_7   MRET_8   1 6 0000001101x10xxx01001111|        Prepare emulation entry point 0x104
-    * d0 ECALL_1  ECALL_2  1 5 010000010111110000110111| ECALL  Verify Imm==0x000
-    * d1 MRET_1   MRET_2   4 3 000000110111011011001001| MRET   First save Imm, start build constant for check
-    * d2 LB_2     LB_3     b 8 000001010011100100000110|        Repeat shr until shreg == 0 (0,8,16,24 times)
-    * d3 aFaultd  aFault_1 5 3 000111010111011000011110|  err   LB Load access fault. Faulting adr to mtval
-    * d4 aFault_2 LDAF_3   f 5 010100010110x10010010010|        Store 5 to mcause
-    * d5 eFetch2  eFetch3  4 d 010110001111010010110100|  Fr10  Update ttime
-    * d6 eILL0c   ILLe     1 3 00000xxxx1x0xxxx11111110| Illegal instruction seen
-    * d7 ECALL_3  ECALL_4  5 3 000111010111011010100001|        mtval = 0, now start the chore of 11 to mcause
-    * d8 BLTU     condb_2  5 3 000001110111011000010011| BLTU   Conditional Branch. Offset to Ryy
-    * d9 MULH_3   MULHU_2  1 3 1000011111x10xxx01000010|        rM<=RS2, Q = 0. next read RS1. Join.
-    * da LDAF_a   LDAF_2   1 3 0000010101x10xxx10010001|        Extra cycle after error detected write mtval
-    * db jFault_1 LDAF_3   5 5 010100000110x10010010010|        Store 1 to mcause
-    * dc CSRRSI_0 CSRRW_1  5 3 000000110111011001001001| CSRRSI Decoded CSR adr in yy
-    * dd aF_SW_1  aF_SW_2  5 3 000111010111011011100101|  err   SW Store access fault. Faulting adr to mtval
-    * de Fetch    Fetch2   4 e 000100011111011011110100|  Fr10  Read and latch instruction
-    * df eFetch   eFetch2  4 b 001101011111011011010101|  Fr10  rep Read until d=mem[(rs1+ofs) & ~3u]
-    * e0 DIVU_1   DIVU_2   5 3 000001011111000011001010|        Store inverted rs2 to yy. Prepare shift
-    * e1 ORI_1    ORI_2    1 3 000000000111100100011101|        Q = RS1
-    * e2 MUL_1    MUL_2    1 8 000001010011110011101000|        Q <= rM[0] ? Q+rs2 : Q. Prepare shr/sar
-    * e3 MUL_3    ANDI_1   1 8 1100010111x10xxx00011010|        Transfer rM to rDee
-    * e4 ANDI_0   ANDI_1   1 3 000001111111101000011010| ANDI   And immediate. Q=~Iimm
-    * e5 aF_SW_2  aF_SW_3  1 5 110001010101110010110000|        Q = 4
-    * e6 StdIncPc Fetch    6 5 111001101100110011011110|  Fr10  IncPC, OpFetch
-    * e7 aFault   aFault_1 5 3 000111010111011000011110|  err   Load access fault. Faulting adr to mtval
-    * e8 MUL_2    MUL_1    1 3 100001110111100111100010|        Shift Q and rM. Prepare read rs2
-    * e9 IJT_3    IJT_4    1 3 010001100101110011000110|        Construct Q = 3
-    * ea MULHU_5  MULHU_6  1 3 000001100111110000100010|        Q <= rM[0] ? Q+Rjj : Q. Prepare read Ryy
-    * eb LH_3     LH_4     1 3 000000111111101001010110|        q = ~mem[rs1+ofs]
-    * ec AND_0    AND_1    1 3 0000011111x10xxx00010001| AND    And 
-    * ed REMU_0   DIVU_1   1 3 1000011100x10xxx11100000| REMU   Store dividend to rM. Prepare read divisor.Q=0
-    * ee eILL0a   ILLe     1 3 00000xxxx1x0xxxx11111110| Illegal instruction seen
-    * ef WFI_5    Fetch    6 5 111101101100110011011110|        IncPC, OpFetch
-    * f0 LBU_2    LBU_3    b 8 000001010011100101110010|        Repeat shr until shreg = 0 (0, 8 or 16 times)
-    * f1 aFaulte  aFault_1 5 3 000111010111011000011110|  err   LBU Load access fault. Faulting adr to mtval
-    * f2 SW_2     StdIncPc 1 3 0000000101x10xxx11100110|        Prepare read PC
-    * f3 aF_SW    aF_SW_1  1 3 00000xxxx1x01xxx11011101|  err   SW/SH/SB access fault. Rest to set SEL_O=4'hf
-    * f4 Fetch2            4 d 010111111111110000000000|  Fr10  Update ttime. Update I. Q=immediate. Use dinx
-    * f5 jFault   jFault_1 5 3 000111010111011011011011|  err   Fetch access fault. Faulting adr to mtval
-    * f6 WFI_1    WFI_2    1 5 110000000101110011111010| WFI    Chk offset=0x105. Now=0xff. Prep 0xff+4 = 0x103
-    * f7 EBREAK_1 EBREAK_2 5 3 000110010111011010101011| EBREAK mepc = pc, store 0 to mtval
-    * f8 BGEU     condb_2  5 3 000001110111011000010011| BGEU   Conditional Branch. Offset to Ryy
-    * f9 MULH_2   MULH_3   4 5 010001110111010011011001|        Store 1 to Rjj. next read rs2, Q=0
-    * fa WFI_2    WFI_3    1 5 010001010111110001000101|        Chk ofs. Now 0x103. Prep +1+~ofs, so ~ofs+0x104
-    * fb SB_3     SB_4     1 3 000000000111011001101011|        Prepare get back address to use 
-    * fc CSRRCI_0 CSRRW_1  5 3 000000110111011001001001| CSRRCI Decoded CSR adr in yy
-    * fd NMI_0    NMI_1    1 3 0000000101x10xxx01111110| NMI    Get current PC
-    * fe ILLe     ILL_1    1 3 0000000101x0xxxx01000110| Illegal
-    * ff QINT_0   QINT_1   1 3 0000000101x10xxx11000111| INT    Get current PC
+    * 00 LB_0     LB_1     0 0 000000000100011011111100| LB     Load byte. q = rdadr=RS1+0fs
+    * 01 LB_1     LB_2     1 1 000100010010010111111001|        Read until q=mem[rs1+ofs) & ~3u]
+    * 02 IJ_0     IJ_1     2 2 001000100100011011111100| IJ     Jump to mem[(rs1+ofs)&~3u]. inCSR=0
+    * 03 _L0x03   StdIncPc 1 3 000100110000000101x10xxx| FENCE  Prepare read PC (FENCE/FENCE.I)
+    * 04 ADDI_0   StdIncPc 3 3 001100110100000101110100| ADDI   Add immediate. rd =RS1+Iimm (or joined)
+    * 05 _L0x05   ADDI_0   1 3 000100110000000101x01xxx| AUIPC  q = imm20 (copy x/2)
+    * 06 LB_3     LB_4     1 3 000100110000001101111010|        q = ~mem[rs1+ofs]
+    * 07 LB_4     LB_5     1 3 000100110000001011111011|        q = (uint8_t) mem[rs1+Iimm]
+    * 08 _L0x08   SB_1     4 0 010000000100011101111100| SB     Store byte. wjj=wradr=RS1+Simm
+    * 09 LB_5     LB_6     1 3 000100110000001011111000|        q = D^0xffffffff^q = D^0x80
+    * 0a _L0x0a   SB_1     4 0 010000000100011101111100| SB     Store byte. wjj=wradr=RS1+Simm
+    * 0b JALR_2   JAL_2    5 4 010101000000000101110011|        Q = (RS1+imn) & 0xfffffffe
+    * 0c ADD_0    ADDI_0   1 3 000100110000011101111001| ADD    add     Addition Q = RS1
+    * 0d MUL_0    MUL_1    1 3 000100111000011101x10xxx| MUL    Store rs1 tp rM. Next read rs2. Q clear
+    * 0e SUB_0    SUB_1    1 3 000100110000011101x10xxx| SUB    Subtraction
+    * 0f _L0x0f   StdIncPc 3 3 001100110000000101110110| LUI    q = imm20
+    * 10 SUB_1    LB_6     1 3 000100110000011111111000|        Q = ~RS2
+    * 11 AND_1    ANDI_1   1 3 000100110000011101111000|        RS1^0xffffffff to Q
+    * 12 _L0x12   ILLe     1 3 0001001100000xxxx1x0xxxx|  Not in use (illegal as entry)
+    * 13 condb_2  condb_3  1 3 000100110000011111111000|        ~RS2 in Q
+    * 14 condb_3  condb_4  1 5 000101010100000101111100|        Calculate RS1+~RS2+1
+    * 15 condb_4  condb_5  4 6 010001100000011001111001|        Branch on condition
+    * 16 condb_5  Fetch    6 5 011001010011011011001110|        Branch not taken.
+    * 17 condb_5t BrOpFet  6 4 011001000101011011111100|        Branch taken.
+    * 18 BEQ      condb_2  5 3 010100110000011101110110| BEQ    Conditional Branch. Offset to Ryy
+    * 19 JALR_0   JALR_1   5 3 010100110100010101110100| JALR   yy=RS1+imm
+    * 1a ANDI_1   StdIncPc 3 3 001100110000000101110011|        rd = Iimm & RS1
+    * 1b _L0x1b   JAL_1    1 4 000101000000000101101110| JAL    J-imm is in q. Branch on alignfault
+    * 1c ECAL_BRK ECAL_RET 1 2 000100100000010111101110| ECALL/EBREAK  Select ECALL/(U/S/M)RET or EBREAK/WFI
+    * 1d ORI_2    StdIncPc 3 3 001100110000000101110111|        rd = Iimm | RS1
+    * 1e aFault_1 aFault_2 1 5 000101011100010101011100|        Q = 4
+    * 1f IJ_2     IJ_3     5 3 010100110000010101110110|        Read word is to be masked with 2 lsb = 00
+    * 20 LH_0     LH_1     7 7 011101110100011011111100| LH     Load hword. Q = rdadr=RS1+Iimm.
+    * 21 XORI_1   StdIncPc 3 3 001100110000000101110000|        rd = Iimm ^ RS1
+    * 22 MULHU_6  MULHU_7  1 8 000110000000010101111100|        Q <= rM[0] ? Q+Ryy : Q. Prepare last shr/sar
+    * 23 _L0x23   StdIncPc 1 3 000100110000000101x10xxx| FENCE  Prepare read PC (FENCE/FENCE.I)
+    * 24 SLLI_0   SLLI_1   1 0 00010000000001111010x110| SLLI   Shift left immediate.
+    * 25 _L0x25   ADDI_0   1 3 000100110000000101x01xxx| AUIPC  q = imm20 (copy x/2)
+    * 26 OR_1     OR_2     4 3 010000110000011101110000|        RS1^0xffffffff to jj
+    * 27 OR_2     ORI_2    1 3 000100110100000001111100|        Q = rs2
+    * 28 _L0x28   SH_1     4 7 010001110100011101111100| SH     Store halfword. jjw=wradr=RS1+Simm
+    * 29 XOR_1    XORI_1   1 3 000100110000011101111000|        Q = RS1^0xFFFFFFFF
+    * 2a _L0x2a   SH_1     4 7 010001110100011101111100| SH     Store halfword. jjw=wradr=RS1+Simm
+    * 2b SLTIX_1  SLTIX_2  1 5 0001010101000xxxx1110100|        RS1 - imm / RS1 - RS2
+    * 2c SLL_0    SLL_1    1 3 000100110000011101x0xxxx| SLL    Shift left
+    * 2d MULH_0   MULH_1   1 3 000100110000010100111001| MULH   Store rs1 to Q. Prep read 0, shcnt--
+    * 2e MULHU_1  MULHU_2  4 3 010000111000011111110110|        rM<=RS2,  Rjj<=Q=0. next read RS1. 
+    * 2f _L0x2f   StdIncPc 3 3 001100110000000101110110| LUI    q = imm20
+    * 30 SLTIX_2  StdIncPc 3 9 001110010000000101110110|        Registered ALU flag to rd
+    * 31 SLTX_1   SLTIX_1  1 3 000100110000011111111000|        ~rs2 to Q
+    * 32 JAL_1    JAL_2    5 3 010100110100000101110100|        Target adr to yy
+    * 33 JAERR_1  JAERR_2  5 3 01010011010110010110x100|  Err   JAL target adr misaligned, store to mtval
+    * 34 JAL_3    Fetch    6 3 011000110011011011101001|        PC+imm/trap entrypt to PC. OpFetch
+    * 35 SLLI_1   SLLI_2   3 3 001100110000010110111001|        Register to shift to Q (and TRG for shift 0)
+    * 36 SLLI_2   _L0x03   8 3 100000110000010110111101|        Repeat Q = Q+Q until shregcnt == 0
+    * 37 ECALL_2  ECALL_3  5 6 0101011000001xxxx1110001|        mepc = pc, prep store 0 to mtval
+    * 38 BNE      condb_2  5 3 010100110000011101110110| BNE    Conditional Branch. Offset to Ryy
+    * 39 MULHU_7  StdIncPc 3 3 001100111000000101110001|        Last shift.
+    * 3a SRxI_1   SRxI_2   3 8 001110000000010100111001|        Register to shift to Q
+    * 3b _L0x3b   JAL_1    1 4 000101000000000101101110| JAL    J-imm is in q. Branch on alignfault
+    * 3c CSRRW_0  CSRRW_1  5 3 010100110000001101110110| CSRRW  Decoded CSR adr in yy
+    * 3d SRxI_2   _L0x03   8 8 100010000000010100111001|        Repeat Q >>= 1 until shregcnt == 0
+    * 3e SLL_1    SLLI_1   1 0 00010000000001111010x001|        Shiftamount was in low 5 bits of RS2
+    * 3f SRx_1    SRxI_1   1 0 00010000000001111010x001|        Shiftamount in low 5 bits of RS2
+    * 40 LW_0     LW_1     0 4 000001000100011011111100| LW     Load word. Q=yy=rdadr=RS1+Iimm
+    * 41 JALR_1   JALR_2   1 5 000101010100011001111100|        Q=1
+    * 42 MULHU_2  MULHU_3  1 8 000110000000010100111100|        Q <= rM[0] ? Q+rs1 : Q. Prepare shr/sar
+    * 43 MULHU_4  MULHU_5  1 3 000100110000000001101000|        Prepare read Rjj.
+    * 44 SLTI_0   SLTIX_1  1 3 000100110000011111111010| SLTI   Set less than immediate (signed)
+    * 45 WFI_3    WFI_4    1 5 000101010100010101111100|        Chk ofs. Now 0x104. Prep +1, so ~ofs+0x105
+    * 46 ILL_1    ILL_2    5 3 01010011000011010110x001|        Store PC to mepc
+    * 47 ILL_2    ILL_3    5 3 010100110001110101110001|        Store 0 to mtval
+    * 48 _L0x48   SW_1     9 4 100101000100011101111100| SW     Store word. Q=wradr=RS1+Simm
+    * 49 CSRRW_1  CSRRW_2  1 5 000101010100000101111100|        Construct PC storage adr
+    * 4a _L0x4a   SW_1     9 4 100101000100011101111100| SW     Store word. Q=wradr=RS1+Simm
+    * 4b CSRRW_2  CSRRW_3  a 3 101000110001110101101001|        Write PC to 0x100 start Prep emulation entrypt
+    * 4c SLT_0    SLTX_1   1 3 000100110000011101x10xxx| SLT    Set less than (signed)
+    * 4d MULHSU_0 MULHU_1  5 3 010100110000011100110001| MULHSU Signed rs1 to Ryy, nxt rd rs2. Q=0, shcnt--
+    * 4e eILL0b   ILLe     1 3 0001001100000xxxx1x0xxxx| Illegal instruction seen
+    * 4f MRET_8   StdIncPc 1 5 000101010100010101111100|        Prep +4
+    * 50 LW_1     StdIncPc 3 a 001110100010010111110001|        Read until d=mem[(rs1+ofs) & ~3u]
+    * 51 LDAF_LW  LDAF_a   5 3 010100110001110101101110|  err   LD AlignFault. Faulting adr to mtval
+    * 52 LH_1     LH_2     1 1 000100010010010111111001|        Read until q=mem[(rs1+ofs) & ~3u]
+    * 53 LDAF_LH  LDAF_a   5 3 010100110001110101101110|  err   LD AlignFault. Faulting adr to mtval
+    * 54 LH_2     LH_3     b 8 101110000000010100111001|        Repeat shr until shreg = 0 (0, 8 or 16 times)
+    * 55 aFaultb  aFault_1 5 3 010100110001110101110110|  err   LH Load access fault. Faulting adr to mtval
+    * 56 LH_4     LH_5     1 3 000100110000010001111011|        q = (uint16_t) mem[rs1+Iimm]
+    * 57 LH_5     LB_6     1 3 000100110000010001111000|        q = D^0xffffffff^q = D ^ 0x00008000
+    * 58 DIV_A    DIV_C    1 8 000110001100010111111001|        Transfer rM to rDee
+    * 59 DIV_B    DIV_10   5 3 010100110000011111110110|        REM = Q to yy
+    * 5a SB_1     SB_2     5 3 010100110000010110111001|        Write d to Q and yy (for sh 0). Prep shift
+    * 5b _L0x5b   JAL_1    1 4 000101000000000101101110| JAL    J-imm is in q. Branch on alignfault
+    * 5c CSRRS_0  CSRRW_1  5 3 010100110000001101110110| CSRRS  Decoded CSR adr in yy
+    * 5d SB_2     SB_3     c 3 110000110000010110111101|        Repeat shl until shreg = 0 (0,8,16 or 24 times)
+    * 5e LHU_1    LHU_2    1 1 000100010010010111111001|        Read until q=mem[(rs1+ofs) & ~3u]
+    * 5f LDAF_LHU LDAF_a   5 3 010100110001110101101110|  err   LD AlignFault. Faulting adr to mtval
+    * 60 MULHU_3  MULHU_2  1 3 000100111000011111111001|        Shift Q and rM. Prepare read rs1
+    * 61 EBRKWFI2 EBREAK_1 4 6 010001100000001101110010| EBREAK/WFI2 Select EBREAK or WFI
+    * 62 DIV_8    DIV_7    1 5 000101010100010110111100|        Conditionally subtract rs2. Update M[0]
+    * 63 DIV_9    DIV_A    d 5 110101010100010111111100|        Last Cond. -rs2. Upd M[0]. Branch on INSTR[13]
+    * 64 SLTIU_0  SLTIX_1  1 3 000100110000011111111010| SLTIU  Set less than immediate (unsigned)
+    * 65 WFI_4    WFI_5    1 6 000101100000000101x10xxx|        Prepare read PC
+    * 66 SW_1     SW_2     e 3 111000110001111101101001|        Write d to a+k until accepted
+    * 67 SW_E1SWE SW_E2    5 3 01010011000110010110x110|        Store faulting address alignment to mtval
+    * 68 DIV_12   StdIncPc 3 3 001100110000000101110001|        RS2 > 0, RS1 >= 0, yy is true result
+    * 69 DIV_13   LB_6     1 3 000100110000010101111000|        RS2 > 0, RS1 < 0, change sign yy
+    * 6a MULH_1   MULH_2   5 3 010100110000010101110000|        Store ~rs1 to Ryy. Prep construct 1.
+    * 6b SB_4     SB_5     9 3 100100110001011001111001|        Address back to Q. Prepare get item to write
+    * 6c SLTU_0   SLTX_1   1 3 000100110000011101x10xxx| SLTU   Set less than (unsigned)
+    * 6d MULHU_0  MULHU_1  5 3 010100110000011100110001| MULHU  Store rs1 to Ryy. Next read rs2. Q=0, shcnt--
+    * 6e DIV_C    DIV_e    5 3 010100110000011101101001|        rM to yy. Q=ffffffff
+    * 6f MRET_6   MRET_7   1 5 0001010101000xxxx1111100|        ~302 + origImm + 1 for branch decision
+    * 70 LHU_2    LHU_3    b 8 101110000000010100111001|        Repeat shr until shreg = 0 (0, 8 or 16 times)
+    * 71 aFaultc  aFault_1 5 3 010100110001110101110110|  err   LHU Load access fault. Faulting adr to mtval
+    * 72 LBU_3    ANDI_1   1 3 000100110000001101111010|        Invert q. Prepare read mask
+    * 73 BAERR_1  BAERR_2  5 3 010100110001111001110001|        Faultadr to mtval. Prepare get offset
+    * 74 BrOpFet  Fetch2   1 b 000110110010010111110110| NewOp2 Read until instruction latched
+    * 75 BAlignEr BAERR_1  1 3 000100110000000101x0xxxx|  Err   Branch target instruction address misaligned
+    * 76 BAERR_2  BAERR_3  1 3 000100110000000101111000|        ~offset to Q. Prep read (origPC+offset)
+    * 77 BAERR_3  BAERR_4  5 5 01010101010011010110x100|        origPC to mepc. Prep read 0
+    * 78 DIV_4    DIV_6    5 3 010100110000000001110110|        ~abs(divisor) to yy
+    * 79 DIV_5    DIV_3    1 5 000101011100010101111100|        Kluge to let add1 work in DIV instr
+    * 7a SB_5     SW_2     e 3 111000110001011001101001|        Write d to a+k until accepted
+    * 7b _L0x7b   JAL_1    1 4 000101000000000101101110| JAL    J-imm is in q. Branch on alignfault
+    * 7c CSRRC_0  CSRRW_1  5 3 010100110000001101110110| CSRRC  Decoded CSR adr in yy
+    * 7d BAERR_4  JAL_3    f 3 11110011000101001110x001|        Store 0 to mcause. Prep get trap entry pont
+    * 7e NMI_1    NMI_2    5 3 0101001100001xxxx1110001|        Store pc to mepc.
+    * 7f JALRE2   BAERR_4  5 3 01010011000111010110x001|        mtval is target
+    * 80 LBU_0    LBU_1    0 0 000000000100011011111100| LBU    Load unsigned byte. Q = rdadr=RS1+Iimm.
+    * 81 JAERR_2  BAERR_4  5 3 01010011000011010110x001|        Store PC to mepc
+    * 82 DIV_1    DIV_3    4 3 010000110000011101110000|        jj=abs(RS1). Next handle divisor
+    * 83 DIV_2    DIV_1    1 3 000100110100010101111100|        Dividend negative, make RS1-1
+    * 84 XORI_0   XORI_1   1 3 000100110000011111111010| XORI   Xor immediate. Q=~Iimm
+    * 85 LBU_1    LBU_2    1 1 000100010010010111111001|        Read until q=mem[(rs1+ofs) & ~3u]
+    * 86 JAL_2    JAL_25   3 5 00110101110000010100x100|        Return address to TRG
+    * 87 JALRE1   JALRE2   5 3 01010011000011100110x001|  err   Store pc to mepc
+    * 88 DIV_E    DIV_10   d 3 110100111000011111x0xxxx|        RS2 != 0. Check signs
+    * 89 DIV_F    StdIncPc 3 3 001100110000000101110110|        RS2 == 0, return 0xffffffff
+    * 8a DIVU_5   ANDI_1   1 8 000110001100010111x10xxx|        Transfer rM to rDee
+    * 8b LB_6     StdIncPc 3 5 001101011100000101110100|        WTRG=(D^0x80)+0xFFFFFF7F+1=(D^0x80)-0x80
+    * 8c XOR_0    XOR_1    1 3 000100110000011111x10xxx| XOR    xor
+    * 8d DIV_0    DIV_1    d 3 110100111000010110111001| DIV    Branch on sign dividend RS1
+    * 8e _LCSRRS_1 ILLe     1 3 0001001100000xxxx1x0xxxx| Illegal instruction seen
+    * 8f ILL_3    ILL_4    1 5 000101010000010101111100|        Q = 1
+    * 90 NMI_2    JAL_3    f 3 111100110001101001110110|        mtval = 0.
+    * 91 LDAF_2   LDAF_3   f 5 11110101110100010100x100|        Store 4 to mcause
+    * 92 LDAF_3   JAL_3    5 3 01010011000011001110x001|        PC to mepc
+    * 93 SW_E2    SW_E3    5 3 010100110000110111110001|        Store address that faulted
+    * 94 SW_E4    JAL_3    f 3 11110011000101001110x101|        Store 6 to mcause
+    * 95 SW_E3    SW_E4    1 5 000101011100010111011100|        Q = 3
+    * 96 SH_1     SH_2     5 3 010100110000010110111001|        Write d to Q and yy (for sh 0). Prep shift
+    * 97 SW_E1SWH SW_E2    5 3 01010011000110010110x110|        Store faulting address alignment to mtval
+    * 98 BLT      condb_2  5 3 010100110000011101110110| BLT    Conditional Branch. Offset to Ryy
+    * 99 _L0x99   ILLe     1 3 0001001100000xxxx1x0xxxx|  Not in use (illegal as entry)
+    * 9a ECALL_6  JAL_3    f 3 11110011010101001100x100|        mcause = 11
+    * 9b SH_4     SH_5     9 3 100100110000111001111001|        Address back to Q. Prepare get item to write
+    * 9c DIV_10   DIV_12   d 3 110100111000011001110001|        RS2 > 0. Branch on sign of RS1
+    * 9d DIV_11   DIV_14   d 3 110100111000011001110001|        RS2 < 0. Branch on sign of RS1
+    * 9e JAL_25   JAL_3    4 3 01000011000001100110x001|        Instr. adr. to jj in case of access error
+    * 9f SH_5     SW_2     e 3 111000110000111001101001|        Write d to a+k until accepted
+    * a0 LHU_0    LHU_1    7 7 011101110100011011111100| LHU    Load unsigned hword. Q = rdadr=RS1+Iimm
+    * a1 ECALL_4  ECALL_5  1 5 000101011100010101011100|        Q = 4
+    * a2 DIV_14   LB_6     1 3 000100110000010101111000|        RS2 < 0, RS1 >= 0, change sign yy
+    * a3 DIV_15   StdIncPc 3 3 001100110000000101110001|        RS2 < 0, RS1 < 0, yy is true result
+    * a4 SRxI_0   SRxI_1   1 0 00010000000001111010x110| SRxI   Shift Right immediate (both logic/arith here)
+    * a5 MRET_3   MRET_4   1 5 000101010100001101111100|        0x102 + 0xff + 1 = 0x202
+    * a6 ECAL_RET ECALL_1  1 4 000101000000010111101110| ECALL/(U/S/M)RET Select ECALL or (U/S/M)RET
+    * a7 EBRKWFI1 EBRKWFI2 1 3 0001001101000xxxx1111100| EBREAK/WFI1 Prepare select EBREAK or WFI
+    * a8 DIV_3    DIV_4    d 3 110100111000010101111000|        Branch on sign divisor RS2
+    * a9 ILL_4    JAL_3    f 5 11110101010101001110x100|        Store 2 to mcause
+    * aa DIV_6    DIV_7    1 3 000100111000010111x10xxx|        Write M. Prepare shift
+    * ab EBREAK_2 ECALL_6  5 3 010100110000110101110001|        pc to mepc
+    * ac _L0xac   SRx_1    1 3 000100110000011101x0xxxx| SRx    Shift Right (both SRL and SRA)
+    * ad DIVU_0   DIVU_1   1 3 000100111000011100x10xxx| DIVU   Store rs1 to rM. Q=0. Prepare invert rs2
+    * ae _L0xae   SRx_1    1 3 000100110000011101x0xxxx| SRx    Shift Right (both SRL and SRA)
+    * af MRET_4   MRET_5   1 5 0001010101000xxxx1111100|        0x202 + 0xff + 1 = 0x302
+    * b0 aF_SW_3  LDAF_3   f 3 11110011010100010100x100|        Store 7 to mcause
+    * b1 CSRRW_3  CSRRW_4  1 5 000101011100010101011100|        Prep emulation entrypt 0x108, here Q to 0x104
+    * b2 CSRRW_4  Fetch    6 5 011001011110011011001100|        IncPC, OpFetch, but force +4
+    * b3 unxb3             e 0 1110000000xxxxxxxxxxxxxx| b3: Not in use 
+    * b4 eFetch3           4 5 010001010100111111111100|  Fr10  Update minstret, Q=immediate. Use dinx
+    * b5 SH_3     SH_4     1 3 000100110000000001110110|        Prepare get back address to use 
+    * b6 ECALL_5  ECALL_6  1 5 000101011100010101011100|        Q = 8
+    * b7 IJ_3     IJ_4     1 3 000100110100011001011100|        Construct Q = 3
+    * b8 BGE      condb_2  5 3 010100110000011101110110| BGE    Conditional Branch. Offset to Ryy
+    * b9 DIV_e    DIV_D    1 5 000101010000011001111000|        Calc carry of RS2+0xFFFFFFFF
+    * ba LHU_3    ANDI_1   1 3 000100110000001111111010|        Invert q. Prepare read mask
+    * bb SH_2     SH_3     c 3 110000110000010110111101|        Repeat shl until shreg = 0 (0,8 or 24 times)
+    * bc CSRRWI_0 CSRRW_1  5 3 010100110000001101110110| CSRRWI Decoded CSR adr in yy
+    * bd IJ_4     Fetch    0 3 000000110010011011101011|        Mask and use as PC
+    * be IJ_1     IJ_2     1 3 000100110010010111111001|        Read until q=mem[(rs1+ofs)&~3u]
+    * bf IJT_1    IJT_2    1 3 000100110010010111111001|        Exit CSR, enter trap
+    * c0 DIV_D    DIV_E    1 6 000101100000011101111001|        Is RS2 == 0?
+    * c1 IJT_2    IJT_3    5 3 010100110000010101110110|        Read word is to be masked with ~3u
+    * c2 DIVU_3   DIVU_2   1 5 000101010100010110111100|        Conditionally subtract rs2. Update M[0]
+    * c3 DIVU_4   DIVU_5   d 5 110101010100010111111100|        Last Cond. -rs2. Upd M[0]. Branch on INSTR[13]
+    * c4 ORI_0    ORI_1    4 3 010000110000011111110010| ORI    Or immediate. jj=~Iimm
+    * c5 MRET_5   MRET_6   1 3 000100110000000001111010|        ~302
+    * c6 IJT_4    ILL_2    5 3 010100110000110101111011|        Mask and store to mepc and Q for read of instr
+    * c7 QINT_1   QINT_2   5 3 0101001100001xxxx1110001|        Store pc to mepc.
+    * c8 DIV_7    DIV_8    1 c 000111001000011001111101|        Shift (Q,M) left. Prepare unsigned sub
+    * c9 MRET_2   MRET_3   1 3 000100110100001101011100|        0xff+3 = 0x102
+    * ca DIVU_2   DIVU_3   1 c 000111001000011001111101|        Shift (Q,M) left. Prepare unsigned sub
+    * cb QINT_2   StdIncPc f 3 111100110001101001110110|        mtval = 0.
+    * cc OR_0     OR_1     1 3 000100110000011111x10xxx| OR     or
+    * cd REM_0    DIV_1    d 3 110100111000010110111001| REM    Branch on sign dividend RS1
+    * ce _LCSRRCI_1 ILLe     1 3 0001001100000xxxx1x0xxxx| Illegal instruction seen
+    * cf MRET_7   MRET_8   1 6 000101100000001101x10xxx|        Prepare emulation entry point 0x104
+    * d0 ECALL_1  ECALL_2  1 5 000101010100000101111100| ECALL  Verify Imm==0x000
+    * d1 MRET_1   MRET_2   4 3 010000110000001101110110| MRET   First save Imm, start build constant for check
+    * d2 LB_2     LB_3     b 8 101110000000010100111001|        Repeat shr until shreg == 0 (0,8,16,24 times)
+    * d3 aFaultd  aFault_1 5 3 010100110001110101110110|  err   LB Load access fault. Faulting adr to mtval
+    * d4 aFault_2 LDAF_3   f 5 11110101010100010110x100|        Store 5 to mcause
+    * d5 eFetch2  eFetch3  4 d 010011010101100011110100|  Fr10  Update ttime
+    * d6 eILL0c   ILLe     1 3 0001001100000xxxx1x0xxxx| Illegal instruction seen
+    * d7 ECALL_3  ECALL_4  5 3 010100110001110101110110|        mtval = 0, now start the chore of 11 to mcause
+    * d8 BLTU     condb_2  5 3 010100110000011101110110| BLTU   Conditional Branch. Offset to Ryy
+    * d9 MULH_3   MULHU_2  1 3 000100111000011111x10xxx|        rM<=RS2, Q = 0. next read RS1. Join.
+    * da LDAF_a   LDAF_2   1 3 000100110000010101x10xxx|        Extra cycle after error detected write mtval
+    * db jFault_1 LDAF_3   5 5 01010101010100000110x100|        Store 1 to mcause
+    * dc CSRRSI_0 CSRRW_1  5 3 010100110000001101110110| CSRRSI Decoded CSR adr in yy
+    * dd aF_SW_1  aF_SW_2  5 3 010100110001110101110110|  err   SW Store access fault. Faulting adr to mtval
+    * de Fetch    Fetch2   4 e 010011100001000111110110|  Fr10  Read and latch instruction
+    * df eFetch   eFetch2  4 b 010010110011010111110110|  Fr10  rep Read until d=mem[(rs1+ofs) & ~3u]
+    * e0 DIVU_1   DIVU_2   5 3 010100110000010111110000|        Store inverted rs2 to yy. Prepare shift
+    * e1 ORI_1    ORI_2    1 3 000100110000000001111001|        Q = RS1
+    * e2 MUL_1    MUL_2    1 8 000110000000010100111100|        Q <= rM[0] ? Q+rs2 : Q. Prepare shr/sar
+    * e3 MUL_3    ANDI_1   1 8 000110001100010111x10xxx|        Transfer rM to rDee
+    * e4 ANDI_0   ANDI_1   1 3 000100110000011111111010| ANDI   And immediate. Q=~Iimm
+    * e5 aF_SW_2  aF_SW_3  1 5 000101011100010101011100|        Q = 4
+    * e6 StdIncPc Fetch    6 5 011001011110011011001100|  Fr10  IncPC, OpFetch
+    * e7 aFault   aFault_1 5 3 010100110001110101110110|  err   Load access fault. Faulting adr to mtval
+    * e8 MUL_2    MUL_1    1 3 000100111000011101111001|        Shift Q and rM. Prepare read rs2
+    * e9 IJT_3    IJT_4    1 3 000100110100011001011100|        Construct Q = 3
+    * ea MULHU_5  MULHU_6  1 3 000100110000011001111100|        Q <= rM[0] ? Q+Rjj : Q. Prepare read Ryy
+    * eb LH_3     LH_4     1 3 000100110000001111111010|        q = ~mem[rs1+ofs]
+    * ec AND_0    AND_1    1 3 000100110000011111x10xxx| AND    And 
+    * ed REMU_0   DIVU_1   1 3 000100111000011100x10xxx| REMU   Store dividend to rM. Prepare read divisor.Q=0
+    * ee eILL0a   ILLe     1 3 0001001100000xxxx1x0xxxx| Illegal instruction seen
+    * ef WFI_5    Fetch    6 5 011001011111011011001100|        IncPC, OpFetch
+    * f0 LBU_2    LBU_3    b 8 101110000000010100111001|        Repeat shr until shreg = 0 (0, 8 or 16 times)
+    * f1 aFaulte  aFault_1 5 3 010100110001110101110110|  err   LBU Load access fault. Faulting adr to mtval
+    * f2 SW_2     StdIncPc 1 3 000100110000000101x10xxx|        Prepare read PC
+    * f3 aF_SW    aF_SW_1  1 3 0001001100000xxxx1x01xxx|  err   SW/SH/SB access fault. Rest to set SEL_O=4'hf
+    * f4 Fetch2            4 d 010011010101111111111100|  Fr10  Update ttime. Update I. Q=immediate. Use dinx
+    * f5 jFault   jFault_1 5 3 010100110001110101110110|  err   Fetch access fault. Faulting adr to mtval
+    * f6 WFI_1    WFI_2    1 5 000101011100000001011100| WFI    Chk offset=0x105. Now=0xff. Prep 0xff+4 = 0x103
+    * f7 EBREAK_1 EBREAK_2 5 3 010100110001100101110110| EBREAK mepc = pc, store 0 to mtval
+    * f8 BGEU     condb_2  5 3 010100110000011101110110| BGEU   Conditional Branch. Offset to Ryy
+    * f9 MULH_2   MULH_3   4 5 010001010100011101110100|        Store 1 to Rjj. next read rs2, Q=0
+    * fa WFI_2    WFI_3    1 5 000101010100010101111100|        Chk ofs. Now 0x103. Prep +1+~ofs, so ~ofs+0x104
+    * fb SB_3     SB_4     1 3 000100110000000001110110|        Prepare get back address to use 
+    * fc CSRRCI_0 CSRRW_1  5 3 010100110000001101110110| CSRRCI Decoded CSR adr in yy
+    * fd NMI_0    NMI_1    1 3 000100110000000101x10xxx| NMI    Get current PC
+    * fe ILLe     ILL_1    1 3 000100110000000101x0xxxx| Illegal
+    * ff QINT_0   QINT_1   1 3 000100110000000101x10xxx| INT    Get current PC
     */
    localparam u0_0 = 256'h76e6501050e2790473867c5af88b7c5afb097a07480474e650e6fcbef9d2fc01;
    localparam u0_1 = 256'h76b75cd477e6eea66e3273e674417613fc74cede79167c15f81440fe781af88b;
@@ -2364,7 +2364,7 @@ endmodule
  * 2019-2020. Copyright B. Nossum.
  * For licence, see LICENCE
  * -----------------------------------------------------------------------------ehdr
- * Automatically generated from ../code/ucode.h by midgetv_indirectEBR.c.
+ * Automatically generated from ../code/ucode.h by ../util/midgetv_indirectEBR.c.
  * Do not edit.
  * Optiones for this variant:
  *   No RVC
@@ -2458,262 +2458,262 @@ module v7_m_2ebr
     *                      indirect_index 1
     * inx         next     | indirect index 0
     * || ucode    ucode    | | direct representation
-    * 00 LB_0     LB_1     0 0 010011011111100000000001| LB     Load byte. q = rdadr=RS1+0fs
-    * 01 LB_1     LB_2     1 1 000010111111001111010010|        Read until q=mem[rs1+ofs) & ~3u]
-    * 02 IJ_0     IJ_1     2 2 010011011111100010111110| IJ     Jump to mem[(rs1+ofs)&~3u]. inCSR=0
-    * 03 _L0x03   StdIncPc 1 3 000000101x10xxx011100110| FENCE  Prepare read PC (FENCE/FENCE.I)
-    * 04 ADDI_0   StdIncPc 3 3 010000101110100011100110| ADDI   Add immediate. rd =RS1+Iimm (or joined)
-    * 05 _L0x05   ADDI_0   1 3 000000101x01xxx000000100| AUIPC  q = imm20 (copy x/2)
-    * 06 LB_3     LB_4     1 3 000001101111010000000111|        q = ~mem[rs1+ofs]
-    * 07 LB_4     LB_5     1 3 000001011111011000001001|        q = (uint8_t) mem[rs1+Iimm]
-    * 08 _L0x08   SB_1     4 0 010011101111100001011010| SB     Store byte. wjj=wradr=RS1+Simm
-    * 09 LB_5     LB_6     1 3 000001011111000010001011|        q = D^0xffffffff^q = D^0x80
-    * 0a _L0x0a   SB_1     4 0 010011101111100001011010| SB     Store byte. wjj=wradr=RS1+Simm
-    * 0b JALR_2   JAL_2    5 4 000000101110011010000110|        Q = (RS1+imn) & 0xfffffffe
-    * 0c ADD_0    ADDI_0   1 3 000011101111001000000100| ADD    add     Addition Q = RS1
-    * 0d MUL_0    MUL_1    1 3 100011101x10xxx011100010| MUL    Store rs1 tp rM. Next read rs2. Q clear
-    * 0e SUB_0    SUB_1    1 3 000011101x10xxx000010000| SUB    Subtraction
-    * 0f _L0x0f   StdIncPc 3 3 000000101110110011100110| LUI    q = imm20
-    * 10 SUB_1    LB_6     1 3 000011111111000010001011|        Q = ~RS2
-    * 11 AND_1    ANDI_1   1 3 000011101111000000011010|        RS1^0xffffffff to Q
-    * 12 _L0x12   ILLe     1 3 0000xxxx1x0xxxx011111110|  Not in use (illegal as entry)
-    * 13 condb_2  condb_3  1 3 000011111111000000010100|        ~RS2 in Q
-    * 14 condb_3  condb_4  1 5 010000101111100000010101|        Calculate RS1+~RS2+1
-    * 15 condb_4  condb_5  4 6 000011001111001000010110|        Branch on condition
-    * 16 condb_5  Fetch    6 7 001011011001110011011110|        Branch not taken.
-    * 17 condb_5t BrOpFet  6 4 011011011111100001110100|        Branch taken.
-    * 18 BEQ      condb_2  5 3 000011101110110000010011| BEQ    Conditional Branch. Offset to Ryy
-    * 19 JALR_0   JALR_1   5 3 010010101110100001000001| JALR   yy=RS1+imm
-    * 1a ANDI_1   StdIncPc 3 3 000000101110011011100110|        rd = Iimm & RS1
-    * 1b _L0x1b   JAL_1    1 4 000000101101110000110010| JAL    J-imm is in q. Branch on alignfault
-    * 1c ECAL_BRK ECAL_RET 1 2 000010111101110010100110| ECALL/EBREAK  Select ECALL/(U/S/M)RET or EBREAK/WFI
-    * 1d ORI_2    StdIncPc 3 3 000000101110111011100110|        rd = Iimm | RS1
-    * 1e aFault_1 aFault_2 1 5 110010101011100011010100|        Q = 4
-    * 1f IJ_2     IJ_3     5 3 000010101110110010110111|        Read word is to be masked with 2 lsb = 00
-    * 20 LH_0     LH_1     7 8 010011011111100001010010| LH     Load hword. Q = rdadr=RS1+Iimm.
-    * 21 XORI_1   StdIncPc 3 3 000000101110000011100110|        rd = Iimm ^ RS1
-    * 22 MULHU_6  MULHU_7  1 9 000010101111100100111001|        Q <= rM[0] ? Q+Ryy : Q. Prepare last shr/sar
-    * 23 _L0x23   StdIncPc 1 3 000000101x10xxx011100110| FENCE  Prepare read PC (FENCE/FENCE.I)
-    * 24 SLLI_0   SLLI_1   1 0 00001111010x110000110101| SLLI   Shift left immediate.
-    * 25 _L0x25   ADDI_0   1 3 000000101x01xxx000000100| AUIPC  q = imm20 (copy x/2)
-    * 26 OR_1     OR_2     4 3 000011101110000000100111|        RS1^0xffffffff to jj
-    * 27 OR_2     ORI_2    1 3 010000001111100000011101|        Q = rs2
-    * 28 _L0x28   SH_1     4 8 010011101111100010010110| SH     Store halfword. jjw=wradr=RS1+Simm
-    * 29 XOR_1    XORI_1   1 3 000011101111000000100001|        Q = RS1^0xFFFFFFFF
-    * 2a _L0x2a   SH_1     4 8 010011101111100010010110| SH     Store halfword. jjw=wradr=RS1+Simm
-    * 2b SLTIX_1  SLTIX_2  1 5 0100xxxx1110100000110000|        RS1 - imm / RS1 - RS2
-    * 2c SLL_0    SLL_1    1 3 000011101x0xxxx000111110| SLL    Shift left
-    * 2d MULH_0   MULH_1   1 3 000010100111001001101010| MULH   Store rs1 to Q. Prep read 0, shcnt--
-    * 2e MULHU_1  MULHU_2  4 3 100011111110110001000010|        rM<=RS2,  Rjj<=Q=0. next read RS1. 
-    * 2f _L0x2f   StdIncPc 3 3 000000101110110011100110| LUI    q = imm20
-    * 30 SLTIX_2  StdIncPc 3 a 000000101110110011100110|        Registered ALU flag to rd
-    * 31 SLTX_1   SLTIX_1  1 3 000011111111000000101011|        ~rs2 to Q
-    * 32 JAL_1    JAL_2    5 3 010000101110100010000110|        Target adr to yy
-    * 33 JAERR_1  JAERR_2  5 3 01110010110x100010000001|  Err   JAL target adr misaligned, store to mtval
-    * 34 JAL_3    Fetch    6 b 001011011101001011011110|        PC+imm/trap entrypt to PC. OpFetch
-    * 35 SLLI_1   SLLI_2   3 3 000010110111001000110110|        Register to shift to Q (and TRG for shift 0)
-    * 36 SLLI_2   _L0x03   8 3 000010110111101000000011|        Repeat Q = Q+Q until shregcnt == 0
-    * 37 ECALL_2  ECALL_3  5 6 0001xxxx1110001011010111|        mepc = pc, prep store 0 to mtval
-    * 38 BNE      condb_2  5 3 000011101110110000010011| BNE    Conditional Branch. Offset to Ryy
-    * 39 MULHU_7  StdIncPc 3 3 100000101110001011100110|        Last shift.
-    * 3a SRxI_1   SRxI_2   3 9 000010100111001100111101|        Register to shift to Q
-    * 3b _L0x3b   JAL_1    1 4 000000101101110000110010| JAL    J-imm is in q. Branch on alignfault
-    * 3c CSRRW_0  CSRRW_1  5 3 000001101110110001001001| CSRRW  Decoded CSR adr in yy
-    * 3d SRxI_2   _L0x03   8 9 000010100111001100000011|        Repeat Q >>= 1 until shregcnt == 0
-    * 3e SLL_1    SLLI_1   1 0 00001111010x001000110101|        Shiftamount was in low 5 bits of RS2
-    * 3f SRx_1    SRxI_1   1 0 00001111010x001000111010|        Shiftamount in low 5 bits of RS2
-    * 40 LW_0     LW_1     0 4 010011011111100001010000| LW     Load word. Q=yy=rdadr=RS1+Iimm
-    * 41 JALR_1   JALR_2   1 5 010011001111100000001011|        Q=1
-    * 42 MULHU_2  MULHU_3  1 9 000010100111100101100000|        Q <= rM[0] ? Q+rs1 : Q. Prepare shr/sar
-    * 43 MULHU_4  MULHU_5  1 3 000000001101000011101010|        Prepare read Rjj.
-    * 44 SLTI_0   SLTIX_1  1 3 000011111111010000101011| SLTI   Set less than immediate (signed)
-    * 45 WFI_3    WFI_4    1 5 010010101111100001100101|        Chk ofs. Now 0x104. Prep +1, so ~ofs+0x105
-    * 46 ILL_1    ILL_2    5 3 00011010110x001001000111|        Store PC to mepc
-    * 47 ILL_2    ILL_3    5 3 001110101110001010001111|        Store 0 to mtval
-    * 48 _L0x48   SW_1     9 4 010011101111100001100110| SW     Store word. Q=wradr=RS1+Simm
-    * 49 CSRRW_1  CSRRW_2  1 5 010000101111100001001011|        Construct PC storage adr
-    * 4a _L0x4a   SW_1     9 4 010011101111100001100110| SW     Store word. Q=wradr=RS1+Simm
-    * 4b CSRRW_2  CSRRW_3  a 3 001110101101001010110001|        Write PC to 0x100 start Prep emulation entrypt
-    * 4c SLT_0    SLTX_1   1 3 000011101x10xxx000110001| SLT    Set less than (signed)
-    * 4d MULHSU_0 MULHU_1  5 3 000011100110001000101110| MULHSU Signed rs1 to Ryy, nxt rd rs2. Q=0, shcnt--
-    * 4e eILL0b   ILLe     1 3 0000xxxx1x0xxxx011111110| Illegal instruction seen
-    * 4f MRET_8   StdIncPc 1 5 010010101111100011100110|        Prep +4
-    * 50 LW_1     StdIncPc 3 c 000010111110001011100110|        Read until d=mem[(rs1+ofs) & ~3u]
-    * 51 LDAF_LW  LDAF_a   5 3 001110101101110011011010|  err   LD AlignFault. Faulting adr to mtval
-    * 52 LH_1     LH_2     1 1 000010111111001101010100|        Read until q=mem[(rs1+ofs) & ~3u]
-    * 53 LDAF_LH  LDAF_a   5 3 001110101101110011011010|  err   LD AlignFault. Faulting adr to mtval
-    * 54 LH_2     LH_3     b 9 000010100111001111101011|        Repeat shr until shreg = 0 (0, 8 or 16 times)
-    * 55 aFaultb  aFault_1 5 3 001110101110110000011110|  err   LH Load access fault. Faulting adr to mtval
-    * 56 LH_4     LH_5     1 3 000010001111011001010111|        q = (uint16_t) mem[rs1+Iimm]
-    * 57 LH_5     LB_6     1 3 000010001111000010001011|        q = D^0xffffffff^q = D ^ 0x00008000
-    * 58 DIV_A    DIV_C    1 9 110010111111001101101110|        Transfer rM to rDee
-    * 59 DIV_B    DIV_10   5 3 000011111110110010011100|        REM = Q to yy
-    * 5a SB_1     SB_2     5 3 000010110111001001011101|        Write d to Q and yy (for sh 0). Prep shift
-    * 5b _L0x5b   JAL_1    1 4 000000101101110000110010| JAL    J-imm is in q. Branch on alignfault
-    * 5c CSRRS_0  CSRRW_1  5 3 000001101110110001001001| CSRRS  Decoded CSR adr in yy
-    * 5d SB_2     SB_3     c 3 000010110111101011111011|        Repeat shl until shreg = 0 (0,8,16 or 24 times)
-    * 5e LHU_1    LHU_2    1 1 000010111111001101110000|        Read until q=mem[(rs1+ofs) & ~3u]
-    * 5f LDAF_LHU LDAF_a   5 3 001110101101110011011010|  err   LD AlignFault. Faulting adr to mtval
-    * 60 MULHU_3  MULHU_2  1 3 100011111111001001000010|        Shift Q and rM. Prepare read rs1
-    * 61 EBRKWFI2 EBREAK_1 4 6 000001101110010011110111| EBREAK/WFI2 Select EBREAK or WFI
-    * 62 DIV_8    DIV_7    1 5 010010110111100011001000|        Conditionally subtract rs2. Update M[0]
-    * 63 DIV_9    DIV_A    d 5 010010111111100001011000|        Last Cond. -rs2. Upd M[0]. Branch on INSTR[13]
-    * 64 SLTIU_0  SLTIX_1  1 3 000011111111010000101011| SLTIU  Set less than immediate (unsigned)
-    * 65 WFI_4    WFI_5    1 6 000000101x10xxx011101111|        Prepare read PC
-    * 66 SW_1     SW_2     e 3 001111101101001011110010|        Write d to a+k until accepted
-    * 67 SW_E1SWE SW_E2    5 3 00110010110x110010010011|        Store faulting address alignment to mtval
-    * 68 DIV_12   StdIncPc 3 3 000000101110001011100110|        RS2 > 0, RS1 >= 0, yy is true result
-    * 69 DIV_13   LB_6     1 3 000010101111000010001011|        RS2 > 0, RS1 < 0, change sign yy
-    * 6a MULH_1   MULH_2   5 3 000010101110000011111001|        Store ~rs1 to Ryy. Prep construct 1.
-    * 6b SB_4     SB_5     9 3 001011001111001001111010|        Address back to Q. Prepare get item to write
-    * 6c SLTU_0   SLTX_1   1 3 000011101x10xxx000110001| SLTU   Set less than (unsigned)
-    * 6d MULHU_0  MULHU_1  5 3 000011100110001000101110| MULHU  Store rs1 to Ryy. Next read rs2. Q=0, shcnt--
-    * 6e DIV_C    DIV_e    5 3 000011101101001010111001|        rM to yy. Q=ffffffff
-    * 6f MRET_6   MRET_7   1 5 0100xxxx1111100011001111|        ~302 + origImm + 1 for branch decision
-    * 70 LHU_2    LHU_3    b 9 000010100111001110111010|        Repeat shr until shreg = 0 (0, 8 or 16 times)
-    * 71 aFaultc  aFault_1 5 3 001110101110110000011110|  err   LHU Load access fault. Faulting adr to mtval
-    * 72 LBU_3    ANDI_1   1 3 000001101111010000011010|        Invert q. Prepare read mask
-    * 73 BAERR_1  BAERR_2  5 3 001111001110001001110110|        Faultadr to mtval. Prepare get offset
-    * 74 BrOpFet  Fetch2   1 d 000010111110110011110100| NewOp2 Read until instruction latched
-    * 75 BAlignEr BAERR_1  1 3 000000101x0xxxx001110011|  Err   Branch target instruction address misaligned
-    * 76 BAERR_2  BAERR_3  1 3 000000101111000001110111|        ~offset to Q. Prep read (origPC+offset)
-    * 77 BAERR_3  BAERR_4  5 5 01011010110x100001111101|        origPC to mepc. Prep read 0
-    * 78 DIV_4    DIV_6    5 3 000000001110110010101010|        ~abs(divisor) to yy
-    * 79 DIV_5    DIV_3    1 5 110010101111100010101000|        Kluge to let add1 work in DIV instr
-    * 7a SB_5     SW_2     e 3 001011001101001011110010|        Write d to a+k until accepted
-    * 7b _L0x7b   JAL_1    1 4 000000101101110000110010| JAL    J-imm is in q. Branch on alignfault
-    * 7c CSRRC_0  CSRRW_1  5 3 000001101110110001001001| CSRRC  Decoded CSR adr in yy
-    * 7d BAERR_4  JAL_3    f 3 00101001110x001000110100|        Store 0 to mcause. Prep get trap entry pont
-    * 7e NMI_1    NMI_2    5 3 0001xxxx1110001010010000|        Store pc to mepc.
-    * 7f JALRE2   BAERR_4  5 3 00111010110x001001111101|        mtval is target
-    * 80 LBU_0    LBU_1    0 0 010011011111100010000101| LBU    Load unsigned byte. Q = rdadr=RS1+Iimm.
-    * 81 JAERR_2  BAERR_4  5 3 00011010110x001001111101|        Store PC to mepc
-    * 82 DIV_1    DIV_3    4 3 000011101110000010101000|        jj=abs(RS1). Next handle divisor
-    * 83 DIV_2    DIV_1    1 3 010010101111100010000010|        Dividend negative, make RS1-1
-    * 84 XORI_0   XORI_1   1 3 000011111111010000100001| XORI   Xor immediate. Q=~Iimm
-    * 85 LBU_1    LBU_2    1 1 000010111111001111110000|        Read until q=mem[(rs1+ofs) & ~3u]
-    * 86 JAL_2    JAL_25   3 5 11000010100x100010011110|        Return address to TRG
-    * 87 JALRE1   JALRE2   5 3 00011100110x001001111111|  err   Store pc to mepc
-    * 88 DIV_E    DIV_10   d 3 100011111x0xxxx010011100|        RS2 != 0. Check signs
-    * 89 DIV_F    StdIncPc 3 3 000000101110110011100110|        RS2 == 0, return 0xffffffff
-    * 8a DIVU_5   ANDI_1   1 9 110010111x10xxx100011010|        Transfer rM to rDee
-    * 8b LB_6     StdIncPc 3 5 110000101110100011100110|        WTRG=(D^0x80)+0xFFFFFF7F+1=(D^0x80)-0x80
-    * 8c XOR_0    XOR_1    1 3 000011111x10xxx000101001| XOR    xor
-    * 8d DIV_0    DIV_1    d 3 100010110111001010000010| DIV    Branch on sign dividend RS1
-    * 8e _LCSRRS_1 ILLe     1 3 0000xxxx1x0xxxx011111110| Illegal instruction seen
-    * 8f ILL_3    ILL_4    1 5 000010101111100010101001|        Q = 1
-    * 90 NMI_2    JAL_3    f 3 001101001110110000110100|        mtval = 0.
-    * 91 LDAF_2   LDAF_3   f 5 11100010100x100010010010|        Store 4 to mcause
-    * 92 LDAF_3   JAL_3    5 3 00011001110x001000110100|        PC to mepc
-    * 93 SW_E2    SW_E3    5 3 000110111110001010010101|        Store address that faulted
-    * 94 SW_E4    JAL_3    f 3 00101001110x101000110100|        Store 6 to mcause
-    * 95 SW_E3    SW_E4    1 5 110010111011100010010100|        Q = 3
-    * 96 SH_1     SH_2     5 3 000010110111001010111011|        Write d to Q and yy (for sh 0). Prep shift
-    * 97 SW_E1SWH SW_E2    5 3 00110010110x110010010011|        Store faulting address alignment to mtval
-    * 98 BLT      condb_2  5 3 000011101110110000010011| BLT    Conditional Branch. Offset to Ryy
-    * 99 _L0x99   ILLe     1 3 0000xxxx1x0xxxx011111110|  Not in use (illegal as entry)
-    * 9a ECALL_6  JAL_3    f 3 01101001100x100000110100|        mcause = 11
-    * 9b SH_4     SH_5     9 3 000111001111001010011111|        Address back to Q. Prepare get item to write
-    * 9c DIV_10   DIV_12   d 3 100011001110001001101000|        RS2 > 0. Branch on sign of RS1
-    * 9d DIV_11   DIV_14   d 3 100011001110001010100010|        RS2 < 0. Branch on sign of RS1
-    * 9e JAL_25   JAL_3    4 3 00001100110x001000110100|        Instr. adr. to jj in case of access error
-    * 9f SH_5     SW_2     e 3 000111001101001011110010|        Write d to a+k until accepted
-    * a0 LHU_0    LHU_1    7 8 010011011111100001011110| LHU    Load unsigned hword. Q = rdadr=RS1+Iimm
-    * a1 ECALL_4  ECALL_5  1 5 110010101011100010110110|        Q = 4
-    * a2 DIV_14   LB_6     1 3 000010101111000010001011|        RS2 < 0, RS1 >= 0, change sign yy
-    * a3 DIV_15   StdIncPc 3 3 000000101110001011100110|        RS2 < 0, RS1 < 0, yy is true result
-    * a4 SRxI_0   SRxI_1   1 0 00001111010x110000111010| SRxI   Shift Right immediate (both logic/arith here)
-    * a5 MRET_3   MRET_4   1 5 010001101111100010101111|        0x102 + 0xff + 1 = 0x202
-    * a6 ECAL_RET ECALL_1  1 4 000010111101110011010000| ECALL/(U/S/M)RET Select ECALL or (U/S/M)RET
-    * a7 EBRKWFI1 EBRKWFI2 1 3 0100xxxx1111100001100001| EBREAK/WFI1 Prepare select EBREAK or WFI
-    * a8 DIV_3    DIV_4    d 3 100010101111000001111000|        Branch on sign divisor RS2
-    * a9 ILL_4    JAL_3    f 5 01101001110x100000110100|        Store 2 to mcause
-    * aa DIV_6    DIV_7    1 3 100010111x10xxx011001000|        Write M. Prepare shift
-    * ab EBREAK_2 ECALL_6  5 3 000110101110001010011010|        pc to mepc
-    * ac _L0xac   SRx_1    1 3 000011101x0xxxx000111111| SRx    Shift Right (both SRL and SRA)
-    * ad DIVU_0   DIVU_1   1 3 100011100x10xxx011100000| DIVU   Store rs1 to rM. Q=0. Prepare invert rs2
-    * ae _L0xae   SRx_1    1 3 000011101x0xxxx000111111| SRx    Shift Right (both SRL and SRA)
-    * af MRET_4   MRET_5   1 5 0100xxxx1111100011000101|        0x202 + 0xff + 1 = 0x302
-    * b0 aF_SW_3  LDAF_3   f 3 01100010100x100010010010|        Store 7 to mcause
-    * b1 CSRRW_3  CSRRW_4  1 5 110010101011100010110010|        Prep emulation entrypt 0x108, here Q to 0x104
-    * b2 CSRRW_4  Fetch    6 7 110011011001100011011110|        IncPC, OpFetch, but force +4
-    * b3 unxb3             e 0 00xxxxxxxxxxxxxxxxxxxxxx| b3: Not in use 
-    * b4 eFetch3           4 5 010111111111100000000000|  Fr11  Write minstret. Update I. Q=immediate, use dinx
-    * b5 SH_3     SH_4     1 3 000000001110110010011011|        Prepare get back address to use 
-    * b6 ECALL_5  ECALL_6  1 5 110010101011100010011010|        Q = 8
-    * b7 IJ_3     IJ_4     1 3 010011001011100010111101|        Construct Q = 3
-    * b8 BGE      condb_2  5 3 000011101110110000010011| BGE    Conditional Branch. Offset to Ryy
-    * b9 DIV_e    DIV_D    1 5 000011001111000011000000|        Calc carry of RS2+0xFFFFFFFF
-    * ba LHU_3    ANDI_1   1 3 000001111111010000011010|        Invert q. Prepare read mask
-    * bb SH_2     SH_3     c 3 000010110111101010110101|        Repeat shl until shreg = 0 (0,8 or 24 times)
-    * bc CSRRWI_0 CSRRW_1  5 3 000001101110110001001001| CSRRWI Decoded CSR adr in yy
-    * bd IJ_4     Fetch    0 b 000011011101011011011110|        Mask and use as PC
-    * be IJ_1     IJ_2     1 b 000010111111001000011111|        Read until q=mem[(rs1+ofs)&~3u]
-    * bf IJT_1    IJT_2    1 b 000010111111001011000001|        Exit CSR, enter trap
-    * c0 DIV_D    DIV_E    1 6 000011101111001010001000|        Is RS2 == 0?
-    * c1 IJT_2    IJT_3    5 3 000010101110110011101001|        Read word is to be masked with ~3u
-    * c2 DIVU_3   DIVU_2   1 5 010010110111100011001010|        Conditionally subtract rs2. Update M[0]
-    * c3 DIVU_4   DIVU_5   d 5 010010111111100010001010|        Last Cond. -rs2. Upd M[0]. Branch on INSTR[13]
-    * c4 ORI_0    ORI_1    4 3 000011111110010011100001| ORI    Or immediate. jj=~Iimm
-    * c5 MRET_5   MRET_6   1 3 000000001111010001101111|        ~302
-    * c6 IJT_4    ILL_2    5 3 000110101111011001000111|        Mask and store to mepc and Q for read of instr
-    * c7 QINT_1   QINT_2   5 3 0001xxxx1110001011001011|        Store pc to mepc.
-    * c8 DIV_7    DIV_8    1 e 100011001111101001100010|        Shift (Q,M) left. Prepare unsigned sub
-    * c9 MRET_2   MRET_3   1 3 010001101011100010100101|        0xff+3 = 0x102
-    * ca DIVU_2   DIVU_3   1 e 100011001111101011000010|        Shift (Q,M) left. Prepare unsigned sub
-    * cb QINT_2   StdIncPc f 3 001101001110110011100110|        mtval = 0.
-    * cc OR_0     OR_1     1 3 000011111x10xxx000100110| OR     or
-    * cd REM_0    DIV_1    d 3 100010110111001010000010| REM    Branch on sign dividend RS1
-    * ce _LCSRRCI_1 ILLe     1 3 0000xxxx1x0xxxx011111110| Illegal instruction seen
-    * cf MRET_7   MRET_8   1 6 000001101x10xxx001001111|        Prepare emulation entry point 0x104
-    * d0 ECALL_1  ECALL_2  1 5 010000101111100000110111| ECALL  Verify Imm==0x000
-    * d1 MRET_1   MRET_2   4 3 000001101110110011001001| MRET   First save Imm, start build constant for check
-    * d2 LB_2     LB_3     b 9 000010100111001100000110|        Repeat shr until shreg == 0 (0,8,16,24 times)
-    * d3 aFaultd  aFault_1 5 3 001110101110110000011110|  err   LB Load access fault. Faulting adr to mtval
-    * d4 aFault_2 LDAF_3   f 5 01100010110x100010010010|        Store 5 to mcause
-    * d5 unxd5             e 0 00xxxxxxxxxxxxxxxxxxxxxx| d5: Not in use
-    * d6 eILL0c   ILLe     1 3 0000xxxx1x0xxxx011111110| Illegal instruction seen
-    * d7 ECALL_3  ECALL_4  5 3 001110101110110010100001|        mtval = 0, now start the chore of 11 to mcause
-    * d8 BLTU     condb_2  5 3 000011101110110000010011| BLTU   Conditional Branch. Offset to Ryy
-    * d9 MULH_3   MULHU_2  1 3 100011111x10xxx001000010|        rM<=RS2, Q = 0. next read RS1. Join.
-    * da LDAF_a   LDAF_2   1 3 000010101x10xxx010010001|        Extra cycle after error detected write mtval
-    * db jFault_1 LDAF_3   5 5 01100000110x100010010010|        Store 1 to mcause
-    * dc CSRRSI_0 CSRRW_1  5 3 000001101110110001001001| CSRRSI Decoded CSR adr in yy
-    * dd aF_SW_1  aF_SW_2  5 3 001110101110110011100101|  err   SW Store access fault. Faulting adr to mtval
-    * de Fetch    Fetch2   4 d 001010111110110011110100|  Fr11  Read and latch instruction
-    * df eFetch   Fetch2   4 d 001010111110110011110100|  Fr11  rep Read until d=mem[(rs1+ofs) & ~3u]
-    * e0 DIVU_1   DIVU_2   5 3 000010111110000011001010|        Store inverted rs2 to yy. Prepare shift
-    * e1 ORI_1    ORI_2    1 3 000000001111001000011101|        Q = RS1
-    * e2 MUL_1    MUL_2    1 9 000010100111100111101000|        Q <= rM[0] ? Q+rs2 : Q. Prepare shr/sar
-    * e3 MUL_3    ANDI_1   1 9 110010111x10xxx100011010|        Transfer rM to rDee
-    * e4 ANDI_0   ANDI_1   1 3 000011111111010000011010| ANDI   And immediate. Q=~Iimm
-    * e5 aF_SW_2  aF_SW_3  1 5 110010101011100010110000|        Q = 4
-    * e6 StdIncPc Fetch    6 7 110011011001100011011110|  Fr11  IncPC, OpFetch
-    * e7 aFault   aFault_1 5 3 001110101110110000011110|  err   Load access fault. Faulting adr to mtval
-    * e8 MUL_2    MUL_1    1 3 100011101111001011100010|        Shift Q and rM. Prepare read rs2
-    * e9 IJT_3    IJT_4    1 3 010011001011100011000110|        Construct Q = 3
-    * ea MULHU_5  MULHU_6  1 3 000011001111100000100010|        Q <= rM[0] ? Q+Rjj : Q. Prepare read Ryy
-    * eb LH_3     LH_4     1 3 000001111111010001010110|        q = ~mem[rs1+ofs]
-    * ec AND_0    AND_1    1 3 000011111x10xxx000010001| AND    And 
-    * ed REMU_0   DIVU_1   1 3 100011100x10xxx011100000| REMU   Store dividend to rM. Prepare read divisor.Q=0
-    * ee eILL0a   ILLe     1 3 0000xxxx1x0xxxx011111110| Illegal instruction seen
-    * ef WFI_5    Fetch    6 7 111011011001100011011110|        IncPC, OpFetch
-    * f0 LBU_2    LBU_3    b 9 000010100111001101110010|        Repeat shr until shreg = 0 (0, 8 or 16 times)
-    * f1 aFaulte  aFault_1 5 3 001110101110110000011110|  err   LBU Load access fault. Faulting adr to mtval
-    * f2 SW_2     StdIncPc 1 3 000000101x10xxx011100110|        Prepare read PC
-    * f3 aF_SW    aF_SW_1  1 3 0000xxxx1x01xxx011011101|  err   SW/SH/SB access fault. Rest to set SEL_O=4'hf
-    * f4 Fetch2   eFetch3  4 f 011100011110100010110100|  Fr11  Update ttime. Update I. Q=immediate. Use dinx
-    * f5 jFault   jFault_1 5 3 001110101110110011011011|  err   Fetch access fault. Faulting adr to mtval
-    * f6 WFI_1    WFI_2    1 5 110000001011100011111010| WFI    Chk offset=0x105. Now=0xff. Prep 0xff+4 = 0x103
-    * f7 EBREAK_1 EBREAK_2 5 3 001100101110110010101011| EBREAK mepc = pc, store 0 to mtval
-    * f8 BGEU     condb_2  5 3 000011101110110000010011| BGEU   Conditional Branch. Offset to Ryy
-    * f9 MULH_2   MULH_3   4 5 010011101110100011011001|        Store 1 to Rjj. next read rs2, Q=0
-    * fa WFI_2    WFI_3    1 5 010010101111100001000101|        Chk ofs. Now 0x103. Prep +1+~ofs, so ~ofs+0x104
-    * fb SB_3     SB_4     1 3 000000001110110001101011|        Prepare get back address to use 
-    * fc CSRRCI_0 CSRRW_1  5 3 000001101110110001001001| CSRRCI Decoded CSR adr in yy
-    * fd NMI_0    NMI_1    1 3 000000101x10xxx001111110| NMI    Get current PC
-    * fe ILLe     ILL_1    1 3 000000101x0xxxx001000110| Illegal
-    * ff QINT_0   QINT_1   1 3 000000101x10xxx011000111| INT    Get current PC
+    * 00 LB_0     LB_1     0 0 000000000100110111111000| LB     Load byte. q = rdadr=RS1+0fs
+    * 01 LB_1     LB_2     1 1 000100010000101111110011|        Read until q=mem[rs1+ofs) & ~3u]
+    * 02 IJ_0     IJ_1     2 2 001000100100110111111000| IJ     Jump to mem[(rs1+ofs)&~3u]. inCSR=0
+    * 03 _L0x03   StdIncPc 1 3 00010011000000101x10xxx0| FENCE  Prepare read PC (FENCE/FENCE.I)
+    * 04 ADDI_0   StdIncPc 3 3 001100110100001011101000| ADDI   Add immediate. rd =RS1+Iimm (or joined)
+    * 05 _L0x05   ADDI_0   1 3 00010011000000101x01xxx0| AUIPC  q = imm20 (copy x/2)
+    * 06 LB_3     LB_4     1 3 000100110000011011110100|        q = ~mem[rs1+ofs]
+    * 07 LB_4     LB_5     1 3 000100110000010111110110|        q = (uint8_t) mem[rs1+Iimm]
+    * 08 _L0x08   SB_1     4 0 010000000100111011111000| SB     Store byte. wjj=wradr=RS1+Simm
+    * 09 LB_5     LB_6     1 3 000100110000010111110000|        q = D^0xffffffff^q = D^0x80
+    * 0a _L0x0a   SB_1     4 0 010000000100111011111000| SB     Store byte. wjj=wradr=RS1+Simm
+    * 0b JALR_2   JAL_2    5 4 010101000000001011100110|        Q = (RS1+imn) & 0xfffffffe
+    * 0c ADD_0    ADDI_0   1 3 000100110000111011110010| ADD    add     Addition Q = RS1
+    * 0d MUL_0    MUL_1    1 3 00010011100011101x10xxx0| MUL    Store rs1 tp rM. Next read rs2. Q clear
+    * 0e SUB_0    SUB_1    1 3 00010011000011101x10xxx0| SUB    Subtraction
+    * 0f _L0x0f   StdIncPc 3 3 001100110000001011101100| LUI    q = imm20
+    * 10 SUB_1    LB_6     1 3 000100110000111111110000|        Q = ~RS2
+    * 11 AND_1    ANDI_1   1 3 000100110000111011110000|        RS1^0xffffffff to Q
+    * 12 _L0x12   ILLe     1 3 000100110000xxxx1x0xxxx0|  Not in use (illegal as entry)
+    * 13 condb_2  condb_3  1 3 000100110000111111110000|        ~RS2 in Q
+    * 14 condb_3  condb_4  1 5 000101010100001011111000|        Calculate RS1+~RS2+1
+    * 15 condb_4  condb_5  4 6 010001100000110011110010|        Branch on condition
+    * 16 condb_5  Fetch    6 7 011001110010110110011100|        Branch not taken.
+    * 17 condb_5t BrOpFet  6 4 011001000110110111111000|        Branch taken.
+    * 18 BEQ      condb_2  5 3 010100110000111011101100| BEQ    Conditional Branch. Offset to Ryy
+    * 19 JALR_0   JALR_1   5 3 010100110100101011101000| JALR   yy=RS1+imm
+    * 1a ANDI_1   StdIncPc 3 3 001100110000001011100110|        rd = Iimm & RS1
+    * 1b _L0x1b   JAL_1    1 4 000101000000001011011100| JAL    J-imm is in q. Branch on alignfault
+    * 1c ECAL_BRK ECAL_RET 1 2 000100100000101111011100| ECALL/EBREAK  Select ECALL/(U/S/M)RET or EBREAK/WFI
+    * 1d ORI_2    StdIncPc 3 3 001100110000001011101110|        rd = Iimm | RS1
+    * 1e aFault_1 aFault_2 1 5 000101011100101010111000|        Q = 4
+    * 1f IJ_2     IJ_3     5 3 010100110000101011101100|        Read word is to be masked with 2 lsb = 00
+    * 20 LH_0     LH_1     7 8 011110000100110111111000| LH     Load hword. Q = rdadr=RS1+Iimm.
+    * 21 XORI_1   StdIncPc 3 3 001100110000001011100000|        rd = Iimm ^ RS1
+    * 22 MULHU_6  MULHU_7  1 9 000110010000101011111001|        Q <= rM[0] ? Q+Ryy : Q. Prepare last shr/sar
+    * 23 _L0x23   StdIncPc 1 3 00010011000000101x10xxx0| FENCE  Prepare read PC (FENCE/FENCE.I)
+    * 24 SLLI_0   SLLI_1   1 0 0001000000001111010x1100| SLLI   Shift left immediate.
+    * 25 _L0x25   ADDI_0   1 3 00010011000000101x01xxx0| AUIPC  q = imm20 (copy x/2)
+    * 26 OR_1     OR_2     4 3 010000110000111011100000|        RS1^0xffffffff to jj
+    * 27 OR_2     ORI_2    1 3 000100110100000011111000|        Q = rs2
+    * 28 _L0x28   SH_1     4 8 010010000100111011111000| SH     Store halfword. jjw=wradr=RS1+Simm
+    * 29 XOR_1    XORI_1   1 3 000100110000111011110000|        Q = RS1^0xFFFFFFFF
+    * 2a _L0x2a   SH_1     4 8 010010000100111011111000| SH     Store halfword. jjw=wradr=RS1+Simm
+    * 2b SLTIX_1  SLTIX_2  1 5 000101010100xxxx11101000|        RS1 - imm / RS1 - RS2
+    * 2c SLL_0    SLL_1    1 3 00010011000011101x0xxxx0| SLL    Shift left
+    * 2d MULH_0   MULH_1   1 3 000100110000101001110010| MULH   Store rs1 to Q. Prep read 0, shcnt--
+    * 2e MULHU_1  MULHU_2  4 3 010000111000111111101100|        rM<=RS2,  Rjj<=Q=0. next read RS1. 
+    * 2f _L0x2f   StdIncPc 3 3 001100110000001011101100| LUI    q = imm20
+    * 30 SLTIX_2  StdIncPc 3 a 001110100000001011101100|        Registered ALU flag to rd
+    * 31 SLTX_1   SLTIX_1  1 3 000100110000111111110000|        ~rs2 to Q
+    * 32 JAL_1    JAL_2    5 3 010100110100001011101000|        Target adr to yy
+    * 33 JAERR_1  JAERR_2  5 3 0101001101110010110x1000|  Err   JAL target adr misaligned, store to mtval
+    * 34 JAL_3    Fetch    6 b 011010110010110111010010|        PC+imm/trap entrypt to PC. OpFetch
+    * 35 SLLI_1   SLLI_2   3 3 001100110000101101110010|        Register to shift to Q (and TRG for shift 0)
+    * 36 SLLI_2   _L0x03   8 3 100000110000101101111010|        Repeat Q = Q+Q until shregcnt == 0
+    * 37 ECALL_2  ECALL_3  5 6 010101100001xxxx11100010|        mepc = pc, prep store 0 to mtval
+    * 38 BNE      condb_2  5 3 010100110000111011101100| BNE    Conditional Branch. Offset to Ryy
+    * 39 MULHU_7  StdIncPc 3 3 001100111000001011100010|        Last shift.
+    * 3a SRxI_1   SRxI_2   3 9 001110010000101001110011|        Register to shift to Q
+    * 3b _L0x3b   JAL_1    1 4 000101000000001011011100| JAL    J-imm is in q. Branch on alignfault
+    * 3c CSRRW_0  CSRRW_1  5 3 010100110000011011101100| CSRRW  Decoded CSR adr in yy
+    * 3d SRxI_2   _L0x03   8 9 100010010000101001110011|        Repeat Q >>= 1 until shregcnt == 0
+    * 3e SLL_1    SLLI_1   1 0 0001000000001111010x0010|        Shiftamount was in low 5 bits of RS2
+    * 3f SRx_1    SRxI_1   1 0 0001000000001111010x0010|        Shiftamount in low 5 bits of RS2
+    * 40 LW_0     LW_1     0 4 000001000100110111111000| LW     Load word. Q=yy=rdadr=RS1+Iimm
+    * 41 JALR_1   JALR_2   1 5 000101010100110011111000|        Q=1
+    * 42 MULHU_2  MULHU_3  1 9 000110010000101001111001|        Q <= rM[0] ? Q+rs1 : Q. Prepare shr/sar
+    * 43 MULHU_4  MULHU_5  1 3 000100110000000011010000|        Prepare read Rjj.
+    * 44 SLTI_0   SLTIX_1  1 3 000100110000111111110100| SLTI   Set less than immediate (signed)
+    * 45 WFI_3    WFI_4    1 5 000101010100101011111000|        Chk ofs. Now 0x104. Prep +1, so ~ofs+0x105
+    * 46 ILL_1    ILL_2    5 3 0101001100011010110x0010|        Store PC to mepc
+    * 47 ILL_2    ILL_3    5 3 010100110011101011100010|        Store 0 to mtval
+    * 48 _L0x48   SW_1     9 4 100101000100111011111000| SW     Store word. Q=wradr=RS1+Simm
+    * 49 CSRRW_1  CSRRW_2  1 5 000101010100001011111000|        Construct PC storage adr
+    * 4a _L0x4a   SW_1     9 4 100101000100111011111000| SW     Store word. Q=wradr=RS1+Simm
+    * 4b CSRRW_2  CSRRW_3  a 3 101000110011101011010010|        Write PC to 0x100 start Prep emulation entrypt
+    * 4c SLT_0    SLTX_1   1 3 00010011000011101x10xxx0| SLT    Set less than (signed)
+    * 4d MULHSU_0 MULHU_1  5 3 010100110000111001100010| MULHSU Signed rs1 to Ryy, nxt rd rs2. Q=0, shcnt--
+    * 4e eILL0b   ILLe     1 3 000100110000xxxx1x0xxxx0| Illegal instruction seen
+    * 4f MRET_8   StdIncPc 1 5 000101010100101011111000|        Prep +4
+    * 50 LW_1     StdIncPc 3 c 001111000000101111100010|        Read until d=mem[(rs1+ofs) & ~3u]
+    * 51 LDAF_LW  LDAF_a   5 3 010100110011101011011100|  err   LD AlignFault. Faulting adr to mtval
+    * 52 LH_1     LH_2     1 1 000100010000101111110011|        Read until q=mem[(rs1+ofs) & ~3u]
+    * 53 LDAF_LH  LDAF_a   5 3 010100110011101011011100|  err   LD AlignFault. Faulting adr to mtval
+    * 54 LH_2     LH_3     b 9 101110010000101001110011|        Repeat shr until shreg = 0 (0, 8 or 16 times)
+    * 55 aFaultb  aFault_1 5 3 010100110011101011101100|  err   LH Load access fault. Faulting adr to mtval
+    * 56 LH_4     LH_5     1 3 000100110000100011110110|        q = (uint16_t) mem[rs1+Iimm]
+    * 57 LH_5     LB_6     1 3 000100110000100011110000|        q = D^0xffffffff^q = D ^ 0x00008000
+    * 58 DIV_A    DIV_C    1 9 000110011100101111110011|        Transfer rM to rDee
+    * 59 DIV_B    DIV_10   5 3 010100110000111111101100|        REM = Q to yy
+    * 5a SB_1     SB_2     5 3 010100110000101101110010|        Write d to Q and yy (for sh 0). Prep shift
+    * 5b _L0x5b   JAL_1    1 4 000101000000001011011100| JAL    J-imm is in q. Branch on alignfault
+    * 5c CSRRS_0  CSRRW_1  5 3 010100110000011011101100| CSRRS  Decoded CSR adr in yy
+    * 5d SB_2     SB_3     c 3 110000110000101101111010|        Repeat shl until shreg = 0 (0,8,16 or 24 times)
+    * 5e LHU_1    LHU_2    1 1 000100010000101111110011|        Read until q=mem[(rs1+ofs) & ~3u]
+    * 5f LDAF_LHU LDAF_a   5 3 010100110011101011011100|  err   LD AlignFault. Faulting adr to mtval
+    * 60 MULHU_3  MULHU_2  1 3 000100111000111111110010|        Shift Q and rM. Prepare read rs1
+    * 61 EBRKWFI2 EBREAK_1 4 6 010001100000011011100100| EBREAK/WFI2 Select EBREAK or WFI
+    * 62 DIV_8    DIV_7    1 5 000101010100101101111000|        Conditionally subtract rs2. Update M[0]
+    * 63 DIV_9    DIV_A    d 5 110101010100101111111000|        Last Cond. -rs2. Upd M[0]. Branch on INSTR[13]
+    * 64 SLTIU_0  SLTIX_1  1 3 000100110000111111110100| SLTIU  Set less than immediate (unsigned)
+    * 65 WFI_4    WFI_5    1 6 00010110000000101x10xxx0|        Prepare read PC
+    * 66 SW_1     SW_2     e 3 111000110011111011010010|        Write d to a+k until accepted
+    * 67 SW_E1SWE SW_E2    5 3 0101001100110010110x1100|        Store faulting address alignment to mtval
+    * 68 DIV_12   StdIncPc 3 3 001100110000001011100010|        RS2 > 0, RS1 >= 0, yy is true result
+    * 69 DIV_13   LB_6     1 3 000100110000101011110000|        RS2 > 0, RS1 < 0, change sign yy
+    * 6a MULH_1   MULH_2   5 3 010100110000101011100000|        Store ~rs1 to Ryy. Prep construct 1.
+    * 6b SB_4     SB_5     9 3 100100110010110011110010|        Address back to Q. Prepare get item to write
+    * 6c SLTU_0   SLTX_1   1 3 00010011000011101x10xxx0| SLTU   Set less than (unsigned)
+    * 6d MULHU_0  MULHU_1  5 3 010100110000111001100010| MULHU  Store rs1 to Ryy. Next read rs2. Q=0, shcnt--
+    * 6e DIV_C    DIV_e    5 3 010100110000111011010010|        rM to yy. Q=ffffffff
+    * 6f MRET_6   MRET_7   1 5 000101010100xxxx11111000|        ~302 + origImm + 1 for branch decision
+    * 70 LHU_2    LHU_3    b 9 101110010000101001110011|        Repeat shr until shreg = 0 (0, 8 or 16 times)
+    * 71 aFaultc  aFault_1 5 3 010100110011101011101100|  err   LHU Load access fault. Faulting adr to mtval
+    * 72 LBU_3    ANDI_1   1 3 000100110000011011110100|        Invert q. Prepare read mask
+    * 73 BAERR_1  BAERR_2  5 3 010100110011110011100010|        Faultadr to mtval. Prepare get offset
+    * 74 BrOpFet  Fetch2   1 d 000111010000101111101100| NewOp2 Read until instruction latched
+    * 75 BAlignEr BAERR_1  1 3 00010011000000101x0xxxx0|  Err   Branch target instruction address misaligned
+    * 76 BAERR_2  BAERR_3  1 3 000100110000001011110000|        ~offset to Q. Prep read (origPC+offset)
+    * 77 BAERR_3  BAERR_4  5 5 0101010101011010110x1000|        origPC to mepc. Prep read 0
+    * 78 DIV_4    DIV_6    5 3 010100110000000011101100|        ~abs(divisor) to yy
+    * 79 DIV_5    DIV_3    1 5 000101011100101011111000|        Kluge to let add1 work in DIV instr
+    * 7a SB_5     SW_2     e 3 111000110010110011010010|        Write d to a+k until accepted
+    * 7b _L0x7b   JAL_1    1 4 000101000000001011011100| JAL    J-imm is in q. Branch on alignfault
+    * 7c CSRRC_0  CSRRW_1  5 3 010100110000011011101100| CSRRC  Decoded CSR adr in yy
+    * 7d BAERR_4  JAL_3    f 3 1111001100101001110x0010|        Store 0 to mcause. Prep get trap entry pont
+    * 7e NMI_1    NMI_2    5 3 010100110001xxxx11100010|        Store pc to mepc.
+    * 7f JALRE2   BAERR_4  5 3 0101001100111010110x0010|        mtval is target
+    * 80 LBU_0    LBU_1    0 0 000000000100110111111000| LBU    Load unsigned byte. Q = rdadr=RS1+Iimm.
+    * 81 JAERR_2  BAERR_4  5 3 0101001100011010110x0010|        Store PC to mepc
+    * 82 DIV_1    DIV_3    4 3 010000110000111011100000|        jj=abs(RS1). Next handle divisor
+    * 83 DIV_2    DIV_1    1 3 000100110100101011111000|        Dividend negative, make RS1-1
+    * 84 XORI_0   XORI_1   1 3 000100110000111111110100| XORI   Xor immediate. Q=~Iimm
+    * 85 LBU_1    LBU_2    1 1 000100010000101111110011|        Read until q=mem[(rs1+ofs) & ~3u]
+    * 86 JAL_2    JAL_25   3 5 0011010111000010100x1000|        Return address to TRG
+    * 87 JALRE1   JALRE2   5 3 0101001100011100110x0010|  err   Store pc to mepc
+    * 88 DIV_E    DIV_10   d 3 11010011100011111x0xxxx0|        RS2 != 0. Check signs
+    * 89 DIV_F    StdIncPc 3 3 001100110000001011101100|        RS2 == 0, return 0xffffffff
+    * 8a DIVU_5   ANDI_1   1 9 00011001110010111x10xxx1|        Transfer rM to rDee
+    * 8b LB_6     StdIncPc 3 5 001101011100001011101000|        WTRG=(D^0x80)+0xFFFFFF7F+1=(D^0x80)-0x80
+    * 8c XOR_0    XOR_1    1 3 00010011000011111x10xxx0| XOR    xor
+    * 8d DIV_0    DIV_1    d 3 110100111000101101110010| DIV    Branch on sign dividend RS1
+    * 8e _LCSRRS_1 ILLe     1 3 000100110000xxxx1x0xxxx0| Illegal instruction seen
+    * 8f ILL_3    ILL_4    1 5 000101010000101011111000|        Q = 1
+    * 90 NMI_2    JAL_3    f 3 111100110011010011101100|        mtval = 0.
+    * 91 LDAF_2   LDAF_3   f 5 1111010111100010100x1000|        Store 4 to mcause
+    * 92 LDAF_3   JAL_3    5 3 0101001100011001110x0010|        PC to mepc
+    * 93 SW_E2    SW_E3    5 3 010100110001101111100010|        Store address that faulted
+    * 94 SW_E4    JAL_3    f 3 1111001100101001110x1010|        Store 6 to mcause
+    * 95 SW_E3    SW_E4    1 5 000101011100101110111000|        Q = 3
+    * 96 SH_1     SH_2     5 3 010100110000101101110010|        Write d to Q and yy (for sh 0). Prep shift
+    * 97 SW_E1SWH SW_E2    5 3 0101001100110010110x1100|        Store faulting address alignment to mtval
+    * 98 BLT      condb_2  5 3 010100110000111011101100| BLT    Conditional Branch. Offset to Ryy
+    * 99 _L0x99   ILLe     1 3 000100110000xxxx1x0xxxx0|  Not in use (illegal as entry)
+    * 9a ECALL_6  JAL_3    f 3 1111001101101001100x1000|        mcause = 11
+    * 9b SH_4     SH_5     9 3 100100110001110011110010|        Address back to Q. Prepare get item to write
+    * 9c DIV_10   DIV_12   d 3 110100111000110011100010|        RS2 > 0. Branch on sign of RS1
+    * 9d DIV_11   DIV_14   d 3 110100111000110011100010|        RS2 < 0. Branch on sign of RS1
+    * 9e JAL_25   JAL_3    4 3 0100001100001100110x0010|        Instr. adr. to jj in case of access error
+    * 9f SH_5     SW_2     e 3 111000110001110011010010|        Write d to a+k until accepted
+    * a0 LHU_0    LHU_1    7 8 011110000100110111111000| LHU    Load unsigned hword. Q = rdadr=RS1+Iimm
+    * a1 ECALL_4  ECALL_5  1 5 000101011100101010111000|        Q = 4
+    * a2 DIV_14   LB_6     1 3 000100110000101011110000|        RS2 < 0, RS1 >= 0, change sign yy
+    * a3 DIV_15   StdIncPc 3 3 001100110000001011100010|        RS2 < 0, RS1 < 0, yy is true result
+    * a4 SRxI_0   SRxI_1   1 0 0001000000001111010x1100| SRxI   Shift Right immediate (both logic/arith here)
+    * a5 MRET_3   MRET_4   1 5 000101010100011011111000|        0x102 + 0xff + 1 = 0x202
+    * a6 ECAL_RET ECALL_1  1 4 000101000000101111011100| ECALL/(U/S/M)RET Select ECALL or (U/S/M)RET
+    * a7 EBRKWFI1 EBRKWFI2 1 3 000100110100xxxx11111000| EBREAK/WFI1 Prepare select EBREAK or WFI
+    * a8 DIV_3    DIV_4    d 3 110100111000101011110000|        Branch on sign divisor RS2
+    * a9 ILL_4    JAL_3    f 5 1111010101101001110x1000|        Store 2 to mcause
+    * aa DIV_6    DIV_7    1 3 00010011100010111x10xxx0|        Write M. Prepare shift
+    * ab EBREAK_2 ECALL_6  5 3 010100110001101011100010|        pc to mepc
+    * ac _L0xac   SRx_1    1 3 00010011000011101x0xxxx0| SRx    Shift Right (both SRL and SRA)
+    * ad DIVU_0   DIVU_1   1 3 00010011100011100x10xxx0| DIVU   Store rs1 to rM. Q=0. Prepare invert rs2
+    * ae _L0xae   SRx_1    1 3 00010011000011101x0xxxx0| SRx    Shift Right (both SRL and SRA)
+    * af MRET_4   MRET_5   1 5 000101010100xxxx11111000|        0x202 + 0xff + 1 = 0x302
+    * b0 aF_SW_3  LDAF_3   f 3 1111001101100010100x1000|        Store 7 to mcause
+    * b1 CSRRW_3  CSRRW_4  1 5 000101011100101010111000|        Prep emulation entrypt 0x108, here Q to 0x104
+    * b2 CSRRW_4  Fetch    6 7 011001111100110110011000|        IncPC, OpFetch, but force +4
+    * b3 unxb3             e 0 1110000000xxxxxxxxxxxxxx| b3: Not in use 
+    * b4 eFetch3           4 5 010001010101111111111000|  Fr11  Write minstret. Update I. Q=immediate, use dinx
+    * b5 SH_3     SH_4     1 3 000100110000000011101100|        Prepare get back address to use 
+    * b6 ECALL_5  ECALL_6  1 5 000101011100101010111000|        Q = 8
+    * b7 IJ_3     IJ_4     1 3 000100110100110010111000|        Construct Q = 3
+    * b8 BGE      condb_2  5 3 010100110000111011101100| BGE    Conditional Branch. Offset to Ryy
+    * b9 DIV_e    DIV_D    1 5 000101010000110011110000|        Calc carry of RS2+0xFFFFFFFF
+    * ba LHU_3    ANDI_1   1 3 000100110000011111110100|        Invert q. Prepare read mask
+    * bb SH_2     SH_3     c 3 110000110000101101111010|        Repeat shl until shreg = 0 (0,8 or 24 times)
+    * bc CSRRWI_0 CSRRW_1  5 3 010100110000011011101100| CSRRWI Decoded CSR adr in yy
+    * bd IJ_4     Fetch    0 b 000010110000110111010110|        Mask and use as PC
+    * be IJ_1     IJ_2     1 b 000110110000101111110010|        Read until q=mem[(rs1+ofs)&~3u]
+    * bf IJT_1    IJT_2    1 b 000110110000101111110010|        Exit CSR, enter trap
+    * c0 DIV_D    DIV_E    1 6 000101100000111011110010|        Is RS2 == 0?
+    * c1 IJT_2    IJT_3    5 3 010100110000101011101100|        Read word is to be masked with ~3u
+    * c2 DIVU_3   DIVU_2   1 5 000101010100101101111000|        Conditionally subtract rs2. Update M[0]
+    * c3 DIVU_4   DIVU_5   d 5 110101010100101111111000|        Last Cond. -rs2. Upd M[0]. Branch on INSTR[13]
+    * c4 ORI_0    ORI_1    4 3 010000110000111111100100| ORI    Or immediate. jj=~Iimm
+    * c5 MRET_5   MRET_6   1 3 000100110000000011110100|        ~302
+    * c6 IJT_4    ILL_2    5 3 010100110001101011110110|        Mask and store to mepc and Q for read of instr
+    * c7 QINT_1   QINT_2   5 3 010100110001xxxx11100010|        Store pc to mepc.
+    * c8 DIV_7    DIV_8    1 e 000111101000110011111010|        Shift (Q,M) left. Prepare unsigned sub
+    * c9 MRET_2   MRET_3   1 3 000100110100011010111000|        0xff+3 = 0x102
+    * ca DIVU_2   DIVU_3   1 e 000111101000110011111010|        Shift (Q,M) left. Prepare unsigned sub
+    * cb QINT_2   StdIncPc f 3 111100110011010011101100|        mtval = 0.
+    * cc OR_0     OR_1     1 3 00010011000011111x10xxx0| OR     or
+    * cd REM_0    DIV_1    d 3 110100111000101101110010| REM    Branch on sign dividend RS1
+    * ce _LCSRRCI_1 ILLe     1 3 000100110000xxxx1x0xxxx0| Illegal instruction seen
+    * cf MRET_7   MRET_8   1 6 00010110000001101x10xxx0|        Prepare emulation entry point 0x104
+    * d0 ECALL_1  ECALL_2  1 5 000101010100001011111000| ECALL  Verify Imm==0x000
+    * d1 MRET_1   MRET_2   4 3 010000110000011011101100| MRET   First save Imm, start build constant for check
+    * d2 LB_2     LB_3     b 9 101110010000101001110011|        Repeat shr until shreg == 0 (0,8,16,24 times)
+    * d3 aFaultd  aFault_1 5 3 010100110011101011101100|  err   LB Load access fault. Faulting adr to mtval
+    * d4 aFault_2 LDAF_3   f 5 1111010101100010110x1000|        Store 5 to mcause
+    * d5 unxd5             e 0 1110000000xxxxxxxxxxxxxx| d5: Not in use
+    * d6 eILL0c   ILLe     1 3 000100110000xxxx1x0xxxx0| Illegal instruction seen
+    * d7 ECALL_3  ECALL_4  5 3 010100110011101011101100|        mtval = 0, now start the chore of 11 to mcause
+    * d8 BLTU     condb_2  5 3 010100110000111011101100| BLTU   Conditional Branch. Offset to Ryy
+    * d9 MULH_3   MULHU_2  1 3 00010011100011111x10xxx0|        rM<=RS2, Q = 0. next read RS1. Join.
+    * da LDAF_a   LDAF_2   1 3 00010011000010101x10xxx0|        Extra cycle after error detected write mtval
+    * db jFault_1 LDAF_3   5 5 0101010101100000110x1000|        Store 1 to mcause
+    * dc CSRRSI_0 CSRRW_1  5 3 010100110000011011101100| CSRRSI Decoded CSR adr in yy
+    * dd aF_SW_1  aF_SW_2  5 3 010100110011101011101100|  err   SW Store access fault. Faulting adr to mtval
+    * de Fetch    Fetch2   4 d 010011010010101111101100|  Fr11  Read and latch instruction
+    * df eFetch   Fetch2   4 d 010011010010101111101100|  Fr11  rep Read until d=mem[(rs1+ofs) & ~3u]
+    * e0 DIVU_1   DIVU_2   5 3 010100110000101111100000|        Store inverted rs2 to yy. Prepare shift
+    * e1 ORI_1    ORI_2    1 3 000100110000000011110010|        Q = RS1
+    * e2 MUL_1    MUL_2    1 9 000110010000101001111001|        Q <= rM[0] ? Q+rs2 : Q. Prepare shr/sar
+    * e3 MUL_3    ANDI_1   1 9 00011001110010111x10xxx1|        Transfer rM to rDee
+    * e4 ANDI_0   ANDI_1   1 3 000100110000111111110100| ANDI   And immediate. Q=~Iimm
+    * e5 aF_SW_2  aF_SW_3  1 5 000101011100101010111000|        Q = 4
+    * e6 StdIncPc Fetch    6 7 011001111100110110011000|  Fr11  IncPC, OpFetch
+    * e7 aFault   aFault_1 5 3 010100110011101011101100|  err   Load access fault. Faulting adr to mtval
+    * e8 MUL_2    MUL_1    1 3 000100111000111011110010|        Shift Q and rM. Prepare read rs2
+    * e9 IJT_3    IJT_4    1 3 000100110100110010111000|        Construct Q = 3
+    * ea MULHU_5  MULHU_6  1 3 000100110000110011111000|        Q <= rM[0] ? Q+Rjj : Q. Prepare read Ryy
+    * eb LH_3     LH_4     1 3 000100110000011111110100|        q = ~mem[rs1+ofs]
+    * ec AND_0    AND_1    1 3 00010011000011111x10xxx0| AND    And 
+    * ed REMU_0   DIVU_1   1 3 00010011100011100x10xxx0| REMU   Store dividend to rM. Prepare read divisor.Q=0
+    * ee eILL0a   ILLe     1 3 000100110000xxxx1x0xxxx0| Illegal instruction seen
+    * ef WFI_5    Fetch    6 7 011001111110110110011000|        IncPC, OpFetch
+    * f0 LBU_2    LBU_3    b 9 101110010000101001110011|        Repeat shr until shreg = 0 (0, 8 or 16 times)
+    * f1 aFaulte  aFault_1 5 3 010100110011101011101100|  err   LBU Load access fault. Faulting adr to mtval
+    * f2 SW_2     StdIncPc 1 3 00010011000000101x10xxx0|        Prepare read PC
+    * f3 aF_SW    aF_SW_1  1 3 000100110000xxxx1x01xxx0|  err   SW/SH/SB access fault. Rest to set SEL_O=4'hf
+    * f4 Fetch2   eFetch3  4 f 010011110111000111101000|  Fr11  Update ttime. Update I. Q=immediate. Use dinx
+    * f5 jFault   jFault_1 5 3 010100110011101011101100|  err   Fetch access fault. Faulting adr to mtval
+    * f6 WFI_1    WFI_2    1 5 000101011100000010111000| WFI    Chk offset=0x105. Now=0xff. Prep 0xff+4 = 0x103
+    * f7 EBREAK_1 EBREAK_2 5 3 010100110011001011101100| EBREAK mepc = pc, store 0 to mtval
+    * f8 BGEU     condb_2  5 3 010100110000111011101100| BGEU   Conditional Branch. Offset to Ryy
+    * f9 MULH_2   MULH_3   4 5 010001010100111011101000|        Store 1 to Rjj. next read rs2, Q=0
+    * fa WFI_2    WFI_3    1 5 000101010100101011111000|        Chk ofs. Now 0x103. Prep +1+~ofs, so ~ofs+0x104
+    * fb SB_3     SB_4     1 3 000100110000000011101100|        Prepare get back address to use 
+    * fc CSRRCI_0 CSRRW_1  5 3 010100110000011011101100| CSRRCI Decoded CSR adr in yy
+    * fd NMI_0    NMI_1    1 3 00010011000000101x10xxx0| NMI    Get current PC
+    * fe ILLe     ILL_1    1 3 00010011000000101x0xxxx0| Illegal
+    * ff QINT_0   QINT_1   1 3 00010011000000101x10xxx0| INT    Get current PC
     */
    localparam u0_0 = 256'hece6a010a0e2f204e686f85af08bf85af609f4079004e8e6a0e6f8bef3d2f801;
    localparam u0_1 = 256'hecb7b8d4eee6dca6dc32e6e6e841ec13f8749cdef216f815f01480fef01af08b;
@@ -2851,7 +2851,7 @@ endmodule
  * 2019-2020. Copyright B. Nossum.
  * For licence, see LICENCE
  * -----------------------------------------------------------------------------ehdr
- * Automatically generated from ../code/ucode.h by midgetv_indirectEBR.c.
+ * Automatically generated from ../code/ucode.h by ../util/midgetv_indirectEBR.c.
  * Do not edit.
  * Optiones for this variant:
  *   RVC included
@@ -2940,262 +2940,262 @@ module v8_m_2ebr
     *                      indirect_index 1
     * inx         next     | indirect index 0
     * || ucode    ucode    | | direct representation
-    * 00 LB_0     LB_1     0 0 001101011110000000000001| LB     Load byte. q = rdadr=RS1+0fs
-    * 01 LB_1     LB_2     1 1 0010111111001xx111010010|        Read until q=mem[rs1+ofs) & ~3u]
-    * 02 IJ_0     IJ_1     2 2 001101111110000010111110| IJ     Jump to mem[(rs1+ofs)&~1u]. inCSR=0
-    * 03 _L0x03   StdIncPc 3 0 0000101x10xxxxx011100110| FENCE  Prepare read PC (FENCE/FENCE.I)
-    * 04 ADDI_0   StdIncPc 4 0 000010111010000011100110| ADDI   Add immediate. rd =RS1+Iimm (or joined)
-    * 05 _L0x05   ADDI_0   3 0 0000001x01xxxxx000000100| AUIPC  q = imm20+2 or imm20+4  (copy x/2)
-    * 06 LB_3     LB_4     3 0 0001101111010xx000000111|        q = ~mem[rs1+ofs]
-    * 07 LB_4     LB_5     3 0 0001011111011xx000001001|        q = (uint8_t) mem[rs1+Iimm]
-    * 08 _L0x08   SB_1     5 0 001110011110000001011010| SB     Store byte. wjj=wradr=RS1+Simm
-    * 09 LB_5     LB_6     3 0 0001011111000xx010001011|        q = D^0xffffffff^q = D^0x80
-    * 0a _L0x0a   SB_1     5 0 001110011110000001011010| SB     Store byte. wjj=wradr=RS1+Simm
-    * 0b JALR_2   JALR_3   3 3 000010111110011000110011|        Q=1. Prep legalize target
-    * 0c ADD_0    ADDI_0   3 0 0011101111001xx000000100| ADD    add     Addition Q = RS1
-    * 0d _L0x0d   StdIncPc 4 0 000010111011000011100110| LUI    q = imm20
-    * 0e SUB_0    SUB_1    3 0 0011101x10xxxxx000010000| SUB    Subtraction
-    * 0f _L0x0f   StdIncPc 4 0 000010111011000011100110| LUI    q = imm20
-    * 10 SUB_1    LB_6     3 0 0011111111000xx010001011|        Q = ~RS2
-    * 11 AND_1    ANDI_1   3 0 0011101111000xx000011010|        RS1^0xffffffff to Q
-    * 12 straddle Fetchu   6 4 101101100110011001110110|  Fr00u IncPC, OpFetch
-    * 13 condb_2  condb_3  3 0 0011111111000xx000010100|        ~RS2 in Q
-    * 14 condb_3  condb_4  3 3 001100111110011000010101|        Calculate RS1+~RS2+1
-    * 15 condb_4  condb_5  3 5 0000001111001xx000010110|        Branch on condition
-    * 16 condb_5  StdIncPc 3 0 0000001x10xxxxx011100110|        Branch not taken.
-    * 17 condb_5t condb_6t 7 0 0000001101001xx001111101|        Branch taken. yy=oldPC incase of access error
-    * 18 BEQ      condb_2  7 0 001110111011000000010011| BEQ    Conditional Branch. Offset to Ryy
-    * 19 JALR_0   JALR_1   5 0 100000110x10000001000001| JALR   (tmp) Prep pc=RS1+imm (target)
-    * 1a ANDI_1   StdIncPc 4 0 0000101110011xx011100110|        rd = Iimm & RS1
-    * 1b _L0x1b   JAL_1    3 0 0000001x01xxxxx000110010| JAL. J-imm is in q. Prep get isntradr from jj
-    * 1c ECAL_BRK ECAL_RET 3 2 001011110111000010100110| ECALL/EBREAK  Select ECALL/(U/S/M)RET or EBREAK/WFI
-    * 1d ORI_2    StdIncPc 4 0 000010111011100011100110|        rd = Iimm | RS1
-    * 1e aFault_1 aFault_2 3 3 001010101110011011010100|        Q = 4
-    * 1f IJ_2     IJ_3     5 0 100000110111000010110111|        Read word is to be masked with lsb = 0
-    * 20 LH_0     LH_1     8 2 001101011110000001010010| LH     Load hword. Q = rdadr=RS1+Iimm.
-    * 21 XORI_1   StdIncPc 4 0 0000101110000xx011100110|        rd = Iimm ^ RS1
-    * 22 _L0x22   ILLe     3 0 00xxxx1x0xxxxxx011111110|  Not in use (illegal as entry)
-    * 23 _L0x23   StdIncPc 3 0 0000101x10xxxxx011100110| FENCE  Prepare read PC (FENCE/FENCE.I)
-    * 24 SLLI_0   SLLI_1   3 6 001111010x11000000110101| SLLI   Shift left immediate.
-    * 25 _L0x25   ADDI_0   3 0 0000001x01xxxxx000000100| AUIPC  q = imm20+2 or imm20+4  (copy x/2)
-    * 26 OR_1     OR_2     5 0 0011101110000xx000100111|        RS1^0xffffffff to jj
-    * 27 OR_2     ORI_2    3 0 000000111110000000011101|        Q = rs2
-    * 28 _L0x28   SH_1     5 2 001110011110000010010110| SH     Store halfword. jjw=wradr=RS1+Simm
-    * 29 XOR_1    XORI_1   3 0 0011101111000xx000100001|        Q = RS1^0xFFFFFFFF
-    * 2a _L0x2a   SH_1     5 2 001110011110000010010110| SH     Store halfword. jjw=wradr=RS1+Simm
-    * 2b SLTIX_1  SLTIX_2  3 3 00xxxx111010011000110000|        RS1 - imm / RS1 - RS2
-    * 2c SLL_0    SLL_1    3 0 0011101x0xxxxxx000111110| SLL    Shift left
-    * 2d _L0x2d   StdIncPc 4 0 000010111011000011100110| LUI    q = imm20
-    * 2e unx2e             9 6 xxxxxxxxxxxxxxxxxxxxxxxx| 2e: Not in use 
-    * 2f _L0x2f   StdIncPc 4 0 000010111011000011100110| LUI    q = imm20
-    * 30 SLTIX_2  StdIncPc 4 7 000010111011001011100110|        Registered ALU flag to rd
-    * 31 SLTX_1   SLTIX_1  3 0 0011111111000xx000101011|        ~rs2 to Q
-    * 32 JAL_1    JAL_2    7 0 0000001101001xx010000110|      Prep Instradr to yy. Refetch instradr
-    * 33 JALR_3   JAL_25   5 0 1000001110011xx010011110|        Q = (RS1+imn) & 0xfffffffe
-    * 34 JAL_3    Fetch    6 0 1011011101001xx011011110|      Prep fetch next instr.
-    * 35 SLLI_1   SLLI_2   4 6 0010111111001xx000110110|        Register to shift to Q (and TRG for shift 0)
-    * 36 SLLI_2   _L0x03   4 8 001011111110100000000011|        Repeat Q = Q+Q until shregcnt == 0
-    * 37 ECALL_2  ECALL_3  7 5 01xxxx1110001xx011010111|        mepc = pc, prep store 0 to mtval
-    * 38 BNE      condb_2  7 0 001110111011000000010011| BNE    Conditional Branch. Offset to Ryy
-    * 39 _L0x39   ILLe     3 0 00xxxx1x0xxxxxx011111110|  Not in use (illegal as entry)
-    * 3a SRxI_1   SRxI_2   4 9 0010101111001xx100111101|        Register to shift to Q
-    * 3b _L0x3b   JAL_1    3 0 0000001x01xxxxx000110010| JAL. J-imm is in q. Prep get isntradr from jj
-    * 3c CSRRW_0  CSRRW_1  7 0 000110111011000001001001| CSRRW  Decoded CSR adr in yy
-    * 3d SRxI_2   _L0x03   4 a 0010101111001xx100000011|        Repeat Q >>= 1 until shregcnt == 0
-    * 3e SLL_1    SLLI_1   3 6 001111010x001xx000110101|        Shiftamount was in low 5 bits of RS2
-    * 3f SRx_1    SRxI_1   3 6 001111010x001xx000111010|        Shiftamount in low 5 bits of RS2
-    * 40 LW_0     LW_1     0 b 001101111110000001010000| LW     Load word. Q=yy=rdadr=RS1+Iimm
-    * 41 JALR_1   JALR_2   7 0 0010101110001xx000001011|        yy=jj. Prep get Q=1
-    * 42 _L0x42   ILLe     3 0 00xxxx1x0xxxxxx011111110|  Not in use (illegal as entry)
-    * 43 _L0x43   ILLe     3 0 00xxxx1x0xxxxxx011111110|  Not in use (illegal as entry)
-    * 44 SLTI_0   SLTIX_1  3 0 0011111111010xx000101011| SLTI   Set less than immediate (signed)
-    * 45 WFI_3    WFI_4    3 3 001010111110011001100101|        Chk ofs. Now 0x104. Prep +1, so ~ofs+0x105
-    * 46 ILL_1    ILL_2    7 0 011010110x001xx001000111|        Store PC to mepc
-    * 47 ILL_2    ILL_3    7 0 1110101110001xx010001111|        Store 0 to mtval
-    * 48 _L0x48   SW_1     a b 001110111110000001100110| SW     Store word. Q=wradr=RS1+Simm
-    * 49 CSRRW_1  CSRRW_2  3 3 000010111110011001001011|        Construct PC storage adr
-    * 4a _L0x4a   SW_1     a b 001110111110000001100110| SW     Store word. Q=wradr=RS1+Simm
-    * 4b CSRRW_2  CSRRW_3  b 0 1110101101001xx010110001|        Write PC to 0x100 start Prep emulation entrypt
-    * 4c SLT_0    SLTX_1   3 0 0011101x10xxxxx000110001| SLT    Set less than (signed)
-    * 4d unx4d             9 6 xxxxxxxxxxxxxxxxxxxxxxxx| 4d: Not in use 
-    * 4e eILL0b   ILLe     3 0 00xxxx1x0xxxxxx011111110| Illegal instruction seen
-    * 4f MRET_8   MRET_9   3 3 001010101110011001110100|        +4, so now 0x103
-    * 50 LW_1     StdIncPc c c 0010111110001xx011100110|        Read until d=mem[(rs1+ofs) & ~3u]
-    * 51 LDAF_LW  LDAF_a   7 0 111010110111000011011010|  err   LD AlignFault. Faulting adr to mtval
-    * 52 LH_1     LH_2     1 1 0010111111001xx101010100|        Read until q=mem[(rs1+ofs) & ~3u]
-    * 53 LDAF_LH  LDAF_a   7 0 111010110111000011011010|  err   LD AlignFault. Faulting adr to mtval
-    * 54 LH_2     LH_3     3 a 0010101111001xx111101011|        Repeat shr until shreg = 0 (0, 8 or 16 times)
-    * 55 aFaultb  aFault_1 7 0 111010111011000000011110|  err   LH Load access fault. Faulting adr to mtval
-    * 56 LH_4     LH_5     3 0 0010001111011xx001010111|        q = (uint16_t) mem[rs1+Iimm]
-    * 57 LH_5     LB_6     3 0 0010001111000xx010001011|        q = D^0xffffffff^q = D ^ 0x00008000
-    * 58 _L0x58   ILLe     3 0 00xxxx1x0xxxxxx011111110|  Not in use (illegal as entry)
-    * 59 _L0x59   ILLe     3 0 00xxxx1x0xxxxxx011111110|  Not in use (illegal as entry)
-    * 5a SB_1     SB_2     7 6 0010111111001xx001011101|        Write d to Q and yy (for sh 0). Prep shift
-    * 5b _L0x5b   JAL_1    3 0 0000001x01xxxxx000110010| JAL. J-imm is in q. Prep get isntradr from jj
-    * 5c CSRRS_0  CSRRW_1  7 0 000110111011000001001001| CSRRS  Decoded CSR adr in yy
-    * 5d SB_2     SB_3     7 8 001011111110100011111011|        Repeat shl until shreg = 0 (0,8,16 or 24 times)
-    * 5e LHU_1    LHU_2    1 1 0010111111001xx101110000|        Read until q=mem[(rs1+ofs) & ~3u]
-    * 5f LDAF_LHU LDAF_a   7 0 111010110111000011011010|  err   LD AlignFault. Faulting adr to mtval
-    * 60 _L0x60   ILLe     3 0 00xxxx1x0xxxxxx011111110|  Not in use (illegal as entry)
-    * 61 EBRKWFI2 EBREAK_1 7 5 0001101110010xx011110111| EBREAK/WFI2 Select EBREAK or WFI.
-    * 62 _L0x62   ILLe     3 0 00xxxx1x0xxxxxx011111110|  Not in use (illegal as entry)
-    * 63 _L0x63   ILLe     3 0 00xxxx1x0xxxxxx011111110|  Not in use (illegal as entry)
-    * 64 SLTIU_0  SLTIX_1  3 0 0011111111010xx000101011| SLTIU  Set less than immediate (unsigned)
-    * 65 WFI_4    WFI_5    3 5 0000001x10xxxxx011101111|        Prepare read PC.
-    * 66 SW_1     SW_2     9 0 1111101101001xx011110010|        Write d to a+k until accepted
-    * 67 SW_E1SWE SW_E2    7 0 110010110x11000010010011|        Store faulting address alignment to mtval
-    * 68 _L0x68   ILLe     3 0 00xxxx1x0xxxxxx011111110|  Not in use (illegal as entry)
-    * 69 unx69             9 6 xxxxxxxxxxxxxxxxxxxxxxxx| 69: Not in use 
-    * 6a _L0x6a   ILLe     3 0 00xxxx1x0xxxxxx011111110|  Not in use (illegal as entry)
-    * 6b SB_4     SB_5     a 0 1011001111001xx001111010|        Address back to Q. Prepare get item to write
-    * 6c SLTU_0   SLTX_1   3 0 0011101x10xxxxx000110001| SLTU   Set less than (unsigned)
-    * 6d unx6d             9 6 xxxxxxxxxxxxxxxxxxxxxxxx| 6d: Not in use 
-    * 6e unx6e             9 6 xxxxxxxxxxxxxxxxxxxxxxxx| 6e: Not in use 
-    * 6f MRET_6   MRET_7   3 3 00xxxx111110011011001111|        ~302 + origImm + 1 for branch decision
-    * 70 LHU_2    LHU_3    3 a 0010101111001xx110111010|        Repeat shr until shreg = 0 (0, 8 or 16 times)
-    * 71 aFaultc  aFault_1 7 0 111010111011000000011110|  err   LHU Load access fault. Faulting adr to mtval
-    * 72 LBU_3    ANDI_1   3 0 0001101111010xx000011010|        Invert q. Prepare read mask
-    * 73 unx73             9 6 xxxxxxxxxxxxxxxxxxxxxxxx| 73: Not in use 
-    * 74 MRET_9   Fetch    6 3 101101110110011011011110|        +1, IncPC, OpFetch next
-    * 75 IJ_5     Fetch    6 0 1011011101011xx011011110|        Mask and use as PC
-    * 76 Fetchu   Fetch2   3 d 000011111011000011110100|  Fr00u Read and latch instruction
-    * 77 eFetchu  Fetch2   1 e 001011111011000011110100|  Fr00u rep Read until d=mem[(rs1+ofs) & ~3u]
-    * 78 _L0x78   ILLe     3 0 00xxxx1x0xxxxxx011111110|  Not in use (illegal as entry)
-    * 79 _L0x79   ILLe     3 0 00xxxx1x0xxxxxx011111110|  Not in use (illegal as entry)
-    * 7a SB_5     SW_2     9 0 1011001101001xx011110010|        Write d to a+k until accepted
-    * 7b _L0x7b   JAL_1    3 0 0000001x01xxxxx000110010| JAL. J-imm is in q. Prep get isntradr from jj
-    * 7c CSRRC_0  CSRRW_1  7 0 000110111011000001001001| CSRRC  Decoded CSR adr in yy
-    * 7d condb_6t Fetch    6 0 101101110110000011011110|        Branch taken.
-    * 7e NMI_1    NMI_2    7 0 01xxxx1110001xx010010000|        Store pc to mepc.
-    * 7f unx7f             9 6 xxxxxxxxxxxxxxxxxxxxxxxx| 7f: Not in use 
-    * 80 LBU_0    LBU_1    0 0 001101011110000010000101| LBU    Load unsigned byte. Q = rdadr=RS1+Iimm.
-    * 81 unx81             9 6 xxxxxxxxxxxxxxxxxxxxxxxx| 81: Not in use 
-    * 82 _L0x82   ILLe     3 0 00xxxx1x0xxxxxx011111110|  Not in use (illegal as entry)
-    * 83 _L0x83   ILLe     3 0 00xxxx1x0xxxxxx011111110|  Not in use (illegal as entry)
-    * 84 XORI_0   XORI_1   3 0 0011111111010xx000100001| XORI   Xor immediate. Q=~Iimm
-    * 85 LBU_1    LBU_2    1 1 0010111111001xx111110000|        Read until q=mem[(rs1+ofs) & ~3u]
-    * 86 JAL_2    JAL_25   5 0 100000111010000010011110|      Prep pc = jj + ofs
-    * 87 unx87             9 6 xxxxxxxxxxxxxxxxxxxxxxxx| 87: Not in use 
-    * 88 _L0x88   ILLe     3 0 00xxxx1x0xxxxxx011111110|  Not in use (illegal as entry)
-    * 89 unx89             9 6 xxxxxxxxxxxxxxxxxxxxxxxx| 89: Not in use 
-    * 8a _L0x8a   ILLe     3 0 00xxxx1x0xxxxxx011111110|  Not in use (illegal as entry)
-    * 8b LB_6     StdIncPc 4 3 000010111010011011100110|        WTRG=(D^0x80)+0xFFFFFF7F+1=(D^0x80)-0x80
-    * 8c XOR_0    XOR_1    3 0 0011111x10xxxxx000101001| XOR    xor
-    * 8d unx8d             9 6 xxxxxxxxxxxxxxxxxxxxxxxx| 8d: Not in use 
-    * 8e _LCSRRS_1 ILLe     3 0 00xxxx1x0xxxxxx011111110| Illegal instruction seen
-    * 8f ILL_3    ILL_4    3 3 001010111110011010101001|        Q = 1
-    * 90 NMI_2    JAL_3    d 0 110100111011000000110100|        mtval = 0.
-    * 91 LDAF_2   LDAF_3   d 3 100010100x10011010010010|        Store 4 to mcause
-    * 92 LDAF_3   JAL_3    7 0 011001110x001xx000110100|        PC to mepc
-    * 93 SW_E2    SW_E3    7 0 0110111110001xx010010101|        Store address that faulted
-    * 94 SW_E4    JAL_3    d 0 101001110x10100000110100|        Store 6 to mcause
-    * 95 SW_E3    SW_E4    3 3 001011101110011010010100|        Q = 3
-    * 96 SH_1     SH_2     7 6 0010111111001xx010111011|        Write d to Q and yy (for sh 0). Prep shift
-    * 97 SW_E1SWH SW_E2    7 0 110010110x11000010010011|        Store faulting address alignment to mtval
-    * 98 BLT      condb_2  7 0 001110111011000000010011| BLT    Conditional Branch. Offset to Ryy
-    * 99 _L0x99   ILLe     3 0 00xxxx1x0xxxxxx011111110|  Not in use (illegal as entry)
-    * 9a ECALL_6  JAL_3    d 0 101001100x10000000110100|        mcause = 11
-    * 9b SH_4     SH_5     a 0 0111001111001xx010011111|        Address back to Q. Prepare get item to write
-    * 9c _L0x9c   ILLe     3 0 00xxxx1x0xxxxxx011111110|  Not in use (illegal as entry)
-    * 9d unx9d             9 6 xxxxxxxxxxxxxxxxxxxxxxxx| 9d: Not in use 
-    * 9e JAL_25   JAL_3    4 4 000010101010011000110100|      Prep WTRG = jj+2/4 (return adr)
-    * 9f SH_5     SW_2     9 0 0111001101001xx011110010|        Write d to a+k until accepted
-    * a0 LHU_0    LHU_1    8 2 001101011110000001011110| LHU    Load unsigned hword. Q = rdadr=RS1+Iimm
-    * a1 ECALL_4  ECALL_5  3 3 001010101110011010110110|        Q = 4
-    * a2 _L0xa2   ILLe     3 0 00xxxx1x0xxxxxx011111110|  Not in use (illegal as entry)
-    * a3 _L0xa3   ILLe     3 0 00xxxx1x0xxxxxx011111110|  Not in use (illegal as entry)
-    * a4 SRxI_0   SRxI_1   3 6 001111010x11000000111010| SRxI   Shift Right immediate (both logic/arith here)
-    * a5 MRET_3   MRET_4   3 3 000110111110011010101111|        0x102 + 0xff + 1 = 0x202
-    * a6 ECAL_RET ECALL_1  3 b 001011110111000011010000| ECALL/(U/S/M)RET Select ECALL or (U/S/M)RET
-    * a7 EBRKWFI1 EBRKWFI2 3 0 00xxxx111110000001100001| EBREAK/WFI1 Prepare select EBREAK or WFI
-    * a8 _L0xa8   ILLe     3 0 00xxxx1x0xxxxxx011111110|  Not in use (illegal as entry)
-    * a9 ILL_4    JAL_3    d 3 101001110x10011000110100|        Store 2 to mcause
-    * aa _L0xaa   ILLe     3 0 00xxxx1x0xxxxxx011111110|  Not in use (illegal as entry)
-    * ab EBREAK_2 ECALL_6  7 0 0110101110001xx010011010|        pc to mepc
-    * ac _L0xac   SRx_1    3 0 0011101x0xxxxxx000111111| SRx    Shift Right (both SRL and SRA)
-    * ad unxad             9 6 xxxxxxxxxxxxxxxxxxxxxxxx| ad: Not in use 
-    * ae _L0xae   SRx_1    3 0 0011101x0xxxxxx000111111| SRx    Shift Right (both SRL and SRA)
-    * af MRET_4   MRET_5   3 3 00xxxx111110011011000101|        0x202 + 0xff + 1 = 0x302
-    * b0 aF_SW_3  LDAF_3   d 0 100010100x10000010010010|        Store 7 to mcause
-    * b1 CSRRW_3  CSRRW_4  3 3 001010101110011010110010|        Prep emulation entrypt 0x108, here Q to 0x104
-    * b2 CSRRW_4  Fetch    6 3 101101100110011011011110|        IncPC, OpFetch, but force +4
-    * b3 unxb3             9 6 xxxxxxxxxxxxxxxxxxxxxxxx| b3: Not in use 
-    * b4 ic0reser          9 6 xxxxxxxxxxxxxxxxxxxxxxxx|  Fr00  Not really used, reserved to allow LASTINCH
-    * b5 SH_3     SH_4     3 0 000000111011000010011011|        Prepare get back address to use 
-    * b6 ECALL_5  ECALL_6  3 3 001010101110011010011010|        Q = 8
-    * b7 IJ_3     IJ_4     7 0 0010101110001xx010111101|        Store present PC in case of access error
-    * b8 BGE      condb_2  7 0 001110111011000000010011| BGE    Conditional Branch. Offset to Ryy
-    * b9 _L0xb9   ILLe     3 0 00xxxx1x0xxxxxx011111110|  Not in use (illegal as entry)
-    * ba LHU_3    ANDI_1   3 0 0001111111010xx000011010|        Invert q. Prepare read mask
-    * bb SH_2     SH_3     7 8 001011111110100010110101|        Repeat shl until shreg = 0 (0,8 or 24 times)
-    * bc CSRRWI_0 CSRRW_1  7 0 000110111011000001001001| CSRRWI Decoded CSR adr in yy
-    * bd IJ_4     IJ_5     3 3 000010111110011001110101|        Construct Q = 1
-    * be IJ_1     IJ_2     1 0 0010111111001xx000011111|        Read until q=mem[(rs1+ofs)&~1u]
-    * bf IJT_1    IJT_2    1 0 0010111111001xx011000001|        Exit CSR, enter trap
-    * c0 _L0xc0   ILLe     3 0 00xxxx1x0xxxxxx011111110|  Not in use (illegal as entry)
-    * c1 IJT_2    IJT_3    7 0 001010111011000011101001|        Read word is to be masked with ~1u
-    * c2 _L0xc2   ILLe     3 0 00xxxx1x0xxxxxx011111110|  Not in use (illegal as entry)
-    * c3 _L0xc3   ILLe     3 0 00xxxx1x0xxxxxx011111110|  Not in use (illegal as entry)
-    * c4 ORI_0    ORI_1    5 0 0011111110010xx011100001| ORI    Or immediate. jj=~Iimm
-    * c5 MRET_5   MRET_6   3 0 0000001111010xx001101111|        ~302
-    * c6 IJT_4    ILL_2    7 0 0110101111011xx001000111|        Mask and store to mepc and Q for read of instr
-    * c7 QINT_1   QINT_2   7 0 01xxxx1110001xx011001011|        Store pc to mepc.
-    * c8 _L0xc8   ILLe     3 0 00xxxx1x0xxxxxx011111110|  Not in use (illegal as entry)
-    * c9 MRET_2   MRET_3   3 0 000110101110000010100101|        0xff+3 = 0x102
-    * ca _L0xca   ILLe     3 0 00xxxx1x0xxxxxx011111110|  Not in use (illegal as entry)
-    * cb QINT_2   StdIncPc d 0 110100111011000011100110|        mtval = 0.
-    * cc OR_0     OR_1     3 0 0011111x10xxxxx000100110| OR     or
-    * cd unxcd             9 6 xxxxxxxxxxxxxxxxxxxxxxxx| cd: Not in use 
-    * ce _LCSRRCI_1 ILLe     3 0 00xxxx1x0xxxxxx011111110| Illegal instruction seen
-    * cf MRET_7   MRET_8   3 5 0001101x10xxxxx001001111|        Prepare emulation entry point 0x104
-    * d0 ECALL_1  ECALL_2  3 3 000000111110011000110111| ECALL  Verify Imm==0x000
-    * d1 MRET_1   MRET_2   5 0 000110111011000011001001| MRET   First save Imm, start build constant for check
-    * d2 LB_2     LB_3     3 a 0010101111001xx100000110|        Repeat shr until shreg == 0 (0,8,16,24 times)
-    * d3 aFaultd  aFault_1 7 0 111010111011000000011110|  err   LB Load access fault. Faulting adr to mtval
-    * d4 aFault_2 LDAF_3   d 3 100010110x10011010010010|        Store 5 to mcause
-    * d5 unalignd straddle 3 0 000010111011000000010010|  Fr00u Unaligned pc, prep read high hword
-    * d6 eILL0c   ILLe     3 0 00xxxx1x0xxxxxx011111110| Illegal instruction seen
-    * d7 ECALL_3  ECALL_4  7 0 111010111011000010100001|        mtval = 0, now start the chore of 11 to mcause
-    * d8 BLTU     condb_2  7 0 001110111011000000010011| BLTU   Conditional Branch. Offset to Ryy
-    * d9 _L0xd9   ILLe     3 0 00xxxx1x0xxxxxx011111110|  Not in use (illegal as entry)
-    * da LDAF_a   LDAF_2   3 0 0010101x10xxxxx010010001|        Extra cycle after error detected write mtval
-    * db jFault_1 LDAF_3   7 3 101100110x10011010010010|        Store 1 to mcause
-    * dc CSRRSI_0 CSRRW_1  7 0 000110111011000001001001| CSRRSI Decoded CSR adr in yy
-    * dd aF_SW_1  aF_SW_2  7 0 111010111011000011100101|  err   SW Store access fault. Faulting adr to mtval
-    * de Fetch    Fetch2   5 d 000011111011000011110100|  Fr00  Read and latch instruction
-    * df eFetch   Fetch2   e e 001011111011000011110100|  Fr00  rep Read until d=mem[(rs1+ofs) & ~3u]
-    * e0 _L0xe0   ILLe     3 0 00xxxx1x0xxxxxx011111110|  Not in use (illegal as entry)
-    * e1 ORI_1    ORI_2    3 0 0000001111001xx000011101|        Q = RS1
-    * e2 _L0xe2   ILLe     3 0 00xxxx1x0xxxxxx011111110|  Not in use (illegal as entry)
-    * e3 _L0xe3   ILLe     3 0 00xxxx1x0xxxxxx011111110|  Not in use (illegal as entry)
-    * e4 ANDI_0   ANDI_1   3 0 0011111111010xx000011010| ANDI   And immediate. Q=~Iimm
-    * e5 aF_SW_2  aF_SW_3  3 3 001010101110011010110000|        Q = 4
-    * e6 StdIncPc Fetch    6 4 101101100110011011011110|  Fr00  IncPC, OpFetch
-    * e7 aFault   aFault_1 7 0 111010111011000000011110|  err   Load access fault. Faulting adr to mtval
-    * e8 _L0xe8   ILLe     3 0 00xxxx1x0xxxxxx011111110|  Not in use (illegal as entry)
-    * e9 IJT_3    IJT_4    3 3 001100111110011011000110|        Construct Q = 1
-    * ea _L0xea   ILLe     3 0 00xxxx1x0xxxxxx011111110|  Not in use (illegal as entry)
-    * eb LH_3     LH_4     3 0 0001111111010xx001010110|        q = ~mem[rs1+ofs]
-    * ec AND_0    AND_1    3 0 0011111x10xxxxx000010001| AND    And 
-    * ed unxed             9 6 xxxxxxxxxxxxxxxxxxxxxxxx| ed: Not in use
-    * ee eILL0a   ILLe     3 0 00xxxx1x0xxxxxx011111110| Illegal instruction seen
-    * ef WFI_5    Fetch    6 3 101101100110011011011110|        IncPC, OpFetch
-    * f0 LBU_2    LBU_3    3 a 0010101111001xx101110010|        Repeat shr until shreg = 0 (0, 8 or 16 times)
-    * f1 aFaulte  aFault_1 7 0 111010111011000000011110|  err   LBU Load access fault. Faulting adr to mtval
-    * f2 SW_2     StdIncPc 3 0 0000101x10xxxxx011100110|        Prepare read PC
-    * f3 aF_SW    aF_SW_1  3 0 00xxxx1x01xxxxx011011101|  err   SW/SH/SB access fault. Rest to set SEL_O=4'hf
-    * f4 Fetch2   unalignd 5 0 111111111110000011010101|  Fr00  Upd ttime, I. Q=imm Use dinx unless unaligned 
-    * f5 jFault   jFault_1 7 0 111010111011000011011011|  err   Fetch access fault. Faulting adr to mtval
-    * f6 WFI_1    WFI_2    3 3 001100101110011011111010| WFI    Chk offset=0x105. Now 0xff. Prep 0xff+4 = 0x103
-    * f7 EBREAK_1 EBREAK_2 7 0 110000111011000010101011| EBREAK mepc = pc, store 0 to mtval
-    * f8 BGEU     condb_2  7 0 001110111011000000010011| BGEU   Conditional Branch. Offset to Ryy
-    * f9 _L0xf9   ILLe     3 0 00xxxx1x0xxxxxx011111110|  Not in use (illegal as entry)
-    * fa WFI_2    WFI_3    3 3 001010111110011001000101|        Chk ofs. Now 0x103. Prep +1+~ofs, so ~ofs+0x104
-    * fb SB_3     SB_4     3 0 000000111011000001101011|        Prepare get back address to use 
-    * fc CSRRCI_0 CSRRW_1  7 0 000110111011000001001001| CSRRCI Decoded CSR adr in yy
-    * fd NMI_0    NMI_1    3 0 0000101x10xxxxx001111110| NMI    Get current PC
-    * fe ILLe     ILL_1    3 0 0000101x0xxxxxx001000110| Illegal
-    * ff QINT_0   QINT_1   3 0 0000101x10xxxxx011000111| INT    Get current PC
+    * 00 LB_0     LB_1     0 0 000000000011010111100000| LB     Load byte. q = rdadr=RS1+0fs
+    * 01 LB_1     LB_2     1 1 000100010010111111001xx1|        Read until q=mem[rs1+ofs) & ~3u]
+    * 02 IJ_0     IJ_1     2 2 001000100011011111100000| IJ     Jump to mem[(rs1+ofs)&~1u]. inCSR=0
+    * 03 _L0x03   StdIncPc 3 0 001100000000101x10xxxxx0| FENCE  Prepare read PC (FENCE/FENCE.I)
+    * 04 ADDI_0   StdIncPc 4 0 010000000000101110100000| ADDI   Add immediate. rd =RS1+Iimm (or joined)
+    * 05 _L0x05   ADDI_0   3 0 001100000000001x01xxxxx0| AUIPC  q = imm20+2 or imm20+4  (copy x/2)
+    * 06 LB_3     LB_4     3 0 001100000001101111010xx0|        q = ~mem[rs1+ofs]
+    * 07 LB_4     LB_5     3 0 001100000001011111011xx0|        q = (uint8_t) mem[rs1+Iimm]
+    * 08 _L0x08   SB_1     5 0 010100000011100111100000| SB     Store byte. wjj=wradr=RS1+Simm
+    * 09 LB_5     LB_6     3 0 001100000001011111000xx0|        q = D^0xffffffff^q = D^0x80
+    * 0a _L0x0a   SB_1     5 0 010100000011100111100000| SB     Store byte. wjj=wradr=RS1+Simm
+    * 0b JALR_2   JALR_3   3 3 001100110000101111100110|        Q=1. Prep legalize target
+    * 0c ADD_0    ADDI_0   3 0 001100000011101111001xx0| ADD    add     Addition Q = RS1
+    * 0d _L0x0d   StdIncPc 4 0 010000000000101110110000| LUI    q = imm20
+    * 0e SUB_0    SUB_1    3 0 001100000011101x10xxxxx0| SUB    Subtraction
+    * 0f _L0x0f   StdIncPc 4 0 010000000000101110110000| LUI    q = imm20
+    * 10 SUB_1    LB_6     3 0 001100000011111111000xx0|        Q = ~RS2
+    * 11 AND_1    ANDI_1   3 0 001100000011101111000xx0|        RS1^0xffffffff to Q
+    * 12 straddle Fetchu   6 4 011001001011011001100110|  Fr00u IncPC, OpFetch
+    * 13 condb_2  condb_3  3 0 001100000011111111000xx0|        ~RS2 in Q
+    * 14 condb_3  condb_4  3 3 001100110011001111100110|        Calculate RS1+~RS2+1
+    * 15 condb_4  condb_5  3 5 001101010000001111001xx0|        Branch on condition
+    * 16 condb_5  StdIncPc 3 0 001100000000001x10xxxxx0|        Branch not taken.
+    * 17 condb_5t condb_6t 7 0 011100000000001101001xx0|        Branch taken. yy=oldPC incase of access error
+    * 18 BEQ      condb_2  7 0 011100000011101110110000| BEQ    Conditional Branch. Offset to Ryy
+    * 19 JALR_0   JALR_1   5 0 01010000100000110x100000| JALR   (tmp) Prep pc=RS1+imm (target)
+    * 1a ANDI_1   StdIncPc 4 0 010000000000101110011xx0|        rd = Iimm & RS1
+    * 1b _L0x1b   JAL_1    3 0 001100000000001x01xxxxx0| JAL. J-imm is in q. Prep get isntradr from jj
+    * 1c ECAL_BRK ECAL_RET 3 2 001100100010111101110000| ECALL/EBREAK  Select ECALL/(U/S/M)RET or EBREAK/WFI
+    * 1d ORI_2    StdIncPc 4 0 010000000000101110111000|        rd = Iimm | RS1
+    * 1e aFault_1 aFault_2 3 3 001100110010101011100110|        Q = 4
+    * 1f IJ_2     IJ_3     5 0 010100001000001101110000|        Read word is to be masked with lsb = 0
+    * 20 LH_0     LH_1     8 2 100000100011010111100000| LH     Load hword. Q = rdadr=RS1+Iimm.
+    * 21 XORI_1   StdIncPc 4 0 010000000000101110000xx0|        rd = Iimm ^ RS1
+    * 22 _L0x22   ILLe     3 0 0011000000xxxx1x0xxxxxx0|  Not in use (illegal as entry)
+    * 23 _L0x23   StdIncPc 3 0 001100000000101x10xxxxx0| FENCE  Prepare read PC (FENCE/FENCE.I)
+    * 24 SLLI_0   SLLI_1   3 6 00110110001111010x110000| SLLI   Shift left immediate.
+    * 25 _L0x25   ADDI_0   3 0 001100000000001x01xxxxx0| AUIPC  q = imm20+2 or imm20+4  (copy x/2)
+    * 26 OR_1     OR_2     5 0 010100000011101110000xx0|        RS1^0xffffffff to jj
+    * 27 OR_2     ORI_2    3 0 001100000000001111100000|        Q = rs2
+    * 28 _L0x28   SH_1     5 2 010100100011100111100000| SH     Store halfword. jjw=wradr=RS1+Simm
+    * 29 XOR_1    XORI_1   3 0 001100000011101111000xx0|        Q = RS1^0xFFFFFFFF
+    * 2a _L0x2a   SH_1     5 2 010100100011100111100000| SH     Store halfword. jjw=wradr=RS1+Simm
+    * 2b SLTIX_1  SLTIX_2  3 3 0011001100xxxx1110100110|        RS1 - imm / RS1 - RS2
+    * 2c SLL_0    SLL_1    3 0 001100000011101x0xxxxxx0| SLL    Shift left
+    * 2d _L0x2d   StdIncPc 4 0 010000000000101110110000| LUI    q = imm20
+    * 2e unx2e             9 6 10010110xxxxxxxxxxxxxxxx| 2e: Not in use 
+    * 2f _L0x2f   StdIncPc 4 0 010000000000101110110000| LUI    q = imm20
+    * 30 SLTIX_2  StdIncPc 4 7 010001110000101110110010|        Registered ALU flag to rd
+    * 31 SLTX_1   SLTIX_1  3 0 001100000011111111000xx0|        ~rs2 to Q
+    * 32 JAL_1    JAL_2    7 0 011100000000001101001xx0|      Prep Instradr to yy. Refetch instradr
+    * 33 JALR_3   JAL_25   5 0 010100001000001110011xx0|        Q = (RS1+imn) & 0xfffffffe
+    * 34 JAL_3    Fetch    6 0 011000001011011101001xx0|      Prep fetch next instr.
+    * 35 SLLI_1   SLLI_2   4 6 010001100010111111001xx0|        Register to shift to Q (and TRG for shift 0)
+    * 36 SLLI_2   _L0x03   4 8 010010000010111111101000|        Repeat Q = Q+Q until shregcnt == 0
+    * 37 ECALL_2  ECALL_3  7 5 0111010101xxxx1110001xx0|        mepc = pc, prep store 0 to mtval
+    * 38 BNE      condb_2  7 0 011100000011101110110000| BNE    Conditional Branch. Offset to Ryy
+    * 39 _L0x39   ILLe     3 0 0011000000xxxx1x0xxxxxx0|  Not in use (illegal as entry)
+    * 3a SRxI_1   SRxI_2   4 9 010010010010101111001xx1|        Register to shift to Q
+    * 3b _L0x3b   JAL_1    3 0 001100000000001x01xxxxx0| JAL. J-imm is in q. Prep get isntradr from jj
+    * 3c CSRRW_0  CSRRW_1  7 0 011100000001101110110000| CSRRW  Decoded CSR adr in yy
+    * 3d SRxI_2   _L0x03   4 a 010010100010101111001xx1|        Repeat Q >>= 1 until shregcnt == 0
+    * 3e SLL_1    SLLI_1   3 6 00110110001111010x001xx0|        Shiftamount was in low 5 bits of RS2
+    * 3f SRx_1    SRxI_1   3 6 00110110001111010x001xx0|        Shiftamount in low 5 bits of RS2
+    * 40 LW_0     LW_1     0 b 000010110011011111100000| LW     Load word. Q=yy=rdadr=RS1+Iimm
+    * 41 JALR_1   JALR_2   7 0 011100000010101110001xx0|        yy=jj. Prep get Q=1
+    * 42 _L0x42   ILLe     3 0 0011000000xxxx1x0xxxxxx0|  Not in use (illegal as entry)
+    * 43 _L0x43   ILLe     3 0 0011000000xxxx1x0xxxxxx0|  Not in use (illegal as entry)
+    * 44 SLTI_0   SLTIX_1  3 0 001100000011111111010xx0| SLTI   Set less than immediate (signed)
+    * 45 WFI_3    WFI_4    3 3 001100110010101111100110|        Chk ofs. Now 0x104. Prep +1, so ~ofs+0x105
+    * 46 ILL_1    ILL_2    7 0 01110000011010110x001xx0|        Store PC to mepc
+    * 47 ILL_2    ILL_3    7 0 011100001110101110001xx0|        Store 0 to mtval
+    * 48 _L0x48   SW_1     a b 101010110011101111100000| SW     Store word. Q=wradr=RS1+Simm
+    * 49 CSRRW_1  CSRRW_2  3 3 001100110000101111100110|        Construct PC storage adr
+    * 4a _L0x4a   SW_1     a b 101010110011101111100000| SW     Store word. Q=wradr=RS1+Simm
+    * 4b CSRRW_2  CSRRW_3  b 0 101100001110101101001xx0|        Write PC to 0x100 start Prep emulation entrypt
+    * 4c SLT_0    SLTX_1   3 0 001100000011101x10xxxxx0| SLT    Set less than (signed)
+    * 4d unx4d             9 6 10010110xxxxxxxxxxxxxxxx| 4d: Not in use 
+    * 4e eILL0b   ILLe     3 0 0011000000xxxx1x0xxxxxx0| Illegal instruction seen
+    * 4f MRET_8   MRET_9   3 3 001100110010101011100110|        +4, so now 0x103
+    * 50 LW_1     StdIncPc c c 110011000010111110001xx0|        Read until d=mem[(rs1+ofs) & ~3u]
+    * 51 LDAF_LW  LDAF_a   7 0 011100001110101101110000|  err   LD AlignFault. Faulting adr to mtval
+    * 52 LH_1     LH_2     1 1 000100010010111111001xx1|        Read until q=mem[(rs1+ofs) & ~3u]
+    * 53 LDAF_LH  LDAF_a   7 0 011100001110101101110000|  err   LD AlignFault. Faulting adr to mtval
+    * 54 LH_2     LH_3     3 a 001110100010101111001xx1|        Repeat shr until shreg = 0 (0, 8 or 16 times)
+    * 55 aFaultb  aFault_1 7 0 011100001110101110110000|  err   LH Load access fault. Faulting adr to mtval
+    * 56 LH_4     LH_5     3 0 001100000010001111011xx0|        q = (uint16_t) mem[rs1+Iimm]
+    * 57 LH_5     LB_6     3 0 001100000010001111000xx0|        q = D^0xffffffff^q = D ^ 0x00008000
+    * 58 _L0x58   ILLe     3 0 0011000000xxxx1x0xxxxxx0|  Not in use (illegal as entry)
+    * 59 _L0x59   ILLe     3 0 0011000000xxxx1x0xxxxxx0|  Not in use (illegal as entry)
+    * 5a SB_1     SB_2     7 6 011101100010111111001xx0|        Write d to Q and yy (for sh 0). Prep shift
+    * 5b _L0x5b   JAL_1    3 0 001100000000001x01xxxxx0| JAL. J-imm is in q. Prep get isntradr from jj
+    * 5c CSRRS_0  CSRRW_1  7 0 011100000001101110110000| CSRRS  Decoded CSR adr in yy
+    * 5d SB_2     SB_3     7 8 011110000010111111101000|        Repeat shl until shreg = 0 (0,8,16 or 24 times)
+    * 5e LHU_1    LHU_2    1 1 000100010010111111001xx1|        Read until q=mem[(rs1+ofs) & ~3u]
+    * 5f LDAF_LHU LDAF_a   7 0 011100001110101101110000|  err   LD AlignFault. Faulting adr to mtval
+    * 60 _L0x60   ILLe     3 0 0011000000xxxx1x0xxxxxx0|  Not in use (illegal as entry)
+    * 61 EBRKWFI2 EBREAK_1 7 5 011101010001101110010xx0| EBREAK/WFI2 Select EBREAK or WFI.
+    * 62 _L0x62   ILLe     3 0 0011000000xxxx1x0xxxxxx0|  Not in use (illegal as entry)
+    * 63 _L0x63   ILLe     3 0 0011000000xxxx1x0xxxxxx0|  Not in use (illegal as entry)
+    * 64 SLTIU_0  SLTIX_1  3 0 001100000011111111010xx0| SLTIU  Set less than immediate (unsigned)
+    * 65 WFI_4    WFI_5    3 5 001101010000001x10xxxxx0|        Prepare read PC.
+    * 66 SW_1     SW_2     9 0 100100001111101101001xx0|        Write d to a+k until accepted
+    * 67 SW_E1SWE SW_E2    7 0 01110000110010110x110000|        Store faulting address alignment to mtval
+    * 68 _L0x68   ILLe     3 0 0011000000xxxx1x0xxxxxx0|  Not in use (illegal as entry)
+    * 69 unx69             9 6 10010110xxxxxxxxxxxxxxxx| 69: Not in use 
+    * 6a _L0x6a   ILLe     3 0 0011000000xxxx1x0xxxxxx0|  Not in use (illegal as entry)
+    * 6b SB_4     SB_5     a 0 101000001011001111001xx0|        Address back to Q. Prepare get item to write
+    * 6c SLTU_0   SLTX_1   3 0 001100000011101x10xxxxx0| SLTU   Set less than (unsigned)
+    * 6d unx6d             9 6 10010110xxxxxxxxxxxxxxxx| 6d: Not in use 
+    * 6e unx6e             9 6 10010110xxxxxxxxxxxxxxxx| 6e: Not in use 
+    * 6f MRET_6   MRET_7   3 3 0011001100xxxx1111100110|        ~302 + origImm + 1 for branch decision
+    * 70 LHU_2    LHU_3    3 a 001110100010101111001xx1|        Repeat shr until shreg = 0 (0, 8 or 16 times)
+    * 71 aFaultc  aFault_1 7 0 011100001110101110110000|  err   LHU Load access fault. Faulting adr to mtval
+    * 72 LBU_3    ANDI_1   3 0 001100000001101111010xx0|        Invert q. Prepare read mask
+    * 73 unx73             9 6 10010110xxxxxxxxxxxxxxxx| 73: Not in use 
+    * 74 MRET_9   Fetch    6 3 011000111011011101100110|        +1, IncPC, OpFetch next
+    * 75 IJ_5     Fetch    6 0 011000001011011101011xx0|        Mask and use as PC
+    * 76 Fetchu   Fetch2   3 d 001111010000111110110000|  Fr00u Read and latch instruction
+    * 77 eFetchu  Fetch2   1 e 000111100010111110110000|  Fr00u rep Read until d=mem[(rs1+ofs) & ~3u]
+    * 78 _L0x78   ILLe     3 0 0011000000xxxx1x0xxxxxx0|  Not in use (illegal as entry)
+    * 79 _L0x79   ILLe     3 0 0011000000xxxx1x0xxxxxx0|  Not in use (illegal as entry)
+    * 7a SB_5     SW_2     9 0 100100001011001101001xx0|        Write d to a+k until accepted
+    * 7b _L0x7b   JAL_1    3 0 001100000000001x01xxxxx0| JAL. J-imm is in q. Prep get isntradr from jj
+    * 7c CSRRC_0  CSRRW_1  7 0 011100000001101110110000| CSRRC  Decoded CSR adr in yy
+    * 7d condb_6t Fetch    6 0 011000001011011101100000|        Branch taken.
+    * 7e NMI_1    NMI_2    7 0 0111000001xxxx1110001xx0|        Store pc to mepc.
+    * 7f unx7f             9 6 10010110xxxxxxxxxxxxxxxx| 7f: Not in use 
+    * 80 LBU_0    LBU_1    0 0 000000000011010111100000| LBU    Load unsigned byte. Q = rdadr=RS1+Iimm.
+    * 81 unx81             9 6 10010110xxxxxxxxxxxxxxxx| 81: Not in use 
+    * 82 _L0x82   ILLe     3 0 0011000000xxxx1x0xxxxxx0|  Not in use (illegal as entry)
+    * 83 _L0x83   ILLe     3 0 0011000000xxxx1x0xxxxxx0|  Not in use (illegal as entry)
+    * 84 XORI_0   XORI_1   3 0 001100000011111111010xx0| XORI   Xor immediate. Q=~Iimm
+    * 85 LBU_1    LBU_2    1 1 000100010010111111001xx1|        Read until q=mem[(rs1+ofs) & ~3u]
+    * 86 JAL_2    JAL_25   5 0 010100001000001110100000|      Prep pc = jj + ofs
+    * 87 unx87             9 6 10010110xxxxxxxxxxxxxxxx| 87: Not in use 
+    * 88 _L0x88   ILLe     3 0 0011000000xxxx1x0xxxxxx0|  Not in use (illegal as entry)
+    * 89 unx89             9 6 10010110xxxxxxxxxxxxxxxx| 89: Not in use 
+    * 8a _L0x8a   ILLe     3 0 0011000000xxxx1x0xxxxxx0|  Not in use (illegal as entry)
+    * 8b LB_6     StdIncPc 4 3 010000110000101110100110|        WTRG=(D^0x80)+0xFFFFFF7F+1=(D^0x80)-0x80
+    * 8c XOR_0    XOR_1    3 0 001100000011111x10xxxxx0| XOR    xor
+    * 8d unx8d             9 6 10010110xxxxxxxxxxxxxxxx| 8d: Not in use 
+    * 8e _LCSRRS_1 ILLe     3 0 0011000000xxxx1x0xxxxxx0| Illegal instruction seen
+    * 8f ILL_3    ILL_4    3 3 001100110010101111100110|        Q = 1
+    * 90 NMI_2    JAL_3    d 0 110100001101001110110000|        mtval = 0.
+    * 91 LDAF_2   LDAF_3   d 3 11010011100010100x100110|        Store 4 to mcause
+    * 92 LDAF_3   JAL_3    7 0 01110000011001110x001xx0|        PC to mepc
+    * 93 SW_E2    SW_E3    7 0 011100000110111110001xx0|        Store address that faulted
+    * 94 SW_E4    JAL_3    d 0 11010000101001110x101000|        Store 6 to mcause
+    * 95 SW_E3    SW_E4    3 3 001100110010111011100110|        Q = 3
+    * 96 SH_1     SH_2     7 6 011101100010111111001xx0|        Write d to Q and yy (for sh 0). Prep shift
+    * 97 SW_E1SWH SW_E2    7 0 01110000110010110x110000|        Store faulting address alignment to mtval
+    * 98 BLT      condb_2  7 0 011100000011101110110000| BLT    Conditional Branch. Offset to Ryy
+    * 99 _L0x99   ILLe     3 0 0011000000xxxx1x0xxxxxx0|  Not in use (illegal as entry)
+    * 9a ECALL_6  JAL_3    d 0 11010000101001100x100000|        mcause = 11
+    * 9b SH_4     SH_5     a 0 101000000111001111001xx0|        Address back to Q. Prepare get item to write
+    * 9c _L0x9c   ILLe     3 0 0011000000xxxx1x0xxxxxx0|  Not in use (illegal as entry)
+    * 9d unx9d             9 6 10010110xxxxxxxxxxxxxxxx| 9d: Not in use 
+    * 9e JAL_25   JAL_3    4 4 010001000000101010100110|      Prep WTRG = jj+2/4 (return adr)
+    * 9f SH_5     SW_2     9 0 100100000111001101001xx0|        Write d to a+k until accepted
+    * a0 LHU_0    LHU_1    8 2 100000100011010111100000| LHU    Load unsigned hword. Q = rdadr=RS1+Iimm
+    * a1 ECALL_4  ECALL_5  3 3 001100110010101011100110|        Q = 4
+    * a2 _L0xa2   ILLe     3 0 0011000000xxxx1x0xxxxxx0|  Not in use (illegal as entry)
+    * a3 _L0xa3   ILLe     3 0 0011000000xxxx1x0xxxxxx0|  Not in use (illegal as entry)
+    * a4 SRxI_0   SRxI_1   3 6 00110110001111010x110000| SRxI   Shift Right immediate (both logic/arith here)
+    * a5 MRET_3   MRET_4   3 3 001100110001101111100110|        0x102 + 0xff + 1 = 0x202
+    * a6 ECAL_RET ECALL_1  3 b 001110110010111101110000| ECALL/(U/S/M)RET Select ECALL or (U/S/M)RET
+    * a7 EBRKWFI1 EBRKWFI2 3 0 0011000000xxxx1111100000| EBREAK/WFI1 Prepare select EBREAK or WFI
+    * a8 _L0xa8   ILLe     3 0 0011000000xxxx1x0xxxxxx0|  Not in use (illegal as entry)
+    * a9 ILL_4    JAL_3    d 3 11010011101001110x100110|        Store 2 to mcause
+    * aa _L0xaa   ILLe     3 0 0011000000xxxx1x0xxxxxx0|  Not in use (illegal as entry)
+    * ab EBREAK_2 ECALL_6  7 0 011100000110101110001xx0|        pc to mepc
+    * ac _L0xac   SRx_1    3 0 001100000011101x0xxxxxx0| SRx    Shift Right (both SRL and SRA)
+    * ad unxad             9 6 10010110xxxxxxxxxxxxxxxx| ad: Not in use 
+    * ae _L0xae   SRx_1    3 0 001100000011101x0xxxxxx0| SRx    Shift Right (both SRL and SRA)
+    * af MRET_4   MRET_5   3 3 0011001100xxxx1111100110|        0x202 + 0xff + 1 = 0x302
+    * b0 aF_SW_3  LDAF_3   d 0 11010000100010100x100000|        Store 7 to mcause
+    * b1 CSRRW_3  CSRRW_4  3 3 001100110010101011100110|        Prep emulation entrypt 0x108, here Q to 0x104
+    * b2 CSRRW_4  Fetch    6 3 011000111011011001100110|        IncPC, OpFetch, but force +4
+    * b3 unxb3             9 6 10010110xxxxxxxxxxxxxxxx| b3: Not in use 
+    * b4 ic0reser          9 6 10010110xxxxxxxxxxxxxxxx|  Fr00  Not really used, reserved to allow LASTINCH
+    * b5 SH_3     SH_4     3 0 001100000000001110110000|        Prepare get back address to use 
+    * b6 ECALL_5  ECALL_6  3 3 001100110010101011100110|        Q = 8
+    * b7 IJ_3     IJ_4     7 0 011100000010101110001xx0|        Store present PC in case of access error
+    * b8 BGE      condb_2  7 0 011100000011101110110000| BGE    Conditional Branch. Offset to Ryy
+    * b9 _L0xb9   ILLe     3 0 0011000000xxxx1x0xxxxxx0|  Not in use (illegal as entry)
+    * ba LHU_3    ANDI_1   3 0 001100000001111111010xx0|        Invert q. Prepare read mask
+    * bb SH_2     SH_3     7 8 011110000010111111101000|        Repeat shl until shreg = 0 (0,8 or 24 times)
+    * bc CSRRWI_0 CSRRW_1  7 0 011100000001101110110000| CSRRWI Decoded CSR adr in yy
+    * bd IJ_4     IJ_5     3 3 001100110000101111100110|        Construct Q = 1
+    * be IJ_1     IJ_2     1 0 000100000010111111001xx0|        Read until q=mem[(rs1+ofs)&~1u]
+    * bf IJT_1    IJT_2    1 0 000100000010111111001xx0|        Exit CSR, enter trap
+    * c0 _L0xc0   ILLe     3 0 0011000000xxxx1x0xxxxxx0|  Not in use (illegal as entry)
+    * c1 IJT_2    IJT_3    7 0 011100000010101110110000|        Read word is to be masked with ~1u
+    * c2 _L0xc2   ILLe     3 0 0011000000xxxx1x0xxxxxx0|  Not in use (illegal as entry)
+    * c3 _L0xc3   ILLe     3 0 0011000000xxxx1x0xxxxxx0|  Not in use (illegal as entry)
+    * c4 ORI_0    ORI_1    5 0 010100000011111110010xx0| ORI    Or immediate. jj=~Iimm
+    * c5 MRET_5   MRET_6   3 0 001100000000001111010xx0|        ~302
+    * c6 IJT_4    ILL_2    7 0 011100000110101111011xx0|        Mask and store to mepc and Q for read of instr
+    * c7 QINT_1   QINT_2   7 0 0111000001xxxx1110001xx0|        Store pc to mepc.
+    * c8 _L0xc8   ILLe     3 0 0011000000xxxx1x0xxxxxx0|  Not in use (illegal as entry)
+    * c9 MRET_2   MRET_3   3 0 001100000001101011100000|        0xff+3 = 0x102
+    * ca _L0xca   ILLe     3 0 0011000000xxxx1x0xxxxxx0|  Not in use (illegal as entry)
+    * cb QINT_2   StdIncPc d 0 110100001101001110110000|        mtval = 0.
+    * cc OR_0     OR_1     3 0 001100000011111x10xxxxx0| OR     or
+    * cd unxcd             9 6 10010110xxxxxxxxxxxxxxxx| cd: Not in use 
+    * ce _LCSRRCI_1 ILLe     3 0 0011000000xxxx1x0xxxxxx0| Illegal instruction seen
+    * cf MRET_7   MRET_8   3 5 001101010001101x10xxxxx0|        Prepare emulation entry point 0x104
+    * d0 ECALL_1  ECALL_2  3 3 001100110000001111100110| ECALL  Verify Imm==0x000
+    * d1 MRET_1   MRET_2   5 0 010100000001101110110000| MRET   First save Imm, start build constant for check
+    * d2 LB_2     LB_3     3 a 001110100010101111001xx1|        Repeat shr until shreg == 0 (0,8,16,24 times)
+    * d3 aFaultd  aFault_1 7 0 011100001110101110110000|  err   LB Load access fault. Faulting adr to mtval
+    * d4 aFault_2 LDAF_3   d 3 11010011100010110x100110|        Store 5 to mcause
+    * d5 unalignd straddle 3 0 001100000000101110110000|  Fr00u Unaligned pc, prep read high hword
+    * d6 eILL0c   ILLe     3 0 0011000000xxxx1x0xxxxxx0| Illegal instruction seen
+    * d7 ECALL_3  ECALL_4  7 0 011100001110101110110000|        mtval = 0, now start the chore of 11 to mcause
+    * d8 BLTU     condb_2  7 0 011100000011101110110000| BLTU   Conditional Branch. Offset to Ryy
+    * d9 _L0xd9   ILLe     3 0 0011000000xxxx1x0xxxxxx0|  Not in use (illegal as entry)
+    * da LDAF_a   LDAF_2   3 0 001100000010101x10xxxxx0|        Extra cycle after error detected write mtval
+    * db jFault_1 LDAF_3   7 3 01110011101100110x100110|        Store 1 to mcause
+    * dc CSRRSI_0 CSRRW_1  7 0 011100000001101110110000| CSRRSI Decoded CSR adr in yy
+    * dd aF_SW_1  aF_SW_2  7 0 011100001110101110110000|  err   SW Store access fault. Faulting adr to mtval
+    * de Fetch    Fetch2   5 d 010111010000111110110000|  Fr00  Read and latch instruction
+    * df eFetch   Fetch2   e e 111011100010111110110000|  Fr00  rep Read until d=mem[(rs1+ofs) & ~3u]
+    * e0 _L0xe0   ILLe     3 0 0011000000xxxx1x0xxxxxx0|  Not in use (illegal as entry)
+    * e1 ORI_1    ORI_2    3 0 001100000000001111001xx0|        Q = RS1
+    * e2 _L0xe2   ILLe     3 0 0011000000xxxx1x0xxxxxx0|  Not in use (illegal as entry)
+    * e3 _L0xe3   ILLe     3 0 0011000000xxxx1x0xxxxxx0|  Not in use (illegal as entry)
+    * e4 ANDI_0   ANDI_1   3 0 001100000011111111010xx0| ANDI   And immediate. Q=~Iimm
+    * e5 aF_SW_2  aF_SW_3  3 3 001100110010101011100110|        Q = 4
+    * e6 StdIncPc Fetch    6 4 011001001011011001100110|  Fr00  IncPC, OpFetch
+    * e7 aFault   aFault_1 7 0 011100001110101110110000|  err   Load access fault. Faulting adr to mtval
+    * e8 _L0xe8   ILLe     3 0 0011000000xxxx1x0xxxxxx0|  Not in use (illegal as entry)
+    * e9 IJT_3    IJT_4    3 3 001100110011001111100110|        Construct Q = 1
+    * ea _L0xea   ILLe     3 0 0011000000xxxx1x0xxxxxx0|  Not in use (illegal as entry)
+    * eb LH_3     LH_4     3 0 001100000001111111010xx0|        q = ~mem[rs1+ofs]
+    * ec AND_0    AND_1    3 0 001100000011111x10xxxxx0| AND    And 
+    * ed unxed             9 6 10010110xxxxxxxxxxxxxxxx| ed: Not in use
+    * ee eILL0a   ILLe     3 0 0011000000xxxx1x0xxxxxx0| Illegal instruction seen
+    * ef WFI_5    Fetch    6 3 011000111011011001100110|        IncPC, OpFetch
+    * f0 LBU_2    LBU_3    3 a 001110100010101111001xx1|        Repeat shr until shreg = 0 (0, 8 or 16 times)
+    * f1 aFaulte  aFault_1 7 0 011100001110101110110000|  err   LBU Load access fault. Faulting adr to mtval
+    * f2 SW_2     StdIncPc 3 0 001100000000101x10xxxxx0|        Prepare read PC
+    * f3 aF_SW    aF_SW_1  3 0 0011000000xxxx1x01xxxxx0|  err   SW/SH/SB access fault. Rest to set SEL_O=4'hf
+    * f4 Fetch2   unalignd 5 0 010100001111111111100000|  Fr00  Upd ttime, I. Q=imm Use dinx unless unaligned 
+    * f5 jFault   jFault_1 7 0 011100001110101110110000|  err   Fetch access fault. Faulting adr to mtval
+    * f6 WFI_1    WFI_2    3 3 001100110011001011100110| WFI    Chk offset=0x105. Now 0xff. Prep 0xff+4 = 0x103
+    * f7 EBREAK_1 EBREAK_2 7 0 011100001100001110110000| EBREAK mepc = pc, store 0 to mtval
+    * f8 BGEU     condb_2  7 0 011100000011101110110000| BGEU   Conditional Branch. Offset to Ryy
+    * f9 _L0xf9   ILLe     3 0 0011000000xxxx1x0xxxxxx0|  Not in use (illegal as entry)
+    * fa WFI_2    WFI_3    3 3 001100110010101111100110|        Chk ofs. Now 0x103. Prep +1+~ofs, so ~ofs+0x104
+    * fb SB_3     SB_4     3 0 001100000000001110110000|        Prepare get back address to use 
+    * fc CSRRCI_0 CSRRW_1  7 0 011100000001101110110000| CSRRCI Decoded CSR adr in yy
+    * fd NMI_0    NMI_1    3 0 001100000000101x10xxxxx0| NMI    Get current PC
+    * fe ILLe     ILL_1    3 0 001100000000101x0xxxxxx0| Illegal
+    * ff QINT_0   QINT_1   3 0 001100000000101x10xxxxx0| INT    Get current PC
     */
    localparam u0_0 = 256'hb0e68010b0e6c804e633e05ac08be05ad809d0074004a0e680e6e0bec9d2e001;
    localparam u0_1 = 256'h70b7e6d4b8e670a6403298e62041b013487d80e6c816e615c0146676c01ac08b;
@@ -3332,7 +3332,7 @@ endmodule
  * 2019-2020. Copyright B. Nossum.
  * For licence, see LICENCE
  * -----------------------------------------------------------------------------ehdr
- * Automatically generated from ../code/ucode.h by midgetv_indirectEBR.c.
+ * Automatically generated from ../code/ucode.h by ../util/midgetv_indirectEBR.c.
  * Do not edit.
  * Optiones for this variant:
  *   RVC included
@@ -3424,262 +3424,262 @@ module v10_m_2ebr
     *                      indirect_index 1
     * inx         next     | indirect index 0
     * || ucode    ucode    | | direct representation
-    * 00 LB_0     LB_1     0 0 100110101111000000000001| LB     Load byte. q = rdadr=RS1+0fs
-    * 01 LB_1     LB_2     1 1 00010111111001x111010010|        Read until q=mem[rs1+ofs) & ~3u]
-    * 02 IJ_0     IJ_1     2 2 100110111111000010111110| IJ     Jump to mem[(rs1+ofs)&~1u]. inCSR=0
-    * 03 _L0x03   StdIncPc 0 0 00000101x10xxxx011100110| FENCE  Prepare read PC (FENCE/FENCE.I)
-    * 04 ADDI_0   StdIncPc 3 0 000001011101000011100110| ADDI   Add immediate. rd =RS1+Iimm (or joined)
-    * 05 _L0x05   ADDI_0   0 0 00000001x01xxxx000000100| AUIPC  q = imm20+2 or imm20+4  (copy x/2)
-    * 06 LB_3     LB_4     0 0 00001101111010x000000111|        q = ~mem[rs1+ofs]
-    * 07 LB_4     LB_5     0 0 00001011111011x000001001|        q = (uint8_t) mem[rs1+Iimm]
-    * 08 _L0x08   SB_1     4 0 000111001111000001011010| SB     Store byte. wjj=wradr=RS1+Simm
-    * 09 LB_5     LB_6     0 0 00001011111000x010001011|        q = D^0xffffffff^q = D^0x80
-    * 0a _L0x0a   SB_1     4 0 000111001111000001011010| SB     Store byte. wjj=wradr=RS1+Simm
-    * 0b JALR_2   JALR_3   0 3 000001011111001000110011|        Q=1. Prep legalize target
-    * 0c ADD_0    ADDI_0   0 0 00011101111001x000000100| ADD    add     Addition Q = RS1
-    * 0d _L0x0d   StdIncPc 3 0 000001011101100011100110| LUI    q = imm20
-    * 0e SUB_0    SUB_1    0 0 00011101x10xxxx000010000| SUB    Subtraction
-    * 0f _L0x0f   StdIncPc 3 0 000001011101100011100110| LUI    q = imm20
-    * 10 SUB_1    LB_6     0 0 00011111111000x010001011|        Q = ~RS2
-    * 11 AND_1    ANDI_1   0 0 00011101111000x000011010|        RS1^0xffffffff to Q
-    * 12 straddle Fetchu   5 4 110110110011001001110110|  Fr10u IncPC, OpFetch
-    * 13 condb_2  condb_3  0 0 00011111111000x000010100|        ~RS2 in Q
-    * 14 condb_3  condb_4  0 3 000110011111001000010101|        Calculate RS1+~RS2+1
-    * 15 condb_4  condb_5  0 5 00000001111001x000010110|        Branch on condition
-    * 16 condb_5  StdIncPc 0 0 00000001x10xxxx011100110|        Branch not taken.
-    * 17 condb_5t condb_6t 6 0 00000001101001x001111101|        Branch taken. yy=oldPC incase of access error
-    * 18 BEQ      condb_2  6 0 000111011101100000010011| BEQ    Conditional Branch. Offset to Ryy
-    * 19 JALR_0   JALR_1   4 0 0100000110x1000001000001| JALR   (tmp) Prep pc=RS1+imm (target)
-    * 1a ANDI_1   StdIncPc 3 0 00000101110011x011100110|        rd = Iimm & RS1
-    * 1b _L0x1b   JAL_1    0 0 00000001x01xxxx000110010| JAL. J-imm is in q. Prep get isntradr from jj
-    * 1c ECAL_BRK ECAL_RET 0 2 000101111011100010100110| ECALL/EBREAK  Select ECALL/(U/S/M)RET or EBREAK/WFI
-    * 1d ORI_2    StdIncPc 3 0 000001011101110011100110|        rd = Iimm | RS1
-    * 1e aFault_1 aFault_2 0 3 000101010111001011010100|        Q = 4
-    * 1f IJ_2     IJ_3     4 0 010000011011100010110111|        Read word is to be masked with lsb = 0
-    * 20 LH_0     LH_1     6 2 100110101111000001010010| LH     Load hword. Q = rdadr=RS1+Iimm.
-    * 21 XORI_1   StdIncPc 3 0 00000101110000x011100110|        rd = Iimm ^ RS1
-    * 22 _L0x22   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * 23 _L0x23   StdIncPc 0 0 00000101x10xxxx011100110| FENCE  Prepare read PC (FENCE/FENCE.I)
-    * 24 SLLI_0   SLLI_1   0 6 0001111010x1100000110101| SLLI   Shift left immediate.
-    * 25 _L0x25   ADDI_0   0 0 00000001x01xxxx000000100| AUIPC  q = imm20+2 or imm20+4  (copy x/2)
-    * 26 OR_1     OR_2     4 0 00011101110000x000100111|        RS1^0xffffffff to jj
-    * 27 OR_2     ORI_2    0 0 000000011111000000011101|        Q = rs2
-    * 28 _L0x28   SH_1     4 2 000111001111000010010110| SH     Store halfword. jjw=wradr=RS1+Simm
-    * 29 XOR_1    XORI_1   0 0 00011101111000x000100001|        Q = RS1^0xFFFFFFFF
-    * 2a _L0x2a   SH_1     4 2 000111001111000010010110| SH     Store halfword. jjw=wradr=RS1+Simm
-    * 2b SLTIX_1  SLTIX_2  0 3 000xxxx11101001000110000|        RS1 - imm / RS1 - RS2
-    * 2c SLL_0    SLL_1    0 0 00011101x0xxxxx000111110| SLL    Shift left
-    * 2d _L0x2d   StdIncPc 3 0 000001011101100011100110| LUI    q = imm20
-    * 2e unx2e             7 6 xxxxxxxxxxxxxxxxxxxxxxxx| 2e: Not in use 
-    * 2f _L0x2f   StdIncPc 3 0 000001011101100011100110| LUI    q = imm20
-    * 30 SLTIX_2  StdIncPc 3 7 000001011101101011100110|        Registered ALU flag to rd
-    * 31 SLTX_1   SLTIX_1  0 0 00011111111000x000101011|        ~rs2 to Q
-    * 32 JAL_1    JAL_2    6 0 00000001101001x010000110|      Prep Instradr to yy. Refetch instradr
-    * 33 JALR_3   JAL_25   4 0 01000001110011x010011110|        Q = (RS1+imn) & 0xfffffffe
-    * 34 JAL_3    Fetch    5 0 11011011101001x011011110|      Prep fetch next instr.
-    * 35 SLLI_1   SLLI_2   3 6 00010111111001x000110110|        Register to shift to Q (and TRG for shift 0)
-    * 36 SLLI_2   _L0x03   8 6 000101111111010000000011|        Repeat Q = Q+Q until shregcnt == 0
-    * 37 ECALL_2  ECALL_3  6 5 001xxxx1110001x011010111|        mepc = pc, prep store 0 to mtval
-    * 38 BNE      condb_2  6 0 000111011101100000010011| BNE    Conditional Branch. Offset to Ryy
-    * 39 _L0x39   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * 3a SRxI_1   SRxI_2   3 8 00010101111001x100111101|        Register to shift to Q
-    * 3b _L0x3b   JAL_1    0 0 00000001x01xxxx000110010| JAL. J-imm is in q. Prep get isntradr from jj
-    * 3c CSRRW_0  CSRRW_1  6 0 000011011101100001001001| CSRRW  Decoded CSR adr in yy
-    * 3d SRxI_2   _L0x03   8 8 00010101111001x100000011|        Repeat Q >>= 1 until shregcnt == 0
-    * 3e SLL_1    SLLI_1   0 6 0001111010x001x000110101|        Shiftamount was in low 5 bits of RS2
-    * 3f SRx_1    SRxI_1   0 6 0001111010x001x000111010|        Shiftamount in low 5 bits of RS2
-    * 40 LW_0     LW_1     0 9 100110111111000001010000| LW     Load word. Q=yy=rdadr=RS1+Iimm
-    * 41 JALR_1   JALR_2   6 0 00010101110001x000001011|        yy=jj. Prep get Q=1
-    * 42 _L0x42   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * 43 _L0x43   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * 44 SLTI_0   SLTIX_1  0 0 00011111111010x000101011| SLTI   Set less than immediate (signed)
-    * 45 WFI_3    WFI_4    0 3 000101011111001001100101|        Chk ofs. Now 0x104. Prep +1, so ~ofs+0x105
-    * 46 ILL_1    ILL_2    6 0 0011010110x001x001000111|        Store PC to mepc
-    * 47 ILL_2    ILL_3    6 0 01110101110001x010001111|        Store 0 to mtval
-    * 48 _L0x48   SW_1     9 9 100111011111000001100110| SW     Store word. Q=wradr=RS1+Simm
-    * 49 CSRRW_1  CSRRW_2  0 3 000000011111001001001011|        Construct PC storage adr
-    * 4a _L0x4a   SW_1     9 9 100111011111000001100110| SW     Store word. Q=wradr=RS1+Simm
-    * 4b CSRRW_2  CSRRW_3  a 0 01110101101001x010110001|        Write PC to 0x100 start Prep emulation entrypt
-    * 4c SLT_0    SLTX_1   0 0 00011101x10xxxx000110001| SLT    Set less than (signed)
-    * 4d unx4d             7 6 xxxxxxxxxxxxxxxxxxxxxxxx| 4d: Not in use 
-    * 4e eILL0b   ILLe     0 0 000xxxx1x0xxxxx011111110| Illegal instruction seen
-    * 4f MRET_8   MRET_9   0 3 000101010111001001110100|        +4, so now 0x103
-    * 50 LW_1     StdIncPc b a 00010111110001x011100110|        Read until d=mem[(rs1+ofs) & ~3u]
-    * 51 LDAF_LW  LDAF_a   6 0 011101011011100011011010|  err   LD AlignFault. Faulting adr to mtval
-    * 52 LH_1     LH_2     1 1 00010111111001x101010100|        Read until q=mem[(rs1+ofs) & ~3u]
-    * 53 LDAF_LH  LDAF_a   6 0 011101011011100011011010|  err   LD AlignFault. Faulting adr to mtval
-    * 54 LH_2     LH_3     c 8 00010101111001x111101011|        Repeat shr until shreg = 0 (0, 8 or 16 times)
-    * 55 aFaultb  aFault_1 6 0 011101011101100000011110|  err   LH Load access fault. Faulting adr to mtval
-    * 56 LH_4     LH_5     0 0 00010001111011x001010111|        q = (uint16_t) mem[rs1+Iimm]
-    * 57 LH_5     LB_6     0 0 00010001111000x010001011|        q = D^0xffffffff^q = D ^ 0x00008000
-    * 58 _L0x58   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * 59 _L0x59   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * 5a SB_1     SB_2     6 6 00010111111001x001011101|        Write d to Q and yy (for sh 0). Prep shift
-    * 5b _L0x5b   JAL_1    0 0 00000001x01xxxx000110010| JAL. J-imm is in q. Prep get isntradr from jj
-    * 5c CSRRS_0  CSRRW_1  6 0 000011011101100001001001| CSRRS  Decoded CSR adr in yy
-    * 5d SB_2     SB_3     d 6 000101111111010011111011|        Repeat shl until shreg = 0 (0,8,16 or 24 times)
-    * 5e LHU_1    LHU_2    1 1 00010111111001x101110000|        Read until q=mem[(rs1+ofs) & ~3u]
-    * 5f LDAF_LHU LDAF_a   6 0 011101011011100011011010|  err   LD AlignFault. Faulting adr to mtval
-    * 60 _L0x60   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * 61 EBRKWFI2 EBREAK_1 6 5 00001101110010x011110111| EBREAK/WFI2 Select EBREAK or WFI.
-    * 62 _L0x62   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * 63 _L0x63   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * 64 SLTIU_0  SLTIX_1  0 0 00011111111010x000101011| SLTIU  Set less than immediate (unsigned)
-    * 65 WFI_4    WFI_5    0 5 00000001x10xxxx011101111|        Prepare read PC.
-    * 66 SW_1     SW_2     7 0 01111101101001x011110010|        Write d to a+k until accepted
-    * 67 SW_E1SWE SW_E2    6 0 0110010110x1100010010011|        Store faulting address alignment to mtval
-    * 68 _L0x68   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * 69 unx69             7 6 xxxxxxxxxxxxxxxxxxxxxxxx| 69: Not in use 
-    * 6a _L0x6a   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * 6b SB_4     SB_5     9 0 11011001111001x001111010|        Address back to Q. Prepare get item to write
-    * 6c SLTU_0   SLTX_1   0 0 00011101x10xxxx000110001| SLTU   Set less than (unsigned)
-    * 6d unx6d             7 6 xxxxxxxxxxxxxxxxxxxxxxxx| 6d: Not in use 
-    * 6e unx6e             7 6 xxxxxxxxxxxxxxxxxxxxxxxx| 6e: Not in use 
-    * 6f MRET_6   MRET_7   0 3 000xxxx11111001011001111|        ~302 + origImm + 1 for branch decision
-    * 70 LHU_2    LHU_3    c 8 00010101111001x110111010|        Repeat shr until shreg = 0 (0, 8 or 16 times)
-    * 71 aFaultc  aFault_1 6 0 011101011101100000011110|  err   LHU Load access fault. Faulting adr to mtval
-    * 72 LBU_3    ANDI_1   0 0 00001101111010x000011010|        Invert q. Prepare read mask
-    * 73 unalignd straddle 0 0 000001011101100000010010|  Fr10u Unaligned pc, prep read high hword
-    * 74 MRET_9   Fetch    5 3 110110111011001011011110|        +1, IncPC, OpFetch next
-    * 75 IJ_5     Fetch    5 0 11011011101011x011011110|        Mask and use as PC
-    * 76 Fetchu   Fetch2   0 b 000001111101100011110100|  Fr10u Read and latch instruction
-    * 77 eFetchu  Fetch2   1 c 000101111101100011110100|  Fr10u rep Read until d=mem[(rs1+ofs) & ~3u]
-    * 78 _L0x78   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * 79 _L0x79   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * 7a SB_5     SW_2     7 0 01011001101001x011110010|        Write d to a+k until accepted
-    * 7b _L0x7b   JAL_1    0 0 00000001x01xxxx000110010| JAL. J-imm is in q. Prep get isntradr from jj
-    * 7c CSRRC_0  CSRRW_1  6 0 000011011101100001001001| CSRRC  Decoded CSR adr in yy
-    * 7d condb_6t Fetch    5 0 110110111011000011011110|        Branch taken.
-    * 7e NMI_1    NMI_2    6 0 001xxxx1110001x010010000|        Store pc to mepc.
-    * 7f unx7f             7 6 xxxxxxxxxxxxxxxxxxxxxxxx| 7f: Not in use 
-    * 80 LBU_0    LBU_1    0 0 100110101111000010000101| LBU    Load unsigned byte. Q = rdadr=RS1+Iimm.
-    * 81 unx81             7 6 xxxxxxxxxxxxxxxxxxxxxxxx| 81: Not in use 
-    * 82 _L0x82   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * 83 _L0x83   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * 84 XORI_0   XORI_1   0 0 00011111111010x000100001| XORI   Xor immediate. Q=~Iimm
-    * 85 LBU_1    LBU_2    1 1 00010111111001x111110000|        Read until q=mem[(rs1+ofs) & ~3u]
-    * 86 JAL_2    JAL_25   4 0 010000011101000010011110|      Prep pc = jj + ofs
-    * 87 unx87             7 6 xxxxxxxxxxxxxxxxxxxxxxxx| 87: Not in use 
-    * 88 _L0x88   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * 89 unx89             7 6 xxxxxxxxxxxxxxxxxxxxxxxx| 89: Not in use 
-    * 8a _L0x8a   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * 8b LB_6     StdIncPc 3 3 000001011101001011100110|        WTRG=(D^0x80)+0xFFFFFF7F+1=(D^0x80)-0x80
-    * 8c XOR_0    XOR_1    0 0 00011111x10xxxx000101001| XOR    xor
-    * 8d unx8d             7 6 xxxxxxxxxxxxxxxxxxxxxxxx| 8d: Not in use 
-    * 8e _LCSRRS_1 ILLe     0 0 000xxxx1x0xxxxx011111110| Illegal instruction seen
-    * 8f ILL_3    ILL_4    0 3 000101011111001010101001|        Q = 1
-    * 90 NMI_2    JAL_3    e 0 011010011101100000110100|        mtval = 0.
-    * 91 LDAF_2   LDAF_3   e 3 0100010100x1001010010010|        Store 4 to mcause
-    * 92 LDAF_3   JAL_3    6 0 0011001110x001x000110100|        PC to mepc
-    * 93 SW_E2    SW_E3    6 0 00110111110001x010010101|        Store address that faulted
-    * 94 SW_E4    JAL_3    e 0 0101001110x1010000110100|        Store 6 to mcause
-    * 95 SW_E3    SW_E4    0 3 000101110111001010010100|        Q = 3
-    * 96 SH_1     SH_2     6 6 00010111111001x010111011|        Write d to Q and yy (for sh 0). Prep shift
-    * 97 SW_E1SWH SW_E2    6 0 0110010110x1100010010011|        Store faulting address alignment to mtval
-    * 98 BLT      condb_2  6 0 000111011101100000010011| BLT    Conditional Branch. Offset to Ryy
-    * 99 _L0x99   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * 9a ECALL_6  JAL_3    e 0 0101001100x1000000110100|        mcause = 11
-    * 9b SH_4     SH_5     9 0 10111001111001x010011111|        Address back to Q. Prepare get item to write
-    * 9c _L0x9c   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * 9d unx9d             7 6 xxxxxxxxxxxxxxxxxxxxxxxx| 9d: Not in use 
-    * 9e JAL_25   JAL_3    3 4 000001010101001000110100|      Prep WTRG = jj+2/4 (return adr)
-    * 9f SH_5     SW_2     7 0 00111001101001x011110010|        Write d to a+k until accepted
-    * a0 LHU_0    LHU_1    6 2 100110101111000001011110| LHU    Load unsigned hword. Q = rdadr=RS1+Iimm
-    * a1 ECALL_4  ECALL_5  0 3 000101010111001010110110|        Q = 4
-    * a2 _L0xa2   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * a3 _L0xa3   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * a4 SRxI_0   SRxI_1   0 6 0001111010x1100000111010| SRxI   Shift Right immediate (both logic/arith here)
-    * a5 MRET_3   MRET_4   0 3 000011011111001010101111|        0x102 + 0xff + 1 = 0x202
-    * a6 ECAL_RET ECALL_1  0 9 000101111011100011010000| ECALL/(U/S/M)RET Select ECALL or (U/S/M)RET
-    * a7 EBRKWFI1 EBRKWFI2 0 0 000xxxx11111000001100001| EBREAK/WFI1 Prepare select EBREAK or WFI
-    * a8 _L0xa8   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * a9 ILL_4    JAL_3    e 3 0101001110x1001000110100|        Store 2 to mcause
-    * aa _L0xaa   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * ab EBREAK_2 ECALL_6  6 0 00110101110001x010011010|        pc to mepc
-    * ac _L0xac   SRx_1    0 0 00011101x0xxxxx000111111| SRx    Shift Right (both SRL and SRA)
-    * ad unxad             7 6 xxxxxxxxxxxxxxxxxxxxxxxx| ad: Not in use 
-    * ae _L0xae   SRx_1    0 0 00011101x0xxxxx000111111| SRx    Shift Right (both SRL and SRA)
-    * af MRET_4   MRET_5   0 3 000xxxx11111001011000101|        0x202 + 0xff + 1 = 0x302
-    * b0 aF_SW_3  LDAF_3   e 0 0100010100x1000010010010|        Store 7 to mcause
-    * b1 CSRRW_3  CSRRW_4  0 3 000101010111001010110010|        Prep emulation entrypt 0x108, here Q to 0x104
-    * b2 CSRRW_4  Fetch    5 3 110110110011001011011110|        IncPC, OpFetch, but force +4
-    * b3 unxb3             7 6 xxxxxxxxxxxxxxxxxxxxxxxx| b3: Not in use 
-    * b4 eFetch3  unalignd 4 d 001111111111001001110011|  Fr10  Update minstret, Q=immediate. Use dinx
-    * b5 SH_3     SH_4     0 0 000000011101100010011011|        Prepare get back address to use 
-    * b6 ECALL_5  ECALL_6  0 3 000101010111001010011010|        Q = 8
-    * b7 IJ_3     IJ_4     6 0 00010101110001x010111101|        Store present PC in case of access error
-    * b8 BGE      condb_2  6 0 000111011101100000010011| BGE    Conditional Branch. Offset to Ryy
-    * b9 _L0xb9   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * ba LHU_3    ANDI_1   0 0 00001111111010x000011010|        Invert q. Prepare read mask
-    * bb SH_2     SH_3     d 6 000101111111010010110101|        Repeat shl until shreg = 0 (0,8 or 24 times)
-    * bc CSRRWI_0 CSRRW_1  6 0 000011011101100001001001| CSRRWI Decoded CSR adr in yy
-    * bd IJ_4     IJ_5     0 3 000001011111001001110101|        Construct Q = 1
-    * be IJ_1     IJ_2     1 0 00010111111001x000011111|        Read until q=mem[(rs1+ofs)&~1u]
-    * bf IJT_1    IJT_2    1 0 00010111111001x011000001|        Exit CSR, enter trap
-    * c0 _L0xc0   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * c1 IJT_2    IJT_3    6 0 000101011101100011101001|        Read word is to be masked with ~1u
-    * c2 _L0xc2   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * c3 _L0xc3   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * c4 ORI_0    ORI_1    4 0 00011111110010x011100001| ORI    Or immediate. jj=~Iimm
-    * c5 MRET_5   MRET_6   0 0 00000001111010x001101111|        ~302
-    * c6 IJT_4    ILL_2    6 0 00110101111011x001000111|        Mask and store to mepc and Q for read of instr
-    * c7 QINT_1   QINT_2   6 0 001xxxx1110001x011001011|        Store pc to mepc.
-    * c8 _L0xc8   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * c9 MRET_2   MRET_3   0 0 000011010111000010100101|        0xff+3 = 0x102
-    * ca _L0xca   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * cb QINT_2   StdIncPc e 0 011010011101100011100110|        mtval = 0.
-    * cc OR_0     OR_1     0 0 00011111x10xxxx000100110| OR     or
-    * cd unxcd             7 6 xxxxxxxxxxxxxxxxxxxxxxxx| cd: Not in use 
-    * ce _LCSRRCI_1 ILLe     0 0 000xxxx1x0xxxxx011111110| Illegal instruction seen
-    * cf MRET_7   MRET_8   0 5 00001101x10xxxx001001111|        Prepare emulation entry point 0x104
-    * d0 ECALL_1  ECALL_2  0 3 000000011111001000110111| ECALL  Verify Imm==0x000
-    * d1 MRET_1   MRET_2   4 0 000011011101100011001001| MRET   First save Imm, start build constant for check
-    * d2 LB_2     LB_3     c 8 00010101111001x100000110|        Repeat shr until shreg == 0 (0,8,16,24 times)
-    * d3 aFaultd  aFault_1 6 0 011101011101100000011110|  err   LB Load access fault. Faulting adr to mtval
-    * d4 aFault_2 LDAF_3   e 3 0100010110x1001010010010|        Store 5 to mcause
-    * d5 eFetch2  eFetch3  4 e 011000111101000010110100|  Fr10  Update ttime
-    * d6 eILL0c   ILLe     0 0 000xxxx1x0xxxxx011111110| Illegal instruction seen
-    * d7 ECALL_3  ECALL_4  6 0 011101011101100010100001|        mtval = 0, now start the chore of 11 to mcause
-    * d8 BLTU     condb_2  6 0 000111011101100000010011| BLTU   Conditional Branch. Offset to Ryy
-    * d9 _L0xd9   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * da LDAF_a   LDAF_2   0 0 00010101x10xxxx010010001|        Extra cycle after error detected write mtval
-    * db jFault_1 LDAF_3   6 3 0101100110x1001010010010|        Store 1 to mcause
-    * dc CSRRSI_0 CSRRW_1  6 0 000011011101100001001001| CSRRSI Decoded CSR adr in yy
-    * dd aF_SW_1  aF_SW_2  6 0 011101011101100011100101|  err   SW Store access fault. Faulting adr to mtval
-    * de Fetch    Fetch2   4 b 000001111101100011110100|  Fr10  Read and latch instruction
-    * df eFetch   eFetch2  5 c 000101111101100011010101|  Fr10  rep Read until d=mem[(rs1+ofs) & ~3u]
-    * e0 _L0xe0   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * e1 ORI_1    ORI_2    0 0 00000001111001x000011101|        Q = RS1
-    * e2 _L0xe2   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * e3 _L0xe3   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * e4 ANDI_0   ANDI_1   0 0 00011111111010x000011010| ANDI   And immediate. Q=~Iimm
-    * e5 aF_SW_2  aF_SW_3  0 3 000101010111001010110000|        Q = 4
-    * e6 StdIncPc Fetch    5 4 110110110011001011011110|  Fr10  IncPC, OpFetch
-    * e7 aFault   aFault_1 6 0 011101011101100000011110|  err   Load access fault. Faulting adr to mtval
-    * e8 _L0xe8   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * e9 IJT_3    IJT_4    0 3 000110011111001011000110|        Construct Q = 1
-    * ea _L0xea   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * eb LH_3     LH_4     0 0 00001111111010x001010110|        q = ~mem[rs1+ofs]
-    * ec AND_0    AND_1    0 0 00011111x10xxxx000010001| AND    And 
-    * ed unxed             7 6 xxxxxxxxxxxxxxxxxxxxxxxx| ed: Not in use
-    * ee eILL0a   ILLe     0 0 000xxxx1x0xxxxx011111110| Illegal instruction seen
-    * ef WFI_5    Fetch    5 3 110110110011001011011110|        IncPC, OpFetch
-    * f0 LBU_2    LBU_3    c 8 00010101111001x101110010|        Repeat shr until shreg = 0 (0, 8 or 16 times)
-    * f1 aFaulte  aFault_1 6 0 011101011101100000011110|  err   LBU Load access fault. Faulting adr to mtval
-    * f2 SW_2     StdIncPc 0 0 00000101x10xxxx011100110|        Prepare read PC
-    * f3 aF_SW    aF_SW_1  0 0 000xxxx1x01xxxx011011101|  err   SW/SH/SB access fault. Rest to set SEL_O=4'hf
-    * f4 Fetch2   unalignd 4 f 011111111111000001110011|  Fr10  Update ttime. Update I. Q=immediate. Use dinx
-    * f5 jFault   jFault_1 6 0 011101011101100011011011|  err   Fetch access fault. Faulting adr to mtval
-    * f6 WFI_1    WFI_2    0 3 000110010111001011111010| WFI    Chk offset=0x105. Now 0xff. Prep 0xff+4 = 0x103
-    * f7 EBREAK_1 EBREAK_2 6 0 011000011101100010101011| EBREAK mepc = pc, store 0 to mtval
-    * f8 BGEU     condb_2  6 0 000111011101100000010011| BGEU   Conditional Branch. Offset to Ryy
-    * f9 _L0xf9   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * fa WFI_2    WFI_3    0 3 000101011111001001000101|        Chk ofs. Now 0x103. Prep +1+~ofs, so ~ofs+0x104
-    * fb SB_3     SB_4     0 0 000000011101100001101011|        Prepare get back address to use 
-    * fc CSRRCI_0 CSRRW_1  6 0 000011011101100001001001| CSRRCI Decoded CSR adr in yy
-    * fd NMI_0    NMI_1    0 0 00000101x10xxxx001111110| NMI    Get current PC
-    * fe ILLe     ILL_1    0 0 00000101x0xxxxx001000110| Illegal
-    * ff QINT_0   QINT_1   0 0 00000101x10xxxx011000111| INT    Get current PC
+    * 00 LB_0     LB_1     0 0 000000001001101011110000| LB     Load byte. q = rdadr=RS1+0fs
+    * 01 LB_1     LB_2     1 1 0001000100010111111001x1|        Read until q=mem[rs1+ofs) & ~3u]
+    * 02 IJ_0     IJ_1     2 2 001000101001101111110000| IJ     Jump to mem[(rs1+ofs)&~1u]. inCSR=0
+    * 03 _L0x03   StdIncPc 0 0 0000000000000101x10xxxx0| FENCE  Prepare read PC (FENCE/FENCE.I)
+    * 04 ADDI_0   StdIncPc 3 0 001100000000010111010000| ADDI   Add immediate. rd =RS1+Iimm (or joined)
+    * 05 _L0x05   ADDI_0   0 0 0000000000000001x01xxxx0| AUIPC  q = imm20+2 or imm20+4  (copy x/2)
+    * 06 LB_3     LB_4     0 0 0000000000001101111010x0|        q = ~mem[rs1+ofs]
+    * 07 LB_4     LB_5     0 0 0000000000001011111011x0|        q = (uint8_t) mem[rs1+Iimm]
+    * 08 _L0x08   SB_1     4 0 010000000001110011110000| SB     Store byte. wjj=wradr=RS1+Simm
+    * 09 LB_5     LB_6     0 0 0000000000001011111000x0|        q = D^0xffffffff^q = D^0x80
+    * 0a _L0x0a   SB_1     4 0 010000000001110011110000| SB     Store byte. wjj=wradr=RS1+Simm
+    * 0b JALR_2   JALR_3   0 3 000000110000010111110010|        Q=1. Prep legalize target
+    * 0c ADD_0    ADDI_0   0 0 0000000000011101111001x0| ADD    add     Addition Q = RS1
+    * 0d _L0x0d   StdIncPc 3 0 001100000000010111011000| LUI    q = imm20
+    * 0e SUB_0    SUB_1    0 0 0000000000011101x10xxxx0| SUB    Subtraction
+    * 0f _L0x0f   StdIncPc 3 0 001100000000010111011000| LUI    q = imm20
+    * 10 SUB_1    LB_6     0 0 0000000000011111111000x0|        Q = ~RS2
+    * 11 AND_1    ANDI_1   0 0 0000000000011101111000x0|        RS1^0xffffffff to Q
+    * 12 straddle Fetchu   5 4 010101001101101100110010|  Fr10u IncPC, OpFetch
+    * 13 condb_2  condb_3  0 0 0000000000011111111000x0|        ~RS2 in Q
+    * 14 condb_3  condb_4  0 3 000000110001100111110010|        Calculate RS1+~RS2+1
+    * 15 condb_4  condb_5  0 5 0000010100000001111001x0|        Branch on condition
+    * 16 condb_5  StdIncPc 0 0 0000000000000001x10xxxx0|        Branch not taken.
+    * 17 condb_5t condb_6t 6 0 0110000000000001101001x0|        Branch taken. yy=oldPC incase of access error
+    * 18 BEQ      condb_2  6 0 011000000001110111011000| BEQ    Conditional Branch. Offset to Ryy
+    * 19 JALR_0   JALR_1   4 0 010000000100000110x10000| JALR   (tmp) Prep pc=RS1+imm (target)
+    * 1a ANDI_1   StdIncPc 3 0 0011000000000101110011x0|        rd = Iimm & RS1
+    * 1b _L0x1b   JAL_1    0 0 0000000000000001x01xxxx0| JAL. J-imm is in q. Prep get isntradr from jj
+    * 1c ECAL_BRK ECAL_RET 0 2 000000100001011110111000| ECALL/EBREAK  Select ECALL/(U/S/M)RET or EBREAK/WFI
+    * 1d ORI_2    StdIncPc 3 0 001100000000010111011100|        rd = Iimm | RS1
+    * 1e aFault_1 aFault_2 0 3 000000110001010101110010|        Q = 4
+    * 1f IJ_2     IJ_3     4 0 010000000100000110111000|        Read word is to be masked with lsb = 0
+    * 20 LH_0     LH_1     6 2 011000101001101011110000| LH     Load hword. Q = rdadr=RS1+Iimm.
+    * 21 XORI_1   StdIncPc 3 0 0011000000000101110000x0|        rd = Iimm ^ RS1
+    * 22 _L0x22   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * 23 _L0x23   StdIncPc 0 0 0000000000000101x10xxxx0| FENCE  Prepare read PC (FENCE/FENCE.I)
+    * 24 SLLI_0   SLLI_1   0 6 000001100001111010x11000| SLLI   Shift left immediate.
+    * 25 _L0x25   ADDI_0   0 0 0000000000000001x01xxxx0| AUIPC  q = imm20+2 or imm20+4  (copy x/2)
+    * 26 OR_1     OR_2     4 0 0100000000011101110000x0|        RS1^0xffffffff to jj
+    * 27 OR_2     ORI_2    0 0 000000000000000111110000|        Q = rs2
+    * 28 _L0x28   SH_1     4 2 010000100001110011110000| SH     Store halfword. jjw=wradr=RS1+Simm
+    * 29 XOR_1    XORI_1   0 0 0000000000011101111000x0|        Q = RS1^0xFFFFFFFF
+    * 2a _L0x2a   SH_1     4 2 010000100001110011110000| SH     Store halfword. jjw=wradr=RS1+Simm
+    * 2b SLTIX_1  SLTIX_2  0 3 00000011000xxxx111010010|        RS1 - imm / RS1 - RS2
+    * 2c SLL_0    SLL_1    0 0 0000000000011101x0xxxxx0| SLL    Shift left
+    * 2d _L0x2d   StdIncPc 3 0 001100000000010111011000| LUI    q = imm20
+    * 2e unx2e             7 6 01110110xxxxxxxxxxxxxxxx| 2e: Not in use 
+    * 2f _L0x2f   StdIncPc 3 0 001100000000010111011000| LUI    q = imm20
+    * 30 SLTIX_2  StdIncPc 3 7 001101110000010111011010|        Registered ALU flag to rd
+    * 31 SLTX_1   SLTIX_1  0 0 0000000000011111111000x0|        ~rs2 to Q
+    * 32 JAL_1    JAL_2    6 0 0110000000000001101001x0|      Prep Instradr to yy. Refetch instradr
+    * 33 JALR_3   JAL_25   4 0 0100000001000001110011x0|        Q = (RS1+imn) & 0xfffffffe
+    * 34 JAL_3    Fetch    5 0 0101000011011011101001x0|      Prep fetch next instr.
+    * 35 SLLI_1   SLLI_2   3 6 0011011000010111111001x0|        Register to shift to Q (and TRG for shift 0)
+    * 36 SLLI_2   _L0x03   8 6 100001100001011111110100|        Repeat Q = Q+Q until shregcnt == 0
+    * 37 ECALL_2  ECALL_3  6 5 01100101001xxxx1110001x0|        mepc = pc, prep store 0 to mtval
+    * 38 BNE      condb_2  6 0 011000000001110111011000| BNE    Conditional Branch. Offset to Ryy
+    * 39 _L0x39   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * 3a SRxI_1   SRxI_2   3 8 0011100000010101111001x1|        Register to shift to Q
+    * 3b _L0x3b   JAL_1    0 0 0000000000000001x01xxxx0| JAL. J-imm is in q. Prep get isntradr from jj
+    * 3c CSRRW_0  CSRRW_1  6 0 011000000000110111011000| CSRRW  Decoded CSR adr in yy
+    * 3d SRxI_2   _L0x03   8 8 1000100000010101111001x1|        Repeat Q >>= 1 until shregcnt == 0
+    * 3e SLL_1    SLLI_1   0 6 000001100001111010x001x0|        Shiftamount was in low 5 bits of RS2
+    * 3f SRx_1    SRxI_1   0 6 000001100001111010x001x0|        Shiftamount in low 5 bits of RS2
+    * 40 LW_0     LW_1     0 9 000010011001101111110000| LW     Load word. Q=yy=rdadr=RS1+Iimm
+    * 41 JALR_1   JALR_2   6 0 0110000000010101110001x0|        yy=jj. Prep get Q=1
+    * 42 _L0x42   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * 43 _L0x43   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * 44 SLTI_0   SLTIX_1  0 0 0000000000011111111010x0| SLTI   Set less than immediate (signed)
+    * 45 WFI_3    WFI_4    0 3 000000110001010111110010|        Chk ofs. Now 0x104. Prep +1, so ~ofs+0x105
+    * 46 ILL_1    ILL_2    6 0 011000000011010110x001x0|        Store PC to mepc
+    * 47 ILL_2    ILL_3    6 0 0110000001110101110001x0|        Store 0 to mtval
+    * 48 _L0x48   SW_1     9 9 100110011001110111110000| SW     Store word. Q=wradr=RS1+Simm
+    * 49 CSRRW_1  CSRRW_2  0 3 000000110000000111110010|        Construct PC storage adr
+    * 4a _L0x4a   SW_1     9 9 100110011001110111110000| SW     Store word. Q=wradr=RS1+Simm
+    * 4b CSRRW_2  CSRRW_3  a 0 1010000001110101101001x0|        Write PC to 0x100 start Prep emulation entrypt
+    * 4c SLT_0    SLTX_1   0 0 0000000000011101x10xxxx0| SLT    Set less than (signed)
+    * 4d unx4d             7 6 01110110xxxxxxxxxxxxxxxx| 4d: Not in use 
+    * 4e eILL0b   ILLe     0 0 00000000000xxxx1x0xxxxx0| Illegal instruction seen
+    * 4f MRET_8   MRET_9   0 3 000000110001010101110010|        +4, so now 0x103
+    * 50 LW_1     StdIncPc b a 1011101000010111110001x0|        Read until d=mem[(rs1+ofs) & ~3u]
+    * 51 LDAF_LW  LDAF_a   6 0 011000000111010110111000|  err   LD AlignFault. Faulting adr to mtval
+    * 52 LH_1     LH_2     1 1 0001000100010111111001x1|        Read until q=mem[(rs1+ofs) & ~3u]
+    * 53 LDAF_LH  LDAF_a   6 0 011000000111010110111000|  err   LD AlignFault. Faulting adr to mtval
+    * 54 LH_2     LH_3     c 8 1100100000010101111001x1|        Repeat shr until shreg = 0 (0, 8 or 16 times)
+    * 55 aFaultb  aFault_1 6 0 011000000111010111011000|  err   LH Load access fault. Faulting adr to mtval
+    * 56 LH_4     LH_5     0 0 0000000000010001111011x0|        q = (uint16_t) mem[rs1+Iimm]
+    * 57 LH_5     LB_6     0 0 0000000000010001111000x0|        q = D^0xffffffff^q = D ^ 0x00008000
+    * 58 _L0x58   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * 59 _L0x59   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * 5a SB_1     SB_2     6 6 0110011000010111111001x0|        Write d to Q and yy (for sh 0). Prep shift
+    * 5b _L0x5b   JAL_1    0 0 0000000000000001x01xxxx0| JAL. J-imm is in q. Prep get isntradr from jj
+    * 5c CSRRS_0  CSRRW_1  6 0 011000000000110111011000| CSRRS  Decoded CSR adr in yy
+    * 5d SB_2     SB_3     d 6 110101100001011111110100|        Repeat shl until shreg = 0 (0,8,16 or 24 times)
+    * 5e LHU_1    LHU_2    1 1 0001000100010111111001x1|        Read until q=mem[(rs1+ofs) & ~3u]
+    * 5f LDAF_LHU LDAF_a   6 0 011000000111010110111000|  err   LD AlignFault. Faulting adr to mtval
+    * 60 _L0x60   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * 61 EBRKWFI2 EBREAK_1 6 5 0110010100001101110010x0| EBREAK/WFI2 Select EBREAK or WFI.
+    * 62 _L0x62   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * 63 _L0x63   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * 64 SLTIU_0  SLTIX_1  0 0 0000000000011111111010x0| SLTIU  Set less than immediate (unsigned)
+    * 65 WFI_4    WFI_5    0 5 0000010100000001x10xxxx0|        Prepare read PC.
+    * 66 SW_1     SW_2     7 0 0111000001111101101001x0|        Write d to a+k until accepted
+    * 67 SW_E1SWE SW_E2    6 0 011000000110010110x11000|        Store faulting address alignment to mtval
+    * 68 _L0x68   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * 69 unx69             7 6 01110110xxxxxxxxxxxxxxxx| 69: Not in use 
+    * 6a _L0x6a   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * 6b SB_4     SB_5     9 0 1001000011011001111001x0|        Address back to Q. Prepare get item to write
+    * 6c SLTU_0   SLTX_1   0 0 0000000000011101x10xxxx0| SLTU   Set less than (unsigned)
+    * 6d unx6d             7 6 01110110xxxxxxxxxxxxxxxx| 6d: Not in use 
+    * 6e unx6e             7 6 01110110xxxxxxxxxxxxxxxx| 6e: Not in use 
+    * 6f MRET_6   MRET_7   0 3 00000011000xxxx111110010|        ~302 + origImm + 1 for branch decision
+    * 70 LHU_2    LHU_3    c 8 1100100000010101111001x1|        Repeat shr until shreg = 0 (0, 8 or 16 times)
+    * 71 aFaultc  aFault_1 6 0 011000000111010111011000|  err   LHU Load access fault. Faulting adr to mtval
+    * 72 LBU_3    ANDI_1   0 0 0000000000001101111010x0|        Invert q. Prepare read mask
+    * 73 unalignd straddle 0 0 000000000000010111011000|  Fr10u Unaligned pc, prep read high hword
+    * 74 MRET_9   Fetch    5 3 010100111101101110110010|        +1, IncPC, OpFetch next
+    * 75 IJ_5     Fetch    5 0 0101000011011011101011x0|        Mask and use as PC
+    * 76 Fetchu   Fetch2   0 b 000010110000011111011000|  Fr10u Read and latch instruction
+    * 77 eFetchu  Fetch2   1 c 000111000001011111011000|  Fr10u rep Read until d=mem[(rs1+ofs) & ~3u]
+    * 78 _L0x78   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * 79 _L0x79   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * 7a SB_5     SW_2     7 0 0111000001011001101001x0|        Write d to a+k until accepted
+    * 7b _L0x7b   JAL_1    0 0 0000000000000001x01xxxx0| JAL. J-imm is in q. Prep get isntradr from jj
+    * 7c CSRRC_0  CSRRW_1  6 0 011000000000110111011000| CSRRC  Decoded CSR adr in yy
+    * 7d condb_6t Fetch    5 0 010100001101101110110000|        Branch taken.
+    * 7e NMI_1    NMI_2    6 0 01100000001xxxx1110001x0|        Store pc to mepc.
+    * 7f unx7f             7 6 01110110xxxxxxxxxxxxxxxx| 7f: Not in use 
+    * 80 LBU_0    LBU_1    0 0 000000001001101011110000| LBU    Load unsigned byte. Q = rdadr=RS1+Iimm.
+    * 81 unx81             7 6 01110110xxxxxxxxxxxxxxxx| 81: Not in use 
+    * 82 _L0x82   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * 83 _L0x83   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * 84 XORI_0   XORI_1   0 0 0000000000011111111010x0| XORI   Xor immediate. Q=~Iimm
+    * 85 LBU_1    LBU_2    1 1 0001000100010111111001x1|        Read until q=mem[(rs1+ofs) & ~3u]
+    * 86 JAL_2    JAL_25   4 0 010000000100000111010000|      Prep pc = jj + ofs
+    * 87 unx87             7 6 01110110xxxxxxxxxxxxxxxx| 87: Not in use 
+    * 88 _L0x88   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * 89 unx89             7 6 01110110xxxxxxxxxxxxxxxx| 89: Not in use 
+    * 8a _L0x8a   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * 8b LB_6     StdIncPc 3 3 001100110000010111010010|        WTRG=(D^0x80)+0xFFFFFF7F+1=(D^0x80)-0x80
+    * 8c XOR_0    XOR_1    0 0 0000000000011111x10xxxx0| XOR    xor
+    * 8d unx8d             7 6 01110110xxxxxxxxxxxxxxxx| 8d: Not in use 
+    * 8e _LCSRRS_1 ILLe     0 0 00000000000xxxx1x0xxxxx0| Illegal instruction seen
+    * 8f ILL_3    ILL_4    0 3 000000110001010111110010|        Q = 1
+    * 90 NMI_2    JAL_3    e 0 111000000110100111011000|        mtval = 0.
+    * 91 LDAF_2   LDAF_3   e 3 111000110100010100x10010|        Store 4 to mcause
+    * 92 LDAF_3   JAL_3    6 0 011000000011001110x001x0|        PC to mepc
+    * 93 SW_E2    SW_E3    6 0 0110000000110111110001x0|        Store address that faulted
+    * 94 SW_E4    JAL_3    e 0 111000000101001110x10100|        Store 6 to mcause
+    * 95 SW_E3    SW_E4    0 3 000000110001011101110010|        Q = 3
+    * 96 SH_1     SH_2     6 6 0110011000010111111001x0|        Write d to Q and yy (for sh 0). Prep shift
+    * 97 SW_E1SWH SW_E2    6 0 011000000110010110x11000|        Store faulting address alignment to mtval
+    * 98 BLT      condb_2  6 0 011000000001110111011000| BLT    Conditional Branch. Offset to Ryy
+    * 99 _L0x99   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * 9a ECALL_6  JAL_3    e 0 111000000101001100x10000|        mcause = 11
+    * 9b SH_4     SH_5     9 0 1001000010111001111001x0|        Address back to Q. Prepare get item to write
+    * 9c _L0x9c   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * 9d unx9d             7 6 01110110xxxxxxxxxxxxxxxx| 9d: Not in use 
+    * 9e JAL_25   JAL_3    3 4 001101000000010101010010|      Prep WTRG = jj+2/4 (return adr)
+    * 9f SH_5     SW_2     7 0 0111000000111001101001x0|        Write d to a+k until accepted
+    * a0 LHU_0    LHU_1    6 2 011000101001101011110000| LHU    Load unsigned hword. Q = rdadr=RS1+Iimm
+    * a1 ECALL_4  ECALL_5  0 3 000000110001010101110010|        Q = 4
+    * a2 _L0xa2   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * a3 _L0xa3   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * a4 SRxI_0   SRxI_1   0 6 000001100001111010x11000| SRxI   Shift Right immediate (both logic/arith here)
+    * a5 MRET_3   MRET_4   0 3 000000110000110111110010|        0x102 + 0xff + 1 = 0x202
+    * a6 ECAL_RET ECALL_1  0 9 000010010001011110111000| ECALL/(U/S/M)RET Select ECALL or (U/S/M)RET
+    * a7 EBRKWFI1 EBRKWFI2 0 0 00000000000xxxx111110000| EBREAK/WFI1 Prepare select EBREAK or WFI
+    * a8 _L0xa8   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * a9 ILL_4    JAL_3    e 3 111000110101001110x10010|        Store 2 to mcause
+    * aa _L0xaa   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * ab EBREAK_2 ECALL_6  6 0 0110000000110101110001x0|        pc to mepc
+    * ac _L0xac   SRx_1    0 0 0000000000011101x0xxxxx0| SRx    Shift Right (both SRL and SRA)
+    * ad unxad             7 6 01110110xxxxxxxxxxxxxxxx| ad: Not in use 
+    * ae _L0xae   SRx_1    0 0 0000000000011101x0xxxxx0| SRx    Shift Right (both SRL and SRA)
+    * af MRET_4   MRET_5   0 3 00000011000xxxx111110010|        0x202 + 0xff + 1 = 0x302
+    * b0 aF_SW_3  LDAF_3   e 0 111000000100010100x10000|        Store 7 to mcause
+    * b1 CSRRW_3  CSRRW_4  0 3 000000110001010101110010|        Prep emulation entrypt 0x108, here Q to 0x104
+    * b2 CSRRW_4  Fetch    5 3 010100111101101100110010|        IncPC, OpFetch, but force +4
+    * b3 unxb3             7 6 01110110xxxxxxxxxxxxxxxx| b3: Not in use 
+    * b4 eFetch3  unalignd 4 d 010011010011111111110010|  Fr10  Update minstret, Q=immediate. Use dinx
+    * b5 SH_3     SH_4     0 0 000000000000000111011000|        Prepare get back address to use 
+    * b6 ECALL_5  ECALL_6  0 3 000000110001010101110010|        Q = 8
+    * b7 IJ_3     IJ_4     6 0 0110000000010101110001x0|        Store present PC in case of access error
+    * b8 BGE      condb_2  6 0 011000000001110111011000| BGE    Conditional Branch. Offset to Ryy
+    * b9 _L0xb9   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * ba LHU_3    ANDI_1   0 0 0000000000001111111010x0|        Invert q. Prepare read mask
+    * bb SH_2     SH_3     d 6 110101100001011111110100|        Repeat shl until shreg = 0 (0,8 or 24 times)
+    * bc CSRRWI_0 CSRRW_1  6 0 011000000000110111011000| CSRRWI Decoded CSR adr in yy
+    * bd IJ_4     IJ_5     0 3 000000110000010111110010|        Construct Q = 1
+    * be IJ_1     IJ_2     1 0 0001000000010111111001x0|        Read until q=mem[(rs1+ofs)&~1u]
+    * bf IJT_1    IJT_2    1 0 0001000000010111111001x0|        Exit CSR, enter trap
+    * c0 _L0xc0   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * c1 IJT_2    IJT_3    6 0 011000000001010111011000|        Read word is to be masked with ~1u
+    * c2 _L0xc2   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * c3 _L0xc3   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * c4 ORI_0    ORI_1    4 0 0100000000011111110010x0| ORI    Or immediate. jj=~Iimm
+    * c5 MRET_5   MRET_6   0 0 0000000000000001111010x0|        ~302
+    * c6 IJT_4    ILL_2    6 0 0110000000110101111011x0|        Mask and store to mepc and Q for read of instr
+    * c7 QINT_1   QINT_2   6 0 01100000001xxxx1110001x0|        Store pc to mepc.
+    * c8 _L0xc8   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * c9 MRET_2   MRET_3   0 0 000000000000110101110000|        0xff+3 = 0x102
+    * ca _L0xca   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * cb QINT_2   StdIncPc e 0 111000000110100111011000|        mtval = 0.
+    * cc OR_0     OR_1     0 0 0000000000011111x10xxxx0| OR     or
+    * cd unxcd             7 6 01110110xxxxxxxxxxxxxxxx| cd: Not in use 
+    * ce _LCSRRCI_1 ILLe     0 0 00000000000xxxx1x0xxxxx0| Illegal instruction seen
+    * cf MRET_7   MRET_8   0 5 0000010100001101x10xxxx0|        Prepare emulation entry point 0x104
+    * d0 ECALL_1  ECALL_2  0 3 000000110000000111110010| ECALL  Verify Imm==0x000
+    * d1 MRET_1   MRET_2   4 0 010000000000110111011000| MRET   First save Imm, start build constant for check
+    * d2 LB_2     LB_3     c 8 1100100000010101111001x1|        Repeat shr until shreg == 0 (0,8,16,24 times)
+    * d3 aFaultd  aFault_1 6 0 011000000111010111011000|  err   LB Load access fault. Faulting adr to mtval
+    * d4 aFault_2 LDAF_3   e 3 111000110100010110x10010|        Store 5 to mcause
+    * d5 eFetch2  eFetch3  4 e 010011100110001111010000|  Fr10  Update ttime
+    * d6 eILL0c   ILLe     0 0 00000000000xxxx1x0xxxxx0| Illegal instruction seen
+    * d7 ECALL_3  ECALL_4  6 0 011000000111010111011000|        mtval = 0, now start the chore of 11 to mcause
+    * d8 BLTU     condb_2  6 0 011000000001110111011000| BLTU   Conditional Branch. Offset to Ryy
+    * d9 _L0xd9   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * da LDAF_a   LDAF_2   0 0 0000000000010101x10xxxx0|        Extra cycle after error detected write mtval
+    * db jFault_1 LDAF_3   6 3 011000110101100110x10010|        Store 1 to mcause
+    * dc CSRRSI_0 CSRRW_1  6 0 011000000000110111011000| CSRRSI Decoded CSR adr in yy
+    * dd aF_SW_1  aF_SW_2  6 0 011000000111010111011000|  err   SW Store access fault. Faulting adr to mtval
+    * de Fetch    Fetch2   4 b 010010110000011111011000|  Fr10  Read and latch instruction
+    * df eFetch   eFetch2  5 c 010111000001011111011000|  Fr10  rep Read until d=mem[(rs1+ofs) & ~3u]
+    * e0 _L0xe0   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * e1 ORI_1    ORI_2    0 0 0000000000000001111001x0|        Q = RS1
+    * e2 _L0xe2   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * e3 _L0xe3   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * e4 ANDI_0   ANDI_1   0 0 0000000000011111111010x0| ANDI   And immediate. Q=~Iimm
+    * e5 aF_SW_2  aF_SW_3  0 3 000000110001010101110010|        Q = 4
+    * e6 StdIncPc Fetch    5 4 010101001101101100110010|  Fr10  IncPC, OpFetch
+    * e7 aFault   aFault_1 6 0 011000000111010111011000|  err   Load access fault. Faulting adr to mtval
+    * e8 _L0xe8   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * e9 IJT_3    IJT_4    0 3 000000110001100111110010|        Construct Q = 1
+    * ea _L0xea   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * eb LH_3     LH_4     0 0 0000000000001111111010x0|        q = ~mem[rs1+ofs]
+    * ec AND_0    AND_1    0 0 0000000000011111x10xxxx0| AND    And 
+    * ed unxed             7 6 01110110xxxxxxxxxxxxxxxx| ed: Not in use
+    * ee eILL0a   ILLe     0 0 00000000000xxxx1x0xxxxx0| Illegal instruction seen
+    * ef WFI_5    Fetch    5 3 010100111101101100110010|        IncPC, OpFetch
+    * f0 LBU_2    LBU_3    c 8 1100100000010101111001x1|        Repeat shr until shreg = 0 (0, 8 or 16 times)
+    * f1 aFaulte  aFault_1 6 0 011000000111010111011000|  err   LBU Load access fault. Faulting adr to mtval
+    * f2 SW_2     StdIncPc 0 0 0000000000000101x10xxxx0|        Prepare read PC
+    * f3 aF_SW    aF_SW_1  0 0 00000000000xxxx1x01xxxx0|  err   SW/SH/SB access fault. Rest to set SEL_O=4'hf
+    * f4 Fetch2   unalignd 4 f 010011110111111111110000|  Fr10  Update ttime. Update I. Q=immediate. Use dinx
+    * f5 jFault   jFault_1 6 0 011000000111010111011000|  err   Fetch access fault. Faulting adr to mtval
+    * f6 WFI_1    WFI_2    0 3 000000110001100101110010| WFI    Chk offset=0x105. Now 0xff. Prep 0xff+4 = 0x103
+    * f7 EBREAK_1 EBREAK_2 6 0 011000000110000111011000| EBREAK mepc = pc, store 0 to mtval
+    * f8 BGEU     condb_2  6 0 011000000001110111011000| BGEU   Conditional Branch. Offset to Ryy
+    * f9 _L0xf9   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * fa WFI_2    WFI_3    0 3 000000110001010111110010|        Chk ofs. Now 0x103. Prep +1+~ofs, so ~ofs+0x104
+    * fb SB_3     SB_4     0 0 000000000000000111011000|        Prepare get back address to use 
+    * fc CSRRCI_0 CSRRW_1  6 0 011000000000110111011000| CSRRCI Decoded CSR adr in yy
+    * fd NMI_0    NMI_1    0 0 0000000000000101x10xxxx0| NMI    Get current PC
+    * fe ILLe     ILL_1    0 0 0000000000000101x0xxxxx0| Illegal
+    * ff QINT_0   QINT_1   0 0 0000000000000101x10xxxx0| INT    Get current PC
     */
    localparam u0_0 = 256'hd8e64010d8e6e404f233f05ae08bf05aec09e8072004d0e640e6f0bee5d2f001;
    localparam u0_1 = 256'hb8b772d4dce6b8a62032cce69041d813a47d40e6e416f215e0143276e01ae08b;
@@ -3817,7 +3817,7 @@ endmodule
  * 2019-2020. Copyright B. Nossum.
  * For licence, see LICENCE
  * -----------------------------------------------------------------------------ehdr
- * Automatically generated from ../code/ucode.h by midgetv_indirectEBR.c.
+ * Automatically generated from ../code/ucode.h by ../util/midgetv_indirectEBR.c.
  * Do not edit.
  * Optiones for this variant:
  *   RVC included
@@ -3909,262 +3909,262 @@ module v11_m_2ebr
     *                      indirect_index 1
     * inx         next     | indirect index 0
     * || ucode    ucode    | | direct representation
-    * 00 LB_0     LB_1     0 0 100110101111000000000001| LB     Load byte. q = rdadr=RS1+0fs
-    * 01 LB_1     LB_2     1 1 00010111111001x111010010|        Read until q=mem[rs1+ofs) & ~3u]
-    * 02 IJ_0     IJ_1     2 2 100110111111000010111110| IJ     Jump to mem[(rs1+ofs)&~1u]. inCSR=0
-    * 03 _L0x03   StdIncPc 0 0 00000101x10xxxx011100110| FENCE  Prepare read PC (FENCE/FENCE.I)
-    * 04 ADDI_0   StdIncPc 3 0 000001011101000011100110| ADDI   Add immediate. rd =RS1+Iimm (or joined)
-    * 05 _L0x05   ADDI_0   0 0 00000001x01xxxx000000100| AUIPC  q = imm20+2 or imm20+4  (copy x/2)
-    * 06 LB_3     LB_4     0 0 00001101111010x000000111|        q = ~mem[rs1+ofs]
-    * 07 LB_4     LB_5     0 0 00001011111011x000001001|        q = (uint8_t) mem[rs1+Iimm]
-    * 08 _L0x08   SB_1     4 0 000111001111000001011010| SB     Store byte. wjj=wradr=RS1+Simm
-    * 09 LB_5     LB_6     0 0 00001011111000x010001011|        q = D^0xffffffff^q = D^0x80
-    * 0a _L0x0a   SB_1     4 0 000111001111000001011010| SB     Store byte. wjj=wradr=RS1+Simm
-    * 0b JALR_2   JALR_3   0 3 000001011111001000110011|        Q=1. Prep legalize target
-    * 0c ADD_0    ADDI_0   0 0 00011101111001x000000100| ADD    add     Addition Q = RS1
-    * 0d _L0x0d   StdIncPc 3 0 000001011101100011100110| LUI    q = imm20
-    * 0e SUB_0    SUB_1    0 0 00011101x10xxxx000010000| SUB    Subtraction
-    * 0f _L0x0f   StdIncPc 3 0 000001011101100011100110| LUI    q = imm20
-    * 10 SUB_1    LB_6     0 0 00011111111000x010001011|        Q = ~RS2
-    * 11 AND_1    ANDI_1   0 0 00011101111000x000011010|        RS1^0xffffffff to Q
-    * 12 straddle Fetchu   5 4 110110110011001001110110|  Fr10u IncPC, OpFetch
-    * 13 condb_2  condb_3  0 0 00011111111000x000010100|        ~RS2 in Q
-    * 14 condb_3  condb_4  0 3 000110011111001000010101|        Calculate RS1+~RS2+1
-    * 15 condb_4  condb_5  0 5 00000001111001x000010110|        Branch on condition
-    * 16 condb_5  StdIncPc 0 0 00000001x10xxxx011100110|        Branch not taken.
-    * 17 condb_5t condb_6t 6 0 00000001101001x001111101|        Branch taken. yy=oldPC incase of access error
-    * 18 BEQ      condb_2  6 0 000111011101100000010011| BEQ    Conditional Branch. Offset to Ryy
-    * 19 JALR_0   JALR_1   4 0 0100000110x1000001000001| JALR   (tmp) Prep pc=RS1+imm (target)
-    * 1a ANDI_1   StdIncPc 3 0 00000101110011x011100110|        rd = Iimm & RS1
-    * 1b _L0x1b   JAL_1    0 0 00000001x01xxxx000110010| JAL. J-imm is in q. Prep get isntradr from jj
-    * 1c ECAL_BRK ECAL_RET 0 2 000101111011100010100110| ECALL/EBREAK  Select ECALL/(U/S/M)RET or EBREAK/WFI
-    * 1d ORI_2    StdIncPc 3 0 000001011101110011100110|        rd = Iimm | RS1
-    * 1e aFault_1 aFault_2 0 3 000101010111001011010100|        Q = 4
-    * 1f IJ_2     IJ_3     4 0 010000011011100010110111|        Read word is to be masked with lsb = 0
-    * 20 LH_0     LH_1     6 2 100110101111000001010010| LH     Load hword. Q = rdadr=RS1+Iimm.
-    * 21 XORI_1   StdIncPc 3 0 00000101110000x011100110|        rd = Iimm ^ RS1
-    * 22 _L0x22   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * 23 _L0x23   StdIncPc 0 0 00000101x10xxxx011100110| FENCE  Prepare read PC (FENCE/FENCE.I)
-    * 24 SLLI_0   SLLI_1   0 6 0001111010x1100000110101| SLLI   Shift left immediate.
-    * 25 _L0x25   ADDI_0   0 0 00000001x01xxxx000000100| AUIPC  q = imm20+2 or imm20+4  (copy x/2)
-    * 26 OR_1     OR_2     4 0 00011101110000x000100111|        RS1^0xffffffff to jj
-    * 27 OR_2     ORI_2    0 0 000000011111000000011101|        Q = rs2
-    * 28 _L0x28   SH_1     4 2 000111001111000010010110| SH     Store halfword. jjw=wradr=RS1+Simm
-    * 29 XOR_1    XORI_1   0 0 00011101111000x000100001|        Q = RS1^0xFFFFFFFF
-    * 2a _L0x2a   SH_1     4 2 000111001111000010010110| SH     Store halfword. jjw=wradr=RS1+Simm
-    * 2b SLTIX_1  SLTIX_2  0 3 000xxxx11101001000110000|        RS1 - imm / RS1 - RS2
-    * 2c SLL_0    SLL_1    0 0 00011101x0xxxxx000111110| SLL    Shift left
-    * 2d _L0x2d   StdIncPc 3 0 000001011101100011100110| LUI    q = imm20
-    * 2e unx2e             7 6 xxxxxxxxxxxxxxxxxxxxxxxx| 2e: Not in use 
-    * 2f _L0x2f   StdIncPc 3 0 000001011101100011100110| LUI    q = imm20
-    * 30 SLTIX_2  StdIncPc 3 7 000001011101101011100110|        Registered ALU flag to rd
-    * 31 SLTX_1   SLTIX_1  0 0 00011111111000x000101011|        ~rs2 to Q
-    * 32 JAL_1    JAL_2    6 0 00000001101001x010000110|      Prep Instradr to yy. Refetch instradr
-    * 33 JALR_3   JAL_25   4 0 01000001110011x010011110|        Q = (RS1+imn) & 0xfffffffe
-    * 34 JAL_3    Fetch    5 0 11011011101001x011011110|      Prep fetch next instr.
-    * 35 SLLI_1   SLLI_2   3 6 00010111111001x000110110|        Register to shift to Q (and TRG for shift 0)
-    * 36 SLLI_2   _L0x03   8 6 000101111111010000000011|        Repeat Q = Q+Q until shregcnt == 0
-    * 37 ECALL_2  ECALL_3  6 5 001xxxx1110001x011010111|        mepc = pc, prep store 0 to mtval
-    * 38 BNE      condb_2  6 0 000111011101100000010011| BNE    Conditional Branch. Offset to Ryy
-    * 39 _L0x39   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * 3a SRxI_1   SRxI_2   3 8 00010101111001x100111101|        Register to shift to Q
-    * 3b _L0x3b   JAL_1    0 0 00000001x01xxxx000110010| JAL. J-imm is in q. Prep get isntradr from jj
-    * 3c CSRRW_0  CSRRW_1  6 0 000011011101100001001001| CSRRW  Decoded CSR adr in yy
-    * 3d SRxI_2   _L0x03   8 8 00010101111001x100000011|        Repeat Q >>= 1 until shregcnt == 0
-    * 3e SLL_1    SLLI_1   0 6 0001111010x001x000110101|        Shiftamount was in low 5 bits of RS2
-    * 3f SRx_1    SRxI_1   0 6 0001111010x001x000111010|        Shiftamount in low 5 bits of RS2
-    * 40 LW_0     LW_1     0 9 100110111111000001010000| LW     Load word. Q=yy=rdadr=RS1+Iimm
-    * 41 JALR_1   JALR_2   6 0 00010101110001x000001011|        yy=jj. Prep get Q=1
-    * 42 _L0x42   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * 43 _L0x43   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * 44 SLTI_0   SLTIX_1  0 0 00011111111010x000101011| SLTI   Set less than immediate (signed)
-    * 45 WFI_3    WFI_4    0 3 000101011111001001100101|        Chk ofs. Now 0x104. Prep +1, so ~ofs+0x105
-    * 46 ILL_1    ILL_2    6 0 0011010110x001x001000111|        Store PC to mepc
-    * 47 ILL_2    ILL_3    6 0 01110101110001x010001111|        Store 0 to mtval
-    * 48 _L0x48   SW_1     9 9 100111011111000001100110| SW     Store word. Q=wradr=RS1+Simm
-    * 49 CSRRW_1  CSRRW_2  0 3 000000011111001001001011|        Construct PC storage adr
-    * 4a _L0x4a   SW_1     9 9 100111011111000001100110| SW     Store word. Q=wradr=RS1+Simm
-    * 4b CSRRW_2  CSRRW_3  a 0 01110101101001x010110001|        Write PC to 0x100 start Prep emulation entrypt
-    * 4c SLT_0    SLTX_1   0 0 00011101x10xxxx000110001| SLT    Set less than (signed)
-    * 4d unx4d             7 6 xxxxxxxxxxxxxxxxxxxxxxxx| 4d: Not in use 
-    * 4e eILL0b   ILLe     0 0 000xxxx1x0xxxxx011111110| Illegal instruction seen
-    * 4f MRET_8   MRET_9   0 3 000101010111001001110100|        +4, so now 0x103
-    * 50 LW_1     StdIncPc b a 00010111110001x011100110|        Read until d=mem[(rs1+ofs) & ~3u]
-    * 51 LDAF_LW  LDAF_a   6 0 011101011011100011011010|  err   LD AlignFault. Faulting adr to mtval
-    * 52 LH_1     LH_2     1 1 00010111111001x101010100|        Read until q=mem[(rs1+ofs) & ~3u]
-    * 53 LDAF_LH  LDAF_a   6 0 011101011011100011011010|  err   LD AlignFault. Faulting adr to mtval
-    * 54 LH_2     LH_3     c 8 00010101111001x111101011|        Repeat shr until shreg = 0 (0, 8 or 16 times)
-    * 55 aFaultb  aFault_1 6 0 011101011101100000011110|  err   LH Load access fault. Faulting adr to mtval
-    * 56 LH_4     LH_5     0 0 00010001111011x001010111|        q = (uint16_t) mem[rs1+Iimm]
-    * 57 LH_5     LB_6     0 0 00010001111000x010001011|        q = D^0xffffffff^q = D ^ 0x00008000
-    * 58 _L0x58   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * 59 _L0x59   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * 5a SB_1     SB_2     6 6 00010111111001x001011101|        Write d to Q and yy (for sh 0). Prep shift
-    * 5b _L0x5b   JAL_1    0 0 00000001x01xxxx000110010| JAL. J-imm is in q. Prep get isntradr from jj
-    * 5c CSRRS_0  CSRRW_1  6 0 000011011101100001001001| CSRRS  Decoded CSR adr in yy
-    * 5d SB_2     SB_3     d 6 000101111111010011111011|        Repeat shl until shreg = 0 (0,8,16 or 24 times)
-    * 5e LHU_1    LHU_2    1 1 00010111111001x101110000|        Read until q=mem[(rs1+ofs) & ~3u]
-    * 5f LDAF_LHU LDAF_a   6 0 011101011011100011011010|  err   LD AlignFault. Faulting adr to mtval
-    * 60 _L0x60   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * 61 EBRKWFI2 EBREAK_1 6 5 00001101110010x011110111| EBREAK/WFI2 Select EBREAK or WFI.
-    * 62 _L0x62   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * 63 _L0x63   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * 64 SLTIU_0  SLTIX_1  0 0 00011111111010x000101011| SLTIU  Set less than immediate (unsigned)
-    * 65 WFI_4    WFI_5    0 5 00000001x10xxxx011101111|        Prepare read PC.
-    * 66 SW_1     SW_2     7 0 01111101101001x011110010|        Write d to a+k until accepted
-    * 67 SW_E1SWE SW_E2    6 0 0110010110x1100010010011|        Store faulting address alignment to mtval
-    * 68 _L0x68   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * 69 unx69             7 6 xxxxxxxxxxxxxxxxxxxxxxxx| 69: Not in use 
-    * 6a _L0x6a   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * 6b SB_4     SB_5     9 0 11011001111001x001111010|        Address back to Q. Prepare get item to write
-    * 6c SLTU_0   SLTX_1   0 0 00011101x10xxxx000110001| SLTU   Set less than (unsigned)
-    * 6d unx6d             7 6 xxxxxxxxxxxxxxxxxxxxxxxx| 6d: Not in use 
-    * 6e unx6e             7 6 xxxxxxxxxxxxxxxxxxxxxxxx| 6e: Not in use 
-    * 6f MRET_6   MRET_7   0 3 000xxxx11111001011001111|        ~302 + origImm + 1 for branch decision
-    * 70 LHU_2    LHU_3    c 8 00010101111001x110111010|        Repeat shr until shreg = 0 (0, 8 or 16 times)
-    * 71 aFaultc  aFault_1 6 0 011101011101100000011110|  err   LHU Load access fault. Faulting adr to mtval
-    * 72 LBU_3    ANDI_1   0 0 00001101111010x000011010|        Invert q. Prepare read mask
-    * 73 unalignd straddle 0 0 000001011101100000010010|  Fr10u Unaligned pc, prep read high hword
-    * 74 MRET_9   Fetch    5 3 110110111011001011011110|        +1, IncPC, OpFetch next
-    * 75 IJ_5     Fetch    5 0 11011011101011x011011110|        Mask and use as PC
-    * 76 Fetchu   Fetch2u  0 b 000001111101100011010101|  Fr10u Read and latch instruction
-    * 77 eFetchu  Fetch2u  1 c 000101111101100011010101|  Fr10u rep Read until d=mem[(rs1+ofs) & ~3u]
-    * 78 _L0x78   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * 79 _L0x79   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * 7a SB_5     SW_2     7 0 01011001101001x011110010|        Write d to a+k until accepted
-    * 7b _L0x7b   JAL_1    0 0 00000001x01xxxx000110010| JAL. J-imm is in q. Prep get isntradr from jj
-    * 7c CSRRC_0  CSRRW_1  6 0 000011011101100001001001| CSRRC  Decoded CSR adr in yy
-    * 7d condb_6t Fetch    5 0 110110111011000011011110|        Branch taken.
-    * 7e NMI_1    NMI_2    6 0 001xxxx1110001x010010000|        Store pc to mepc.
-    * 7f unx7f             7 6 xxxxxxxxxxxxxxxxxxxxxxxx| 7f: Not in use 
-    * 80 LBU_0    LBU_1    0 0 100110101111000010000101| LBU    Load unsigned byte. Q = rdadr=RS1+Iimm.
-    * 81 unx81             7 6 xxxxxxxxxxxxxxxxxxxxxxxx| 81: Not in use 
-    * 82 _L0x82   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * 83 _L0x83   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * 84 XORI_0   XORI_1   0 0 00011111111010x000100001| XORI   Xor immediate. Q=~Iimm
-    * 85 LBU_1    LBU_2    1 1 00010111111001x111110000|        Read until q=mem[(rs1+ofs) & ~3u]
-    * 86 JAL_2    JAL_25   4 0 010000011101000010011110|      Prep pc = jj + ofs
-    * 87 unx87             7 6 xxxxxxxxxxxxxxxxxxxxxxxx| 87: Not in use 
-    * 88 _L0x88   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * 89 unx89             7 6 xxxxxxxxxxxxxxxxxxxxxxxx| 89: Not in use 
-    * 8a _L0x8a   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * 8b LB_6     StdIncPc 3 3 000001011101001011100110|        WTRG=(D^0x80)+0xFFFFFF7F+1=(D^0x80)-0x80
-    * 8c XOR_0    XOR_1    0 0 00011111x10xxxx000101001| XOR    xor
-    * 8d unx8d             7 6 xxxxxxxxxxxxxxxxxxxxxxxx| 8d: Not in use 
-    * 8e _LCSRRS_1 ILLe     0 0 000xxxx1x0xxxxx011111110| Illegal instruction seen
-    * 8f ILL_3    ILL_4    0 3 000101011111001010101001|        Q = 1
-    * 90 NMI_2    JAL_3    e 0 011010011101100000110100|        mtval = 0.
-    * 91 LDAF_2   LDAF_3   e 3 0100010100x1001010010010|        Store 4 to mcause
-    * 92 LDAF_3   JAL_3    6 0 0011001110x001x000110100|        PC to mepc
-    * 93 SW_E2    SW_E3    6 0 00110111110001x010010101|        Store address that faulted
-    * 94 SW_E4    JAL_3    e 0 0101001110x1010000110100|        Store 6 to mcause
-    * 95 SW_E3    SW_E4    0 3 000101110111001010010100|        Q = 3
-    * 96 SH_1     SH_2     6 6 00010111111001x010111011|        Write d to Q and yy (for sh 0). Prep shift
-    * 97 SW_E1SWH SW_E2    6 0 0110010110x1100010010011|        Store faulting address alignment to mtval
-    * 98 BLT      condb_2  6 0 000111011101100000010011| BLT    Conditional Branch. Offset to Ryy
-    * 99 _L0x99   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * 9a ECALL_6  JAL_3    e 0 0101001100x1000000110100|        mcause = 11
-    * 9b SH_4     SH_5     9 0 10111001111001x010011111|        Address back to Q. Prepare get item to write
-    * 9c _L0x9c   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * 9d unx9d             7 6 xxxxxxxxxxxxxxxxxxxxxxxx| 9d: Not in use 
-    * 9e JAL_25   JAL_3    3 4 000001010101001000110100|      Prep WTRG = jj+2/4 (return adr)
-    * 9f SH_5     SW_2     7 0 00111001101001x011110010|        Write d to a+k until accepted
-    * a0 LHU_0    LHU_1    6 2 100110101111000001011110| LHU    Load unsigned hword. Q = rdadr=RS1+Iimm
-    * a1 ECALL_4  ECALL_5  0 3 000101010111001010110110|        Q = 4
-    * a2 _L0xa2   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * a3 _L0xa3   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * a4 SRxI_0   SRxI_1   0 6 0001111010x1100000111010| SRxI   Shift Right immediate (both logic/arith here)
-    * a5 MRET_3   MRET_4   0 3 000011011111001010101111|        0x102 + 0xff + 1 = 0x202
-    * a6 ECAL_RET ECALL_1  0 9 000101111011100011010000| ECALL/(U/S/M)RET Select ECALL or (U/S/M)RET
-    * a7 EBRKWFI1 EBRKWFI2 0 0 000xxxx11111000001100001| EBREAK/WFI1 Prepare select EBREAK or WFI
-    * a8 _L0xa8   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * a9 ILL_4    JAL_3    e 3 0101001110x1001000110100|        Store 2 to mcause
-    * aa _L0xaa   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * ab EBREAK_2 ECALL_6  6 0 00110101110001x010011010|        pc to mepc
-    * ac _L0xac   SRx_1    0 0 00011101x0xxxxx000111111| SRx    Shift Right (both SRL and SRA)
-    * ad unxad             7 6 xxxxxxxxxxxxxxxxxxxxxxxx| ad: Not in use 
-    * ae _L0xae   SRx_1    0 0 00011101x0xxxxx000111111| SRx    Shift Right (both SRL and SRA)
-    * af MRET_4   MRET_5   0 3 000xxxx11111001011000101|        0x202 + 0xff + 1 = 0x302
-    * b0 aF_SW_3  LDAF_3   e 0 0100010100x1000010010010|        Store 7 to mcause
-    * b1 CSRRW_3  CSRRW_4  0 3 000101010111001010110010|        Prep emulation entrypt 0x108, here Q to 0x104
-    * b2 CSRRW_4  Fetch    5 3 110110110011001011011110|        IncPC, OpFetch, but force +4
-    * b3 unxb3             7 6 xxxxxxxxxxxxxxxxxxxxxxxx| b3: Not in use 
-    * b4 eFetch3  unalignd 4 d 001111111111001001110011|  Fr11  Write minstret. Update I. Q=immediate, use dinx
-    * b5 SH_3     SH_4     0 0 000000011101100010011011|        Prepare get back address to use 
-    * b6 ECALL_5  ECALL_6  0 3 000101010111001010011010|        Q = 8
-    * b7 IJ_3     IJ_4     6 0 00010101110001x010111101|        Store present PC in case of access error
-    * b8 BGE      condb_2  6 0 000111011101100000010011| BGE    Conditional Branch. Offset to Ryy
-    * b9 _L0xb9   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * ba LHU_3    ANDI_1   0 0 00001111111010x000011010|        Invert q. Prepare read mask
-    * bb SH_2     SH_3     d 6 000101111111010010110101|        Repeat shl until shreg = 0 (0,8 or 24 times)
-    * bc CSRRWI_0 CSRRW_1  6 0 000011011101100001001001| CSRRWI Decoded CSR adr in yy
-    * bd IJ_4     IJ_5     0 3 000001011111001001110101|        Construct Q = 1
-    * be IJ_1     IJ_2     1 0 00010111111001x000011111|        Read until q=mem[(rs1+ofs)&~1u]
-    * bf IJT_1    IJT_2    1 0 00010111111001x011000001|        Exit CSR, enter trap
-    * c0 _L0xc0   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * c1 IJT_2    IJT_3    6 0 000101011101100011101001|        Read word is to be masked with ~1u
-    * c2 _L0xc2   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * c3 _L0xc3   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * c4 ORI_0    ORI_1    4 0 00011111110010x011100001| ORI    Or immediate. jj=~Iimm
-    * c5 MRET_5   MRET_6   0 0 00000001111010x001101111|        ~302
-    * c6 IJT_4    ILL_2    6 0 00110101111011x001000111|        Mask and store to mepc and Q for read of instr
-    * c7 QINT_1   QINT_2   6 0 001xxxx1110001x011001011|        Store pc to mepc.
-    * c8 _L0xc8   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * c9 MRET_2   MRET_3   0 0 000011010111000010100101|        0xff+3 = 0x102
-    * ca _L0xca   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * cb QINT_2   StdIncPc e 0 011010011101100011100110|        mtval = 0.
-    * cc OR_0     OR_1     0 0 00011111x10xxxx000100110| OR     or
-    * cd unxcd             7 6 xxxxxxxxxxxxxxxxxxxxxxxx| cd: Not in use 
-    * ce _LCSRRCI_1 ILLe     0 0 000xxxx1x0xxxxx011111110| Illegal instruction seen
-    * cf MRET_7   MRET_8   0 5 00001101x10xxxx001001111|        Prepare emulation entry point 0x104
-    * d0 ECALL_1  ECALL_2  0 3 000000011111001000110111| ECALL  Verify Imm==0x000
-    * d1 MRET_1   MRET_2   4 0 000011011101100011001001| MRET   First save Imm, start build constant for check
-    * d2 LB_2     LB_3     c 8 00010101111001x100000110|        Repeat shr until shreg == 0 (0,8,16,24 times)
-    * d3 aFaultd  aFault_1 6 0 011101011101100000011110|  err   LB Load access fault. Faulting adr to mtval
-    * d4 aFault_2 LDAF_3   e 3 0100010110x1001010010010|        Store 5 to mcause
-    * d5 Fetch2u           4 e 011111111111000000000000|  Fr11  Update ttime. Update I. Q=immediate. Use dinx
-    * d6 eILL0c   ILLe     0 0 000xxxx1x0xxxxx011111110| Illegal instruction seen
-    * d7 ECALL_3  ECALL_4  6 0 011101011101100010100001|        mtval = 0, now start the chore of 11 to mcause
-    * d8 BLTU     condb_2  6 0 000111011101100000010011| BLTU   Conditional Branch. Offset to Ryy
-    * d9 _L0xd9   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * da LDAF_a   LDAF_2   0 0 00010101x10xxxx010010001|        Extra cycle after error detected write mtval
-    * db jFault_1 LDAF_3   6 3 0101100110x1001010010010|        Store 1 to mcause
-    * dc CSRRSI_0 CSRRW_1  6 0 000011011101100001001001| CSRRSI Decoded CSR adr in yy
-    * dd aF_SW_1  aF_SW_2  6 0 011101011101100011100101|  err   SW Store access fault. Faulting adr to mtval
-    * de Fetch    Fetch2   5 c 000101111101100011110100|  Fr11  Read and latch instruction
-    * df eFetch   Fetch2   5 c 000101111101100011110100|  Fr11  rep Read until d=mem[(rs1+ofs) & ~3u]
-    * e0 _L0xe0   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * e1 ORI_1    ORI_2    0 0 00000001111001x000011101|        Q = RS1
-    * e2 _L0xe2   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * e3 _L0xe3   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * e4 ANDI_0   ANDI_1   0 0 00011111111010x000011010| ANDI   And immediate. Q=~Iimm
-    * e5 aF_SW_2  aF_SW_3  0 3 000101010111001010110000|        Q = 4
-    * e6 StdIncPc Fetch    5 4 110110110011001011011110|  Fr11  IncPC, OpFetch
-    * e7 aFault   aFault_1 6 0 011101011101100000011110|  err   Load access fault. Faulting adr to mtval
-    * e8 _L0xe8   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * e9 IJT_3    IJT_4    0 3 000110011111001011000110|        Construct Q = 1
-    * ea _L0xea   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * eb LH_3     LH_4     0 0 00001111111010x001010110|        q = ~mem[rs1+ofs]
-    * ec AND_0    AND_1    0 0 00011111x10xxxx000010001| AND    And 
-    * ed unxed             7 6 xxxxxxxxxxxxxxxxxxxxxxxx| ed: Not in use
-    * ee eILL0a   ILLe     0 0 000xxxx1x0xxxxx011111110| Illegal instruction seen
-    * ef WFI_5    Fetch    5 3 110110110011001011011110|        IncPC, OpFetch
-    * f0 LBU_2    LBU_3    c 8 00010101111001x101110010|        Repeat shr until shreg = 0 (0, 8 or 16 times)
-    * f1 aFaulte  aFault_1 6 0 011101011101100000011110|  err   LBU Load access fault. Faulting adr to mtval
-    * f2 SW_2     StdIncPc 0 0 00000101x10xxxx011100110|        Prepare read PC
-    * f3 aF_SW    aF_SW_1  0 0 000xxxx1x01xxxx011011101|  err   SW/SH/SB access fault. Rest to set SEL_O=4'hf
-    * f4 Fetch2   eFetch3  4 f 011000111101000010110100|  Fr11  Update ttime. Update I. Q=immediate. Use dinx
-    * f5 jFault   jFault_1 6 0 011101011101100011011011|  err   Fetch access fault. Faulting adr to mtval
-    * f6 WFI_1    WFI_2    0 3 000110010111001011111010| WFI    Chk offset=0x105. Now 0xff. Prep 0xff+4 = 0x103
-    * f7 EBREAK_1 EBREAK_2 6 0 011000011101100010101011| EBREAK mepc = pc, store 0 to mtval
-    * f8 BGEU     condb_2  6 0 000111011101100000010011| BGEU   Conditional Branch. Offset to Ryy
-    * f9 _L0xf9   ILLe     0 0 000xxxx1x0xxxxx011111110|  Not in use (illegal as entry)
-    * fa WFI_2    WFI_3    0 3 000101011111001001000101|        Chk ofs. Now 0x103. Prep +1+~ofs, so ~ofs+0x104
-    * fb SB_3     SB_4     0 0 000000011101100001101011|        Prepare get back address to use 
-    * fc CSRRCI_0 CSRRW_1  6 0 000011011101100001001001| CSRRCI Decoded CSR adr in yy
-    * fd NMI_0    NMI_1    0 0 00000101x10xxxx001111110| NMI    Get current PC
-    * fe ILLe     ILL_1    0 0 00000101x0xxxxx001000110| Illegal
-    * ff QINT_0   QINT_1   0 0 00000101x10xxxx011000111| INT    Get current PC
+    * 00 LB_0     LB_1     0 0 000000001001101011110000| LB     Load byte. q = rdadr=RS1+0fs
+    * 01 LB_1     LB_2     1 1 0001000100010111111001x1|        Read until q=mem[rs1+ofs) & ~3u]
+    * 02 IJ_0     IJ_1     2 2 001000101001101111110000| IJ     Jump to mem[(rs1+ofs)&~1u]. inCSR=0
+    * 03 _L0x03   StdIncPc 0 0 0000000000000101x10xxxx0| FENCE  Prepare read PC (FENCE/FENCE.I)
+    * 04 ADDI_0   StdIncPc 3 0 001100000000010111010000| ADDI   Add immediate. rd =RS1+Iimm (or joined)
+    * 05 _L0x05   ADDI_0   0 0 0000000000000001x01xxxx0| AUIPC  q = imm20+2 or imm20+4  (copy x/2)
+    * 06 LB_3     LB_4     0 0 0000000000001101111010x0|        q = ~mem[rs1+ofs]
+    * 07 LB_4     LB_5     0 0 0000000000001011111011x0|        q = (uint8_t) mem[rs1+Iimm]
+    * 08 _L0x08   SB_1     4 0 010000000001110011110000| SB     Store byte. wjj=wradr=RS1+Simm
+    * 09 LB_5     LB_6     0 0 0000000000001011111000x0|        q = D^0xffffffff^q = D^0x80
+    * 0a _L0x0a   SB_1     4 0 010000000001110011110000| SB     Store byte. wjj=wradr=RS1+Simm
+    * 0b JALR_2   JALR_3   0 3 000000110000010111110010|        Q=1. Prep legalize target
+    * 0c ADD_0    ADDI_0   0 0 0000000000011101111001x0| ADD    add     Addition Q = RS1
+    * 0d _L0x0d   StdIncPc 3 0 001100000000010111011000| LUI    q = imm20
+    * 0e SUB_0    SUB_1    0 0 0000000000011101x10xxxx0| SUB    Subtraction
+    * 0f _L0x0f   StdIncPc 3 0 001100000000010111011000| LUI    q = imm20
+    * 10 SUB_1    LB_6     0 0 0000000000011111111000x0|        Q = ~RS2
+    * 11 AND_1    ANDI_1   0 0 0000000000011101111000x0|        RS1^0xffffffff to Q
+    * 12 straddle Fetchu   5 4 010101001101101100110010|  Fr10u IncPC, OpFetch
+    * 13 condb_2  condb_3  0 0 0000000000011111111000x0|        ~RS2 in Q
+    * 14 condb_3  condb_4  0 3 000000110001100111110010|        Calculate RS1+~RS2+1
+    * 15 condb_4  condb_5  0 5 0000010100000001111001x0|        Branch on condition
+    * 16 condb_5  StdIncPc 0 0 0000000000000001x10xxxx0|        Branch not taken.
+    * 17 condb_5t condb_6t 6 0 0110000000000001101001x0|        Branch taken. yy=oldPC incase of access error
+    * 18 BEQ      condb_2  6 0 011000000001110111011000| BEQ    Conditional Branch. Offset to Ryy
+    * 19 JALR_0   JALR_1   4 0 010000000100000110x10000| JALR   (tmp) Prep pc=RS1+imm (target)
+    * 1a ANDI_1   StdIncPc 3 0 0011000000000101110011x0|        rd = Iimm & RS1
+    * 1b _L0x1b   JAL_1    0 0 0000000000000001x01xxxx0| JAL. J-imm is in q. Prep get isntradr from jj
+    * 1c ECAL_BRK ECAL_RET 0 2 000000100001011110111000| ECALL/EBREAK  Select ECALL/(U/S/M)RET or EBREAK/WFI
+    * 1d ORI_2    StdIncPc 3 0 001100000000010111011100|        rd = Iimm | RS1
+    * 1e aFault_1 aFault_2 0 3 000000110001010101110010|        Q = 4
+    * 1f IJ_2     IJ_3     4 0 010000000100000110111000|        Read word is to be masked with lsb = 0
+    * 20 LH_0     LH_1     6 2 011000101001101011110000| LH     Load hword. Q = rdadr=RS1+Iimm.
+    * 21 XORI_1   StdIncPc 3 0 0011000000000101110000x0|        rd = Iimm ^ RS1
+    * 22 _L0x22   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * 23 _L0x23   StdIncPc 0 0 0000000000000101x10xxxx0| FENCE  Prepare read PC (FENCE/FENCE.I)
+    * 24 SLLI_0   SLLI_1   0 6 000001100001111010x11000| SLLI   Shift left immediate.
+    * 25 _L0x25   ADDI_0   0 0 0000000000000001x01xxxx0| AUIPC  q = imm20+2 or imm20+4  (copy x/2)
+    * 26 OR_1     OR_2     4 0 0100000000011101110000x0|        RS1^0xffffffff to jj
+    * 27 OR_2     ORI_2    0 0 000000000000000111110000|        Q = rs2
+    * 28 _L0x28   SH_1     4 2 010000100001110011110000| SH     Store halfword. jjw=wradr=RS1+Simm
+    * 29 XOR_1    XORI_1   0 0 0000000000011101111000x0|        Q = RS1^0xFFFFFFFF
+    * 2a _L0x2a   SH_1     4 2 010000100001110011110000| SH     Store halfword. jjw=wradr=RS1+Simm
+    * 2b SLTIX_1  SLTIX_2  0 3 00000011000xxxx111010010|        RS1 - imm / RS1 - RS2
+    * 2c SLL_0    SLL_1    0 0 0000000000011101x0xxxxx0| SLL    Shift left
+    * 2d _L0x2d   StdIncPc 3 0 001100000000010111011000| LUI    q = imm20
+    * 2e unx2e             7 6 01110110xxxxxxxxxxxxxxxx| 2e: Not in use 
+    * 2f _L0x2f   StdIncPc 3 0 001100000000010111011000| LUI    q = imm20
+    * 30 SLTIX_2  StdIncPc 3 7 001101110000010111011010|        Registered ALU flag to rd
+    * 31 SLTX_1   SLTIX_1  0 0 0000000000011111111000x0|        ~rs2 to Q
+    * 32 JAL_1    JAL_2    6 0 0110000000000001101001x0|      Prep Instradr to yy. Refetch instradr
+    * 33 JALR_3   JAL_25   4 0 0100000001000001110011x0|        Q = (RS1+imn) & 0xfffffffe
+    * 34 JAL_3    Fetch    5 0 0101000011011011101001x0|      Prep fetch next instr.
+    * 35 SLLI_1   SLLI_2   3 6 0011011000010111111001x0|        Register to shift to Q (and TRG for shift 0)
+    * 36 SLLI_2   _L0x03   8 6 100001100001011111110100|        Repeat Q = Q+Q until shregcnt == 0
+    * 37 ECALL_2  ECALL_3  6 5 01100101001xxxx1110001x0|        mepc = pc, prep store 0 to mtval
+    * 38 BNE      condb_2  6 0 011000000001110111011000| BNE    Conditional Branch. Offset to Ryy
+    * 39 _L0x39   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * 3a SRxI_1   SRxI_2   3 8 0011100000010101111001x1|        Register to shift to Q
+    * 3b _L0x3b   JAL_1    0 0 0000000000000001x01xxxx0| JAL. J-imm is in q. Prep get isntradr from jj
+    * 3c CSRRW_0  CSRRW_1  6 0 011000000000110111011000| CSRRW  Decoded CSR adr in yy
+    * 3d SRxI_2   _L0x03   8 8 1000100000010101111001x1|        Repeat Q >>= 1 until shregcnt == 0
+    * 3e SLL_1    SLLI_1   0 6 000001100001111010x001x0|        Shiftamount was in low 5 bits of RS2
+    * 3f SRx_1    SRxI_1   0 6 000001100001111010x001x0|        Shiftamount in low 5 bits of RS2
+    * 40 LW_0     LW_1     0 9 000010011001101111110000| LW     Load word. Q=yy=rdadr=RS1+Iimm
+    * 41 JALR_1   JALR_2   6 0 0110000000010101110001x0|        yy=jj. Prep get Q=1
+    * 42 _L0x42   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * 43 _L0x43   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * 44 SLTI_0   SLTIX_1  0 0 0000000000011111111010x0| SLTI   Set less than immediate (signed)
+    * 45 WFI_3    WFI_4    0 3 000000110001010111110010|        Chk ofs. Now 0x104. Prep +1, so ~ofs+0x105
+    * 46 ILL_1    ILL_2    6 0 011000000011010110x001x0|        Store PC to mepc
+    * 47 ILL_2    ILL_3    6 0 0110000001110101110001x0|        Store 0 to mtval
+    * 48 _L0x48   SW_1     9 9 100110011001110111110000| SW     Store word. Q=wradr=RS1+Simm
+    * 49 CSRRW_1  CSRRW_2  0 3 000000110000000111110010|        Construct PC storage adr
+    * 4a _L0x4a   SW_1     9 9 100110011001110111110000| SW     Store word. Q=wradr=RS1+Simm
+    * 4b CSRRW_2  CSRRW_3  a 0 1010000001110101101001x0|        Write PC to 0x100 start Prep emulation entrypt
+    * 4c SLT_0    SLTX_1   0 0 0000000000011101x10xxxx0| SLT    Set less than (signed)
+    * 4d unx4d             7 6 01110110xxxxxxxxxxxxxxxx| 4d: Not in use 
+    * 4e eILL0b   ILLe     0 0 00000000000xxxx1x0xxxxx0| Illegal instruction seen
+    * 4f MRET_8   MRET_9   0 3 000000110001010101110010|        +4, so now 0x103
+    * 50 LW_1     StdIncPc b a 1011101000010111110001x0|        Read until d=mem[(rs1+ofs) & ~3u]
+    * 51 LDAF_LW  LDAF_a   6 0 011000000111010110111000|  err   LD AlignFault. Faulting adr to mtval
+    * 52 LH_1     LH_2     1 1 0001000100010111111001x1|        Read until q=mem[(rs1+ofs) & ~3u]
+    * 53 LDAF_LH  LDAF_a   6 0 011000000111010110111000|  err   LD AlignFault. Faulting adr to mtval
+    * 54 LH_2     LH_3     c 8 1100100000010101111001x1|        Repeat shr until shreg = 0 (0, 8 or 16 times)
+    * 55 aFaultb  aFault_1 6 0 011000000111010111011000|  err   LH Load access fault. Faulting adr to mtval
+    * 56 LH_4     LH_5     0 0 0000000000010001111011x0|        q = (uint16_t) mem[rs1+Iimm]
+    * 57 LH_5     LB_6     0 0 0000000000010001111000x0|        q = D^0xffffffff^q = D ^ 0x00008000
+    * 58 _L0x58   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * 59 _L0x59   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * 5a SB_1     SB_2     6 6 0110011000010111111001x0|        Write d to Q and yy (for sh 0). Prep shift
+    * 5b _L0x5b   JAL_1    0 0 0000000000000001x01xxxx0| JAL. J-imm is in q. Prep get isntradr from jj
+    * 5c CSRRS_0  CSRRW_1  6 0 011000000000110111011000| CSRRS  Decoded CSR adr in yy
+    * 5d SB_2     SB_3     d 6 110101100001011111110100|        Repeat shl until shreg = 0 (0,8,16 or 24 times)
+    * 5e LHU_1    LHU_2    1 1 0001000100010111111001x1|        Read until q=mem[(rs1+ofs) & ~3u]
+    * 5f LDAF_LHU LDAF_a   6 0 011000000111010110111000|  err   LD AlignFault. Faulting adr to mtval
+    * 60 _L0x60   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * 61 EBRKWFI2 EBREAK_1 6 5 0110010100001101110010x0| EBREAK/WFI2 Select EBREAK or WFI.
+    * 62 _L0x62   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * 63 _L0x63   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * 64 SLTIU_0  SLTIX_1  0 0 0000000000011111111010x0| SLTIU  Set less than immediate (unsigned)
+    * 65 WFI_4    WFI_5    0 5 0000010100000001x10xxxx0|        Prepare read PC.
+    * 66 SW_1     SW_2     7 0 0111000001111101101001x0|        Write d to a+k until accepted
+    * 67 SW_E1SWE SW_E2    6 0 011000000110010110x11000|        Store faulting address alignment to mtval
+    * 68 _L0x68   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * 69 unx69             7 6 01110110xxxxxxxxxxxxxxxx| 69: Not in use 
+    * 6a _L0x6a   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * 6b SB_4     SB_5     9 0 1001000011011001111001x0|        Address back to Q. Prepare get item to write
+    * 6c SLTU_0   SLTX_1   0 0 0000000000011101x10xxxx0| SLTU   Set less than (unsigned)
+    * 6d unx6d             7 6 01110110xxxxxxxxxxxxxxxx| 6d: Not in use 
+    * 6e unx6e             7 6 01110110xxxxxxxxxxxxxxxx| 6e: Not in use 
+    * 6f MRET_6   MRET_7   0 3 00000011000xxxx111110010|        ~302 + origImm + 1 for branch decision
+    * 70 LHU_2    LHU_3    c 8 1100100000010101111001x1|        Repeat shr until shreg = 0 (0, 8 or 16 times)
+    * 71 aFaultc  aFault_1 6 0 011000000111010111011000|  err   LHU Load access fault. Faulting adr to mtval
+    * 72 LBU_3    ANDI_1   0 0 0000000000001101111010x0|        Invert q. Prepare read mask
+    * 73 unalignd straddle 0 0 000000000000010111011000|  Fr10u Unaligned pc, prep read high hword
+    * 74 MRET_9   Fetch    5 3 010100111101101110110010|        +1, IncPC, OpFetch next
+    * 75 IJ_5     Fetch    5 0 0101000011011011101011x0|        Mask and use as PC
+    * 76 Fetchu   Fetch2u  0 b 000010110000011111011000|  Fr10u Read and latch instruction
+    * 77 eFetchu  Fetch2u  1 c 000111000001011111011000|  Fr10u rep Read until d=mem[(rs1+ofs) & ~3u]
+    * 78 _L0x78   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * 79 _L0x79   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * 7a SB_5     SW_2     7 0 0111000001011001101001x0|        Write d to a+k until accepted
+    * 7b _L0x7b   JAL_1    0 0 0000000000000001x01xxxx0| JAL. J-imm is in q. Prep get isntradr from jj
+    * 7c CSRRC_0  CSRRW_1  6 0 011000000000110111011000| CSRRC  Decoded CSR adr in yy
+    * 7d condb_6t Fetch    5 0 010100001101101110110000|        Branch taken.
+    * 7e NMI_1    NMI_2    6 0 01100000001xxxx1110001x0|        Store pc to mepc.
+    * 7f unx7f             7 6 01110110xxxxxxxxxxxxxxxx| 7f: Not in use 
+    * 80 LBU_0    LBU_1    0 0 000000001001101011110000| LBU    Load unsigned byte. Q = rdadr=RS1+Iimm.
+    * 81 unx81             7 6 01110110xxxxxxxxxxxxxxxx| 81: Not in use 
+    * 82 _L0x82   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * 83 _L0x83   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * 84 XORI_0   XORI_1   0 0 0000000000011111111010x0| XORI   Xor immediate. Q=~Iimm
+    * 85 LBU_1    LBU_2    1 1 0001000100010111111001x1|        Read until q=mem[(rs1+ofs) & ~3u]
+    * 86 JAL_2    JAL_25   4 0 010000000100000111010000|      Prep pc = jj + ofs
+    * 87 unx87             7 6 01110110xxxxxxxxxxxxxxxx| 87: Not in use 
+    * 88 _L0x88   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * 89 unx89             7 6 01110110xxxxxxxxxxxxxxxx| 89: Not in use 
+    * 8a _L0x8a   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * 8b LB_6     StdIncPc 3 3 001100110000010111010010|        WTRG=(D^0x80)+0xFFFFFF7F+1=(D^0x80)-0x80
+    * 8c XOR_0    XOR_1    0 0 0000000000011111x10xxxx0| XOR    xor
+    * 8d unx8d             7 6 01110110xxxxxxxxxxxxxxxx| 8d: Not in use 
+    * 8e _LCSRRS_1 ILLe     0 0 00000000000xxxx1x0xxxxx0| Illegal instruction seen
+    * 8f ILL_3    ILL_4    0 3 000000110001010111110010|        Q = 1
+    * 90 NMI_2    JAL_3    e 0 111000000110100111011000|        mtval = 0.
+    * 91 LDAF_2   LDAF_3   e 3 111000110100010100x10010|        Store 4 to mcause
+    * 92 LDAF_3   JAL_3    6 0 011000000011001110x001x0|        PC to mepc
+    * 93 SW_E2    SW_E3    6 0 0110000000110111110001x0|        Store address that faulted
+    * 94 SW_E4    JAL_3    e 0 111000000101001110x10100|        Store 6 to mcause
+    * 95 SW_E3    SW_E4    0 3 000000110001011101110010|        Q = 3
+    * 96 SH_1     SH_2     6 6 0110011000010111111001x0|        Write d to Q and yy (for sh 0). Prep shift
+    * 97 SW_E1SWH SW_E2    6 0 011000000110010110x11000|        Store faulting address alignment to mtval
+    * 98 BLT      condb_2  6 0 011000000001110111011000| BLT    Conditional Branch. Offset to Ryy
+    * 99 _L0x99   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * 9a ECALL_6  JAL_3    e 0 111000000101001100x10000|        mcause = 11
+    * 9b SH_4     SH_5     9 0 1001000010111001111001x0|        Address back to Q. Prepare get item to write
+    * 9c _L0x9c   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * 9d unx9d             7 6 01110110xxxxxxxxxxxxxxxx| 9d: Not in use 
+    * 9e JAL_25   JAL_3    3 4 001101000000010101010010|      Prep WTRG = jj+2/4 (return adr)
+    * 9f SH_5     SW_2     7 0 0111000000111001101001x0|        Write d to a+k until accepted
+    * a0 LHU_0    LHU_1    6 2 011000101001101011110000| LHU    Load unsigned hword. Q = rdadr=RS1+Iimm
+    * a1 ECALL_4  ECALL_5  0 3 000000110001010101110010|        Q = 4
+    * a2 _L0xa2   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * a3 _L0xa3   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * a4 SRxI_0   SRxI_1   0 6 000001100001111010x11000| SRxI   Shift Right immediate (both logic/arith here)
+    * a5 MRET_3   MRET_4   0 3 000000110000110111110010|        0x102 + 0xff + 1 = 0x202
+    * a6 ECAL_RET ECALL_1  0 9 000010010001011110111000| ECALL/(U/S/M)RET Select ECALL or (U/S/M)RET
+    * a7 EBRKWFI1 EBRKWFI2 0 0 00000000000xxxx111110000| EBREAK/WFI1 Prepare select EBREAK or WFI
+    * a8 _L0xa8   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * a9 ILL_4    JAL_3    e 3 111000110101001110x10010|        Store 2 to mcause
+    * aa _L0xaa   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * ab EBREAK_2 ECALL_6  6 0 0110000000110101110001x0|        pc to mepc
+    * ac _L0xac   SRx_1    0 0 0000000000011101x0xxxxx0| SRx    Shift Right (both SRL and SRA)
+    * ad unxad             7 6 01110110xxxxxxxxxxxxxxxx| ad: Not in use 
+    * ae _L0xae   SRx_1    0 0 0000000000011101x0xxxxx0| SRx    Shift Right (both SRL and SRA)
+    * af MRET_4   MRET_5   0 3 00000011000xxxx111110010|        0x202 + 0xff + 1 = 0x302
+    * b0 aF_SW_3  LDAF_3   e 0 111000000100010100x10000|        Store 7 to mcause
+    * b1 CSRRW_3  CSRRW_4  0 3 000000110001010101110010|        Prep emulation entrypt 0x108, here Q to 0x104
+    * b2 CSRRW_4  Fetch    5 3 010100111101101100110010|        IncPC, OpFetch, but force +4
+    * b3 unxb3             7 6 01110110xxxxxxxxxxxxxxxx| b3: Not in use 
+    * b4 eFetch3  unalignd 4 d 010011010011111111110010|  Fr11  Write minstret. Update I. Q=immediate, use dinx
+    * b5 SH_3     SH_4     0 0 000000000000000111011000|        Prepare get back address to use 
+    * b6 ECALL_5  ECALL_6  0 3 000000110001010101110010|        Q = 8
+    * b7 IJ_3     IJ_4     6 0 0110000000010101110001x0|        Store present PC in case of access error
+    * b8 BGE      condb_2  6 0 011000000001110111011000| BGE    Conditional Branch. Offset to Ryy
+    * b9 _L0xb9   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * ba LHU_3    ANDI_1   0 0 0000000000001111111010x0|        Invert q. Prepare read mask
+    * bb SH_2     SH_3     d 6 110101100001011111110100|        Repeat shl until shreg = 0 (0,8 or 24 times)
+    * bc CSRRWI_0 CSRRW_1  6 0 011000000000110111011000| CSRRWI Decoded CSR adr in yy
+    * bd IJ_4     IJ_5     0 3 000000110000010111110010|        Construct Q = 1
+    * be IJ_1     IJ_2     1 0 0001000000010111111001x0|        Read until q=mem[(rs1+ofs)&~1u]
+    * bf IJT_1    IJT_2    1 0 0001000000010111111001x0|        Exit CSR, enter trap
+    * c0 _L0xc0   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * c1 IJT_2    IJT_3    6 0 011000000001010111011000|        Read word is to be masked with ~1u
+    * c2 _L0xc2   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * c3 _L0xc3   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * c4 ORI_0    ORI_1    4 0 0100000000011111110010x0| ORI    Or immediate. jj=~Iimm
+    * c5 MRET_5   MRET_6   0 0 0000000000000001111010x0|        ~302
+    * c6 IJT_4    ILL_2    6 0 0110000000110101111011x0|        Mask and store to mepc and Q for read of instr
+    * c7 QINT_1   QINT_2   6 0 01100000001xxxx1110001x0|        Store pc to mepc.
+    * c8 _L0xc8   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * c9 MRET_2   MRET_3   0 0 000000000000110101110000|        0xff+3 = 0x102
+    * ca _L0xca   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * cb QINT_2   StdIncPc e 0 111000000110100111011000|        mtval = 0.
+    * cc OR_0     OR_1     0 0 0000000000011111x10xxxx0| OR     or
+    * cd unxcd             7 6 01110110xxxxxxxxxxxxxxxx| cd: Not in use 
+    * ce _LCSRRCI_1 ILLe     0 0 00000000000xxxx1x0xxxxx0| Illegal instruction seen
+    * cf MRET_7   MRET_8   0 5 0000010100001101x10xxxx0|        Prepare emulation entry point 0x104
+    * d0 ECALL_1  ECALL_2  0 3 000000110000000111110010| ECALL  Verify Imm==0x000
+    * d1 MRET_1   MRET_2   4 0 010000000000110111011000| MRET   First save Imm, start build constant for check
+    * d2 LB_2     LB_3     c 8 1100100000010101111001x1|        Repeat shr until shreg == 0 (0,8,16,24 times)
+    * d3 aFaultd  aFault_1 6 0 011000000111010111011000|  err   LB Load access fault. Faulting adr to mtval
+    * d4 aFault_2 LDAF_3   e 3 111000110100010110x10010|        Store 5 to mcause
+    * d5 Fetch2u           4 e 010011100111111111110000|  Fr11  Update ttime. Update I. Q=immediate. Use dinx
+    * d6 eILL0c   ILLe     0 0 00000000000xxxx1x0xxxxx0| Illegal instruction seen
+    * d7 ECALL_3  ECALL_4  6 0 011000000111010111011000|        mtval = 0, now start the chore of 11 to mcause
+    * d8 BLTU     condb_2  6 0 011000000001110111011000| BLTU   Conditional Branch. Offset to Ryy
+    * d9 _L0xd9   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * da LDAF_a   LDAF_2   0 0 0000000000010101x10xxxx0|        Extra cycle after error detected write mtval
+    * db jFault_1 LDAF_3   6 3 011000110101100110x10010|        Store 1 to mcause
+    * dc CSRRSI_0 CSRRW_1  6 0 011000000000110111011000| CSRRSI Decoded CSR adr in yy
+    * dd aF_SW_1  aF_SW_2  6 0 011000000111010111011000|  err   SW Store access fault. Faulting adr to mtval
+    * de Fetch    Fetch2   5 c 010111000001011111011000|  Fr11  Read and latch instruction
+    * df eFetch   Fetch2   5 c 010111000001011111011000|  Fr11  rep Read until d=mem[(rs1+ofs) & ~3u]
+    * e0 _L0xe0   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * e1 ORI_1    ORI_2    0 0 0000000000000001111001x0|        Q = RS1
+    * e2 _L0xe2   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * e3 _L0xe3   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * e4 ANDI_0   ANDI_1   0 0 0000000000011111111010x0| ANDI   And immediate. Q=~Iimm
+    * e5 aF_SW_2  aF_SW_3  0 3 000000110001010101110010|        Q = 4
+    * e6 StdIncPc Fetch    5 4 010101001101101100110010|  Fr11  IncPC, OpFetch
+    * e7 aFault   aFault_1 6 0 011000000111010111011000|  err   Load access fault. Faulting adr to mtval
+    * e8 _L0xe8   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * e9 IJT_3    IJT_4    0 3 000000110001100111110010|        Construct Q = 1
+    * ea _L0xea   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * eb LH_3     LH_4     0 0 0000000000001111111010x0|        q = ~mem[rs1+ofs]
+    * ec AND_0    AND_1    0 0 0000000000011111x10xxxx0| AND    And 
+    * ed unxed             7 6 01110110xxxxxxxxxxxxxxxx| ed: Not in use
+    * ee eILL0a   ILLe     0 0 00000000000xxxx1x0xxxxx0| Illegal instruction seen
+    * ef WFI_5    Fetch    5 3 010100111101101100110010|        IncPC, OpFetch
+    * f0 LBU_2    LBU_3    c 8 1100100000010101111001x1|        Repeat shr until shreg = 0 (0, 8 or 16 times)
+    * f1 aFaulte  aFault_1 6 0 011000000111010111011000|  err   LBU Load access fault. Faulting adr to mtval
+    * f2 SW_2     StdIncPc 0 0 0000000000000101x10xxxx0|        Prepare read PC
+    * f3 aF_SW    aF_SW_1  0 0 00000000000xxxx1x01xxxx0|  err   SW/SH/SB access fault. Rest to set SEL_O=4'hf
+    * f4 Fetch2   eFetch3  4 f 010011110110001111010000|  Fr11  Update ttime. Update I. Q=immediate. Use dinx
+    * f5 jFault   jFault_1 6 0 011000000111010111011000|  err   Fetch access fault. Faulting adr to mtval
+    * f6 WFI_1    WFI_2    0 3 000000110001100101110010| WFI    Chk offset=0x105. Now 0xff. Prep 0xff+4 = 0x103
+    * f7 EBREAK_1 EBREAK_2 6 0 011000000110000111011000| EBREAK mepc = pc, store 0 to mtval
+    * f8 BGEU     condb_2  6 0 011000000001110111011000| BGEU   Conditional Branch. Offset to Ryy
+    * f9 _L0xf9   ILLe     0 0 00000000000xxxx1x0xxxxx0|  Not in use (illegal as entry)
+    * fa WFI_2    WFI_3    0 3 000000110001010111110010|        Chk ofs. Now 0x103. Prep +1+~ofs, so ~ofs+0x104
+    * fb SB_3     SB_4     0 0 000000000000000111011000|        Prepare get back address to use 
+    * fc CSRRCI_0 CSRRW_1  6 0 011000000000110111011000| CSRRCI Decoded CSR adr in yy
+    * fd NMI_0    NMI_1    0 0 0000000000000101x10xxxx0| NMI    Get current PC
+    * fe ILLe     ILL_1    0 0 0000000000000101x0xxxxx0| Illegal
+    * ff QINT_0   QINT_1   0 0 0000000000000101x10xxxx0| INT    Get current PC
     */
    localparam u0_0 = 256'hd8e64010d8e6e404f233f05ae08bf05aec09e8072004d0e640e6f0bee5d2f001;
    localparam u0_1 = 256'hb8b772d4dce6b8a62032cce69041d813a47d40e6e416f215e0143276e01ae08b;
@@ -4302,7 +4302,7 @@ endmodule
  * 2019-2020. Copyright B. Nossum.
  * For licence, see LICENCE
  * -----------------------------------------------------------------------------ehdr
- * Automatically generated from ../code/ucode.h by midgetv_indirectEBR.c.
+ * Automatically generated from ../code/ucode.h by ../util/midgetv_indirectEBR.c.
  * Do not edit.
  * Optiones for this variant:
  *   RVC included
@@ -4398,262 +4398,262 @@ module v12_m_2ebr
     *                      indirect_index 1
     * inx         next     | indirect index 0
     * || ucode    ucode    | | direct representation
-    * 00 LB_0     LB_1     0 0 011000110111110000000001| LB     Load byte. q = rdadr=RS1+0fs
-    * 01 LB_1     LB_2     1 1 001000101111100111010010|        Read until q=mem[rs1+ofs) & ~3u]
-    * 02 IJ_0     IJ_1     2 2 011000110111110010111110| IJ     Jump to mem[(rs1+ofs)&~1u]. inCSR=0
-    * 03 _L0x03   StdIncPc 3 3 0010000010x10xxx11100110| FENCE  Prepare read PC (FENCE/FENCE.I)
-    * 04 ADDI_0   StdIncPc 3 3 010010001011010011100110| ADDI   Add immediate. rd =RS1+Iimm (or joined)
-    * 05 _L0x05   ADDI_0   3 3 0010000000x01xxx00000100| AUIPC  q = imm20+2 or imm20+4  (copy x/2)
-    * 06 LB_3     LB_4     3 3 001000011011101000000111|        q = ~mem[rs1+ofs]
-    * 07 LB_4     LB_5     3 3 001000010111101100001001|        q = (uint8_t) mem[rs1+Iimm]
-    * 08 _L0x08   SB_1     3 0 010100111011110001011010| SB     Store byte. wjj=wradr=RS1+Simm
-    * 09 LB_5     LB_6     3 3 001000010111100010001011|        q = D^0xffffffff^q = D^0x80
-    * 0a _L0x0a   SB_1     3 0 010100111011110001011010| SB     Store byte. wjj=wradr=RS1+Simm
-    * 0b JALR_2   JALR_3   3 4 011000001011110000110011|        Q=1. Prep legalize target
-    * 0c ADD_0    ADDI_0   3 3 001000111011100100000100| ADD    add     Addition Q = RS1
-    * 0d MUL_0    MUL_1    3 3 1010001110x10xxx11100010| MUL    Store rs1 tp rM. Next read rs2. Q clear
-    * 0e SUB_0    SUB_1    3 3 0010001110x10xxx00010000| SUB    Subtraction
-    * 0f _L0x0f   StdIncPc 3 3 000010001011011011100110| LUI    q = imm20
-    * 10 SUB_1    LB_6     3 3 001000111111100010001011|        Q = ~RS2
-    * 11 AND_1    ANDI_1   3 3 001000111011100000011010|        RS1^0xffffffff to Q
-    * 12 straddle Fetchu   4 5 110100110100110001110110|  Fr10u IncPC, OpFetch
-    * 13 condb_2  condb_3  3 3 001000111111100000010100|        ~RS2 in Q
-    * 14 condb_3  condb_4  3 4 011000110011110000010101|        Calculate RS1+~RS2+1
-    * 15 condb_4  condb_5  3 6 001000000011100100010110|        Branch on condition
-    * 16 condb_5  StdIncPc 3 3 0010000000x10xxx11100110|        Branch not taken.
-    * 17 condb_5t condb_6t 3 3 000110000010100101111101|        Branch taken. yy=oldPC incase of access error
-    * 18 BEQ      condb_2  3 3 000110111011011000010011| BEQ    Conditional Branch. Offset to Ryy
-    * 19 JALR_0   JALR_1   5 3 010100000010x10001000001| JALR   (tmp) Prep pc=RS1+imm (target)
-    * 1a ANDI_1   StdIncPc 3 3 000010001011001111100110|        rd = Iimm & RS1
-    * 1b _L0x1b   JAL_1    3 3 0010000000x01xxx00110010| JAL. J-imm is in q. Prep get isntradr from jj
-    * 1c ECAL_BRK ECAL_RET 3 2 001000101110111010100110| ECALL/EBREAK  Select ECALL/(U/S/M)RET or EBREAK/WFI
-    * 1d ORI_2    StdIncPc 3 3 000010001011011111100110|        rd = Iimm | RS1
-    * 1e aFault_1 aFault_2 3 4 111000101001110011010100|        Q = 4
-    * 1f IJ_2     IJ_3     5 3 000100000010111010110111|        Read word is to be masked with lsb = 0
-    * 20 LH_0     LH_1     0 7 010110110111110001010010| LH     Load hword. Q = rdadr=RS1+Iimm.
-    * 21 XORI_1   StdIncPc 3 3 000010001011000011100110|        rd = Iimm ^ RS1
-    * 22 MULHU_6  MULHU_7  3 8 001000101011110000111001|        Q <= rM[0] ? Q+Ryy : Q. Prepare last shr/sar
-    * 23 _L0x23   StdIncPc 3 3 0010000010x10xxx11100110| FENCE  Prepare read PC (FENCE/FENCE.I)
-    * 24 SLLI_0   SLLI_1   6 0 001000111110x11000110101| SLLI   Shift left immediate.
-    * 25 _L0x25   ADDI_0   3 3 0010000000x01xxx00000100| AUIPC  q = imm20+2 or imm20+4  (copy x/2)
-    * 26 OR_1     OR_2     3 3 000100111011000000100111|        RS1^0xffffffff to jj
-    * 27 OR_2     ORI_2    3 3 011000000011110000011101|        Q = rs2
-    * 28 _L0x28   SH_1     3 7 010100111011110010010110| SH     Store halfword. jjw=wradr=RS1+Simm
-    * 29 XOR_1    XORI_1   3 3 001000111011100000100001|        Q = RS1^0xFFFFFFFF
-    * 2a _L0x2a   SH_1     3 7 010100111011110010010110| SH     Store halfword. jjw=wradr=RS1+Simm
-    * 2b SLTIX_1  SLTIX_2  3 4 011000xxxx11010000110000|        RS1 - imm / RS1 - RS2
-    * 2c SLL_0    SLL_1    3 3 0010001110x0xxxx00111110| SLL    Shift left
-    * 2d MULH_0   MULH_1   6 3 001000101011100101101010| MULH   Store rs1 to Q. Prep read 0, shcnt--
-    * 2e MULHU_1  MULHU_2  3 3 100100111111011001000010|        rM<=RS2,  Rjj<=Q=0. next read RS1. 
-    * 2f _L0x2f   StdIncPc 3 3 000010001011011011100110| LUI    q = imm20
-    * 30 SLTIX_2  StdIncPc 3 9 000010001011011011100110|        Registered ALU flag to rd
-    * 31 SLTX_1   SLTIX_1  3 3 001000111111100000101011|        ~rs2 to Q
-    * 32 JAL_1    JAL_2    3 3 000110000010100110000110|      Prep Instradr to yy. Refetch instradr
-    * 33 JALR_3   JAL_25   5 3 000100000011001110011110|        Q = (RS1+imn) & 0xfffffffe
-    * 34 JAL_3    Fetch    4 3 000100110110100111011110|      Prep fetch next instr.
-    * 35 SLLI_1   SLLI_2   6 3 000010101111100100110110|        Register to shift to Q (and TRG for shift 0)
-    * 36 SLLI_2   _L0x03   7 3 000010101111110100000011|        Repeat Q = Q+Q until shregcnt == 0
-    * 37 ECALL_2  ECALL_3  3 6 000111xxxx11000111010111|        mepc = pc, prep store 0 to mtval
-    * 38 BNE      condb_2  3 3 000110111011011000010011| BNE    Conditional Branch. Offset to Ryy
-    * 39 MULHU_7  StdIncPc 3 3 100010001011000111100110|        Last shift.
-    * 3a SRxI_1   SRxI_2   6 8 000010101011100100111101|        Register to shift to Q
-    * 3b _L0x3b   JAL_1    3 3 0010000000x01xxx00110010| JAL. J-imm is in q. Prep get isntradr from jj
-    * 3c CSRRW_0  CSRRW_1  3 3 000110011011011001001001| CSRRW  Decoded CSR adr in yy
-    * 3d SRxI_2   _L0x03   7 8 000010101011100100000011|        Repeat Q >>= 1 until shregcnt == 0
-    * 3e SLL_1    SLLI_1   6 0 001000111110x00100110101|        Shiftamount was in low 5 bits of RS2
-    * 3f SRx_1    SRxI_1   6 0 001000111110x00100111010|        Shiftamount in low 5 bits of RS2
-    * 40 LW_0     LW_1     0 a 011000110111110001010000| LW     Load word. Q=yy=rdadr=RS1+Iimm
-    * 41 JALR_1   JALR_2   3 3 000110101011000100001011|        yy=jj. Prep get Q=1
-    * 42 MULHU_2  MULHU_3  6 8 001000101011110001100000|        Q <= rM[0] ? Q+rs1 : Q. Prepare shr/sar
-    * 43 MULHU_4  MULHU_5  3 3 001000000010100011101010|        Prepare read Rjj.
-    * 44 SLTI_0   SLTIX_1  3 3 001000111111101000101011| SLTI   Set less than immediate (signed)
-    * 45 WFI_3    WFI_4    3 4 011000101011110001100101|        Chk ofs. Now 0x104. Prep +1, so ~ofs+0x105
-    * 46 ILL_1    ILL_2    3 3 000111101010x00101000111|        Store PC to mepc
-    * 47 ILL_2    ILL_3    5 3 000111101011000110001111|        Store 0 to mtval
-    * 48 _L0x48   SW_1     8 a 011000111011110001100110| SW     Store word. Q=wradr=RS1+Simm
-    * 49 CSRRW_1  CSRRW_2  3 4 011000000011110001001011|        Construct PC storage adr
-    * 4a _L0x4a   SW_1     8 a 011000111011110001100110| SW     Store word. Q=wradr=RS1+Simm
-    * 4b CSRRW_2  CSRRW_3  9 3 000001101010100110110001|        Write PC to 0x100 start Prep emulation entrypt
-    * 4c SLT_0    SLTX_1   3 3 0010001110x10xxx00110001| SLT    Set less than (signed)
-    * 4d MULHSU_0 MULHU_1  6 3 000110111011000100101110| MULHSU Signed rs1 to Ryy, nxt rd rs2. Q=0, shcnt--
-    * 4e eILL0b   ILLe     3 3 001000xxxxx0xxxx11111110| Illegal instruction seen
-    * 4f MRET_8   MRET_9   3 4 111000101001110001110100|        +4, so now 0x103
-    * 50 LW_1     StdIncPc 1 b 000010101111000111100110|        Read until d=mem[(rs1+ofs) & ~3u]
-    * 51 LDAF_LW  LDAF_a   5 3 000111101010111011011010|  err   LD AlignFault. Faulting adr to mtval
-    * 52 LH_1     LH_2     1 1 001000101111100101010100|        Read until q=mem[(rs1+ofs) & ~3u]
-    * 53 LDAF_LH  LDAF_a   5 3 000111101010111011011010|  err   LD AlignFault. Faulting adr to mtval
-    * 54 LH_2     LH_3     7 8 001000101011100111101011|        Repeat shr until shreg = 0 (0, 8 or 16 times)
-    * 55 aFaultb  aFault_1 5 3 000111101011011000011110|  err   LH Load access fault. Faulting adr to mtval
-    * 56 LH_4     LH_5     3 3 001000100011101101010111|        q = (uint16_t) mem[rs1+Iimm]
-    * 57 LH_5     LB_6     3 3 001000100011100010001011|        q = D^0xffffffff^q = D ^ 0x00008000
-    * 58 DIV_A    DIV_C    3 8 111000101111100101101110|        Transfer rM to rDee
-    * 59 DIV_B    DIV_10   3 3 000110111111011010011100|        REM = Q to yy
-    * 5a SB_1     SB_2     6 3 000110101111100101011101|        Write d to Q and yy (for sh 0). Prep shift
-    * 5b _L0x5b   JAL_1    3 3 0010000000x01xxx00110010| JAL. J-imm is in q. Prep get isntradr from jj
-    * 5c CSRRS_0  CSRRW_1  3 3 000110011011011001001001| CSRRS  Decoded CSR adr in yy
-    * 5d SB_2     SB_3     7 3 000110101111110111111011|        Repeat shl until shreg = 0 (0,8,16 or 24 times)
-    * 5e LHU_1    LHU_2    1 1 001000101111100101110000|        Read until q=mem[(rs1+ofs) & ~3u]
-    * 5f LDAF_LHU LDAF_a   5 3 000111101010111011011010|  err   LD AlignFault. Faulting adr to mtval
-    * 60 MULHU_3  MULHU_2  3 3 101000111111100101000010|        Shift Q and rM. Prepare read rs1
-    * 61 EBRKWFI2 EBREAK_1 3 6 000110011011001011110111| EBREAK/WFI2 Select EBREAK or WFI.
-    * 62 DIV_8    DIV_7    6 4 011000101111110011001000|        Conditionally subtract rs2. Update M[0]
-    * 63 DIV_9    DIV_A    a 4 011000101111110001011000|        Last Cond. -rs2. Upd M[0]. Branch on INSTR[13]
-    * 64 SLTIU_0  SLTIX_1  3 3 001000111111101000101011| SLTIU  Set less than immediate (unsigned)
-    * 65 WFI_4    WFI_5    3 6 0010000000x10xxx11101111|        Prepare read PC.
-    * 66 SW_1     SW_2     5 3 000001111010100111110010|        Write d to a+k until accepted
-    * 67 SW_E1SWE SW_E2    5 3 000111001010x11010010011|        Store faulting address alignment to mtval
-    * 68 DIV_12   StdIncPc 3 3 000010001011000111100110|        RS2 > 0, RS1 >= 0, yy is true result
-    * 69 DIV_13   LB_6     3 3 001000101011100010001011|        RS2 > 0, RS1 < 0, change sign yy
-    * 6a MULH_1   MULH_2   3 3 000110101011000011111001|        Store ~rs1 to Ryy. Prep construct 1.
-    * 6b SB_4     SB_5     b 3 001000110011100101111010|        Address back to Q. Prepare get item to write
-    * 6c SLTU_0   SLTX_1   3 3 0010001110x10xxx00110001| SLTU   Set less than (unsigned)
-    * 6d MULHU_0  MULHU_1  6 3 000110111011000100101110| MULHU  Store rs1 to Ryy. Next read rs2. Q=0, shcnt--
-    * 6e DIV_C    DIV_e    3 3 000110111010100110111001|        rM to yy. Q=ffffffff
-    * 6f MRET_6   MRET_7   3 4 011000xxxx11110011001111|        ~302 + origImm + 1 for branch decision
-    * 70 LHU_2    LHU_3    7 8 001000101011100110111010|        Repeat shr until shreg = 0 (0, 8 or 16 times)
-    * 71 aFaultc  aFault_1 5 3 000111101011011000011110|  err   LHU Load access fault. Faulting adr to mtval
-    * 72 LBU_3    ANDI_1   3 3 001000011011101000011010|        Invert q. Prepare read mask
-    * 73 unx73             6 0 00xxxxxxxxxxxxxxxxxxxxxx| 73: Not in use 
-    * 74 MRET_9   Fetch    4 4 010100110110110011011110|        +1, IncPC, OpFetch next
-    * 75 IJ_5     Fetch    4 3 000100110110101111011110|        Mask and use as PC
-    * 76 Fetchu   Fetch2   3 c 001000001111011011110100|  Fr00u Read and latch instruction
-    * 77 eFetchu  Fetch2   1 d 001000101111011011110100|  Fr00u rep Read until d=mem[(rs1+ofs) & ~3u]
-    * 78 DIV_4    DIV_6    3 3 000110000011011010101010|        ~abs(divisor) to yy
-    * 79 DIV_5    DIV_3    3 4 111000101011110010101000|        Kluge to let add1 work in DIV instr
-    * 7a SB_5     SW_2     5 3 000000110010100111110010|        Write d to a+k until accepted
-    * 7b _L0x7b   JAL_1    3 3 0010000000x01xxx00110010| JAL. J-imm is in q. Prep get isntradr from jj
-    * 7c CSRRC_0  CSRRW_1  3 3 000110011011011001001001| CSRRC  Decoded CSR adr in yy
-    * 7d condb_6t Fetch    4 3 010100110110110011011110|        Branch taken.
-    * 7e NMI_1    NMI_2    3 3 000111xxxx11000110010000|        Store pc to mepc.
-    * 7f unx7f             6 0 00xxxxxxxxxxxxxxxxxxxxxx| 7f: Not in use 
-    * 80 LBU_0    LBU_1    0 0 011000110111110010000101| LBU    Load unsigned byte. Q = rdadr=RS1+Iimm.
-    * 81 unx81             6 0 00xxxxxxxxxxxxxxxxxxxxxx| 81: Not in use 
-    * 82 DIV_1    DIV_3    3 3 000100111011000010101000|        jj=abs(RS1). Next handle divisor
-    * 83 DIV_2    DIV_1    3 3 011000101011110010000010|        Dividend negative, make RS1-1
-    * 84 XORI_0   XORI_1   3 3 001000111111101000100001| XORI   Xor immediate. Q=~Iimm
-    * 85 LBU_1    LBU_2    1 1 001000101111100111110000|        Read until q=mem[(rs1+ofs) & ~3u]
-    * 86 JAL_2    JAL_25   5 3 010100000011010010011110|      Prep pc = jj + ofs
-    * 87 unx87             6 0 00xxxxxxxxxxxxxxxxxxxxxx| 87: Not in use 
-    * 88 DIV_E    DIV_10   a 3 1010001111x0xxxx10011100|        RS2 != 0. Check signs
-    * 89 DIV_F    StdIncPc 3 3 000010001011011011100110|        RS2 == 0, return 0xffffffff
-    * 8a DIVU_5   ANDI_1   3 8 1110001011x10xxx00011010|        Transfer rM to rDee
-    * 8b LB_6     StdIncPc 3 4 110010001011010011100110|        WTRG=(D^0x80)+0xFFFFFF7F+1=(D^0x80)-0x80
-    * 8c XOR_0    XOR_1    3 3 0010001111x10xxx00101001| XOR    xor
-    * 8d DIV_0    DIV_1    c 3 101000101111100110000010| DIV    Branch on sign dividend RS1
-    * 8e _LCSRRS_1 ILLe     3 3 001000xxxxx0xxxx11111110| Illegal instruction seen
-    * 8f ILL_3    ILL_4    3 4 001000101011110010101001|        Q = 1
-    * 90 NMI_2    JAL_3    d 3 000111010011011000110100|        mtval = 0.
-    * 91 LDAF_2   LDAF_3   d 4 110110001000x10010010010|        Store 4 to mcause
-    * 92 LDAF_3   JAL_3    3 3 000111100110x00100110100|        PC to mepc
-    * 93 SW_E2    SW_E3    3 3 000111101111000110010101|        Store address that faulted
-    * 94 SW_E4    JAL_3    d 3 000110100110x10100110100|        Store 6 to mcause
-    * 95 SW_E3    SW_E4    3 4 111000101101110010010100|        Q = 3
-    * 96 SH_1     SH_2     6 3 000110101111100110111011|        Write d to Q and yy (for sh 0). Prep shift
-    * 97 SW_E1SWH SW_E2    5 3 000111001010x11010010011|        Store faulting address alignment to mtval
-    * 98 BLT      condb_2  3 3 000110111011011000010011| BLT    Conditional Branch. Offset to Ryy
-    * 99 _L0x99   ILLe     3 3 001000xxxxx0xxxx11111110|  Not in use (illegal as entry)
-    * 9a ECALL_6  JAL_3    d 3 010110100100x10000110100|        mcause = 11
-    * 9b SH_4     SH_5     8 3 001001110011100110011111|        Address back to Q. Prepare get item to write
-    * 9c DIV_10   DIV_12   a 3 101000110011000101101000|        RS2 > 0. Branch on sign of RS1
-    * 9d DIV_11   DIV_14   a 3 101000110011000110100010|        RS2 < 0. Branch on sign of RS1
-    * 9e JAL_25   JAL_3    3 5 110010001001010000110100|      Prep WTRG = jj+2/4 (return adr)
-    * 9f SH_5     SW_2     3 3 000001110010100111110010|        Write d to a+k until accepted
-    * a0 LHU_0    LHU_1    0 7 010110110111110001011110| LHU    Load unsigned hword. Q = rdadr=RS1+Iimm
-    * a1 ECALL_4  ECALL_5  3 4 111000101001110010110110|        Q = 4
-    * a2 DIV_14   LB_6     3 3 001000101011100010001011|        RS2 < 0, RS1 >= 0, change sign yy
-    * a3 DIV_15   StdIncPc 3 3 000010001011000111100110|        RS2 < 0, RS1 < 0, yy is true result
-    * a4 SRxI_0   SRxI_1   6 0 001000111110x11000111010| SRxI   Shift Right immediate (both logic/arith here)
-    * a5 MRET_3   MRET_4   3 4 011000011011110010101111|        0x102 + 0xff + 1 = 0x202
-    * a6 ECAL_RET ECALL_1  3 a 001000101110111011010000| ECALL/(U/S/M)RET Select ECALL or (U/S/M)RET
-    * a7 EBRKWFI1 EBRKWFI2 3 3 011000xxxx11110001100001| EBREAK/WFI1 Prepare select EBREAK or WFI
-    * a8 DIV_3    DIV_4    a 3 101000101011100001111000|        Branch on sign divisor RS2
-    * a9 ILL_4    JAL_3    d 4 010110100110x10000110100|        Store 2 to mcause
-    * aa DIV_6    DIV_7    3 3 1010001011x10xxx11001000|        Write M. Prepare shift
-    * ab EBREAK_2 ECALL_6  3 3 000111101011000110011010|        pc to mepc
-    * ac _L0xac   SRx_1    3 3 0010001110x0xxxx00111111| SRx    Shift Right (both SRL and SRA)
-    * ad DIVU_0   DIVU_1   6 3 1010001110x10xxx11100000| DIVU   Store rs1 to rM. Q=0. Prepare invert rs2
-    * ae _L0xae   SRx_1    3 3 0010001110x0xxxx00111111| SRx    Shift Right (both SRL and SRA)
-    * af MRET_4   MRET_5   3 4 011000xxxx11110011000101|        0x202 + 0xff + 1 = 0x302
-    * b0 aF_SW_3  LDAF_3   d 3 010110001000x10010010010|        Store 7 to mcause
-    * b1 CSRRW_3  CSRRW_4  3 4 111000101001110010110010|        Prep emulation entrypt 0x108, here Q to 0x104
-    * b2 CSRRW_4  Fetch    4 4 110100110100110011011110|        IncPC, OpFetch, but force +4
-    * b3 unxb3             6 0 00xxxxxxxxxxxxxxxxxxxxxx| b3: Not in use 
-    * b4 ic0reser          6 0 00xxxxxxxxxxxxxxxxxxxxxx|  Fr00  Not really used, reserved to allow LASTINCH
-    * b5 SH_3     SH_4     3 3 001000000011011010011011|        Prepare get back address to use 
-    * b6 ECALL_5  ECALL_6  3 4 111000101001110010011010|        Q = 8
-    * b7 IJ_3     IJ_4     3 3 000110101011000110111101|        Store present PC in case of access error
-    * b8 BGE      condb_2  3 3 000110111011011000010011| BGE    Conditional Branch. Offset to Ryy
-    * b9 DIV_e    DIV_D    3 4 001000110011100011000000|        Calc carry of RS2+0xFFFFFFFF
-    * ba LHU_3    ANDI_1   3 3 001000011111101000011010|        Invert q. Prepare read mask
-    * bb SH_2     SH_3     7 3 000110101111110110110101|        Repeat shl until shreg = 0 (0,8 or 24 times)
-    * bc CSRRWI_0 CSRRW_1  3 3 000110011011011001001001| CSRRWI Decoded CSR adr in yy
-    * bd IJ_4     IJ_5     3 4 011000001011110001110101|        Construct Q = 1
-    * be IJ_1     IJ_2     1 3 001000101111100100011111|        Read until q=mem[(rs1+ofs)&~1u]
-    * bf IJT_1    IJT_2    1 3 001000101111100111000001|        Exit CSR, enter trap
-    * c0 DIV_D    DIV_E    3 6 001000111011100110001000|        Is RS2 == 0?
-    * c1 IJT_2    IJT_3    3 3 000110101011011011101001|        Read word is to be masked with ~1u
-    * c2 DIVU_3   DIVU_2   6 4 011000101111110011001010|        Conditionally subtract rs2. Update M[0]
-    * c3 DIVU_4   DIVU_5   a 4 011000101111110010001010|        Last Cond. -rs2. Upd M[0]. Branch on INSTR[13]
-    * c4 ORI_0    ORI_1    3 3 000100111111001011100001| ORI    Or immediate. jj=~Iimm
-    * c5 MRET_5   MRET_6   3 3 001000000011101001101111|        ~302
-    * c6 IJT_4    ILL_2    3 3 000111101011101101000111|        Mask and store to mepc and Q for read of instr
-    * c7 QINT_1   QINT_2   3 3 000111xxxx11000111001011|        Store pc to mepc.
-    * c8 DIV_7    DIV_8    3 e 101000110011110101100010|        Shift (Q,M) left. Prepare unsigned sub
-    * c9 MRET_2   MRET_3   3 3 011000011001110010100101|        0xff+3 = 0x102
-    * ca DIVU_2   DIVU_3   3 e 101000110011110111000010|        Shift (Q,M) left. Prepare unsigned sub
-    * cb QINT_2   StdIncPc d 3 000111010011011011100110|        mtval = 0.
-    * cc OR_0     OR_1     3 3 0010001111x10xxx00100110| OR     or
-    * cd REM_0    DIV_1    c 3 101000101111100110000010| REM    Branch on sign dividend RS1
-    * ce _LCSRRCI_1 ILLe     3 3 001000xxxxx0xxxx11111110| Illegal instruction seen
-    * cf MRET_7   MRET_8   3 6 0010000110x10xxx01001111|        Prepare emulation entry point 0x104
-    * d0 ECALL_1  ECALL_2  3 4 011000000011110000110111| ECALL  Verify Imm==0x000
-    * d1 MRET_1   MRET_2   3 3 000100011011011011001001| MRET   First save Imm, start build constant for check
-    * d2 LB_2     LB_3     7 8 001000101011100100000110|        Repeat shr until shreg == 0 (0,8,16,24 times)
-    * d3 aFaultd  aFault_1 5 3 000111101011011000011110|  err   LB Load access fault. Faulting adr to mtval
-    * d4 aFault_2 LDAF_3   d 4 010110001010x10010010010|        Store 5 to mcause
-    * d5 unalignd straddle 3 3 001000001011011000010010|  Fr00u Unaligned pc, prep read high hword
-    * d6 eILL0c   ILLe     3 3 001000xxxxx0xxxx11111110| Illegal instruction seen
-    * d7 ECALL_3  ECALL_4  5 3 000111101011011010100001|        mtval = 0, now start the chore of 11 to mcause
-    * d8 BLTU     condb_2  3 3 000110111011011000010011| BLTU   Conditional Branch. Offset to Ryy
-    * d9 MULH_3   MULHU_2  3 3 1010001111x10xxx01000010|        rM<=RS2, Q = 0. next read RS1. Join.
-    * da LDAF_a   LDAF_2   3 3 0010001010x10xxx10010001|        Extra cycle after error detected write mtval
-    * db jFault_1 LDAF_3   5 4 010110110010x10010010010|        Store 1 to mcause
-    * dc CSRRSI_0 CSRRW_1  3 3 000110011011011001001001| CSRRSI Decoded CSR adr in yy
-    * dd aF_SW_1  aF_SW_2  5 3 000111101011011011100101|  err   SW Store access fault. Faulting adr to mtval
-    * de Fetch    Fetch2   3 c 000100001111011011110100|  Fr00  Read and latch instruction
-    * df eFetch   Fetch2   1 d 000100101111011011110100|  Fr00  rep Read until d=mem[(rs1+ofs) & ~3u]
-    * e0 DIVU_1   DIVU_2   3 3 000110101111000011001010|        Store inverted rs2 to yy. Prepare shift
-    * e1 ORI_1    ORI_2    3 3 001000000011100100011101|        Q = RS1
-    * e2 MUL_1    MUL_2    6 8 001000101011110011101000|        Q <= rM[0] ? Q+rs2 : Q. Prepare shr/sar
-    * e3 MUL_3    ANDI_1   3 8 1110001011x10xxx00011010|        Transfer rM to rDee
-    * e4 ANDI_0   ANDI_1   3 3 001000111111101000011010| ANDI   And immediate. Q=~Iimm
-    * e5 aF_SW_2  aF_SW_3  3 4 111000101001110010110000|        Q = 4
-    * e6 StdIncPc Fetch    4 5 110100110100110011011110|  Fr00  IncPC, OpFetch
-    * e7 aFault   aFault_1 5 3 000111101011011000011110|  err   Load access fault. Faulting adr to mtval
-    * e8 MUL_2    MUL_1    3 3 101000111011100111100010|        Shift Q and rM. Prepare read rs2
-    * e9 IJT_3    IJT_4    3 4 011000110011110011000110|        Construct Q = 1
-    * ea MULHU_5  MULHU_6  3 3 001000110011110000100010|        Q <= rM[0] ? Q+Rjj : Q. Prepare read Ryy
-    * eb LH_3     LH_4     3 3 001000011111101001010110|        q = ~mem[rs1+ofs]
-    * ec AND_0    AND_1    3 3 0010001111x10xxx00010001| AND    And 
-    * ed REMU_0   DIVU_1   6 3 1010001110x10xxx11100000| REMU   Store dividend to rM. Prepare read divisor.Q=0
-    * ee eILL0a   ILLe     3 3 001000xxxxx0xxxx11111110| Illegal instruction seen
-    * ef WFI_5    Fetch    4 4 110100110100110011011110|        IncPC, OpFetch
-    * f0 LBU_2    LBU_3    7 8 001000101011100101110010|        Repeat shr until shreg = 0 (0, 8 or 16 times)
-    * f1 aFaulte  aFault_1 5 3 000111101011011000011110|  err   LBU Load access fault. Faulting adr to mtval
-    * f2 SW_2     StdIncPc 3 3 0010000010x10xxx11100110|        Prepare read PC
-    * f3 aF_SW    aF_SW_1  3 3 001000xxxxx01xxx11011101|  err   SW/SH/SB access fault. Rest to set SEL_O=4'hf
-    * f4 Fetch2   unalignd 5 3 010101111111110011010101|  Fr00  Upd ttime, I. Q=imm Use dinx unless unaligned 
-    * f5 jFault   jFault_1 5 3 000111101011011011011011|  err   Fetch access fault. Faulting adr to mtval
-    * f6 WFI_1    WFI_2    3 4 111000110001110011111010| WFI    Chk offset=0x105. Now 0xff. Prep 0xff+4 = 0x103
-    * f7 EBREAK_1 EBREAK_2 5 3 000111000011011010101011| EBREAK mepc = pc, store 0 to mtval
-    * f8 BGEU     condb_2  3 3 000110111011011000010011| BGEU   Conditional Branch. Offset to Ryy
-    * f9 MULH_2   MULH_3   3 4 010100111011010011011001|        Store 1 to Rjj. next read rs2, Q=0
-    * fa WFI_2    WFI_3    3 4 011000101011110001000101|        Chk ofs. Now 0x103. Prep +1+~ofs, so ~ofs+0x104
-    * fb SB_3     SB_4     3 3 001000000011011001101011|        Prepare get back address to use 
-    * fc CSRRCI_0 CSRRW_1  3 3 000110011011011001001001| CSRRCI Decoded CSR adr in yy
-    * fd NMI_0    NMI_1    3 3 0010000010x10xxx01111110| NMI    Get current PC
-    * fe ILLe     ILL_1    3 3 0010000010x0xxxx01000110| Illegal
-    * ff QINT_0   QINT_1   3 3 0010000010x10xxx11000111| INT    Get current PC
+    * 00 LB_0     LB_1     0 0 000000000110001101111100| LB     Load byte. q = rdadr=RS1+0fs
+    * 01 LB_1     LB_2     1 1 000100010010001011111001|        Read until q=mem[rs1+ofs) & ~3u]
+    * 02 IJ_0     IJ_1     2 2 001000100110001101111100| IJ     Jump to mem[(rs1+ofs)&~1u]. inCSR=0
+    * 03 _L0x03   StdIncPc 3 3 001100110010000010x10xxx| FENCE  Prepare read PC (FENCE/FENCE.I)
+    * 04 ADDI_0   StdIncPc 3 3 001100110100100010110100| ADDI   Add immediate. rd =RS1+Iimm (or joined)
+    * 05 _L0x05   ADDI_0   3 3 001100110010000000x01xxx| AUIPC  q = imm20+2 or imm20+4  (copy x/2)
+    * 06 LB_3     LB_4     3 3 001100110010000110111010|        q = ~mem[rs1+ofs]
+    * 07 LB_4     LB_5     3 3 001100110010000101111011|        q = (uint8_t) mem[rs1+Iimm]
+    * 08 _L0x08   SB_1     3 0 001100000101001110111100| SB     Store byte. wjj=wradr=RS1+Simm
+    * 09 LB_5     LB_6     3 3 001100110010000101111000|        q = D^0xffffffff^q = D^0x80
+    * 0a _L0x0a   SB_1     3 0 001100000101001110111100| SB     Store byte. wjj=wradr=RS1+Simm
+    * 0b JALR_2   JALR_3   3 4 001101000110000010111100|        Q=1. Prep legalize target
+    * 0c ADD_0    ADDI_0   3 3 001100110010001110111001| ADD    add     Addition Q = RS1
+    * 0d MUL_0    MUL_1    3 3 001100111010001110x10xxx| MUL    Store rs1 tp rM. Next read rs2. Q clear
+    * 0e SUB_0    SUB_1    3 3 001100110010001110x10xxx| SUB    Subtraction
+    * 0f _L0x0f   StdIncPc 3 3 001100110000100010110110| LUI    q = imm20
+    * 10 SUB_1    LB_6     3 3 001100110010001111111000|        Q = ~RS2
+    * 11 AND_1    ANDI_1   3 3 001100110010001110111000|        RS1^0xffffffff to Q
+    * 12 straddle Fetchu   4 5 010001011101001101001100|  Fr10u IncPC, OpFetch
+    * 13 condb_2  condb_3  3 3 001100110010001111111000|        ~RS2 in Q
+    * 14 condb_3  condb_4  3 4 001101000110001100111100|        Calculate RS1+~RS2+1
+    * 15 condb_4  condb_5  3 6 001101100010000000111001|        Branch on condition
+    * 16 condb_5  StdIncPc 3 3 001100110010000000x10xxx|        Branch not taken.
+    * 17 condb_5t condb_6t 3 3 001100110001100000101001|        Branch taken. yy=oldPC incase of access error
+    * 18 BEQ      condb_2  3 3 001100110001101110110110| BEQ    Conditional Branch. Offset to Ryy
+    * 19 JALR_0   JALR_1   5 3 01010011010100000010x100| JALR   (tmp) Prep pc=RS1+imm (target)
+    * 1a ANDI_1   StdIncPc 3 3 001100110000100010110011|        rd = Iimm & RS1
+    * 1b _L0x1b   JAL_1    3 3 001100110010000000x01xxx| JAL. J-imm is in q. Prep get isntradr from jj
+    * 1c ECAL_BRK ECAL_RET 3 2 001100100010001011101110| ECALL/EBREAK  Select ECALL/(U/S/M)RET or EBREAK/WFI
+    * 1d ORI_2    StdIncPc 3 3 001100110000100010110111|        rd = Iimm | RS1
+    * 1e aFault_1 aFault_2 3 4 001101001110001010011100|        Q = 4
+    * 1f IJ_2     IJ_3     5 3 010100110001000000101110|        Read word is to be masked with lsb = 0
+    * 20 LH_0     LH_1     0 7 000001110101101101111100| LH     Load hword. Q = rdadr=RS1+Iimm.
+    * 21 XORI_1   StdIncPc 3 3 001100110000100010110000|        rd = Iimm ^ RS1
+    * 22 MULHU_6  MULHU_7  3 8 001110000010001010111100|        Q <= rM[0] ? Q+Ryy : Q. Prepare last shr/sar
+    * 23 _L0x23   StdIncPc 3 3 001100110010000010x10xxx| FENCE  Prepare read PC (FENCE/FENCE.I)
+    * 24 SLLI_0   SLLI_1   6 0 01100000001000111110x110| SLLI   Shift left immediate.
+    * 25 _L0x25   ADDI_0   3 3 001100110010000000x01xxx| AUIPC  q = imm20+2 or imm20+4  (copy x/2)
+    * 26 OR_1     OR_2     3 3 001100110001001110110000|        RS1^0xffffffff to jj
+    * 27 OR_2     ORI_2    3 3 001100110110000000111100|        Q = rs2
+    * 28 _L0x28   SH_1     3 7 001101110101001110111100| SH     Store halfword. jjw=wradr=RS1+Simm
+    * 29 XOR_1    XORI_1   3 3 001100110010001110111000|        Q = RS1^0xFFFFFFFF
+    * 2a _L0x2a   SH_1     3 7 001101110101001110111100| SH     Store halfword. jjw=wradr=RS1+Simm
+    * 2b SLTIX_1  SLTIX_2  3 4 00110100011000xxxx110100|        RS1 - imm / RS1 - RS2
+    * 2c SLL_0    SLL_1    3 3 001100110010001110x0xxxx| SLL    Shift left
+    * 2d MULH_0   MULH_1   6 3 011000110010001010111001| MULH   Store rs1 to Q. Prep read 0, shcnt--
+    * 2e MULHU_1  MULHU_2  3 3 001100111001001111110110|        rM<=RS2,  Rjj<=Q=0. next read RS1. 
+    * 2f _L0x2f   StdIncPc 3 3 001100110000100010110110| LUI    q = imm20
+    * 30 SLTIX_2  StdIncPc 3 9 001110010000100010110110|        Registered ALU flag to rd
+    * 31 SLTX_1   SLTIX_1  3 3 001100110010001111111000|        ~rs2 to Q
+    * 32 JAL_1    JAL_2    3 3 001100110001100000101001|      Prep Instradr to yy. Refetch instradr
+    * 33 JALR_3   JAL_25   5 3 010100110001000000110011|        Q = (RS1+imn) & 0xfffffffe
+    * 34 JAL_3    Fetch    4 3 010000110001001101101001|      Prep fetch next instr.
+    * 35 SLLI_1   SLLI_2   6 3 011000110000101011111001|        Register to shift to Q (and TRG for shift 0)
+    * 36 SLLI_2   _L0x03   7 3 011100110000101011111101|        Repeat Q = Q+Q until shregcnt == 0
+    * 37 ECALL_2  ECALL_3  3 6 00110110000111xxxx110001|        mepc = pc, prep store 0 to mtval
+    * 38 BNE      condb_2  3 3 001100110001101110110110| BNE    Conditional Branch. Offset to Ryy
+    * 39 MULHU_7  StdIncPc 3 3 001100111000100010110001|        Last shift.
+    * 3a SRxI_1   SRxI_2   6 8 011010000000101010111001|        Register to shift to Q
+    * 3b _L0x3b   JAL_1    3 3 001100110010000000x01xxx| JAL. J-imm is in q. Prep get isntradr from jj
+    * 3c CSRRW_0  CSRRW_1  3 3 001100110001100110110110| CSRRW  Decoded CSR adr in yy
+    * 3d SRxI_2   _L0x03   7 8 011110000000101010111001|        Repeat Q >>= 1 until shregcnt == 0
+    * 3e SLL_1    SLLI_1   6 0 01100000001000111110x001|        Shiftamount was in low 5 bits of RS2
+    * 3f SRx_1    SRxI_1   6 0 01100000001000111110x001|        Shiftamount in low 5 bits of RS2
+    * 40 LW_0     LW_1     0 a 000010100110001101111100| LW     Load word. Q=yy=rdadr=RS1+Iimm
+    * 41 JALR_1   JALR_2   3 3 001100110001101010110001|        yy=jj. Prep get Q=1
+    * 42 MULHU_2  MULHU_3  6 8 011010000010001010111100|        Q <= rM[0] ? Q+rs1 : Q. Prepare shr/sar
+    * 43 MULHU_4  MULHU_5  3 3 001100110010000000101000|        Prepare read Rjj.
+    * 44 SLTI_0   SLTIX_1  3 3 001100110010001111111010| SLTI   Set less than immediate (signed)
+    * 45 WFI_3    WFI_4    3 4 001101000110001010111100|        Chk ofs. Now 0x104. Prep +1, so ~ofs+0x105
+    * 46 ILL_1    ILL_2    3 3 00110011000111101010x001|        Store PC to mepc
+    * 47 ILL_2    ILL_3    5 3 010100110001111010110001|        Store 0 to mtval
+    * 48 _L0x48   SW_1     8 a 100010100110001110111100| SW     Store word. Q=wradr=RS1+Simm
+    * 49 CSRRW_1  CSRRW_2  3 4 001101000110000000111100|        Construct PC storage adr
+    * 4a _L0x4a   SW_1     8 a 100010100110001110111100| SW     Store word. Q=wradr=RS1+Simm
+    * 4b CSRRW_2  CSRRW_3  9 3 100100110000011010101001|        Write PC to 0x100 start Prep emulation entrypt
+    * 4c SLT_0    SLTX_1   3 3 001100110010001110x10xxx| SLT    Set less than (signed)
+    * 4d MULHSU_0 MULHU_1  6 3 011000110001101110110001| MULHSU Signed rs1 to Ryy, nxt rd rs2. Q=0, shcnt--
+    * 4e eILL0b   ILLe     3 3 00110011001000xxxxx0xxxx| Illegal instruction seen
+    * 4f MRET_8   MRET_9   3 4 001101001110001010011100|        +4, so now 0x103
+    * 50 LW_1     StdIncPc 1 b 000110110000101011110001|        Read until d=mem[(rs1+ofs) & ~3u]
+    * 51 LDAF_LW  LDAF_a   5 3 010100110001111010101110|  err   LD AlignFault. Faulting adr to mtval
+    * 52 LH_1     LH_2     1 1 000100010010001011111001|        Read until q=mem[(rs1+ofs) & ~3u]
+    * 53 LDAF_LH  LDAF_a   5 3 010100110001111010101110|  err   LD AlignFault. Faulting adr to mtval
+    * 54 LH_2     LH_3     7 8 011110000010001010111001|        Repeat shr until shreg = 0 (0, 8 or 16 times)
+    * 55 aFaultb  aFault_1 5 3 010100110001111010110110|  err   LH Load access fault. Faulting adr to mtval
+    * 56 LH_4     LH_5     3 3 001100110010001000111011|        q = (uint16_t) mem[rs1+Iimm]
+    * 57 LH_5     LB_6     3 3 001100110010001000111000|        q = D^0xffffffff^q = D ^ 0x00008000
+    * 58 DIV_A    DIV_C    3 8 001110001110001011111001|        Transfer rM to rDee
+    * 59 DIV_B    DIV_10   3 3 001100110001101111110110|        REM = Q to yy
+    * 5a SB_1     SB_2     6 3 011000110001101011111001|        Write d to Q and yy (for sh 0). Prep shift
+    * 5b _L0x5b   JAL_1    3 3 001100110010000000x01xxx| JAL. J-imm is in q. Prep get isntradr from jj
+    * 5c CSRRS_0  CSRRW_1  3 3 001100110001100110110110| CSRRS  Decoded CSR adr in yy
+    * 5d SB_2     SB_3     7 3 011100110001101011111101|        Repeat shl until shreg = 0 (0,8,16 or 24 times)
+    * 5e LHU_1    LHU_2    1 1 000100010010001011111001|        Read until q=mem[(rs1+ofs) & ~3u]
+    * 5f LDAF_LHU LDAF_a   5 3 010100110001111010101110|  err   LD AlignFault. Faulting adr to mtval
+    * 60 MULHU_3  MULHU_2  3 3 001100111010001111111001|        Shift Q and rM. Prepare read rs1
+    * 61 EBRKWFI2 EBREAK_1 3 6 001101100001100110110010| EBREAK/WFI2 Select EBREAK or WFI.
+    * 62 DIV_8    DIV_7    6 4 011001000110001011111100|        Conditionally subtract rs2. Update M[0]
+    * 63 DIV_9    DIV_A    a 4 101001000110001011111100|        Last Cond. -rs2. Upd M[0]. Branch on INSTR[13]
+    * 64 SLTIU_0  SLTIX_1  3 3 001100110010001111111010| SLTIU  Set less than immediate (unsigned)
+    * 65 WFI_4    WFI_5    3 6 001101100010000000x10xxx|        Prepare read PC.
+    * 66 SW_1     SW_2     5 3 010100110000011110101001|        Write d to a+k until accepted
+    * 67 SW_E1SWE SW_E2    5 3 01010011000111001010x110|        Store faulting address alignment to mtval
+    * 68 DIV_12   StdIncPc 3 3 001100110000100010110001|        RS2 > 0, RS1 >= 0, yy is true result
+    * 69 DIV_13   LB_6     3 3 001100110010001010111000|        RS2 > 0, RS1 < 0, change sign yy
+    * 6a MULH_1   MULH_2   3 3 001100110001101010110000|        Store ~rs1 to Ryy. Prep construct 1.
+    * 6b SB_4     SB_5     b 3 101100110010001100111001|        Address back to Q. Prepare get item to write
+    * 6c SLTU_0   SLTX_1   3 3 001100110010001110x10xxx| SLTU   Set less than (unsigned)
+    * 6d MULHU_0  MULHU_1  6 3 011000110001101110110001| MULHU  Store rs1 to Ryy. Next read rs2. Q=0, shcnt--
+    * 6e DIV_C    DIV_e    3 3 001100110001101110101001|        rM to yy. Q=ffffffff
+    * 6f MRET_6   MRET_7   3 4 00110100011000xxxx111100|        ~302 + origImm + 1 for branch decision
+    * 70 LHU_2    LHU_3    7 8 011110000010001010111001|        Repeat shr until shreg = 0 (0, 8 or 16 times)
+    * 71 aFaultc  aFault_1 5 3 010100110001111010110110|  err   LHU Load access fault. Faulting adr to mtval
+    * 72 LBU_3    ANDI_1   3 3 001100110010000110111010|        Invert q. Prepare read mask
+    * 73 unx73             6 0 0110000000xxxxxxxxxxxxxx| 73: Not in use 
+    * 74 MRET_9   Fetch    4 4 010001000101001101101100|        +1, IncPC, OpFetch next
+    * 75 IJ_5     Fetch    4 3 010000110001001101101011|        Mask and use as PC
+    * 76 Fetchu   Fetch2   3 c 001111000010000011110110|  Fr00u Read and latch instruction
+    * 77 eFetchu  Fetch2   1 d 000111010010001011110110|  Fr00u rep Read until d=mem[(rs1+ofs) & ~3u]
+    * 78 DIV_4    DIV_6    3 3 001100110001100000110110|        ~abs(divisor) to yy
+    * 79 DIV_5    DIV_3    3 4 001101001110001010111100|        Kluge to let add1 work in DIV instr
+    * 7a SB_5     SW_2     5 3 010100110000001100101001|        Write d to a+k until accepted
+    * 7b _L0x7b   JAL_1    3 3 001100110010000000x01xxx| JAL. J-imm is in q. Prep get isntradr from jj
+    * 7c CSRRC_0  CSRRW_1  3 3 001100110001100110110110| CSRRC  Decoded CSR adr in yy
+    * 7d condb_6t Fetch    4 3 010000110101001101101100|        Branch taken.
+    * 7e NMI_1    NMI_2    3 3 00110011000111xxxx110001|        Store pc to mepc.
+    * 7f unx7f             6 0 0110000000xxxxxxxxxxxxxx| 7f: Not in use 
+    * 80 LBU_0    LBU_1    0 0 000000000110001101111100| LBU    Load unsigned byte. Q = rdadr=RS1+Iimm.
+    * 81 unx81             6 0 0110000000xxxxxxxxxxxxxx| 81: Not in use 
+    * 82 DIV_1    DIV_3    3 3 001100110001001110110000|        jj=abs(RS1). Next handle divisor
+    * 83 DIV_2    DIV_1    3 3 001100110110001010111100|        Dividend negative, make RS1-1
+    * 84 XORI_0   XORI_1   3 3 001100110010001111111010| XORI   Xor immediate. Q=~Iimm
+    * 85 LBU_1    LBU_2    1 1 000100010010001011111001|        Read until q=mem[(rs1+ofs) & ~3u]
+    * 86 JAL_2    JAL_25   5 3 010100110101000000110100|      Prep pc = jj + ofs
+    * 87 unx87             6 0 0110000000xxxxxxxxxxxxxx| 87: Not in use 
+    * 88 DIV_E    DIV_10   a 3 101000111010001111x0xxxx|        RS2 != 0. Check signs
+    * 89 DIV_F    StdIncPc 3 3 001100110000100010110110|        RS2 == 0, return 0xffffffff
+    * 8a DIVU_5   ANDI_1   3 8 001110001110001011x10xxx|        Transfer rM to rDee
+    * 8b LB_6     StdIncPc 3 4 001101001100100010110100|        WTRG=(D^0x80)+0xFFFFFF7F+1=(D^0x80)-0x80
+    * 8c XOR_0    XOR_1    3 3 001100110010001111x10xxx| XOR    xor
+    * 8d DIV_0    DIV_1    c 3 110000111010001011111001| DIV    Branch on sign dividend RS1
+    * 8e _LCSRRS_1 ILLe     3 3 00110011001000xxxxx0xxxx| Illegal instruction seen
+    * 8f ILL_3    ILL_4    3 4 001101000010001010111100|        Q = 1
+    * 90 NMI_2    JAL_3    d 3 110100110001110100110110|        mtval = 0.
+    * 91 LDAF_2   LDAF_3   d 4 11010100110110001000x100|        Store 4 to mcause
+    * 92 LDAF_3   JAL_3    3 3 00110011000111100110x001|        PC to mepc
+    * 93 SW_E2    SW_E3    3 3 001100110001111011110001|        Store address that faulted
+    * 94 SW_E4    JAL_3    d 3 11010011000110100110x101|        Store 6 to mcause
+    * 95 SW_E3    SW_E4    3 4 001101001110001011011100|        Q = 3
+    * 96 SH_1     SH_2     6 3 011000110001101011111001|        Write d to Q and yy (for sh 0). Prep shift
+    * 97 SW_E1SWH SW_E2    5 3 01010011000111001010x110|        Store faulting address alignment to mtval
+    * 98 BLT      condb_2  3 3 001100110001101110110110| BLT    Conditional Branch. Offset to Ryy
+    * 99 _L0x99   ILLe     3 3 00110011001000xxxxx0xxxx|  Not in use (illegal as entry)
+    * 9a ECALL_6  JAL_3    d 3 11010011010110100100x100|        mcause = 11
+    * 9b SH_4     SH_5     8 3 100000110010011100111001|        Address back to Q. Prepare get item to write
+    * 9c DIV_10   DIV_12   a 3 101000111010001100110001|        RS2 > 0. Branch on sign of RS1
+    * 9d DIV_11   DIV_14   a 3 101000111010001100110001|        RS2 < 0. Branch on sign of RS1
+    * 9e JAL_25   JAL_3    3 5 001101011100100010010100|      Prep WTRG = jj+2/4 (return adr)
+    * 9f SH_5     SW_2     3 3 001100110000011100101001|        Write d to a+k until accepted
+    * a0 LHU_0    LHU_1    0 7 000001110101101101111100| LHU    Load unsigned hword. Q = rdadr=RS1+Iimm
+    * a1 ECALL_4  ECALL_5  3 4 001101001110001010011100|        Q = 4
+    * a2 DIV_14   LB_6     3 3 001100110010001010111000|        RS2 < 0, RS1 >= 0, change sign yy
+    * a3 DIV_15   StdIncPc 3 3 001100110000100010110001|        RS2 < 0, RS1 < 0, yy is true result
+    * a4 SRxI_0   SRxI_1   6 0 01100000001000111110x110| SRxI   Shift Right immediate (both logic/arith here)
+    * a5 MRET_3   MRET_4   3 4 001101000110000110111100|        0x102 + 0xff + 1 = 0x202
+    * a6 ECAL_RET ECALL_1  3 a 001110100010001011101110| ECALL/(U/S/M)RET Select ECALL or (U/S/M)RET
+    * a7 EBRKWFI1 EBRKWFI2 3 3 00110011011000xxxx111100| EBREAK/WFI1 Prepare select EBREAK or WFI
+    * a8 DIV_3    DIV_4    a 3 101000111010001010111000|        Branch on sign divisor RS2
+    * a9 ILL_4    JAL_3    d 4 11010100010110100110x100|        Store 2 to mcause
+    * aa DIV_6    DIV_7    3 3 001100111010001011x10xxx|        Write M. Prepare shift
+    * ab EBREAK_2 ECALL_6  3 3 001100110001111010110001|        pc to mepc
+    * ac _L0xac   SRx_1    3 3 001100110010001110x0xxxx| SRx    Shift Right (both SRL and SRA)
+    * ad DIVU_0   DIVU_1   6 3 011000111010001110x10xxx| DIVU   Store rs1 to rM. Q=0. Prepare invert rs2
+    * ae _L0xae   SRx_1    3 3 001100110010001110x0xxxx| SRx    Shift Right (both SRL and SRA)
+    * af MRET_4   MRET_5   3 4 00110100011000xxxx111100|        0x202 + 0xff + 1 = 0x302
+    * b0 aF_SW_3  LDAF_3   d 3 11010011010110001000x100|        Store 7 to mcause
+    * b1 CSRRW_3  CSRRW_4  3 4 001101001110001010011100|        Prep emulation entrypt 0x108, here Q to 0x104
+    * b2 CSRRW_4  Fetch    4 4 010001001101001101001100|        IncPC, OpFetch, but force +4
+    * b3 unxb3             6 0 0110000000xxxxxxxxxxxxxx| b3: Not in use 
+    * b4 ic0reser          6 0 0110000000xxxxxxxxxxxxxx|  Fr00  Not really used, reserved to allow LASTINCH
+    * b5 SH_3     SH_4     3 3 001100110010000000110110|        Prepare get back address to use 
+    * b6 ECALL_5  ECALL_6  3 4 001101001110001010011100|        Q = 8
+    * b7 IJ_3     IJ_4     3 3 001100110001101010110001|        Store present PC in case of access error
+    * b8 BGE      condb_2  3 3 001100110001101110110110| BGE    Conditional Branch. Offset to Ryy
+    * b9 DIV_e    DIV_D    3 4 001101000010001100111000|        Calc carry of RS2+0xFFFFFFFF
+    * ba LHU_3    ANDI_1   3 3 001100110010000111111010|        Invert q. Prepare read mask
+    * bb SH_2     SH_3     7 3 011100110001101011111101|        Repeat shl until shreg = 0 (0,8 or 24 times)
+    * bc CSRRWI_0 CSRRW_1  3 3 001100110001100110110110| CSRRWI Decoded CSR adr in yy
+    * bd IJ_4     IJ_5     3 4 001101000110000010111100|        Construct Q = 1
+    * be IJ_1     IJ_2     1 3 000100110010001011111001|        Read until q=mem[(rs1+ofs)&~1u]
+    * bf IJT_1    IJT_2    1 3 000100110010001011111001|        Exit CSR, enter trap
+    * c0 DIV_D    DIV_E    3 6 001101100010001110111001|        Is RS2 == 0?
+    * c1 IJT_2    IJT_3    3 3 001100110001101010110110|        Read word is to be masked with ~1u
+    * c2 DIVU_3   DIVU_2   6 4 011001000110001011111100|        Conditionally subtract rs2. Update M[0]
+    * c3 DIVU_4   DIVU_5   a 4 101001000110001011111100|        Last Cond. -rs2. Upd M[0]. Branch on INSTR[13]
+    * c4 ORI_0    ORI_1    3 3 001100110001001111110010| ORI    Or immediate. jj=~Iimm
+    * c5 MRET_5   MRET_6   3 3 001100110010000000111010|        ~302
+    * c6 IJT_4    ILL_2    3 3 001100110001111010111011|        Mask and store to mepc and Q for read of instr
+    * c7 QINT_1   QINT_2   3 3 00110011000111xxxx110001|        Store pc to mepc.
+    * c8 DIV_7    DIV_8    3 e 001111101010001100111101|        Shift (Q,M) left. Prepare unsigned sub
+    * c9 MRET_2   MRET_3   3 3 001100110110000110011100|        0xff+3 = 0x102
+    * ca DIVU_2   DIVU_3   3 e 001111101010001100111101|        Shift (Q,M) left. Prepare unsigned sub
+    * cb QINT_2   StdIncPc d 3 110100110001110100110110|        mtval = 0.
+    * cc OR_0     OR_1     3 3 001100110010001111x10xxx| OR     or
+    * cd REM_0    DIV_1    c 3 110000111010001011111001| REM    Branch on sign dividend RS1
+    * ce _LCSRRCI_1 ILLe     3 3 00110011001000xxxxx0xxxx| Illegal instruction seen
+    * cf MRET_7   MRET_8   3 6 001101100010000110x10xxx|        Prepare emulation entry point 0x104
+    * d0 ECALL_1  ECALL_2  3 4 001101000110000000111100| ECALL  Verify Imm==0x000
+    * d1 MRET_1   MRET_2   3 3 001100110001000110110110| MRET   First save Imm, start build constant for check
+    * d2 LB_2     LB_3     7 8 011110000010001010111001|        Repeat shr until shreg == 0 (0,8,16,24 times)
+    * d3 aFaultd  aFault_1 5 3 010100110001111010110110|  err   LB Load access fault. Faulting adr to mtval
+    * d4 aFault_2 LDAF_3   d 4 11010100010110001010x100|        Store 5 to mcause
+    * d5 unalignd straddle 3 3 001100110010000010110110|  Fr00u Unaligned pc, prep read high hword
+    * d6 eILL0c   ILLe     3 3 00110011001000xxxxx0xxxx| Illegal instruction seen
+    * d7 ECALL_3  ECALL_4  5 3 010100110001111010110110|        mtval = 0, now start the chore of 11 to mcause
+    * d8 BLTU     condb_2  3 3 001100110001101110110110| BLTU   Conditional Branch. Offset to Ryy
+    * d9 MULH_3   MULHU_2  3 3 001100111010001111x10xxx|        rM<=RS2, Q = 0. next read RS1. Join.
+    * da LDAF_a   LDAF_2   3 3 001100110010001010x10xxx|        Extra cycle after error detected write mtval
+    * db jFault_1 LDAF_3   5 4 01010100010110110010x100|        Store 1 to mcause
+    * dc CSRRSI_0 CSRRW_1  3 3 001100110001100110110110| CSRRSI Decoded CSR adr in yy
+    * dd aF_SW_1  aF_SW_2  5 3 010100110001111010110110|  err   SW Store access fault. Faulting adr to mtval
+    * de Fetch    Fetch2   3 c 001111000001000011110110|  Fr00  Read and latch instruction
+    * df eFetch   Fetch2   1 d 000111010001001011110110|  Fr00  rep Read until d=mem[(rs1+ofs) & ~3u]
+    * e0 DIVU_1   DIVU_2   3 3 001100110001101011110000|        Store inverted rs2 to yy. Prepare shift
+    * e1 ORI_1    ORI_2    3 3 001100110010000000111001|        Q = RS1
+    * e2 MUL_1    MUL_2    6 8 011010000010001010111100|        Q <= rM[0] ? Q+rs2 : Q. Prepare shr/sar
+    * e3 MUL_3    ANDI_1   3 8 001110001110001011x10xxx|        Transfer rM to rDee
+    * e4 ANDI_0   ANDI_1   3 3 001100110010001111111010| ANDI   And immediate. Q=~Iimm
+    * e5 aF_SW_2  aF_SW_3  3 4 001101001110001010011100|        Q = 4
+    * e6 StdIncPc Fetch    4 5 010001011101001101001100|  Fr00  IncPC, OpFetch
+    * e7 aFault   aFault_1 5 3 010100110001111010110110|  err   Load access fault. Faulting adr to mtval
+    * e8 MUL_2    MUL_1    3 3 001100111010001110111001|        Shift Q and rM. Prepare read rs2
+    * e9 IJT_3    IJT_4    3 4 001101000110001100111100|        Construct Q = 1
+    * ea MULHU_5  MULHU_6  3 3 001100110010001100111100|        Q <= rM[0] ? Q+Rjj : Q. Prepare read Ryy
+    * eb LH_3     LH_4     3 3 001100110010000111111010|        q = ~mem[rs1+ofs]
+    * ec AND_0    AND_1    3 3 001100110010001111x10xxx| AND    And 
+    * ed REMU_0   DIVU_1   6 3 011000111010001110x10xxx| REMU   Store dividend to rM. Prepare read divisor.Q=0
+    * ee eILL0a   ILLe     3 3 00110011001000xxxxx0xxxx| Illegal instruction seen
+    * ef WFI_5    Fetch    4 4 010001001101001101001100|        IncPC, OpFetch
+    * f0 LBU_2    LBU_3    7 8 011110000010001010111001|        Repeat shr until shreg = 0 (0, 8 or 16 times)
+    * f1 aFaulte  aFault_1 5 3 010100110001111010110110|  err   LBU Load access fault. Faulting adr to mtval
+    * f2 SW_2     StdIncPc 3 3 001100110010000010x10xxx|        Prepare read PC
+    * f3 aF_SW    aF_SW_1  3 3 00110011001000xxxxx01xxx|  err   SW/SH/SB access fault. Rest to set SEL_O=4'hf
+    * f4 Fetch2   unalignd 5 3 010100110101011111111100|  Fr00  Upd ttime, I. Q=imm Use dinx unless unaligned 
+    * f5 jFault   jFault_1 5 3 010100110001111010110110|  err   Fetch access fault. Faulting adr to mtval
+    * f6 WFI_1    WFI_2    3 4 001101001110001100011100| WFI    Chk offset=0x105. Now 0xff. Prep 0xff+4 = 0x103
+    * f7 EBREAK_1 EBREAK_2 5 3 010100110001110000110110| EBREAK mepc = pc, store 0 to mtval
+    * f8 BGEU     condb_2  3 3 001100110001101110110110| BGEU   Conditional Branch. Offset to Ryy
+    * f9 MULH_2   MULH_3   3 4 001101000101001110110100|        Store 1 to Rjj. next read rs2, Q=0
+    * fa WFI_2    WFI_3    3 4 001101000110001010111100|        Chk ofs. Now 0x103. Prep +1+~ofs, so ~ofs+0x104
+    * fb SB_3     SB_4     3 3 001100110010000000110110|        Prepare get back address to use 
+    * fc CSRRCI_0 CSRRW_1  3 3 001100110001100110110110| CSRRCI Decoded CSR adr in yy
+    * fd NMI_0    NMI_1    3 3 001100110010000010x10xxx| NMI    Get current PC
+    * fe ILLe     ILL_1    3 3 001100110010000010x0xxxx| Illegal
+    * ff QINT_0   QINT_1   3 3 001100110010000010x10xxx| INT    Get current PC
     */
    localparam u0_0 = 256'hb6e6901090e2b904bc33bc5a788bbc5a7b09ba070804b4e690e67cbef9d27c01;
    localparam u0_1 = 256'h2eb79cd4b7e6eea60832b3e62441b613297d10e639163c15f8144c76b81af88b;
@@ -4790,7 +4790,7 @@ endmodule
  * 2019-2020. Copyright B. Nossum.
  * For licence, see LICENCE
  * -----------------------------------------------------------------------------ehdr
- * Automatically generated from ../code/ucode.h by midgetv_indirectEBR.c.
+ * Automatically generated from ../code/ucode.h by ../util/midgetv_indirectEBR.c.
  * Do not edit.
  * Optiones for this variant:
  *   RVC included
@@ -4914,262 +4914,262 @@ module v14_m_2ebr
     *                      | indirect_index 1
     * inx         next     | | indirect index 0
     * || ucode    ucode    | | | direct representation
-    * 00 LB_0     LB_1     0 0 0 01011011110000000001| LB     Load byte. q = rdadr=RS1+0fs
-    * 01 LB_1     LB_2     1 1 1 00010111100111010010|        Read until q=mem[rs1+ofs) & ~3u]
-    * 02 IJ_0     IJ_1     2 2 2 01011011110010111110| IJ     Jump to mem[(rs1+ofs)&~1u]. inCSR=0
-    * 03 _L0x03   StdIncPc 3 3 2 000001010xx011100110| FENCE  Prepare read PC (FENCE/FENCE.I)
-    * 04 ADDI_0   StdIncPc 4 3 2 01100101010011100110| ADDI   Add immediate. rd =RS1+Iimm (or joined)
-    * 05 _L0x05   ADDI_0   3 3 2 000000001xx000000100| AUIPC  q = imm20+2 or imm20+4  (copy x/2)
-    * 06 LB_3     LB_4     0 3 2 00001101101000000111|        q = ~mem[rs1+ofs]
-    * 07 LB_4     LB_5     1 3 2 00001011101000001001|        q = (uint8_t) mem[rs1+Iimm]
-    * 08 _L0x08   SB_1     5 3 0 01011101110001011010| SB     Store byte. wjj=wradr=RS1+Simm
-    * 09 LB_5     LB_6     0 3 2 00001011100010001011|        q = D^0xffffffff^q = D^0x80
-    * 0a _L0x0a   SB_1     5 3 0 01011101110001011010| SB     Store byte. wjj=wradr=RS1+Simm
-    * 0b JALR_2   JALR_3   0 3 3 01000101110000110011|        Q=1. Prep legalize target
-    * 0c ADD_0    ADDI_0   1 3 2 00011101100000000100| ADD    add     Addition Q = RS1
-    * 0d MUL_0    MUL_1    3 3 2 100111010xx011100010| MUL    Store rs1 tp rM. Next read rs2. Q clear
-    * 0e SUB_0    SUB_1    3 3 2 000111010xx000010000| SUB    Subtraction
-    * 0f _L0x0f   StdIncPc 4 3 2 00100101011011100110| LUI    q = imm20
-    * 10 SUB_1    LB_6     0 3 2 00011111100010001011|        Q = ~RS2
-    * 11 AND_1    ANDI_1   0 3 2 00011101100000011010|        RS1^0xffffffff to Q
-    * 12 straddle Fetchu   6 4 4 11011010110001110110|  Fr10u IncPC, OpFetch
-    * 13 condb_2  condb_3  0 3 2 00011111100000010100|        ~RS2 in Q
-    * 14 condb_3  condb_4  0 3 3 01011001110000010101|        Calculate RS1+~RS2+1
-    * 15 condb_4  condb_5  1 3 5 00000001100000010110|        Branch on condition
-    * 16 condb_5  StdIncPc 3 3 2 000000010xx011100110|        Branch not taken.
-    * 17 condb_5t condb_6t 7 3 2 00100000100001111101|        Branch taken. yy=oldPC incase of access error
-    * 18 BEQ      condb_2  5 3 2 00111101011000010011| BEQ    Conditional Branch. Offset to Ryy
-    * 19 JALR_0   JALR_1   5 5 2 01000000x10001000001| JALR   (tmp) Prep pc=RS1+imm (target)
-    * 1a ANDI_1   StdIncPc 8 3 2 00100101001011100110|        rd = Iimm & RS1
-    * 1b _L0x1b   JAL_1    3 3 2 000000001xx000110010| JAL. J-imm is in q. Prep get isntradr from jj
-    * 1c ECAL_BRK ECAL_RET 2 3 2 00010110111010100110| ECALL/EBREAK  Select ECALL/(U/S/M)RET or EBREAK/WFI
-    * 1d ORI_2    StdIncPc 8 3 2 00100101011011100110|        rd = Iimm | RS1
-    * 1e aFault_1 aFault_2 3 3 3 11010101110011010100|        Q = 4
-    * 1f IJ_2     IJ_3     5 5 2 00000000111010110111|        Read word is to be masked with lsb = 0
-    * 20 LH_0     LH_1     9 0 0 01111011110001010010| LH     Load hword. Q = rdadr=RS1+Iimm.
-    * 21 XORI_1   StdIncPc 4 3 2 00100101000011100110|        rd = Iimm ^ RS1
-    * 22 MULHU_6  MULHU_7  0 3 6 00010101110100111001|        Q <= rM[0] ? Q+Ryy : Q. Prepare last shr/sar
-    * 23 _L0x23   StdIncPc 3 3 2 000001010xx011100110| FENCE  Prepare read PC (FENCE/FENCE.I)
-    * 24 SLLI_0   SLLI_1   0 6 0 00011110x11000110101| SLLI   Shift left immediate.
-    * 25 _L0x25   ADDI_0   3 3 2 000000001xx000000100| AUIPC  q = imm20+2 or imm20+4  (copy x/2)
-    * 26 OR_1     OR_2     5 3 2 00011101000000100111|        RS1^0xffffffff to jj
-    * 27 OR_2     ORI_2    0 3 2 01000001110000011101|        Q = rs2
-    * 28 _L0x28   SH_1     9 3 0 01011101110010010110| SH     Store halfword. jjw=wradr=RS1+Simm
-    * 29 XOR_1    XORI_1   0 3 2 00011101100000100001|        Q = RS1^0xFFFFFFFF
-    * 2a _L0x2a   SH_1     9 3 0 01011101110010010110| SH     Store halfword. jjw=wradr=RS1+Simm
-    * 2b SLTIX_1  SLTIX_2  0 3 3 010xxxx1010000110000|        RS1 - imm / RS1 - RS2
-    * 2c SLL_0    SLL_1    3 3 2 00011100xxx000111110| SLL    Shift left
-    * 2d MULH_0   MULH_1   1 6 2 00010101100001101010| MULH   Store rs1 to Q. Prep read 0, shcnt--
-    * 2e MULHU_1  MULHU_2  5 3 2 10011111011001000010|        rM<=RS2,  Rjj<=Q=0. next read RS1. 
-    * 2f _L0x2f   StdIncPc 4 3 2 00100101011011100110| LUI    q = imm20
-    * 30 SLTIX_2  StdIncPc 4 3 7 00100101011011100110|        Registered ALU flag to rd
-    * 31 SLTX_1   SLTIX_1  0 3 2 00011111100000101011|        ~rs2 to Q
-    * 32 JAL_1    JAL_2    7 3 2 00100000100010000110|      Prep Instradr to yy. Refetch instradr
-    * 33 JALR_3   JAL_25   7 5 2 00000001001010011110|        Q = (RS1+imn) & 0xfffffffe
-    * 34 JAL_3    Fetch    7 4 2 00011010100011011110|      Prep fetch next instr.
-    * 35 SLLI_1   SLLI_2   8 6 2 00110111100000110110|        Register to shift to Q (and TRG for shift 0)
-    * 36 SLLI_2   _L0x03   8 7 2 00110111110000000011|        Repeat Q = Q+Q until shregcnt == 0
-    * 37 ECALL_2  ECALL_3  a 3 5 001xxxx1000011010111|        mepc = pc, prep store 0 to mtval
-    * 38 BNE      condb_2  5 3 2 00111101011000010011| BNE    Conditional Branch. Offset to Ryy
-    * 39 MULHU_7  StdIncPc 8 3 2 10100101000011100110|        Last shift.
-    * 3a SRxI_1   SRxI_2   8 6 6 00110101100100111101|        Register to shift to Q
-    * 3b _L0x3b   JAL_1    3 3 2 000000001xx000110010| JAL. J-imm is in q. Prep get isntradr from jj
-    * 3c CSRRW_0  CSRRW_1  5 3 2 00101101011001001001| CSRRW  Decoded CSR adr in yy
-    * 3d SRxI_2   _L0x03   8 7 6 00110101100100000011|        Repeat Q >>= 1 until shregcnt == 0
-    * 3e SLL_1    SLLI_1   1 6 0 00011110x00000110101|        Shiftamount was in low 5 bits of RS2
-    * 3f SRx_1    SRxI_1   1 6 0 00011110x00000111010|        Shiftamount in low 5 bits of RS2
-    * 40 LW_0     LW_1     2 0 8 01011011110001010000| LW     Load word. Q=yy=rdadr=RS1+Iimm
-    * 41 JALR_1   JALR_2   7 3 2 00110101000000001011|        yy=jj. Prep get Q=1
-    * 42 MULHU_2  MULHU_3  0 6 6 00010101110101100000|        Q <= rM[0] ? Q+rs1 : Q. Prepare shr/sar
-    * 43 MULHU_4  MULHU_5  0 3 2 00000000100011101010|        Prepare read Rjj.
-    * 44 SLTI_0   SLTIX_1  0 3 2 00011111101000101011| SLTI   Set less than immediate (signed)
-    * 45 WFI_3    WFI_4    0 3 3 01010101110001100101|        Chk ofs. Now 0x104. Prep +1, so ~ofs+0x105
-    * 46 ILL_1    ILL_2    a 3 2 00110100x00001000111|        Store PC to mepc
-    * 47 ILL_2    ILL_3    a 5 2 00110101000010001111|        Store 0 to mtval
-    * 48 _L0x48   SW_1     2 8 8 01011101110001100110| SW     Store word. Q=wradr=RS1+Simm
-    * 49 CSRRW_1  CSRRW_2  0 3 3 01000001110001001011|        Construct PC storage adr
-    * 4a _L0x4a   SW_1     2 8 8 01011101110001100110| SW     Store word. Q=wradr=RS1+Simm
-    * 4b CSRRW_2  CSRRW_3  b 9 2 00010100100010110001|        Write PC to 0x100 start Prep emulation entrypt
-    * 4c SLT_0    SLTX_1   3 3 2 000111010xx000110001| SLT    Set less than (signed)
-    * 4d MULHSU_0 MULHU_1  7 6 2 00111101000000101110| MULHSU Signed rs1 to Ryy, nxt rd rs2. Q=0, shcnt--
-    * 4e eILL0b   ILLe     3 3 2 000xxxx0xxx011111110| Illegal instruction seen
-    * 4f MRET_8   MRET_9   3 3 3 11010101110001110100|        +4, so now 0x103
-    * 50 LW_1     StdIncPc 8 1 9 00110111000011100110|        Read until d=mem[(rs1+ofs) & ~3u]
-    * 51 LDAF_LW  LDAF_a   c 5 2 00110100111011011010|  err   LD AlignFault. Faulting adr to mtval
-    * 52 LH_1     LH_2     1 1 1 00010111100101010100|        Read until q=mem[(rs1+ofs) & ~3u]
-    * 53 LDAF_LH  LDAF_a   c 5 2 00110100111011011010|  err   LD AlignFault. Faulting adr to mtval
-    * 54 LH_2     LH_3     1 7 6 00010101100111101011|        Repeat shr until shreg = 0 (0, 8 or 16 times)
-    * 55 aFaultb  aFault_1 c 5 2 00110101011000011110|  err   LH Load access fault. Faulting adr to mtval
-    * 56 LH_4     LH_5     1 3 2 00010001101001010111|        q = (uint16_t) mem[rs1+Iimm]
-    * 57 LH_5     LB_6     0 3 2 00010001100010001011|        q = D^0xffffffff^q = D ^ 0x00008000
-    * 58 DIV_A    DIV_C    1 3 6 11010111100101101110|        Transfer rM to rDee
-    * 59 DIV_B    DIV_10   5 3 2 00111111011010011100|        REM = Q to yy
-    * 5a SB_1     SB_2     7 6 2 00110111100001011101|        Write d to Q and yy (for sh 0). Prep shift
-    * 5b _L0x5b   JAL_1    3 3 2 000000001xx000110010| JAL. J-imm is in q. Prep get isntradr from jj
-    * 5c CSRRS_0  CSRRW_1  5 3 2 00101101011001001001| CSRRS  Decoded CSR adr in yy
-    * 5d SB_2     SB_3     7 7 2 00110111110011111011|        Repeat shl until shreg = 0 (0,8,16 or 24 times)
-    * 5e LHU_1    LHU_2    1 1 1 00010111100101110000|        Read until q=mem[(rs1+ofs) & ~3u]
-    * 5f LDAF_LHU LDAF_a   c 5 2 00110100111011011010|  err   LD AlignFault. Faulting adr to mtval
-    * 60 MULHU_3  MULHU_2  1 3 2 10011111100001000010|        Shift Q and rM. Prepare read rs1
-    * 61 EBRKWFI2 EBREAK_1 5 3 5 00101101001011110111| EBREAK/WFI2 Select EBREAK or WFI.
-    * 62 DIV_8    DIV_7    0 6 3 01010111110011001000|        Conditionally subtract rs2. Update M[0]
-    * 63 DIV_9    DIV_A    0 a 3 01010111110001011000|        Last Cond. -rs2. Upd M[0]. Branch on INSTR[13]
-    * 64 SLTIU_0  SLTIX_1  0 3 2 00011111101000101011| SLTIU  Set less than immediate (unsigned)
-    * 65 WFI_4    WFI_5    3 3 5 000000010xx011101111|        Prepare read PC.
-    * 66 SW_1     SW_2     b 5 2 00011100100011110010|        Write d to a+k until accepted
-    * 67 SW_E1SWE SW_E2    c 5 2 00100100x11010010011|        Store faulting address alignment to mtval
-    * 68 DIV_12   StdIncPc 8 3 2 00100101000011100110|        RS2 > 0, RS1 >= 0, yy is true result
-    * 69 DIV_13   LB_6     0 3 2 00010101100010001011|        RS2 > 0, RS1 < 0, change sign yy
-    * 6a MULH_1   MULH_2   5 3 2 00110101000011111001|        Store ~rs1 to Ryy. Prep construct 1.
-    * 6b SB_4     SB_5     1 b 2 00011001100001111010|        Address back to Q. Prepare get item to write
-    * 6c SLTU_0   SLTX_1   3 3 2 000111010xx000110001| SLTU   Set less than (unsigned)
-    * 6d MULHU_0  MULHU_1  7 6 2 00111101000000101110| MULHU  Store rs1 to Ryy. Next read rs2. Q=0, shcnt--
-    * 6e DIV_C    DIV_e    7 3 2 00111100100010111001|        rM to yy. Q=ffffffff
-    * 6f MRET_6   MRET_7   0 3 3 010xxxx1110011001111|        ~302 + origImm + 1 for branch decision
-    * 70 LHU_2    LHU_3    1 7 6 00010101100110111010|        Repeat shr until shreg = 0 (0, 8 or 16 times)
-    * 71 aFaultc  aFault_1 c 5 2 00110101011000011110|  err   LHU Load access fault. Faulting adr to mtval
-    * 72 LBU_3    ANDI_1   0 3 2 00001101101000011010|        Invert q. Prepare read mask
-    * 73 unalignd straddle 0 3 2 00000101011000010010|  Fr10u Unaligned pc, prep read high hword
-    * 74 MRET_9   Fetch    5 4 3 01011010110011011110|        +1, IncPC, OpFetch next
-    * 75 IJ_5     Fetch    7 4 2 00011010101011011110|        Mask and use as PC
-    * 76 Fetchu   Fetch2   0 3 a 00000111011011110100|  Fr10u Read and latch instruction
-    * 77 eFetchu  Fetch2   0 1 b 00010111011011110100|  Fr10u rep Read until d=mem[(rs1+ofs) & ~3u]
-    * 78 DIV_4    DIV_6    5 3 2 00100001011010101010|        ~abs(divisor) to yy
-    * 79 DIV_5    DIV_3    0 3 3 11010101110010101000|        Kluge to let add1 work in DIV instr
-    * 7a SB_5     SW_2     8 5 2 00011000100011110010|        Write d to a+k until accepted
-    * 7b _L0x7b   JAL_1    3 3 2 000000001xx000110010| JAL. J-imm is in q. Prep get isntradr from jj
-    * 7c CSRRC_0  CSRRW_1  5 3 2 00101101011001001001| CSRRC  Decoded CSR adr in yy
-    * 7d condb_6t Fetch    5 4 2 01011010110011011110|        Branch taken.
-    * 7e NMI_1    NMI_2    a 3 2 001xxxx1000010010000|        Store pc to mepc.
-    * 7f unx7f             d 6 0 00xxxxxxxxxxxxxxxxxx| 7f: Not in use 
-    * 80 LBU_0    LBU_1    0 0 0 01011011110010000101| LBU    Load unsigned byte. Q = rdadr=RS1+Iimm.
-    * 81 unx81             d 6 0 00xxxxxxxxxxxxxxxxxx| 81: Not in use 
-    * 82 DIV_1    DIV_3    5 3 2 00011101000010101000|        jj=abs(RS1). Next handle divisor
-    * 83 DIV_2    DIV_1    0 3 2 01010101110010000010|        Dividend negative, make RS1-1
-    * 84 XORI_0   XORI_1   0 3 2 00011111101000100001| XORI   Xor immediate. Q=~Iimm
-    * 85 LBU_1    LBU_2    1 1 1 00010111100111110000|        Read until q=mem[(rs1+ofs) & ~3u]
-    * 86 JAL_2    JAL_25   5 5 2 01000001010010011110|      Prep pc = jj + ofs
-    * 87 unx87             d 6 0 00xxxxxxxxxxxxxxxxxx| 87: Not in use 
-    * 88 DIV_E    DIV_10   3 a 2 10011110xxx010011100|        RS2 != 0. Check signs
-    * 89 DIV_F    StdIncPc 4 3 2 00100101011011100110|        RS2 == 0, return 0xffffffff
-    * 8a DIVU_5   ANDI_1   3 3 6 110101110xx100011010|        Transfer rM to rDee
-    * 8b LB_6     StdIncPc 4 3 3 11100101010011100110|        WTRG=(D^0x80)+0xFFFFFF7F+1=(D^0x80)-0x80
-    * 8c XOR_0    XOR_1    3 3 2 000111110xx000101001| XOR    xor
-    * 8d DIV_0    DIV_1    1 c 2 10010111100010000010| DIV    Branch on sign dividend RS1
-    * 8e _LCSRRS_1 ILLe     3 3 2 000xxxx0xxx011111110| Illegal instruction seen
-    * 8f ILL_3    ILL_4    0 3 3 00010101110010101001|        Q = 1
-    * 90 NMI_2    JAL_3    c d 2 00101001011000110100|        mtval = 0.
-    * 91 LDAF_2   LDAF_3   6 d 3 11100100x10010010010|        Store 4 to mcause
-    * 92 LDAF_3   JAL_3    a 3 2 00110010x00000110100|        PC to mepc
-    * 93 SW_E2    SW_E3    a 3 2 00110111000010010101|        Store address that faulted
-    * 94 SW_E4    JAL_3    7 d 2 00110010x10000110100|        Store 6 to mcause
-    * 95 SW_E3    SW_E4    3 3 3 11010111110010010100|        Q = 3
-    * 96 SH_1     SH_2     7 6 2 00110111100010111011|        Write d to Q and yy (for sh 0). Prep shift
-    * 97 SW_E1SWH SW_E2    c 5 2 00100100x11010010011|        Store faulting address alignment to mtval
-    * 98 BLT      condb_2  5 3 2 00111101011000010011| BLT    Conditional Branch. Offset to Ryy
-    * 99 _L0x99   ILLe     3 3 2 000xxxx0xxx011111110|  Not in use (illegal as entry)
-    * 9a ECALL_6  JAL_3    6 d 2 01110010x10000110100|        mcause = 11
-    * 9b SH_4     SH_5     e 8 2 00011001100010011111|        Address back to Q. Prepare get item to write
-    * 9c DIV_10   DIV_12   1 a 2 10011001000001101000|        RS2 > 0. Branch on sign of RS1
-    * 9d DIV_11   DIV_14   1 a 2 10011001000010100010|        RS2 < 0. Branch on sign of RS1
-    * 9e JAL_25   JAL_3    d 3 4 11100101010000110100|      Prep WTRG = jj+2/4 (return adr)
-    * 9f SH_5     SW_2     b 3 2 00011000100011110010|        Write d to a+k until accepted
-    * a0 LHU_0    LHU_1    9 0 0 01111011110001011110| LHU    Load unsigned hword. Q = rdadr=RS1+Iimm
-    * a1 ECALL_4  ECALL_5  3 3 3 11010101110010110110|        Q = 4
-    * a2 DIV_14   LB_6     0 3 2 00010101100010001011|        RS2 < 0, RS1 >= 0, change sign yy
-    * a3 DIV_15   StdIncPc 8 3 2 00100101000011100110|        RS2 < 0, RS1 < 0, yy is true result
-    * a4 SRxI_0   SRxI_1   0 6 0 00011110x11000111010| SRxI   Shift Right immediate (both logic/arith here)
-    * a5 MRET_3   MRET_4   0 3 3 01001101110010101111|        0x102 + 0xff + 1 = 0x202
-    * a6 ECAL_RET ECALL_1  2 3 8 00010110111011010000| ECALL/(U/S/M)RET Select ECALL or (U/S/M)RET
-    * a7 EBRKWFI1 EBRKWFI2 0 3 2 010xxxx1110001100001| EBREAK/WFI1 Prepare select EBREAK or WFI
-    * a8 DIV_3    DIV_4    0 a 2 10010101100001111000|        Branch on sign divisor RS2
-    * a9 ILL_4    JAL_3    5 d 3 01110010x10000110100|        Store 2 to mcause
-    * aa DIV_6    DIV_7    3 3 2 100101110xx011001000|        Write M. Prepare shift
-    * ab EBREAK_2 ECALL_6  a 3 2 00110101000010011010|        pc to mepc
-    * ac _L0xac   SRx_1    3 3 2 00011100xxx000111111| SRx    Shift Right (both SRL and SRA)
-    * ad DIVU_0   DIVU_1   3 6 2 100111010xx011100000| DIVU   Store rs1 to rM. Q=0. Prepare invert rs2
-    * ae _L0xae   SRx_1    3 3 2 00011100xxx000111111| SRx    Shift Right (both SRL and SRA)
-    * af MRET_4   MRET_5   0 3 3 010xxxx1110011000101|        0x202 + 0xff + 1 = 0x302
-    * b0 aF_SW_3  LDAF_3   6 d 2 01100100x10010010010|        Store 7 to mcause
-    * b1 CSRRW_3  CSRRW_4  3 3 3 11010101110010110010|        Prep emulation entrypt 0x108, here Q to 0x104
-    * b2 CSRRW_4  Fetch    6 4 3 11011010110011011110|        IncPC, OpFetch, but force +4
-    * b3 unxb3             d 6 0 00xxxxxxxxxxxxxxxxxx| b3: Not in use 
-    * b4 eFetch3  unalignd c 3 c 01011111110001110011|  Fr10  Update minstret, Q=immediate. Use dinx
-    * b5 SH_3     SH_4     0 3 2 00000001011010011011|        Prepare get back address to use 
-    * b6 ECALL_5  ECALL_6  3 3 3 11010101110010011010|        Q = 8
-    * b7 IJ_3     IJ_4     7 3 2 00110101000010111101|        Store present PC in case of access error
-    * b8 BGE      condb_2  5 3 2 00111101011000010011| BGE    Conditional Branch. Offset to Ryy
-    * b9 DIV_e    DIV_D    0 3 3 00011001100011000000|        Calc carry of RS2+0xFFFFFFFF
-    * ba LHU_3    ANDI_1   0 3 2 00001111101000011010|        Invert q. Prepare read mask
-    * bb SH_2     SH_3     7 7 2 00110111110010110101|        Repeat shl until shreg = 0 (0,8 or 24 times)
-    * bc CSRRWI_0 CSRRW_1  5 3 2 00101101011001001001| CSRRWI Decoded CSR adr in yy
-    * bd IJ_4     IJ_5     0 3 3 01000101110001110101|        Construct Q = 1
-    * be IJ_1     IJ_2     1 1 2 00010111100000011111|        Read until q=mem[(rs1+ofs)&~1u]
-    * bf IJT_1    IJT_2    1 1 2 00010111100011000001|        Exit CSR, enter trap
-    * c0 DIV_D    DIV_E    1 3 5 00011101100010001000|        Is RS2 == 0?
-    * c1 IJT_2    IJT_3    5 3 2 00110101011011101001|        Read word is to be masked with ~1u
-    * c2 DIVU_3   DIVU_2   0 6 3 01010111110011001010|        Conditionally subtract rs2. Update M[0]
-    * c3 DIVU_4   DIVU_5   0 a 3 01010111110010001010|        Last Cond. -rs2. Upd M[0]. Branch on INSTR[13]
-    * c4 ORI_0    ORI_1    5 3 2 00011111001011100001| ORI    Or immediate. jj=~Iimm
-    * c5 MRET_5   MRET_6   0 3 2 00000001101001101111|        ~302
-    * c6 IJT_4    ILL_2    a 3 2 00110101101001000111|        Mask and store to mepc and Q for read of instr
-    * c7 QINT_1   QINT_2   a 3 2 001xxxx1000011001011|        Store pc to mepc.
-    * c8 DIV_7    DIV_8    1 3 d 10011001110001100010|        Shift (Q,M) left. Prepare unsigned sub
-    * c9 MRET_2   MRET_3   3 3 2 01001101110010100101|        0xff+3 = 0x102
-    * ca DIVU_2   DIVU_3   1 3 d 10011001110011000010|        Shift (Q,M) left. Prepare unsigned sub
-    * cb QINT_2   StdIncPc c d 2 00101001011011100110|        mtval = 0.
-    * cc OR_0     OR_1     3 3 2 000111110xx000100110| OR     or
-    * cd REM_0    DIV_1    1 c 2 10010111100010000010| REM    Branch on sign dividend RS1
-    * ce _LCSRRCI_1 ILLe     3 3 2 000xxxx0xxx011111110| Illegal instruction seen
-    * cf MRET_7   MRET_8   3 3 5 000011010xx001001111|        Prepare emulation entry point 0x104
-    * d0 ECALL_1  ECALL_2  0 3 3 01000001110000110111| ECALL  Verify Imm==0x000
-    * d1 MRET_1   MRET_2   5 3 2 00001101011011001001| MRET   First save Imm, start build constant for check
-    * d2 LB_2     LB_3     1 7 6 00010101100100000110|        Repeat shr until shreg == 0 (0,8,16,24 times)
-    * d3 aFaultd  aFault_1 c 5 2 00110101011000011110|  err   LB Load access fault. Faulting adr to mtval
-    * d4 aFault_2 LDAF_3   5 d 3 01100100x10010010010|        Store 5 to mcause
-    * d5 eFetch2  eFetch3  c 5 e 01000011010010110100|  Fr10  Update ttime
-    * d6 eILL0c   ILLe     3 3 2 000xxxx0xxx011111110| Illegal instruction seen
-    * d7 ECALL_3  ECALL_4  c 5 2 00110101011010100001|        mtval = 0, now start the chore of 11 to mcause
-    * d8 BLTU     condb_2  5 3 2 00111101011000010011| BLTU   Conditional Branch. Offset to Ryy
-    * d9 MULH_3   MULHU_2  3 3 2 100111110xx001000010|        rM<=RS2, Q = 0. next read RS1. Join.
-    * da LDAF_a   LDAF_2   3 3 2 000101010xx010010001|        Extra cycle after error detected write mtval
-    * db jFault_1 LDAF_3   5 5 3 01111000x10010010010|        Store 1 to mcause
-    * dc CSRRSI_0 CSRRW_1  5 3 2 00101101011001001001| CSRRSI Decoded CSR adr in yy
-    * dd aF_SW_1  aF_SW_2  c 5 2 00110101011011100101|  err   SW Store access fault. Faulting adr to mtval
-    * de Fetch    Fetch2   5 3 a 00000111011011110100|  Fr10  Read and latch instruction
-    * df eFetch   eFetch2  5 1 b 00010111011011010101|  Fr10  rep Read until d=mem[(rs1+ofs) & ~3u]
-    * e0 DIVU_1   DIVU_2   5 3 2 00110111000011001010|        Store inverted rs2 to yy. Prepare shift
-    * e1 ORI_1    ORI_2    1 3 2 00000001100000011101|        Q = RS1
-    * e2 MUL_1    MUL_2    0 6 6 00010101110111101000|        Q <= rM[0] ? Q+rs2 : Q. Prepare shr/sar
-    * e3 MUL_3    ANDI_1   3 3 6 110101110xx100011010|        Transfer rM to rDee
-    * e4 ANDI_0   ANDI_1   0 3 2 00011111101000011010| ANDI   And immediate. Q=~Iimm
-    * e5 aF_SW_2  aF_SW_3  3 3 3 11010101110010110000|        Q = 4
-    * e6 StdIncPc Fetch    6 4 4 11011010110011011110|  Fr10  IncPC, OpFetch
-    * e7 aFault   aFault_1 c 5 2 00110101011000011110|  err   Load access fault. Faulting adr to mtval
-    * e8 MUL_2    MUL_1    1 3 2 10011101100011100010|        Shift Q and rM. Prepare read rs2
-    * e9 IJT_3    IJT_4    0 3 3 01011001110011000110|        Construct Q = 1
-    * ea MULHU_5  MULHU_6  0 3 2 00011001110000100010|        Q <= rM[0] ? Q+Rjj : Q. Prepare read Ryy
-    * eb LH_3     LH_4     0 3 2 00001111101001010110|        q = ~mem[rs1+ofs]
-    * ec AND_0    AND_1    3 3 2 000111110xx000010001| AND    And 
-    * ed REMU_0   DIVU_1   3 6 2 100111010xx011100000| REMU   Store dividend to rM. Prepare read divisor.Q=0
-    * ee eILL0a   ILLe     3 3 2 000xxxx0xxx011111110| Illegal instruction seen
-    * ef WFI_5    Fetch    6 4 3 11011010110011011110|        IncPC, OpFetch
-    * f0 LBU_2    LBU_3    1 7 6 00010101100101110010|        Repeat shr until shreg = 0 (0, 8 or 16 times)
-    * f1 aFaulte  aFault_1 c 5 2 00110101011000011110|  err   LBU Load access fault. Faulting adr to mtval
-    * f2 SW_2     StdIncPc 3 3 2 000001010xx011100110|        Prepare read PC
-    * f3 aF_SW    aF_SW_1  3 3 2 000xxxx01xx011011101|  err   SW/SH/SB access fault. Rest to set SEL_O=4'hf
-    * f4 Fetch2   unalignd c 5 f 01011111110001110011|  Fr10  Update ttime. Update I. Q=immediate. Use dinx
-    * f5 jFault   jFault_1 c 5 2 00110101011011011011|  err   Fetch access fault. Faulting adr to mtval
-    * f6 WFI_1    WFI_2    3 3 3 11011001110011111010| WFI    Chk offset=0x105. Now 0xff. Prep 0xff+4 = 0x103
-    * f7 EBREAK_1 EBREAK_2 c 5 2 00100001011010101011| EBREAK mepc = pc, store 0 to mtval
-    * f8 BGEU     condb_2  5 3 2 00111101011000010011| BGEU   Conditional Branch. Offset to Ryy
-    * f9 MULH_2   MULH_3   5 3 3 01011101010011011001|        Store 1 to Rjj. next read rs2, Q=0
-    * fa WFI_2    WFI_3    0 3 3 01010101110001000101|        Chk ofs. Now 0x103. Prep +1+~ofs, so ~ofs+0x104
-    * fb SB_3     SB_4     0 3 2 00000001011001101011|        Prepare get back address to use 
-    * fc CSRRCI_0 CSRRW_1  5 3 2 00101101011001001001| CSRRCI Decoded CSR adr in yy
-    * fd NMI_0    NMI_1    3 3 2 000001010xx001111110| NMI    Get current PC
-    * fe ILLe     ILL_1    3 3 2 00000100xxx001000110| Illegal
-    * ff QINT_0   QINT_1   3 3 2 000001010xx011000111| INT    Get current PC
+    * 00 LB_0     LB_1     0 0 0 00000000000001011011| LB     Load byte. q = rdadr=RS1+0fs
+    * 01 LB_1     LB_2     1 1 1 00010001000100010111|        Read until q=mem[rs1+ofs) & ~3u]
+    * 02 IJ_0     IJ_1     2 2 2 00100010001001011011| IJ     Jump to mem[(rs1+ofs)&~1u]. inCSR=0
+    * 03 _L0x03   StdIncPc 3 3 2 00110011001000000101| FENCE  Prepare read PC (FENCE/FENCE.I)
+    * 04 ADDI_0   StdIncPc 4 3 2 01000011001001100101| ADDI   Add immediate. rd =RS1+Iimm (or joined)
+    * 05 _L0x05   ADDI_0   3 3 2 00110011001000000000| AUIPC  q = imm20+2 or imm20+4  (copy x/2)
+    * 06 LB_3     LB_4     0 3 2 00000011001000001101|        q = ~mem[rs1+ofs]
+    * 07 LB_4     LB_5     1 3 2 00010011001000001011|        q = (uint8_t) mem[rs1+Iimm]
+    * 08 _L0x08   SB_1     5 3 0 01010011000001011101| SB     Store byte. wjj=wradr=RS1+Simm
+    * 09 LB_5     LB_6     0 3 2 00000011001000001011|        q = D^0xffffffff^q = D^0x80
+    * 0a _L0x0a   SB_1     5 3 0 01010011000001011101| SB     Store byte. wjj=wradr=RS1+Simm
+    * 0b JALR_2   JALR_3   0 3 3 00000011001101000101|        Q=1. Prep legalize target
+    * 0c ADD_0    ADDI_0   1 3 2 00010011001000011101| ADD    add     Addition Q = RS1
+    * 0d MUL_0    MUL_1    3 3 2 00110011001010011101| MUL    Store rs1 tp rM. Next read rs2. Q clear
+    * 0e SUB_0    SUB_1    3 3 2 00110011001000011101| SUB    Subtraction
+    * 0f _L0x0f   StdIncPc 4 3 2 01000011001000100101| LUI    q = imm20
+    * 10 SUB_1    LB_6     0 3 2 00000011001000011111|        Q = ~RS2
+    * 11 AND_1    ANDI_1   0 3 2 00000011001000011101|        RS1^0xffffffff to Q
+    * 12 straddle Fetchu   6 4 4 01100100010011011010|  Fr10u IncPC, OpFetch
+    * 13 condb_2  condb_3  0 3 2 00000011001000011111|        ~RS2 in Q
+    * 14 condb_3  condb_4  0 3 3 00000011001101011001|        Calculate RS1+~RS2+1
+    * 15 condb_4  condb_5  1 3 5 00010011010100000001|        Branch on condition
+    * 16 condb_5  StdIncPc 3 3 2 00110011001000000001|        Branch not taken.
+    * 17 condb_5t condb_6t 7 3 2 01110011001000100000|        Branch taken. yy=oldPC incase of access error
+    * 18 BEQ      condb_2  5 3 2 01010011001000111101| BEQ    Conditional Branch. Offset to Ryy
+    * 19 JALR_0   JALR_1   5 5 2 01010101001001000000| JALR   (tmp) Prep pc=RS1+imm (target)
+    * 1a ANDI_1   StdIncPc 8 3 2 10000011001000100101|        rd = Iimm & RS1
+    * 1b _L0x1b   JAL_1    3 3 2 00110011001000000000| JAL. J-imm is in q. Prep get isntradr from jj
+    * 1c ECAL_BRK ECAL_RET 2 3 2 00100011001000010110| ECALL/EBREAK  Select ECALL/(U/S/M)RET or EBREAK/WFI
+    * 1d ORI_2    StdIncPc 8 3 2 10000011001000100101|        rd = Iimm | RS1
+    * 1e aFault_1 aFault_2 3 3 3 00110011001111010101|        Q = 4
+    * 1f IJ_2     IJ_3     5 5 2 01010101001000000000|        Read word is to be masked with lsb = 0
+    * 20 LH_0     LH_1     9 0 0 10010000000001111011| LH     Load hword. Q = rdadr=RS1+Iimm.
+    * 21 XORI_1   StdIncPc 4 3 2 01000011001000100101|        rd = Iimm ^ RS1
+    * 22 MULHU_6  MULHU_7  0 3 6 00000011011000010101|        Q <= rM[0] ? Q+Ryy : Q. Prepare last shr/sar
+    * 23 _L0x23   StdIncPc 3 3 2 00110011001000000101| FENCE  Prepare read PC (FENCE/FENCE.I)
+    * 24 SLLI_0   SLLI_1   0 6 0 00000110000000011110| SLLI   Shift left immediate.
+    * 25 _L0x25   ADDI_0   3 3 2 00110011001000000000| AUIPC  q = imm20+2 or imm20+4  (copy x/2)
+    * 26 OR_1     OR_2     5 3 2 01010011001000011101|        RS1^0xffffffff to jj
+    * 27 OR_2     ORI_2    0 3 2 00000011001001000001|        Q = rs2
+    * 28 _L0x28   SH_1     9 3 0 10010011000001011101| SH     Store halfword. jjw=wradr=RS1+Simm
+    * 29 XOR_1    XORI_1   0 3 2 00000011001000011101|        Q = RS1^0xFFFFFFFF
+    * 2a _L0x2a   SH_1     9 3 0 10010011000001011101| SH     Store halfword. jjw=wradr=RS1+Simm
+    * 2b SLTIX_1  SLTIX_2  0 3 3 000000110011010xxxx1|        RS1 - imm / RS1 - RS2
+    * 2c SLL_0    SLL_1    3 3 2 00110011001000011100| SLL    Shift left
+    * 2d MULH_0   MULH_1   1 6 2 00010110001000010101| MULH   Store rs1 to Q. Prep read 0, shcnt--
+    * 2e MULHU_1  MULHU_2  5 3 2 01010011001010011111|        rM<=RS2,  Rjj<=Q=0. next read RS1. 
+    * 2f _L0x2f   StdIncPc 4 3 2 01000011001000100101| LUI    q = imm20
+    * 30 SLTIX_2  StdIncPc 4 3 7 01000011011100100101|        Registered ALU flag to rd
+    * 31 SLTX_1   SLTIX_1  0 3 2 00000011001000011111|        ~rs2 to Q
+    * 32 JAL_1    JAL_2    7 3 2 01110011001000100000|      Prep Instradr to yy. Refetch instradr
+    * 33 JALR_3   JAL_25   7 5 2 01110101001000000001|        Q = (RS1+imn) & 0xfffffffe
+    * 34 JAL_3    Fetch    7 4 2 01110100001000011010|      Prep fetch next instr.
+    * 35 SLLI_1   SLLI_2   8 6 2 10000110001000110111|        Register to shift to Q (and TRG for shift 0)
+    * 36 SLLI_2   _L0x03   8 7 2 10000111001000110111|        Repeat Q = Q+Q until shregcnt == 0
+    * 37 ECALL_2  ECALL_3  a 3 5 101000110101001xxxx1|        mepc = pc, prep store 0 to mtval
+    * 38 BNE      condb_2  5 3 2 01010011001000111101| BNE    Conditional Branch. Offset to Ryy
+    * 39 MULHU_7  StdIncPc 8 3 2 10000011001010100101|        Last shift.
+    * 3a SRxI_1   SRxI_2   8 6 6 10000110011000110101|        Register to shift to Q
+    * 3b _L0x3b   JAL_1    3 3 2 00110011001000000000| JAL. J-imm is in q. Prep get isntradr from jj
+    * 3c CSRRW_0  CSRRW_1  5 3 2 01010011001000101101| CSRRW  Decoded CSR adr in yy
+    * 3d SRxI_2   _L0x03   8 7 6 10000111011000110101|        Repeat Q >>= 1 until shregcnt == 0
+    * 3e SLL_1    SLLI_1   1 6 0 00010110000000011110|        Shiftamount was in low 5 bits of RS2
+    * 3f SRx_1    SRxI_1   1 6 0 00010110000000011110|        Shiftamount in low 5 bits of RS2
+    * 40 LW_0     LW_1     2 0 8 00100000100001011011| LW     Load word. Q=yy=rdadr=RS1+Iimm
+    * 41 JALR_1   JALR_2   7 3 2 01110011001000110101|        yy=jj. Prep get Q=1
+    * 42 MULHU_2  MULHU_3  0 6 6 00000110011000010101|        Q <= rM[0] ? Q+rs1 : Q. Prepare shr/sar
+    * 43 MULHU_4  MULHU_5  0 3 2 00000011001000000000|        Prepare read Rjj.
+    * 44 SLTI_0   SLTIX_1  0 3 2 00000011001000011111| SLTI   Set less than immediate (signed)
+    * 45 WFI_3    WFI_4    0 3 3 00000011001101010101|        Chk ofs. Now 0x104. Prep +1, so ~ofs+0x105
+    * 46 ILL_1    ILL_2    a 3 2 10100011001000110100|        Store PC to mepc
+    * 47 ILL_2    ILL_3    a 5 2 10100101001000110101|        Store 0 to mtval
+    * 48 _L0x48   SW_1     2 8 8 00101000100001011101| SW     Store word. Q=wradr=RS1+Simm
+    * 49 CSRRW_1  CSRRW_2  0 3 3 00000011001101000001|        Construct PC storage adr
+    * 4a _L0x4a   SW_1     2 8 8 00101000100001011101| SW     Store word. Q=wradr=RS1+Simm
+    * 4b CSRRW_2  CSRRW_3  b 9 2 10111001001000010100|        Write PC to 0x100 start Prep emulation entrypt
+    * 4c SLT_0    SLTX_1   3 3 2 00110011001000011101| SLT    Set less than (signed)
+    * 4d MULHSU_0 MULHU_1  7 6 2 01110110001000111101| MULHSU Signed rs1 to Ryy, nxt rd rs2. Q=0, shcnt--
+    * 4e eILL0b   ILLe     3 3 2 001100110010000xxxx0| Illegal instruction seen
+    * 4f MRET_8   MRET_9   3 3 3 00110011001111010101|        +4, so now 0x103
+    * 50 LW_1     StdIncPc 8 1 9 10000001100100110111|        Read until d=mem[(rs1+ofs) & ~3u]
+    * 51 LDAF_LW  LDAF_a   c 5 2 11000101001000110100|  err   LD AlignFault. Faulting adr to mtval
+    * 52 LH_1     LH_2     1 1 1 00010001000100010111|        Read until q=mem[(rs1+ofs) & ~3u]
+    * 53 LDAF_LH  LDAF_a   c 5 2 11000101001000110100|  err   LD AlignFault. Faulting adr to mtval
+    * 54 LH_2     LH_3     1 7 6 00010111011000010101|        Repeat shr until shreg = 0 (0, 8 or 16 times)
+    * 55 aFaultb  aFault_1 c 5 2 11000101001000110101|  err   LH Load access fault. Faulting adr to mtval
+    * 56 LH_4     LH_5     1 3 2 00010011001000010001|        q = (uint16_t) mem[rs1+Iimm]
+    * 57 LH_5     LB_6     0 3 2 00000011001000010001|        q = D^0xffffffff^q = D ^ 0x00008000
+    * 58 DIV_A    DIV_C    1 3 6 00010011011011010111|        Transfer rM to rDee
+    * 59 DIV_B    DIV_10   5 3 2 01010011001000111111|        REM = Q to yy
+    * 5a SB_1     SB_2     7 6 2 01110110001000110111|        Write d to Q and yy (for sh 0). Prep shift
+    * 5b _L0x5b   JAL_1    3 3 2 00110011001000000000| JAL. J-imm is in q. Prep get isntradr from jj
+    * 5c CSRRS_0  CSRRW_1  5 3 2 01010011001000101101| CSRRS  Decoded CSR adr in yy
+    * 5d SB_2     SB_3     7 7 2 01110111001000110111|        Repeat shl until shreg = 0 (0,8,16 or 24 times)
+    * 5e LHU_1    LHU_2    1 1 1 00010001000100010111|        Read until q=mem[(rs1+ofs) & ~3u]
+    * 5f LDAF_LHU LDAF_a   c 5 2 11000101001000110100|  err   LD AlignFault. Faulting adr to mtval
+    * 60 MULHU_3  MULHU_2  1 3 2 00010011001010011111|        Shift Q and rM. Prepare read rs1
+    * 61 EBRKWFI2 EBREAK_1 5 3 5 01010011010100101101| EBREAK/WFI2 Select EBREAK or WFI.
+    * 62 DIV_8    DIV_7    0 6 3 00000110001101010111|        Conditionally subtract rs2. Update M[0]
+    * 63 DIV_9    DIV_A    0 a 3 00001010001101010111|        Last Cond. -rs2. Upd M[0]. Branch on INSTR[13]
+    * 64 SLTIU_0  SLTIX_1  0 3 2 00000011001000011111| SLTIU  Set less than immediate (unsigned)
+    * 65 WFI_4    WFI_5    3 3 5 00110011010100000001|        Prepare read PC.
+    * 66 SW_1     SW_2     b 5 2 10110101001000011100|        Write d to a+k until accepted
+    * 67 SW_E1SWE SW_E2    c 5 2 11000101001000100100|        Store faulting address alignment to mtval
+    * 68 DIV_12   StdIncPc 8 3 2 10000011001000100101|        RS2 > 0, RS1 >= 0, yy is true result
+    * 69 DIV_13   LB_6     0 3 2 00000011001000010101|        RS2 > 0, RS1 < 0, change sign yy
+    * 6a MULH_1   MULH_2   5 3 2 01010011001000110101|        Store ~rs1 to Ryy. Prep construct 1.
+    * 6b SB_4     SB_5     1 b 2 00011011001000011001|        Address back to Q. Prepare get item to write
+    * 6c SLTU_0   SLTX_1   3 3 2 00110011001000011101| SLTU   Set less than (unsigned)
+    * 6d MULHU_0  MULHU_1  7 6 2 01110110001000111101| MULHU  Store rs1 to Ryy. Next read rs2. Q=0, shcnt--
+    * 6e DIV_C    DIV_e    7 3 2 01110011001000111100|        rM to yy. Q=ffffffff
+    * 6f MRET_6   MRET_7   0 3 3 000000110011010xxxx1|        ~302 + origImm + 1 for branch decision
+    * 70 LHU_2    LHU_3    1 7 6 00010111011000010101|        Repeat shr until shreg = 0 (0, 8 or 16 times)
+    * 71 aFaultc  aFault_1 c 5 2 11000101001000110101|  err   LHU Load access fault. Faulting adr to mtval
+    * 72 LBU_3    ANDI_1   0 3 2 00000011001000001101|        Invert q. Prepare read mask
+    * 73 unalignd straddle 0 3 2 00000011001000000101|  Fr10u Unaligned pc, prep read high hword
+    * 74 MRET_9   Fetch    5 4 3 01010100001101011010|        +1, IncPC, OpFetch next
+    * 75 IJ_5     Fetch    7 4 2 01110100001000011010|        Mask and use as PC
+    * 76 Fetchu   Fetch2   0 3 a 00000011101000000111|  Fr10u Read and latch instruction
+    * 77 eFetchu  Fetch2   0 1 b 00000001101100010111|  Fr10u rep Read until d=mem[(rs1+ofs) & ~3u]
+    * 78 DIV_4    DIV_6    5 3 2 01010011001000100001|        ~abs(divisor) to yy
+    * 79 DIV_5    DIV_3    0 3 3 00000011001111010101|        Kluge to let add1 work in DIV instr
+    * 7a SB_5     SW_2     8 5 2 10000101001000011000|        Write d to a+k until accepted
+    * 7b _L0x7b   JAL_1    3 3 2 00110011001000000000| JAL. J-imm is in q. Prep get isntradr from jj
+    * 7c CSRRC_0  CSRRW_1  5 3 2 01010011001000101101| CSRRC  Decoded CSR adr in yy
+    * 7d condb_6t Fetch    5 4 2 01010100001001011010|        Branch taken.
+    * 7e NMI_1    NMI_2    a 3 2 101000110010001xxxx1|        Store pc to mepc.
+    * 7f unx7f             d 6 0 11010110000000xxxxxx| 7f: Not in use 
+    * 80 LBU_0    LBU_1    0 0 0 00000000000001011011| LBU    Load unsigned byte. Q = rdadr=RS1+Iimm.
+    * 81 unx81             d 6 0 11010110000000xxxxxx| 81: Not in use 
+    * 82 DIV_1    DIV_3    5 3 2 01010011001000011101|        jj=abs(RS1). Next handle divisor
+    * 83 DIV_2    DIV_1    0 3 2 00000011001001010101|        Dividend negative, make RS1-1
+    * 84 XORI_0   XORI_1   0 3 2 00000011001000011111| XORI   Xor immediate. Q=~Iimm
+    * 85 LBU_1    LBU_2    1 1 1 00010001000100010111|        Read until q=mem[(rs1+ofs) & ~3u]
+    * 86 JAL_2    JAL_25   5 5 2 01010101001001000001|      Prep pc = jj + ofs
+    * 87 unx87             d 6 0 11010110000000xxxxxx| 87: Not in use 
+    * 88 DIV_E    DIV_10   3 a 2 00111010001010011110|        RS2 != 0. Check signs
+    * 89 DIV_F    StdIncPc 4 3 2 01000011001000100101|        RS2 == 0, return 0xffffffff
+    * 8a DIVU_5   ANDI_1   3 3 6 00110011011011010111|        Transfer rM to rDee
+    * 8b LB_6     StdIncPc 4 3 3 01000011001111100101|        WTRG=(D^0x80)+0xFFFFFF7F+1=(D^0x80)-0x80
+    * 8c XOR_0    XOR_1    3 3 2 00110011001000011111| XOR    xor
+    * 8d DIV_0    DIV_1    1 c 2 00011100001010010111| DIV    Branch on sign dividend RS1
+    * 8e _LCSRRS_1 ILLe     3 3 2 001100110010000xxxx0| Illegal instruction seen
+    * 8f ILL_3    ILL_4    0 3 3 00000011001100010101|        Q = 1
+    * 90 NMI_2    JAL_3    c d 2 11001101001000101001|        mtval = 0.
+    * 91 LDAF_2   LDAF_3   6 d 3 01101101001111100100|        Store 4 to mcause
+    * 92 LDAF_3   JAL_3    a 3 2 10100011001000110010|        PC to mepc
+    * 93 SW_E2    SW_E3    a 3 2 10100011001000110111|        Store address that faulted
+    * 94 SW_E4    JAL_3    7 d 2 01111101001000110010|        Store 6 to mcause
+    * 95 SW_E3    SW_E4    3 3 3 00110011001111010111|        Q = 3
+    * 96 SH_1     SH_2     7 6 2 01110110001000110111|        Write d to Q and yy (for sh 0). Prep shift
+    * 97 SW_E1SWH SW_E2    c 5 2 11000101001000100100|        Store faulting address alignment to mtval
+    * 98 BLT      condb_2  5 3 2 01010011001000111101| BLT    Conditional Branch. Offset to Ryy
+    * 99 _L0x99   ILLe     3 3 2 001100110010000xxxx0|  Not in use (illegal as entry)
+    * 9a ECALL_6  JAL_3    6 d 2 01101101001001110010|        mcause = 11
+    * 9b SH_4     SH_5     e 8 2 11101000001000011001|        Address back to Q. Prepare get item to write
+    * 9c DIV_10   DIV_12   1 a 2 00011010001010011001|        RS2 > 0. Branch on sign of RS1
+    * 9d DIV_11   DIV_14   1 a 2 00011010001010011001|        RS2 < 0. Branch on sign of RS1
+    * 9e JAL_25   JAL_3    d 3 4 11010011010011100101|      Prep WTRG = jj+2/4 (return adr)
+    * 9f SH_5     SW_2     b 3 2 10110011001000011000|        Write d to a+k until accepted
+    * a0 LHU_0    LHU_1    9 0 0 10010000000001111011| LHU    Load unsigned hword. Q = rdadr=RS1+Iimm
+    * a1 ECALL_4  ECALL_5  3 3 3 00110011001111010101|        Q = 4
+    * a2 DIV_14   LB_6     0 3 2 00000011001000010101|        RS2 < 0, RS1 >= 0, change sign yy
+    * a3 DIV_15   StdIncPc 8 3 2 10000011001000100101|        RS2 < 0, RS1 < 0, yy is true result
+    * a4 SRxI_0   SRxI_1   0 6 0 00000110000000011110| SRxI   Shift Right immediate (both logic/arith here)
+    * a5 MRET_3   MRET_4   0 3 3 00000011001101001101|        0x102 + 0xff + 1 = 0x202
+    * a6 ECAL_RET ECALL_1  2 3 8 00100011100000010110| ECALL/(U/S/M)RET Select ECALL or (U/S/M)RET
+    * a7 EBRKWFI1 EBRKWFI2 0 3 2 000000110010010xxxx1| EBREAK/WFI1 Prepare select EBREAK or WFI
+    * a8 DIV_3    DIV_4    0 a 2 00001010001010010101|        Branch on sign divisor RS2
+    * a9 ILL_4    JAL_3    5 d 3 01011101001101110010|        Store 2 to mcause
+    * aa DIV_6    DIV_7    3 3 2 00110011001010010111|        Write M. Prepare shift
+    * ab EBREAK_2 ECALL_6  a 3 2 10100011001000110101|        pc to mepc
+    * ac _L0xac   SRx_1    3 3 2 00110011001000011100| SRx    Shift Right (both SRL and SRA)
+    * ad DIVU_0   DIVU_1   3 6 2 00110110001010011101| DIVU   Store rs1 to rM. Q=0. Prepare invert rs2
+    * ae _L0xae   SRx_1    3 3 2 00110011001000011100| SRx    Shift Right (both SRL and SRA)
+    * af MRET_4   MRET_5   0 3 3 000000110011010xxxx1|        0x202 + 0xff + 1 = 0x302
+    * b0 aF_SW_3  LDAF_3   6 d 2 01101101001001100100|        Store 7 to mcause
+    * b1 CSRRW_3  CSRRW_4  3 3 3 00110011001111010101|        Prep emulation entrypt 0x108, here Q to 0x104
+    * b2 CSRRW_4  Fetch    6 4 3 01100100001111011010|        IncPC, OpFetch, but force +4
+    * b3 unxb3             d 6 0 11010110000000xxxxxx| b3: Not in use 
+    * b4 eFetch3  unalignd c 3 c 11000011110001011111|  Fr10  Update minstret, Q=immediate. Use dinx
+    * b5 SH_3     SH_4     0 3 2 00000011001000000001|        Prepare get back address to use 
+    * b6 ECALL_5  ECALL_6  3 3 3 00110011001111010101|        Q = 8
+    * b7 IJ_3     IJ_4     7 3 2 01110011001000110101|        Store present PC in case of access error
+    * b8 BGE      condb_2  5 3 2 01010011001000111101| BGE    Conditional Branch. Offset to Ryy
+    * b9 DIV_e    DIV_D    0 3 3 00000011001100011001|        Calc carry of RS2+0xFFFFFFFF
+    * ba LHU_3    ANDI_1   0 3 2 00000011001000001111|        Invert q. Prepare read mask
+    * bb SH_2     SH_3     7 7 2 01110111001000110111|        Repeat shl until shreg = 0 (0,8 or 24 times)
+    * bc CSRRWI_0 CSRRW_1  5 3 2 01010011001000101101| CSRRWI Decoded CSR adr in yy
+    * bd IJ_4     IJ_5     0 3 3 00000011001101000101|        Construct Q = 1
+    * be IJ_1     IJ_2     1 1 2 00010001001000010111|        Read until q=mem[(rs1+ofs)&~1u]
+    * bf IJT_1    IJT_2    1 1 2 00010001001000010111|        Exit CSR, enter trap
+    * c0 DIV_D    DIV_E    1 3 5 00010011010100011101|        Is RS2 == 0?
+    * c1 IJT_2    IJT_3    5 3 2 01010011001000110101|        Read word is to be masked with ~1u
+    * c2 DIVU_3   DIVU_2   0 6 3 00000110001101010111|        Conditionally subtract rs2. Update M[0]
+    * c3 DIVU_4   DIVU_5   0 a 3 00001010001101010111|        Last Cond. -rs2. Upd M[0]. Branch on INSTR[13]
+    * c4 ORI_0    ORI_1    5 3 2 01010011001000011111| ORI    Or immediate. jj=~Iimm
+    * c5 MRET_5   MRET_6   0 3 2 00000011001000000001|        ~302
+    * c6 IJT_4    ILL_2    a 3 2 10100011001000110101|        Mask and store to mepc and Q for read of instr
+    * c7 QINT_1   QINT_2   a 3 2 101000110010001xxxx1|        Store pc to mepc.
+    * c8 DIV_7    DIV_8    1 3 d 00010011110110011001|        Shift (Q,M) left. Prepare unsigned sub
+    * c9 MRET_2   MRET_3   3 3 2 00110011001001001101|        0xff+3 = 0x102
+    * ca DIVU_2   DIVU_3   1 3 d 00010011110110011001|        Shift (Q,M) left. Prepare unsigned sub
+    * cb QINT_2   StdIncPc c d 2 11001101001000101001|        mtval = 0.
+    * cc OR_0     OR_1     3 3 2 00110011001000011111| OR     or
+    * cd REM_0    DIV_1    1 c 2 00011100001010010111| REM    Branch on sign dividend RS1
+    * ce _LCSRRCI_1 ILLe     3 3 2 001100110010000xxxx0| Illegal instruction seen
+    * cf MRET_7   MRET_8   3 3 5 00110011010100001101|        Prepare emulation entry point 0x104
+    * d0 ECALL_1  ECALL_2  0 3 3 00000011001101000001| ECALL  Verify Imm==0x000
+    * d1 MRET_1   MRET_2   5 3 2 01010011001000001101| MRET   First save Imm, start build constant for check
+    * d2 LB_2     LB_3     1 7 6 00010111011000010101|        Repeat shr until shreg == 0 (0,8,16,24 times)
+    * d3 aFaultd  aFault_1 c 5 2 11000101001000110101|  err   LB Load access fault. Faulting adr to mtval
+    * d4 aFault_2 LDAF_3   5 d 3 01011101001101100100|        Store 5 to mcause
+    * d5 eFetch2  eFetch3  c 5 e 11000101111001000011|  Fr10  Update ttime
+    * d6 eILL0c   ILLe     3 3 2 001100110010000xxxx0| Illegal instruction seen
+    * d7 ECALL_3  ECALL_4  c 5 2 11000101001000110101|        mtval = 0, now start the chore of 11 to mcause
+    * d8 BLTU     condb_2  5 3 2 01010011001000111101| BLTU   Conditional Branch. Offset to Ryy
+    * d9 MULH_3   MULHU_2  3 3 2 00110011001010011111|        rM<=RS2, Q = 0. next read RS1. Join.
+    * da LDAF_a   LDAF_2   3 3 2 00110011001000010101|        Extra cycle after error detected write mtval
+    * db jFault_1 LDAF_3   5 5 3 01010101001101111000|        Store 1 to mcause
+    * dc CSRRSI_0 CSRRW_1  5 3 2 01010011001000101101| CSRRSI Decoded CSR adr in yy
+    * dd aF_SW_1  aF_SW_2  c 5 2 11000101001000110101|  err   SW Store access fault. Faulting adr to mtval
+    * de Fetch    Fetch2   5 3 a 01010011101000000111|  Fr10  Read and latch instruction
+    * df eFetch   eFetch2  5 1 b 01010001101100010111|  Fr10  rep Read until d=mem[(rs1+ofs) & ~3u]
+    * e0 DIVU_1   DIVU_2   5 3 2 01010011001000110111|        Store inverted rs2 to yy. Prepare shift
+    * e1 ORI_1    ORI_2    1 3 2 00010011001000000001|        Q = RS1
+    * e2 MUL_1    MUL_2    0 6 6 00000110011000010101|        Q <= rM[0] ? Q+rs2 : Q. Prepare shr/sar
+    * e3 MUL_3    ANDI_1   3 3 6 00110011011011010111|        Transfer rM to rDee
+    * e4 ANDI_0   ANDI_1   0 3 2 00000011001000011111| ANDI   And immediate. Q=~Iimm
+    * e5 aF_SW_2  aF_SW_3  3 3 3 00110011001111010101|        Q = 4
+    * e6 StdIncPc Fetch    6 4 4 01100100010011011010|  Fr10  IncPC, OpFetch
+    * e7 aFault   aFault_1 c 5 2 11000101001000110101|  err   Load access fault. Faulting adr to mtval
+    * e8 MUL_2    MUL_1    1 3 2 00010011001010011101|        Shift Q and rM. Prepare read rs2
+    * e9 IJT_3    IJT_4    0 3 3 00000011001101011001|        Construct Q = 1
+    * ea MULHU_5  MULHU_6  0 3 2 00000011001000011001|        Q <= rM[0] ? Q+Rjj : Q. Prepare read Ryy
+    * eb LH_3     LH_4     0 3 2 00000011001000001111|        q = ~mem[rs1+ofs]
+    * ec AND_0    AND_1    3 3 2 00110011001000011111| AND    And 
+    * ed REMU_0   DIVU_1   3 6 2 00110110001010011101| REMU   Store dividend to rM. Prepare read divisor.Q=0
+    * ee eILL0a   ILLe     3 3 2 001100110010000xxxx0| Illegal instruction seen
+    * ef WFI_5    Fetch    6 4 3 01100100001111011010|        IncPC, OpFetch
+    * f0 LBU_2    LBU_3    1 7 6 00010111011000010101|        Repeat shr until shreg = 0 (0, 8 or 16 times)
+    * f1 aFaulte  aFault_1 c 5 2 11000101001000110101|  err   LBU Load access fault. Faulting adr to mtval
+    * f2 SW_2     StdIncPc 3 3 2 00110011001000000101|        Prepare read PC
+    * f3 aF_SW    aF_SW_1  3 3 2 001100110010000xxxx0|  err   SW/SH/SB access fault. Rest to set SEL_O=4'hf
+    * f4 Fetch2   unalignd c 5 f 11000101111101011111|  Fr10  Update ttime. Update I. Q=immediate. Use dinx
+    * f5 jFault   jFault_1 c 5 2 11000101001000110101|  err   Fetch access fault. Faulting adr to mtval
+    * f6 WFI_1    WFI_2    3 3 3 00110011001111011001| WFI    Chk offset=0x105. Now 0xff. Prep 0xff+4 = 0x103
+    * f7 EBREAK_1 EBREAK_2 c 5 2 11000101001000100001| EBREAK mepc = pc, store 0 to mtval
+    * f8 BGEU     condb_2  5 3 2 01010011001000111101| BGEU   Conditional Branch. Offset to Ryy
+    * f9 MULH_2   MULH_3   5 3 3 01010011001101011101|        Store 1 to Rjj. next read rs2, Q=0
+    * fa WFI_2    WFI_3    0 3 3 00000011001101010101|        Chk ofs. Now 0x103. Prep +1+~ofs, so ~ofs+0x104
+    * fb SB_3     SB_4     0 3 2 00000011001000000001|        Prepare get back address to use 
+    * fc CSRRCI_0 CSRRW_1  5 3 2 01010011001000101101| CSRRCI Decoded CSR adr in yy
+    * fd NMI_0    NMI_1    3 3 2 00110011001000000101| NMI    Get current PC
+    * fe ILLe     ILL_1    3 3 2 00110011001000000100| Illegal
+    * ff QINT_0   QINT_1   3 3 2 00110011001000000101| INT    Get current PC
     */
    localparam u0_0 = 256'h56e6d010d0e2d8045c33dc5ab88bdc5aba09da07080454e650e6bcbe79d2bc01;
    localparam u0_1 = 256'h0eb75cd456e66ea6083252e60441d613087d10e618169c15f814ac76d81af88b;
@@ -5308,7 +5308,7 @@ endmodule
  * 2019-2020. Copyright B. Nossum.
  * For licence, see LICENCE
  * -----------------------------------------------------------------------------ehdr
- * Automatically generated from ../code/ucode.h by midgetv_indirectEBR.c.
+ * Automatically generated from ../code/ucode.h by ../util/midgetv_indirectEBR.c.
  * Do not edit.
  * Optiones for this variant:
  *   RVC included
@@ -5433,262 +5433,262 @@ module v15_m_2ebr
     *                      | indirect_index 1
     * inx         next     | | indirect index 0
     * || ucode    ucode    | | | direct representation
-    * 00 LB_0     LB_1     0 0 0 01011011110000000001| LB     Load byte. q = rdadr=RS1+0fs
-    * 01 LB_1     LB_2     1 1 1 00010111100111010010|        Read until q=mem[rs1+ofs) & ~3u]
-    * 02 IJ_0     IJ_1     2 2 2 01011011110010111110| IJ     Jump to mem[(rs1+ofs)&~1u]. inCSR=0
-    * 03 _L0x03   StdIncPc 3 3 2 000001010xx011100110| FENCE  Prepare read PC (FENCE/FENCE.I)
-    * 04 ADDI_0   StdIncPc 4 3 2 01100101010011100110| ADDI   Add immediate. rd =RS1+Iimm (or joined)
-    * 05 _L0x05   ADDI_0   3 3 2 000000001xx000000100| AUIPC  q = imm20+2 or imm20+4  (copy x/2)
-    * 06 LB_3     LB_4     0 3 2 00001101101000000111|        q = ~mem[rs1+ofs]
-    * 07 LB_4     LB_5     1 3 2 00001011101000001001|        q = (uint8_t) mem[rs1+Iimm]
-    * 08 _L0x08   SB_1     5 3 0 01011101110001011010| SB     Store byte. wjj=wradr=RS1+Simm
-    * 09 LB_5     LB_6     0 3 2 00001011100010001011|        q = D^0xffffffff^q = D^0x80
-    * 0a _L0x0a   SB_1     5 3 0 01011101110001011010| SB     Store byte. wjj=wradr=RS1+Simm
-    * 0b JALR_2   JALR_3   0 3 3 01000101110000110011|        Q=1. Prep legalize target
-    * 0c ADD_0    ADDI_0   1 3 2 00011101100000000100| ADD    add     Addition Q = RS1
-    * 0d MUL_0    MUL_1    3 3 2 100111010xx011100010| MUL    Store rs1 tp rM. Next read rs2. Q clear
-    * 0e SUB_0    SUB_1    3 3 2 000111010xx000010000| SUB    Subtraction
-    * 0f _L0x0f   StdIncPc 4 3 2 00100101011011100110| LUI    q = imm20
-    * 10 SUB_1    LB_6     0 3 2 00011111100010001011|        Q = ~RS2
-    * 11 AND_1    ANDI_1   0 3 2 00011101100000011010|        RS1^0xffffffff to Q
-    * 12 straddle Fetchu   6 4 4 11011010110001110110|  Fr10u IncPC, OpFetch
-    * 13 condb_2  condb_3  0 3 2 00011111100000010100|        ~RS2 in Q
-    * 14 condb_3  condb_4  0 3 3 01011001110000010101|        Calculate RS1+~RS2+1
-    * 15 condb_4  condb_5  1 3 5 00000001100000010110|        Branch on condition
-    * 16 condb_5  StdIncPc 3 3 2 000000010xx011100110|        Branch not taken.
-    * 17 condb_5t condb_6t 7 3 2 00100000100001111101|        Branch taken. yy=oldPC incase of access error
-    * 18 BEQ      condb_2  5 3 2 00111101011000010011| BEQ    Conditional Branch. Offset to Ryy
-    * 19 JALR_0   JALR_1   5 5 2 01000000x10001000001| JALR   (tmp) Prep pc=RS1+imm (target)
-    * 1a ANDI_1   StdIncPc 8 3 2 00100101001011100110|        rd = Iimm & RS1
-    * 1b _L0x1b   JAL_1    3 3 2 000000001xx000110010| JAL. J-imm is in q. Prep get isntradr from jj
-    * 1c ECAL_BRK ECAL_RET 2 3 2 00010110111010100110| ECALL/EBREAK  Select ECALL/(U/S/M)RET or EBREAK/WFI
-    * 1d ORI_2    StdIncPc 8 3 2 00100101011011100110|        rd = Iimm | RS1
-    * 1e aFault_1 aFault_2 3 3 3 11010101110011010100|        Q = 4
-    * 1f IJ_2     IJ_3     5 5 2 00000000111010110111|        Read word is to be masked with lsb = 0
-    * 20 LH_0     LH_1     9 0 0 01111011110001010010| LH     Load hword. Q = rdadr=RS1+Iimm.
-    * 21 XORI_1   StdIncPc 4 3 2 00100101000011100110|        rd = Iimm ^ RS1
-    * 22 MULHU_6  MULHU_7  0 3 6 00010101110100111001|        Q <= rM[0] ? Q+Ryy : Q. Prepare last shr/sar
-    * 23 _L0x23   StdIncPc 3 3 2 000001010xx011100110| FENCE  Prepare read PC (FENCE/FENCE.I)
-    * 24 SLLI_0   SLLI_1   0 6 0 00011110x11000110101| SLLI   Shift left immediate.
-    * 25 _L0x25   ADDI_0   3 3 2 000000001xx000000100| AUIPC  q = imm20+2 or imm20+4  (copy x/2)
-    * 26 OR_1     OR_2     5 3 2 00011101000000100111|        RS1^0xffffffff to jj
-    * 27 OR_2     ORI_2    0 3 2 01000001110000011101|        Q = rs2
-    * 28 _L0x28   SH_1     9 3 0 01011101110010010110| SH     Store halfword. jjw=wradr=RS1+Simm
-    * 29 XOR_1    XORI_1   0 3 2 00011101100000100001|        Q = RS1^0xFFFFFFFF
-    * 2a _L0x2a   SH_1     9 3 0 01011101110010010110| SH     Store halfword. jjw=wradr=RS1+Simm
-    * 2b SLTIX_1  SLTIX_2  0 3 3 010xxxx1010000110000|        RS1 - imm / RS1 - RS2
-    * 2c SLL_0    SLL_1    3 3 2 00011100xxx000111110| SLL    Shift left
-    * 2d MULH_0   MULH_1   1 6 2 00010101100001101010| MULH   Store rs1 to Q. Prep read 0, shcnt--
-    * 2e MULHU_1  MULHU_2  5 3 2 10011111011001000010|        rM<=RS2,  Rjj<=Q=0. next read RS1. 
-    * 2f _L0x2f   StdIncPc 4 3 2 00100101011011100110| LUI    q = imm20
-    * 30 SLTIX_2  StdIncPc 4 3 7 00100101011011100110|        Registered ALU flag to rd
-    * 31 SLTX_1   SLTIX_1  0 3 2 00011111100000101011|        ~rs2 to Q
-    * 32 JAL_1    JAL_2    7 3 2 00100000100010000110|      Prep Instradr to yy. Refetch instradr
-    * 33 JALR_3   JAL_25   7 5 2 00000001001010011110|        Q = (RS1+imn) & 0xfffffffe
-    * 34 JAL_3    Fetch    7 4 2 00011010100011011110|      Prep fetch next instr.
-    * 35 SLLI_1   SLLI_2   8 6 2 00110111100000110110|        Register to shift to Q (and TRG for shift 0)
-    * 36 SLLI_2   _L0x03   8 7 2 00110111110000000011|        Repeat Q = Q+Q until shregcnt == 0
-    * 37 ECALL_2  ECALL_3  a 3 5 001xxxx1000011010111|        mepc = pc, prep store 0 to mtval
-    * 38 BNE      condb_2  5 3 2 00111101011000010011| BNE    Conditional Branch. Offset to Ryy
-    * 39 MULHU_7  StdIncPc 8 3 2 10100101000011100110|        Last shift.
-    * 3a SRxI_1   SRxI_2   8 6 6 00110101100100111101|        Register to shift to Q
-    * 3b _L0x3b   JAL_1    3 3 2 000000001xx000110010| JAL. J-imm is in q. Prep get isntradr from jj
-    * 3c CSRRW_0  CSRRW_1  5 3 2 00101101011001001001| CSRRW  Decoded CSR adr in yy
-    * 3d SRxI_2   _L0x03   8 7 6 00110101100100000011|        Repeat Q >>= 1 until shregcnt == 0
-    * 3e SLL_1    SLLI_1   1 6 0 00011110x00000110101|        Shiftamount was in low 5 bits of RS2
-    * 3f SRx_1    SRxI_1   1 6 0 00011110x00000111010|        Shiftamount in low 5 bits of RS2
-    * 40 LW_0     LW_1     2 0 8 01011011110001010000| LW     Load word. Q=yy=rdadr=RS1+Iimm
-    * 41 JALR_1   JALR_2   7 3 2 00110101000000001011|        yy=jj. Prep get Q=1
-    * 42 MULHU_2  MULHU_3  0 6 6 00010101110101100000|        Q <= rM[0] ? Q+rs1 : Q. Prepare shr/sar
-    * 43 MULHU_4  MULHU_5  0 3 2 00000000100011101010|        Prepare read Rjj.
-    * 44 SLTI_0   SLTIX_1  0 3 2 00011111101000101011| SLTI   Set less than immediate (signed)
-    * 45 WFI_3    WFI_4    0 3 3 01010101110001100101|        Chk ofs. Now 0x104. Prep +1, so ~ofs+0x105
-    * 46 ILL_1    ILL_2    a 3 2 00110100x00001000111|        Store PC to mepc
-    * 47 ILL_2    ILL_3    a 5 2 00110101000010001111|        Store 0 to mtval
-    * 48 _L0x48   SW_1     2 8 8 01011101110001100110| SW     Store word. Q=wradr=RS1+Simm
-    * 49 CSRRW_1  CSRRW_2  0 3 3 01000001110001001011|        Construct PC storage adr
-    * 4a _L0x4a   SW_1     2 8 8 01011101110001100110| SW     Store word. Q=wradr=RS1+Simm
-    * 4b CSRRW_2  CSRRW_3  b 9 2 00010100100010110001|        Write PC to 0x100 start Prep emulation entrypt
-    * 4c SLT_0    SLTX_1   3 3 2 000111010xx000110001| SLT    Set less than (signed)
-    * 4d MULHSU_0 MULHU_1  7 6 2 00111101000000101110| MULHSU Signed rs1 to Ryy, nxt rd rs2. Q=0, shcnt--
-    * 4e eILL0b   ILLe     3 3 2 000xxxx0xxx011111110| Illegal instruction seen
-    * 4f MRET_8   MRET_9   3 3 3 11010101110001110100|        +4, so now 0x103
-    * 50 LW_1     StdIncPc 8 1 9 00110111000011100110|        Read until d=mem[(rs1+ofs) & ~3u]
-    * 51 LDAF_LW  LDAF_a   c 5 2 00110100111011011010|  err   LD AlignFault. Faulting adr to mtval
-    * 52 LH_1     LH_2     1 1 1 00010111100101010100|        Read until q=mem[(rs1+ofs) & ~3u]
-    * 53 LDAF_LH  LDAF_a   c 5 2 00110100111011011010|  err   LD AlignFault. Faulting adr to mtval
-    * 54 LH_2     LH_3     1 7 6 00010101100111101011|        Repeat shr until shreg = 0 (0, 8 or 16 times)
-    * 55 aFaultb  aFault_1 c 5 2 00110101011000011110|  err   LH Load access fault. Faulting adr to mtval
-    * 56 LH_4     LH_5     1 3 2 00010001101001010111|        q = (uint16_t) mem[rs1+Iimm]
-    * 57 LH_5     LB_6     0 3 2 00010001100010001011|        q = D^0xffffffff^q = D ^ 0x00008000
-    * 58 DIV_A    DIV_C    1 3 6 11010111100101101110|        Transfer rM to rDee
-    * 59 DIV_B    DIV_10   5 3 2 00111111011010011100|        REM = Q to yy
-    * 5a SB_1     SB_2     7 6 2 00110111100001011101|        Write d to Q and yy (for sh 0). Prep shift
-    * 5b _L0x5b   JAL_1    3 3 2 000000001xx000110010| JAL. J-imm is in q. Prep get isntradr from jj
-    * 5c CSRRS_0  CSRRW_1  5 3 2 00101101011001001001| CSRRS  Decoded CSR adr in yy
-    * 5d SB_2     SB_3     7 7 2 00110111110011111011|        Repeat shl until shreg = 0 (0,8,16 or 24 times)
-    * 5e LHU_1    LHU_2    1 1 1 00010111100101110000|        Read until q=mem[(rs1+ofs) & ~3u]
-    * 5f LDAF_LHU LDAF_a   c 5 2 00110100111011011010|  err   LD AlignFault. Faulting adr to mtval
-    * 60 MULHU_3  MULHU_2  1 3 2 10011111100001000010|        Shift Q and rM. Prepare read rs1
-    * 61 EBRKWFI2 EBREAK_1 5 3 5 00101101001011110111| EBREAK/WFI2 Select EBREAK or WFI.
-    * 62 DIV_8    DIV_7    0 6 3 01010111110011001000|        Conditionally subtract rs2. Update M[0]
-    * 63 DIV_9    DIV_A    0 a 3 01010111110001011000|        Last Cond. -rs2. Upd M[0]. Branch on INSTR[13]
-    * 64 SLTIU_0  SLTIX_1  0 3 2 00011111101000101011| SLTIU  Set less than immediate (unsigned)
-    * 65 WFI_4    WFI_5    3 3 5 000000010xx011101111|        Prepare read PC.
-    * 66 SW_1     SW_2     b 5 2 00011100100011110010|        Write d to a+k until accepted
-    * 67 SW_E1SWE SW_E2    c 5 2 00100100x11010010011|        Store faulting address alignment to mtval
-    * 68 DIV_12   StdIncPc 8 3 2 00100101000011100110|        RS2 > 0, RS1 >= 0, yy is true result
-    * 69 DIV_13   LB_6     0 3 2 00010101100010001011|        RS2 > 0, RS1 < 0, change sign yy
-    * 6a MULH_1   MULH_2   5 3 2 00110101000011111001|        Store ~rs1 to Ryy. Prep construct 1.
-    * 6b SB_4     SB_5     1 b 2 00011001100001111010|        Address back to Q. Prepare get item to write
-    * 6c SLTU_0   SLTX_1   3 3 2 000111010xx000110001| SLTU   Set less than (unsigned)
-    * 6d MULHU_0  MULHU_1  7 6 2 00111101000000101110| MULHU  Store rs1 to Ryy. Next read rs2. Q=0, shcnt--
-    * 6e DIV_C    DIV_e    7 3 2 00111100100010111001|        rM to yy. Q=ffffffff
-    * 6f MRET_6   MRET_7   0 3 3 010xxxx1110011001111|        ~302 + origImm + 1 for branch decision
-    * 70 LHU_2    LHU_3    1 7 6 00010101100110111010|        Repeat shr until shreg = 0 (0, 8 or 16 times)
-    * 71 aFaultc  aFault_1 c 5 2 00110101011000011110|  err   LHU Load access fault. Faulting adr to mtval
-    * 72 LBU_3    ANDI_1   0 3 2 00001101101000011010|        Invert q. Prepare read mask
-    * 73 unalignd straddle 0 3 2 00000101011000010010|  Fr10u Unaligned pc, prep read high hword
-    * 74 MRET_9   Fetch    5 4 3 01011010110011011110|        +1, IncPC, OpFetch next
-    * 75 IJ_5     Fetch    7 4 2 00011010101011011110|        Mask and use as PC
-    * 76 Fetchu   Fetch2u  0 3 a 00000111011011010101|  Fr10u Read and latch instruction
-    * 77 eFetchu  Fetch2u  0 1 b 00010111011011010101|  Fr10u rep Read until d=mem[(rs1+ofs) & ~3u]
-    * 78 DIV_4    DIV_6    5 3 2 00100001011010101010|        ~abs(divisor) to yy
-    * 79 DIV_5    DIV_3    0 3 3 11010101110010101000|        Kluge to let add1 work in DIV instr
-    * 7a SB_5     SW_2     8 5 2 00011000100011110010|        Write d to a+k until accepted
-    * 7b _L0x7b   JAL_1    3 3 2 000000001xx000110010| JAL. J-imm is in q. Prep get isntradr from jj
-    * 7c CSRRC_0  CSRRW_1  5 3 2 00101101011001001001| CSRRC  Decoded CSR adr in yy
-    * 7d condb_6t Fetch    5 4 2 01011010110011011110|        Branch taken.
-    * 7e NMI_1    NMI_2    a 3 2 001xxxx1000010010000|        Store pc to mepc.
-    * 7f unx7f             d 6 0 00xxxxxxxxxxxxxxxxxx| 7f: Not in use 
-    * 80 LBU_0    LBU_1    0 0 0 01011011110010000101| LBU    Load unsigned byte. Q = rdadr=RS1+Iimm.
-    * 81 unx81             d 6 0 00xxxxxxxxxxxxxxxxxx| 81: Not in use 
-    * 82 DIV_1    DIV_3    5 3 2 00011101000010101000|        jj=abs(RS1). Next handle divisor
-    * 83 DIV_2    DIV_1    0 3 2 01010101110010000010|        Dividend negative, make RS1-1
-    * 84 XORI_0   XORI_1   0 3 2 00011111101000100001| XORI   Xor immediate. Q=~Iimm
-    * 85 LBU_1    LBU_2    1 1 1 00010111100111110000|        Read until q=mem[(rs1+ofs) & ~3u]
-    * 86 JAL_2    JAL_25   5 5 2 01000001010010011110|      Prep pc = jj + ofs
-    * 87 unx87             d 6 0 00xxxxxxxxxxxxxxxxxx| 87: Not in use 
-    * 88 DIV_E    DIV_10   3 a 2 10011110xxx010011100|        RS2 != 0. Check signs
-    * 89 DIV_F    StdIncPc 4 3 2 00100101011011100110|        RS2 == 0, return 0xffffffff
-    * 8a DIVU_5   ANDI_1   3 3 6 110101110xx100011010|        Transfer rM to rDee
-    * 8b LB_6     StdIncPc 4 3 3 11100101010011100110|        WTRG=(D^0x80)+0xFFFFFF7F+1=(D^0x80)-0x80
-    * 8c XOR_0    XOR_1    3 3 2 000111110xx000101001| XOR    xor
-    * 8d DIV_0    DIV_1    1 c 2 10010111100010000010| DIV    Branch on sign dividend RS1
-    * 8e _LCSRRS_1 ILLe     3 3 2 000xxxx0xxx011111110| Illegal instruction seen
-    * 8f ILL_3    ILL_4    0 3 3 00010101110010101001|        Q = 1
-    * 90 NMI_2    JAL_3    c d 2 00101001011000110100|        mtval = 0.
-    * 91 LDAF_2   LDAF_3   6 d 3 11100100x10010010010|        Store 4 to mcause
-    * 92 LDAF_3   JAL_3    a 3 2 00110010x00000110100|        PC to mepc
-    * 93 SW_E2    SW_E3    a 3 2 00110111000010010101|        Store address that faulted
-    * 94 SW_E4    JAL_3    7 d 2 00110010x10000110100|        Store 6 to mcause
-    * 95 SW_E3    SW_E4    3 3 3 11010111110010010100|        Q = 3
-    * 96 SH_1     SH_2     7 6 2 00110111100010111011|        Write d to Q and yy (for sh 0). Prep shift
-    * 97 SW_E1SWH SW_E2    c 5 2 00100100x11010010011|        Store faulting address alignment to mtval
-    * 98 BLT      condb_2  5 3 2 00111101011000010011| BLT    Conditional Branch. Offset to Ryy
-    * 99 _L0x99   ILLe     3 3 2 000xxxx0xxx011111110|  Not in use (illegal as entry)
-    * 9a ECALL_6  JAL_3    6 d 2 01110010x10000110100|        mcause = 11
-    * 9b SH_4     SH_5     e 8 2 00011001100010011111|        Address back to Q. Prepare get item to write
-    * 9c DIV_10   DIV_12   1 a 2 10011001000001101000|        RS2 > 0. Branch on sign of RS1
-    * 9d DIV_11   DIV_14   1 a 2 10011001000010100010|        RS2 < 0. Branch on sign of RS1
-    * 9e JAL_25   JAL_3    d 3 4 11100101010000110100|      Prep WTRG = jj+2/4 (return adr)
-    * 9f SH_5     SW_2     b 3 2 00011000100011110010|        Write d to a+k until accepted
-    * a0 LHU_0    LHU_1    9 0 0 01111011110001011110| LHU    Load unsigned hword. Q = rdadr=RS1+Iimm
-    * a1 ECALL_4  ECALL_5  3 3 3 11010101110010110110|        Q = 4
-    * a2 DIV_14   LB_6     0 3 2 00010101100010001011|        RS2 < 0, RS1 >= 0, change sign yy
-    * a3 DIV_15   StdIncPc 8 3 2 00100101000011100110|        RS2 < 0, RS1 < 0, yy is true result
-    * a4 SRxI_0   SRxI_1   0 6 0 00011110x11000111010| SRxI   Shift Right immediate (both logic/arith here)
-    * a5 MRET_3   MRET_4   0 3 3 01001101110010101111|        0x102 + 0xff + 1 = 0x202
-    * a6 ECAL_RET ECALL_1  2 3 8 00010110111011010000| ECALL/(U/S/M)RET Select ECALL or (U/S/M)RET
-    * a7 EBRKWFI1 EBRKWFI2 0 3 2 010xxxx1110001100001| EBREAK/WFI1 Prepare select EBREAK or WFI
-    * a8 DIV_3    DIV_4    0 a 2 10010101100001111000|        Branch on sign divisor RS2
-    * a9 ILL_4    JAL_3    5 d 3 01110010x10000110100|        Store 2 to mcause
-    * aa DIV_6    DIV_7    3 3 2 100101110xx011001000|        Write M. Prepare shift
-    * ab EBREAK_2 ECALL_6  a 3 2 00110101000010011010|        pc to mepc
-    * ac _L0xac   SRx_1    3 3 2 00011100xxx000111111| SRx    Shift Right (both SRL and SRA)
-    * ad DIVU_0   DIVU_1   3 6 2 100111010xx011100000| DIVU   Store rs1 to rM. Q=0. Prepare invert rs2
-    * ae _L0xae   SRx_1    3 3 2 00011100xxx000111111| SRx    Shift Right (both SRL and SRA)
-    * af MRET_4   MRET_5   0 3 3 010xxxx1110011000101|        0x202 + 0xff + 1 = 0x302
-    * b0 aF_SW_3  LDAF_3   6 d 2 01100100x10010010010|        Store 7 to mcause
-    * b1 CSRRW_3  CSRRW_4  3 3 3 11010101110010110010|        Prep emulation entrypt 0x108, here Q to 0x104
-    * b2 CSRRW_4  Fetch    6 4 3 11011010110011011110|        IncPC, OpFetch, but force +4
-    * b3 unxb3             d 6 0 00xxxxxxxxxxxxxxxxxx| b3: Not in use 
-    * b4 eFetch3  unalignd c 3 c 01011111110001110011|  Fr11  Write minstret. Update I. Q=immediate, use dinx
-    * b5 SH_3     SH_4     0 3 2 00000001011010011011|        Prepare get back address to use 
-    * b6 ECALL_5  ECALL_6  3 3 3 11010101110010011010|        Q = 8
-    * b7 IJ_3     IJ_4     7 3 2 00110101000010111101|        Store present PC in case of access error
-    * b8 BGE      condb_2  5 3 2 00111101011000010011| BGE    Conditional Branch. Offset to Ryy
-    * b9 DIV_e    DIV_D    0 3 3 00011001100011000000|        Calc carry of RS2+0xFFFFFFFF
-    * ba LHU_3    ANDI_1   0 3 2 00001111101000011010|        Invert q. Prepare read mask
-    * bb SH_2     SH_3     7 7 2 00110111110010110101|        Repeat shl until shreg = 0 (0,8 or 24 times)
-    * bc CSRRWI_0 CSRRW_1  5 3 2 00101101011001001001| CSRRWI Decoded CSR adr in yy
-    * bd IJ_4     IJ_5     0 3 3 01000101110001110101|        Construct Q = 1
-    * be IJ_1     IJ_2     1 1 2 00010111100000011111|        Read until q=mem[(rs1+ofs)&~1u]
-    * bf IJT_1    IJT_2    1 1 2 00010111100011000001|        Exit CSR, enter trap
-    * c0 DIV_D    DIV_E    1 3 5 00011101100010001000|        Is RS2 == 0?
-    * c1 IJT_2    IJT_3    5 3 2 00110101011011101001|        Read word is to be masked with ~1u
-    * c2 DIVU_3   DIVU_2   0 6 3 01010111110011001010|        Conditionally subtract rs2. Update M[0]
-    * c3 DIVU_4   DIVU_5   0 a 3 01010111110010001010|        Last Cond. -rs2. Upd M[0]. Branch on INSTR[13]
-    * c4 ORI_0    ORI_1    5 3 2 00011111001011100001| ORI    Or immediate. jj=~Iimm
-    * c5 MRET_5   MRET_6   0 3 2 00000001101001101111|        ~302
-    * c6 IJT_4    ILL_2    a 3 2 00110101101001000111|        Mask and store to mepc and Q for read of instr
-    * c7 QINT_1   QINT_2   a 3 2 001xxxx1000011001011|        Store pc to mepc.
-    * c8 DIV_7    DIV_8    1 3 d 10011001110001100010|        Shift (Q,M) left. Prepare unsigned sub
-    * c9 MRET_2   MRET_3   3 3 2 01001101110010100101|        0xff+3 = 0x102
-    * ca DIVU_2   DIVU_3   1 3 d 10011001110011000010|        Shift (Q,M) left. Prepare unsigned sub
-    * cb QINT_2   StdIncPc c d 2 00101001011011100110|        mtval = 0.
-    * cc OR_0     OR_1     3 3 2 000111110xx000100110| OR     or
-    * cd REM_0    DIV_1    1 c 2 10010111100010000010| REM    Branch on sign dividend RS1
-    * ce _LCSRRCI_1 ILLe     3 3 2 000xxxx0xxx011111110| Illegal instruction seen
-    * cf MRET_7   MRET_8   3 3 5 000011010xx001001111|        Prepare emulation entry point 0x104
-    * d0 ECALL_1  ECALL_2  0 3 3 01000001110000110111| ECALL  Verify Imm==0x000
-    * d1 MRET_1   MRET_2   5 3 2 00001101011011001001| MRET   First save Imm, start build constant for check
-    * d2 LB_2     LB_3     1 7 6 00010101100100000110|        Repeat shr until shreg == 0 (0,8,16,24 times)
-    * d3 aFaultd  aFault_1 c 5 2 00110101011000011110|  err   LB Load access fault. Faulting adr to mtval
-    * d4 aFault_2 LDAF_3   5 d 3 01100100x10010010010|        Store 5 to mcause
-    * d5 Fetch2u           c 5 e 01011111110000000000|  Fr11  Update ttime. Update I. Q=immediate. Use dinx
-    * d6 eILL0c   ILLe     3 3 2 000xxxx0xxx011111110| Illegal instruction seen
-    * d7 ECALL_3  ECALL_4  c 5 2 00110101011010100001|        mtval = 0, now start the chore of 11 to mcause
-    * d8 BLTU     condb_2  5 3 2 00111101011000010011| BLTU   Conditional Branch. Offset to Ryy
-    * d9 MULH_3   MULHU_2  3 3 2 100111110xx001000010|        rM<=RS2, Q = 0. next read RS1. Join.
-    * da LDAF_a   LDAF_2   3 3 2 000101010xx010010001|        Extra cycle after error detected write mtval
-    * db jFault_1 LDAF_3   5 5 3 01111000x10010010010|        Store 1 to mcause
-    * dc CSRRSI_0 CSRRW_1  5 3 2 00101101011001001001| CSRRSI Decoded CSR adr in yy
-    * dd aF_SW_1  aF_SW_2  c 5 2 00110101011011100101|  err   SW Store access fault. Faulting adr to mtval
-    * de Fetch    Fetch2   5 1 b 00010111011011110100|  Fr11  Read and latch instruction
-    * df eFetch   Fetch2   5 1 b 00010111011011110100|  Fr11  rep Read until d=mem[(rs1+ofs) & ~3u]
-    * e0 DIVU_1   DIVU_2   5 3 2 00110111000011001010|        Store inverted rs2 to yy. Prepare shift
-    * e1 ORI_1    ORI_2    1 3 2 00000001100000011101|        Q = RS1
-    * e2 MUL_1    MUL_2    0 6 6 00010101110111101000|        Q <= rM[0] ? Q+rs2 : Q. Prepare shr/sar
-    * e3 MUL_3    ANDI_1   3 3 6 110101110xx100011010|        Transfer rM to rDee
-    * e4 ANDI_0   ANDI_1   0 3 2 00011111101000011010| ANDI   And immediate. Q=~Iimm
-    * e5 aF_SW_2  aF_SW_3  3 3 3 11010101110010110000|        Q = 4
-    * e6 StdIncPc Fetch    6 4 4 11011010110011011110|  Fr11  IncPC, OpFetch
-    * e7 aFault   aFault_1 c 5 2 00110101011000011110|  err   Load access fault. Faulting adr to mtval
-    * e8 MUL_2    MUL_1    1 3 2 10011101100011100010|        Shift Q and rM. Prepare read rs2
-    * e9 IJT_3    IJT_4    0 3 3 01011001110011000110|        Construct Q = 1
-    * ea MULHU_5  MULHU_6  0 3 2 00011001110000100010|        Q <= rM[0] ? Q+Rjj : Q. Prepare read Ryy
-    * eb LH_3     LH_4     0 3 2 00001111101001010110|        q = ~mem[rs1+ofs]
-    * ec AND_0    AND_1    3 3 2 000111110xx000010001| AND    And 
-    * ed REMU_0   DIVU_1   3 6 2 100111010xx011100000| REMU   Store dividend to rM. Prepare read divisor.Q=0
-    * ee eILL0a   ILLe     3 3 2 000xxxx0xxx011111110| Illegal instruction seen
-    * ef WFI_5    Fetch    6 4 3 11011010110011011110|        IncPC, OpFetch
-    * f0 LBU_2    LBU_3    1 7 6 00010101100101110010|        Repeat shr until shreg = 0 (0, 8 or 16 times)
-    * f1 aFaulte  aFault_1 c 5 2 00110101011000011110|  err   LBU Load access fault. Faulting adr to mtval
-    * f2 SW_2     StdIncPc 3 3 2 000001010xx011100110|        Prepare read PC
-    * f3 aF_SW    aF_SW_1  3 3 2 000xxxx01xx011011101|  err   SW/SH/SB access fault. Rest to set SEL_O=4'hf
-    * f4 Fetch2   eFetch3  c 5 f 01000011010010110100|  Fr11  Update ttime. Update I. Q=immediate. Use dinx
-    * f5 jFault   jFault_1 c 5 2 00110101011011011011|  err   Fetch access fault. Faulting adr to mtval
-    * f6 WFI_1    WFI_2    3 3 3 11011001110011111010| WFI    Chk offset=0x105. Now 0xff. Prep 0xff+4 = 0x103
-    * f7 EBREAK_1 EBREAK_2 c 5 2 00100001011010101011| EBREAK mepc = pc, store 0 to mtval
-    * f8 BGEU     condb_2  5 3 2 00111101011000010011| BGEU   Conditional Branch. Offset to Ryy
-    * f9 MULH_2   MULH_3   5 3 3 01011101010011011001|        Store 1 to Rjj. next read rs2, Q=0
-    * fa WFI_2    WFI_3    0 3 3 01010101110001000101|        Chk ofs. Now 0x103. Prep +1+~ofs, so ~ofs+0x104
-    * fb SB_3     SB_4     0 3 2 00000001011001101011|        Prepare get back address to use 
-    * fc CSRRCI_0 CSRRW_1  5 3 2 00101101011001001001| CSRRCI Decoded CSR adr in yy
-    * fd NMI_0    NMI_1    3 3 2 000001010xx001111110| NMI    Get current PC
-    * fe ILLe     ILL_1    3 3 2 00000100xxx001000110| Illegal
-    * ff QINT_0   QINT_1   3 3 2 000001010xx011000111| INT    Get current PC
+    * 00 LB_0     LB_1     0 0 0 00000000000001011011| LB     Load byte. q = rdadr=RS1+0fs
+    * 01 LB_1     LB_2     1 1 1 00010001000100010111|        Read until q=mem[rs1+ofs) & ~3u]
+    * 02 IJ_0     IJ_1     2 2 2 00100010001001011011| IJ     Jump to mem[(rs1+ofs)&~1u]. inCSR=0
+    * 03 _L0x03   StdIncPc 3 3 2 00110011001000000101| FENCE  Prepare read PC (FENCE/FENCE.I)
+    * 04 ADDI_0   StdIncPc 4 3 2 01000011001001100101| ADDI   Add immediate. rd =RS1+Iimm (or joined)
+    * 05 _L0x05   ADDI_0   3 3 2 00110011001000000000| AUIPC  q = imm20+2 or imm20+4  (copy x/2)
+    * 06 LB_3     LB_4     0 3 2 00000011001000001101|        q = ~mem[rs1+ofs]
+    * 07 LB_4     LB_5     1 3 2 00010011001000001011|        q = (uint8_t) mem[rs1+Iimm]
+    * 08 _L0x08   SB_1     5 3 0 01010011000001011101| SB     Store byte. wjj=wradr=RS1+Simm
+    * 09 LB_5     LB_6     0 3 2 00000011001000001011|        q = D^0xffffffff^q = D^0x80
+    * 0a _L0x0a   SB_1     5 3 0 01010011000001011101| SB     Store byte. wjj=wradr=RS1+Simm
+    * 0b JALR_2   JALR_3   0 3 3 00000011001101000101|        Q=1. Prep legalize target
+    * 0c ADD_0    ADDI_0   1 3 2 00010011001000011101| ADD    add     Addition Q = RS1
+    * 0d MUL_0    MUL_1    3 3 2 00110011001010011101| MUL    Store rs1 tp rM. Next read rs2. Q clear
+    * 0e SUB_0    SUB_1    3 3 2 00110011001000011101| SUB    Subtraction
+    * 0f _L0x0f   StdIncPc 4 3 2 01000011001000100101| LUI    q = imm20
+    * 10 SUB_1    LB_6     0 3 2 00000011001000011111|        Q = ~RS2
+    * 11 AND_1    ANDI_1   0 3 2 00000011001000011101|        RS1^0xffffffff to Q
+    * 12 straddle Fetchu   6 4 4 01100100010011011010|  Fr10u IncPC, OpFetch
+    * 13 condb_2  condb_3  0 3 2 00000011001000011111|        ~RS2 in Q
+    * 14 condb_3  condb_4  0 3 3 00000011001101011001|        Calculate RS1+~RS2+1
+    * 15 condb_4  condb_5  1 3 5 00010011010100000001|        Branch on condition
+    * 16 condb_5  StdIncPc 3 3 2 00110011001000000001|        Branch not taken.
+    * 17 condb_5t condb_6t 7 3 2 01110011001000100000|        Branch taken. yy=oldPC incase of access error
+    * 18 BEQ      condb_2  5 3 2 01010011001000111101| BEQ    Conditional Branch. Offset to Ryy
+    * 19 JALR_0   JALR_1   5 5 2 01010101001001000000| JALR   (tmp) Prep pc=RS1+imm (target)
+    * 1a ANDI_1   StdIncPc 8 3 2 10000011001000100101|        rd = Iimm & RS1
+    * 1b _L0x1b   JAL_1    3 3 2 00110011001000000000| JAL. J-imm is in q. Prep get isntradr from jj
+    * 1c ECAL_BRK ECAL_RET 2 3 2 00100011001000010110| ECALL/EBREAK  Select ECALL/(U/S/M)RET or EBREAK/WFI
+    * 1d ORI_2    StdIncPc 8 3 2 10000011001000100101|        rd = Iimm | RS1
+    * 1e aFault_1 aFault_2 3 3 3 00110011001111010101|        Q = 4
+    * 1f IJ_2     IJ_3     5 5 2 01010101001000000000|        Read word is to be masked with lsb = 0
+    * 20 LH_0     LH_1     9 0 0 10010000000001111011| LH     Load hword. Q = rdadr=RS1+Iimm.
+    * 21 XORI_1   StdIncPc 4 3 2 01000011001000100101|        rd = Iimm ^ RS1
+    * 22 MULHU_6  MULHU_7  0 3 6 00000011011000010101|        Q <= rM[0] ? Q+Ryy : Q. Prepare last shr/sar
+    * 23 _L0x23   StdIncPc 3 3 2 00110011001000000101| FENCE  Prepare read PC (FENCE/FENCE.I)
+    * 24 SLLI_0   SLLI_1   0 6 0 00000110000000011110| SLLI   Shift left immediate.
+    * 25 _L0x25   ADDI_0   3 3 2 00110011001000000000| AUIPC  q = imm20+2 or imm20+4  (copy x/2)
+    * 26 OR_1     OR_2     5 3 2 01010011001000011101|        RS1^0xffffffff to jj
+    * 27 OR_2     ORI_2    0 3 2 00000011001001000001|        Q = rs2
+    * 28 _L0x28   SH_1     9 3 0 10010011000001011101| SH     Store halfword. jjw=wradr=RS1+Simm
+    * 29 XOR_1    XORI_1   0 3 2 00000011001000011101|        Q = RS1^0xFFFFFFFF
+    * 2a _L0x2a   SH_1     9 3 0 10010011000001011101| SH     Store halfword. jjw=wradr=RS1+Simm
+    * 2b SLTIX_1  SLTIX_2  0 3 3 000000110011010xxxx1|        RS1 - imm / RS1 - RS2
+    * 2c SLL_0    SLL_1    3 3 2 00110011001000011100| SLL    Shift left
+    * 2d MULH_0   MULH_1   1 6 2 00010110001000010101| MULH   Store rs1 to Q. Prep read 0, shcnt--
+    * 2e MULHU_1  MULHU_2  5 3 2 01010011001010011111|        rM<=RS2,  Rjj<=Q=0. next read RS1. 
+    * 2f _L0x2f   StdIncPc 4 3 2 01000011001000100101| LUI    q = imm20
+    * 30 SLTIX_2  StdIncPc 4 3 7 01000011011100100101|        Registered ALU flag to rd
+    * 31 SLTX_1   SLTIX_1  0 3 2 00000011001000011111|        ~rs2 to Q
+    * 32 JAL_1    JAL_2    7 3 2 01110011001000100000|      Prep Instradr to yy. Refetch instradr
+    * 33 JALR_3   JAL_25   7 5 2 01110101001000000001|        Q = (RS1+imn) & 0xfffffffe
+    * 34 JAL_3    Fetch    7 4 2 01110100001000011010|      Prep fetch next instr.
+    * 35 SLLI_1   SLLI_2   8 6 2 10000110001000110111|        Register to shift to Q (and TRG for shift 0)
+    * 36 SLLI_2   _L0x03   8 7 2 10000111001000110111|        Repeat Q = Q+Q until shregcnt == 0
+    * 37 ECALL_2  ECALL_3  a 3 5 101000110101001xxxx1|        mepc = pc, prep store 0 to mtval
+    * 38 BNE      condb_2  5 3 2 01010011001000111101| BNE    Conditional Branch. Offset to Ryy
+    * 39 MULHU_7  StdIncPc 8 3 2 10000011001010100101|        Last shift.
+    * 3a SRxI_1   SRxI_2   8 6 6 10000110011000110101|        Register to shift to Q
+    * 3b _L0x3b   JAL_1    3 3 2 00110011001000000000| JAL. J-imm is in q. Prep get isntradr from jj
+    * 3c CSRRW_0  CSRRW_1  5 3 2 01010011001000101101| CSRRW  Decoded CSR adr in yy
+    * 3d SRxI_2   _L0x03   8 7 6 10000111011000110101|        Repeat Q >>= 1 until shregcnt == 0
+    * 3e SLL_1    SLLI_1   1 6 0 00010110000000011110|        Shiftamount was in low 5 bits of RS2
+    * 3f SRx_1    SRxI_1   1 6 0 00010110000000011110|        Shiftamount in low 5 bits of RS2
+    * 40 LW_0     LW_1     2 0 8 00100000100001011011| LW     Load word. Q=yy=rdadr=RS1+Iimm
+    * 41 JALR_1   JALR_2   7 3 2 01110011001000110101|        yy=jj. Prep get Q=1
+    * 42 MULHU_2  MULHU_3  0 6 6 00000110011000010101|        Q <= rM[0] ? Q+rs1 : Q. Prepare shr/sar
+    * 43 MULHU_4  MULHU_5  0 3 2 00000011001000000000|        Prepare read Rjj.
+    * 44 SLTI_0   SLTIX_1  0 3 2 00000011001000011111| SLTI   Set less than immediate (signed)
+    * 45 WFI_3    WFI_4    0 3 3 00000011001101010101|        Chk ofs. Now 0x104. Prep +1, so ~ofs+0x105
+    * 46 ILL_1    ILL_2    a 3 2 10100011001000110100|        Store PC to mepc
+    * 47 ILL_2    ILL_3    a 5 2 10100101001000110101|        Store 0 to mtval
+    * 48 _L0x48   SW_1     2 8 8 00101000100001011101| SW     Store word. Q=wradr=RS1+Simm
+    * 49 CSRRW_1  CSRRW_2  0 3 3 00000011001101000001|        Construct PC storage adr
+    * 4a _L0x4a   SW_1     2 8 8 00101000100001011101| SW     Store word. Q=wradr=RS1+Simm
+    * 4b CSRRW_2  CSRRW_3  b 9 2 10111001001000010100|        Write PC to 0x100 start Prep emulation entrypt
+    * 4c SLT_0    SLTX_1   3 3 2 00110011001000011101| SLT    Set less than (signed)
+    * 4d MULHSU_0 MULHU_1  7 6 2 01110110001000111101| MULHSU Signed rs1 to Ryy, nxt rd rs2. Q=0, shcnt--
+    * 4e eILL0b   ILLe     3 3 2 001100110010000xxxx0| Illegal instruction seen
+    * 4f MRET_8   MRET_9   3 3 3 00110011001111010101|        +4, so now 0x103
+    * 50 LW_1     StdIncPc 8 1 9 10000001100100110111|        Read until d=mem[(rs1+ofs) & ~3u]
+    * 51 LDAF_LW  LDAF_a   c 5 2 11000101001000110100|  err   LD AlignFault. Faulting adr to mtval
+    * 52 LH_1     LH_2     1 1 1 00010001000100010111|        Read until q=mem[(rs1+ofs) & ~3u]
+    * 53 LDAF_LH  LDAF_a   c 5 2 11000101001000110100|  err   LD AlignFault. Faulting adr to mtval
+    * 54 LH_2     LH_3     1 7 6 00010111011000010101|        Repeat shr until shreg = 0 (0, 8 or 16 times)
+    * 55 aFaultb  aFault_1 c 5 2 11000101001000110101|  err   LH Load access fault. Faulting adr to mtval
+    * 56 LH_4     LH_5     1 3 2 00010011001000010001|        q = (uint16_t) mem[rs1+Iimm]
+    * 57 LH_5     LB_6     0 3 2 00000011001000010001|        q = D^0xffffffff^q = D ^ 0x00008000
+    * 58 DIV_A    DIV_C    1 3 6 00010011011011010111|        Transfer rM to rDee
+    * 59 DIV_B    DIV_10   5 3 2 01010011001000111111|        REM = Q to yy
+    * 5a SB_1     SB_2     7 6 2 01110110001000110111|        Write d to Q and yy (for sh 0). Prep shift
+    * 5b _L0x5b   JAL_1    3 3 2 00110011001000000000| JAL. J-imm is in q. Prep get isntradr from jj
+    * 5c CSRRS_0  CSRRW_1  5 3 2 01010011001000101101| CSRRS  Decoded CSR adr in yy
+    * 5d SB_2     SB_3     7 7 2 01110111001000110111|        Repeat shl until shreg = 0 (0,8,16 or 24 times)
+    * 5e LHU_1    LHU_2    1 1 1 00010001000100010111|        Read until q=mem[(rs1+ofs) & ~3u]
+    * 5f LDAF_LHU LDAF_a   c 5 2 11000101001000110100|  err   LD AlignFault. Faulting adr to mtval
+    * 60 MULHU_3  MULHU_2  1 3 2 00010011001010011111|        Shift Q and rM. Prepare read rs1
+    * 61 EBRKWFI2 EBREAK_1 5 3 5 01010011010100101101| EBREAK/WFI2 Select EBREAK or WFI.
+    * 62 DIV_8    DIV_7    0 6 3 00000110001101010111|        Conditionally subtract rs2. Update M[0]
+    * 63 DIV_9    DIV_A    0 a 3 00001010001101010111|        Last Cond. -rs2. Upd M[0]. Branch on INSTR[13]
+    * 64 SLTIU_0  SLTIX_1  0 3 2 00000011001000011111| SLTIU  Set less than immediate (unsigned)
+    * 65 WFI_4    WFI_5    3 3 5 00110011010100000001|        Prepare read PC.
+    * 66 SW_1     SW_2     b 5 2 10110101001000011100|        Write d to a+k until accepted
+    * 67 SW_E1SWE SW_E2    c 5 2 11000101001000100100|        Store faulting address alignment to mtval
+    * 68 DIV_12   StdIncPc 8 3 2 10000011001000100101|        RS2 > 0, RS1 >= 0, yy is true result
+    * 69 DIV_13   LB_6     0 3 2 00000011001000010101|        RS2 > 0, RS1 < 0, change sign yy
+    * 6a MULH_1   MULH_2   5 3 2 01010011001000110101|        Store ~rs1 to Ryy. Prep construct 1.
+    * 6b SB_4     SB_5     1 b 2 00011011001000011001|        Address back to Q. Prepare get item to write
+    * 6c SLTU_0   SLTX_1   3 3 2 00110011001000011101| SLTU   Set less than (unsigned)
+    * 6d MULHU_0  MULHU_1  7 6 2 01110110001000111101| MULHU  Store rs1 to Ryy. Next read rs2. Q=0, shcnt--
+    * 6e DIV_C    DIV_e    7 3 2 01110011001000111100|        rM to yy. Q=ffffffff
+    * 6f MRET_6   MRET_7   0 3 3 000000110011010xxxx1|        ~302 + origImm + 1 for branch decision
+    * 70 LHU_2    LHU_3    1 7 6 00010111011000010101|        Repeat shr until shreg = 0 (0, 8 or 16 times)
+    * 71 aFaultc  aFault_1 c 5 2 11000101001000110101|  err   LHU Load access fault. Faulting adr to mtval
+    * 72 LBU_3    ANDI_1   0 3 2 00000011001000001101|        Invert q. Prepare read mask
+    * 73 unalignd straddle 0 3 2 00000011001000000101|  Fr10u Unaligned pc, prep read high hword
+    * 74 MRET_9   Fetch    5 4 3 01010100001101011010|        +1, IncPC, OpFetch next
+    * 75 IJ_5     Fetch    7 4 2 01110100001000011010|        Mask and use as PC
+    * 76 Fetchu   Fetch2u  0 3 a 00000011101000000111|  Fr10u Read and latch instruction
+    * 77 eFetchu  Fetch2u  0 1 b 00000001101100010111|  Fr10u rep Read until d=mem[(rs1+ofs) & ~3u]
+    * 78 DIV_4    DIV_6    5 3 2 01010011001000100001|        ~abs(divisor) to yy
+    * 79 DIV_5    DIV_3    0 3 3 00000011001111010101|        Kluge to let add1 work in DIV instr
+    * 7a SB_5     SW_2     8 5 2 10000101001000011000|        Write d to a+k until accepted
+    * 7b _L0x7b   JAL_1    3 3 2 00110011001000000000| JAL. J-imm is in q. Prep get isntradr from jj
+    * 7c CSRRC_0  CSRRW_1  5 3 2 01010011001000101101| CSRRC  Decoded CSR adr in yy
+    * 7d condb_6t Fetch    5 4 2 01010100001001011010|        Branch taken.
+    * 7e NMI_1    NMI_2    a 3 2 101000110010001xxxx1|        Store pc to mepc.
+    * 7f unx7f             d 6 0 11010110000000xxxxxx| 7f: Not in use 
+    * 80 LBU_0    LBU_1    0 0 0 00000000000001011011| LBU    Load unsigned byte. Q = rdadr=RS1+Iimm.
+    * 81 unx81             d 6 0 11010110000000xxxxxx| 81: Not in use 
+    * 82 DIV_1    DIV_3    5 3 2 01010011001000011101|        jj=abs(RS1). Next handle divisor
+    * 83 DIV_2    DIV_1    0 3 2 00000011001001010101|        Dividend negative, make RS1-1
+    * 84 XORI_0   XORI_1   0 3 2 00000011001000011111| XORI   Xor immediate. Q=~Iimm
+    * 85 LBU_1    LBU_2    1 1 1 00010001000100010111|        Read until q=mem[(rs1+ofs) & ~3u]
+    * 86 JAL_2    JAL_25   5 5 2 01010101001001000001|      Prep pc = jj + ofs
+    * 87 unx87             d 6 0 11010110000000xxxxxx| 87: Not in use 
+    * 88 DIV_E    DIV_10   3 a 2 00111010001010011110|        RS2 != 0. Check signs
+    * 89 DIV_F    StdIncPc 4 3 2 01000011001000100101|        RS2 == 0, return 0xffffffff
+    * 8a DIVU_5   ANDI_1   3 3 6 00110011011011010111|        Transfer rM to rDee
+    * 8b LB_6     StdIncPc 4 3 3 01000011001111100101|        WTRG=(D^0x80)+0xFFFFFF7F+1=(D^0x80)-0x80
+    * 8c XOR_0    XOR_1    3 3 2 00110011001000011111| XOR    xor
+    * 8d DIV_0    DIV_1    1 c 2 00011100001010010111| DIV    Branch on sign dividend RS1
+    * 8e _LCSRRS_1 ILLe     3 3 2 001100110010000xxxx0| Illegal instruction seen
+    * 8f ILL_3    ILL_4    0 3 3 00000011001100010101|        Q = 1
+    * 90 NMI_2    JAL_3    c d 2 11001101001000101001|        mtval = 0.
+    * 91 LDAF_2   LDAF_3   6 d 3 01101101001111100100|        Store 4 to mcause
+    * 92 LDAF_3   JAL_3    a 3 2 10100011001000110010|        PC to mepc
+    * 93 SW_E2    SW_E3    a 3 2 10100011001000110111|        Store address that faulted
+    * 94 SW_E4    JAL_3    7 d 2 01111101001000110010|        Store 6 to mcause
+    * 95 SW_E3    SW_E4    3 3 3 00110011001111010111|        Q = 3
+    * 96 SH_1     SH_2     7 6 2 01110110001000110111|        Write d to Q and yy (for sh 0). Prep shift
+    * 97 SW_E1SWH SW_E2    c 5 2 11000101001000100100|        Store faulting address alignment to mtval
+    * 98 BLT      condb_2  5 3 2 01010011001000111101| BLT    Conditional Branch. Offset to Ryy
+    * 99 _L0x99   ILLe     3 3 2 001100110010000xxxx0|  Not in use (illegal as entry)
+    * 9a ECALL_6  JAL_3    6 d 2 01101101001001110010|        mcause = 11
+    * 9b SH_4     SH_5     e 8 2 11101000001000011001|        Address back to Q. Prepare get item to write
+    * 9c DIV_10   DIV_12   1 a 2 00011010001010011001|        RS2 > 0. Branch on sign of RS1
+    * 9d DIV_11   DIV_14   1 a 2 00011010001010011001|        RS2 < 0. Branch on sign of RS1
+    * 9e JAL_25   JAL_3    d 3 4 11010011010011100101|      Prep WTRG = jj+2/4 (return adr)
+    * 9f SH_5     SW_2     b 3 2 10110011001000011000|        Write d to a+k until accepted
+    * a0 LHU_0    LHU_1    9 0 0 10010000000001111011| LHU    Load unsigned hword. Q = rdadr=RS1+Iimm
+    * a1 ECALL_4  ECALL_5  3 3 3 00110011001111010101|        Q = 4
+    * a2 DIV_14   LB_6     0 3 2 00000011001000010101|        RS2 < 0, RS1 >= 0, change sign yy
+    * a3 DIV_15   StdIncPc 8 3 2 10000011001000100101|        RS2 < 0, RS1 < 0, yy is true result
+    * a4 SRxI_0   SRxI_1   0 6 0 00000110000000011110| SRxI   Shift Right immediate (both logic/arith here)
+    * a5 MRET_3   MRET_4   0 3 3 00000011001101001101|        0x102 + 0xff + 1 = 0x202
+    * a6 ECAL_RET ECALL_1  2 3 8 00100011100000010110| ECALL/(U/S/M)RET Select ECALL or (U/S/M)RET
+    * a7 EBRKWFI1 EBRKWFI2 0 3 2 000000110010010xxxx1| EBREAK/WFI1 Prepare select EBREAK or WFI
+    * a8 DIV_3    DIV_4    0 a 2 00001010001010010101|        Branch on sign divisor RS2
+    * a9 ILL_4    JAL_3    5 d 3 01011101001101110010|        Store 2 to mcause
+    * aa DIV_6    DIV_7    3 3 2 00110011001010010111|        Write M. Prepare shift
+    * ab EBREAK_2 ECALL_6  a 3 2 10100011001000110101|        pc to mepc
+    * ac _L0xac   SRx_1    3 3 2 00110011001000011100| SRx    Shift Right (both SRL and SRA)
+    * ad DIVU_0   DIVU_1   3 6 2 00110110001010011101| DIVU   Store rs1 to rM. Q=0. Prepare invert rs2
+    * ae _L0xae   SRx_1    3 3 2 00110011001000011100| SRx    Shift Right (both SRL and SRA)
+    * af MRET_4   MRET_5   0 3 3 000000110011010xxxx1|        0x202 + 0xff + 1 = 0x302
+    * b0 aF_SW_3  LDAF_3   6 d 2 01101101001001100100|        Store 7 to mcause
+    * b1 CSRRW_3  CSRRW_4  3 3 3 00110011001111010101|        Prep emulation entrypt 0x108, here Q to 0x104
+    * b2 CSRRW_4  Fetch    6 4 3 01100100001111011010|        IncPC, OpFetch, but force +4
+    * b3 unxb3             d 6 0 11010110000000xxxxxx| b3: Not in use 
+    * b4 eFetch3  unalignd c 3 c 11000011110001011111|  Fr11  Write minstret. Update I. Q=immediate, use dinx
+    * b5 SH_3     SH_4     0 3 2 00000011001000000001|        Prepare get back address to use 
+    * b6 ECALL_5  ECALL_6  3 3 3 00110011001111010101|        Q = 8
+    * b7 IJ_3     IJ_4     7 3 2 01110011001000110101|        Store present PC in case of access error
+    * b8 BGE      condb_2  5 3 2 01010011001000111101| BGE    Conditional Branch. Offset to Ryy
+    * b9 DIV_e    DIV_D    0 3 3 00000011001100011001|        Calc carry of RS2+0xFFFFFFFF
+    * ba LHU_3    ANDI_1   0 3 2 00000011001000001111|        Invert q. Prepare read mask
+    * bb SH_2     SH_3     7 7 2 01110111001000110111|        Repeat shl until shreg = 0 (0,8 or 24 times)
+    * bc CSRRWI_0 CSRRW_1  5 3 2 01010011001000101101| CSRRWI Decoded CSR adr in yy
+    * bd IJ_4     IJ_5     0 3 3 00000011001101000101|        Construct Q = 1
+    * be IJ_1     IJ_2     1 1 2 00010001001000010111|        Read until q=mem[(rs1+ofs)&~1u]
+    * bf IJT_1    IJT_2    1 1 2 00010001001000010111|        Exit CSR, enter trap
+    * c0 DIV_D    DIV_E    1 3 5 00010011010100011101|        Is RS2 == 0?
+    * c1 IJT_2    IJT_3    5 3 2 01010011001000110101|        Read word is to be masked with ~1u
+    * c2 DIVU_3   DIVU_2   0 6 3 00000110001101010111|        Conditionally subtract rs2. Update M[0]
+    * c3 DIVU_4   DIVU_5   0 a 3 00001010001101010111|        Last Cond. -rs2. Upd M[0]. Branch on INSTR[13]
+    * c4 ORI_0    ORI_1    5 3 2 01010011001000011111| ORI    Or immediate. jj=~Iimm
+    * c5 MRET_5   MRET_6   0 3 2 00000011001000000001|        ~302
+    * c6 IJT_4    ILL_2    a 3 2 10100011001000110101|        Mask and store to mepc and Q for read of instr
+    * c7 QINT_1   QINT_2   a 3 2 101000110010001xxxx1|        Store pc to mepc.
+    * c8 DIV_7    DIV_8    1 3 d 00010011110110011001|        Shift (Q,M) left. Prepare unsigned sub
+    * c9 MRET_2   MRET_3   3 3 2 00110011001001001101|        0xff+3 = 0x102
+    * ca DIVU_2   DIVU_3   1 3 d 00010011110110011001|        Shift (Q,M) left. Prepare unsigned sub
+    * cb QINT_2   StdIncPc c d 2 11001101001000101001|        mtval = 0.
+    * cc OR_0     OR_1     3 3 2 00110011001000011111| OR     or
+    * cd REM_0    DIV_1    1 c 2 00011100001010010111| REM    Branch on sign dividend RS1
+    * ce _LCSRRCI_1 ILLe     3 3 2 001100110010000xxxx0| Illegal instruction seen
+    * cf MRET_7   MRET_8   3 3 5 00110011010100001101|        Prepare emulation entry point 0x104
+    * d0 ECALL_1  ECALL_2  0 3 3 00000011001101000001| ECALL  Verify Imm==0x000
+    * d1 MRET_1   MRET_2   5 3 2 01010011001000001101| MRET   First save Imm, start build constant for check
+    * d2 LB_2     LB_3     1 7 6 00010111011000010101|        Repeat shr until shreg == 0 (0,8,16,24 times)
+    * d3 aFaultd  aFault_1 c 5 2 11000101001000110101|  err   LB Load access fault. Faulting adr to mtval
+    * d4 aFault_2 LDAF_3   5 d 3 01011101001101100100|        Store 5 to mcause
+    * d5 Fetch2u           c 5 e 11000101111001011111|  Fr11  Update ttime. Update I. Q=immediate. Use dinx
+    * d6 eILL0c   ILLe     3 3 2 001100110010000xxxx0| Illegal instruction seen
+    * d7 ECALL_3  ECALL_4  c 5 2 11000101001000110101|        mtval = 0, now start the chore of 11 to mcause
+    * d8 BLTU     condb_2  5 3 2 01010011001000111101| BLTU   Conditional Branch. Offset to Ryy
+    * d9 MULH_3   MULHU_2  3 3 2 00110011001010011111|        rM<=RS2, Q = 0. next read RS1. Join.
+    * da LDAF_a   LDAF_2   3 3 2 00110011001000010101|        Extra cycle after error detected write mtval
+    * db jFault_1 LDAF_3   5 5 3 01010101001101111000|        Store 1 to mcause
+    * dc CSRRSI_0 CSRRW_1  5 3 2 01010011001000101101| CSRRSI Decoded CSR adr in yy
+    * dd aF_SW_1  aF_SW_2  c 5 2 11000101001000110101|  err   SW Store access fault. Faulting adr to mtval
+    * de Fetch    Fetch2   5 1 b 01010001101100010111|  Fr11  Read and latch instruction
+    * df eFetch   Fetch2   5 1 b 01010001101100010111|  Fr11  rep Read until d=mem[(rs1+ofs) & ~3u]
+    * e0 DIVU_1   DIVU_2   5 3 2 01010011001000110111|        Store inverted rs2 to yy. Prepare shift
+    * e1 ORI_1    ORI_2    1 3 2 00010011001000000001|        Q = RS1
+    * e2 MUL_1    MUL_2    0 6 6 00000110011000010101|        Q <= rM[0] ? Q+rs2 : Q. Prepare shr/sar
+    * e3 MUL_3    ANDI_1   3 3 6 00110011011011010111|        Transfer rM to rDee
+    * e4 ANDI_0   ANDI_1   0 3 2 00000011001000011111| ANDI   And immediate. Q=~Iimm
+    * e5 aF_SW_2  aF_SW_3  3 3 3 00110011001111010101|        Q = 4
+    * e6 StdIncPc Fetch    6 4 4 01100100010011011010|  Fr11  IncPC, OpFetch
+    * e7 aFault   aFault_1 c 5 2 11000101001000110101|  err   Load access fault. Faulting adr to mtval
+    * e8 MUL_2    MUL_1    1 3 2 00010011001010011101|        Shift Q and rM. Prepare read rs2
+    * e9 IJT_3    IJT_4    0 3 3 00000011001101011001|        Construct Q = 1
+    * ea MULHU_5  MULHU_6  0 3 2 00000011001000011001|        Q <= rM[0] ? Q+Rjj : Q. Prepare read Ryy
+    * eb LH_3     LH_4     0 3 2 00000011001000001111|        q = ~mem[rs1+ofs]
+    * ec AND_0    AND_1    3 3 2 00110011001000011111| AND    And 
+    * ed REMU_0   DIVU_1   3 6 2 00110110001010011101| REMU   Store dividend to rM. Prepare read divisor.Q=0
+    * ee eILL0a   ILLe     3 3 2 001100110010000xxxx0| Illegal instruction seen
+    * ef WFI_5    Fetch    6 4 3 01100100001111011010|        IncPC, OpFetch
+    * f0 LBU_2    LBU_3    1 7 6 00010111011000010101|        Repeat shr until shreg = 0 (0, 8 or 16 times)
+    * f1 aFaulte  aFault_1 c 5 2 11000101001000110101|  err   LBU Load access fault. Faulting adr to mtval
+    * f2 SW_2     StdIncPc 3 3 2 00110011001000000101|        Prepare read PC
+    * f3 aF_SW    aF_SW_1  3 3 2 001100110010000xxxx0|  err   SW/SH/SB access fault. Rest to set SEL_O=4'hf
+    * f4 Fetch2   eFetch3  c 5 f 11000101111101000011|  Fr11  Update ttime. Update I. Q=immediate. Use dinx
+    * f5 jFault   jFault_1 c 5 2 11000101001000110101|  err   Fetch access fault. Faulting adr to mtval
+    * f6 WFI_1    WFI_2    3 3 3 00110011001111011001| WFI    Chk offset=0x105. Now 0xff. Prep 0xff+4 = 0x103
+    * f7 EBREAK_1 EBREAK_2 c 5 2 11000101001000100001| EBREAK mepc = pc, store 0 to mtval
+    * f8 BGEU     condb_2  5 3 2 01010011001000111101| BGEU   Conditional Branch. Offset to Ryy
+    * f9 MULH_2   MULH_3   5 3 3 01010011001101011101|        Store 1 to Rjj. next read rs2, Q=0
+    * fa WFI_2    WFI_3    0 3 3 00000011001101010101|        Chk ofs. Now 0x103. Prep +1+~ofs, so ~ofs+0x104
+    * fb SB_3     SB_4     0 3 2 00000011001000000001|        Prepare get back address to use 
+    * fc CSRRCI_0 CSRRW_1  5 3 2 01010011001000101101| CSRRCI Decoded CSR adr in yy
+    * fd NMI_0    NMI_1    3 3 2 00110011001000000101| NMI    Get current PC
+    * fe ILLe     ILL_1    3 3 2 00110011001000000100| Illegal
+    * ff QINT_0   QINT_1   3 3 2 00110011001000000101| INT    Get current PC
     */
    localparam u0_0 = 256'h56e6d010d0e2d8045c33dc5ab88bdc5aba09da07080454e650e6bcbe79d2bc01;
    localparam u0_1 = 256'h0eb75cd456e66ea6083252e60441d613087d10e618169c15f814ac76d81af88b;

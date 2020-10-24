@@ -18,8 +18,10 @@ module m_ucode
     input        clk,
     input [7:0]  minx,
     input        progress_ucode, // Hold when shifting
+    input [0:0]  MULDIVREG,
     output       sa00, // sa02,sa03,sa04,sa05,sa06,
     output [1:0] s_alu_carryin,
+    output       mod_s_alu_1,
     output [2:0] s_alu,
     output [1:0] s_shift,
     output [1:0] s_cyclecnt,
@@ -207,7 +209,13 @@ module m_ucode
    assign sa42 = d[40]; // Possibly activate STB_O or sram_stb
    assign sa43 = d[41]; // Possibly activate WE_O next cycle
 
+   
    generate
+      if ( MULDIV == 0 ) begin
+         assign mod_s_alu_1 = s_alu[1];
+      end else begin
+         assign mod_s_alu_1 = (s_alu == 3'b100 && clrM == 1'b0) ? ~MULDIVREG[0] : s_alu[1];
+      end
       if ( MULDIV == 0 && RVC == 1 ) begin
          assign ctrl_pcinc_by_2 = d[42]; // May perhaps combine with another controleq?
          assign clrM = d[43];               // Fake! R for M register. Also used to flag unsigned subtraction in DIV/DIVU/REM/REMU

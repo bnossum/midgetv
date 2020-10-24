@@ -12,11 +12,16 @@ BIN_DIR := ../bin
 
 TRG := $(GEN_DIR)/m_2ebr.v $(GEN_DIR)/midgetv_ucodeoptions.hv 
 
+CLUMSY := m_3ebr.v m_alu_carryin.v m_alu.v m_condcode.v m_cyclecnt.v m_ebr.v m_ebr_w16.v m_ebr_w2.v m_ebr_w4.v m_ebr_w8.v m_ice_shortcuts.v \
+	m_illegalop.v m_immexp_zfind_q.v m_inputmux.v m_midgetv_core.v m_mimux.v m_opreg.v m_progressctrl.v m_rai.v m_ram_a16.v m_ram_a17.v m_ram.v \
+	m_RVC.v m_shiftcounter.v m_shlr.v m_status_and_interrupts.v m_ucodepc.v m_ucode.v m_wai.v
+
+
 # $(GEN_DIR)/ucodeinitval.hv 
 
 all: ../midgetv.v $(TRG)
 
-../midgetv.v:$(TRG)
+../midgetv.v:$(TRG) $(CLUMSY)
 	$(BIN_DIR)/make_monolithic > $@
 
 $(GEN_DIR)/m_2ebr.v:$(BIN_DIR)/midgetv_indirectEBR ../code/ucode.h

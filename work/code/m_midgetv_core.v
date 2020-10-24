@@ -526,6 +526,7 @@ module m_midgetv_core
    wire                 meie;                   // From inst_status_and_interrupts of m_status_and_interrupts.v
    wire                 mie;                    // From inst_status_and_interrupts of m_status_and_interrupts.v
    wire [7:0]           minx;                   // From inst_ucodepc of m_ucodepc.v
+   wire                 mod_s_alu_1;            // From inst_ucode of m_ucode.v
    wire                 mpie;                   // From inst_status_and_interrupts of m_status_and_interrupts.v
    wire                 mrinstretie;            // From inst_status_and_interrupts of m_status_and_interrupts.v
    wire                 mrinstretip;            // From inst_status_and_interrupts of m_status_and_interrupts.v
@@ -802,16 +803,6 @@ module m_midgetv_core
       .STB_O                            (STB_O),
       .ADR_O                            (ADR_O[31:0]));
 
-   // Problem with a write to mcause in _ILL_5 had nothing to do with mod_s_alu_1
-   wire                 mod_s_alu_1;
-   generate
-      if ( MULDIV == 0 ) begin
-         assign mod_s_alu_1 = s_alu[1];
-      end else begin
-         assign mod_s_alu_1 = (s_alu == 3'b100 && clrM == 1'b0) ? ~MULDIVREG[0] : s_alu[1];
-      end
-   endgenerate
-   
    m_alu_carryin #(.HIGHLEVEL(HIGHLEVEL), .MULDIV(MULDIV)) 
    inst_alu_carryin
      (// Inputs
@@ -1128,6 +1119,7 @@ module m_midgetv_core
       // Outputs
       .sa00                             (sa00),
       .s_alu_carryin                    (s_alu_carryin[1:0]),
+      .mod_s_alu_1                      (mod_s_alu_1),
       .s_alu                            (s_alu[2:0]),
       .s_shift                          (s_shift[1:0]),
       .s_cyclecnt                       (s_cyclecnt[1:0]),
@@ -1165,7 +1157,8 @@ module m_midgetv_core
       // Inputs
       .clk                              (clk),
       .minx                             (minx[7:0]),
-      .progress_ucode                   (progress_ucode));
+      .progress_ucode                   (progress_ucode),
+      .MULDIVREG                        (MULDIVREG[0:0]));
 
    m_ucodepc #(.LAZY_DECODE(LAZY_DECODE), .MULDIV(MULDIV), .RVC(RVC))
      inst_ucodepc
@@ -1265,13 +1258,10 @@ module m_midgetv_core
 
    /* Multiply and Divide instructions are optionally supported
     */
-//   wire loadM =  ~sa14 | (~sa15 & sa14 & sa32); // For RVC
-//   wire loadMn = ~loadM;
    m_shlr #( .ALUWIDTH(32), .MULDIV(MULDIV) )
      inst_shlr
        (// Inputs
         .loadMn     (sa14    ),
-//        .loadMn     (loadMn),
         .ADR_O0     (ADR_O[0]),
         /*AUTOINST*/
         // Outputs
