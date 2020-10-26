@@ -6,47 +6,17 @@
  * Risc-v in a iCE40UP5K. Max size midgetv.
  */
 
-`include "../../code/m_ice_shortcuts.v"
-`include "../../code/m_inputmux.v"
-`include "../../code/m_mimux.v"
-`include "../../code/m_alu_carryin.v"
-`include "../../code/m_alu.v"
-`include "../../code/m_immexp_zfind_q.v"
-`include "../../code/m_ram.v"
-`include "../../code/m_ram_a16.v"
-`include "../../code/m_ram_a17.v"
-`include "../../code/m_ebr.v"
-`include "../../code/m_ebr_w16.v"
-`include "../../code/m_ebr_w8.v"
-`include "../../code/m_ebr_w4.v"
-`include "../../code/m_ebr_w2.v"
-`include "../../code/m_rai.v"
-`include "../../code/m_wai.v"
-`include "../../code/m_opreg.v"
-`include "../../code/m_cyclecnt.v"
-`include "../../code/m_condcode.v"
-`include "../../code/m_shiftcounter.v"
-`include "../../code/m_status_and_interrupts.v"
-`include "../../code/m_ucode.v" 
-`include "../../code/m_3ebr.v"
-`include "../../generated/m_2ebr.v"
-`include "../../code/m_ucodepc.v"
-`include "../../code/m_progressctrl.v"
-`include "../../code/m_shlr.v"
-`include "../../code/m_RVC.v"
-`include "../../code/m_midgetv_core.v"
+`include "../../midgetv.v"
 
 
 module mytop
   # ( parameter
       SRAMADRWIDTH       = 16,
-      FORCEEBRADRWIDTH   = 9, 
+      FORCEEBRAWIDTH     = 11, 
       IWIDTH             = 32, 
       NO_CYCLECNT        = 0, 
       MTIMETAP           = 0,//16, 
-      HIGHLEVEL          = 0,
-      LAZY_DECODE        = 1,
-      DISREGARD_WB4_3_55 = 0
+      HIGHLEVEL          = 0
       )
    (
     input  usartRX,
@@ -247,13 +217,11 @@ module mytop
    m_midgetv_core
      #(
        .SRAMADRWIDTH       ( SRAMADRWIDTH       ),
-       .EBRADRWIDTH        ( FORCEEBRADRWIDTH   ),
+       .EBRAWIDTH          ( FORCEEBRAWIDTH     ),
        .IWIDTH             ( IWIDTH             ),
        .NO_CYCLECNT        ( NO_CYCLECNT        ),
        .MTIMETAP           ( MTIMETAP           ),
        .HIGHLEVEL          ( HIGHLEVEL          ),
-       .LAZY_DECODE        ( LAZY_DECODE        ),
-       .DISREGARD_WB4_3_55 ( DISREGARD_WB4_3_55 ),
        .prg00(prg00),       .prg01(prg01),       .prg02(prg02),       .prg03(prg03),
        .prg04(prg04),       .prg05(prg05),       .prg06(prg06),       .prg07(prg07),
        .prg08(prg08),       .prg09(prg09),       .prg0A(prg0A),       .prg0B(prg0B),
