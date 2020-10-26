@@ -32,7 +32,7 @@ INFOCHUNK g_info = {
 int g_suspendtrace;
 
 /////////////////////////////////////////////////////////////////////////////
-#define    EBRADRWIDTH  8 // Is a parameter to m_midgetv
+#define    EBRAWIDTH  10 // Is a parameter to m_midgetv
 #include "Vm_ice40sim_SRAM__Syms.h"
 
 
@@ -45,7 +45,7 @@ uint32_t getebr( Vm_ice40sim_SRAM *tb, uint32_t byteadr ) {
         uint32_t wa = byteadr/4;
         if ( byteadr & 3 )
                 ferr( "Que?\n" );
-#if EBRADRWIDTH == 8 
+#if EBRAWIDTH == 10 
 //        d =  (tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ebr->b0__BRA__0__KET____DOT__genblk5__DOT__ebr->get_as_16(wa) <<  0);
 //        d |= (tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ebr->b0__BRA__1__KET____DOT__genblk5__DOT__ebr->get_as_16(wa) << 16);
         d =  (tb->v->inst_ice40sim_EBRonly->inst_midgetv_core->inst_ebr->ebrb->genblk1__DOT__mem->get_as_16(wa) <<  0);
@@ -103,7 +103,7 @@ void readout_ebr_sram(const char *hdrEBR, const char *hdrSRAM, int hexdumpit, Vm
 
         if ( hdrEBR )
                 printf( "%s", hdrEBR );
-        for ( i = 0; i < (1<<EBRADRWIDTH)*4; i += 4 ) {
+        for ( i = 0; i < (1<<EBRAWIDTH); i += 4 ) {
                 d = getebr(tb, i );
                 if ( ! hexdumpit ) {
                         printf("%4.4x %8.8x\n", i, d);
@@ -155,7 +155,7 @@ void initialize_ebr_sram( Vm_ice40sim_SRAM *tb, FILE *fi, char *finame ) {
                 i++;
         }
         
-#if EBRADRWIDTH == 8
+#if EBRAWIDTH == 10
         /* The image is assumed to start with a complete dump of
          * EBR-based RAM
          */
@@ -199,7 +199,7 @@ void initialize_ebr_sram( Vm_ice40sim_SRAM *tb, FILE *fi, char *finame ) {
         }
                 
                 
-#elif EBRADRWIDTH == 11
+#elif EBRAWIDTH == 13
                 
         int k;
         uint16_t ew[16];

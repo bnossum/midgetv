@@ -22,7 +22,7 @@ INFOCHUNK g_info = {
 
 
 /////////////////////////////////////////////////////////////////////////////
-#define    EBRADRWIDTH  9 // Is a parameter to m_midgetv. MUST match def in m_ice40sim_EBRonly.v
+#define    EBRAWIDTH  11 // Is a parameter to m_midgetv. MUST match def in m_ice40sim_EBRonly.v
 
 #include "Vm_ice40sim_EBRonly__Syms.h"
 #include "verilated.h"
@@ -38,18 +38,18 @@ uint32_t getebr( void *vtb, uint32_t byteadr ) {
         if ( byteadr & 3 )
                 ferr( "Que?\n" );
         Vm_ice40sim_EBRonly *tb = (Vm_ice40sim_EBRonly *) vtb;
-#if EBRADRWIDTH == 8
+#if EBRAWIDTH == 10
         d =  (tb->v->inst_midgetv_core->inst_ebr->ebrb->genblk1__DOT__mem->get_as_16(wa) <<  0);
         d |= (tb->v->inst_midgetv_core->inst_ebr->ebrh->genblk1__DOT__mem->get_as_16(wa) << 16);
 
-#elif EBRADRWIDTH == 9
+#elif EBRAWIDTH == 11
         uint32_t mwa = ((wa>>1) | (wa<<8)) & 0x1ff;
         d =  (tb->v->inst_midgetv_core->inst_ebr->ebrb->genblk2__DOT__ebrb->genblk1__DOT__mem->get_as_8(mwa) <<  0);
         d |= (tb->v->inst_midgetv_core->inst_ebr->ebrb->genblk2__DOT__ebrh->genblk1__DOT__mem->get_as_8(mwa) <<  8);
         d |= (tb->v->inst_midgetv_core->inst_ebr->ebrh->genblk2__DOT__ebrb->genblk1__DOT__mem->get_as_8(mwa) << 16);
         d |= (tb->v->inst_midgetv_core->inst_ebr->ebrh->genblk2__DOT__ebrh->genblk1__DOT__mem->get_as_8(mwa) << 24);
 
-#elif EBRADRWIDTH == 10
+#elif EBRAWIDTH == 12
         uint32_t mwa = ((wa>>2) | (wa<<8)) & 0x3ff;
         d =  (tb->v->inst_midgetv_core->inst_ebr->ebrb->genblk2__DOT__ebrb->genblk2__DOT__ebrb->genblk1__DOT__mem->get_as_4(mwa) <<  0);
         d |= (tb->v->inst_midgetv_core->inst_ebr->ebrb->genblk2__DOT__ebrb->genblk2__DOT__ebrh->genblk1__DOT__mem->get_as_4(mwa) <<  4);
@@ -60,7 +60,7 @@ uint32_t getebr( void *vtb, uint32_t byteadr ) {
         d |= (tb->v->inst_midgetv_core->inst_ebr->ebrh->genblk2__DOT__ebrh->genblk2__DOT__ebrb->genblk1__DOT__mem->get_as_4(mwa) << 24);
         d |= (tb->v->inst_midgetv_core->inst_ebr->ebrh->genblk2__DOT__ebrh->genblk2__DOT__ebrh->genblk1__DOT__mem->get_as_4(mwa) << 28);
 
-#elif EBRADRWIDTH == 11 
+#elif EBRAWIDTH == 13 
         uint32_t mwa = ((wa>>3) | (wa<<8)) & 0x7ff;
         d =  (tb->v->inst_midgetv_core->inst_ebr->ebrb->genblk2__DOT__ebrb->genblk2__DOT__ebrb->genblk2__DOT__ebrb->mem->get_as_2(mwa) <<  0);
         d |= (tb->v->inst_midgetv_core->inst_ebr->ebrb->genblk2__DOT__ebrb->genblk2__DOT__ebrb->genblk2__DOT__ebrh->mem->get_as_2(mwa) <<  2);
@@ -91,7 +91,7 @@ void readout_ebr(const char *hdr, int hexdumpit, void *tb ) {
 
         if ( hdr )
                 printf( "%s", hdr );
-        for ( i = 0; i < (1<<EBRADRWIDTH)*4; i += 4 ) {
+        for ( i = 0; i < (1<<EBRAWIDTH); i += 4 ) {
                 d = getebr(tb, i );
                 if ( ! hexdumpit ) {
                         printf("%4.4x %8.8x\n", i, d);
@@ -127,7 +127,7 @@ void initialize_ebr( void *vtb, FILE *fi, char *finame ) {
                 i++;
         }
         
-#if EBRADRWIDTH == 8
+#if EBRAWIDTH == 10
         for ( j = 0; j < i; j += 4 ) {
                 uint32_t hb,hh;
                 hb = (ebr[j+1]<<8) | ebr[j+0];
@@ -137,7 +137,7 @@ void initialize_ebr( void *vtb, FILE *fi, char *finame ) {
                 tb->v->inst_midgetv_core->inst_ebr->ebrb->genblk1__DOT__mem->set_as_16(j>>2,hb);
                 tb->v->inst_midgetv_core->inst_ebr->ebrh->genblk1__DOT__mem->set_as_16(j>>2,hh);
         }
-#elif EBRADRWIDTH == 9
+#elif EBRAWIDTH == 11
         for ( j = 0; j < i; j += 4 ) {
                 uint32_t jj = j>>2;
                 uint32_t mjj = ((jj>>1) | (jj<<8)) & 0x1ff;
@@ -147,7 +147,7 @@ void initialize_ebr( void *vtb, FILE *fi, char *finame ) {
                 tb->v->inst_midgetv_core->inst_ebr->ebrh->genblk2__DOT__ebrb->genblk1__DOT__mem->set_as_8(mjj,ebr[j+2]);
                 tb->v->inst_midgetv_core->inst_ebr->ebrh->genblk2__DOT__ebrh->genblk1__DOT__mem->set_as_8(mjj,ebr[j+3]);
         }
-#elif EBRADRWIDTH == 10
+#elif EBRAWIDTH == 12
         for ( j = 0; j < i; j += 4 ) {
                 uint32_t jj = j>>2;
                 uint32_t mjj = ((jj>>2) | (jj<<8)) & 0x3ff;
@@ -160,7 +160,7 @@ void initialize_ebr( void *vtb, FILE *fi, char *finame ) {
 		tb->v->inst_midgetv_core->inst_ebr->ebrh->genblk2__DOT__ebrh->genblk2__DOT__ebrb->genblk1__DOT__mem->set_as_4(mjj,(ebr[j+3] >> 0) & 15);
 		tb->v->inst_midgetv_core->inst_ebr->ebrh->genblk2__DOT__ebrh->genblk2__DOT__ebrh->genblk1__DOT__mem->set_as_4(mjj,(ebr[j+3] >> 4) & 15);
         }
-#elif EBRADRWIDTH == 11
+#elif EBRAWIDTH == 13
         for ( j = 0; j < i; j += 4 ) {
                 uint32_t jj = j>>2;
                 uint32_t mjj = ((jj>>3) | (jj<<8)) & 0x7ff;

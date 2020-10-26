@@ -818,10 +818,12 @@ void common_simprintf( INFOCHUNK * const p, uint32_t cy) {
         const char *ucodetxt[256] = {
 #define X(label,text,ty,pos,value,reachability,mask,instr,nrhit) text,
 #include "../code/ucode.h"
+#undef X
         };
         const char *ucodelabeltxt[256] = {
 #define X(label,text,ty,pos,value,reachability,mask,instr,nrhit) STR(label),
 #include "../code/ucode.h"
+#undef X
         };
                 
         if ( p->CONF & INFO_skip_first64 ) 
