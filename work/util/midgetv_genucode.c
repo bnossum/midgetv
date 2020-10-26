@@ -812,12 +812,296 @@ void print_input_as_comment( int v, char *entrypoint[256], uint32_t sampleinstru
         printf( " */\n" );
 }
 
+/////////////////////////////////////////////////////////////////////////////
+/*
+ */
+int simulate_isillegal( int v, uint32_t instr ) {
+        int MULDIV = v & 4;
+        int funct3 = (instr>>12) & 7;
+        int funct7 = (instr>>25) & 127;
+        int opcode = instr & 127;
+        int mostof_funct7_ne0;
+        int also_check_funct7_5;
+        int also_illegal;
+        
+        int checkfunct7 = ((((opcode>>4)&3) == 1) && (((opcode>>2)&1) == 0) && (((funct3>>0)&3) == 1)) |
+                ((((opcode>>4)&7) == 3) && (((opcode>>2)&1) == 0));
+        if ( MULDIV == 0 ) {
+                mostof_funct7_ne0 = ((funct7>>6)&1) || (funct7&31);
+                also_check_funct7_5 =
+                        ((((opcode>>5)&1) == 0) && (((funct3>>2)&1) == 0)) ||
+                        ((((opcode>>5)&1) == 1) && ~( funct3 == 0 || funct3 == 5));
+                also_illegal = 0;
+        } else {
+                mostof_funct7_ne0 = ((funct7>>6)&1) || ((funct7>>1)&15) || (((opcode>>5)&1) == 0 && (funct7 & 1));
+                also_check_funct7_5 =
+                        ((((opcode>>5)&1) == 0) && (((funct3>>2)&1) == 0)) ||
+                        ((((opcode>>5)&1) == 1) && ~( funct3 == 0 || funct3 == 5)) ||
+                        ((((opcode>>5)&1) == 1) && (funct7 & 1));
+                switch ( (((instr>>2) & 31)<<3) | ((instr>>12)&7) ) {
+                case 0b00000011 :                                                       // close to LB
+                case 0b00000110 : case 0b00000111 :                                     // close to LB
+                case 0b00010001 :                                                       // close ot ij
+                case 0b00010010 : case 0b00010011 :                                     // close ot ij
+                case 0b00010100 : case 0b00010101 : case 0b00010110 : case 0b00010111 : // close to ij
+                case 0b00011010 : case 0b00011011 :                                     // close to FENCE
+                case 0b00011100 : case 0b00011101 : case 0b00011110 : case 0b00011111 : // close to FENCE
+                case 0b01000011 :                                                       // close to SW
+                case 0b01000100 : case 0b01000101 : case 0b01000110 : case 0b01000111 : // close to SW
+                case 0b11001001 :                                                       // close to JALR
+                case 0b11001010 : case 0b11001011 :                                     // close to JALR
+                case 0b11001100 : case 0b11001101 : case 0b11001110 : case 0b11001111 : // close to JALR
+                case 0b11100100 :                                                       // close to CSR
+                        also_illegal = 1;
+                        break;
+                default :
+                        also_illegal = 0;
+                }
+        }
+        // in this simulation I skip checking of fields rs1 and rd
+        int illegal_rs1_rd = 0;
+        int illegal_funct7_or_illegal_rs1_rd =
+                (checkfunct7 & mostof_funct7_ne0) |
+                (checkfunct7 & also_check_funct7_5 & ((funct7>>5)&1)) |
+                illegal_rs1_rd  | also_illegal;
+
+        int illegal_ba;
+        switch ( (opcode>>2)&15 ) {
+             case 0b0000 : illegal_ba = 0b10; break;
+             case 0b0001 : illegal_ba = 0b11; break;
+             case 0b0010 : illegal_ba = 0b10; break;  
+             case 0b0011 : illegal_ba = 0b10; break;
+             case 0b0100 : illegal_ba = 0b10; break;
+             case 0b0101 : illegal_ba = 0b10; break;
+             case 0b0110 : illegal_ba = 0b11; break;
+             case 0b0111 : illegal_ba = 0b11; break;
+             case 0b1000 : illegal_ba = 0b00; break;
+             case 0b1001 : illegal_ba = 0b01; break;
+             case 0b1010 : illegal_ba = 0b11; break;
+             case 0b1011 : illegal_ba = 0b01; break;
+             case 0b1100 : illegal_ba = 0b00; break;
+             case 0b1101 : illegal_ba = 0b10; break;
+             case 0b1110 : illegal_ba = 0b11; break;
+             case 0b1111 : illegal_ba = 0b11; break;
+        }
+        int illegal_a = illegal_ba & 1;
+        int illegal_b = illegal_ba >> 1;
+        int main_illegal = (((opcode>>6)&1) ? illegal_b : illegal_a) | ((opcode & 3) != 3);
+        int illegal = main_illegal | illegal_funct7_or_illegal_rs1_rd;
+        return illegal;        
+}
+
+/*
+  This routine is kind of displaced, but it is handy to know entry points
+  into the ucode store in this program.
+ */
+int simulate_decode( char *entrypoint[256], uint32_t sampleinstruction[256], int variant ) {
+        int fatals = 0;
+        int64_t instr = -1;
+        const char *txt;
+        int MULDIV = variant & 4;
+        int dbg = 0;
+        
+        do {
+                instr += 4;
+                if ( instr & (1<<7) ) 
+                        instr += (1<<12) - (1<<7);
+                if ( instr & (1<<15) )
+                        instr += (1<<25) - (1<<15);
+                if ( instr & (1<<26) )
+                        instr += (1<<30) - (1<<26);
+                        
+                /* Is instr one I care about ?
+                 */
+                switch ( instr & 0x7F ) {
+                default : continue;
+                case 0b0110111 :
+                        txt = "lui     ";
+                        break;
+                case 0b0010111 :
+                        txt = "auipc   ";
+                        break;
+                case 0b1101111 :
+                        txt = "jal     ";
+                        break;
+                case 0b1100111 :
+                        switch ( (instr>>12) & 7) {
+                        case 0b000 : txt = "jalr    "; break;
+                        default :    txt = "close to jalr"; break;
+                        }
+                        break;
+                case 0b1100011 : 
+                        switch ( (instr>>12) & 7) {
+                        case 0b000 : txt = "beq     "; break;
+                        case 0b001 : txt = "bne     "; break;
+                        case 0b100 : txt = "blt     "; break;
+                        case 0b101 : txt = "bge     "; break;
+                        case 0b110 : txt = "bltu    "; break;
+                        case 0b111 : txt = "bgeu    "; break;
+                        default :    txt = "close to branch"; break;
+                        }
+                        break;
+                case 0b0000011 :
+                        switch ( (instr>>12) & 7) {
+                        case 0b000 : txt = "lb      "; break;
+                        case 0b001 : txt = "lh      "; break;
+                        case 0b010 : txt = "lw      "; break;
+                        case 0b100 : txt = "lbu     "; break;
+                        case 0b101 : txt = "lhu     "; break;
+                        default :    txt = "close to load"; break;
+                        }
+                        break;
+                case 0b0100011 :
+                        switch ( (instr>>12) & 7) {
+                        case 0b000 : txt = "sb      "; break;
+                        case 0b001 : txt = "sh      "; break;
+                        case 0b010 : txt = "sw      "; break;
+                        default :    txt = "close to store"; break;
+                        }
+                        break;
+                case 0b0010011 :
+                        switch ( (instr>>12) & 7) {
+                        case 0b000 : txt = "addi    "; break;
+                        case 0b001 : txt = "slli    "; break; // slli will also be decoded for instr[30] == 1
+                        case 0b010 : txt = "slti    "; break;
+                        case 0b011 : txt = "sltiu   "; break;
+                        case 0b100 : txt = "xori    "; break;
+                        case 0b101 : txt = "sr(l/a)i"; break;
+                        case 0b110 : txt = "ori     "; break;
+                        case 0b111 : txt = "andi    "; break;                                
+                        }
+                        break;
+                case 0b0110011 :
+                        if ( MULDIV ) {
+                                if ( (instr>>25) & 1 ) {
+                                        switch ( (instr>>12) & 7) {
+                                        case 0b000 : txt ="mul   ";break;
+                                        case 0b001 : txt ="mulh  ";break;
+                                        case 0b010 : txt ="mulhsu";break;
+                                        case 0b011 : txt ="mulhu ";break;
+                                        case 0b100 : txt ="div   ";break;
+                                        case 0b101 : txt ="divu  ";break;
+                                        case 0b110 : txt ="rem   ";break;
+                                        case 0b111 : txt ="remu  ";break;                                               
+                                        }
+                                        break;
+                                }
+                        }
+                        switch ( (instr>>12) & 7) {
+                        case 0b000 : txt = ( (instr>>30) & 1 ) ? "sub " : "add "; break;
+                        case 0b001 : txt = ( (instr>>30) & 1 ) ? "sloppy sll     " : "sll     "; break;
+                        case 0b010 : txt = ( (instr>>30) & 1 ) ? "sloppy slt     " : "slt     "; break;
+                        case 0b011 : txt = ( (instr>>30) & 1 ) ? "sloppy sltu    " : "sltu    "; break;
+                        case 0b100 : txt = ( (instr>>30) & 1 ) ? "sloppy xor     " : "xor     "; break;
+                        case 0b101 : txt = ( (instr>>30) & 1 ) ? "sra"             : "srl     "; break;
+                        case 0b110 : txt = ( (instr>>30) & 1 ) ? "sloppy or      " : "or      "; break;
+                        case 0b111 : txt = ( (instr>>30) & 1 ) ? "sloppy and     " : "and     "; break;                                
+                        }
+                        break;
+                case 0b0001111 :
+                        switch ( (instr>>12) & 7) {
+                        case 0b000 : txt = "fence   "; break;
+                        case 0b001 : txt = "fence.i "; break;
+                        default :    txt = "close to fence"; break;
+                        }
+                        break;
+                case 0b1110011 : 
+                        switch ( (instr>>12) & 7) {
+                        case 0b000 : txt = "ecall/ebreak/mret/wfi"; break;
+                        case 0b001 : txt = "csrrw"; break;
+                        case 0b010 : txt = "csrrs"; break;
+                        case 0b011 : txt = "csrrc"; break;
+                        case 0b100 : txt = "close to csr/system "; break;
+                        case 0b101 : txt = "csrrwi"; break;
+                        case 0b110 : txt = "csrrsi"; break;
+                        case 0b111 : txt = "csrrci"; break;
+                        }
+                        break;
+                case 0b0001011 :
+                        switch ( (instr>>12) & 7) {
+                        case 0b000 : txt = "ij       "; break;
+                        default :    txt = "close to ij"; break;
+                        }
+                        break;
+                        
+                }
+                
+                                
+                int dinx,dinx0,dinx1,dinx2,dinx3,dinx4,dinx5,dinx6,dinx7;
+                
+                if ( MULDIV ) {
+                        dinx0 = ((((instr>>4)&7) == 3) && (((instr>>2) & 1) == 0)) ? ((instr>>25)&1) : ((instr>>2) & 1);
+                } else {
+                        dinx0 = (instr>>2) & 1;
+                }
+                
+                int is_lui = ((instr>>2) & 31 ) == 0b01101; // can be simplified due to calculation of "illegal"
+                //int is_lui = ((instr>>4) & 3 ) == 3 && ((instr>>2) == 1); -- could not do this simplifaction after all
+                if ( is_lui ) {
+                        dinx1 = 1;
+                } else {
+                        dinx1 = ( (   (((instr>>6)&1)^1) & ((instr>>5)&1) ) & ((instr>>30)&1) ) |
+                                ( (1^((((instr>>6)&1)^1) & ((instr>>5)&1))) & ((instr>>3)&1) );
+                }
+                dinx2 = (instr>> 4) & 1;
+                dinx3 = (instr>> 5) & 1;
+                dinx4 = (instr>> 6) & 1;
+                dinx5 = (instr>>12) & 1;
+                if ( ((instr>>2) & 7) != 0b101 ) {
+                        dinx6 = (instr>>13) & 1;
+                } else {
+                        dinx6 = 0;
+                }
+                if  ( ((instr>>2) & 7) != 0b101 && ((instr>>2) & 15) != 0b1011 ) {
+                        dinx7 = (instr>>14) & 1;
+                } else {
+                        dinx7 = 0;
+                }
+                dinx = (dinx7<<7) | (dinx6<<6) | (dinx5<<5) | (dinx4<<4) | (dinx3<<3) | (dinx2<<2) | (dinx1<<1) | (dinx0<<0);
+                int illegal;
+                if ( (illegal=simulate_isillegal(variant,instr)) != 0 ) {
+                        if ( dbg )
+                                printf( "instr=0x%8.8x is illegal\n", (uint32_t) instr );
+                        dinx = 0xfe;
+                }
+                        
+                if ( entrypoint[dinx] == NULL ) {
+                        entrypoint[dinx] = strdup(txt);
+                        sampleinstruction[dinx] = instr;
+                        if ( dbg )
+                                printf( "// instr=0x%8.8x dinx=0x%2.2x sampleinstr=%s\n", (uint32_t)instr, dinx, txt );
+                } else {
+                        if ( strcmp( entrypoint[dinx], txt ) != 0 &&
+                             strncmp(txt,"DUP",3) != 0 &&
+                             strncmp(entrypoint[dinx], "DUP",3) != 0 ) {
+                                if ( !illegal ) {
+                                        if ( dbg ) {
+                                                printf( "// Internal error, instr=0x%8.8x maps to index 0x%2.2x  %s, but also to txt=%s\n", (uint32_t)instr, dinx, entrypoint[dinx], txt );
+                                        } else {
+                                                printf( "// Internal error, instr=0x%8.8x maps to index 0x%2.2x  %s, but also to txt=%s\n", (uint32_t)instr, dinx, entrypoint[dinx], txt );
+                                                fatals++;
+                                        }
+                                }
+                        }
+                }
+                
+        } while ( instr <= 0xffffffff );
+        //int k;
+        //for ( k = 0; k < 256; k++ ) 
+        //        printf( "%2.2x %s\n", k, entrypoint[k] ? entrypoint[k] : "" );
+
+        return fatals;
+}
+
 
 
 /////////////////////////////////////////////////////////////////////////////
-void generate_headerfile( const char *progname, char *entrypoint[256], uint32_t sampleinstruction[256] ) {
+void generate_headerfile( const char *progname ) {
         int k,kk,j;
         uint16_t rom[4][256];
+        char *entrypoint[256] = { NULL };
+        uint32_t sampleinstruction[256] = { 0 };
+                
 
         printf( 
                 "/* -------------------------------------"
@@ -835,8 +1119,15 @@ void generate_headerfile( const char *progname, char *entrypoint[256], uint32_t 
         for ( v = 0; v < 16; v++ ) {
                 if ( (v & 3) == 1 )
                         continue;
-                
+
+                for ( k = 0; k < 256; k++ ) {
+                        entrypoint[k] = NULL;
+                        sampleinstruction[k] = 0;
+                }
+                int fatals = simulate_decode(entrypoint,sampleinstruction, v );
                 print_input_as_comment( v, entrypoint, sampleinstruction ); 
+                if ( fatals )
+                        ferr( "%d Errors detected\n",fatals );
 
 #if 0
                 //
@@ -936,191 +1227,13 @@ void generate_headerfile( const char *progname, char *entrypoint[256], uint32_t 
 
 
 /////////////////////////////////////////////////////////////////////////////
-/*
-  This routine is kind of displaced, but it is handy to know entry points
-  into the ucode store in this program.
- */
-void simulate_decode( char *entrypoint[256], uint32_t sampleinstruction[256] ) {
-
-        int64_t instr = -1;
-        const char *txt;
-        
-#define MULDIV 0
-        
-        do {
-                instr += 4;
-                if ( instr & (1<<7) ) 
-                        instr += (1<<12) - (1<<7);
-                if ( instr & (1<<15) )
-                        instr += (1<<25) - (1<<15);
-                if ( instr & (1<<26) )
-                        instr += (1<<30) - (1<<26);
-                        
-                /* Is instr one I care about ?
-                 */
-                switch ( instr & 0x7F ) {
-                default : continue;
-                case 0b0110111 :
-                        txt = "lui     ";
-                        break;
-                case 0b0010111 :
-                        txt = "auipc   ";
-                        break;
-                case 0b1101111 :
-                        txt = "jal     ";
-                        break;
-                case 0b1100111 :
-                        switch ( (instr>>12) & 7) {
-                        case 0b000 : txt = "jalr    "; break;
-                        default :    txt = "close to jalr"; break;
-                        }
-                        break;
-                case 0b1100011 : 
-                        switch ( (instr>>12) & 7) {
-                        case 0b000 : txt = "beq     "; break;
-                        case 0b001 : txt = "bne     "; break;
-                        case 0b100 : txt = "blt     "; break;
-                        case 0b101 : txt = "bge     "; break;
-                        case 0b110 : txt = "bltu    "; break;
-                        case 0b111 : txt = "bgeu    "; break;
-                        default :    txt = "close to branch"; break;
-                        }
-                        break;
-                case 0b0000011 :
-                        switch ( (instr>>12) & 7) {
-                        case 0b000 : txt = "lb      "; break;
-                        case 0b001 : txt = "lh      "; break;
-                        case 0b010 : txt = "lw      "; break;
-                        case 0b100 : txt = "lbu     "; break;
-                        case 0b101 : txt = "lhu     "; break;
-                        default :    txt = "close to load"; break;
-                        }
-                        break;
-                case 0b0100011 :
-                        switch ( (instr>>12) & 7) {
-                        case 0b000 : txt = "sb      "; break;
-                        case 0b001 : txt = "sh      "; break;
-                        case 0b010 : txt = "sw      "; break;
-                        default :    txt = "close to store"; break;
-                        }
-                        break;
-                case 0b0010011 :
-                        switch ( (instr>>12) & 7) {
-                        case 0b000 : txt = "addi    "; break;
-                        case 0b001 : txt = "slli    "; break; // slli will also be decoded for instr[30] == 1
-                        case 0b010 : txt = "slti    "; break;
-                        case 0b011 : txt = "sltiu   "; break;
-                        case 0b100 : txt = "xori    "; break;
-                        case 0b101 : txt = "sr(l/a)i"; break;
-                        case 0b110 : txt = "ori     "; break;
-                        case 0b111 : txt = "andi    "; break;                                
-                        }
-                        break;
-                case 0b0110011 :
-                        switch ( (instr>>12) & 7) {
-                        case 0b000 : txt = ( (instr>>30) & 1 ) ? "sub " : "add "; break;
-                        case 0b001 : txt = ( (instr>>30) & 1 ) ? "sloppy sll     " : "sll     "; break;
-                        case 0b010 : txt = ( (instr>>30) & 1 ) ? "sloppy slt     " : "slt     "; break;
-                        case 0b011 : txt = ( (instr>>30) & 1 ) ? "sloppy sltu    " : "sltu    "; break;
-                        case 0b100 : txt = ( (instr>>30) & 1 ) ? "sloppy xor     " : "xor     "; break;
-                        case 0b101 : txt = ( (instr>>30) & 1 ) ? "sra"             : "srl     "; break;
-                        case 0b110 : txt = ( (instr>>30) & 1 ) ? "sloppy or      " : "or      "; break;
-                        case 0b111 : txt = ( (instr>>30) & 1 ) ? "sloppy and     " : "and     "; break;                                
-                        }
-                        break;
-                case 0b0001111 :
-                        switch ( (instr>>12) & 7) {
-                        case 0b000 : txt = "fence   "; break;
-                        case 0b001 : txt = "fence.i "; break;
-                        default :    txt = "close to fence"; break;
-                        }
-                        break;
-                case 0b1110011 : 
-                        switch ( (instr>>12) & 7) {
-                        case 0b000 : txt = "ecall/ebreak/mret/wfi"; break;
-                        case 0b001 : txt = "csrrw"; break;
-                        case 0b010 : txt = "csrrs"; break;
-                        case 0b011 : txt = "csrrc"; break;
-                        case 0b100 : txt = "close to csr/system "; break;
-                        case 0b101 : txt = "csrrwi"; break;
-                        case 0b110 : txt = "csrrsi"; break;
-                        case 0b111 : txt = "csrrci"; break;
-                        }
-                        break;
-                case 0b0001011 :
-                        switch ( (instr>>12) & 7) {
-                        case 0b000 : txt = "ij       "; break;
-                        default :    txt = "close to ij"; break;
-                        }
-                        break;
-                        
-                }
-                
-                                
-                int dinx;
-                int is_lui = ((instr>>4) & 3 ) == 3 && ((instr>>2) == 1);
-                
-                int dinx0,dinx1,dinx2,dinx3,dinx4,dinx5,dinx6,dinx7;
-                
-                if ( MULDIV == 0 ) {
-                        dinx0 = (instr>>2) & 1;
-                } else {
-                        ferr( "work" );
-                }
-                if ( is_lui ) {
-                        dinx1 = 1;
-                } else {
-                        dinx1 = ( ((((instr>>6)&1)^1) & ((instr>>5)&1)) & ((instr>>30)&1) ) |
-                                ( (1^((((instr>>6)&1)^1) & ((instr>>5)&1))) & ((instr>>3)&1) );
-                }
-                dinx2 = (instr>> 4) & 1;
-                dinx3 = (instr>> 5) & 1;
-                dinx4 = (instr>> 6) & 1;
-                dinx5 = (instr>>12) & 1;
-                if ( ((instr>>2) & 7) != 0b101 ) {
-                        dinx6 = (instr>>13) & 1;
-                } else {
-                        dinx6 = 0;
-                }
-                if  ( ((instr>>2) & 7) != 0b101 && ((instr>>2) & 15) != 0b1011 ) {
-                        dinx7 = (instr>>14) & 1;
-                } else {
-                        dinx7 = 0;
-                }
-                dinx = (dinx7<<7) | (dinx6<<6) | (dinx5<<5) | (dinx4<<4) | (dinx3<<3) | (dinx2<<2) | (dinx1<<1) | (dinx0<<0);
-
-
-                if ( entrypoint[dinx] == NULL ) {
-                        entrypoint[dinx] = strdup(txt);
-                        sampleinstruction[dinx] = instr;
-                } else {
-                        if ( strcmp( entrypoint[dinx], txt ) != 0 &&
-                             strncmp(txt,"DUP",3) != 0 &&
-                             strncmp(entrypoint[dinx], "DUP",3) != 0 )                                        
-                                ferr( "Internal error, instr=0x%8.8x maps to index 0x%2.2x  %s, but also to %s\n", (uint32_t)instr, dinx, entrypoint[dinx], txt );
-                }
-                
-        } while ( instr <= 0xffffffff );
-        //int k;
-        //for ( k = 0; k < 256; k++ ) 
-        //        printf( "%2.2x %s\n", k, entrypoint[k] ? entrypoint[k] : "" );
-                
-        
-}
-
-/////////////////////////////////////////////////////////////////////////////
 int main( int argc __attribute__((unused)), char *argv[] ) {
 
-        char *entrypoint[256] = { NULL };
-        uint32_t sampleinstruction[256] = { 0 };
-        
-        simulate_decode(entrypoint,sampleinstruction);
-        
         if ( _LENDx16 != 256*16 )
                 ferr( "Wrong number of microcode instructions\n" );
 
         check_internal_consistency();
-        generate_headerfile(argv[0],entrypoint,sampleinstruction);
+        generate_headerfile(argv[0]);
         
         return 0;
 }

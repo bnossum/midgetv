@@ -142,7 +142,8 @@ void printf_preamble( int optionsused ) {
                 (optionsused & 3) == 0 ? "minstret not implemented" :
                 (optionsused & 3) == 2 ? "minstret for instructions in SRAM" :
                 (optionsused & 3) == 3 ? "minstret for instructions in SRAM and EBR" :
-                "internal error" );                
+                "internal error" );
+        printf( "/* verilator lint_off DECLFILENAME */\n" );
 }
 
 
