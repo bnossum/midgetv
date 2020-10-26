@@ -1,4 +1,4 @@
-![picture of midgetv](doc/m_midgetv_core.png)
+![picture of midgetv](m_midgetv_core.png)
                        
 ## midgetv - specifically for ice40* FPGAs
    
