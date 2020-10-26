@@ -53,7 +53,6 @@ be reasonable well debugged, so others can use it.
 
 ### Future plans, in order of priority
  - Consolidate. Increase coverage on module tests in directory [tst](work/tst).
- - Production of a monolithic source file to ease integration of `midgetv` into projects.
  - There is more to compliance than passing the compliance tests. More work to ensure
    compliance with RV32I (version 2.1), with standard extensions M, C, Zicsr and Zifence
    (all version 2.0).
@@ -112,8 +111,3 @@ designs. It was, however, so close to usefulness for me that I could
 not just ignore it and let it die.
 
 
-### Semantic Versioning API specification
-1. Signal interface to module [`m_midgetv_core`](work/code/m_midgetv_core.v) is part of the API.
-2. The coarse [memory map](work/sw/inc/midgetv.inc) of midgetv is part of the API. 
-3. The way a binary file is mapped to `localparam` specifications by the
-   utility [`midgetv_bin2ebr`](work/util/midgetv_bin2ebr.c) is part of the API.

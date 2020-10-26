@@ -18,3 +18,8 @@ More (rather unstructured) information is available
 [here](doc/generalinfo.md).
 
 
+### Semantic Versioning API specification
+1. Signal interface to module [`m_midgetv_core`](work/code/m_midgetv_core.v) is part of the API.
+2. The coarse [memory map](work/sw/inc/midgetv.inc) of midgetv is part of the API. 
+3. The way a binary file is mapped to `localparam` specifications by the
+   utility [`midgetv_bin2ebr`](work/util/midgetv_bin2ebr.c) is part of the API.
