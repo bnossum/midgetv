@@ -20,3 +20,4 @@ simeratosthenes
 m_decompress.bin
 m_RVC.bin
 m_tb_illegalop.bin
+make_monolithic
