@@ -356,7 +356,7 @@ module m_progressctrl
             if ( MTIMETAP < MTIMETAP_LOWLIM ) begin
                assign qACK = ACK_I;
             end else begin
-               SB_LUT4 #(.LUT_INIT(16'heeee)) l_iwe(.O(qACK), .I3(1'b0), .I2(1'b0), .I1(ACK_I), .I0(sysregack));
+               SB_LUT4 #(.LUT_INIT(16'heeee)) l_qACK(.O(qACK), .I3(1'b0), .I2(1'b0), .I1(ACK_I), .I0(sysregack));
             end
          end
       end else begin

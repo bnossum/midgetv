@@ -13,7 +13,7 @@
 module m_ice40sim_SRAM
   # ( parameter
       SRAMADRWIDTH       = 16,  
-      SIMEBRADRWIDTH     =  8
+      SIMEBRAWIDTH       = 10
       )
    (
     input CLK_I, // Toggled from verilator
@@ -25,7 +25,7 @@ module m_ice40sim_SRAM
    m_ice40sim_EBRonly
      #(
        .SRAMADRWIDTH       ( SRAMADRWIDTH        ),
-       .SIMEBRADRWIDTH     ( SIMEBRADRWIDTH      )
+       .SIMEBRAWIDTH       ( SIMEBRAWIDTH        )
        )
    inst_ice40sim_EBRonly
      (/*AUTOINST*/

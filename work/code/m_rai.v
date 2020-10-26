@@ -50,23 +50,23 @@
  */
 
 module m_rai
-  # ( parameter HIGHLEVEL = 0, EBRADRWIDTH = 8 )
+  # ( parameter HIGHLEVEL = 0, EBRAWIDTH = 10 )
    (
-    input [EBRADRWIDTH+1:0]  B, //        Read address may come directly out from ALU
-    input [4:0]              SRC1, //     or from source register 1
-    input [4:0]              SRC2, //     or source register 2
-    input                    sa20, //     | These are the basic select signals
-    input                    sa21, //     |
-    input                    sa22, //     |
-    input                    sa23, //     |
-    input                    sram_ack, // || These may modify sa20
-    input                    qACK, //     ||    Qualified acknowledge, usually (ACK_I | sysregack)
-    input                    sa34, //     ||
-    input                    sa40,
-    input                    STB_O,
-    input                    sram_stb,
-    output [EBRADRWIDTH-1:0] Rai,
-    output                   m_rai_killwarning
+    input [EBRAWIDTH-1:0]  B, //        Read address may come directly out from ALU
+    input [4:0]            SRC1, //     or from source register 1
+    input [4:0]            SRC2, //     or source register 2
+    input                  sa20, //     | These are the basic select signals
+    input                  sa21, //     |
+    input                  sa22, //     |
+    input                  sa23, //     |
+    input                  sram_ack, // || These may modify sa20
+    input                  qACK, //     ||    Qualified acknowledge, usually (ACK_I | sysregack)
+    input                  sa34, //     ||
+    input                  sa40,
+    input                  STB_O,
+    input                  sram_stb,
+    output [EBRAWIDTH-3:0] Rai,
+    output                 m_rai_killwarning
     );
    /*
     sa40
@@ -115,12 +115,12 @@ module m_rai
              4'b1010 : extRai = 12'h2a; // r00000000     
              4'b1011 : extRai = 12'h2b; // rFFFFFFFF     
              4'b1100 : extRai = 12'h2c; // yy            
-             4'b1101 : extRai = {zeros[11:EBRADRWIDTH],B[EBRADRWIDTH+1:2]};  // ALU
+             4'b1101 : extRai = {zeros[11:EBRAWIDTH-2],B[EBRAWIDTH-1:2]};  // ALU
              4'b1110 : extRai = {7'b0,SRC2}; // SRC2
              4'b1111 : extRai = {7'b0,SRC1}; // SRC1                                        
             endcase
 
-         assign Rai = extRai[EBRADRWIDTH-1:0];
+         assign Rai = extRai[EBRAWIDTH-3:0];
          assign m_rai_killwarning = &B[1:0] & &extRai;
          
       end else begin
@@ -197,11 +197,11 @@ module m_rai
           */
          SB_LUT4 #(.LUT_INIT(16'h0808)) L_Rai6( .O(Rai[6]), .I3(1'b0), .I2(ss1), .I1(ss0), .I0(B[8]));
          SB_LUT4 #(.LUT_INIT(16'h0808)) L_Rai7( .O(Rai[7]), .I3(1'b0), .I2(ss1), .I1(ss0), .I0(B[9]));
-         if ( EBRADRWIDTH > 8 ) begin
+         if ( EBRAWIDTH > 10 ) begin
             SB_LUT4 #(.LUT_INIT(16'h0808)) L_Rai8( .O(Rai[8]), .I3(1'b0), .I2(ss1), .I1(ss0), .I0(B[10]));
-            if ( EBRADRWIDTH > 9 ) begin
+            if ( EBRAWIDTH > 11 ) begin
                SB_LUT4 #(.LUT_INIT(16'h0808)) L_Rai9( .O(Rai[9]), .I3(1'b0), .I2(ss1), .I1(ss0), .I0(B[11]));
-               if ( EBRADRWIDTH > 10 ) begin
+               if ( EBRAWIDTH > 12 ) begin
                   SB_LUT4 #(.LUT_INIT(16'h0808)) L_Rai10( .O(Rai[10]), .I3(1'b0), .I2(ss1), .I1(ss0), .I0(B[12]));
                end
             end

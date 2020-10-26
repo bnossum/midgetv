@@ -6,20 +6,20 @@
  * EBR program memory is split into 4-bit wide memory, specified here.
  */
 module m_ebr_w4
-  # ( parameter EBRADRWIDTH = 10,
+  # ( parameter EBRAWIDTH = 12,
       parameter [4095:0] prg0 = 4096'h0,
       parameter [4095:0] prg1 = 4096'h0
       )
    (
-    input [3:0]             B, //     Output from ALU
-    input [EBRADRWIDTH-1:0] Rai, //   Read address
-    input [EBRADRWIDTH-1:0] Wai, //   Write address
-    input                   clk, //   System clock
-    input                   we, //    Write enable
-    output [3:0]            DAT_O //  Registered output
+    input [3:0]           B, //     Output from ALU
+    input [EBRAWIDTH-3:0] Rai, //   Read address
+    input [EBRAWIDTH-3:0] Wai, //   Write address
+    input                 clk, //   System clock
+    input                 we, //    Write enable
+    output [3:0]          DAT_O //  Registered output
     );
    
-   localparam NrRamsHere = (1<<(EBRADRWIDTH-10));
+   localparam NrRamsHere = (1<<(EBRAWIDTH-12));
 
    generate
 

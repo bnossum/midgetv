@@ -4,28 +4,23 @@
  * For licence, see LICENCE
  * -----------------------------------------------------------------------------ehdr
  * EBR holds constants, registers, and code. This is a wrapper,
- * EBRADRWIDTH  EBRs  Organization   Gives     Capacity  WRITE/READ mode
- *  8           2     16 x  8 *  2   32 x  8   1 kiB     0
- *  9           4      8 x  9 *  4   32 x  9   2 kiB     1
- * 10           8      4 x 10 *  8   32 x 10   4 kiB     2
- * 11           16     2 x 11 * 16   32 x 11   8 kiB     3
+ * EBRAWIDTH  EBRs  Organization   Gives     Capacity  WRITE/READ mode
+ * 10         2     16 x  8 *  2   32 x  8   1 kiB     0
+ * 11         4      8 x  9 *  4   32 x  9   2 kiB     1
+ * 12         8      4 x 10 *  8   32 x 10   4 kiB     2
+ * 13         16     2 x 11 * 16   32 x 11   8 kiB     3
  * 
  * In this illustration, for brevity; m0 = bmask0 etc, w=iwe
- * EBRADRWIDTH
+ * EBRAWIDTH
  *    EBR15 EBR14 EBR13 EBR12 EBR11 EBR10 EBR9  EBR8  EBR7  EBR6  EBR5  EBR4  EBR3  EBR2  EBR1  EBR0
- *  8                                                                                     w     w
- *  9                                                                         w&m3  w&m2  w&m1  w&m0
- * 10                                                 w&m3  w&m3  w&m2  w&m2  w&m1  w&m1  w&m0  w&m0
- * 11 w&m3  w&m3  w&m3  w&m3  ie&m2 ie&m2 ie&m2 ie&m2 w&m1  w&m1  w&m1  w&m1  w&m0  w&m0  w&m0  w&m0
+ * 10                                                                                     w     w
+ * 11                                                                         w&m3  w&m2  w&m1  w&m0
+ * 12                                                 w&m3  w&m3  w&m2  w&m2  w&m1  w&m1  w&m0  w&m0
+ * 13 w&m3  w&m3  w&m3  w&m3  ie&m2 ie&m2 ie&m2 ie&m2 w&m1  w&m1  w&m1  w&m1  w&m0  w&m0  w&m0  w&m0
  * 
- * Rather belatedly I saw a reference to a a silicon bug, https://github.com/YosysHQ/yosys/issues/101.
- * It seems that one should use RCLKE/WCLKE instead of RE/WE. As luck will have it, the bug is that
- * mem[0] is spuriously written by 0 between configuration and before the core is released. As luck 
- * will have it, mem[0] should **always** be 0 in midgetv, so I do not change anything now.
- * Fixed Sept 2020.
  */
 module m_ebr
-  # ( parameter EBRADRWIDTH = 8,
+  # ( parameter EBRAWIDTH = 10,
       parameter [4095:0] prg00 = 4096'h0,
       parameter [4095:0] prg01 = 4096'h0,
       parameter [4095:0] prg02 = 4096'h0,
@@ -44,14 +39,14 @@ module m_ebr
       parameter [4095:0] prg0F = 4096'h0
       )
    (
-    input [31:0]            B, //     Output from ALU
-    input [EBRADRWIDTH-1:0] Rai, //   Read address
-    input [EBRADRWIDTH-1:0] Wai, //   Write address    
-    input                   clk, //   System clock
-    input [3:0]             bmask, // Byte masks for write, active LOW
-    input                   iwe, //   Write enable
-    output [31:0]           DAT_O, //  Register used in many places, also I/O output
-    output                  next_readvalue_unknown // For debugging only
+    input [31:0]          B, //     Output from ALU
+    input [EBRAWIDTH-3:0] Rai, //   Read address
+    input [EBRAWIDTH-3:0] Wai, //   Write address    
+    input                 clk, //   System clock
+    input [3:0]           bmask, // Byte masks for write, active LOW
+    input                 iwe, //   Write enable
+    output [31:0]         DAT_O, //  Register used in many places, also I/O output
+    output                next_readvalue_unknown // For debugging only
     );
    wire [31:0]              eDAT_O;
 `ifdef verilator 
@@ -596,7 +591,7 @@ module m_ebr
             prg00[ 511: 496],prg00[ 479: 464],prg00[ 447: 432],prg00[ 415: 400],prg00[ 383: 368],prg00[ 351: 336],prg00[ 319: 304],prg00[ 287: 272],
             prg00[ 255: 240],prg00[ 223: 208],prg00[ 191: 176],prg00[ 159: 144],prg00[ 127: 112],prg00[  95:  80],prg00[  63:  48],prg00[  31:  16]};
 
-   m_ebr_w16 #(.EBRADRWIDTH(EBRADRWIDTH),
+   m_ebr_w16 #(.EBRAWIDTH(EBRAWIDTH),
                .prg0(pb0), .prg1(pb1), .prg2(pb2), .prg3(pb3), .prg4(pb4), .prg5(pb5), .prg6(pb6), .prg7(pb7) )
    ebrb 
      (/*AUTOINST*/
@@ -604,13 +599,13 @@ module m_ebr
       .DAT_O                            (eDAT_O[15:0]),
       // Inputs
       .B                                (B[15:0]),
-      .Rai                              (Rai[EBRADRWIDTH-1:0]),
-      .Wai                              (Wai[EBRADRWIDTH-1:0]),
+      .Rai                              (Rai[EBRAWIDTH-3:0]),
+      .Wai                              (Wai[EBRAWIDTH-3:0]),
       .clk                              (clk),
       .bmask                            (bmask[1:0]),
       .iwe                              (iwe));
    
-   m_ebr_w16 #(.EBRADRWIDTH(EBRADRWIDTH),
+   m_ebr_w16 #(.EBRAWIDTH(EBRAWIDTH),
                .prg0(ph0), .prg1(ph1), .prg2(ph2), .prg3(ph3), .prg4(ph4), .prg5(ph5), .prg6(ph6), .prg7(ph7) )
    ebrh
      (
@@ -621,8 +616,8 @@ module m_ebr
       .bmask                            (bmask[3:2]),
       /*AUTOINST*/
       // Inputs
-      .Rai                              (Rai[EBRADRWIDTH-1:0]),
-      .Wai                              (Wai[EBRADRWIDTH-1:0]),
+      .Rai                              (Rai[EBRAWIDTH-3:0]),
+      .Wai                              (Wai[EBRAWIDTH-3:0]),
       .clk                              (clk),
       .iwe                              (iwe));
    

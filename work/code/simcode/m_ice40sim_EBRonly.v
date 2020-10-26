@@ -11,11 +11,15 @@
 module m_ice40sim_EBRonly
   # ( parameter
       SRAMADRWIDTH       = 0,  
-      SIMEBRADRWIDTH     = 9,  // Corresponding macro in m_ice4sim_EBRonly.cpp MUST match this.
+      SIMEBRAWIDTH       = 11,  // Corresponding macro in m_ice4sim_EBRonly.cpp MUST match this.
       IWIDTH             = 32, 
       NO_CYCLECNT        = 0, 
       MTIMETAP           = 0, //14, 
       HIGHLEVEL          = 0,
+      HAS_MINSTRET       = 0,
+      HAS_EBR_MINSTRET   = 0,
+      RVC                = 1,
+      MULDIV             = 1,
       DAT_I_ZERO_WHEN_INACTIVE = 1
       )
    (
@@ -74,12 +78,16 @@ module m_ice40sim_EBRonly
    m_midgetv_core
      #(
        .SRAMADRWIDTH      ( SRAMADRWIDTH       ),
-       .EBRADRWIDTH       ( SIMEBRADRWIDTH     ),
+       .EBRAWIDTH         ( SIMEBRAWIDTH       ),
        .IWIDTH            ( IWIDTH             ),
        .NO_CYCLECNT       ( NO_CYCLECNT        ),
        .MTIMETAP          ( MTIMETAP           ),
        .DAT_I_ZERO_WHEN_INACTIVE(DAT_I_ZERO_WHEN_INACTIVE),
        .HIGHLEVEL         ( HIGHLEVEL          ),
+       .HAS_MINSTRET      ( HAS_MINSTRET       ), 
+       .HAS_EBR_MINSTRET  ( HAS_EBR_MINSTRET   ), 
+       .RVC               ( RVC                ), 
+       .MULDIV            ( MULDIV             ), 
        .prg00(prg00),       .prg01(prg01),       .prg02(prg02),       .prg03(prg03),
        .prg04(prg04),       .prg05(prg05),       .prg06(prg06),       .prg07(prg07),
        .prg08(prg08),       .prg09(prg09),       .prg0A(prg0A),       .prg0B(prg0B),

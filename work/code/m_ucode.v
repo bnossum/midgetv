@@ -7,6 +7,9 @@
  * This module is a wrapper to assign control lines to a distinct data out of EBR.
  * 
  */
+
+/* verilator lint_off DECLFILENAME */
+
 module m_ucode
   # ( parameter NO_UCODEOPT = 0,
       parameter MULDIV = 0,
@@ -34,7 +37,7 @@ module m_ucode
     output       potentialMODbranch,
     output       ctrl_pcinc_by_2,
     output [7:0] rinx,
-    output       ucode_killwarnings
+    output       ucode_killw
     );
 `ifdef verilator
    function [47:0] get_sa;
@@ -228,7 +231,7 @@ module m_ucode
          assign ctrl_pcinc_by_2 = d[45]; // May perhaps combine with another controleq?
       end
    endgenerate
-   assign ucode_killwarnings = &d[47:46]; // ???
+   assign ucode_killw = &d[47:46] | &MULDIVREG; // 
 endmodule
 
 // Local Variables:

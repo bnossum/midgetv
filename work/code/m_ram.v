@@ -154,7 +154,7 @@ module m_ram
 
          
          wire       next_readvalue_unknown;
-         m_ebr #(.EBRADRWIDTH(SRAMADRWIDTH-2))
+         m_ebr #(.EBRAWIDTH(SRAMADRWIDTH))
          inst_ram (// Inputs
                    .Rai                 (ADR_I[SRAMADRWIDTH-1:2]),
                    .Wai                 (ADR_I[SRAMADRWIDTH-1:2]),

@@ -323,13 +323,13 @@ DAT_I[31:0] ------------|or|-|\   ___  rDee                      |
  * 0: DAT_I[] unknown when not active
  * 1: DAT_I[] == 0 when not active. 
  * 
- * EBRADRWIDTH
+ * EBRAWIDTH
  * -----------
  * Determines the size of EBR in midgetv. Legal values:
- *  8    1 kiB EBR 
- *  9    2 kiB EBR
- * 10    4 kiB EBR
- * 11    8 kiB EBR
+ * 10    1 kiB EBR 
+ * 11    2 kiB EBR
+ * 12    4 kiB EBR
+ * 13    8 kiB EBR
  * See m_ebr.v for details.
  * 
  * prg00, prg01, ... prg0F
@@ -367,7 +367,7 @@ module m_midgetv_core
       RVC                      = 0,
       MULDIV                   = 0,
       SRAMADRWIDTH             = 0,  
-      EBRADRWIDTH              = 8, 
+      EBRAWIDTH                = 10, 
       IWIDTH                   = 8, 
       NO_CYCLECNT              = 0, 
       MTIMETAP                 = 0, 
@@ -478,7 +478,7 @@ module m_midgetv_core
    wire                 m_ram_killwarnings;     // From inst_ram of m_ram.v
    wire                 m_status_and_interrupts_killwarnings;// From inst_status_and_interrupts of m_status_and_interrupts.v
    wire                 m_wai_killwarning;      // From inst_wai of m_wai.v
-   wire                 ucode_killwarnings;     // From inst_ucode of m_ucode.v
+   wire                 ucode_killw;            // From inst_ucode of m_ucode.v
    wire                 ucodepc_killwarnings;   // From inst_ucodepc of m_ucodepc.v
    wire                 m_mimux_killwarnings;   // From inst_mimux of m_mimux.v
    wire                 buserror;               // From inst_cyclecnt of m_cyclecnt.v
@@ -501,11 +501,11 @@ module m_midgetv_core
    wire [31:0]          INSTR;                  // From inst_opreg of m_opreg.v
    wire [ALUWIDTH-1:0]  MULDIVREG;              // From inst_shlr of m_shlr.v
    wire [31:0]          QQ;                     // From inst_cyclecnt of m_cyclecnt.v
-   wire [EBRADRWIDTH-1:0] Rai;                  // From inst_rai of m_rai.v
+   wire [EBRAWIDTH-3:0] Rai;                    // From inst_rai of m_rai.v
    wire [4:0]           SRC1;                   // From inst_opreg of m_opreg.v
    wire [4:0]           SRC2;                   // From inst_opreg of m_opreg.v
    wire [4:0]           TRG;                    // From inst_opreg of m_opreg.v
-   wire [EBRADRWIDTH-1:0] Wai;                  // From inst_wai of m_wai.v
+   wire [EBRAWIDTH-3:0] Wai;                    // From inst_wai of m_wai.v
    wire                 alu_carryin;            // From inst_alu_carryin of m_alu_carryin.v
    wire                 alu_carryout;           // From inst_alu of m_alu.v
    wire                 alu_minstretofl;        // From inst_alu of m_alu.v
@@ -641,11 +641,11 @@ module m_midgetv_core
       // verilator public
       get_Di = Di;
    endfunction
-   function [EBRADRWIDTH-1:0] get_Wai;
+   function [EBRAWIDTH-3:0] get_Wai;
       // verilator public
       get_Wai = Wai;
    endfunction
-   function [EBRADRWIDTH-1:0] get_Rai;
+   function [EBRAWIDTH-3:0] get_Rai;
       // verilator public
       get_Rai = Rai;      
    endfunction
@@ -866,7 +866,7 @@ module m_midgetv_core
         .enaQ                           (enaQ),
         .INSTR                          (INSTR[31:0]));
    
-   m_ebr #(.EBRADRWIDTH(EBRADRWIDTH),
+   m_ebr #(.EBRAWIDTH(EBRAWIDTH),
            .prg00(prg00),.prg01(prg01),.prg02(prg02),.prg03(prg03),
            .prg04(prg04),.prg05(prg05),.prg06(prg06),.prg07(prg07),
            .prg08(prg08),.prg09(prg09),.prg0A(prg0A),.prg0B(prg0B),
@@ -879,8 +879,8 @@ module m_midgetv_core
       .next_readvalue_unknown           (next_readvalue_unknown),
       // Inputs
       .B                                (B[31:0]),
-      .Rai                              (Rai[EBRADRWIDTH-1:0]),
-      .Wai                              (Wai[EBRADRWIDTH-1:0]),
+      .Rai                              (Rai[EBRAWIDTH-3:0]),
+      .Wai                              (Wai[EBRAWIDTH-3:0]),
       .clk                              (clk),
       .bmask                            (bmask[3:0]),
       .iwe                              (iwe));
@@ -935,14 +935,14 @@ module m_midgetv_core
     */
    
    // Internal read addresses
-   m_rai #(.HIGHLEVEL(HIGHLEVEL), .EBRADRWIDTH(EBRADRWIDTH))
+   m_rai #(.HIGHLEVEL(HIGHLEVEL), .EBRAWIDTH(EBRAWIDTH))
    inst_rai
      (/*AUTOINST*/
       // Outputs
-      .Rai                              (Rai[EBRADRWIDTH-1:0]),
+      .Rai                              (Rai[EBRAWIDTH-3:0]),
       .m_rai_killwarning                (m_rai_killwarning),
       // Inputs
-      .B                                (B[EBRADRWIDTH+1:0]),
+      .B                                (B[EBRAWIDTH-1:0]),
       .SRC1                             (SRC1[4:0]),
       .SRC2                             (SRC2[4:0]),
       .sa20                             (sa20),
@@ -957,14 +957,14 @@ module m_midgetv_core
       .sram_stb                         (sram_stb));
 
    // Internal write addresses
-   m_wai #(.HIGHLEVEL(HIGHLEVEL), .EBRADRWIDTH(EBRADRWIDTH))
+   m_wai #(.HIGHLEVEL(HIGHLEVEL), .EBRAWIDTH(EBRAWIDTH))
    inst_wai
      (/*AUTOINST*/
       // Outputs
-      .Wai                              (Wai[EBRADRWIDTH-1:0]),
+      .Wai                              (Wai[EBRAWIDTH-3:0]),
       .m_wai_killwarning                (m_wai_killwarning),
       // Inputs
-      .ADR_O                            (ADR_O[EBRADRWIDTH+1:0]),
+      .ADR_O                            (ADR_O[EBRAWIDTH-1:0]),
       .TRG                              (TRG[4:0]),
       .sa24                             (sa24),
       .sa25                             (sa25),
@@ -1153,7 +1153,7 @@ module m_midgetv_core
       .potentialMODbranch               (potentialMODbranch),
       .ctrl_pcinc_by_2                  (ctrl_pcinc_by_2),
       .rinx                             (rinx[7:0]),
-      .ucode_killwarnings               (ucode_killwarnings),
+      .ucode_killw                      (ucode_killw),
       // Inputs
       .clk                              (clk),
       .minx                             (minx[7:0]),

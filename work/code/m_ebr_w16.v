@@ -7,7 +7,7 @@
  * The memory is up to 4 KiB large
  */
 module m_ebr_w16
-  # ( parameter EBRADRWIDTH = 8,
+  # ( parameter EBRAWIDTH = 10,
       parameter [4095:0] prg0 = 4096'h0,
       parameter [4095:0] prg1 = 4096'h0,
       parameter [4095:0] prg2 = 4096'h0,
@@ -18,16 +18,16 @@ module m_ebr_w16
       parameter [4095:0] prg7 = 4096'h0
       )
    (
-    input [15:0]            B, //     Output from ALU
-    input [EBRADRWIDTH-1:0] Rai, //   Read adddress
-    input [EBRADRWIDTH-1:0] Wai, //   Write adddress
-    input                   clk, //   System clock
-    input [1:0]             bmask, // Byte masks for write, active LUW
-    input                   iwe, //   Write enable
-    output [15:0]           DAT_O //  Registered output
+    input [15:0]          B, //     Output from ALU
+    input [EBRAWIDTH-3:0] Rai, //   Read adddress
+    input [EBRAWIDTH-3:0] Wai, //   Write adddress
+    input                 clk, //   System clock
+    input [1:0]           bmask, // Byte masks for write, active LUW
+    input                 iwe, //   Write enable
+    output [15:0]         DAT_O //  Registered output
     );
    
-   localparam NrRamsHere = (1<<(EBRADRWIDTH-8));
+   localparam NrRamsHere = (1<<(EBRAWIDTH-10));
    
    generate
       
@@ -589,7 +589,7 @@ module m_ebr_w16
                   prg0[ 255: 248],prg0[ 239: 232],prg0[ 223: 216],prg0[ 207: 200],prg0[ 191: 184],prg0[ 175: 168],prg0[ 159: 152],prg0[ 143: 136],
                   prg0[ 127: 120],prg0[ 111: 104],prg0[  95:  88],prg0[  79:  72],prg0[  63:  56],prg0[  47:  40],prg0[  31:  24],prg0[  15:   8]};
 
-         m_ebr_w8 #(.EBRADRWIDTH(EBRADRWIDTH),
+         m_ebr_w8 #(.EBRAWIDTH(EBRAWIDTH),
                     .prg0(pb0), .prg1(pb1), .prg2(pb2), .prg3(pb3))
          ebrb 
            (// Inputs
@@ -599,12 +599,12 @@ module m_ebr_w16
             .DAT_O                      (DAT_O[7:0]),
             // Inputs
             .B                          (B[7:0]),
-            .Rai                        (Rai[EBRADRWIDTH-1:0]),
-            .Wai                        (Wai[EBRADRWIDTH-1:0]),
+            .Rai                        (Rai[EBRAWIDTH-3:0]),
+            .Wai                        (Wai[EBRAWIDTH-3:0]),
             .clk                        (clk),
             .iwe                        (iwe));
    
-         m_ebr_w8 #(.EBRADRWIDTH(EBRADRWIDTH),
+         m_ebr_w8 #(.EBRAWIDTH(EBRAWIDTH),
                     .prg0(ph0), .prg1(ph1), .prg2(ph2), .prg3(ph3))
          ebrh
            (// Outputs
@@ -614,8 +614,8 @@ module m_ebr_w16
             .bmask                      (bmask[1]),
             /*AUTOINST*/
             // Inputs
-            .Rai                        (Rai[EBRADRWIDTH-1:0]),
-            .Wai                        (Wai[EBRADRWIDTH-1:0]),
+            .Rai                        (Rai[EBRAWIDTH-3:0]),
+            .Wai                        (Wai[EBRAWIDTH-3:0]),
             .clk                        (clk),
             .iwe                        (iwe));
       end

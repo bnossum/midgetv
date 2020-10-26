@@ -33,17 +33,17 @@
  * 2e 0010111000   mcause                      00101110   1110  
  * 2f 0010111100   mtval                       00101111   1111                
  * 
- * With EBRADRWIDTH == 8, highlevel use 12 LUTs
- * With EBRADRWIDTH == 8, lowlevel  use 10 LUTs
+ * With EBRAWIDTH == 10, highlevel use 12 LUTs
+ * With EBRAWIDTH == 10, lowlevel  use 10 LUTs
  */
 module m_wai
-  # ( parameter HIGHLEVEL = 0, EBRADRWIDTH = 8 )
+  # ( parameter HIGHLEVEL = 0, EBRAWIDTH = 10 )
    (
-    input [EBRADRWIDTH+1:0]  ADR_O,
-    input [4:0]              TRG,
-    input                    sa24,sa25,sa26,sa27,
-    output [EBRADRWIDTH-1:0] Wai,
-    output                   m_wai_killwarning
+    input [EBRAWIDTH-1:0]  ADR_O,
+    input [4:0]            TRG,
+    input                  sa24,sa25,sa26,sa27,
+    output [EBRAWIDTH-3:0] Wai,
+    output                 m_wai_killwarning
     );
    
    generate
@@ -56,10 +56,10 @@ module m_wai
          always @(/*AS*/ADR_O or TRG or sa24 or sa25 or sa26 or sa27
                   or u or zeros) begin
             case ({sa27,sa26,sa25,sa24})
-              4'b0000 : extWai = {zeros[11:EBRADRWIDTH],ADR_O[EBRADRWIDTH+1:2]};  // 
-              4'b0001 : extWai = {zeros[11:EBRADRWIDTH],ADR_O[EBRADRWIDTH+1:2]};  // 
-              4'b0010 : extWai = {zeros[11:EBRADRWIDTH],ADR_O[EBRADRWIDTH+1:2]};  // 
-              4'b0011 : extWai = {zeros[11:EBRADRWIDTH],ADR_O[EBRADRWIDTH+1:2]};  //          
+              4'b0000 : extWai = {zeros[11:EBRAWIDTH-2],ADR_O[EBRAWIDTH-1:2]};  // 
+              4'b0001 : extWai = {zeros[11:EBRAWIDTH-2],ADR_O[EBRAWIDTH-1:2]};  // 
+              4'b0010 : extWai = {zeros[11:EBRAWIDTH-2],ADR_O[EBRAWIDTH-1:2]};  // 
+              4'b0011 : extWai = {zeros[11:EBRAWIDTH-2],ADR_O[EBRAWIDTH-1:2]};  //          
               4'b0100 : extWai = {6'b0,u,TRG}; // 
               4'b0101 : extWai = {6'b0,u,TRG}; // 
               4'b0110 : extWai = {6'b0,u,TRG}; // 
@@ -74,7 +74,7 @@ module m_wai
               4'b1111 : extWai = 12'h2f; // mtval
             endcase
          end
-         assign Wai = extWai[EBRADRWIDTH-1:0];
+         assign Wai = extWai[EBRAWIDTH-3:0];
       end else begin
          wire preWai0,preWai1,waicy0,waicy1,waicy2,waicy3,waicy4;
 
@@ -89,11 +89,11 @@ module m_wai
          SB_LUT4 #(.LUT_INIT(16'h0202)) L_2326(.O(Wai[6]),.I3(1'b0),.I2(sa27),.I1(sa26),.I0(ADR_O[8]));      
          SB_LUT4 #(.LUT_INIT(16'h0202)) L_2327(.O(Wai[7]),.I3(1'b0),.I2(sa27),.I1(sa26),.I0(ADR_O[9]));      
          
-         if ( EBRADRWIDTH > 8 ) begin
+         if ( EBRAWIDTH > 10 ) begin
             SB_LUT4 #(.LUT_INIT(16'h0202)) L_93(.O(Wai[8]),.I3(1'b0),.I2(sa27),.I1(sa26),.I0(ADR_O[10]));      
-            if ( EBRADRWIDTH > 9 ) begin
+            if ( EBRAWIDTH > 11 ) begin
                SB_LUT4 #(.LUT_INIT(16'h0202)) L_95(.O(Wai[9]),.I3(1'b0),.I2(sa27),.I1(sa26),.I0(ADR_O[11]));      
-               if ( EBRADRWIDTH > 10 ) begin
+               if ( EBRAWIDTH > 11 ) begin
                   SB_LUT4 #(.LUT_INIT(16'h0202)) L_97(.O(Wai[10]),.I3(1'b0),.I2(sa27),.I1(sa26),.I0(ADR_O[12]));      
                end
             end
