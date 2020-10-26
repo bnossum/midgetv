@@ -13,7 +13,7 @@
         //      ???
         //
         // This test program is full of fragile code, it runs on a setup with
-        // EBRADRWIDTH  9
+        // EBRAWIDTH    11
         // SRAMADRWIDTH 16
         // MTIMETAP     0  (so no system registers)
         //

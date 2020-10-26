@@ -13,7 +13,6 @@ CFLAGS = -mabi=ilp32 -march=rv32i -nodefaultlibs -nostartfiles -Os -Wall \
 all: $(BINDIR)/simmorse ../../../hwtst/upduino2/ice40loaderprog.hv \
 	../../../hwtst/iceblink40-hx1k/ice40loaderprog.hv \
 	../../../hwtst/max_iceblink40-hx1k/ice40loaderprog.hv \
-	../../../hwtst/max_upduino2/ice40loaderprog.hv \
 	../../../hwtst/for_size_estimate/ice40loaderprog.hv \
 	../../../hwtst/icebreaker/ice40loaderprog.hv \
 	$(OBJDIR)/morse.lst \
